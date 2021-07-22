@@ -226,4 +226,106 @@ class TestImages(TestCase):
 class TestTimeSeriesReferenceVectorData(TestCase):
 
     def test_init(self):
-        TimeSeriesReferenceVectorData(name='test', description='test')
+        temp = TimeSeriesReferenceVectorData()
+        self.assertEqual(temp.name, 'timeseries')
+        self.assertEqual(temp.description,
+                         "Column storing references to a TimeSeries (rows). For each TimeSeries this "
+                         "VectorData column stores the start_index and count to indicate the range in time "
+                         "to be selected as well as an object reference to the TimeSeries.")
+        self.assertListEqual(temp.data, [])
+        temp = TimeSeriesReferenceVectorData(name='test', description='test')
+        self.assertEqual(temp.name, 'test')
+        self.assertEqual(temp.description, 'test')
+
+    def test_get_empty(self):
+        """Get data from an empty TimeSeriesReferenceVectorData"""
+        temp = TimeSeriesReferenceVectorData()
+        self.assertListEqual(temp[:].tolist(), [])
+        with self.assertRaises(IndexError):
+            temp[0]
+
+    def test_get_lenght1_valid_data(self):
+        """Get data from a TimeSeriesReferenceVectorData with one element and valid data"""
+        temp = TimeSeriesReferenceVectorData()
+        value = (0, 5, TimeSeries(name='test', description='test', data=np.arange(10), starting_time=5.0, rate=0.1))
+        temp.append(value)
+        self.assertTupleEqual(temp[0], value)
+        self.assertListEqual(temp[:].tolist(), [list(value), ])
+
+    def test_get_lenght1_invalid_data(self):
+        """Get data from a TimeSeriesReferenceVectorData with one element and invalid data"""
+        temp = TimeSeriesReferenceVectorData()
+        value = (-1, -1, TimeSeries(name='test', description='test', data=np.arange(10), starting_time=5.0, rate=0.1))
+        temp.append(value)
+        # test index slicing
+        re = temp[0]
+        self.assertTrue(isinstance(re, np.ma.core.MaskedArray))
+        self.assertListEqual(re.mask.tolist(), [True, True, True])
+        self.assertListEqual(re.data.tolist(), list(value))
+        # test array slicing and list slicing
+        selection = [slice(None), [0, ]]
+        for s in selection:
+            re = temp[s]
+            self.assertTrue(isinstance(re, np.ma.core.MaskedArray))
+            self.assertTrue(len(re), 1)
+            self.assertTrue(isinstance(re[0], np.ma.core.MaskedArray))
+            self.assertListEqual(re[0].mask.tolist(), [True, True, True])
+            self.assertListEqual(re[0].data.tolist(), list(value))
+
+    def test_get_lenght5_valid_data(self):
+        """Get data from a TimeSeriesReferenceVectorData with 5 elements"""
+        temp = TimeSeriesReferenceVectorData()
+        num_values = 5
+        values = [(0, 5, TimeSeries(name='test'+str(i), description='test',
+                                    data=np.arange(10), starting_time=5.0, rate=0.1))
+                  for i in range(num_values)]
+        for v in values:
+            temp.append(v)
+        # Test single element selection
+        for i in range(num_values):
+            # test index slicing
+            re = temp[i]
+            self.assertTupleEqual(re, values[i])
+            # test slicing
+            re = temp[i:i+1]
+            self.assertListEqual(re[0].tolist(), list(values[i]))
+        # Test multi element selection
+        re = temp[0:2]
+        self.assertListEqual(re[0].tolist(), list(values[0]))
+        self.assertListEqual(re[1].tolist(), list(values[1]))
+
+    def test_get_lenght5_with_in_valid_data(self):
+        """Get data from a TimeSeriesReferenceVectorData with 5 elements"""
+        temp = TimeSeriesReferenceVectorData()
+        num_values = 5
+        values = [(0, 5, TimeSeries(name='test'+str(i+1), description='test',
+                                    data=np.arange(10), starting_time=5.0, rate=0.1))
+                  for i in range(num_values-2)]
+        values = ([(-1, -1, TimeSeries(name='test'+str(0), description='test',
+                                       data=np.arange(10), starting_time=5.0, rate=0.1)), ]
+                  + values
+                  + [(-1, -1, TimeSeries(name='test'+str(5), description='test',
+                                         data=np.arange(10), starting_time=5.0, rate=0.1)), ])
+        for v in values:
+            temp.append(v)
+        # Test single element selection
+        for i in range(num_values):
+            # test index slicing
+            re = temp[i]
+            if i in [0, 4]:
+                self.assertTrue(isinstance(re, np.ma.core.MaskedArray))
+                self.assertListEqual(re.mask.tolist(), [True, True, True])
+                self.assertListEqual(re.data.tolist(), list(values[i]))
+            else:
+                self.assertTupleEqual(re, values[i])
+            # test slicing
+            re = temp[i:i+1]
+            if i in [0, 4]:
+                self.assertTrue(isinstance(re[0], np.ma.core.MaskedArray))
+                np.testing.assert_array_equal(re[0], np.ma.core.MaskedArray(data=values[i], mask=[True, True, True]))
+            else:
+                self.assertListEqual(re[0].tolist(), list(values[i]))
+        # Test multi element selection
+        re = temp[0:2]
+        np.testing.assert_array_equal(re[0], np.ma.core.MaskedArray(data=values[0], mask=[True, True, True]))
+        self.assertListEqual(re[1].tolist(), list(values[1]))

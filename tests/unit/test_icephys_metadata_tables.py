@@ -14,7 +14,7 @@ import warnings
 import h5py
 
 
-from pynwb.testing import TestCase, remove_test_file
+from pynwb.testing import TestCase, remove_test_file, create_icephys_stimulus_and_response
 from pynwb.file import NWBFile
 from pynwb.icephys import (VoltageClampStimulusSeries, VoltageClampSeries, CurrentClampStimulusSeries,
                            IZeroClampSeries, IntracellularRecordingsTable, SimultaneousRecordingsTable,
@@ -31,166 +31,6 @@ class ICEphysMetaTestBase(TestCase):
     to make sure tests of the individual tables do not depend on our custom class. We are testing
     ICEphysFile separately.
     """
-    @classmethod
-    def create_stimulus_and_response(cls, sweep_number, electrode, randomize_data):
-        """
-        Internal helper function to construct a dummy stimulus and reponse pair representing an
-        instracellular recording:
-
-        :param sweep_number: Integer sweep number of the recording
-        :param electrode: Intracellular electrode used
-        :param randomize_data: Randomize data values in the stimulus and response
-
-        :returns: Tuple of VoltageClampStimulusSeries with the stimulus and VoltageClampSeries with the response.
-        """
-        stimulus = VoltageClampStimulusSeries(
-                    name="ccss_"+str(sweep_number),
-                    data=[1, 2, 3, 4, 5] if not randomize_data else np.random.rand(10),
-                    starting_time=123.6 if not randomize_data else (np.random.rand() * 100),
-                    rate=10e3 if not randomize_data else int(np.random.rand()*10) * 1000 + 1000.,
-                    electrode=electrode,
-                    gain=0.1 if not randomize_data else np.random.rand(),
-                    sweep_number=sweep_number)
-        # Create and ic-response
-        response = VoltageClampSeries(
-                    name='vcs_'+str(sweep_number),
-                    data=[0.1, 0.2, 0.3, 0.4, 0.5] if not randomize_data else np.random.rand(10),
-                    conversion=1e-12,
-                    resolution=np.nan,
-                    starting_time=123.6 if not randomize_data else (np.random.rand() * 100),
-                    rate=20e3 if not randomize_data else int(np.random.rand() * 20) * 1000. + 1000.,
-                    electrode=electrode,
-                    gain=0.02 if not randomize_data else np.random.rand(),
-                    capacitance_slow=100e-12,
-                    resistance_comp_correction=70.0 if not randomize_data else 70.0 + np.random.rand(),
-                    sweep_number=sweep_number)
-        return stimulus, response
-
-    @classmethod
-    def create_icephs_meta_testfile(cls, filename=None, add_custom_columns=True, randomize_data=True):
-        """
-        Create a small but relatively complex icephys test file that
-        we can use for testing of queries.
-
-        :param filename: The name of the output file to be generated. If set to None then the file is not written
-                         but only created in memory
-        :type filename: str, None
-        :param add_custom_colums: Add custom metadata columns to each table
-        :type add_custom_colums: bool
-        :param randomize_data: Randomize data values in the stimulus and response
-        :type randomize_data: bool
-
-        :returns: ICEphysFile NWBFile object
-        :rtype: ICEphysFile
-        """
-        nwbfile = NWBFile(
-                session_description='my first synthetic recording',
-                identifier='EXAMPLE_ID',
-                session_start_time=datetime.now(tzlocal()),
-                experimenter='Dr. Bilbo Baggins',
-                lab='Bag End Laboratory',
-                institution='University of Middle Earth at the Shire',
-                experiment_description='I went on an adventure with thirteen dwarves to reclaim vast treasures.',
-                session_id='LONELYMTN')
-        # Add a device
-        device = nwbfile.create_device(name='Heka ITC-1600')
-        # Add an intracellular electrode
-        electrode0 = nwbfile.create_icephys_electrode(
-            name="elec0",
-            description='a mock intracellular electrode',
-            device=device)
-        # Add an intracellular electrode
-        electrode1 = nwbfile.create_icephys_electrode(
-            name="elec1",
-            description='another mock intracellular electrode',
-            device=device)
-        # Add the intracelluar recordings
-        for sweep_number in range(20):
-            elec = (electrode0 if (sweep_number % 2 == 0) else electrode1)
-            stim, resp = cls.create_stimulus_and_response(sweep_number=np.uint64(sweep_number),
-                                                          electrode=elec,
-                                                          randomize_data=randomize_data)
-            nwbfile.add_intracellular_recording(electrode=elec,
-                                                stimulus=stim,
-                                                response=resp,
-                                                id=sweep_number)
-        nwbfile.intracellular_recordings.add_column(name='recording_tags',
-                                                    data=['A1', 'A2',
-                                                          'B1', 'B2',
-                                                          'C1', 'C2', 'C3',
-                                                          'D1', 'D2', 'D3',
-                                                          'A1', 'A2',
-                                                          'B1', 'B2',
-                                                          'C1', 'C2', 'C3',
-                                                          'D1', 'D2', 'D3'],
-                                                    description='String with a set of recording tags')
-        # Add simultaneous_recordings
-        nwbfile.add_icephys_simultaneous_recording(recordings=[0, 1], id=np.int64(100))
-        nwbfile.add_icephys_simultaneous_recording(recordings=[2, 3], id=np.int64(101))
-        nwbfile.add_icephys_simultaneous_recording(recordings=[4, 5, 6], id=np.int64(102))
-        nwbfile.add_icephys_simultaneous_recording(recordings=[7, 8, 9], id=np.int64(103))
-        nwbfile.add_icephys_simultaneous_recording(recordings=[10, 11], id=np.int64(104))
-        nwbfile.add_icephys_simultaneous_recording(recordings=[12, 13], id=np.int64(105))
-        nwbfile.add_icephys_simultaneous_recording(recordings=[14, 15, 16], id=np.int64(106))
-        nwbfile.add_icephys_simultaneous_recording(recordings=[17, 18, 19], id=np.int64(107))
-        if add_custom_columns:
-            nwbfile.icephys_simultaneous_recordings.add_column(
-                name='tag',
-                data=np.arange(8),
-                description='some integer tag for a sweep')
-
-        # Add sequential recordings
-        nwbfile.add_icephys_sequential_recording(simultaneous_recordings=[0, 1],
-                                                 id=np.int64(1000),
-                                                 stimulus_type="StimType_1")
-        nwbfile.add_icephys_sequential_recording(simultaneous_recordings=[2, ],
-                                                 id=np.int64(1001),
-                                                 stimulus_type="StimType_2")
-        nwbfile.add_icephys_sequential_recording(simultaneous_recordings=[3, ],
-                                                 id=np.int64(1002),
-                                                 stimulus_type="StimType_3")
-        nwbfile.add_icephys_sequential_recording(simultaneous_recordings=[4, 5],
-                                                 id=np.int64(1003),
-                                                 stimulus_type="StimType_1")
-        nwbfile.add_icephys_sequential_recording(simultaneous_recordings=[6, ],
-                                                 id=np.int64(1004),
-                                                 stimulus_type="StimType_2")
-        nwbfile.add_icephys_sequential_recording(simultaneous_recordings=[7, ],
-                                                 id=np.int64(1005),
-                                                 stimulus_type="StimType_3")
-        if add_custom_columns:
-            nwbfile.icephys_sequential_recordings.add_column(
-                name='type',
-                data=['T1', 'T2', 'T3', 'T1', 'T2', 'T3'],
-                description='type of the sequential recording')
-
-        # Add repetitions
-        nwbfile.add_icephys_repetition(sequential_recordings=[0, ], id=np.int64(10000))
-        nwbfile.add_icephys_repetition(sequential_recordings=[1, 2], id=np.int64(10001))
-        nwbfile.add_icephys_repetition(sequential_recordings=[3, ], id=np.int64(10002))
-        nwbfile.add_icephys_repetition(sequential_recordings=[4, 5], id=np.int64(10003))
-        if add_custom_columns:
-            nwbfile.icephys_repetitions.add_column(
-                name='type',
-                data=['R1', 'R2', 'R1', 'R2'],
-                description='some repetition type indicator')
-
-        # Add experimental_conditions
-        nwbfile.add_icephys_experimental_condition(repetitions=[0, 1], id=np.int64(100000))
-        nwbfile.add_icephys_experimental_condition(repetitions=[2, 3], id=np.int64(100001))
-        if add_custom_columns:
-            nwbfile.icephys_experimental_conditions.add_column(
-                name='temperature',
-                data=[32., 24.],
-                description='Temperatur in C')
-
-        # Write our test file
-        if filename is not None:
-            with NWBHDF5IO(filename, 'w') as io:
-                io.write(nwbfile)
-
-        # Return our in-memory NWBFile
-        return nwbfile
 
     def setUp(self):
         # Create an example nwbfile with a device, intracellular electrode, stimulus, and response
@@ -450,7 +290,7 @@ class IntracellularRecordingsTableTests(ICEphysMetaTestBase):
         # Check the stimulus
         self.assertTupleEqual(res[('stimuli', 'stimulus')].iloc[0], (0, 5, self.stimulus))
         # Check the response
-        self.assertTupleEqual(res[('responses', 'response')].iloc[0], (-1, -1, self.stimulus))
+        self.assertTrue(isinstance(res[('responses', 'response')].iloc[0], np.ma.core.MaskedArray))
         # test writing out ir table
         self.write_test_helper(ir)
 
@@ -469,7 +309,7 @@ class IntracellularRecordingsTableTests(ICEphysMetaTestBase):
         # Check electrodes
         self.assertIs(res[('electrodes', 'electrode')].iloc[0], self.electrode)
         # Check the stimulus
-        self.assertTupleEqual(res[('stimuli', 'stimulus')].iloc[0], (-1, -1, self.response))
+        self.assertTrue(isinstance(res[('stimuli', 'stimulus')].iloc[0], np.ma.core.MaskedArray))
         # Check the response
         self.assertTupleEqual(res[('responses', 'response')].iloc[0], (0, 5, self.response))
         # test writing out ir table
@@ -489,8 +329,7 @@ class IntracellularRecordingsTableTests(ICEphysMetaTestBase):
         res = ir[0]
         self.assertTupleEqual(res[('stimuli', 'stimulus')].iloc[0],
                               (0, len(self.stimulus.data), self.stimulus))
-        self.assertTupleEqual(res[('responses', 'response')].iloc[0],
-                              (-1, -1, self.stimulus))
+        self.assertTrue(isinstance(res[('responses', 'response')].iloc[0], np.ma.core.MaskedArray))
         # Make sure single -1 values are converted
         ir = IntracellularRecordingsTable()
         ir.add_recording(electrode=self.electrode,
@@ -603,6 +442,86 @@ class IntracellularRecordingsTableTests(ICEphysMetaTestBase):
         self.assertEqual(row_index, 0)
         ir.add_column(name='test', description='test column', data=np.arange(1))
         self.write_test_helper(ir=ir)
+
+    def test_to_dataframe(self):
+        # Add the intracelluar recordings
+        # Create a table setup for testing a number of conditions
+        electrode0 = self.electrode
+        electrode1 = self.nwbfile.create_icephys_electrode(
+            name="elec1",
+            description='another mock intracellular electrode',
+            device=self.device)
+        for sweep_number in range(20):
+            elec = (electrode0 if (sweep_number % 2 == 0) else electrode1)
+            stim, resp = create_icephys_stimulus_and_response(sweep_number=np.uint64(sweep_number),
+                                                              electrode=elec,
+                                                              randomize_data=False)
+            if sweep_number in [0, 10]:  # include missing stimuli
+                stim = None
+            self.nwbfile.add_intracellular_recording(electrode=elec,
+                                                     stimulus=stim,
+                                                     response=resp,
+                                                     id=sweep_number)
+        tags_data = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2', 'C3',
+                     'D1', 'D2', 'D3', 'A1', 'A2', 'B1', 'B2',
+                     'C1', 'C2', 'C3', 'D1', 'D2', 'D3']
+        self.nwbfile.intracellular_recordings.add_column(name='recording_tags',
+                                                         data=tags_data,
+                                                         description='String with a set of recording tags')
+        # Test normal conversion to a dataframe
+        df = self.nwbfile.intracellular_recordings.to_dataframe()
+        expected_cols = [('intracellular_recordings', 'recording_tags'), ('electrodes', 'id'),
+                         ('electrodes', 'electrode'), ('stimuli', 'id'), ('stimuli', 'stimulus'),
+                         ('responses', 'id'), ('responses', 'response')]
+        self.assertListEqual(df.columns.to_list(), expected_cols)
+        self.assertListEqual(df[('intracellular_recordings', 'recording_tags')].to_list(), tags_data)
+        # Test conversion with ignore category ids set
+        df = self.nwbfile.intracellular_recordings.to_dataframe(ignore_category_ids=True)
+        expected_cols_no_ids = [('intracellular_recordings', 'recording_tags'),
+                                ('electrodes', 'electrode'), ('stimuli', 'stimulus'),
+                                ('responses', 'response')]
+        self.assertListEqual(df.columns.to_list(), expected_cols_no_ids)
+        # Test conversion with stimulus_refs_as_objectids
+        df = self.nwbfile.intracellular_recordings.to_dataframe(stimulus_refs_as_objectids=True)
+        self.assertListEqual(df.columns.to_list(), expected_cols)
+        expects_stim_col = [e if isinstance(e, (np.ma.core.MaskedArray, np.ma.core.MaskedConstant)) and np.all(e.mask)
+                            else (e[0], e[1],  e[2].object_id)
+                            for e in self.nwbfile.intracellular_recordings[('stimuli', 'stimulus')][:]]
+        for i, v in enumerate(expects_stim_col):
+            if isinstance(v, tuple):
+                self.assertTupleEqual(df[('stimuli', 'stimulus')][i], v)
+            else:
+                self.assertTrue(isinstance(df[('stimuli', 'stimulus')][i],
+                                           (np.ma.core.MaskedArray, np.ma.core.MaskedConstant)))
+        # Test conversion with response_refs_as_objectids
+        df = self.nwbfile.intracellular_recordings.to_dataframe(response_refs_as_objectids=True)
+        self.assertListEqual(df.columns.to_list(), expected_cols)
+        expects_resp_col = [e if isinstance(e, (np.ma.core.MaskedArray, np.ma.core.MaskedConstant)) and np.all(e.mask)
+                            else (e[0], e[1],  e[2].object_id)
+                            for e in self.nwbfile.intracellular_recordings[('responses', 'response')][:]]
+        for i, v in enumerate(expects_resp_col):
+            if isinstance(v, tuple):
+                self.assertTupleEqual(df[('responses', 'response')][i], v)
+            else:
+                self.assertTrue(isinstance(df[('responses', 'response')][i],
+                                           (np.ma.core.MaskedArray, np.ma.core.MaskedConstant)))
+        # Test conversion with all options enabled
+        df = self.nwbfile.intracellular_recordings.to_dataframe(ignore_category_ids=True,
+                                                                stimulus_refs_as_objectids=True,
+                                                                response_refs_as_objectids=True)
+        self.assertListEqual(df.columns.to_list(), expected_cols_no_ids)
+        for i, v in enumerate(expects_stim_col):
+            if isinstance(v, tuple):
+                self.assertTupleEqual(df[('stimuli', 'stimulus')][i], v)
+            else:
+                self.assertTrue(isinstance(df[('stimuli', 'stimulus')][i],
+                                           (np.ma.core.MaskedArray, np.ma.core.MaskedConstant)))
+        for i, v in enumerate(expects_resp_col):
+            if isinstance(v, tuple):
+                self.assertTupleEqual(df[('responses', 'response')][i], v)
+            else:
+                self.assertTrue(isinstance(df[('responses', 'response')][i],
+                                           (np.ma.core.MaskedArray, np.ma.core.MaskedConstant)))
 
     def test_round_trip_container_no_data(self):
         """Test read and write the container by itself"""

@@ -2,7 +2,9 @@ from warnings import warn
 from collections.abc import Iterable
 
 from hdmf.utils import docval, getargs, popargs, call_docval_func, get_docval
+from hdmf.data_utils import extend_data
 from hdmf.common import DynamicTable, VectorData
+import numpy as np
 
 
 from . import register_class, CORE_NAMESPACE
@@ -290,8 +292,70 @@ class TimeSeriesReferenceVectorData(VectorData):
     Column storing references to a TimeSeries (rows). For each TimeSeries this VectorData
     column stores the start_index and count to indicate the range in time to be selected
     as well as an object reference to the TimeSeries.
-    """
 
-    @docval(*get_docval(VectorData.__init__))
+    In practice we sometimes need to be able to represent missing values, e.g., in the
+    IntracellularRecordingsTable we have TimeSeriesReferenceVectorData for stimulus and
+    response but a user can specify either only one of them or both. Since there is no
+    "None" value for a complex type like (idx_start, count, TimeSeries), we internally
+    define None as (-1, -1, TimeSeries), i.e., if the idx_start and/or count is negative
+    then this indicates an invalid link (in practice both idx_start and count should always
+    either both be positive or both be negative). When selecting data via the
+    TimeSeriesReferenceVectorData.get and TimeSeriesReferenceVectorData.__getitem__
+    functions, (-1, -1, TimeSeries) are masked in the resulting np.ma.masked_array or
+    represented as a np.ma.core.MaskedConstant()
+    """
+    @docval({'name': 'name', 'type': str, 'doc': 'the name of this VectorData', 'default': 'timeseries'},
+            {'name': 'description', 'type': str, 'doc': 'a description for this column',
+             'default': "Column storing references to a TimeSeries (rows). For each TimeSeries this "
+                        "VectorData column stores the start_index and count to indicate the range in time "
+                        "to be selected as well as an object reference to the TimeSeries."},
+            *get_docval(VectorData.__init__, 'data'))
     def __init__(self, **kwargs):
         call_docval_func(super().__init__, kwargs)
+
+    def get(self, key, **kwargs):
+        """
+        Retrieve elements from this TimeSeriesReferenceVectorData
+
+        :param key: Selection of the elements
+        :param **kwargs: Ignored
+        """
+        vals = super().get(key)
+        # we only selected one row.
+        if isinstance(key, (int, np.integer)):
+            # NOTE: If we never wrote the data to disk, then vals will be a single tuple.
+            #       If the data is loaded from an h5py.Dataset then vals will be a single
+            #       np.void object. I.e., and alternative check would be
+            #       if isinstance(vals, tuple) or isinstance(vals, np.void):
+            #          ...
+            if vals[0] < 0 or vals[1] < 0:
+                return np.ma.core.MaskedArray(data=vals, mask=[True, True, True])
+            else:
+                return vals
+        else:  # key selected multiple rows
+            # When loading from HDF5 we get an np.ndarray otherwise we get list-of-list. This
+            # makes things the values consistent
+            if isinstance(vals, np.ndarray):
+                vals = [[v[0], v[1], v[2]] for v in vals]
+            vals = np.asarray(vals)
+            mask = np.asarray([(v[0] < 0 or v[1] < 0) for v in vals])
+            # For some reason, when we only select 0 or 1 element it is sufficient to mask that element
+            # but when selecting more than 1 element we need to mask all 3 components of each element
+            if len(vals) > 1:
+                mask = np.asarray([v for v in mask for i in range(3)])
+            # If we are masking any elements than create a masked array
+            if np.any(mask):
+                # Depending on whether we select 1 or multiple values we need to for some reason
+                # either define mask values for ea
+                return np.ma.masked_array(vals, mask)
+            else:  # otherwise just use a regular (unmasked) ndarray
+                return np.asarray(vals)
+
+    def extend(self, ar):
+        """
+        The extend_data method adds all the elements of the iterable arg to the
+        end of the data of this Data container.
+
+        :param arg: The iterable to add to the end of this VectorData
+        """
+        self.data = extend_data(self.data, ar)

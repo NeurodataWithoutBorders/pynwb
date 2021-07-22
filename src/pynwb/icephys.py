@@ -464,13 +464,13 @@ class IntracellularRecordingsTable(AlignedDynamicTable):
         call_docval_func(super().__init__, kwargs)
 
     @docval({'name': 'electrode', 'type': IntracellularElectrode, 'doc': 'The intracellular electrode used'},
-            {'name': 'stimulus_start_index', 'type': 'int', 'doc': 'Start index of the stimulus', 'default': -1},
-            {'name': 'stimulus_index_count', 'type': 'int', 'doc': 'Stop index of the stimulus', 'default': -1},
+            {'name': 'stimulus_start_index', 'type': 'int', 'doc': 'Start index of the stimulus', 'default': None},
+            {'name': 'stimulus_index_count', 'type': 'int', 'doc': 'Stop index of the stimulus', 'default': None},
             {'name': 'stimulus', 'type': TimeSeries,
              'doc': 'The TimeSeries (usually a PatchClampSeries) with the stimulus',
              'default': None},
-            {'name': 'response_start_index', 'type': 'int', 'doc': 'Start index of the response', 'default': -1},
-            {'name': 'response_index_count', 'type': 'int', 'doc': 'Stop index of the response', 'default': -1},
+            {'name': 'response_start_index', 'type': 'int', 'doc': 'Start index of the response', 'default': None},
+            {'name': 'response_index_count', 'type': 'int', 'doc': 'Stop index of the response', 'default': None},
             {'name': 'response', 'type': TimeSeries,
              'doc': 'The TimeSeries (usually a PatchClampSeries) with the response',
              'default': None},
@@ -582,8 +582,10 @@ class IntracellularRecordingsTable(AlignedDynamicTable):
         """
         if time_series is None:
             return -1, -1
+        start_index = -1 if start_index is None else start_index
         start_index = start_index if start_index >= 0 else 0
         num_samples = time_series.num_samples
+        index_count = -1 if index_count is None else index_count
         index_count = (index_count
                        if index_count >= 0
                        else ((num_samples - start_index)
@@ -615,9 +617,15 @@ class IntracellularRecordingsTable(AlignedDynamicTable):
         if getargs('electrode_refs_as_objectids', kwargs):
             res[('electrodes', 'electrode')] = [e.object_id for e in res[('electrodes', 'electrode')]]
         if getargs('stimulus_refs_as_objectids', kwargs):
-            res[('stimuli', 'stimulus')] = [(e[0], e[1],  e[2].object_id) for e in res[('stimuli', 'stimulus')]]
+            res[('stimuli', 'stimulus')] = \
+                [e if isinstance(e, (np.ma.core.MaskedArray, np.ma.core.MaskedConstant)) and np.all(e.mask)
+                 else (e[0], e[1],  e[2].object_id)
+                 for e in res[('stimuli', 'stimulus')]]
         if getargs('response_refs_as_objectids', kwargs):
-            res[('responses', 'response')] = [(e[0], e[1],  e[2].object_id) for e in res[('responses', 'response')]]
+            res[('responses', 'response')] = \
+                [e if isinstance(e, (np.ma.core.MaskedArray, np.ma.core.MaskedConstant)) and np.all(e.mask)
+                 else (e[0], e[1],  e[2].object_id)
+                 for e in res[('responses', 'response')]]
         return res
 
 

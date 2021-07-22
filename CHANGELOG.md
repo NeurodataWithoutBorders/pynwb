@@ -19,6 +19,8 @@
 ### Tutorial enhancements:
 - Added new tutorial for intracellular electrophysiology to describe the use of the new metadata tables
   and declared the previous tutoral using ``SweepTable`` as deprecated.  @oruebel (#1349)
+- Added new tutorial for query intracellular electrophysiology metadata
+  (``docs/gallery/domain/plot_icephys_pandas.py``) @oruebel (#1349, #1383)
 - Add thumbnails for tutorials to improve presentation of online docs.  @oruebel (#1349)
 - Use `sphinx.ext.extlinks` extension in docs to simplify linking to common targets @oruebel (#1349)
 - Create new section for advanced I/O tutorials moved parallel I/O tutorial to its own file @oruebel (#1349)
@@ -26,6 +28,8 @@
 ### Minor new features:
 - Add RRID for citing PyNWB to the docs. @oruebel (#1372)
 - Update CI and tests to handle deprecations in libraries. @rly (#1377)
+- Add test utilities for icephys (``pynwb.testing.icephys_testutils``) to ease creation of test data
+  for tests and tutorials @oruebel (#1349, #1383)
 
 ### Bug fixes:
 - Update behavior of ``make clean`` command for docs to ensure tutorial files are cleaned up.  @oruebel (#1349)

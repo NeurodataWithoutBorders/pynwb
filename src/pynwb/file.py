@@ -782,7 +782,7 @@ class NWBFile(MultiContainerInterface):
     def add_intracellular_recording(self, **kwargs):
         """
         Add a intracellular recording to the intracellular_recordings table. If the
-        electrode, stimulus, and/or response do not exsist yet in the NWBFile, then
+        electrode, stimulus, and/or response do not exist yet in the NWBFile, then
         they will be added to this NWBFile before adding them to the table.
 
         Note: For more complex organization of intracellular recordings you may also be
