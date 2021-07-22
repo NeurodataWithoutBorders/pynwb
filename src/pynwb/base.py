@@ -318,7 +318,7 @@ class TimeSeriesReferenceVectorData(VectorData):
         Retrieve elements from this TimeSeriesReferenceVectorData
 
         :param key: Selection of the elements
-        :param **kwargs: Ignored
+        :param kwargs: Ignored
         """
         vals = super().get(key)
         # we only selected one row.
