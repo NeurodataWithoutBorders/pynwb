@@ -294,15 +294,16 @@ class TimeSeriesReferenceVectorData(VectorData):
     as well as an object reference to the TimeSeries.
 
     In practice we sometimes need to be able to represent missing values, e.g., in the
-    IntracellularRecordingsTable we have TimeSeriesReferenceVectorData for stimulus and
-    response but a user can specify either only one of them or both. Since there is no
-    "None" value for a complex type like (idx_start, count, TimeSeries), we internally
-    define None as (-1, -1, TimeSeries), i.e., if the idx_start and/or count is negative
-    then this indicates an invalid link (in practice both idx_start and count should always
+    :py:class:`~pynwb.icephys.IntracellularRecordingsTable` we have
+    :py:class:`~pynwb.base.TimeSeriesReferenceVectorData` to link to stimulus and
+    response recordings, but a user can specify either only one of them or both. Since there is no
+    "None" value for a complex type like ``(idx_start, count, TimeSeries)``, we internally
+    define None as ``(-1, -1, TimeSeries)``, i.e., if the ``idx_start`` (and ``count``) is negative
+    then this indicates an invalid link (in practice both ``idx_start`` and ``count`` must always
     either both be positive or both be negative). When selecting data via the
-    TimeSeriesReferenceVectorData.get and TimeSeriesReferenceVectorData.__getitem__
-    functions, (-1, -1, TimeSeries) are masked in the resulting np.ma.masked_array or
-    represented as a np.ma.core.MaskedConstant()
+    :py:meth:`~pynwb.base.TimeSeriesReferenceVectorData.get` or
+    :py:meth:`~pynwb.base. TimeSeriesReferenceVectorData.__getitem__`
+    functions, ``(-1, -1, TimeSeries)`` values are masked in the resulting np.ma.core.MaskedArray.
     """
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this VectorData', 'default': 'timeseries'},
             {'name': 'description', 'type': str, 'doc': 'a description for this column',
@@ -315,7 +316,13 @@ class TimeSeriesReferenceVectorData(VectorData):
 
     def get(self, key, **kwargs):
         """
-        Retrieve elements from this TimeSeriesReferenceVectorData
+        Retrieve elements from this object.
+
+        The selection behavior is the same as for :py:meth:`~hdmf.common.table.VectorData.get`. A
+        key difference is that for invalid reference (i.e., values of ``(-1, -1, TimeSeries)``), the
+        value is being represented by a ``np.ma.core.MaskedArray`` instead. This allows us to
+        avoid exposing internal details of the schema to the user and simplifies handling of
+        missing values.
 
         :param key: Selection of the elements
         :param kwargs: Ignored
@@ -325,7 +332,7 @@ class TimeSeriesReferenceVectorData(VectorData):
         if isinstance(key, (int, np.integer)):
             # NOTE: If we never wrote the data to disk, then vals will be a single tuple.
             #       If the data is loaded from an h5py.Dataset then vals will be a single
-            #       np.void object. I.e., and alternative check would be
+            #       np.void object. I.e., an alternative check would be
             #       if isinstance(vals, tuple) or isinstance(vals, np.void):
             #          ...
             if vals[0] < 0 or vals[1] < 0:
@@ -348,8 +355,8 @@ class TimeSeriesReferenceVectorData(VectorData):
                 # Depending on whether we select 1 or multiple values we need to for some reason
                 # either define mask values for ea
                 return np.ma.masked_array(vals, mask)
-            else:  # otherwise just use a regular (unmasked) ndarray
-                return np.asarray(vals)
+            else:  # otherwise just use the regular (unmasked) ndarray
+                return vals
 
     def extend(self, ar):
         """
