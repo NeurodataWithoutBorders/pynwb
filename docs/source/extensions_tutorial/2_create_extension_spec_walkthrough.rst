@@ -11,7 +11,7 @@ the appropriate directory structure.
 After you finish the instructions :nwb_extension:`here <ndx-template#getting-started>`,
 you should have a directory structure that looks like this
 
-.. code-block:: c
+.. code-block:: bash
 
     ├── LICENSE.txt
     ├── MANIFEST.in
