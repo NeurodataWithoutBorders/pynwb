@@ -352,8 +352,6 @@ class TimeSeriesReferenceVectorData(VectorData):
                 mask = np.asarray([v for v in mask for i in range(3)])
             # If we are masking any elements than create a masked array
             if np.any(mask):
-                # Depending on whether we select 1 or multiple values we need to for some reason
-                # either define mask values for ea
                 return np.ma.masked_array(vals, mask)
             else:  # otherwise just use the regular (unmasked) ndarray
                 return vals
