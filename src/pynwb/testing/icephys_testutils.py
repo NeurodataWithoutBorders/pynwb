@@ -11,12 +11,15 @@ from pynwb import NWBHDF5IO
 
 def create_icephys_stimulus_and_response(sweep_number, electrode, randomize_data):
     """
-    Internal helper function to construct a dummy stimulus and reponse pair representing an
-    instracellular recording:
+    Internal helper function to construct a dummy stimulus and response pair representing an
+    intracellular recording:
 
     :param sweep_number: Integer sweep number of the recording
+    :type sweep_number: int
     :param electrode: Intracellular electrode used
+    :type electrode: pynwb.icephys.IntracellularElectrode
     :param randomize_data: Randomize data values in the stimulus and response
+    :type randomize_data: bool
 
     :returns: Tuple of VoltageClampStimulusSeries with the stimulus and VoltageClampSeries with the response.
     """
