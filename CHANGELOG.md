@@ -7,36 +7,37 @@
   is still possible but no longer recommended. @oruebel  (#1349)
 
 ### New features:
-- Add new intracellular electrophysiology hierarchical table structure from ndx-icephys-meta to NWB core.
+- Added new intracellular electrophysiology hierarchical table structure from ndx-icephys-meta to NWB core.
   This includes the new types ``TimeSeriesReferenceVectorData``, ``IntracellularRecordingsTable``,
   ``SimultaneousRecordingsTable``, ``SequentialRecordingsTable``, ``RepetitionsTable`` and
   ``ExperimentalConditionsTable`` as well as corresponding updates to ``NWBFile`` to support interaction
    with the new tables. @oruebel  (#1349)
-- Add support for nwb-schema 2.4.0 @oruebel (#1349)
-- Drop Python 3.6 support, add Python 3.9 support. @rly (#1377)
-- Update requirements to allow compatibility with HDMF 3 and h5py 3. @rly (#1377)
+- Added support for nwb-schema 2.4.0. See [Release Notes](https://nwb-schema.readthedocs.io/en/latest/format_release_notes.html)
+  for more details. @oruebel (#1349)
+- Dropped Python 3.6 support, added Python 3.9 support. @rly (#1377)
+- Updated requirements to allow compatibility with HDMF 3 and h5py 3. @rly (#1377)
 
 ### Tutorial enhancements:
 - Added new tutorial for intracellular electrophysiology to describe the use of the new metadata tables
   and declared the previous tutoral using ``SweepTable`` as deprecated.  @oruebel (#1349)
-- Added new tutorial for query intracellular electrophysiology metadata
-  (``docs/gallery/domain/plot_icephys_pandas.py``) @oruebel (#1349, #1383)
-- Add thumbnails for tutorials to improve presentation of online docs.  @oruebel (#1349)
-- Use `sphinx.ext.extlinks` extension in docs to simplify linking to common targets @oruebel (#1349)
-- Create new section for advanced I/O tutorials moved parallel I/O tutorial to its own file @oruebel (#1349)
+- Added new tutorial for querying intracellular electrophysiology metadata
+  (``docs/gallery/domain/plot_icephys_pandas.py``). @oruebel (#1349, #1383)
+- Added thumbnails for tutorials to improve presentation of online docs.  @oruebel (#1349)
+- Used `sphinx.ext.extlinks` extension in docs to simplify linking to common targets. @oruebel (#1349)
+- Create new section for advanced I/O tutorials and moved parallel I/O tutorial to its own file. @oruebel (#1349)
 
 ### Minor new features:
 - Add RRID for citing PyNWB to the docs. @oruebel (#1372)
 - Update CI and tests to handle deprecations in libraries. @rly (#1377)
 - Add test utilities for icephys (``pynwb.testing.icephys_testutils``) to ease creation of test data
-  for tests and tutorials @oruebel (#1349, #1383)
+  for tests and tutorial.s @oruebel (#1349, #1383)
 
 ### Bug fixes:
-- Update behavior of ``make clean`` command for docs to ensure tutorial files are cleaned up.  @oruebel (#1349)
-- Enforce electrode ID uniqueness during insertion into table. @CodyCBakerPhD (#1344)
-- Fix integration tests with invalid test data that will be caught by future hdmf validator version.
+- Updated behavior of ``make clean`` command for docs to ensure tutorial files are cleaned up.  @oruebel (#1349)
+- Enforced electrode ID uniqueness during insertion into table. @CodyCBakerPhD (#1344)
+- Fixed integration tests with invalid test data that will be caught by future hdmf validator version.
   @dsleiter, @rly (#1366, #1376)
-- Fix build warnings in docs @oruebel (#1380)
+- Fixed build warnings in docs @oruebel (#1380)
 
 ## PyNWB 1.5.1 (May 24, 2021)
 
