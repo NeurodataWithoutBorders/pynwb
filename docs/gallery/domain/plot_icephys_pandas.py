@@ -30,6 +30,8 @@ pandas.set_option("display.max_columns", 6)
 # ---------------
 #
 # Generate a simple example NWBFile with dummy intracellular electrophysiology data.
+# This example uses a utility function ``create_icephys_testfile`` to create a
+# dummy NWB file with random icephys data.
 
 from pynwb.testing.icephys_testutils import create_icephys_testfile
 test_filename = "icephys_pandas_testfile.nwb"
