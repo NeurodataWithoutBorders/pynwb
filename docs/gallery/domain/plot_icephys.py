@@ -74,7 +74,7 @@ related tables.
           must also always contain a corresponding :py:class:`~pynwb.icephys.IntracellularRecordingsTable`.
 '''
 
-#######################
+#####################################################################
 # Imports used in the tutorial
 # ------------------------------
 
@@ -97,7 +97,7 @@ from pynwb import NWBHDF5IO
 # Import additional core datatypes used in the example
 from pynwb.core import DynamicTable, VectorData
 
-#######################
+#####################################################################
 # A brief example
 # ---------------
 #
@@ -111,9 +111,11 @@ from pynwb.core import DynamicTable, VectorData
 #    script with ``ex_``.
 
 # Create an ICEphysFile
-ex_nwbfile = NWBFile(session_description='my first recording',
-                     identifier='EXAMPLE_ID',
-                     session_start_time=datetime.now(tzlocal()))
+ex_nwbfile = NWBFile(
+    session_description='my first recording',
+    identifier='EXAMPLE_ID',
+    session_start_time=datetime.now(tzlocal())
+)
 
 # Add a device
 ex_device = ex_nwbfile.create_device(name='Heka ITC-1600')
@@ -122,36 +124,43 @@ ex_device = ex_nwbfile.create_device(name='Heka ITC-1600')
 ex_electrode = ex_nwbfile.create_icephys_electrode(
     name="elec0",
     description='a mock intracellular electrode',
-    device=ex_device)
+    device=ex_device
+)
 
 # Create an ic-ephys stimulus
-ex_stimulus = VoltageClampStimulusSeries(name="stimulus",
-                                         data=[1, 2, 3, 4, 5],
-                                         starting_time=123.6,
-                                         rate=10e3,
-                                         electrode=ex_electrode,
-                                         gain=0.02)
+ex_stimulus = VoltageClampStimulusSeries(
+    name="stimulus",
+    data=[1, 2, 3, 4, 5],
+    starting_time=123.6,
+    rate=10e3,
+    electrode=ex_electrode,
+    gain=0.02
+)
 
 # Create an ic-response
-ex_response = VoltageClampSeries(name='response',
-                                 data=[0.1, 0.2, 0.3, 0.4, 0.5],
-                                 conversion=1e-12,
-                                 resolution=np.nan,
-                                 starting_time=123.6,
-                                 rate=20e3,
-                                 electrode=ex_electrode,
-                                 gain=0.02,
-                                 capacitance_slow=100e-12,
-                                 resistance_comp_correction=70.0)
+ex_response = VoltageClampSeries(
+    name='response',
+    data=[0.1, 0.2, 0.3, 0.4, 0.5],
+    conversion=1e-12,
+    resolution=np.nan,
+    starting_time=123.6,
+    rate=20e3,
+    electrode=ex_electrode,
+    gain=0.02,
+    capacitance_slow=100e-12,
+    resistance_comp_correction=70.0
+)
 
 # (A) Add an intracellular recording to the file
 #     NOTE: We can optionally define time-ranges for the stimulus/response via
 #     the corresponding optional _start_index and _index_count parameters.
 #     NOTE: It is allowed to add a recording with just a stimulus or a response
 #     NOTE: We can  add custom columns to any of our tables in steps (A)-(E)
-ex_ir_index = ex_nwbfile.add_intracellular_recording(electrode=ex_electrode,
-                                                     stimulus=ex_stimulus,
-                                                     response=ex_response)
+ex_ir_index = ex_nwbfile.add_intracellular_recording(
+    electrode=ex_electrode,
+    stimulus=ex_stimulus,
+    response=ex_response
+)
 
 # (B) Add a list of sweeps to the simultaneous recordings table
 ex_sweep_index = ex_nwbfile.add_icephys_simultaneous_recording(recordings=[ex_ir_index, ])
@@ -159,7 +168,8 @@ ex_sweep_index = ex_nwbfile.add_icephys_simultaneous_recording(recordings=[ex_ir
 # (C) Add a list of simultaneous recordings table indices as a sequential recording
 ex_sequence_index = ex_nwbfile.add_icephys_sequential_recording(
     simultaneous_recordings=[ex_sweep_index, ],
-    stimulus_type='square')
+    stimulus_type='square'
+)
 
 # (D) Add a list of sequential recordings table indices as a repetition
 run_index = ex_nwbfile.add_icephys_repetition(sequential_recordings=[ex_sequence_index, ])
@@ -187,17 +197,17 @@ try:
 except ImportError:  # ignore in case hdmf_docutils is not installed
     pass
 
-#######################
+#####################################################################
 # Now that we have seen a brief example, we are going to start from the beginning and
 # go through each of the steps in more detail in the following sections.
 
 
-#######################
+#####################################################################
 # Creating an NWB file for Intracellular electrophysiology
 # --------------------------------------------------------
 #
 # When creating an NWB file, the first step is to create the :py:class:`~pynwb.file.NWBFile`. The first
-# argument is is a brief description of the dataset.
+# argument is a brief description of the dataset.
 
 # Create the file
 nwbfile = NWBFile(
@@ -208,19 +218,20 @@ nwbfile = NWBFile(
     lab='Bag End Laboratory',
     institution='University of Middle Earth at the Shire',
     experiment_description='I went on an adventure with thirteen dwarves to reclaim vast treasures.',
-    session_id='LONELYMTN')
+    session_id='LONELYMTN'
+)
 
-#######################
+#####################################################################
 # Device metadata
 # ^^^^^^^^^^^^^^^
 #
 # Device metadata is represented by :py:class:`~pynwb.device.Device` objects.
-# To create a device, you can use the :py:class:`~pynwb.device.Device` instance method
+# To create a device, you can use the :py:class:`~pynwb.file.NWBFile` instance method
 # :py:meth:`~pynwb.file.NWBFile.create_device`.
 
 device = nwbfile.create_device(name='Heka ITC-1600')
 
-#######################
+#####################################################################
 # Electrode metadata
 # ^^^^^^^^^^^^^^^^^^
 #
@@ -228,11 +239,13 @@ device = nwbfile.create_device(name='Heka ITC-1600')
 # To create an electrode group, you can use the :py:class:`~pynwb.file.NWBFile` instance method
 # :py:meth:`~pynwb.file.NWBFile.create_icephys_electrode`.
 
-electrode = nwbfile.create_icephys_electrode(name="elec0",
-                                             description='a mock intracellular electrode',
-                                             device=device)
+electrode = nwbfile.create_icephys_electrode(
+    name="elec0",
+    description='a mock intracellular electrode',
+    device=device
+)
 
-#######################
+#####################################################################
 # Stimulus and response data
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^
 #
@@ -254,29 +267,33 @@ electrode = nwbfile.create_icephys_electrode(name="elec0",
 #
 # Below we create a simple example stimulus/response recording data pair.
 
-# Create an example  icephys stimulus.
-stimulus = VoltageClampStimulusSeries(name="ccss",
-                                      data=[1, 2, 3, 4, 5],
-                                      starting_time=123.6,
-                                      rate=10e3,
-                                      electrode=electrode,
-                                      gain=0.02,
-                                      sweep_number=np.uint64(15))
+# Create an example icephys stimulus.
+stimulus = VoltageClampStimulusSeries(
+    name="ccss",
+    data=[1, 2, 3, 4, 5],
+    starting_time=123.6,
+    rate=10e3,
+    electrode=electrode,
+    gain=0.02,
+    sweep_number=np.uint64(15)
+)
 
 # Create and icephys response
-response = VoltageClampSeries(name='vcs',
-                              data=[0.1, 0.2, 0.3, 0.4, 0.5],
-                              conversion=1e-12,
-                              resolution=np.nan,
-                              starting_time=123.6,
-                              rate=20e3,
-                              electrode=electrode,
-                              gain=0.02,
-                              capacitance_slow=100e-12,
-                              resistance_comp_correction=70.0,
-                              sweep_number=np.uint64(15))
+response = VoltageClampSeries(
+    name='vcs',
+    data=[0.1, 0.2, 0.3, 0.4, 0.5],
+    conversion=1e-12,
+    resolution=np.nan,
+    starting_time=123.6,
+    rate=20e3,
+    electrode=electrode,
+    gain=0.02,
+    capacitance_slow=100e-12,
+    resistance_comp_correction=70.0,
+    sweep_number=np.uint64(15)
+)
 
-#######################
+#####################################################################
 # Adding an intracellular recording
 # ---------------------------------
 #
@@ -286,7 +303,7 @@ response = VoltageClampSeries(name='vcs',
 #
 # .. figure:: ../../figures/plot_icephys_intracellular_recordings_table.png
 #    :width: 700
-#    :alt: IntracellularRecordingsTabl
+#    :alt: IntracellularRecordingsTable
 #
 #    Illustration of the structure of the IntracellularRecordingsTable
 #
@@ -297,18 +314,20 @@ response = VoltageClampSeries(name='vcs',
 # :py:meth:`~pynwb.file.NWBFile.add_intracellular_recording`) returns the integer index of the
 # newly created row. The ``rowindex`` is used in subsequent tables that reference rows in our table.
 
-rowindex = nwbfile.add_intracellular_recording(electrode=electrode,
-                                               stimulus=stimulus,
-                                               response=response,
-                                               id=10)
+rowindex = nwbfile.add_intracellular_recording(
+    electrode=electrode,
+    stimulus=stimulus,
+    response=response,
+    id=10
+)
 
-#######################
+#####################################################################
 # .. note:: Since :py:meth:`~pynwb.file.NWBFile.add_intracellular_recording` can automatically add
-#          the objects to the NWBFile  we do not need to separately call
+#          the objects to the NWBFile we do not need to separately call
 #          :py:meth:`~pynwb.file.NWBFile.add_stimulus` and :py:meth:`~pynwb.file.NWBFile.add_acquistion`
 #          to add our stimulus and response, but it is still fine to do so.
 #
-# .. note::  The ``id`` parameter in the call is optional and if the ``id`` is omitted then PyNWB will
+# .. note:: The ``id`` parameter in the call is optional and if the ``id`` is omitted then PyNWB will
 #          automatically number recordings in sequences (i.e., id is the same as the rowindex)
 #
 # .. note:: The IntracellularRecordigns, SimultaneousRecordings, SequentialRecordingsTable,
@@ -317,96 +336,105 @@ rowindex = nwbfile.add_intracellular_recording(electrode=electrode,
 #          results in a ValueError.
 #
 
-#######################
+#####################################################################
 # .. note:: We may optionally also specify the relevant time range for a stimulus and/or response as part of
 #           the intracellular_recording. This is useful, e.g., in case where the recording of the stimulus
-#           and response do not align (e.g., in case that recording of the response started before
+#           and response do not align (e.g., in case the recording of the response started before
 #           the recording of the stimulus).
 
-rowindex2 = nwbfile.add_intracellular_recording(electrode=electrode,
-                                                stimulus=stimulus,
-                                                stimulus_start_index=1,
-                                                stimulus_index_count=3,
-                                                response=response,
-                                                response_start_index=2,
-                                                response_index_count=3,
-                                                id=11)
+rowindex2 = nwbfile.add_intracellular_recording(
+    electrode=electrode,
+    stimulus=stimulus,
+    stimulus_start_index=1,
+    stimulus_index_count=3,
+    response=response,
+    response_start_index=2,
+    response_index_count=3,
+    id=11
+)
 
-#######################
+#####################################################################
 # .. note:: A recording may optionally also consist of just an electrode and stimulus or electrode
-#           and response, but at least one of stimulus or response are required. If either stimulus or response
-#           are missing, then the stimulus and response are internally set ot the same TimeSeries and the
+#           and response, but at least one of stimulus or response is required. If either stimulus or response
+#           is missing, then the stimulus and response are internally set to the same TimeSeries and the
 #           start_index and index_count for the missing parameter are set to -1. When retrieving
-#           data from the :py:class:`~pynwb.base.TimeSeriesReferenceVectorData` the missing values
+#           data from the :py:class:`~pynwb.base.TimeSeriesReferenceVectorData`, the missing values
 #           will be represented via masked numpy arrays, i.e., as masked values in a
 #           ``numpy.ma.masked_array`` or as a ``np.ma.core.MaskedConstant``.
 
-rowindex3 = nwbfile.add_intracellular_recording(electrode=electrode,
-                                                response=response,
-                                                id=12)
+rowindex3 = nwbfile.add_intracellular_recording(
+    electrode=electrode,
+    response=response,
+    id=12
+)
 
-#######################
+#####################################################################
 # .. warning:: For brevity we reused in the above example the same response and stimulus in
 #        all rows of the intracellular_recordings. While this is allowed, in most practical
 #        cases the stimulus and response will change between intracellular_recordings.
 
-#######################
+#####################################################################
 # Adding custom columns to the intracellular recordings table
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 #
-# We can add a column to the main intracellular recordings table as follows
+# We can add a column to the main intracellular recordings table as follows.
 
 nwbfile.intracellular_recordings.add_column(
     name='recording_tag',
     data=['A1', 'A2', 'A3'],
-    description='String with a recording tag')
+    description='String with a recording tag'
+)
 
-#######################
-# Similarly, we can also add custom columns to any of the subcategory tables, i.e.,
-# the electrodes, stimuli, and responses tables. All we need to do is indicate
-# the name of the category we want to add the column to.
-#
-
-nwbfile.intracellular_recordings.add_column(
-    name='voltage_threshold',
-    data=[0.1, 0.12, 0.13],
-    description='Just and example filter on the electrode',
-    category='electrodes')
-
-#######################
+#####################################################################
 # The :py:class:`~pynwb.icephys.IntracellularRecordingsTable` table is not just a ``DynamicTable``
 # but an ``AlignedDynamicTable`. The ``AlignedDynamicTable` type is itself a ``DynamicTable``
 # that may contain an arbitrary number of additional ``DynamicTable``, each of which defines
 # a "category". This is similar to a table with "sub-headings". In the case of the
-# :py:class:`~pynwb.icephys.IntracellularRecordingsTable` we have three predefined categories,
-# i.e., electrodes, stimuli, and responses. We can now also dynamically add new categories to
-# the table. As each category corresponds to a DynamicTable this means we have to create a
+# :py:class:`~pynwb.icephys.IntracellularRecordingsTable`, we have three predefined categories,
+# i.e., electrodes, stimuli, and responses. We can also dynamically add new categories to
+# the table. As each category corresponds to a DynamicTable, this means we have to create a
 # new DynamicTable and add it to our table.
 
-# Create a new DynamicTable for our category
+# Create a new DynamicTable for our category that contains a location column of type VectorData 
+location_column = VectorData(
+    name='location',
+    data=['Mordor', 'Gondor', 'Rohan'],
+    description='Recording location in Middle Earth'
+)
+
 lab_category = DynamicTable(
     name='recording_lab_data',
     description='category table for lab-specific recording metadata',
     colnames=['location', ],
-    columns=[VectorData(name='location',
-                        data=['Mordor', 'Gondor', 'Rohan'],
-                        description='Recording location in Middle Earth')])
+    columns=[location_column, ]
+)
 # Add the table as a new category to our intracellular_recordings
 nwbfile.intracellular_recordings.add_category(category=lab_category)
-# Note, the name of the category is name of the table, i.e. recording_lab_data
+# Note, the name of the category is name of the table, i.e., 'recording_lab_data'
 
-#######################
+#####################################################################
 # .. note:: In an ``AlignedDynamicTable`` all category tables MUST align with the master table,
 #           i.e., all tables must have the same number of rows and rows are expected to
 #           correspond to each other by index
 
+#####################################################################
+# We can also add custom columns to any of the subcategory tables, i.e.,
+# the electrodes, stimuli, and responses tables, and any custom subcategory tables. 
+# All we need to do is indicate the name of the category we want to add the column to.
 
-#######################
+nwbfile.intracellular_recordings.add_column(
+    name='voltage_threshold',
+    data=[0.1, 0.12, 0.13],
+    description='Just an example column on the electrodes category table',
+    category='electrodes'
+)
+
+#####################################################################
 # Add a simultaneous recording
 # ---------------------------------
 #
 # Before adding a simultaneous recording, we will take a brief discourse to illustrate
-# how we can add custom columns to tables before  and after we have populated the table with data
+# how we can add custom columns to tables before and after we have populated the table with data
 #
 # Define a custom column for a simultaneous recording before populating the table
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -419,31 +447,33 @@ nwbfile.intracellular_recordings.add_category(category=lab_category)
 
 print(nwbfile.icephys_simultaneous_recordings)
 
-#######################
+#####################################################################
 # The :py:class:`~pynwb.icephys.SimultaneousRecordingsTable` is optional, and since we have
 # not populated it with any data yet, we can see that the table does not actually exist yet.
 # In order to make sure the table is being created we can use
-# :py:meth:`~pynwb.file.NWBFile.get_icephys_simultaneous_recordings` instead, which ensures
+# :py:meth:`~pynwb.file.NWBFile.get_icephys_simultaneous_recordings`, which ensures
 # that the table is being created if it does not exist yet.
 
 icephys_simultaneous_recordings = nwbfile.get_icephys_simultaneous_recordings()
-icephys_simultaneous_recordings.add_column(name='simultaneous_recording_tag',
-                                           description='A custom tag for simultaneous_recordings')
+icephys_simultaneous_recordings.add_column(
+    name='simultaneous_recording_tag',
+    description='A custom tag for simultaneous_recordings'
+)
 print(icephys_simultaneous_recordings.colnames)
 
-#######################
-# As we can see, we now have succesfully created a new custom column
+#####################################################################
+# As we can see, we now have succesfully created a new custom column.
 #
-# .. note:: The same process applies to all our other tables as well. Here we use the
-#         corresponding :py:meth:`~pynwb.file.NWBFile.get_intracelluar_recordings`,
+# .. note:: The same process applies to all our other tables as well. We can use the
+#         corresponding :py:meth:`~pynwb.file.NWBFile.get_intracellular_recordings`,
 #         :py:meth:`~pynwb.file.NWBFile.get_icephys_sequential_recordings`,
 #         :py:meth:`~pynwb.file.NWBFile.get_icephys_repetitions`, and
-#         :py:meth:`~pynwb.file.NWBFile.get_icephys_conditions` functions intead.
+#         :py:meth:`~pynwb.file.NWBFile.get_icephys_conditions` functions instead.
 #         In general, we can always use the get functions instead of accessing the property
 #         of the file.
 #
 
-#######################
+#####################################################################
 # Add a simultaneous recording
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 #
@@ -453,34 +483,36 @@ print(icephys_simultaneous_recordings.colnames)
 # here is simply a list of ints with the indices of the corresponding rows in
 # the :py:class:`~pynwb.icephys.IntracellularRecordingsTable`
 #
-# .. note:: Since we created our custom ``simultaneous_recording_tag column`` earlier
+# .. note:: Since we created our custom ``simultaneous_recording_tag column`` earlier,
 #           we now also need to populate this custom field for every row we add to
 #           the :py:class:`~pynwb.icephys.SimultaneousRecordingsTable`.
 #
 
-rowindex = nwbfile.add_icephys_simultaneous_recording(recordings=[rowindex, rowindex2, rowindex3],
-                                                      id=12,
-                                                      simultaneous_recording_tag='LabTag1')
+rowindex = nwbfile.add_icephys_simultaneous_recording(
+    recordings=[rowindex, rowindex2, rowindex3],
+    id=12,
+    simultaneous_recording_tag='LabTag1'
+)
 
-#######################
+#####################################################################
 # .. note:: The ``recordings`` argument is the list of indices of the rows in the
 #           :py:class:`~pynwb.icephys.IntracellularRecordingsTable` that we want
 #           to reference. The indices are determined by the order in which we
 #           added the elements to the table. If we don't know the row indicies,
 #           but only the ids of the relevant intracellular recordings, then
-#           we can search for them  as follows:
+#           we can search for them as follows:
 
-temp_row_indicies = (nwbfile.intracellular_recordings.id == [10, 11])
-print(temp_row_indicies)
+temp_row_indices = (nwbfile.intracellular_recordings.id == [10, 11])
+print(temp_row_indices)
 
-#######################
+#####################################################################
 # .. note::  The same is true for our other tables as well, i.e., referencing is
 #            done always by indices of rows (NOT ids). If we only know ids then we
 #            can search for them in the same manner on the other tables as well,
 #            e.g,. via  ``nwbfile.simultaneous_recordings.id == 15``. In the search
 #            we can use a list of integer ids or a single int.
 
-#######################
+#####################################################################
 # Define a custom column for a simultaneous recording after adding rows
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 #
@@ -492,9 +524,10 @@ print(temp_row_indicies)
 nwbfile.icephys_simultaneous_recordings.add_column(
     name='simultaneous_recording_type',
     description='Description of the type of simultaneous_recording',
-    data=['SimultaneousRecordingType1', ])
+    data=['SimultaneousRecordingType1', ]
+)
 
-#######################
+#####################################################################
 # Add a sequential recording
 # --------------------------
 #
@@ -508,9 +541,10 @@ nwbfile.icephys_simultaneous_recordings.add_column(
 rowindex = nwbfile.add_icephys_sequential_recording(
     simultaneous_recordings=[0],
     stimulus_type='square',
-    id=15)
+    id=15
+)
 
-#######################
+#####################################################################
 # Add a repetition
 # ----------------
 #
@@ -523,8 +557,7 @@ rowindex = nwbfile.add_icephys_sequential_recording(
 
 rowindex = nwbfile.add_icephys_repetition(sequential_recordings=[0], id=17)
 
-
-#######################
+#####################################################################
 # Add an experimental condition
 # -----------------------------
 #
@@ -537,7 +570,7 @@ rowindex = nwbfile.add_icephys_repetition(sequential_recordings=[0], id=17)
 
 rowindex = nwbfile.add_icephys_experimental_condition(repetitions=[0], id=19)
 
-#######################
+#####################################################################
 # As mentioned earlier, to add additonal columns to any of the tables, we can
 # use the ``.add_column`` function on the corresponding table after they have
 # been created.
@@ -545,17 +578,19 @@ rowindex = nwbfile.add_icephys_experimental_condition(repetitions=[0], id=19)
 nwbfile.icephys_experimental_conditions.add_column(
     name='tag',
     data=np.arange(1),
-    description='integer tag for a experimental condition')
+    description='integer tag for a experimental condition'
+)
 
-#######################
-# When we add new items then we now also need to set the values for the new column, e.g.:
+#####################################################################
+# When we add new items, then we now also need to set the values for the new column, e.g.:
 
 rowindex = nwbfile.add_icephys_experimental_condition(
     repetitions=[0],
     id=21,
-    tag=3)
+    tag=3
+)
 
-#######################
+#####################################################################
 # Read/write the NWBFile
 # -----------------------------
 #
@@ -570,45 +605,45 @@ with NWBHDF5IO(testpath, 'r') as io:
     infile = io.read()
 
 
-#######################
+#####################################################################
 # Accessing the tables
 # -----------------------------
 #
 # All of the icephys metadata tables are available as attributes on the NWBFile object.
-# For display purposed we convert the tables to pandas DataFrames to show their content.
-# For a more in-depth discussion of how to access and use the tables
+# For display purposes, we convert the tables to pandas DataFrames to show their content.
+# For a more in-depth discussion of how to access and use the tables,
 # see the tutorial on :ref:`icephys_pandas_tutorial`.
 pandas.set_option("display.max_columns", 6)  # avoid oversize table in the html docs
 nwbfile.intracellular_recordings.to_dataframe()
 
-#######################
+#####################################################################
 #
 
 # optionally we can ignore the id columns of the category subtables
 pandas.set_option("display.max_columns", 5)  # avoid oversize table in the html docs
 nwbfile.intracellular_recordings.to_dataframe(ignore_category_ids=True)
 
-#######################
+#####################################################################
 #
 nwbfile.icephys_simultaneous_recordings.to_dataframe()
 
-#######################
+#####################################################################
 #
 
 nwbfile.icephys_sequential_recordings.to_dataframe()
 
-#######################
+#####################################################################
 #
 
 nwbfile.icephys_repetitions.to_dataframe()
 
-#######################
+#####################################################################
 #
 
 nwbfile.icephys_experimental_conditions.to_dataframe()
 
 
-#######################
+#####################################################################
 # Validate data
 # ^^^^^^^^^^^^^
 #
