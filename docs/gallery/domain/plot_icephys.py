@@ -395,7 +395,7 @@ nwbfile.intracellular_recordings.add_column(
 # the table. As each category corresponds to a DynamicTable, this means we have to create a
 # new DynamicTable and add it to our table.
 
-# Create a new DynamicTable for our category that contains a location column of type VectorData 
+# Create a new DynamicTable for our category that contains a location column of type VectorData
 location_column = VectorData(
     name='location',
     data=['Mordor', 'Gondor', 'Rohan'],
@@ -419,7 +419,7 @@ nwbfile.intracellular_recordings.add_category(category=lab_category)
 
 #####################################################################
 # We can also add custom columns to any of the subcategory tables, i.e.,
-# the electrodes, stimuli, and responses tables, and any custom subcategory tables. 
+# the electrodes, stimuli, and responses tables, and any custom subcategory tables.
 # All we need to do is indicate the name of the category we want to add the column to.
 
 nwbfile.intracellular_recordings.add_column(
