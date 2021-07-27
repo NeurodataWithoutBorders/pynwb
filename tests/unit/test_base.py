@@ -244,7 +244,7 @@ class TestTimeSeriesReferenceVectorData(TestCase):
         with self.assertRaises(IndexError):
             temp[0]
 
-    def test_get_lenght1_valid_data(self):
+    def test_get_length1_valid_data(self):
         """Get data from a TimeSeriesReferenceVectorData with one element and valid data"""
         temp = TimeSeriesReferenceVectorData()
         value = (0, 5, TimeSeries(name='test', description='test', data=np.arange(10), starting_time=5.0, rate=0.1))
@@ -252,7 +252,7 @@ class TestTimeSeriesReferenceVectorData(TestCase):
         self.assertTupleEqual(temp[0], value)
         self.assertListEqual(temp[:].tolist(), [list(value), ])
 
-    def test_get_lenght1_invalid_data(self):
+    def test_get_length1_invalid_data(self):
         """Get data from a TimeSeriesReferenceVectorData with one element and invalid data"""
         temp = TimeSeriesReferenceVectorData()
         value = (-1, -1, TimeSeries(name='test', description='test', data=np.arange(10), starting_time=5.0, rate=0.1))
@@ -272,7 +272,7 @@ class TestTimeSeriesReferenceVectorData(TestCase):
             self.assertListEqual(re[0].mask.tolist(), [True, True, True])
             self.assertListEqual(re[0].data.tolist(), list(value))
 
-    def test_get_lenght5_valid_data(self):
+    def test_get_length5_valid_data(self):
         """Get data from a TimeSeriesReferenceVectorData with 5 elements"""
         temp = TimeSeriesReferenceVectorData()
         num_values = 5
@@ -294,7 +294,7 @@ class TestTimeSeriesReferenceVectorData(TestCase):
         self.assertListEqual(re[0].tolist(), list(values[0]))
         self.assertListEqual(re[1].tolist(), list(values[1]))
 
-    def test_get_lenght5_with_in_valid_data(self):
+    def test_get_length5_with_invalid_data(self):
         """Get data from a TimeSeriesReferenceVectorData with 5 elements"""
         temp = TimeSeriesReferenceVectorData()
         num_values = 5
