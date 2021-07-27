@@ -136,8 +136,9 @@ exp_cond_df
 
 #####################################################################
 # By default, the method will resolve :py:class:`~hdmf.common.table.DynamicTableRegion`
-# references and include the rows that are referenced in related tables as `DataFrame`_
-# objects, resulting in a hierarchically nested `DataFrame`_. For example, looking at a single cell of the
+# references and include the rows that are referenced in related tables as
+# `DataFrame <https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html>`_ objects,
+# resulting in a hierarchically nested `DataFrame`_. For example, looking at a single cell of the
 # ``repetitions`` column of our :py:class:`~pynwb.icephys.ExperimentalConditionsTable` table,
 # we get the corresponding subset of repetitions from the py:class:`~pynwb.icephys.RepetitionsTable`.
 
