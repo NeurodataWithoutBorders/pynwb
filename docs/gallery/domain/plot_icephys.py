@@ -413,7 +413,7 @@ nwbfile.intracellular_recordings.add_category(category=lab_category)
 # Note, the name of the category is name of the table, i.e., 'recording_lab_data'
 
 #####################################################################
-# .. note:: In an ``AlignedDynamicTable`` all category tables MUST align with the master table,
+# .. note:: In an ``AlignedDynamicTable`` all category tables MUST align with the main table,
 #           i.e., all tables must have the same number of rows and rows are expected to
 #           correspond to each other by index
 
