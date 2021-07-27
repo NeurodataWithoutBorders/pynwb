@@ -190,8 +190,7 @@ device = nwbfile.get_device('Heka ITC-1600')
 # PatchClampSeries which belongs to a certain sweep number via
 # :py:meth:`~pynwb.icephys.SweepTable.get_series`.
 #
-# The following call will return the voltage clamp data, of two timeseries
+# The following call will return the voltage clamp data of two timeseries
 # consisting of acquisition and stimulus, from sweep 1.
 
 series = nwbfile.sweep_table.get_series(1)
-print("hello world")
