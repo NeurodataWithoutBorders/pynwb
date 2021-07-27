@@ -787,9 +787,9 @@ class NWBFile(MultiContainerInterface):
 
         Note: For more complex organization of intracellular recordings you may also be
         interested in the related SimultaneousRecordingsTable, SequentialRecordingsTable,
-        RepetitionsTable, and ExperimentalConditionsTable tables an the related function
-        of NWBFile: add_icephsy_simultaneous_recording, add_icephys_sequential_recording,
-        add_icephys_repetition, and add_icephys_condition.
+        RepetitionsTable, and ExperimentalConditionsTable tables and the related functions
+        of NWBFile: add_icephys_simultaneous_recording, add_icephys_sequential_recording,
+        add_icephys_repetition, and add_icephys_experimental_condition.
         """
         # Add the stimulus, response, and electrode to the file if they don't exist yet
         stimulus, response, electrode = getargs('stimulus', 'response', 'electrode', kwargs)
