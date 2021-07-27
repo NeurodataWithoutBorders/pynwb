@@ -146,7 +146,7 @@ ex_response = VoltageClampSeries(name='response',
 
 # (A) Add an intracellular recording to the file
 #     NOTE: We can optionally define time-ranges for the stimulus/response via
-#     the corresponding option _start_index and _index_count parameters.
+#     the corresponding optional _start_index and _index_count parameters.
 #     NOTE: It is allowed to add a recording with just a stimulus or a response
 #     NOTE: We can  add custom columns to any of our tables in steps (A)-(E)
 ex_ir_index = ex_nwbfile.add_intracellular_recording(electrode=ex_electrode,
