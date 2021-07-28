@@ -488,9 +488,9 @@ class IntracellularRecordingsTable(AlignedDynamicTable):
         Add a single recording to the IntracellularRecordingsTable table.
 
         Typically, both stimulus and response are expected. However, in some cases only a stimulus
-        or a resposne may be recodred as part of a recording. In this case, None, may be given
+        or a response may be recodred as part of a recording. In this case, None may be given
         for either stimulus or response, but not both. Internally, this results in both stimulus
-        and response pointing to the same timeseries, while the start_index and index_count for
+        and response pointing to the same TimeSeries, while the start_index and index_count for
         the invalid series will both be set to -1.
         """
         # Get the input data
@@ -551,7 +551,7 @@ class IntracellularRecordingsTable(AlignedDynamicTable):
             stimuli = {}
         stimuli['stimulus'] = (stimulus_start_index, stimulus_index_count, stimulus)
 
-        # Compile the reponses table data
+        # Compile the responses table data
         responses = copy(popargs('response_metadata', kwargs))
         if responses is None:
             responses = {}
@@ -578,7 +578,7 @@ class IntracellularRecordingsTable(AlignedDynamicTable):
         :raises IndexError: If index_count cannot be determined or start_index+index_count
             are outside of the range of the timeseries.
 
-        :returns: A tuple of integers with the start_index and index_count to use
+        :returns: A tuple of integers with the start_index and index_count to use.
         """
         if time_series is None:
             return -1, -1
@@ -639,7 +639,7 @@ class SimultaneousRecordingsTable(DynamicTable):
 
     __columns__ = (
         {'name': 'recordings',
-         'description': 'Column with a references to one or more rows in the IntracellularRecordingsTable table',
+         'description': 'Column with references to one or more rows in the IntracellularRecordingsTable table',
          'required': True,
          'index': True,
          'table': True},
@@ -675,8 +675,8 @@ class SimultaneousRecordingsTable(DynamicTable):
             allow_extra=True)
     def add_simultaneous_recording(self, **kwargs):
         """
-        Add a single Sweep consisting of one-or-more recordings and associated custom
-        SimultaneousRecordingsTable metadata to the table.
+        Add a single simultaneous recording (i.e., one sweep, or one row) consisting of one or more
+        recordings and associated custom simultaneous recording metadata to the table.
         """
         _ = super().add_row(enforce_unique_id=True, **kwargs)
         return len(self.id) - 1
@@ -693,7 +693,7 @@ class SequentialRecordingsTable(DynamicTable):
 
     __columns__ = (
         {'name': 'simultaneous_recordings',
-         'description': 'Column with a references to one or more rows in the SimultaneousRecordingsTable table',
+         'description': 'Column with references to one or more rows in the SimultaneousRecordingsTable table',
          'required': True,
          'index': True,
          'table': True},
@@ -738,8 +738,8 @@ class SequentialRecordingsTable(DynamicTable):
             allow_extra=True)
     def add_sequential_recording(self, **kwargs):
         """
-        Add a sequential recording (i.e., one row)  consisting of one-or-more recording simultaneous_recordings
-        and associated custom sequential recording  metadata to the table.
+        Add a sequential recording (i.e., one row) consisting of one or more simultaneous recordings
+        and associated custom sequential recording metadata to the table.
         """
         _ = super().add_row(enforce_unique_id=True, **kwargs)
         return len(self.id) - 1
@@ -755,7 +755,7 @@ class RepetitionsTable(DynamicTable):
 
     __columns__ = (
         {'name': 'sequential_recordings',
-         'description': 'Column with a references to one or more rows in the SequentialRecordingsTable table',
+         'description': 'Column with references to one or more rows in the SequentialRecordingsTable table',
          'required': True,
          'index': True,
          'table': True},
@@ -793,8 +793,8 @@ class RepetitionsTable(DynamicTable):
             allow_extra=True)
     def add_repetition(self, **kwargs):
         """
-        Add a repetition (i.e., one row)  consisting of one-or-more recording sequential recordings
-        and associated custom repetition  metadata to the table.
+        Add a repetition (i.e., one row) consisting of one or more sequential recordings
+        and associated custom repetition metadata to the table.
         """
         _ = super().add_row(enforce_unique_id=True, **kwargs)
         return len(self.id) - 1
@@ -809,7 +809,7 @@ class ExperimentalConditionsTable(DynamicTable):
 
     __columns__ = (
         {'name': 'repetitions',
-         'description': 'Column with a references to one or more rows in the RepetitionsTable table',
+         'description': 'Column with references to one or more rows in the RepetitionsTable table',
          'required': True,
          'index': True,
          'table': True},
@@ -836,15 +836,15 @@ class ExperimentalConditionsTable(DynamicTable):
 
     @docval({'name': 'repetitions',
              'type': 'array_data',
-             'doc': 'the indices of the repetitions  belonging to this condition',
+             'doc': 'the indices of the repetitions belonging to this condition',
              'default': None},
             returns='Integer index of the row that was added to this table',
             rtype=int,
             allow_extra=True)
     def add_experimental_condition(self, **kwargs):
         """
-        Add a condition (i.e., one row)  consisting of one-or-more recording repetitions of sequential recordings
-        and associated custom experimental_conditions  metadata to the table.
+        Add a condition (i.e., one row) consisting of one or more repetitions of sequential recordings
+        and associated custom experimental_conditions metadata to the table.
         """
         _ = super().add_row(enforce_unique_id=True, **kwargs)
         return len(self.id) - 1
