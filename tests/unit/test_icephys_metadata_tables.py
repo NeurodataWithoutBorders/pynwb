@@ -620,8 +620,9 @@ class SimultaneousRecordingsTableTests(ICEphysMetaTestBase):
         Test __init__ to make sure we can instantiate the SimultaneousRecordingsTable container
         """
         ir = IntracellularRecordingsTable()
-        _ = SimultaneousRecordingsTable(intracellular_recordings_table=ir)
-        self.assertTrue(True)
+        ret = SimultaneousRecordingsTable(intracellular_recordings_table=ir)
+        self.assertIs(ret.recordings.table, ir)
+        self.assertEqual(ret.name, 'simultaneous_recordings')
 
     def test_missing_intracellular_recordings_on_init(self):
         """
