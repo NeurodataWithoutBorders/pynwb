@@ -189,8 +189,8 @@ class IntracellularRecordingsTableTests(ICEphysMetaTestBase):
     """
 
     def test_init(self):
-        _ = IntracellularRecordingsTable()
-        self.assertTrue(True)
+        ret = IntracellularRecordingsTable()
+        self.assertEqual(ret.name, 'intracellular_recordings')
 
     def test_add_row(self):
         # Add a row to our IR table
