@@ -180,11 +180,7 @@ class IntracellularResponsesTableTests(TestCase):
     The IntracellularResponsesTable is covered by the
     IntracellularRecordingsTableTests as this table is part of that table.
     """
-    def setUp(self):
-        pass
-
-    def tearDown(self):
-        pass
+    pass
 
 
 class IntracellularRecordingsTableTests(ICEphysMetaTestBase):
