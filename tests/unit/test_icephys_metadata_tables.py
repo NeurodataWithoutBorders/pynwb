@@ -19,6 +19,7 @@ from pynwb.file import NWBFile
 from pynwb.icephys import (VoltageClampStimulusSeries, VoltageClampSeries, CurrentClampStimulusSeries,
                            IZeroClampSeries, IntracellularRecordingsTable, SimultaneousRecordingsTable,
                            SequentialRecordingsTable, RepetitionsTable, ExperimentalConditionsTable)
+from pynwb.base import TimeSeriesReferenceVectorData
 from pynwb import NWBHDF5IO
 from hdmf.utils import docval, popargs
 
@@ -309,7 +310,8 @@ class IntracellularRecordingsTableTests(ICEphysMetaTestBase):
         # Check the stimulus
         self.assertTupleEqual(res[('stimuli', 'stimulus')].iloc[0], (0, 5, self.stimulus))
         # Check the response
-        self.assertTrue(isinstance(res[('responses', 'response')].iloc[0], np.ma.core.MaskedArray))
+        self.assertTrue(isinstance(res[('responses', 'response')].iloc[0],
+                                   TimeSeriesReferenceVectorData.TIME_SERIES_REFERENCE_TUPLE))
         # Test writing out ir table
         self.write_test_helper(ir)
 
@@ -330,7 +332,8 @@ class IntracellularRecordingsTableTests(ICEphysMetaTestBase):
         # Check electrodes
         self.assertIs(res[('electrodes', 'electrode')].iloc[0], self.electrode)
         # Check the stimulus
-        self.assertTrue(isinstance(res[('stimuli', 'stimulus')].iloc[0], np.ma.core.MaskedArray))
+        self.assertTrue(isinstance(res[('stimuli', 'stimulus')].iloc[0],
+                                   TimeSeriesReferenceVectorData.TIME_SERIES_REFERENCE_TUPLE))
         # Check the response
         self.assertTupleEqual(res[('responses', 'response')].iloc[0], (0, 5, self.response))
         # Test writing out ir table
@@ -352,7 +355,8 @@ class IntracellularRecordingsTableTests(ICEphysMetaTestBase):
         res = ir[0]
         self.assertTupleEqual(res[('stimuli', 'stimulus')].iloc[0],
                               (0, len(self.stimulus.data), self.stimulus))
-        self.assertTrue(isinstance(res[('responses', 'response')].iloc[0], np.ma.core.MaskedArray))
+        self.assertTrue(isinstance(res[('responses', 'response')].iloc[0],
+                                   TimeSeriesReferenceVectorData.TIME_SERIES_REFERENCE_TUPLE))
         # Make sure single -1 values are converted
         ir = IntracellularRecordingsTable()
         ir.add_recording(
@@ -533,44 +537,22 @@ class IntracellularRecordingsTableTests(ICEphysMetaTestBase):
         # Test conversion with stimulus_refs_as_objectids
         df = self.nwbfile.intracellular_recordings.to_dataframe(stimulus_refs_as_objectids=True)
         self.assertListEqual(df.columns.to_list(), expected_cols)
-        expects_stim_col = [e if isinstance(e, (np.ma.core.MaskedArray, np.ma.core.MaskedConstant)) and np.all(e.mask)
-                            else (e[0], e[1], e[2].object_id)
+        expects_stim_col = [e if e[2] is None else (e[0], e[1], e[2].object_id)
                             for e in self.nwbfile.intracellular_recordings[('stimuli', 'stimulus')][:]]
-        for i, v in enumerate(expects_stim_col):
-            if isinstance(v, tuple):
-                self.assertTupleEqual(df[('stimuli', 'stimulus')][i], v)
-            else:
-                self.assertTrue(isinstance(df[('stimuli', 'stimulus')][i],
-                                           (np.ma.core.MaskedArray, np.ma.core.MaskedConstant)))
+        self.assertListEqual(df[('stimuli', 'stimulus')].tolist(), expects_stim_col)
         # Test conversion with response_refs_as_objectids
         df = self.nwbfile.intracellular_recordings.to_dataframe(response_refs_as_objectids=True)
         self.assertListEqual(df.columns.to_list(), expected_cols)
-        expects_resp_col = [e if isinstance(e, (np.ma.core.MaskedArray, np.ma.core.MaskedConstant)) and np.all(e.mask)
-                            else (e[0], e[1], e[2].object_id)
+        expects_resp_col = [e if e[2] is None else (e[0], e[1], e[2].object_id)
                             for e in self.nwbfile.intracellular_recordings[('responses', 'response')][:]]
-        for i, v in enumerate(expects_resp_col):
-            if isinstance(v, tuple):
-                self.assertTupleEqual(df[('responses', 'response')][i], v)
-            else:
-                self.assertTrue(isinstance(df[('responses', 'response')][i],
-                                           (np.ma.core.MaskedArray, np.ma.core.MaskedConstant)))
+        self.assertListEqual(df[('responses', 'response')].tolist(), expects_resp_col)
         # Test conversion with all options enabled
         df = self.nwbfile.intracellular_recordings.to_dataframe(ignore_category_ids=True,
                                                                 stimulus_refs_as_objectids=True,
                                                                 response_refs_as_objectids=True)
         self.assertListEqual(df.columns.to_list(), expected_cols_no_ids)
-        for i, v in enumerate(expects_stim_col):
-            if isinstance(v, tuple):
-                self.assertTupleEqual(df[('stimuli', 'stimulus')][i], v)
-            else:
-                self.assertTrue(isinstance(df[('stimuli', 'stimulus')][i],
-                                           (np.ma.core.MaskedArray, np.ma.core.MaskedConstant)))
-        for i, v in enumerate(expects_resp_col):
-            if isinstance(v, tuple):
-                self.assertTupleEqual(df[('responses', 'response')][i], v)
-            else:
-                self.assertTrue(isinstance(df[('responses', 'response')][i],
-                                           (np.ma.core.MaskedArray, np.ma.core.MaskedConstant)))
+        self.assertListEqual(df[('stimuli', 'stimulus')].tolist(), expects_stim_col)
+        self.assertListEqual(df[('responses', 'response')].tolist(), expects_resp_col)
 
     def test_round_trip_container_no_data(self):
         """Test read and write the container by itself"""

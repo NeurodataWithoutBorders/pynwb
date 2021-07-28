@@ -1,5 +1,6 @@
 from warnings import warn
 from collections.abc import Iterable
+from collections import namedtuple
 
 from hdmf.utils import docval, getargs, popargs, call_docval_func, get_docval
 from hdmf.data_utils import extend_data
@@ -286,6 +287,14 @@ class Images(MultiContainerInterface):
         self.images = images
 
 
+class TimeSeriesReference(namedtuple('TimeSeriesReference', ['idx_start', 'count', 'timeseries'])):
+    """
+    Class used to represent data values of a :py:class:`~pynwb.base.TimeSeriesReferenceVectorData`
+    This is a ``namedtuple('TimeSeriesReference', ['idx_start', 'count', 'timeseries'])`` type.
+    """
+    pass
+
+
 @register_class('TimeSeriesReferenceVectorData', CORE_NAMESPACE)
 class TimeSeriesReferenceVectorData(VectorData):
     """
@@ -293,18 +302,35 @@ class TimeSeriesReferenceVectorData(VectorData):
     column stores the start_index and count to indicate the range in time to be selected
     as well as an object reference to the TimeSeries.
 
-    In practice we sometimes need to be able to represent missing values, e.g., in the
-    :py:class:`~pynwb.icephys.IntracellularRecordingsTable` we have
+    **Representing missing values** In practice we sometimes need to be able to represent missing values,
+    e.g., in the :py:class:`~pynwb.icephys.IntracellularRecordingsTable` we have
     :py:class:`~pynwb.base.TimeSeriesReferenceVectorData` to link to stimulus and
     response recordings, but a user can specify either only one of them or both. Since there is no
-    "None" value for a complex type like ``(idx_start, count, TimeSeries)``, we internally
-    define None as ``(-1, -1, TimeSeries)``, i.e., if the ``idx_start`` (and ``count``) is negative
+    ``None`` value for a complex types like ``(idx_start, count, TimeSeries)``, NWB defines
+    ``None`` as ``(-1, -1, TimeSeries)`` for storage, i.e., if the ``idx_start`` (and ``count``) is negative
     then this indicates an invalid link (in practice both ``idx_start`` and ``count`` must always
     either both be positive or both be negative). When selecting data via the
     :py:meth:`~pynwb.base.TimeSeriesReferenceVectorData.get` or
     :py:meth:`~pynwb.base. TimeSeriesReferenceVectorData.__getitem__`
-    functions, ``(-1, -1, TimeSeries)`` values are masked in the resulting np.ma.core.MaskedArray.
+    functions, ``(-1, -1, TimeSeries)`` values are replaced by the corresponding
+    :py:class:`~pynwb.base.TimeSeriesReferenceVectorData.TIME_SERIES_REFERENCE_NONE_TYPE` tuple
+    to avoid exposing NWB storage internals to the user and simplifying the use of and checking
+    for missing values. **NOTE:** We can still inspect the raw data values by looking at ``self.data``
+    directly instead.
+
+    :cvar TIME_SERIES_REFERENCE_TUPLE:
+    :cvar TIME_SERIES_REFERENCE_NONE_TYPE:
     """
+
+    TIME_SERIES_REFERENCE_TUPLE = TimeSeriesReference
+    """Return type when calling :py:meth:`~pynwb.base.TimeSeriesReferenceVectorData.get` or
+    :py:meth:`~pynwb.base. TimeSeriesReferenceVectorData.__getitem__`."""
+
+    TIME_SERIES_REFERENCE_NONE_TYPE = TIME_SERIES_REFERENCE_TUPLE(None, None, None)
+    """Tuple used to represent None values when calling :py:meth:`~pynwb.base.TimeSeriesReferenceVectorData.get` or
+    :py:meth:`~pynwb.base. TimeSeriesReferenceVectorData.__getitem__`. See also
+    :py:class:`~pynwb.base.TimeSeriesReferenceVectorData.TIME_SERIES_REFERENCE_TUPLE`"""
+
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this VectorData', 'default': 'timeseries'},
             {'name': 'description', 'type': str, 'doc': 'a description for this column',
              'default': "Column storing references to a TimeSeries (rows). For each TimeSeries this "
@@ -318,14 +344,22 @@ class TimeSeriesReferenceVectorData(VectorData):
         """
         Retrieve elements from this object.
 
-        The selection behavior is the same as for :py:meth:`~hdmf.common.table.VectorData.get`. A
-        key difference is that for invalid reference (i.e., values of ``(-1, -1, TimeSeries)``), the
-        value is being represented by a ``np.ma.core.MaskedArray`` instead. This allows us to
-        avoid exposing internal details of the schema to the user and simplifies handling of
-        missing values.
+        The function uses :py:class:`~pynwb.base.TimeSeriesReferenceVectorData.TIME_SERIES_REFERENCE_TUPLE`
+        to describe individual records in the dataset. This allows the code to avoid exposing internal
+        details of the schema to the user and simplifies handling of missing values by explictly
+        representing missing values via
+        :py:class:`~pynwb.base.TimeSeriesReferenceVectorData.TIME_SERIES_REFERENCE_NONE_TYPE`
+        rather than the internal representation used for storage of ``(-1, -1, TimeSeries)``.
 
         :param key: Selection of the elements
         :param kwargs: Ignored
+
+        :returns: :py:class:`~pynwb.base.TimeSeriesReferenceVectorData.TIME_SERIES_REFERENCE_TUPLE` if a single
+                  element is being selected. Otherwise return a list of
+                  :py:class:`~pynwb.base.TimeSeriesReferenceVectorData.TIME_SERIES_REFERENCE_TUPLE` objets.
+                  Missing values are represented by
+                  :py:class:`~pynwb.base.TimeSeriesReferenceVectorData.TIME_SERIES_REFERENCE_NONE_TYPE`
+                  in which all values (i.e,. idx_start, count, timeseries) are set to None.
         """
         vals = super().get(key)
         # we only selected one row.
@@ -336,25 +370,16 @@ class TimeSeriesReferenceVectorData(VectorData):
             #       if isinstance(vals, tuple) or isinstance(vals, np.void):
             #          ...
             if vals[0] < 0 or vals[1] < 0:
-                return np.ma.core.MaskedArray(data=vals, mask=[True, True, True])
+                return self.TIME_SERIES_REFERENCE_NONE_TYPE
             else:
-                return vals
+                return self.TIME_SERIES_REFERENCE_TUPLE(*vals)
         else:  # key selected multiple rows
             # When loading from HDF5 we get an np.ndarray otherwise we get list-of-list. This
-            # makes things the values consistent
-            if isinstance(vals, np.ndarray):
-                vals = [[v[0], v[1], v[2]] for v in vals]
-            vals = np.asarray(vals)
-            mask = np.asarray([(v[0] < 0 or v[1] < 0) for v in vals])
-            # For some reason, when we only select 0 or 1 element it is sufficient to mask that element
-            # but when selecting more than 1 element we need to mask all 3 components of each element
-            if len(vals) > 1:
-                mask = np.asarray([v for v in mask for i in range(3)])
-            # If we are masking any elements than create a masked array
-            if np.any(mask):
-                return np.ma.masked_array(vals, mask)
-            else:  # otherwise just use the regular (unmasked) ndarray
-                return vals
+            # makes makes the values consistent and tranforms the data to use our named tuple type
+            re = [self.TIME_SERIES_REFERENCE_NONE_TYPE
+                  if (v[0] < 0 or v[1] < 0) else self.TIME_SERIES_REFERENCE_TUPLE(*v)
+                  for v in vals]
+            return re
 
     def extend(self, ar):
         """

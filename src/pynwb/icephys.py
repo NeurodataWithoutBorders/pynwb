@@ -549,13 +549,15 @@ class IntracellularRecordingsTable(AlignedDynamicTable):
         stimuli = copy(popargs('stimulus_metadata', kwargs))
         if stimuli is None:
             stimuli = {}
-        stimuli['stimulus'] = (stimulus_start_index, stimulus_index_count, stimulus)
+        stimuli['stimulus'] = TimeSeriesReferenceVectorData.TIME_SERIES_REFERENCE_TUPLE(
+            stimulus_start_index, stimulus_index_count, stimulus)
 
         # Compile the responses table data
         responses = copy(popargs('response_metadata', kwargs))
         if responses is None:
             responses = {}
-        responses['response'] = (response_start_index, response_index_count, response)
+        responses['response'] = TimeSeriesReferenceVectorData.TIME_SERIES_REFERENCE_TUPLE(
+            response_start_index, response_index_count, response)
 
         _ = super().add_row(enforce_unique_id=True,
                             electrodes=electrodes,
@@ -580,17 +582,19 @@ class IntracellularRecordingsTable(AlignedDynamicTable):
 
         :returns: A tuple of integers with the start_index and index_count to use.
         """
+        # If times_series is not valid then return -1, -1 to indicate invalid times
         if time_series is None:
             return -1, -1
-        start_index = -1 if start_index is None else start_index
-        start_index = start_index if start_index >= 0 else 0
+        # Since time_series is valid, negative or None start_index means the user did not specify a start_index
+        # so we now need to set it to 0
+        if start_index is None or start_index < 0:
+            start_index = 0
+        # If index_count has not been set yet (i.e., it is -1 or None) then attempt to set it to the
+        # full range of the timeseries starting from start_index
         num_samples = time_series.num_samples
-        index_count = -1 if index_count is None else index_count
-        index_count = (index_count
-                       if index_count >= 0
-                       else ((num_samples - start_index)
-                             if num_samples is not None
-                             else None))
+        if index_count is None or index_count < 0:
+            index_count = (num_samples - start_index) if num_samples is not None else None
+        # Check that the start_index and index_count are valid and raise IndexError if they are invalid
         if index_count is None:
             raise IndexError("Invalid %s_index_count cannot be determined from %s data." % (name, name))
         if num_samples is not None:
@@ -598,6 +602,7 @@ class IntracellularRecordingsTable(AlignedDynamicTable):
                 raise IndexError("%s_start_index out of range" % name)
             if (start_index + index_count) > num_samples:
                 raise IndexError("%s_start_index + %s_index_count out of range" % (name, name))
+        # Return the values
         return start_index, index_count
 
     @docval(*get_docval(AlignedDynamicTable.to_dataframe, 'ignore_category_ids'),
@@ -618,13 +623,13 @@ class IntracellularRecordingsTable(AlignedDynamicTable):
             res[('electrodes', 'electrode')] = [e.object_id for e in res[('electrodes', 'electrode')]]
         if getargs('stimulus_refs_as_objectids', kwargs):
             res[('stimuli', 'stimulus')] = \
-                [e if isinstance(e, (np.ma.core.MaskedArray, np.ma.core.MaskedConstant)) and np.all(e.mask)
-                 else (e[0], e[1],  e[2].object_id)
+                [e if e[2] is None
+                 else TimeSeriesReferenceVectorData.TIME_SERIES_REFERENCE_TUPLE(e[0], e[1],  e[2].object_id)
                  for e in res[('stimuli', 'stimulus')]]
         if getargs('response_refs_as_objectids', kwargs):
             res[('responses', 'response')] = \
-                [e if isinstance(e, (np.ma.core.MaskedArray, np.ma.core.MaskedConstant)) and np.all(e.mask)
-                 else (e[0], e[1],  e[2].object_id)
+                [e if e[2] is None else
+                 TimeSeriesReferenceVectorData.TIME_SERIES_REFERENCE_TUPLE(e[0], e[1],  e[2].object_id)
                  for e in res[('responses', 'response')]]
         return res
 
