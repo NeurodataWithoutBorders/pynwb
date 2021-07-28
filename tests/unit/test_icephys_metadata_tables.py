@@ -1,6 +1,6 @@
 """
 Module for testing of the intracellular electrophysiology experiment metadata
-tables originally created as part of the ndx-icephy-meta extension. These
+tables originally created as part of the ndx-icephys-meta extension. These
 are tested in this separate module to avoid crowding of the main test_icephys
 test module and to allow us to test the main experiment metadata structures
 separately.
@@ -26,10 +26,6 @@ from hdmf.utils import docval, popargs
 class ICEphysMetaTestBase(TestCase):
     """
     Base helper class for setting up tests for the ndx-icephys-meta extension.
-
-    Here we use the base NWBFile class for read/write (rather than our custom ICEphysFile)
-    to make sure tests of the individual tables do not depend on our custom class. We are testing
-    ICEphysFile separately.
     """
 
     def setUp(self):
@@ -42,30 +38,37 @@ class ICEphysMetaTestBase(TestCase):
             lab='Bag End Laboratory',
             institution='University of Middle Earth at the Shire',
             experiment_description='I went on an adventure with thirteen dwarves to reclaim vast treasures.',
-            session_id='LONELYMTN')
+            session_id='LONELYMTN'
+        )
         self.device = self.nwbfile.create_device(name='Heka ITC-1600')
-        self.electrode = self.nwbfile.create_icephys_electrode(name="elec0",
-                                                               description='a mock intracellular electrode',
-                                                               device=self.device)
-        self.stimulus = VoltageClampStimulusSeries(name="ccss",
-                                                   data=[1, 2, 3, 4, 5],
-                                                   starting_time=123.6,
-                                                   rate=10e3,
-                                                   electrode=self.electrode,
-                                                   gain=0.02,
-                                                   sweep_number=np.uint64(15))
+        self.electrode = self.nwbfile.create_icephys_electrode(
+            name="elec0",
+            description='a mock intracellular electrode',
+            device=self.device
+        )
+        self.stimulus = VoltageClampStimulusSeries(
+            name="ccss",
+            data=[1, 2, 3, 4, 5],
+            starting_time=123.6,
+            rate=10e3,
+            electrode=self.electrode,
+            gain=0.02,
+            sweep_number=np.uint64(15)
+        )
         self.nwbfile.add_stimulus(self.stimulus)
-        self.response = VoltageClampSeries(name='vcs',
-                                           data=[0.1, 0.2, 0.3, 0.4, 0.5],
-                                           conversion=1e-12,
-                                           resolution=np.nan,
-                                           starting_time=123.6,
-                                           rate=20e3,
-                                           electrode=self.electrode,
-                                           gain=0.02,
-                                           capacitance_slow=100e-12,
-                                           resistance_comp_correction=70.0,
-                                           sweep_number=np.uint64(15))
+        self.response = VoltageClampSeries(
+            name='vcs',
+            data=[0.1, 0.2, 0.3, 0.4, 0.5],
+            conversion=1e-12,
+            resolution=np.nan,
+            starting_time=123.6,
+            rate=20e3,
+            electrode=self.electrode,
+            gain=0.02,
+            capacitance_slow=100e-12,
+            resistance_comp_correction=70.0,
+            sweep_number=np.uint64(15)
+        )
         self.nwbfile.add_acquisition(self.response)
         self.path = 'test_icephys_meta_intracellularrecording.h5'
 
@@ -200,13 +203,15 @@ class IntracellularRecordingsTableTests(ICEphysMetaTestBase):
         # Add a row to our IR table
         ir = IntracellularRecordingsTable()
 
-        row_index = ir.add_recording(electrode=self.electrode,
-                                     stimulus=self.stimulus,
-                                     response=self.response,
-                                     id=np.int64(10))
-        # test that we get the correct row index back
+        row_index = ir.add_recording(
+            electrode=self.electrode,
+            stimulus=self.stimulus,
+            response=self.response,
+            id=np.int64(10)
+        )
+        # Test that we get the correct row index back
         self.assertEqual(row_index, 0)
-        # read our first (and only) row and assert that it is correct
+        # Read our first (and only) row and assert that it is correct
         res = ir[0]
         # Confirm that slicing one row give the same result as converting the whole table, which has only one row
         assert_frame_equal(ir.to_dataframe(), res)
@@ -218,7 +223,7 @@ class IntracellularRecordingsTableTests(ICEphysMetaTestBase):
         self.assertTupleEqual(res[('stimuli', 'stimulus')].iloc[0], (0, 5, self.stimulus))
         # Check the response
         self.assertTupleEqual(res[('responses', 'response')].iloc[0], (0, 5, self.response))
-        # test writing out ir table
+        # Test writing out ir table
         self.write_test_helper(ir)
 
     def test_add_row_incompatible_types(self):
@@ -231,13 +236,16 @@ class IntracellularRecordingsTableTests(ICEphysMetaTestBase):
             rate=10e3,
             electrode=self.electrode,
             gain=0.1,
-            sweep_number=np.uint64(sweep_number))
+            sweep_number=np.uint64(sweep_number)
+        )
         ir = IntracellularRecordingsTable()
         with self.assertRaises(ValueError):
-            _ = ir.add_recording(electrode=self.electrode,
-                                 stimulus=local_stimulus,
-                                 response=self.response,
-                                 id=np.int64(10))
+            _ = ir.add_recording(
+                electrode=self.electrode,
+                stimulus=local_stimulus,
+                response=self.response,
+                id=np.int64(10)
+            )
 
     def test_warn_if_IZeroClampSeries_with_stimulus(self):
         local_response = IZeroClampSeries(
@@ -247,38 +255,49 @@ class IntracellularRecordingsTableTests(ICEphysMetaTestBase):
             rate=10e3,
             electrode=self.electrode,
             gain=0.02,
-            sweep_number=np.uint64(100000))
+            sweep_number=np.uint64(100000)
+        )
         ir = IntracellularRecordingsTable()
         with self.assertRaises(ValueError):
-            _ = ir.add_recording(electrode=self.electrode,
-                                 stimulus=self.stimulus,
-                                 response=local_response,
-                                 id=np.int64(10))
+            _ = ir.add_recording(
+                electrode=self.electrode,
+                stimulus=self.stimulus,
+                response=local_response,
+                id=np.int64(10)
+            )
 
     def test_inconsistent_PatchClampSeries(self):
-        local_electrode = self.nwbfile.create_icephys_electrode(name="elec1",
-                                                                description='a mock intracellular electrode',
-                                                                device=self.device)
-        local_stimulus = VoltageClampStimulusSeries(name="ccss",
-                                                    data=[1, 2, 3, 4, 5],
-                                                    starting_time=123.6,
-                                                    rate=10e3,
-                                                    electrode=local_electrode,
-                                                    gain=0.02,
-                                                    sweep_number=np.uint64(100000))
+        local_electrode = self.nwbfile.create_icephys_electrode(
+            name="elec1",
+            description='a mock intracellular electrode',
+            device=self.device
+        )
+        local_stimulus = VoltageClampStimulusSeries(
+            name="ccss",
+            data=[1, 2, 3, 4, 5],
+            starting_time=123.6,
+            rate=10e3,
+            electrode=local_electrode,
+            gain=0.02,
+            sweep_number=np.uint64(100000)
+        )
         ir = IntracellularRecordingsTable()
         with self.assertRaises(ValueError):
-            _ = ir.add_recording(electrode=self.electrode,
-                                 stimulus=local_stimulus,
-                                 response=self.response,
-                                 id=np.int64(10))
+            _ = ir.add_recording(
+                electrode=self.electrode,
+                stimulus=local_stimulus,
+                response=self.response,
+                id=np.int64(10)
+            )
 
     def test_add_row_no_response(self):
         ir = IntracellularRecordingsTable()
-        row_index = ir.add_recording(electrode=self.electrode,
-                                     stimulus=self.stimulus,
-                                     response=None,
-                                     id=np.int64(10))
+        row_index = ir.add_recording(
+            electrode=self.electrode,
+            stimulus=self.stimulus,
+            response=None,
+            id=np.int64(10)
+        )
         res = ir[0]
         # Check the ID
         self.assertEqual(row_index, 0)
@@ -291,15 +310,17 @@ class IntracellularRecordingsTableTests(ICEphysMetaTestBase):
         self.assertTupleEqual(res[('stimuli', 'stimulus')].iloc[0], (0, 5, self.stimulus))
         # Check the response
         self.assertTrue(isinstance(res[('responses', 'response')].iloc[0], np.ma.core.MaskedArray))
-        # test writing out ir table
+        # Test writing out ir table
         self.write_test_helper(ir)
 
     def test_add_row_no_stimulus(self):
         ir = IntracellularRecordingsTable()
-        row_index = ir.add_recording(electrode=self.electrode,
-                                     stimulus=None,
-                                     response=self.response,
-                                     id=np.int64(10))
+        row_index = ir.add_recording(
+            electrode=self.electrode,
+            stimulus=None,
+            response=self.response,
+            id=np.int64(10)
+        )
         res = ir[0]
         # Check the ID
         self.assertEqual(row_index, 0)
@@ -312,106 +333,127 @@ class IntracellularRecordingsTableTests(ICEphysMetaTestBase):
         self.assertTrue(isinstance(res[('stimuli', 'stimulus')].iloc[0], np.ma.core.MaskedArray))
         # Check the response
         self.assertTupleEqual(res[('responses', 'response')].iloc[0], (0, 5, self.response))
-        # test writing out ir table
+        # Test writing out ir table
         self.write_test_helper(ir)
 
     def test_add_row_check_start_index_and_index_count_are_fixed(self):
         # Make sure -1 values are converted
         ir = IntracellularRecordingsTable()
-        ir.add_recording(electrode=self.electrode,
-                         stimulus=self.stimulus,
-                         stimulus_start_index=-1,  # assert this is fixed to 0
-                         stimulus_index_count=-1,  # assert this is fixed to len(stimulus)
-                         response=None,
-                         response_start_index=0,   # assert this is fixed to -1
-                         response_index_count=10,  # assert this is fixed to -1
-                         id=np.int64(10))
+        ir.add_recording(
+            electrode=self.electrode,
+            stimulus=self.stimulus,
+            stimulus_start_index=-1,  # assert this is fixed to 0
+            stimulus_index_count=-1,  # assert this is fixed to len(stimulus)
+            response=None,
+            response_start_index=0,   # assert this is fixed to -1
+            response_index_count=10,  # assert this is fixed to -1
+            id=np.int64(10)
+        )
         res = ir[0]
         self.assertTupleEqual(res[('stimuli', 'stimulus')].iloc[0],
                               (0, len(self.stimulus.data), self.stimulus))
         self.assertTrue(isinstance(res[('responses', 'response')].iloc[0], np.ma.core.MaskedArray))
         # Make sure single -1 values are converted
         ir = IntracellularRecordingsTable()
-        ir.add_recording(electrode=self.electrode,
-                         stimulus=self.stimulus,
-                         stimulus_start_index=2,
-                         id=np.int64(10))
+        ir.add_recording(
+            electrode=self.electrode,
+            stimulus=self.stimulus,
+            stimulus_start_index=2,
+            id=np.int64(10)
+        )
         res = ir[0]
         self.assertTupleEqual(res[('stimuli', 'stimulus')].iloc[0],
                               (2, len(self.stimulus.data)-2, self.stimulus))
         # Make sure single -1 values are converted
         ir = IntracellularRecordingsTable()
-        ir.add_recording(electrode=self.electrode,
-                         stimulus=self.stimulus,
-                         stimulus_index_count=2,
-                         id=np.int64(10))
+        ir.add_recording(
+            electrode=self.electrode,
+            stimulus=self.stimulus,
+            stimulus_index_count=2,
+            id=np.int64(10)
+        )
         res = ir[0]
         self.assertTupleEqual(res[('stimuli', 'stimulus')].iloc[0],
                               (0, 2, self.stimulus))
 
     def test_add_row_index_out_of_range(self):
-
         # Stimulus/Response start_index to large
         with self.assertRaises(IndexError):
             ir = IntracellularRecordingsTable()
-            ir.add_recording(electrode=self.electrode,
-                             stimulus=self.stimulus,
-                             stimulus_start_index=10,
-                             response=self.response,
-                             id=np.int64(10))
+            ir.add_recording(
+                electrode=self.electrode,
+                stimulus=self.stimulus,
+                stimulus_start_index=10,
+                response=self.response,
+                id=np.int64(10)
+            )
         with self.assertRaises(IndexError):
             ir = IntracellularRecordingsTable()
-            ir.add_recording(electrode=self.electrode,
-                             stimulus=self.stimulus,
-                             response_start_index=10,
-                             response=self.response,
-                             id=np.int64(10))
+            ir.add_recording(
+                electrode=self.electrode,
+                stimulus=self.stimulus,
+                response_start_index=10,
+                response=self.response,
+                id=np.int64(10)
+            )
         # Stimulus/Reponse index count too large
         with self.assertRaises(IndexError):
             ir = IntracellularRecordingsTable()
-            ir.add_recording(electrode=self.electrode,
-                             stimulus=self.stimulus,
-                             stimulus_index_count=10,
-                             response=self.response,
-                             id=np.int64(10))
+            ir.add_recording(
+                electrode=self.electrode,
+                stimulus=self.stimulus,
+                stimulus_index_count=10,
+                response=self.response,
+                id=np.int64(10)
+            )
         with self.assertRaises(IndexError):
             ir = IntracellularRecordingsTable()
-            ir.add_recording(electrode=self.electrode,
-                             stimulus=self.stimulus,
-                             response_index_count=10,
-                             response=self.response,
-                             id=np.int64(10))
+            ir.add_recording(
+                electrode=self.electrode,
+                stimulus=self.stimulus,
+                response_index_count=10,
+                response=self.response,
+                id=np.int64(10)
+            )
         # Stimulus/Reponse start+count combination too large
         with self.assertRaises(IndexError):
             ir = IntracellularRecordingsTable()
-            ir.add_recording(electrode=self.electrode,
-                             stimulus=self.stimulus,
-                             stimulus_start_index=3,
-                             stimulus_index_count=4,
-                             response=self.response,
-                             id=np.int64(10))
+            ir.add_recording(
+                electrode=self.electrode,
+                stimulus=self.stimulus,
+                stimulus_start_index=3,
+                stimulus_index_count=4,
+                response=self.response,
+                id=np.int64(10)
+            )
         with self.assertRaises(IndexError):
             ir = IntracellularRecordingsTable()
-            ir.add_recording(electrode=self.electrode,
-                             stimulus=self.stimulus,
-                             response_start_index=3,
-                             response_index_count=4,
-                             response=self.response,
-                             id=np.int64(10))
+            ir.add_recording(
+                electrode=self.electrode,
+                stimulus=self.stimulus,
+                response_start_index=3,
+                response_index_count=4,
+                response=self.response,
+                id=np.int64(10)
+            )
 
     def test_add_row_no_stimulus_and_response(self):
         with self.assertRaises(ValueError):
             ir = IntracellularRecordingsTable()
-            ir.add_recording(electrode=self.electrode,
-                             stimulus=None,
-                             response=None)
+            ir.add_recording(
+                electrode=self.electrode,
+                stimulus=None,
+                response=None
+            )
 
     def test_add_column(self):
         ir = IntracellularRecordingsTable()
-        ir.add_recording(electrode=self.electrode,
-                         stimulus=self.stimulus,
-                         response=self.response,
-                         id=np.int64(10))
+        ir.add_recording(
+            electrode=self.electrode,
+            stimulus=self.stimulus,
+            response=self.response,
+            id=np.int64(10)
+        )
         ir.add_column(name='test', description='test column', data=np.arange(1))
         self.assertTupleEqual(ir.colnames, ('test',))
 
@@ -420,25 +462,31 @@ class IntracellularRecordingsTableTests(ICEphysMetaTestBase):
         Test to ensure that unique ids are enforced on RepetitionsTable table
         """
         ir = IntracellularRecordingsTable()
-        ir.add_recording(electrode=self.electrode,
-                         stimulus=self.stimulus,
-                         response=self.response,
-                         id=np.int64(10))
+        ir.add_recording(
+            electrode=self.electrode,
+            stimulus=self.stimulus,
+            response=self.response,
+            id=np.int64(10)
+        )
         with self.assertRaises(ValueError):
-            ir.add_recording(electrode=self.electrode,
-                             stimulus=self.stimulus,
-                             response=self.response,
-                             id=np.int64(10))
+            ir.add_recording(
+                electrode=self.electrode,
+                stimulus=self.stimulus,
+                response=self.response,
+                id=np.int64(10)
+            )
 
     def test_basic_write(self):
         """
         Populate, write, and read the SimultaneousRecordingsTable container and other required containers
         """
         ir = IntracellularRecordingsTable()
-        row_index = ir.add_recording(electrode=self.electrode,
-                                     stimulus=self.stimulus,
-                                     response=self.response,
-                                     id=np.int64(10))
+        row_index = ir.add_recording(
+            electrode=self.electrode,
+            stimulus=self.stimulus,
+            response=self.response,
+            id=np.int64(10)
+        )
         self.assertEqual(row_index, 0)
         ir.add_column(name='test', description='test column', data=np.arange(1))
         self.write_test_helper(ir=ir)
@@ -450,7 +498,8 @@ class IntracellularRecordingsTableTests(ICEphysMetaTestBase):
         electrode1 = self.nwbfile.create_icephys_electrode(
             name="elec1",
             description='another mock intracellular electrode',
-            device=self.device)
+            device=self.device
+        )
         for sweep_number in range(20):
             elec = (electrode0 if (sweep_number % 2 == 0) else electrode1)
             stim, resp = create_icephys_stimulus_and_response(sweep_number=np.uint64(sweep_number),
@@ -485,7 +534,7 @@ class IntracellularRecordingsTableTests(ICEphysMetaTestBase):
         df = self.nwbfile.intracellular_recordings.to_dataframe(stimulus_refs_as_objectids=True)
         self.assertListEqual(df.columns.to_list(), expected_cols)
         expects_stim_col = [e if isinstance(e, (np.ma.core.MaskedArray, np.ma.core.MaskedConstant)) and np.all(e.mask)
-                            else (e[0], e[1],  e[2].object_id)
+                            else (e[0], e[1], e[2].object_id)
                             for e in self.nwbfile.intracellular_recordings[('stimuli', 'stimulus')][:]]
         for i, v in enumerate(expects_stim_col):
             if isinstance(v, tuple):
@@ -497,7 +546,7 @@ class IntracellularRecordingsTableTests(ICEphysMetaTestBase):
         df = self.nwbfile.intracellular_recordings.to_dataframe(response_refs_as_objectids=True)
         self.assertListEqual(df.columns.to_list(), expected_cols)
         expects_resp_col = [e if isinstance(e, (np.ma.core.MaskedArray, np.ma.core.MaskedConstant)) and np.all(e.mask)
-                            else (e[0], e[1],  e[2].object_id)
+                            else (e[0], e[1], e[2].object_id)
                             for e in self.nwbfile.intracellular_recordings[('responses', 'response')][:]]
         for i, v in enumerate(expects_resp_col):
             if isinstance(v, tuple):
@@ -540,43 +589,51 @@ class IntracellularRecordingsTableTests(ICEphysMetaTestBase):
         Populate, write, and read the SimultaneousRecordingsTable container and other required containers
         """
         local_nwbfile = NWBFile(
-                session_description='my first synthetic recording',
-                identifier='EXAMPLE_ID',
-                session_start_time=datetime.now(tzlocal()),
-                experimenter='Dr. Bilbo Baggins',
-                lab='Bag End Laboratory',
-                institution='University of Middle Earth at the Shire',
-                experiment_description='I went on an adventure with thirteen dwarves to reclaim vast treasures.',
-                session_id='LONELYMTN')
+            session_description='my first synthetic recording',
+            identifier='EXAMPLE_ID',
+            session_start_time=datetime.now(tzlocal()),
+            experimenter='Dr. Bilbo Baggins',
+            lab='Bag End Laboratory',
+            institution='University of Middle Earth at the Shire',
+            experiment_description='I went on an adventure with thirteen dwarves to reclaim vast treasures.',
+            session_id='LONELYMTN'
+        )
         # Add a device
         local_device = local_nwbfile.create_device(name='Heka ITC-1600')
         local_electrode = local_nwbfile.create_icephys_electrode(
             name="elec0",
             description='a mock intracellular electrode',
-            device=local_device)
-        local_stimulus = VoltageClampStimulusSeries(name="ccss",
-                                                    data=[1, 2, 3, 4, 5],
-                                                    starting_time=123.6,
-                                                    rate=10e3,
-                                                    electrode=local_electrode,
-                                                    gain=0.02,
-                                                    sweep_number=np.uint64(15))
-        local_response = VoltageClampSeries(name='vcs',
-                                            data=[0.1, 0.2, 0.3, 0.4, 0.5],
-                                            conversion=1e-12,
-                                            resolution=np.nan,
-                                            starting_time=123.6,
-                                            rate=20e3,
-                                            electrode=local_electrode,
-                                            gain=0.02,
-                                            capacitance_slow=100e-12,
-                                            resistance_comp_correction=70.0,
-                                            sweep_number=np.uint64(15))
+            device=local_device
+        )
+        local_stimulus = VoltageClampStimulusSeries(
+            name="ccss",
+            data=[1, 2, 3, 4, 5],
+            starting_time=123.6,
+            rate=10e3,
+            electrode=local_electrode,
+            gain=0.02,
+            sweep_number=np.uint64(15)
+        )
+        local_response = VoltageClampSeries(
+            name='vcs',
+            data=[0.1, 0.2, 0.3, 0.4, 0.5],
+            conversion=1e-12,
+            resolution=np.nan,
+            starting_time=123.6,
+            rate=20e3,
+            electrode=local_electrode,
+            gain=0.02,
+            capacitance_slow=100e-12,
+            resistance_comp_correction=70.0,
+            sweep_number=np.uint64(15)
+        )
         local_nwbfile.add_stimulus_template(local_stimulus)
-        row_index = local_nwbfile.add_intracellular_recording(electrode=local_electrode,
-                                                              stimulus=local_stimulus,
-                                                              response=local_response,
-                                                              id=np.int64(10))
+        row_index = local_nwbfile.add_intracellular_recording(
+            electrode=local_electrode,
+            stimulus=local_stimulus,
+            response=local_response,
+            id=np.int64(10)
+        )
         self.assertEqual(row_index, 0)
         # Write our test file
         with NWBHDF5IO(self.path, 'w') as io:
@@ -590,7 +647,7 @@ class SimultaneousRecordingsTableTests(ICEphysMetaTestBase):
 
     def test_init(self):
         """
-        Test  __init__ to make sure we can instantiate the SimultaneousRecordingsTable container
+        Test __init__ to make sure we can instantiate the SimultaneousRecordingsTable container
         """
         ir = IntracellularRecordingsTable()
         _ = SimultaneousRecordingsTable(intracellular_recordings_table=ir)
@@ -610,10 +667,12 @@ class SimultaneousRecordingsTableTests(ICEphysMetaTestBase):
         Populate, write, and read the SimultaneousRecordingsTable container and other required containers
         """
         ir = IntracellularRecordingsTable()
-        row_index = ir.add_recording(electrode=self.electrode,
-                                     stimulus=self.stimulus,
-                                     response=self.response,
-                                     id=np.int64(10))
+        row_index = ir.add_recording(
+            electrode=self.electrode,
+            stimulus=self.stimulus,
+            response=self.response,
+            id=np.int64(10)
+        )
         self.assertEqual(row_index, 0)
         self.assertEqual(len(ir), 1)
         sw = SimultaneousRecordingsTable(intracellular_recordings_table=ir)
@@ -628,10 +687,12 @@ class SimultaneousRecordingsTableTests(ICEphysMetaTestBase):
         Populate, write, and read the SimultaneousRecordingsTable container and other required containers
         """
         ir = IntracellularRecordingsTable()
-        row_index = ir.add_recording(electrode=self.electrode,
-                                     stimulus=self.stimulus,
-                                     response=self.response,
-                                     id=np.int64(10))
+        row_index = ir.add_recording(
+            electrode=self.electrode,
+            stimulus=self.stimulus,
+            response=self.response,
+            id=np.int64(10)
+        )
         self.assertEqual(row_index, 0)
         self.assertEqual(len(ir), 1)
         sw = SimultaneousRecordingsTable(intracellular_recordings_table=ir)
@@ -644,10 +705,12 @@ class SimultaneousRecordingsTableTests(ICEphysMetaTestBase):
         Test to ensure that unique ids are enforced on RepetitionsTable table
         """
         ir = IntracellularRecordingsTable()
-        ir.add_recording(electrode=self.electrode,
-                         stimulus=self.stimulus,
-                         response=self.response,
-                         id=np.int64(10))
+        ir.add_recording(
+            electrode=self.electrode,
+            stimulus=self.stimulus,
+            response=self.response,
+            id=np.int64(10)
+        )
         sw = SimultaneousRecordingsTable(intracellular_recordings_table=ir)
         sw.add_simultaneous_recording(recordings=[0], id=np.int64(10))
         with self.assertRaises(ValueError):
@@ -682,10 +745,12 @@ class SequentialRecordingsTableTests(ICEphysMetaTestBase):
         Populate, write, and read the SequentialRecordingsTable container and other required containers
         """
         ir = IntracellularRecordingsTable()
-        row_index = ir.add_recording(electrode=self.electrode,
-                                     stimulus=self.stimulus,
-                                     response=self.response,
-                                     id=np.int64(10))
+        row_index = ir.add_recording(
+            electrode=self.electrode,
+            stimulus=self.stimulus,
+            response=self.response,
+            id=np.int64(10)
+        )
         self.assertEqual(row_index, 0)
         sw = SimultaneousRecordingsTable(intracellular_recordings_table=ir)
         row_index = sw.add_simultaneous_recording(recordings=[0])
@@ -700,10 +765,12 @@ class SequentialRecordingsTableTests(ICEphysMetaTestBase):
         Test to ensure that unique ids are enforced on RepetitionsTable table
         """
         ir = IntracellularRecordingsTable()
-        ir.add_recording(electrode=self.electrode,
-                         stimulus=self.stimulus,
-                         response=self.response,
-                         id=np.int64(10))
+        ir.add_recording(
+            electrode=self.electrode,
+            stimulus=self.stimulus,
+            response=self.response,
+            id=np.int64(10)
+        )
         sw = SimultaneousRecordingsTable(intracellular_recordings_table=ir)
         sw.add_simultaneous_recording(recordings=[0])
         sws = SequentialRecordingsTable(sw)
@@ -741,10 +808,12 @@ class RepetitionsTableTests(ICEphysMetaTestBase):
         Populate, write, and read the RepetitionsTable container and other required containers
         """
         ir = IntracellularRecordingsTable()
-        row_index = ir.add_recording(electrode=self.electrode,
-                                     stimulus=self.stimulus,
-                                     response=self.response,
-                                     id=np.int64(10))
+        row_index = ir.add_recording(
+            electrode=self.electrode,
+            stimulus=self.stimulus,
+            response=self.response,
+            id=np.int64(10)
+        )
         self.assertEqual(row_index, 0)
         sw = SimultaneousRecordingsTable(intracellular_recordings_table=ir)
         row_index = sw.add_simultaneous_recording(recordings=[0])
@@ -761,10 +830,12 @@ class RepetitionsTableTests(ICEphysMetaTestBase):
         Test to ensure that unique ids are enforced on RepetitionsTable table
         """
         ir = IntracellularRecordingsTable()
-        ir.add_recording(electrode=self.electrode,
-                         stimulus=self.stimulus,
-                         response=self.response,
-                         id=np.int64(10))
+        ir.add_recording(
+            electrode=self.electrode,
+            stimulus=self.stimulus,
+            response=self.response,
+            id=np.int64(10)
+        )
         sw = SimultaneousRecordingsTable(intracellular_recordings_table=ir)
         sw.add_simultaneous_recording(recordings=[0])
         sws = SequentialRecordingsTable(sw)
@@ -845,7 +916,6 @@ class ExperimentalConditionsTableTests(ICEphysMetaTestBase):
             cond.add_experimental_condition(repetitions=[0, ], id=np.int64(10))
 
 
-# TODO: Move these tests from ICEPhys to NWBFile proper
 class NWBFileTests(TestCase):
     """
     Test class for testing the NWBFileTests Container class
@@ -864,12 +934,8 @@ class NWBFileTests(TestCase):
         icefile = NWBFile(
             session_description='my first synthetic recording',
             identifier='EXAMPLE_ID',
-            session_start_time=datetime.now(tzlocal()),
-            experimenter='Dr. Bilbo Baggins',
-            lab='Bag End Laboratory',
-            institution='University of Middle Earth at the Shire',
-            experiment_description='I went on an adventure with thirteen dwarves to reclaim vast treasures.',
-            session_id='LONELYMTN')
+            session_start_time=datetime.now(tzlocal())
+        )
         return icefile
 
     def __add_device(self, icefile):
@@ -880,7 +946,7 @@ class NWBFileTests(TestCase):
                                                 description='a mock intracellular electrode',
                                                 device=device)
 
-    def __get_stimuls(self, electrode):
+    def __get_stimulus(self, electrode):
         """
         Create a dummy VoltageClampStimulusSeries
         """
@@ -891,7 +957,8 @@ class NWBFileTests(TestCase):
             rate=10e3,
             electrode=electrode,
             gain=0.02,
-            sweep_number=np.uint64(15))
+            sweep_number=np.uint64(15)
+        )
 
     def __get_response(self, electrode):
         """
@@ -908,7 +975,8 @@ class NWBFileTests(TestCase):
             gain=0.02,
             capacitance_slow=100e-12,
             resistance_comp_correction=70.0,
-            sweep_number=np.uint64(15))
+            sweep_number=np.uint64(15)
+        )
 
     def test_init(self):
         """
@@ -923,8 +991,8 @@ class NWBFileTests(TestCase):
         nwbfile = self.__get_icephysfile()
         device = self.__add_device(nwbfile)
         electrode = self.__add_electrode(nwbfile, device)
-        stimulus = self.__get_stimuls(electrode=electrode)
-        responce = self.__get_response(electrode=electrode)
+        stimulus = self.__get_stimulus(electrode=electrode)
+        response = self.__get_response(electrode=electrode)
         # Make sure we warn if sweeptable is added on add_stimulus
         with warnings.catch_warnings(record=True) as w:
             warnings.simplefilter("always")  # Trigger all warnings
@@ -932,7 +1000,7 @@ class NWBFileTests(TestCase):
             self.assertEqual(len(w), 1)
             assert issubclass(w[-1].category, DeprecationWarning)
             # make sure we don't trigger the same deprecation warning twice
-            nwbfile.add_acquisition(responce, use_sweep_table=True)
+            nwbfile.add_acquisition(response, use_sweep_table=True)
             self.assertEqual(len(w), 1)
 
     def test_deprecate_sweeptable_on_add_stimulus_template(self):
@@ -943,7 +1011,8 @@ class NWBFileTests(TestCase):
         local_electrode = nwbfile.create_icephys_electrode(
             name="elec0",
             description='a mock intracellular electrode',
-            device=nwbfile.create_device(name='Heka ITC-1600'))
+            device=nwbfile.create_device(name='Heka ITC-1600')
+        )
         local_stimulus = VoltageClampStimulusSeries(
             name="ccss",
             data=[1, 2, 3, 4, 5],
@@ -951,7 +1020,8 @@ class NWBFileTests(TestCase):
             rate=10e3,
             electrode=local_electrode,
             gain=0.02,
-            sweep_number=np.uint64(15))
+            sweep_number=np.uint64(15)
+        )
         local_stimulus2 = VoltageClampStimulusSeries(
             name="ccss2",
             data=[1, 2, 3, 4, 5],
@@ -959,7 +1029,8 @@ class NWBFileTests(TestCase):
             rate=10e3,
             electrode=local_electrode,
             gain=0.02,
-            sweep_number=np.uint64(15))
+            sweep_number=np.uint64(15)
+        )
         with warnings.catch_warnings(record=True) as w:
             nwbfile.add_stimulus_template(local_stimulus, use_sweep_table=True)
             self.assertEqual(len(w), 1)
@@ -978,11 +1049,11 @@ class NWBFileTests(TestCase):
         nwbfile = self.__get_icephysfile()
         device = self.__add_device(nwbfile)
         electrode = self.__add_electrode(nwbfile, device)
-        stimulus = self.__get_stimuls(electrode=electrode)
-        responce = self.__get_response(electrode=electrode)
+        stimulus = self.__get_stimulus(electrode=electrode)
+        response = self.__get_response(electrode=electrode)
         # Make sure we warn if sweeptable is added on add_stimulus
         with warnings.catch_warnings(record=True) as w:
-            nwbfile.add_acquisition(responce, use_sweep_table=True)
+            nwbfile.add_acquisition(response, use_sweep_table=True)
             self.assertEqual(len(w), 1)
             assert issubclass(w[-1].category, DeprecationWarning)
             self.assertEqual(str(w[-1].message),
@@ -1002,15 +1073,11 @@ class NWBFileTests(TestCase):
                 session_description='my first synthetic recording',
                 identifier='EXAMPLE_ID',
                 session_start_time=datetime.now(tzlocal()),
-                experimenter='Dr. Bilbo Baggins',
-                lab='Bag End Laboratory',
-                institution='University of Middle Earth at the Shire',
-                experiment_description='I went on an adventure with thirteen dwarves to reclaim vast treasures.',
-                session_id='LONELYMTN',
-                sweep_table=SweepTable())
+                sweep_table=SweepTable()
+            )
             device = self.__add_device(nwbfile)
             electrode = self.__add_electrode(nwbfile, device)
-            stimulus = self.__get_stimuls(electrode=electrode)
+            stimulus = self.__get_stimulus(electrode=electrode)
             self.assertEqual(len(w), 1)
             assert issubclass(w[-1].category, DeprecationWarning)
             # make sure we don't trigger the same deprecation warning twice
@@ -1023,26 +1090,18 @@ class NWBFileTests(TestCase):
                 session_description='my first synthetic recording',
                 identifier='EXAMPLE_ID',
                 session_start_time=datetime.now(tzlocal()),
-                experimenter='Dr. Bilbo Baggins',
-                lab='Bag End Laboratory',
-                institution='University of Middle Earth at the Shire',
-                experiment_description='I went on an adventure with thirteen dwarves to reclaim vast treasures.',
-                session_id='LONELYMTN',
-                icephys_filtering='test filtering')
+                icephys_filtering='test filtering'
+            )
             assert issubclass(w[-1].category, DeprecationWarning)
             self.assertEqual(nwbfile.icephys_filtering, 'test filtering')
 
     def test_icephys_filtering_roundtrip(self):
         # create the base file
         nwbfile = NWBFile(
-                session_description='my first synthetic recording',
-                identifier='EXAMPLE_ID',
-                session_start_time=datetime.now(tzlocal()),
-                experimenter='Dr. Bilbo Baggins',
-                lab='Bag End Laboratory',
-                institution='University of Middle Earth at the Shire',
-                experiment_description='I went on an adventure with thirteen dwarves to reclaim vast treasures.',
-                session_id='LONELYMTN')
+            session_description='my first synthetic recording',
+            identifier='EXAMPLE_ID',
+            session_start_time=datetime.now(tzlocal())
+        )
         # set the icephys_filtering attribute and make sure we get a deprectation warning
         with warnings.catch_warnings(record=True) as w:
             nwbfile.icephys_filtering = 'test filtering'
@@ -1064,46 +1123,49 @@ class NWBFileTests(TestCase):
         returns the expected top table
         """
         local_nwbfile = NWBFile(
-                session_description='my first synthetic recording',
-                identifier='EXAMPLE_ID',
-                session_start_time=datetime.now(tzlocal()),
-                experimenter='Dr. Bilbo Baggins',
-                lab='Bag End Laboratory',
-                institution='University of Middle Earth at the Shire',
-                experiment_description='I went on an adventure with thirteen dwarves to reclaim vast treasures.',
-                session_id='LONELYMTN')
+            session_description='my first synthetic recording',
+            identifier='EXAMPLE_ID',
+            session_start_time=datetime.now(tzlocal())
+        )
         # Add a device
         local_device = local_nwbfile.create_device(name='Heka ITC-1600')
         local_electrode = local_nwbfile.create_icephys_electrode(
             name="elec0",
             description='a mock intracellular electrode',
-            device=local_device)
-        local_stimulus = VoltageClampStimulusSeries(name="ccss",
-                                                    data=[1, 2, 3, 4, 5],
-                                                    starting_time=123.6,
-                                                    rate=10e3,
-                                                    electrode=local_electrode,
-                                                    gain=0.02,
-                                                    sweep_number=np.uint64(15))
-        local_response = VoltageClampSeries(name='vcs',
-                                            data=[0.1, 0.2, 0.3, 0.4, 0.5],
-                                            conversion=1e-12,
-                                            resolution=np.nan,
-                                            starting_time=123.6,
-                                            rate=20e3,
-                                            electrode=local_electrode,
-                                            gain=0.02,
-                                            capacitance_slow=100e-12,
-                                            resistance_comp_correction=70.0,
-                                            sweep_number=np.uint64(15))
+            device=local_device
+        )
+        local_stimulus = VoltageClampStimulusSeries(
+            name="ccss",
+            data=[1, 2, 3, 4, 5],
+            starting_time=123.6,
+            rate=10e3,
+            electrode=local_electrode,
+            gain=0.02,
+            sweep_number=np.uint64(15)
+        )
+        local_response = VoltageClampSeries(
+            name='vcs',
+            data=[0.1, 0.2, 0.3, 0.4, 0.5],
+            conversion=1e-12,
+            resolution=np.nan,
+            starting_time=123.6,
+            rate=20e3,
+            electrode=local_electrode,
+            gain=0.02,
+            capacitance_slow=100e-12,
+            resistance_comp_correction=70.0,
+            sweep_number=np.uint64(15)
+        )
         local_nwbfile.add_stimulus_template(local_stimulus)
         # Check that none of the table exist yet
         self.assertIsNone(local_nwbfile.get_icephys_meta_parent_table())
         # Add a recording and confirm that intracellular_recordings is the top table
-        _ = local_nwbfile.add_intracellular_recording(electrode=local_electrode,
-                                                      stimulus=local_stimulus,
-                                                      response=local_response,
-                                                      id=np.int64(10))
+        _ = local_nwbfile.add_intracellular_recording(
+            electrode=local_electrode,
+            stimulus=local_stimulus,
+            response=local_response,
+            id=np.int64(10)
+        )
         self.assertIsInstance(local_nwbfile.get_icephys_meta_parent_table(),
                               IntracellularRecordingsTable)
         # Add a sweep and check that the simultaneous_recordings table is the top table
@@ -1136,7 +1198,7 @@ class NWBFileTests(TestCase):
         device = self.__add_device(nwbfile)
         electrode = self.__add_electrode(nwbfile, device)
         # Add the data using standard methods from NWBFile
-        stimulus = self.__get_stimuls(electrode=electrode)
+        stimulus = self.__get_stimulus(electrode=electrode)
         nwbfile.add_stimulus(stimulus)
         # Check that the deprecated sweep table has indeed not been created
         self.assertIsNone(nwbfile.sweep_table)
@@ -1148,18 +1210,22 @@ class NWBFileTests(TestCase):
         #############################################
         #  Test adding IntracellularRecordingsTable
         #############################################
-        # Check that our IntracellularRecordingsTable table does not yet exists
+        # Check that our IntracellularRecordingsTable table does not yet exist
         self.assertIsNone(nwbfile.intracellular_recordings)
         # Add an intracellular recording
         intracellular_recording_ids = [np.int64(10), np.int64(11)]
-        nwbfile.add_intracellular_recording(electrode=electrode,
-                                            stimulus=stimulus,
-                                            response=response,
-                                            id=intracellular_recording_ids[0])
-        nwbfile.add_intracellular_recording(electrode=electrode,
-                                            stimulus=stimulus,
-                                            response=response,
-                                            id=intracellular_recording_ids[1])
+        nwbfile.add_intracellular_recording(
+            electrode=electrode,
+            stimulus=stimulus,
+            response=response,
+            id=intracellular_recording_ids[0]
+        )
+        nwbfile.add_intracellular_recording(
+            electrode=electrode,
+            stimulus=stimulus,
+            response=response,
+            id=intracellular_recording_ids[1]
+        )
         # Check that the table has been created
         self.assertIsNotNone(nwbfile.intracellular_recordings)
         # Check that the values in our row are correct
