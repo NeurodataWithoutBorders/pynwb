@@ -859,8 +859,9 @@ class ExperimentalConditionsTableTests(ICEphysMetaTestBase):
         sw = SimultaneousRecordingsTable(intracellular_recordings_table=ir)
         sws = SequentialRecordingsTable(simultaneous_recordings_table=sw)
         repetitions = RepetitionsTable(sequential_recordings_table=sws)
-        _ = ExperimentalConditionsTable(repetitions_table=repetitions)
-        self.assertTrue(True)
+        ret = ExperimentalConditionsTable(repetitions_table=repetitions)
+        self.assertIs(ret.repetitions.table, repetitions)
+        self.assertEqual(ret.name, 'experimental_conditions')
 
     def test_missing_repetitions_on_init(self):
         """
