@@ -699,8 +699,9 @@ class SequentialRecordingsTableTests(ICEphysMetaTestBase):
         """
         ir = IntracellularRecordingsTable()
         sw = SimultaneousRecordingsTable(intracellular_recordings_table=ir)
-        _ = SequentialRecordingsTable(simultaneous_recordings_table=sw)
-        self.assertTrue(True)
+        ret = SequentialRecordingsTable(simultaneous_recordings_table=sw)
+        self.assertIs(ret.simultaneous_recordings.table, sw)
+        self.assertEqual(ret.name, 'sequential_recordings')
 
     def test_missing_simultaneous_recordings_on_init(self):
         """
