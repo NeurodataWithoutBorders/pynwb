@@ -160,11 +160,7 @@ class IntracellularElectrodesTableTests(TestCase):
     The IntracellularElectrodesTable is covered by the
     IntracellularRecordingsTableTests as this table is part of that table.
     """
-    def setUp(self):
-        pass
-
-    def tearDown(self):
-        pass
+    pass
 
 
 class IntracellularStimuliTableTests(TestCase):
