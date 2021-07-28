@@ -952,12 +952,6 @@ class NWBFileTests(TestCase):
             sweep_number=np.uint64(15)
         )
 
-    def test_init(self):
-        """
-        Test  __init__ to make sure we can instantiate the NWBFileTests container
-        """
-        _ = self.__get_icephysfile()
-
     def test_deprecate_simultaneous_recordings_on_add_stimulus(self):
         """
         Test that warnings are raised if the user tries to use a simultaneous_recordings table
