@@ -396,7 +396,7 @@ class TimeSeriesReference(NamedTuple):
         :raises TypeError: If one of the fields does not match the expected type
 
         :returns: Result of ``self.timeseries.data[self.idx_start: (self.idx_start + self.count)]``. Returns
-            None in case the reference is invalid (i.e,. if both :py:meth:`~pynwb.base.TimeSeriesReference.idx_start`
+            None in case the reference is invalid (i.e., if both :py:meth:`~pynwb.base.TimeSeriesReference.idx_start`
             and :py:meth:`~pynwb.base.TimeSeriesReference.count` are negative.
         """
         self.isvalid()
