@@ -374,8 +374,7 @@ class TimeSeriesReference(NamedTuple):
 
         :returns: Array with the timestamps.
         """
-        self.isvalid()
-        if self.idx_start < 0 and self.count < 0:
+        if not self.isvalid():
             return None
         elif self.timeseries.timestamps is not None:
             return self.timeseries.timestamps[self.idx_start: (self.idx_start + self.count)]
