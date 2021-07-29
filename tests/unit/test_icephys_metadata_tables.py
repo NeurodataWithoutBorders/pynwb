@@ -168,7 +168,7 @@ class IntracellularStimuliTableTests(TestCase):
     The IntracellularStimuliTable is covered by the
     IntracellularRecordingsTableTests as this table is part of that table.
     """
-	pass
+    pass
 
 
 class IntracellularResponsesTableTests(TestCase):
