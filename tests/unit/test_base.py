@@ -405,7 +405,7 @@ class TestTimeSeriesReference(TestCase):
         # Timestamps from starting_time and rate
         tsr = TimeSeriesReference(5, 4, TimeSeries(name='test0', description='test0',
                                                    data=np.arange(10), starting_time=5.0, rate=0.1))
-        np.testing.assert_array_equal(tsr.timestamps, np.array([0.5, 0.6, 0.7, 0.8]))
+        np.testing.assert_array_equal(tsr.timestamps, np.array([5.5, 5.6, 5.7, 5.8]))
         # Timestamps from timestamps directly
         tsr = TimeSeriesReference(5, 4, TimeSeries(name='test0', description='test0',
                                                    data=np.arange(10), timestamps=np.arange(10).astype(float)))

@@ -374,12 +374,15 @@ class TimeSeriesReference(NamedTuple):
 
         :returns: Array with the timestamps.
         """
+        # isvalid will be False only if both idx_start and count are negative. Otherwise well get errors or be True.
         if not self.isvalid():
             return None
+        # load the data from the timestamps
         elif self.timeseries.timestamps is not None:
             return self.timeseries.timestamps[self.idx_start: (self.idx_start + self.count)]
+        # construct the timestamps from the starting_time and rate
         else:
-            start_time = self.timeseries.rate * self.idx_start
+            start_time = self.timeseries.rate * self.idx_start + self.timeseries.starting_time
             return np.arange(0, self.count) * self.timeseries.rate + start_time
 
     @property
@@ -399,8 +402,10 @@ class TimeSeriesReference(NamedTuple):
             None in case the reference is invalid (i.e., if both :py:meth:`~pynwb.base.TimeSeriesReference.idx_start`
             and :py:meth:`~pynwb.base.TimeSeriesReference.count` are negative.
         """
+        # isvalid will be False only if both idx_start and count are negative. Otherwise well get errors or be True.
         if not self.isvalid():
             return None
+        # load the data from the timeseries
         return self.timeseries.data[self.idx_start: (self.idx_start + self.count)]
 
 
