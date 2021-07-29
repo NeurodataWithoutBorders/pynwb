@@ -258,16 +258,20 @@ icephys_meta_df
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 #
 # For query purposes it can be useful to expand the stimulus and response columns to separate the
-# (start, count, TimeSeries) values in separate columns.
+# ``(start, count, timeseries)`` values in separate columns. This is primarily useful if we want to
+# perform queries on these components directly, otherwise it is usually best to keep the stimulus/response
+# references around as `:py:class:`~pynwb.base.TimeSeriesReference`, which provides additional features
+# to inspect and validate the references and load data. We, therefore, here keep the data in both forms
+# in the table
 
 # Expand the ('stimuli', 'stimulus') to a DataFrame with 3 columns
 stimulus_df = pandas.DataFrame(
     icephys_meta_df[('stimuli', 'stimulus')].tolist(),
-    columns=[('stimuli', 'idx_start'), ('stimuli', 'count'), ('stimuli', 'stimulus')],
+    columns=[('stimuli', 'idx_start'), ('stimuli', 'count'), ('stimuli', 'timeseries')],
     index=icephys_meta_df.index
 )
-# Remove the original ('stimuli', 'stimulus') from the icephys_meta_df dataframe
-icephys_meta_df.drop(labels=[('stimuli', 'stimulus'), ], axis=1, inplace=True)
+# If we want to remove the original ('stimuli', 'stimulus') from the icephys_meta_df dataframe we can do this via
+# icephys_meta_df.drop(labels=[('stimuli', 'stimulus'), ], axis=1, inplace=True)
 # Add our expanded columns to the icephys_meta_df dataframe
 icephys_meta_df = pandas.concat([icephys_meta_df, stimulus_df], axis=1)
 # display the table for the HTML docs
@@ -278,10 +282,9 @@ icephys_meta_df
 
 response_df = pandas.DataFrame(
     icephys_meta_df[('responses', 'response')].tolist(),
-    columns=[('responses', 'idx_start'), ('responses', 'count'), ('responses', 'response')],
+    columns=[('responses', 'idx_start'), ('responses', 'count'), ('responses', 'timeseries')],
     index=icephys_meta_df.index
 )
-icephys_meta_df.drop(labels=[('responses', 'response'), ], axis=1, inplace=True)
 icephys_meta_df = pandas.concat([icephys_meta_df, response_df], axis=1)
 
 
@@ -297,18 +300,18 @@ icephys_meta_df = pandas.concat([icephys_meta_df, response_df], axis=1)
 
 # Add a column with the name of the stimulus TimeSeries object.
 # Note: We use getattr here to easily deal with missing values, i.e., cases where no stimulus is present
-icephys_meta_df[('stimuli', 'name')] = [getattr(s, 'name', None) for s in icephys_meta_df[('stimuli', 'stimulus')]]
+icephys_meta_df[('stimuli', 'name')] = [getattr(s, 'name', None) for s in icephys_meta_df[('stimuli', 'timeseries')]]
 
 # Often we can easily do this in bulk-fashion by specifing the collection of fields of interest
 for field in ['neurodata_type', 'gain', 'rate', 'starting_time', 'object_id']:
-    icephys_meta_df[('stimuli', field)] = [getattr(s, field, None) for s in icephys_meta_df[('stimuli', 'stimulus')]]
+    icephys_meta_df[('stimuli', field)] = [getattr(s, field, None) for s in icephys_meta_df[('stimuli', 'timeseries')]]
 icephys_meta_df
 
 #####################################################################
 # Naturally we can again do the same also for our response columns
 for field in ['name', 'neurodata_type', 'gain', 'rate', 'starting_time', 'object_id']:
     icephys_meta_df[('responses', field)] = [getattr(s, field, None)
-                                             for s in icephys_meta_df[('responses', 'response')]]
+                                             for s in icephys_meta_df[('responses', 'timeseries')]]
 
 #####################################################################
 # And we can use the same process to also gather additional metadata about the
@@ -386,8 +389,8 @@ for field in ['name', 'device', 'object_id']:
 #
 # Below we show just a few simple examples:
 #
-# **Given a response, get the stimulus**
-#
+# Given a response, get the stimulus
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 # Get a response 'vcs_9' from the file
 response = nwbfile.get_acquisition('vcs_9')
@@ -396,12 +399,33 @@ icephys_meta_df[icephys_meta_df[('responses', 'object_id')] == response.object_i
 
 
 #####################################################################
-# **Get a list of all stimulus types**
+# Given a response load the associated data
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 #
+# References to timeseries are stored in the :py:class:`~pynwb.icephys.IntracellularRecordingsTable` via
+# :py:class:`~pynwb.base.TimeSeriesReferenceVectorData` columns which return the references to the stimulus/response
+# via :py:class:`~pynwb.base.TimeSeriesReference` objects. Using :py:class:`~pynwb.base.TimeSeriesReference` we can
+# easily inspect the selected data.
+
+ref = icephys_meta_df[('responses', 'response')][0]  # Get the TimeSeriesReference
+_ = ref.isvalid()        # Is the reference valid
+_ = ref.idx_start        # Get the start index
+_ = ref.count            # Get the count
+_ = ref.timeseries.name  # Get the timeseries
+_ = ref.timestamps       # Get the selected timestamps
+ref_data = ref.data      # Get the selected recorded response data values
+# Print the data values just as an example
+print("data = " + str(ref_data))
+
+#####################################################################
+# Get a list of all stimulus types
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
 unique_stimulus_types = np.unique(icephys_meta_df[('sequential_recordings', 'stimulus_type')])
 print(unique_stimulus_types)
 
 #####################################################################
-# **Given a stimulus type, get all corresponding intracellular recordings**
-#
+# Given a stimulus type, get all corresponding intracellular recordings
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
 icephys_meta_df[icephys_meta_df[('sequential_recordings', 'stimulus_type')] == 'StimType_1']
