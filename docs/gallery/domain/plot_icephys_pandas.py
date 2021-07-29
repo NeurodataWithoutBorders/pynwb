@@ -21,11 +21,9 @@ tables and how to create an NWBFile for intracellular electrophysiology data.
 import numpy as np
 import pandas
 # Set pandas rendering option to avoid very wide tables in the html docs
-def set_pandas_options():
-    pandas.set_option("display.max_colwidth", 30)
-    pandas.set_option("display.max_rows", 10)
-    pandas.set_option("display.max_columns", 6)
-set_pandas_options()
+pandas.set_option("display.max_colwidth", 30)
+pandas.set_option("display.max_rows", 10)
+pandas.set_option("display.max_columns", 6)
 
 #####################################################################
 # Example setup
@@ -231,14 +229,7 @@ icephys_meta_df = to_hierarchical_dataframe(root_table)
 
 # To avoid a too wide display in the online docs we here only show 4 select rows of the
 # table and transpose the table to show the large MultiIndex as columns instead of rows
-icephys_meta_df.iloc[[0,1,18,19]].transpose()
-
-#####################################################################
-#
-
-# Reset our pandas rendering option
-set_pandas_options()
-
+icephys_meta_df.iloc[[0, 1, 18, 19]].transpose()
 
 #####################################################################
 # Depending on the analysis, it can be useful to further process our `DataFrame`_. Using the standard
