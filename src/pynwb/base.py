@@ -334,7 +334,7 @@ class TimeSeriesReference(NamedTuple):
         :py:meth:`~pynwb.base.TimeSeriesReference.count` to -1 is used to indicate invalid references. This is
         useful to allow for missing data in :py:class:`~pynwb.base.TimeSeriesReferenceVectorData`
 
-        :returns: True if the selection is valid. Returns False if bot
+        :returns: True if the selection is valid. Returns False if both
             :py:meth:`~pynwb.base.TimeSeriesReference.idx_start` and :py:meth:`~pynwb.base.TimeSeriesReference.count`
             are negative. Raises `IndexError` in case the indices are bad.
 
