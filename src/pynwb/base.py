@@ -356,10 +356,10 @@ class TimeSeriesReferenceVectorData(VectorData):
 
         :returns: :py:class:`~pynwb.base.TimeSeriesReferenceVectorData.TIME_SERIES_REFERENCE_TUPLE` if a single
                   element is being selected. Otherwise return a list of
-                  :py:class:`~pynwb.base.TimeSeriesReferenceVectorData.TIME_SERIES_REFERENCE_TUPLE` objets.
+                  :py:class:`~pynwb.base.TimeSeriesReferenceVectorData.TIME_SERIES_REFERENCE_TUPLE` objects.
                   Missing values are represented by
                   :py:class:`~pynwb.base.TimeSeriesReferenceVectorData.TIME_SERIES_REFERENCE_NONE_TYPE`
-                  in which all values (i.e,. idx_start, count, timeseries) are set to None.
+                  in which all values (i.e., idx_start, count, timeseries) are set to None.
         """
         vals = super().get(key)
         # we only selected one row.
@@ -375,7 +375,7 @@ class TimeSeriesReferenceVectorData(VectorData):
                 return self.TIME_SERIES_REFERENCE_TUPLE(*vals)
         else:  # key selected multiple rows
             # When loading from HDF5 we get an np.ndarray otherwise we get list-of-list. This
-            # makes makes the values consistent and tranforms the data to use our named tuple type
+            # makes the values consistent and tranforms the data to use our namedtuple type
             re = [self.TIME_SERIES_REFERENCE_NONE_TYPE
                   if (v[0] < 0 or v[1] < 0) else self.TIME_SERIES_REFERENCE_TUPLE(*v)
                   for v in vals]
