@@ -366,7 +366,7 @@ class TestTimeSeriesReference(TestCase):
             tsr.check_types()
         # invalid type for TimeSeries but valid idx_start and count
         tsr = TimeSeriesReference(1, 5, None)
-        with self.assertRaisesWith(TypeError, "timeseries must of of type TimeSeries. <class 'NoneType'>"):
+        with self.assertRaisesWith(TypeError, "timeseries must be of type TimeSeries. <class 'NoneType'>"):
             tsr.check_types()
 
     def test_is_invalid(self):

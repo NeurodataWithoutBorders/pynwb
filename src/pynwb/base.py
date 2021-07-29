@@ -325,7 +325,7 @@ class TimeSeriesReference(NamedTuple):
         if not isinstance(self.count, (int, np.integer)):
             raise TypeError("count must be an integer %s" % str(type(self.count)))
         if not isinstance(self.timeseries, TimeSeries):
-            raise TypeError("timeseries must of of type TimeSeries. %s" % str(type(self.timeseries)))
+            raise TypeError("timeseries must be of type TimeSeries. %s" % str(type(self.timeseries)))
         return True
 
     def isvalid(self):
