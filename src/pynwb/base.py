@@ -363,7 +363,7 @@ class TimeSeriesReference(NamedTuple):
     def timestamps(self):
         """
         Get the floating point timestamp offsets in seconds from the timeseries that correspond to the array.
-        These are either loaded directlyu from the :py:meth:`~pynwb.base.TimeSeriesReference.timeseries`
+        These are either loaded directly from the :py:meth:`~pynwb.base.TimeSeriesReference.timeseries`
         or calculated from the
 
 
