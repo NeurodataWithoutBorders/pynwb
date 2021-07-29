@@ -399,8 +399,7 @@ class TimeSeriesReference(NamedTuple):
             None in case the reference is invalid (i.e., if both :py:meth:`~pynwb.base.TimeSeriesReference.idx_start`
             and :py:meth:`~pynwb.base.TimeSeriesReference.count` are negative.
         """
-        self.isvalid()
-        if self.idx_start < 0 and self.count < 0:
+        if not self.isvalid():
             return None
         return self.timeseries.data[self.idx_start: (self.idx_start + self.count)]
 
