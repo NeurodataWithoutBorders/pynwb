@@ -72,7 +72,7 @@ sphinx_gallery_conf = {
 
 intersphinx_mapping = {
     'python': ('https://docs.python.org/3.8', None),
-    'numpy': ('https://numpy.org/doc/stable/objects.inv', None),
+    'numpy': ('https://numpy.org/doc/stable/', None),
     'matplotlib': ('https://matplotlib.org', None),
     'h5py': ('https://docs.h5py.org/en/latest/', None),
     'hdmf': ('https://hdmf.readthedocs.io/en/latest/', None),
