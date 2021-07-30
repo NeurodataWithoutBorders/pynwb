@@ -120,7 +120,7 @@ if __name__ == '__main__':
         make_nwbfile_str_experimenter()
         make_nwbfile_str_pub()
 
-    if __version__ == '1.3.3':
+    if __version__ == '1.5.1':
         make_nwbfile_timeseries_no_data()
         make_nwbfile_timeseries_no_unit()
         make_nwbfile_imageseries_no_data()

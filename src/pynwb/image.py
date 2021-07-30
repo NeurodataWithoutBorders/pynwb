@@ -60,7 +60,6 @@ class ImageSeries(TimeSeries):
         if data is not None and unit is None:
             raise ValueError("Must supply 'unit' argument when supplying 'data' to %s '%s'."
                              % (self.__class__.__name__, name))
-        call_docval_func(super(ImageSeries, self).__init__, kwargs)
         if external_file is None and data is None:
             raise ValueError("Must supply either external_file or data to %s '%s'."
                              % (self.__class__.__name__, name))
