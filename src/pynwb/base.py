@@ -1,9 +1,8 @@
 from warnings import warn
 from collections.abc import Iterable
-from collections import namedtuple
+from typing import NamedTuple
 
 from hdmf.utils import docval, getargs, popargs, call_docval_func, get_docval
-from hdmf.data_utils import extend_data
 from hdmf.common import DynamicTable, VectorData
 import numpy as np
 
@@ -287,12 +286,127 @@ class Images(MultiContainerInterface):
         self.images = images
 
 
-class TimeSeriesReference(namedtuple('TimeSeriesReference', ['idx_start', 'count', 'timeseries'])):
+class TimeSeriesReference(NamedTuple):
     """
     Class used to represent data values of a :py:class:`~pynwb.base.TimeSeriesReferenceVectorData`
-    This is a ``namedtuple('TimeSeriesReference', ['idx_start', 'count', 'timeseries'])`` type.
+    This is a ``typing.NamedTuple`` type with predefined tuple components
+    :py:meth:`~pynwb.base.TimeSeriesReference.idx_start`, :py:meth:`~pynwb.base.TimeSeriesReference.count`, and
+    :py:meth:`~pynwb.base.TimeSeriesReference.timeseries`.
+
+    :cvar idx_start:
+    :cvar count:
+    :cvar timeseries:
     """
-    pass
+    idx_start: int
+    """Start index in time for the timeseries"""
+
+    count: int
+    """Number of timesteps to be selected starting from :py:meth:`~pynwb.base.TimeSeriesReference.idx_start`"""
+
+    timeseries: TimeSeries
+    """The :py:class:`~pynwb.base.TimeSeries` object the TimeSeriesReference applies to"""
+
+    def check_types(self):
+        """
+        Helper function to check correct types for :py:meth:`~pynwb.base.TimeSeriesReference.idx_start`,
+        :py:meth:`~pynwb.base.TimeSeriesReference.count`, and :py:meth:`~pynwb.base.TimeSeriesReference.timeseries`.
+
+        This function is usually used in the try/except block to check for `TypeError` raised by the function.
+
+        See also :py:meth:`~pynwb.base.TimeSeriesReference.isvalid` to check both validity of types and the
+        reference itself.
+
+        :returns: True if successful. If unsuccessful `TypeError` is raised.
+
+        :raises TypeError: If one of the fields does not match the expected type
+        """
+        if not isinstance(self.idx_start, (int, np.integer)):
+            raise TypeError("idx_start must be an integer not %s" % str(type(self.idx_start)))
+        if not isinstance(self.count, (int, np.integer)):
+            raise TypeError("count must be an integer %s" % str(type(self.count)))
+        if not isinstance(self.timeseries, TimeSeries):
+            raise TypeError("timeseries must be of type TimeSeries. %s" % str(type(self.timeseries)))
+        return True
+
+    def isvalid(self):
+        """
+        Check whether the reference is valid. Setting :py:meth:`~pynwb.base.TimeSeriesReference.idx_start` and
+        :py:meth:`~pynwb.base.TimeSeriesReference.count` to -1 is used to indicate invalid references. This is
+        useful to allow for missing data in :py:class:`~pynwb.base.TimeSeriesReferenceVectorData`
+
+        :returns: True if the selection is valid. Returns False if both
+            :py:meth:`~pynwb.base.TimeSeriesReference.idx_start` and :py:meth:`~pynwb.base.TimeSeriesReference.count`
+            are negative. Raises `IndexError` in case the indices are bad.
+
+        :raises IndexError: If the combination of :py:meth:`~pynwb.base.TimeSeriesReference.idx_start` and
+            :py:meth:`~pynwb.base.TimeSeriesReference.count` are not valid for the given timeseries.
+
+        :raises TypeError: If one of the fields does not match the expected type
+        """
+        # Check types first
+        self.check_types()
+        # Check for none-type selection
+        if self.idx_start < 0 and self.count < 0:
+            return False
+        num_samples = self.timeseries.num_samples
+        if num_samples is not None:
+            if self.idx_start >= num_samples or self.idx_start < 0:
+                raise IndexError("'idx_start' %i out of range for timeseries '%s'" %
+                                 (self.idx_start, self.timeseries.name))
+            if self.count < 0:
+                raise IndexError("'count' %i invalid. 'count' must be positive" % self.count)
+            if (self.idx_start + self.count) > num_samples:
+                raise IndexError("'idx_start + count' out of range for timeseries '%s'" % self.timeseries.name)
+        return True
+
+    @property
+    def timestamps(self):
+        """
+        Get the floating point timestamp offsets in seconds from the timeseries that correspond to the array.
+        These are either loaded directly from the :py:meth:`~pynwb.base.TimeSeriesReference.timeseries`
+        timestamps or calculated from the starting time and sampling rate.
+
+
+        :raises IndexError: If the combination of :py:meth:`~pynwb.base.TimeSeriesReference.idx_start` and
+            :py:meth:`~pynwb.base.TimeSeriesReference.count` are not valid for the given timeseries.
+
+        :raises TypeError: If one of the fields does not match the expected type
+
+        :returns: Array with the timestamps.
+        """
+        # isvalid will be False only if both idx_start and count are negative. Otherwise well get errors or be True.
+        if not self.isvalid():
+            return None
+        # load the data from the timestamps
+        elif self.timeseries.timestamps is not None:
+            return self.timeseries.timestamps[self.idx_start: (self.idx_start + self.count)]
+        # construct the timestamps from the starting_time and rate
+        else:
+            start_time = self.timeseries.rate * self.idx_start + self.timeseries.starting_time
+            return np.arange(0, self.count) * self.timeseries.rate + start_time
+
+    @property
+    def data(self):
+        """
+        Get the selected data values. This is a convenience function to slice data from the
+        :py:meth:`~pynwb.base.TimeSeriesReference.timeseries` based on the given
+        :py:meth:`~pynwb.base.TimeSeriesReference.idx_start` and
+        :py:meth:`~pynwb.base.TimeSeriesReference.count`
+
+        :raises IndexError: If the combination of :py:meth:`~pynwb.base.TimeSeriesReference.idx_start` and
+            :py:meth:`~pynwb.base.TimeSeriesReference.count` are not valid for the given timeseries.
+
+        :raises TypeError: If one of the fields does not match the expected type
+
+        :returns: Result of ``self.timeseries.data[self.idx_start: (self.idx_start + self.count)]``. Returns
+            None in case the reference is invalid (i.e., if both :py:meth:`~pynwb.base.TimeSeriesReference.idx_start`
+            and :py:meth:`~pynwb.base.TimeSeriesReference.count` are negative.
+        """
+        # isvalid will be False only if both idx_start and count are negative. Otherwise well get errors or be True.
+        if not self.isvalid():
+            return None
+        # load the data from the timeseries
+        return self.timeseries.data[self.idx_start: (self.idx_start + self.count)]
 
 
 @register_class('TimeSeriesReferenceVectorData', CORE_NAMESPACE)
@@ -340,6 +454,20 @@ class TimeSeriesReferenceVectorData(VectorData):
     def __init__(self, **kwargs):
         call_docval_func(super().__init__, kwargs)
 
+    @docval({'name': 'val', 'type': TIME_SERIES_REFERENCE_TUPLE, 'doc': 'the value to add to this column'})
+    def add_row(self, **kwargs):
+        """Append a data value to this column."""
+        val = getargs('val', kwargs)
+        val.check_types()
+        super().append(val)
+
+    @docval({'name': 'arg', 'type': TIME_SERIES_REFERENCE_TUPLE, 'doc': 'the value to append to this column'})
+    def append(self, **kwargs):
+        """Append a data value to this column."""
+        arg = getargs('arg', kwargs)
+        arg.check_types()
+        super().append(arg)
+
     def get(self, key, **kwargs):
         """
         Retrieve elements from this object.
@@ -380,12 +508,3 @@ class TimeSeriesReferenceVectorData(VectorData):
                   if (v[0] < 0 or v[1] < 0) else self.TIME_SERIES_REFERENCE_TUPLE(*v)
                   for v in vals]
             return re
-
-    def extend(self, ar):
-        """
-        The extend_data method adds all the elements of the iterable arg to the
-        end of the data of this Data container.
-
-        :param arg: The iterable to add to the end of this VectorData
-        """
-        self.data = extend_data(self.data, ar)

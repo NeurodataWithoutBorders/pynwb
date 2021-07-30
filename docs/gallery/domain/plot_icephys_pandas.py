@@ -30,16 +30,16 @@ pandas.set_option("display.max_columns", 6)
 # ---------------
 #
 # Generate a simple example NWBFile with dummy intracellular electrophysiology data.
-# This example uses a utility function ``create_icephys_testfile`` to create a
-# dummy NWB file with random icephys data.
+# This example uses a utility function :py:meth:`~pynwb.testing.icephys_testutils.create_icephys_testfile`
+# to create a dummy NWB file with random icephys data.
 
 from pynwb.testing.icephys_testutils import create_icephys_testfile
 test_filename = "icephys_pandas_testfile.nwb"
 nwbfile = create_icephys_testfile(
     filename=test_filename,      # Write the file to disk for testing
-    add_custom_columns=True,     # Add a custom column to each icephys metadata table for testing
-    randomize_data=True,         # Randomize the data in the simulus and response for some more realistic behavior
-    with_missing_stimulus=True   # Don't include the stimulus for row 0 and 10 so we can illustrate this case
+    add_custom_columns=True,     # Add a custom column to each metadata table
+    randomize_data=True,         # Randomize the data in the simulus and response
+    with_missing_stimulus=True   # Don't include the stimulus for row 0 and 10
 )
 
 #####################################################################
@@ -107,7 +107,7 @@ print("Foreign Columns:", root_table.get_foreign_columns())
 #####################################################################
 # Using :py:meth:`~hdmf.common.table.DynamicTable.get_linked_tables` we can then also
 # look at all links defined directly or indirectly from a given table to other tables.
-# The result is a list of dicts containing, for each found link, the:
+# The result is a ``list`` of ``typing.NamedTuple`` objects containing, for each found link, the:
 #
 # * *"source_table"* :py:class:`~hdmf.common.table.DynamicTable` object,
 # * *"source_column"* :py:class:`~hdmf.common.table.DynamicTableRegion` column from the source table, and
@@ -116,9 +116,11 @@ print("Foreign Columns:", root_table.get_foreign_columns())
 linked_tables = root_table.get_linked_tables()
 
 # Print the links
-for i, t in enumerate(linked_tables):
-    print("%s (%s, %s) ----> %s" %
-          ("    " * i, t['source_table'].name, t['source_column'].name, t['target_table'].name))
+for i, link in enumerate(linked_tables):
+    print("%s (%s, %s) ----> %s" % ("    " * i,
+                                    link.source_table.name,
+                                    link.source_column.name,
+                                    link.target_table.name))
 
 #####################################################################
 # Converting ICEphys metadata tables to pandas DataFrames
@@ -225,8 +227,9 @@ icephys_meta_df = to_hierarchical_dataframe(root_table)
 #####################################################################
 #
 
-# Print table as text to avoid too wide display in HTML docs
-print(icephys_meta_df.to_string())
+# To avoid a too wide display in the online docs we here only show 4 select rows of the
+# table and transpose the table to show the large MultiIndex as columns instead of rows
+icephys_meta_df.iloc[[0, 1, 18, 19]].transpose()
 
 #####################################################################
 # Depending on the analysis, it can be useful to further process our `DataFrame`_. Using the standard
@@ -235,20 +238,21 @@ print(icephys_meta_df.to_string())
 # effectively denormalizing the display by repeating all data across rows. HDMF then also
 # provides: 1) :py:func:`~hdmf.common.hierarchicaltable.drop_id_columns` to remove all "id" columns
 # and 2) :py:func:`~hdmf.common.hierarchicaltable.flatten_column_index` to turn the
-# `MultiIndex`_
-# on the columns of our table into a regular
-# `MultiIndex`_ of tuples.
+# `MultiIndex`_ on the columns of the table into a regular
+# `Index <https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.Index.html>`_ of tuples.
 #
+# .. note:: Dropping ``id`` columns is often useful for visualization purposes while for
+#           query and analysis it is often useful to maintain the ``id`` columns to facilitate
+#           lookups and correlation of information.
 
 from hdmf.common.hierarchicaltable import drop_id_columns, flatten_column_index
 # Reset the index of the dataframe and turn the values into columns instead
 icephys_meta_df.reset_index(inplace=True)
-# Flatten the column-index, turning the pandas.MultiIndex into a regular pandas.Index of tuples
+# Flatten the column-index, turning the pandas.MultiIndex into a pandas.Index of tuples
 flatten_column_index(dataframe=icephys_meta_df, max_levels=2, inplace=True)
-# Remove the id columns
-drop_id_columns(dataframe=icephys_meta_df, inplace=True)
-# Display the DataFrame in the html docs
-icephys_meta_df
+# Remove the id columns. By setting inplace=False allows us to visualize the result of this
+# action while keeping the id columns in our main icephys_meta_df table
+drop_id_columns(dataframe=icephys_meta_df, inplace=False)
 
 #####################################################################
 # Useful additional data preparations
@@ -258,16 +262,20 @@ icephys_meta_df
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 #
 # For query purposes it can be useful to expand the stimulus and response columns to separate the
-# (start, count, TimeSeries) values in separate columns.
+# ``(start, count, timeseries)`` values in separate columns. This is primarily useful if we want to
+# perform queries on these components directly, otherwise it is usually best to keep the stimulus/response
+# references around as `:py:class:`~pynwb.base.TimeSeriesReference`, which provides additional features
+# to inspect and validate the references and load data. We, therefore, here keep the data in both forms
+# in the table
 
 # Expand the ('stimuli', 'stimulus') to a DataFrame with 3 columns
 stimulus_df = pandas.DataFrame(
     icephys_meta_df[('stimuli', 'stimulus')].tolist(),
-    columns=[('stimuli', 'idx_start'), ('stimuli', 'count'), ('stimuli', 'stimulus')],
+    columns=[('stimuli', 'idx_start'), ('stimuli', 'count'), ('stimuli', 'timeseries')],
     index=icephys_meta_df.index
 )
-# Remove the original ('stimuli', 'stimulus') from the icephys_meta_df dataframe
-icephys_meta_df.drop(labels=[('stimuli', 'stimulus'), ], axis=1, inplace=True)
+# If we want to remove the original ('stimuli', 'stimulus') from the dataframe we can call
+# icephys_meta_df.drop(labels=[('stimuli', 'stimulus'), ], axis=1, inplace=True)
 # Add our expanded columns to the icephys_meta_df dataframe
 icephys_meta_df = pandas.concat([icephys_meta_df, stimulus_df], axis=1)
 # display the table for the HTML docs
@@ -278,10 +286,9 @@ icephys_meta_df
 
 response_df = pandas.DataFrame(
     icephys_meta_df[('responses', 'response')].tolist(),
-    columns=[('responses', 'idx_start'), ('responses', 'count'), ('responses', 'response')],
+    columns=[('responses', 'idx_start'), ('responses', 'count'), ('responses', 'timeseries')],
     index=icephys_meta_df.index
 )
-icephys_meta_df.drop(labels=[('responses', 'response'), ], axis=1, inplace=True)
 icephys_meta_df = pandas.concat([icephys_meta_df, response_df], axis=1)
 
 
@@ -297,25 +304,31 @@ icephys_meta_df = pandas.concat([icephys_meta_df, response_df], axis=1)
 
 # Add a column with the name of the stimulus TimeSeries object.
 # Note: We use getattr here to easily deal with missing values, i.e., cases where no stimulus is present
-icephys_meta_df[('stimuli', 'name')] = [getattr(s, 'name', None) for s in icephys_meta_df[('stimuli', 'stimulus')]]
+col = ('stimuli', 'name')
+icephys_meta_df[col] = [getattr(s, 'name', None)
+                        for s in icephys_meta_df[('stimuli', 'timeseries')]]
 
 # Often we can easily do this in bulk-fashion by specifing the collection of fields of interest
 for field in ['neurodata_type', 'gain', 'rate', 'starting_time', 'object_id']:
-    icephys_meta_df[('stimuli', field)] = [getattr(s, field, None) for s in icephys_meta_df[('stimuli', 'stimulus')]]
+    col = ('stimuli', field)
+    icephys_meta_df[col] = [getattr(s, field, None)
+                            for s in icephys_meta_df[('stimuli', 'timeseries')]]
 icephys_meta_df
 
 #####################################################################
 # Naturally we can again do the same also for our response columns
 for field in ['name', 'neurodata_type', 'gain', 'rate', 'starting_time', 'object_id']:
-    icephys_meta_df[('responses', field)] = [getattr(s, field, None)
-                                             for s in icephys_meta_df[('responses', 'response')]]
+    col = ('responses', field)
+    icephys_meta_df[col] = [getattr(s, field, None)
+                            for s in icephys_meta_df[('responses', 'timeseries')]]
 
 #####################################################################
 # And we can use the same process to also gather additional metadata about the
 # :py:class:`~pynwb.icephys.IntracellularElectrode`, :py:class:`~pynwb.device.Device` and others
 for field in ['name', 'device', 'object_id']:
-    icephys_meta_df[('electrodes', field)] = [getattr(s, field, None)
-                                              for s in icephys_meta_df[('electrodes', 'electrode')]]
+    col = ('electrodes', field)
+    icephys_meta_df[col] = [getattr(s, field, None)
+                            for s in icephys_meta_df[('electrodes', 'electrode')]]
 
 #####################################################################
 # This basic approach allows us to easily collect all data needed for query in a convenient
@@ -386,8 +399,8 @@ for field in ['name', 'device', 'object_id']:
 #
 # Below we show just a few simple examples:
 #
-# **Given a response, get the stimulus**
-#
+# Given a response, get the stimulus
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 # Get a response 'vcs_9' from the file
 response = nwbfile.get_acquisition('vcs_9')
@@ -396,12 +409,33 @@ icephys_meta_df[icephys_meta_df[('responses', 'object_id')] == response.object_i
 
 
 #####################################################################
-# **Get a list of all stimulus types**
+# Given a response load the associated data
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 #
+# References to timeseries are stored in the :py:class:`~pynwb.icephys.IntracellularRecordingsTable` via
+# :py:class:`~pynwb.base.TimeSeriesReferenceVectorData` columns which return the references to the stimulus/response
+# via :py:class:`~pynwb.base.TimeSeriesReference` objects. Using :py:class:`~pynwb.base.TimeSeriesReference` we can
+# easily inspect the selected data.
+
+ref = icephys_meta_df[('responses', 'response')][0]  # Get the TimeSeriesReference
+_ = ref.isvalid()        # Is the reference valid
+_ = ref.idx_start        # Get the start index
+_ = ref.count            # Get the count
+_ = ref.timeseries.name  # Get the timeseries
+_ = ref.timestamps       # Get the selected timestamps
+ref_data = ref.data      # Get the selected recorded response data values
+# Print the data values just as an example
+print("data = " + str(ref_data))
+
+#####################################################################
+# Get a list of all stimulus types
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
 unique_stimulus_types = np.unique(icephys_meta_df[('sequential_recordings', 'stimulus_type')])
 print(unique_stimulus_types)
 
 #####################################################################
-# **Given a stimulus type, get all corresponding intracellular recordings**
-#
+# Given a stimulus type, get all corresponding intracellular recordings
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
 icephys_meta_df[icephys_meta_df[('sequential_recordings', 'stimulus_type')] == 'StimType_1']

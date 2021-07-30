@@ -298,13 +298,13 @@ class TestTimeSeriesReferenceVectorData(TestCase):
         """Get data from a TimeSeriesReferenceVectorData with 5 elements"""
         temp = TimeSeriesReferenceVectorData()
         num_values = 5
-        values = [(0, 5, TimeSeries(name='test'+str(i+1), description='test',
-                                    data=np.arange(10), starting_time=5.0, rate=0.1))
+        values = [TimeSeriesReference(0, 5, TimeSeries(name='test'+str(i+1), description='test',
+                                                       data=np.arange(10), starting_time=5.0, rate=0.1))
                   for i in range(num_values-2)]
-        values = ([(-1, -1, TimeSeries(name='test'+str(0), description='test',
-                                       data=np.arange(10), starting_time=5.0, rate=0.1)), ]
+        values = ([TimeSeriesReference(-1, -1, TimeSeries(name='test'+str(0), description='test',
+                                                          data=np.arange(10), starting_time=5.0, rate=0.1)), ]
                   + values
-                  + [(-1, -1, TimeSeries(name='test'+str(5), description='test',
+                  + [TimeSeriesReference(-1, -1, TimeSeries(name='test'+str(5), description='test',
                                          data=np.arange(10), starting_time=5.0, rate=0.1)), ])
         for v in values:
             temp.append(v)
@@ -328,3 +328,117 @@ class TestTimeSeriesReferenceVectorData(TestCase):
         re = temp[0:2]
         self.assertTupleEqual(re[0], TimeSeriesReferenceVectorData.TIME_SERIES_REFERENCE_NONE_TYPE)
         self.assertTupleEqual(re[1], TimeSeriesReferenceVectorData.TIME_SERIES_REFERENCE_TUPLE(*values[1]))
+
+    def test_add_row_restricted_type(self):
+        v = TimeSeriesReferenceVectorData(name='a', description='a')
+        with self.assertRaisesWith(TypeError, "TimeSeriesReferenceVectorData.add_row: incorrect type for "
+                                              "'val' (got 'int', expected 'TimeSeriesReference')"):
+            v.add_row(1)
+
+    def test_append_restricted_type(self):
+        v = TimeSeriesReferenceVectorData(name='a', description='a')
+        with self.assertRaisesWith(TypeError, "TimeSeriesReferenceVectorData.append: incorrect type for "
+                                              "'arg' (got 'float', expected 'TimeSeriesReference')"):
+            v.append(2.0)
+
+
+class TestTimeSeriesReference(TestCase):
+
+    def test_check_types(self):
+        # invalid selection but with correct types
+        tsr = TimeSeriesReference(-1, -1, TimeSeries(name='test'+str(0), description='test',
+                                                     data=np.arange(10), starting_time=5.0, rate=0.1))
+        self.assertTrue(tsr.check_types())
+        # invalid types, use float instead of int for both idx_start and count
+        tsr = TimeSeriesReference(1.0, 5.0, TimeSeries(name='test'+str(0), description='test',
+                                                       data=np.arange(10), starting_time=5.0, rate=0.1))
+        with self.assertRaisesWith(TypeError, "idx_start must be an integer not <class 'float'>"):
+            tsr.check_types()
+        # invalid types, use float instead of int for idx_start only
+        tsr = TimeSeriesReference(1.0, 5, TimeSeries(name='test'+str(0), description='test',
+                                                     data=np.arange(10), starting_time=5.0, rate=0.1))
+        with self.assertRaisesWith(TypeError, "idx_start must be an integer not <class 'float'>"):
+            tsr.check_types()
+        # invalid types, use float instead of int for count only
+        tsr = TimeSeriesReference(1, 5.0, TimeSeries(name='test'+str(0), description='test',
+                                                     data=np.arange(10), starting_time=5.0, rate=0.1))
+        with self.assertRaisesWith(TypeError, "count must be an integer <class 'float'>"):
+            tsr.check_types()
+        # invalid type for TimeSeries but valid idx_start and count
+        tsr = TimeSeriesReference(1, 5, None)
+        with self.assertRaisesWith(TypeError, "timeseries must be of type TimeSeries. <class 'NoneType'>"):
+            tsr.check_types()
+
+    def test_is_invalid(self):
+        tsr = TimeSeriesReference(-1, -1, TimeSeries(name='test'+str(0), description='test',
+                                                     data=np.arange(10), starting_time=5.0, rate=0.1))
+        self.assertFalse(tsr.isvalid())
+
+    def test_is_valid(self):
+        tsr = TimeSeriesReference(0, 10, TimeSeries(name='test'+str(0), description='test',
+                                                    data=np.arange(10), starting_time=5.0, rate=0.1))
+        self.assertTrue(tsr.isvalid())
+
+    def test_is_valid_bad_index(self):
+        # Error: negative start_index but positive count
+        tsr = TimeSeriesReference(-1, 10, TimeSeries(name='test0', description='test0',
+                                                     data=np.arange(10), starting_time=5.0, rate=0.1))
+        with self.assertRaisesWith(IndexError, "'idx_start' -1 out of range for timeseries 'test0'"):
+            tsr.isvalid()
+        # Error: start_index too large
+        tsr = TimeSeriesReference(10, 0, TimeSeries(name='test0', description='test0',
+                                                    data=np.arange(10), starting_time=5.0, rate=0.1))
+        with self.assertRaisesWith(IndexError, "'idx_start' 10 out of range for timeseries 'test0'"):
+            tsr.isvalid()
+        # Error: positive start_index but negative count
+        tsr = TimeSeriesReference(0, -3, TimeSeries(name='test0', description='test0',
+                                                    data=np.arange(10), starting_time=5.0, rate=0.1))
+        with self.assertRaisesWith(IndexError, "'count' -3 invalid. 'count' must be positive"):
+            tsr.isvalid()
+        # Error:  start_index + count too large
+        tsr = TimeSeriesReference(3, 10, TimeSeries(name='test0', description='test0',
+                                                    data=np.arange(10), starting_time=5.0, rate=0.1))
+        with self.assertRaisesWith(IndexError, "'idx_start + count' out of range for timeseries 'test0'"):
+            tsr.isvalid()
+
+    def test_timestamps_property(self):
+        # Timestamps from starting_time and rate
+        tsr = TimeSeriesReference(5, 4, TimeSeries(name='test0', description='test0',
+                                                   data=np.arange(10), starting_time=5.0, rate=0.1))
+        np.testing.assert_array_equal(tsr.timestamps, np.array([5.5, 5.6, 5.7, 5.8]))
+        # Timestamps from timestamps directly
+        tsr = TimeSeriesReference(5, 4, TimeSeries(name='test0', description='test0',
+                                                   data=np.arange(10), timestamps=np.arange(10).astype(float)))
+        np.testing.assert_array_equal(tsr.timestamps, np.array([5., 6., 7., 8.]))
+
+    def test_timestamps_property_invalid_reference(self):
+        # Timestamps from starting_time and rate
+        tsr = TimeSeriesReference(-1, -1, TimeSeries(name='test0', description='test0',
+                                                     data=np.arange(10), starting_time=5.0, rate=0.1))
+        self.assertIsNone(tsr.timestamps)
+
+    def test_timestamps_property_bad_reference(self):
+        tsr = TimeSeriesReference(0, 12, TimeSeries(name='test0', description='test0',
+                                                    data=np.arange(10), timestamps=np.arange(10).astype(float)))
+        with self.assertRaisesWith(IndexError, "'idx_start + count' out of range for timeseries 'test0'"):
+            tsr.timestamps
+        tsr = TimeSeriesReference(0, 12, TimeSeries(name='test0', description='test0',
+                                                    data=np.arange(10), starting_time=5.0, rate=0.1))
+        with self.assertRaisesWith(IndexError, "'idx_start + count' out of range for timeseries 'test0'"):
+            tsr.timestamps
+
+    def test_data_property(self):
+        tsr = TimeSeriesReference(5, 4, TimeSeries(name='test0', description='test0',
+                                                   data=np.arange(10), starting_time=5.0, rate=0.1))
+        np.testing.assert_array_equal(tsr.data, np.array([5., 6., 7., 8.]))
+
+    def test_data_property_invalid_reference(self):
+        tsr = TimeSeriesReference(-1, -1, TimeSeries(name='test0', description='test0',
+                                                     data=np.arange(10), starting_time=5.0, rate=0.1))
+        self.assertIsNone(tsr.data)
+
+    def test_data_property_bad_reference(self):
+        tsr = TimeSeriesReference(0, 12, TimeSeries(name='test0', description='test0',
+                                                    data=np.arange(10), starting_time=5.0, rate=0.1))
+        with self.assertRaisesWith(IndexError, "'idx_start + count' out of range for timeseries 'test0'"):
+            tsr.data
