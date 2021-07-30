@@ -38,6 +38,7 @@
 - Fixed integration tests with invalid test data that will be caught by future hdmf validator version.
   @dsleiter, @rly (#1366, #1376)
 - Fixed build warnings in docs @oruebel (#1380)
+- Fix intersphinx links in docs for numpy @oruebel (#1386)
 
 ## PyNWB 1.5.1 (May 24, 2021)
 
