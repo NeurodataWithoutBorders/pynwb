@@ -1,6 +1,7 @@
 import numpy as np
 
 from pynwb import TimeSeries
+from pynwb.device import Device
 from pynwb.image import ImageSeries, IndexSeries, ImageMaskSeries, OpticalSeries, GrayscaleImage, RGBImage, RGBAImage
 from pynwb.testing import TestCase
 
@@ -8,6 +9,7 @@ from pynwb.testing import TestCase
 class ImageSeriesConstructor(TestCase):
 
     def test_init(self):
+        dev = Device('test_device')
         iS = ImageSeries(
             name='test_iS',
             data=np.ones((3, 3, 3)),
@@ -15,13 +17,16 @@ class ImageSeriesConstructor(TestCase):
             external_file=['external_file'],
             starting_frame=[1, 2, 3],
             format='tiff',
-            timestamps=[1., 2., 3.]
+            timestamps=list(),
+            device=dev,
         )
         self.assertEqual(iS.name, 'test_iS')
         self.assertEqual(iS.unit, 'unit')
         self.assertEqual(iS.external_file, ['external_file'])
         self.assertEqual(iS.starting_frame, [1, 2, 3])
         self.assertEqual(iS.format, 'tiff')
+        self.assertIs(iS.device, dev)
+        # self.assertEqual(iS.bits_per_pixel, np.nan)
 
     def test_no_data_no_file(self):
         msg = "Must supply either external_file or data to ImageSeries 'test_iS'."

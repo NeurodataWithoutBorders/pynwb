@@ -13,8 +13,8 @@ including writing and reading of an NWB file.
 # The NWB file
 # ------------
 #
-#
 
+# sphinx_gallery_thumbnail_path = 'figures/gallery_thumbnails_file.png'
 from datetime import datetime
 from dateutil.tz import tzlocal
 from pynwb import NWBFile
@@ -294,25 +294,13 @@ nwbfile.processing
 nwbfile.processing['behavior'].add(position)
 
 ####################
-# .. _basic_epochs:
+# Time Intervals
+# --------------
 #
-# Epochs
-# ------
-#
-# Epochs can be added to an NWB file using the method :py:meth:`~pynwb.file.NWBFile.add_epoch`.
-# The first and second arguments are the start time and stop times, respectively.
-# The third argument is one or more tags for labelling the epoch, and the fifth argument is a
-# list of all the :py:class:`~pynwb.base.TimeSeries` that the epoch applies
-# to.
-
-nwbfile.add_epoch(2.0, 4.0, ['first', 'example'], [test_ts, ])
-nwbfile.add_epoch(6.0, 8.0, ['second', 'example'], [test_ts, ])
-
-####################
 # .. _basic_trials:
 #
 # Trials
-# ------
+# ~~~~~~~~~~~~~~~~~~~~~~
 #
 # Trials can be added to an NWB file using the methods :py:meth:`~pynwb.file.NWBFile.add_trial`
 # and :py:meth:`~pynwb.file.NWBFile.add_trial_column`. Together, these methods maintains a
@@ -347,6 +335,42 @@ print(nwbfile.trials.to_dataframe())
 #       1          3.0        5.0   ocean
 #       2          6.0        8.0  desert
 #
+# .. _basic_epochs:
+#
+# Epochs
+# ~~~~~~~~~~~~~~~~~~~~~~
+#
+# Epochs can be added to an NWB file using the method :py:meth:`~pynwb.file.NWBFile.add_epoch`.
+# The first and second arguments are the start time and stop times, respectively.
+# The third argument is one or more tags for labeling the epoch, and the fourth argument is a
+# list of all the :py:class:`~pynwb.base.TimeSeries` that the epoch applies
+# to.
+
+nwbfile.add_epoch(2.0, 4.0, ['first', 'example'], [test_ts, ])
+nwbfile.add_epoch(6.0, 8.0, ['second', 'example'], [test_ts, ])
+
+####################
+# Other time intervals
+# ~~~~~~~~~~~~~~~~~~~~~~
+# Both ``epochs`` and ``trials`` are of of data type :py:class:`~pynwb.epoch.TimeIntervals`, which is a type of
+# ``DynamicTable`` for storing information about time intervals. ``"epochs"`` and ``"trials"``
+# are the two default names for :py:class:`~pynwb.base.TimeIntervals` objects, but you can also add your own
+
+from pynwb.epoch import TimeIntervals
+
+sleep_stages = TimeIntervals(
+    name="sleep_stages",
+    description="intervals for each sleep stage as determined by EEG",
+)
+
+sleep_stages.add_column(name="stage", description="stage of sleep")
+sleep_stages.add_column(name="confidence", description="confidence in stage (0-1)")
+
+sleep_stages.add_row(start_time=0.3, stop_time=0.5, stage=1, confidence=.5)
+sleep_stages.add_row(start_time=0.7, stop_time=0.9, stage=2, confidence=.99)
+sleep_stages.add_row(start_time=1.3, stop_time=3.0, stage=3, confidence=0.7)
+
+nwbfile.add_time_intervals(sleep_stages)
 
 ####################
 # .. _basic_units:

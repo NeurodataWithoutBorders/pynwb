@@ -47,13 +47,21 @@ class NWBFileMap(ObjectMapper):
         general_spec = self.spec.get_group('general')
         self.unmap(general_spec)
 
+        # map icephys metadata structures and tables
         icephys_spec = general_spec.get_group('intracellular_ephys')
         self.unmap(icephys_spec)
         self.map_spec('icephys_electrodes', icephys_spec.get_neurodata_type('IntracellularElectrode'))
         self.map_spec('sweep_table', icephys_spec.get_neurodata_type('SweepTable'))
+        self.map_spec('intracellular_recordings', icephys_spec.get_neurodata_type('IntracellularRecordingsTable'))
+        self.map_spec('icephys_simultaneous_recordings', icephys_spec.get_neurodata_type('SimultaneousRecordingsTable'))
+        self.map_spec('icephys_sequential_recordings', icephys_spec.get_neurodata_type('SequentialRecordingsTable'))
+        self.map_spec('icephys_repetitions', icephys_spec.get_neurodata_type('RepetitionsTable'))
+        self.map_spec('icephys_experimental_conditions', icephys_spec.get_neurodata_type('ExperimentalConditionsTable'))
 
-        # TODO map the filtering dataset to something or deprecate it
-        self.unmap(icephys_spec.get_dataset('filtering'))
+        # 'filtering' has been deprecated. add this mapping in the meantime
+        icephys_filtering_spec = icephys_spec.get_dataset('filtering')
+        self.unmap(icephys_filtering_spec)
+        self.map_spec('icephys_filtering', icephys_filtering_spec)
 
         ecephys_spec = general_spec.get_group('extracellular_ephys')
         self.unmap(ecephys_spec)

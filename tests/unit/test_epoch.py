@@ -11,7 +11,7 @@ from pynwb.testing import TestCase
 class TimeIntervalsTest(TestCase):
 
     def test_init(self):
-        tstamps = np.arange(1.0, 100.0, 0.1, dtype=np.float)
+        tstamps = np.arange(1.0, 100.0, 0.1, dtype=np.float64)
         ts = TimeSeries(name="test_ts", data=list(range(len(tstamps))), unit='unit', timestamps=tstamps)
         ept = TimeIntervals(name='epochs', description="TimeIntervals unittest")
         self.assertEqual(ept.name, 'epochs')

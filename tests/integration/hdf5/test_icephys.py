@@ -6,6 +6,7 @@ from pynwb.icephys import (IntracellularElectrode, PatchClampSeries, CurrentClam
                            VoltageClampSeries, IZeroClampSeries)
 from pynwb.device import Device
 from pynwb.testing import NWBH5IOMixin, AcquisitionH5IOMixin, TestCase
+import warnings
 
 
 class TestIntracellularElectrode(NWBH5IOMixin, TestCase):
@@ -128,7 +129,14 @@ class TestSweepTableRoundTripEasy(NWBH5IOMixin, TestCase):
         self.pcs = PatchClampSeries(name="pcs", data=[1, 2, 3, 4, 5], unit='A',
                                     starting_time=123.6, rate=10e3, electrode=self.elec, gain=0.126,
                                     stimulus_description="gotcha ya!", sweep_number=np.uint(4711))
-        return SweepTable(name='sweep_table')
+        # Create the SweepTable but ignore the DeprecationWarning
+        with warnings.catch_warnings(record=True) as w:
+            warnings.simplefilter('ignore', DeprecationWarning)
+            sweeptable = SweepTable(name='sweep_table')
+            # Reissue any other warnings that may have occured
+            for i in w:
+                warnings.warn(i.message, i.category)
+        return sweeptable
 
     def addContainer(self, nwbfile):
         """
@@ -137,11 +145,25 @@ class TestSweepTableRoundTripEasy(NWBH5IOMixin, TestCase):
         nwbfile.sweep_table = self.container
         nwbfile.add_device(self.device)
         nwbfile.add_icephys_electrode(self.elec)
-        nwbfile.add_acquisition(self.pcs)
+        nwbfile.add_acquisition(self.pcs, use_sweep_table=True)
 
     def getContainer(self, nwbfile):
         """ Return the test SweepTable from the given NWBFile """
         return nwbfile.sweep_table
+
+    def roundtripContainer(self, cache_spec=False):
+        # catch the DeprecationWarning raised when reading the SweepTable object from file
+        with self.assertWarnsWith(DeprecationWarning,
+                                  "Use of SweepTable is deprecated. Use the IntracellularRecordingsTable instead. "
+                                  "See also the  NWBFile.add_intracellular_recordings function."):
+            return super().roundtripContainer(cache_spec)
+
+    def roundtripExportContainer(self, cache_spec=False):
+        # catch the DeprecationWarning raised when reading the SweepTable object from file
+        with self.assertWarnsWith(DeprecationWarning,
+                                  "Use of SweepTable is deprecated. Use the IntracellularRecordingsTable instead. "
+                                  "See also the  NWBFile.add_intracellular_recordings function."):
+            return super().roundtripExportContainer(cache_spec)
 
     def test_container(self):
         """ Test properties of the SweepTable read from file """
@@ -178,7 +200,14 @@ class TestSweepTableRoundTripComplicated(NWBH5IOMixin, TestCase):
                                       starting_time=123.6, rate=10e3, electrode=self.elec, gain=0.126,
                                       stimulus_description="gotcha ya!", sweep_number=np.uint(4712))
 
-        return SweepTable(name='sweep_table')
+        # Create the SweepTable but ignore the DeprecationWarning
+        with warnings.catch_warnings(record=True) as w:
+            warnings.simplefilter('ignore', DeprecationWarning)
+            sweeptable = SweepTable(name='sweep_table')
+            # Reissue any other warnings that may have occured
+            for i in w:
+                warnings.warn(i.message, i.category)
+        return sweeptable
 
     def addContainer(self, nwbfile):
         """
@@ -188,13 +217,27 @@ class TestSweepTableRoundTripComplicated(NWBH5IOMixin, TestCase):
         nwbfile.add_device(self.device)
         nwbfile.add_icephys_electrode(self.elec)
 
-        nwbfile.add_acquisition(self.pcs1)
-        nwbfile.add_stimulus_template(self.pcs2a)
-        nwbfile.add_stimulus(self.pcs2b)
+        nwbfile.add_acquisition(self.pcs1, use_sweep_table=True)
+        nwbfile.add_stimulus_template(self.pcs2a, use_sweep_table=True)
+        nwbfile.add_stimulus(self.pcs2b, use_sweep_table=True)
 
     def getContainer(self, nwbfile):
         """ Return the test SweepTable from the given NWBFile """
         return nwbfile.sweep_table
+
+    def roundtripContainer(self, cache_spec=False):
+        # catch the DeprecationWarning raised when reading the SweepTable object from file
+        with self.assertWarnsWith(DeprecationWarning,
+                                  "Use of SweepTable is deprecated. Use the IntracellularRecordingsTable instead. "
+                                  "See also the  NWBFile.add_intracellular_recordings function."):
+            return super().roundtripContainer(cache_spec)
+
+    def roundtripExportContainer(self, cache_spec=False):
+        # catch the DeprecationWarning raised when reading the SweepTable object from file
+        with self.assertWarnsWith(DeprecationWarning,
+                                  "Use of SweepTable is deprecated. Use the IntracellularRecordingsTable instead. "
+                                  "See also the  NWBFile.add_intracellular_recordings function."):
+            return super().roundtripExportContainer(cache_spec)
 
     def test_container(self):
         """ Test properties of the SweepTable read from file """

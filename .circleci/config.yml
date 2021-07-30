@@ -17,6 +17,34 @@ references:
       python -m virtualenv ../venv || python -m venv ../venv
       . ../venv/bin/activate
 
+  py39: &py39
+    docker:
+    - image: circleci/python:3.9.2-buster
+      auth:
+        username: hdmf
+        password: $DOCKERHUB_PASSWORD
+
+  py38: &py38
+    docker:
+    - image: circleci/python:3.8.8-buster
+      auth:
+        username: hdmf
+        password: $DOCKERHUB_PASSWORD
+
+  py37: &py37
+    docker:
+    - image: circleci/python:3.7.10-buster
+      auth:
+        username: hdmf
+        password: $DOCKERHUB_PASSWORD
+
+  conda-image: &conda-image
+    docker:
+    - image: continuumio/miniconda3:4.9.2
+      auth:
+        username: hdmf
+        password: $DOCKERHUB_PASSWORD
+
   ci-steps: &ci-steps
     steps:
       - checkout
@@ -33,13 +61,6 @@ references:
           # Install is expected to be quick. Increase timeout in case there are some network issues.
           # While pip installing tox does not output by default. Circle thinks task is dead after 10 min.
           no_output_timeout: 30m
-      - run:
-          name: Run coverage and submit to codecov-io if COVERAGE_TOX_ENV != ""
-          command: |
-            . ../venv/bin/activate
-            if [[ "${COVERAGE_TOX_ENV}" != "" ]]; then
-              tox -e $COVERAGE_TOX_ENV
-            fi
       - run:
           name: Build wheel and source distribution
           command: |
@@ -120,11 +141,12 @@ references:
           # exclude tags created by "ci_addons publish_github_release"
           - /^latest$/
           - /^latest-tmp$/
+    context:
+      - docker-hub-creds
 
 jobs:
   flake8:
-    docker:
-      - image: circleci/python:3.8.1-buster
+    <<: *py38
     steps:
       - checkout
       - run:
@@ -132,121 +154,120 @@ jobs:
       - run:
           <<: *run-style-check
 
-  python35:
-    docker:
-      - image: circleci/python:3.5.9-stretch
-    environment:
-     - TEST_TOX_ENV: "py35"
-     - COVERAGE_TOX_ENV: ""
-     - BUILD_TOX_ENV: "build-py35"
-     - TEST_WHEELINSTALL_ENV: "wheelinstall-py35"
-    <<: *ci-steps
-
-  python36:
-    docker:
-      - image: circleci/python:3.6.10-stretch
-    environment:
-     - TEST_TOX_ENV: "py36"
-     - COVERAGE_TOX_ENV: ""
-     - BUILD_TOX_ENV: "build-py36"
-     - TEST_WHEELINSTALL_ENV: "wheelinstall-py36"
-    <<: *ci-steps
-
   python37:
-    docker:
-      - image: circleci/python:3.7.6-stretch
+    <<: *py37
     environment:
-     - TEST_TOX_ENV: "py37"
-     - COVERAGE_TOX_ENV: ""
-     - BUILD_TOX_ENV: "build-py37"
-     - TEST_WHEELINSTALL_ENV: "wheelinstall-py37"
+      - TEST_TOX_ENV: "py37"
+      - BUILD_TOX_ENV: "build-py37"
+      - TEST_WHEELINSTALL_ENV: "wheelinstall"
     <<: *ci-steps
 
   python38:
-    docker:
-      - image: circleci/python:3.8.1-buster
+    <<: *py38
     environment:
-     - TEST_TOX_ENV: "py38"
-     - COVERAGE_TOX_ENV: "coverage"
-     - BUILD_TOX_ENV: "build-py38"
-     - TEST_WHEELINSTALL_ENV: "wheelinstall-py38"
-     - UPLOAD_WHEELS: "true"
+      - TEST_TOX_ENV: "py38"
+      - BUILD_TOX_ENV: "build-py38"
+      - TEST_WHEELINSTALL_ENV: "wheelinstall"
     <<: *ci-steps
 
-  python36-min-req:
-    docker:
-      - image: circleci/python:3.6.10-stretch
+  python39:
+    <<: *py39
     environment:
-     - TEST_TOX_ENV: "py36-min-req"
-     - COVERAGE_TOX_ENV: ""
-     - BUILD_TOX_ENV: "build-py36-min-req"
-     - TEST_WHEELINSTALL_ENV: "wheelinstall-py36-min-req"
+      - TEST_TOX_ENV: "py39"
+      - BUILD_TOX_ENV: "build-py39"
+      - TEST_WHEELINSTALL_ENV: "wheelinstall"
+      - UPLOAD_WHEELS: "true"  # upload distributions from only this job to pypi
     <<: *ci-steps
 
-  miniconda35:
-    docker:
-      - image: continuumio/miniconda3:4.3.27p0
+  python39-upgrade-dev:
+    <<: *py39
     environment:
-      - CONDA_PYTHON_VER: "3.5"
-      - TEST_TOX_ENV: "py35"
-      - BUILD_TOX_ENV: "build-py35"
-      - TEST_WHEELINSTALL_ENV: "wheelinstall-py35"
-    <<: *conda-steps
+      - TEST_TOX_ENV: "py39-upgrade-dev"
+      - BUILD_TOX_ENV: "build-py39-upgrade-dev"
+      - TEST_WHEELINSTALL_ENV: "wheelinstall"
+    <<: *ci-steps
 
-  miniconda36:
-    docker:
-      - image: continuumio/miniconda3:4.7.12
+  python39-upgrade-dev-pre:
+    <<: *py39
     environment:
-      - CONDA_PYTHON_VER: "3.6"
-      - TEST_TOX_ENV: "py36"
-      - BUILD_TOX_ENV: "build-py36"
-      - TEST_WHEELINSTALL_ENV: "wheelinstall-py36"
-    <<: *conda-steps
+      - TEST_TOX_ENV: "py39-upgrade-dev-pre"
+      - BUILD_TOX_ENV: "build-py39-upgrade-dev-pre"
+      - TEST_WHEELINSTALL_ENV: "wheelinstall"
+    <<: *ci-steps
+
+  python37-min-req:
+    <<: *py37
+    environment:
+      - TEST_TOX_ENV: "py37-min-req"
+      - BUILD_TOX_ENV: "build-py37-min-req"
+      - TEST_WHEELINSTALL_ENV: "wheelinstall"
+    <<: *ci-steps
 
   miniconda37:
-    docker:
-      - image: continuumio/miniconda3:4.7.12
+    <<: *conda-image
     environment:
       - CONDA_PYTHON_VER: "3.7"
       - TEST_TOX_ENV: "py37"
       - BUILD_TOX_ENV: "build-py37"
-      - TEST_WHEELINSTALL_ENV: "wheelinstall-py37"
+      - TEST_WHEELINSTALL_ENV: "wheelinstall"
     <<: *conda-steps
 
   miniconda38:
-    docker:
-      - image: continuumio/miniconda3:4.7.12
+    <<: *conda-image
     environment:
       - CONDA_PYTHON_VER: "3.8"
       - TEST_TOX_ENV: "py38"
       - BUILD_TOX_ENV: "build-py38"
-      - TEST_WHEELINSTALL_ENV: "wheelinstall-py38"
+      - TEST_WHEELINSTALL_ENV: "wheelinstall"
     <<: *conda-steps
 
-  gallery36:
-    docker:
-      - image: circleci/python:3.6.3-jessie
+  miniconda39:
+    <<: *conda-image
     environment:
-     - TEST_TOX_ENV: "gallery-py36"
-    <<: *gallery-steps
+      - CONDA_PYTHON_VER: "3.9"
+      - TEST_TOX_ENV: "py39"
+      - BUILD_TOX_ENV: "build-py39"
+      - TEST_WHEELINSTALL_ENV: "wheelinstall"
+    <<: *conda-steps
 
   gallery37:
-    docker:
-      - image: circleci/python:3.7.6-stretch
+    <<: *py37
     environment:
-     - TEST_TOX_ENV: "gallery-py37"
+      - TEST_TOX_ENV: "gallery-py37"
     <<: *gallery-steps
 
-  gallery36-min-req:
-    docker:
-      - image: circleci/python:3.6.3-jessie
+  gallery38:
+    <<: *py38
     environment:
-     - TEST_TOX_ENV: "gallery-py36-min-req"
+      - TEST_TOX_ENV: "gallery-py38"
+    <<: *gallery-steps
+
+  gallery39:
+    <<: *py39
+    environment:
+      - TEST_TOX_ENV: "gallery-py39"
+    <<: *gallery-steps
+
+  gallery39-upgrade-dev:
+    <<: *py39
+    environment:
+      - TEST_TOX_ENV: "gallery-py39-upgrade-dev"
+    <<: *gallery-steps
+
+  gallery39-upgrade-dev-pre:
+    <<: *py39
+    environment:
+      - TEST_TOX_ENV: "gallery-py39-upgrade-dev-pre"
+    <<: *gallery-steps
+
+  gallery37-min-req:
+    <<: *py37
+    environment:
+      - TEST_TOX_ENV: "gallery-py37-min-req"
     <<: *gallery-steps
 
   test-validation:
-    docker:
-      - image: circleci/python:3.8.1-buster
+    <<: *py39
     steps:
       - checkout
       - run: git submodule sync
@@ -258,14 +279,13 @@ jobs:
           command: |
             . ../venv/bin/activate
             pip install tox
-            tox -e validation-py38
+            tox -e validation-py39
           # Install is expected to be quick. Increase timeout in case there are some network issues.
           # While pip installing tox does not output by default. Circle thinks task is dead after 10 min.
           no_output_timeout: 30m
 
   deploy-dev:
-    docker:
-      - image: circleci/python:3.8.1-buster
+    <<: *py39
     steps:
       - checkout
       - attach_workspace:
@@ -286,8 +306,7 @@ jobs:
                 --exit-success-if-missing-token
 
   deploy-release:
-    docker:
-      - image: circleci/python:3.8.1-buster
+    <<: *py39
     steps:
       - attach_workspace:
           at: ./
@@ -305,7 +324,8 @@ jobs:
           command: |
             python -m venv ../venv
             . ../venv/bin/activate
-            pip install githubrelease
+            # use click<8 until https://github.com/j0057/github-release/issues/62 is resolved
+            pip install "click<8" githubrelease
             githubrelease release $CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME \
               create $CIRCLE_TAG --name $CIRCLE_TAG \
               --publish ./dist/*
@@ -316,45 +336,27 @@ workflows:
     jobs:
       - flake8:
           <<: *no_filters
-      - python35:
+      - python37-min-req:
           <<: *no_filters
-      - python36:
-          <<: *no_filters
-      - python37:
-          <<: *no_filters
-      - python38:
-          <<: *no_filters
-      - python36-min-req:
-          <<: *no_filters
-      - miniconda35:
-          <<: *no_filters
-      - miniconda36:
+      - python39:
           <<: *no_filters
       - miniconda37:
           <<: *no_filters
-      - miniconda38:
+      - miniconda39:
           <<: *no_filters
-      - gallery36:
+      - gallery37-min-req:
           <<: *no_filters
-      - gallery37:
-          <<: *no_filters
-      - gallery36-min-req:
+      - gallery38:  # TODO replace with gallery39 after allensdk support py39
           <<: *no_filters
       - deploy-dev:
           requires:
             - flake8
-            - python35
-            - python36
-            - python37
-            - python38
-            - python36-min-req
-            - miniconda35
-            - miniconda36
+            - python37-min-req
+            - python39
             - miniconda37
-            - miniconda38
-            - gallery36
-            - gallery37
-            - gallery36-min-req
+            - miniconda39
+            - gallery37-min-req
+            - gallery38  # gallery39
           filters:
             tags:
               ignore:
@@ -363,26 +365,24 @@ workflows:
                 - /^latest-tmp$/
             branches:
               only: dev
+          context:
+            - docker-hub-creds
       - deploy-release:
           requires:
             - flake8
-            - python35
-            - python36
-            - python37
-            - python38
-            - python36-min-req
-            - miniconda35
-            - miniconda36
+            - python37-min-req
+            - python39
             - miniconda37
-            - miniconda38
-            - gallery36
-            - gallery37
-            - gallery36-min-req
+            - miniconda39
+            - gallery37-min-req
+            - gallery38  # gallery39
           filters:
             tags:
               only: /^[0-9]+(\.[0-9]+)*(\.post[0-9]+)?$/
             branches:
               ignore: /.*/
+          context:
+            - docker-hub-creds
 
   nightly:
     triggers:
@@ -392,4 +392,35 @@ workflows:
             branches:
               only: dev
     jobs:
-      - test-validation
+      - flake8:
+          <<: *no_filters
+      - python37:
+          <<: *no_filters
+      - python37-min-req:
+          <<: *no_filters
+      - python38:
+          <<: *no_filters
+      - python39:
+          <<: *no_filters
+      - python39-upgrade-dev:
+          <<: *no_filters
+      - python39-upgrade-dev-pre:
+          <<: *no_filters
+      - miniconda37:
+          <<: *no_filters
+      - miniconda38:
+          <<: *no_filters
+      - miniconda39:
+          <<: *no_filters
+      - gallery37:
+          <<: *no_filters
+      - gallery37-min-req:
+          <<: *no_filters
+      - gallery38:
+          <<: *no_filters
+      - gallery39:
+          <<: *no_filters
+      - gallery39-upgrade-dev:
+          <<: *no_filters
+      - gallery39-upgrade-dev-pre:
+          <<: *no_filters

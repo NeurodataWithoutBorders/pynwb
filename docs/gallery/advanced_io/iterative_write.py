@@ -88,9 +88,9 @@ writing large arrays without loading all data into memory and streaming data wri
 # .. tip::
 #
 #    Currently the HDF5 I/O backend of PyNWB (:py:class:`~hdmf.backends.hdf5.h5tools.HDF5IO`,
-#    :py:class:`~pynwb.NWBHDF5IO`) processes itertive data writes one-dataset-at-a-time. This means, that
+#    :py:class:`~pynwb.NWBHDF5IO`) processes iterative data writes one-dataset-at-a-time. This means, that
 #    while you may have an arbitrary number of iterative data writes, the write is performed in order.
-#    In the future we may use a queing process to enable the simultaneous processing of multiple iterative writes at
+#    In the future we may use a queuing process to enable the simultaneous processing of multiple iterative writes at
 #    the same time.
 #
 # Preparations:
@@ -98,8 +98,9 @@ writing large arrays without loading all data into memory and streaming data wri
 #
 # The data write in our examples really does not change. We, therefore, here create a
 # simple helper function first to write a simple NWBFile containing a single timeseries to
-# avoid repition of the same code and to allow us to focus on the important parts of this tutorial.
+# avoid repetition of the same code and to allow us to focus on the important parts of this tutorial.
 
+# sphinx_gallery_thumbnail_path = 'figures/gallery_thumbnails_iterative_write.png'
 from datetime import datetime
 from dateutil.tz import tzlocal
 from pynwb import NWBFile, TimeSeries
@@ -305,7 +306,7 @@ data = SparseMatrixIterator(shape=(xsize, ysize),
                             chunk_shape=chunk_shape)
 
 #####################
-# In order to also enable compression and other advanced HDF5 dataset I/O featurs we can then also
+# In order to also enable compression and other advanced HDF5 dataset I/O features we can then also
 # wrap our data via :py:class:`~hdmf.backends.hdf5.h5_utils.H5DataIO`.
 from hdmf.backends.hdf5.h5_utils import H5DataIO
 matrix2 = SparseMatrixIterator(shape=(xsize, ysize),

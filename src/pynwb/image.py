@@ -6,6 +6,7 @@ from hdmf.utils import docval, getargs, popargs, call_docval_func, get_docval
 
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries, Image
+from .device import Device
 
 
 @register_class('ImageSeries', CORE_NAMESPACE)
@@ -18,7 +19,8 @@ class ImageSeries(TimeSeries):
     __nwbfields__ = ('dimension',
                      'external_file',
                      'starting_frame',
-                     'format')
+                     'format',
+                     'device')
 
     # value used when an ImageSeries is read and missing data
     DEFAULT_DATA = np.ndarray(shape=(0, 0, 0), dtype=np.uint8)
@@ -48,14 +50,17 @@ class ImageSeries(TimeSeries):
             {'name': 'dimension', 'type': Iterable,
              'doc': 'Number of pixels on x, y, (and z) axes.', 'default': None},
             *get_docval(TimeSeries.__init__, 'resolution', 'conversion', 'timestamps', 'starting_time', 'rate',
-                        'comments', 'description', 'control', 'control_description'))
+                        'comments', 'description', 'control', 'control_description'),
+            {'name': 'device', 'type': Device,
+             'doc': 'Device used to capture the images/video.', 'default': None},)
     def __init__(self, **kwargs):
-        bits_per_pixel, dimension, external_file, starting_frame, format = popargs(
-            'bits_per_pixel', 'dimension', 'external_file', 'starting_frame', 'format', kwargs)
+        bits_per_pixel, dimension, external_file, starting_frame, format, device = popargs(
+            'bits_per_pixel', 'dimension', 'external_file', 'starting_frame', 'format', 'device', kwargs)
         name, data, unit = getargs('name', 'data', 'unit', kwargs)
         if data is not None and unit is None:
             raise ValueError("Must supply 'unit' argument when supplying 'data' to %s '%s'."
                              % (self.__class__.__name__, name))
+        call_docval_func(super(ImageSeries, self).__init__, kwargs)
         if external_file is None and data is None:
             raise ValueError("Must supply either external_file or data to %s '%s'."
                              % (self.__class__.__name__, name))
@@ -76,6 +81,7 @@ class ImageSeries(TimeSeries):
         else:
             self.starting_frame = None
         self.format = format
+        self.device = device
 
     @property
     def bits_per_pixel(self):
@@ -133,7 +139,11 @@ class ImageMaskSeries(ImageSeries):
              'doc': 'Link to ImageSeries that mask is applied to.'},
             *get_docval(ImageSeries.__init__, 'data', 'unit', 'format', 'external_file', 'starting_frame',
                         'bits_per_pixel', 'dimension', 'resolution', 'conversion', 'timestamps', 'starting_time',
-                        'rate', 'comments', 'description', 'control', 'control_description'))
+                        'rate', 'comments', 'description', 'control', 'control_description'),
+            {'name': 'device', 'type': Device,
+             'doc': ('Device used to capture the mask data. This field will likely not be needed. '
+                     'The device used to capture the masked ImageSeries data should be stored in the ImageSeries.'),
+             'default': None},)
     def __init__(self, **kwargs):
         masked_imageseries = popargs('masked_imageseries', kwargs)
         super(ImageMaskSeries, self).__init__(**kwargs)
@@ -169,7 +179,7 @@ class OpticalSeries(ImageSeries):
              'default': None},
             *get_docval(ImageSeries.__init__, 'unit', 'format', 'external_file', 'starting_frame', 'bits_per_pixel',
                         'dimension', 'resolution', 'conversion', 'timestamps', 'starting_time', 'rate', 'comments',
-                        'description', 'control', 'control_description'))
+                        'description', 'control', 'control_description', 'device'))
     def __init__(self, **kwargs):
         distance, field_of_view, orientation = popargs('distance', 'field_of_view', 'orientation', kwargs)
         super(OpticalSeries, self).__init__(**kwargs)

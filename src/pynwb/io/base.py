@@ -29,6 +29,7 @@ class TimeSeriesMap(NWBContainerMapper):
         self.map_spec('unit', data_spec.get_attribute('unit'))
         self.map_spec('resolution', data_spec.get_attribute('resolution'))
         self.map_spec('conversion', data_spec.get_attribute('conversion'))
+        self.map_spec('continuity', data_spec.get_attribute('continuity'))
 
         timestamps_spec = self.spec.get_dataset('timestamps')
         self.map_spec('timestamps_unit', timestamps_spec.get_attribute('unit'))

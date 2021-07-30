@@ -7,7 +7,7 @@ from pynwb.image import ImageSeries
 # pynwb 1.0.2 should be installed with hdmf 1.0.3
 # pynwb 1.0.3 should be installed with hdmf 1.0.5
 # pynwb 1.1.0 should be installed with hdmf 1.2.0
-# pynwb 1.1.1+ should be installed with an appopriate version of hdmf
+# pynwb 1.1.1+ should be installed with an appropriate version of hdmf
 
 
 def _write(test_name, nwbfile):

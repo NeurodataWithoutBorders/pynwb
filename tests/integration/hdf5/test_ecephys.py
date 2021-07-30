@@ -40,7 +40,7 @@ class TestElectricalSeriesIO(AcquisitionH5IOMixin, TestCase):
                                     location='tetrode location',
                                     device=self.dev1)
         for i in range(4):
-            self.table.add_row(x=i, y=2.0, z=3.0, imp=-1.0, location='CA1', filtering='none', group=self.group,
+            self.table.add_row(x=float(i), y=2.0, z=3.0, imp=-1.0, location='CA1', filtering='none', group=self.group,
                                group_name='tetrode1')
 
     def setUpContainer(self):
@@ -52,11 +52,16 @@ class TestElectricalSeriesIO(AcquisitionH5IOMixin, TestCase):
                                     table=self.table)
         data = list(zip(range(10), range(10, 20)))
         timestamps = list(map(lambda x: x/10., range(10)))
-        es = ElectricalSeries(name='test_eS',
-                              data=data,
-                              electrodes=region,
-                              channel_conversion=[4., .4],
-                              timestamps=timestamps)
+        channel_conversion = [1., 2., 3., 4.]
+        filtering = 'Low-pass filter at 300 Hz'
+        es = ElectricalSeries(
+            name='test_eS',
+            data=data,
+            electrodes=region,
+            channel_conversion=channel_conversion,
+            filtering=filtering,
+            timestamps=timestamps
+        )
         return es
 
     def addContainer(self, nwbfile):
@@ -145,6 +150,11 @@ class TestClusteringIO(AcquisitionH5IOMixin, TestCase):
         with self.assertWarnsWith(DeprecationWarning, 'use pynwb.misc.Units or NWBFile.units instead'):
             return super().roundtripContainer(cache_spec)
 
+    def roundtripExportContainer(self, cache_spec=False):
+        # catch the DeprecationWarning raised when reading the Clustering object from file
+        with self.assertWarnsWith(DeprecationWarning, 'use pynwb.misc.Units or NWBFile.units instead'):
+            return super().roundtripExportContainer(cache_spec)
+
 
 class EventWaveformConstructor(AcquisitionH5IOMixin, TestCase):
 
@@ -194,6 +204,11 @@ class ClusterWaveformsConstructor(AcquisitionH5IOMixin, TestCase):
         # catch the DeprecationWarning raised when reading the Clustering object from file
         with self.assertWarnsWith(DeprecationWarning, 'use pynwb.misc.Units or NWBFile.units instead'):
             return super().roundtripContainer(cache_spec)
+
+    def roundtripExportContainer(self, cache_spec=False):
+        # catch the DeprecationWarning raised when reading the Clustering object from file
+        with self.assertWarnsWith(DeprecationWarning, 'use pynwb.misc.Units or NWBFile.units instead'):
+            return super().roundtripExportContainer(cache_spec)
 
 
 class FeatureExtractionConstructor(AcquisitionH5IOMixin, TestCase):

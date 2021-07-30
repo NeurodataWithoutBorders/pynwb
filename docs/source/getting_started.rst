@@ -6,7 +6,7 @@ Dependencies
 
 PyNWB has the following minimum requirements, which must be installed before you can get started using PyNWB.
 
-#. Python 3.5, 3.6, or 3.7
+#. Python 3.7, 3.8, or 3.9
 #. pip
 
 ------------

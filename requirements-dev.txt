@@ -1,6 +1,9 @@
-codecov==2.1.8
-coverage==5.2
-flake8==3.8.3
-flake8-debugger==3.1.0
-flake8-print==3.1.4
-tox==3.17.1
+# pinned dependencies to reproduce an entire development environment to use PyNWB, run PyNWB tests, check code style,
+# compute coverage, and create test environments
+codecov==2.1.11
+coverage==5.5
+flake8==3.9.2
+flake8-debugger==4.0.0
+flake8-print==4.0.0
+importlib-metadata==4.6.1
+tox==3.23.1

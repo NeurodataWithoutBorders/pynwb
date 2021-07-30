@@ -27,6 +27,7 @@ and scratch space.
 # To demonstrate linking and scratch space, lets assume we are starting with some acquired data.
 #
 
+# sphinx_gallery_thumbnail_path = 'figures/gallery_thumbnails_scratch.png'
 from pynwb import NWBFile, TimeSeries, NWBHDF5IO
 from datetime import datetime
 from dateutil.tz import tzlocal
@@ -138,7 +139,7 @@ filt_ts = nwb_scratch.modules['filtering_module']['filtered_timeseries']
 
 fft = np.fft.fft(filt_ts.data)
 
-nwb_scratch.add_scratch(fft, name='dft_filtered', notes='discrete Fourier transform from filtered data')
+nwb_scratch.add_scratch(fft, name='dft_filtered', description='discrete Fourier transform from filtered data')
 
 
 ####################

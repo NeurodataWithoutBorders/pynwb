@@ -9,6 +9,17 @@ from pynwb.testing import TestCase
 
 class TestReadOldVersions(TestCase):
 
+    expected_errors = {
+        '1.0.2_str_experimenter.nwb': [("root/general/experimenter (general/experimenter): incorrect shape - expected "
+                                        "an array of shape '[None]', got non-array data 'one experimenter'")],
+        '1.0.3_str_experimenter.nwb': [("root/general/experimenter (general/experimenter): incorrect shape - expected "
+                                        "an array of shape '[None]', got non-array data 'one experimenter'")],
+        '1.0.2_str_pub.nwb': [("root/general/related_publications (general/related_publications): incorrect shape "
+                               "- expected an array of shape '[None]', got non-array data 'one publication'")],
+        '1.0.3_str_pub.nwb': [("root/general/related_publications (general/related_publications): incorrect shape "
+                               "- expected an array of shape '[None]', got non-array data 'one publication'")],
+    }
+
     def test_read(self):
         """Test reading and validating all NWB files in the same folder as this file.
 
@@ -24,7 +35,8 @@ class TestReadOldVersions(TestCase):
                     io.read()
                     if errors:
                         for e in errors:
-                            warnings.warn('%s: %s' % (f.name, e))
+                            if f.name in self.expected_errors and str(e) not in self.expected_errors[f.name]:
+                                warnings.warn('%s: %s' % (f.name, e))
                         # TODO uncomment below when validation errors have been fixed
                         # raise Exception('%d validation error(s). See warnings.' % len(errors))
 
