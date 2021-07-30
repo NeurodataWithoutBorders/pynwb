@@ -5,10 +5,10 @@ Using ndx-template
 ~~~~~~~~~~~~~~~~~~
 Extensions should be created in their own repository, not alongside data conversion code. This facilitates sharing
 and editing of the extension separately from the code that uses it. When starting a new extension, we highly
-recommend using the `ndx-template <https://github.com/nwb-extensions/ndx-template>`_ repository, which automatically
-generates a repository with the appropriate directory structure.
+recommend using the :nwb_extension:`ndx-template` repository, which automatically generates a repository with
+the appropriate directory structure.
 
-After you finish the instructions `here <https://github.com/nwb-extensions/ndx-template#getting-started>`_,
+After you finish the instructions :nwb_extension:`here <ndx-template#getting-started>`,
 you should have a directory structure that looks like this
 
 .. code-block:: bash
@@ -60,7 +60,7 @@ modifying this script to create your own NWB extension. Let's first walk through
 Creating a namespace
 ~~~~~~~~~~~~~~~~~~~~
 NWB organizes types into namespaces. You must define a new namespace before creating any new types. After following
-the instructions from `ndx-template <https://github.com/nwb-extensions/ndx-template>`_, you should have a file
+the instructions from the :nwb_extension:`ndx-template`, you should have a file
 ``ndx-my-ext/src/spec/create_extension_spec.py``. The beginning of this file should look like
 
 .. code-block:: python

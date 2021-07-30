@@ -50,6 +50,7 @@ if "%1" == "clean" (
 	for /d %%i in (%BUILDDIR%\*) do rmdir /q /s %%i
 	del /q /s %BUILDDIR%\*
 	del /q %RSTDIR%\%PKGNAME%*.rst
+	rmdir /q /s %RSTDIR%\tutorials
 	goto end
 )
 

@@ -17,6 +17,7 @@ The following examples will reference variables that may not be defined within t
 clarity, we define them here:
 '''
 
+# sphinx_gallery_thumbnail_path = 'figures/gallery_thumbnails_ophys.png'
 from datetime import datetime
 from dateutil.tz import tzlocal
 

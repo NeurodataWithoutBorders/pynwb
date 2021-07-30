@@ -1,8 +1,10 @@
 from warnings import warn
 from collections.abc import Iterable
+from typing import NamedTuple
 
-from hdmf.utils import docval, getargs, popargs, call_docval_func
-from hdmf.common import DynamicTable
+from hdmf.utils import docval, getargs, popargs, call_docval_func, get_docval
+from hdmf.common import DynamicTable, VectorData
+import numpy as np
 
 
 from . import register_class, CORE_NAMESPACE
@@ -282,3 +284,227 @@ class Images(MultiContainerInterface):
         super(Images, self).__init__(name, **kwargs)
         self.description = description
         self.images = images
+
+
+class TimeSeriesReference(NamedTuple):
+    """
+    Class used to represent data values of a :py:class:`~pynwb.base.TimeSeriesReferenceVectorData`
+    This is a ``typing.NamedTuple`` type with predefined tuple components
+    :py:meth:`~pynwb.base.TimeSeriesReference.idx_start`, :py:meth:`~pynwb.base.TimeSeriesReference.count`, and
+    :py:meth:`~pynwb.base.TimeSeriesReference.timeseries`.
+
+    :cvar idx_start:
+    :cvar count:
+    :cvar timeseries:
+    """
+    idx_start: int
+    """Start index in time for the timeseries"""
+
+    count: int
+    """Number of timesteps to be selected starting from :py:meth:`~pynwb.base.TimeSeriesReference.idx_start`"""
+
+    timeseries: TimeSeries
+    """The :py:class:`~pynwb.base.TimeSeries` object the TimeSeriesReference applies to"""
+
+    def check_types(self):
+        """
+        Helper function to check correct types for :py:meth:`~pynwb.base.TimeSeriesReference.idx_start`,
+        :py:meth:`~pynwb.base.TimeSeriesReference.count`, and :py:meth:`~pynwb.base.TimeSeriesReference.timeseries`.
+
+        This function is usually used in the try/except block to check for `TypeError` raised by the function.
+
+        See also :py:meth:`~pynwb.base.TimeSeriesReference.isvalid` to check both validity of types and the
+        reference itself.
+
+        :returns: True if successful. If unsuccessful `TypeError` is raised.
+
+        :raises TypeError: If one of the fields does not match the expected type
+        """
+        if not isinstance(self.idx_start, (int, np.integer)):
+            raise TypeError("idx_start must be an integer not %s" % str(type(self.idx_start)))
+        if not isinstance(self.count, (int, np.integer)):
+            raise TypeError("count must be an integer %s" % str(type(self.count)))
+        if not isinstance(self.timeseries, TimeSeries):
+            raise TypeError("timeseries must be of type TimeSeries. %s" % str(type(self.timeseries)))
+        return True
+
+    def isvalid(self):
+        """
+        Check whether the reference is valid. Setting :py:meth:`~pynwb.base.TimeSeriesReference.idx_start` and
+        :py:meth:`~pynwb.base.TimeSeriesReference.count` to -1 is used to indicate invalid references. This is
+        useful to allow for missing data in :py:class:`~pynwb.base.TimeSeriesReferenceVectorData`
+
+        :returns: True if the selection is valid. Returns False if both
+            :py:meth:`~pynwb.base.TimeSeriesReference.idx_start` and :py:meth:`~pynwb.base.TimeSeriesReference.count`
+            are negative. Raises `IndexError` in case the indices are bad.
+
+        :raises IndexError: If the combination of :py:meth:`~pynwb.base.TimeSeriesReference.idx_start` and
+            :py:meth:`~pynwb.base.TimeSeriesReference.count` are not valid for the given timeseries.
+
+        :raises TypeError: If one of the fields does not match the expected type
+        """
+        # Check types first
+        self.check_types()
+        # Check for none-type selection
+        if self.idx_start < 0 and self.count < 0:
+            return False
+        num_samples = self.timeseries.num_samples
+        if num_samples is not None:
+            if self.idx_start >= num_samples or self.idx_start < 0:
+                raise IndexError("'idx_start' %i out of range for timeseries '%s'" %
+                                 (self.idx_start, self.timeseries.name))
+            if self.count < 0:
+                raise IndexError("'count' %i invalid. 'count' must be positive" % self.count)
+            if (self.idx_start + self.count) > num_samples:
+                raise IndexError("'idx_start + count' out of range for timeseries '%s'" % self.timeseries.name)
+        return True
+
+    @property
+    def timestamps(self):
+        """
+        Get the floating point timestamp offsets in seconds from the timeseries that correspond to the array.
+        These are either loaded directly from the :py:meth:`~pynwb.base.TimeSeriesReference.timeseries`
+        timestamps or calculated from the starting time and sampling rate.
+
+
+        :raises IndexError: If the combination of :py:meth:`~pynwb.base.TimeSeriesReference.idx_start` and
+            :py:meth:`~pynwb.base.TimeSeriesReference.count` are not valid for the given timeseries.
+
+        :raises TypeError: If one of the fields does not match the expected type
+
+        :returns: Array with the timestamps.
+        """
+        # isvalid will be False only if both idx_start and count are negative. Otherwise well get errors or be True.
+        if not self.isvalid():
+            return None
+        # load the data from the timestamps
+        elif self.timeseries.timestamps is not None:
+            return self.timeseries.timestamps[self.idx_start: (self.idx_start + self.count)]
+        # construct the timestamps from the starting_time and rate
+        else:
+            start_time = self.timeseries.rate * self.idx_start + self.timeseries.starting_time
+            return np.arange(0, self.count) * self.timeseries.rate + start_time
+
+    @property
+    def data(self):
+        """
+        Get the selected data values. This is a convenience function to slice data from the
+        :py:meth:`~pynwb.base.TimeSeriesReference.timeseries` based on the given
+        :py:meth:`~pynwb.base.TimeSeriesReference.idx_start` and
+        :py:meth:`~pynwb.base.TimeSeriesReference.count`
+
+        :raises IndexError: If the combination of :py:meth:`~pynwb.base.TimeSeriesReference.idx_start` and
+            :py:meth:`~pynwb.base.TimeSeriesReference.count` are not valid for the given timeseries.
+
+        :raises TypeError: If one of the fields does not match the expected type
+
+        :returns: Result of ``self.timeseries.data[self.idx_start: (self.idx_start + self.count)]``. Returns
+            None in case the reference is invalid (i.e., if both :py:meth:`~pynwb.base.TimeSeriesReference.idx_start`
+            and :py:meth:`~pynwb.base.TimeSeriesReference.count` are negative.
+        """
+        # isvalid will be False only if both idx_start and count are negative. Otherwise well get errors or be True.
+        if not self.isvalid():
+            return None
+        # load the data from the timeseries
+        return self.timeseries.data[self.idx_start: (self.idx_start + self.count)]
+
+
+@register_class('TimeSeriesReferenceVectorData', CORE_NAMESPACE)
+class TimeSeriesReferenceVectorData(VectorData):
+    """
+    Column storing references to a TimeSeries (rows). For each TimeSeries this VectorData
+    column stores the start_index and count to indicate the range in time to be selected
+    as well as an object reference to the TimeSeries.
+
+    **Representing missing values** In practice we sometimes need to be able to represent missing values,
+    e.g., in the :py:class:`~pynwb.icephys.IntracellularRecordingsTable` we have
+    :py:class:`~pynwb.base.TimeSeriesReferenceVectorData` to link to stimulus and
+    response recordings, but a user can specify either only one of them or both. Since there is no
+    ``None`` value for a complex types like ``(idx_start, count, TimeSeries)``, NWB defines
+    ``None`` as ``(-1, -1, TimeSeries)`` for storage, i.e., if the ``idx_start`` (and ``count``) is negative
+    then this indicates an invalid link (in practice both ``idx_start`` and ``count`` must always
+    either both be positive or both be negative). When selecting data via the
+    :py:meth:`~pynwb.base.TimeSeriesReferenceVectorData.get` or
+    :py:meth:`~pynwb.base. TimeSeriesReferenceVectorData.__getitem__`
+    functions, ``(-1, -1, TimeSeries)`` values are replaced by the corresponding
+    :py:class:`~pynwb.base.TimeSeriesReferenceVectorData.TIME_SERIES_REFERENCE_NONE_TYPE` tuple
+    to avoid exposing NWB storage internals to the user and simplifying the use of and checking
+    for missing values. **NOTE:** We can still inspect the raw data values by looking at ``self.data``
+    directly instead.
+
+    :cvar TIME_SERIES_REFERENCE_TUPLE:
+    :cvar TIME_SERIES_REFERENCE_NONE_TYPE:
+    """
+
+    TIME_SERIES_REFERENCE_TUPLE = TimeSeriesReference
+    """Return type when calling :py:meth:`~pynwb.base.TimeSeriesReferenceVectorData.get` or
+    :py:meth:`~pynwb.base. TimeSeriesReferenceVectorData.__getitem__`."""
+
+    TIME_SERIES_REFERENCE_NONE_TYPE = TIME_SERIES_REFERENCE_TUPLE(None, None, None)
+    """Tuple used to represent None values when calling :py:meth:`~pynwb.base.TimeSeriesReferenceVectorData.get` or
+    :py:meth:`~pynwb.base. TimeSeriesReferenceVectorData.__getitem__`. See also
+    :py:class:`~pynwb.base.TimeSeriesReferenceVectorData.TIME_SERIES_REFERENCE_TUPLE`"""
+
+    @docval({'name': 'name', 'type': str, 'doc': 'the name of this VectorData', 'default': 'timeseries'},
+            {'name': 'description', 'type': str, 'doc': 'a description for this column',
+             'default': "Column storing references to a TimeSeries (rows). For each TimeSeries this "
+                        "VectorData column stores the start_index and count to indicate the range in time "
+                        "to be selected as well as an object reference to the TimeSeries."},
+            *get_docval(VectorData.__init__, 'data'))
+    def __init__(self, **kwargs):
+        call_docval_func(super().__init__, kwargs)
+
+    @docval({'name': 'val', 'type': TIME_SERIES_REFERENCE_TUPLE, 'doc': 'the value to add to this column'})
+    def add_row(self, **kwargs):
+        """Append a data value to this column."""
+        val = getargs('val', kwargs)
+        val.check_types()
+        super().append(val)
+
+    @docval({'name': 'arg', 'type': TIME_SERIES_REFERENCE_TUPLE, 'doc': 'the value to append to this column'})
+    def append(self, **kwargs):
+        """Append a data value to this column."""
+        arg = getargs('arg', kwargs)
+        arg.check_types()
+        super().append(arg)
+
+    def get(self, key, **kwargs):
+        """
+        Retrieve elements from this object.
+
+        The function uses :py:class:`~pynwb.base.TimeSeriesReferenceVectorData.TIME_SERIES_REFERENCE_TUPLE`
+        to describe individual records in the dataset. This allows the code to avoid exposing internal
+        details of the schema to the user and simplifies handling of missing values by explictly
+        representing missing values via
+        :py:class:`~pynwb.base.TimeSeriesReferenceVectorData.TIME_SERIES_REFERENCE_NONE_TYPE`
+        rather than the internal representation used for storage of ``(-1, -1, TimeSeries)``.
+
+        :param key: Selection of the elements
+        :param kwargs: Ignored
+
+        :returns: :py:class:`~pynwb.base.TimeSeriesReferenceVectorData.TIME_SERIES_REFERENCE_TUPLE` if a single
+                  element is being selected. Otherwise return a list of
+                  :py:class:`~pynwb.base.TimeSeriesReferenceVectorData.TIME_SERIES_REFERENCE_TUPLE` objects.
+                  Missing values are represented by
+                  :py:class:`~pynwb.base.TimeSeriesReferenceVectorData.TIME_SERIES_REFERENCE_NONE_TYPE`
+                  in which all values (i.e., idx_start, count, timeseries) are set to None.
+        """
+        vals = super().get(key)
+        # we only selected one row.
+        if isinstance(key, (int, np.integer)):
+            # NOTE: If we never wrote the data to disk, then vals will be a single tuple.
+            #       If the data is loaded from an h5py.Dataset then vals will be a single
+            #       np.void object. I.e., an alternative check would be
+            #       if isinstance(vals, tuple) or isinstance(vals, np.void):
+            #          ...
+            if vals[0] < 0 or vals[1] < 0:
+                return self.TIME_SERIES_REFERENCE_NONE_TYPE
+            else:
+                return self.TIME_SERIES_REFERENCE_TUPLE(*vals)
+        else:  # key selected multiple rows
+            # When loading from HDF5 we get an np.ndarray otherwise we get list-of-list. This
+            # makes the values consistent and tranforms the data to use our namedtuple type
+            re = [self.TIME_SERIES_REFERENCE_NONE_TYPE
+                  if (v[0] < 0 or v[1] < 0) else self.TIME_SERIES_REFERENCE_TUPLE(*v)
+                  for v in vals]
+            return re
