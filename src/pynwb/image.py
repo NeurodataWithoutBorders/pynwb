@@ -117,7 +117,7 @@ class IndexSeries(TimeSeries):
                         'comments', 'description', 'control', 'control_description'))
     def __init__(self, **kwargs):
         indexed_timeseries = popargs('indexed_timeseries', kwargs)
-        kwargs['unit'] = IndexSeries.DEFAULT_UNIT
+        kwargs['unit'] = IndexSeries.DEFAULT_UNIT  # IndexSeries/data.unit has a fixed value of N/A in NWB 2.4.0
         super(IndexSeries, self).__init__(**kwargs)
         self.indexed_timeseries = indexed_timeseries
 
