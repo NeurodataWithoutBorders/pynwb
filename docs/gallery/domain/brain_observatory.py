@@ -78,7 +78,6 @@ for stimulus in stimulus_list:
     image_index = IndexSeries(
         name=stimulus,
         data=dataset.get_stimulus_table(stimulus).frame.values,
-        unit='NA',
         indexed_timeseries=visual_stimulus_images,
         timestamps=timestamps[dataset.get_stimulus_table(stimulus).start.values])
     nwbfile.add_stimulus_template(visual_stimulus_images)
