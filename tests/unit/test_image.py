@@ -55,6 +55,23 @@ class ImageSeriesConstructor(TestCase):
         )
         self.assertIsNone(iS.starting_frame)
 
+    def test_data_no_unit(self):
+        msg = "Must supply 'unit' argument when supplying 'data' to ImageSeries 'test_iS'."
+        with self.assertRaisesWith(ValueError, msg):
+            ImageSeries(
+                name='test_iS',
+                data=np.ones((3, 3, 3)),
+                timestamps=list()
+            )
+
+    def test_external_file_no_unit(self):
+        iS = ImageSeries(
+            name='test_iS',
+            external_file=['external_file'],
+            timestamps=list()
+        )
+        self.assertEqual(iS.unit, ImageSeries.DEFAULT_UNIT)
+
 
 class IndexSeriesConstructor(TestCase):
 
@@ -72,7 +89,7 @@ class IndexSeriesConstructor(TestCase):
             timestamps=[0.1, 0.2, 0.3]
         )
         self.assertEqual(iS.name, 'test_iS')
-        self.assertEqual(iS.unit, 'N/A')
+        self.assertEqual(iS.unit, IndexSeries.DEFAULT_UNIT)
         self.assertIs(iS.indexed_timeseries, ts)
 
 

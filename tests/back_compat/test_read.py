@@ -42,28 +42,28 @@ class TestReadOldVersions(TestCase):
 
     def test_read_timeseries_no_data(self):
         """Test that a TimeSeries written without data is read with data set to the default value."""
-        f = Path(__file__).parent / '1.3.3_timeseries_no_data.nwb'
+        f = Path(__file__).parent / '1.5.1_timeseries_no_data.nwb'
         with NWBHDF5IO(str(f), 'r') as io:
             read_nwbfile = io.read()
             np.testing.assert_array_equal(read_nwbfile.acquisition['test_timeseries'].data, TimeSeries.DEFAULT_DATA)
 
     def test_read_timeseries_no_unit(self):
         """Test that an ImageSeries written without unit is read with unit set to the default value."""
-        f = Path(__file__).parent / '1.3.3_timeseries_no_unit.nwb'
+        f = Path(__file__).parent / '1.5.1_timeseries_no_unit.nwb'
         with NWBHDF5IO(str(f), 'r') as io:
             read_nwbfile = io.read()
             self.assertEqual(read_nwbfile.acquisition['test_timeseries'].unit, TimeSeries.DEFAULT_UNIT)
 
     def test_read_imageseries_no_data(self):
         """Test that an ImageSeries written without data is read with data set to the default value."""
-        f = Path(__file__).parent / '1.3.3_imageseries_no_data.nwb'
+        f = Path(__file__).parent / '1.5.1_imageseries_no_data.nwb'
         with NWBHDF5IO(str(f), 'r') as io:
             read_nwbfile = io.read()
             np.testing.assert_array_equal(read_nwbfile.acquisition['test_imageseries'].data, ImageSeries.DEFAULT_DATA)
 
     def test_read_imageseries_no_unit(self):
         """Test that an ImageSeries written without unit is read with unit set to the default value."""
-        f = Path(__file__).parent / '1.3.3_imageseries_no_unit.nwb'
+        f = Path(__file__).parent / '1.5.1_imageseries_no_unit.nwb'
         with NWBHDF5IO(str(f), 'r') as io:
             read_nwbfile = io.read()
             self.assertEqual(read_nwbfile.acquisition['test_imageseries'].unit, ImageSeries.DEFAULT_UNIT)
