@@ -11,7 +11,7 @@ generates a repository with the appropriate directory structure.
 After you finish the instructions `here <https://github.com/nwb-extensions/ndx-template#getting-started>`_,
 you should have a directory structure that looks like this
 
-.. code-block:: c
+.. code-block:: bash
 
     ├── LICENSE.txt
     ├── MANIFEST.in
@@ -51,8 +51,8 @@ you should have a directory structure that looks like this
             └── create_extension_spec.py
 
 At its core, an NWB extension consists of YAML text files, such as those generated in the `spec`
-folder. While you can write these YAML extension files by hand, PyNWB provides a convenient API 
-via the :py:mod:`~pynwb.spec` module for creating extensions. 
+folder. While you can write these YAML extension files by hand, PyNWB provides a convenient API
+via the :py:mod:`~pynwb.spec` module for creating extensions.
 
 Open ``src/spec/create_extension_spec.py``. You will be
 modifying this script to create your own NWB extension. Let's first walk through each piece.

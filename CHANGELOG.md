@@ -1,10 +1,15 @@
 # PyNWB Changelog
 
+## PyNWB 1.6.0 (TBD, 2021)
 
-## PyNWB 2.0.0
+## Minor new features:
+- Add RRID for citing PyNWB to the docs. @oruebel (#1372)
 
-- Add RRID for citing PyNWB to the docs @oruebel (#1372)
-
+## Bug fix:
+- Enforce electrode ID uniqueness during insertion into table. @CodyCBakerPhD (#1344)
+- Fix integration tests with invalid test data that will be caught by future hdmf validator version.
+  @dsleiter, @rly (#1366, #1376)
+- Fix build warnings in docs @oruebel (#1380)
 
 ## PyNWB 1.5.1 (May 24, 2021)
 
@@ -51,7 +56,7 @@
   - Add capability to add a row to a column after IO.
   - Add method `AbstractContainer.get_fields_conf`.
   - Add functionality for storing external resource references.
-  - Add method `hdmf.utils.get_docval_macro` to get a tuple of the current values for a docval_macro, e.g., 'array_data'
+  - Add method `hdmf.utils.get_docval_macro` to get a tuple of the current values for a docval_macro, e.g., 'array_data'  
     and 'scalar_data'.
   - `DynamicTable` can be automatically generated using `get_class`. Now the HDMF API can read files with extensions
     that contain a DynamicTable without needing to import the extension first.

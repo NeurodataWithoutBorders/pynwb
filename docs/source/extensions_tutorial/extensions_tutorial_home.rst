@@ -1,3 +1,5 @@
+.. _extending-nwb:
+
 Extending NWB
 =============
 
