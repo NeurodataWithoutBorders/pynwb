@@ -2,10 +2,11 @@ import warnings
 import numpy as np
 from collections.abc import Iterable
 
-from hdmf.utils import docval, getargs, popargs, call_docval_func, get_docval
+from hdmf.utils import docval, getargs, popargs, call_docval_func, get_docval, get_data_shape
 
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries, Image
+from .core import NWBDataInterface
 from .device import Device
 
 
@@ -24,17 +25,15 @@ class ImageSeries(TimeSeries):
 
     # value used when an ImageSeries is read and missing data
     DEFAULT_DATA = np.ndarray(shape=(0, 0, 0), dtype=np.uint8)
+    # TODO: copy new docs from 2.4 schema
 
     @docval(*get_docval(TimeSeries.__init__, 'name'),  # required
             {'name': 'data', 'type': ('array_data', 'data', TimeSeries), 'shape': ([None] * 3, [None] * 4),
              'doc': ('The data values. Can be 3D or 4D. The first dimension must be time (frame). The second and third '
                      'dimensions represent x and y. The optional fourth dimension represents z. Either data or '
-                     'external_file must be specified, but not both.'),
-             'default': None},
+                     'external_file must be specified, but not both.')},
             {'name': 'unit', 'type': str,
-             'doc': ('The unit of measurement of the image data, e.g., values between 0 and 255. Required if data is '
-                     'specified.'),
-             'default': None},
+             'doc': ('The unit of measurement of the image data, e.g., values between 0 and 255.')},
             {'name': 'format', 'type': str,
              'doc': 'Format of image. Three types: 1) Image format; tiff, png, jpg, etc. 2) external 3) raw.',
              'default': None},
@@ -63,6 +62,19 @@ class ImageSeries(TimeSeries):
         if external_file is None and data is None:
             raise ValueError("Must supply either external_file or data to %s '%s'."
                              % (self.__class__.__name__, name))
+        if external_file is not None:
+            msg = ("Storing external files in an ImageSeries is discouraged and will be deprecated in a future "
+                   "major release. Use ExternalImageSeries instead.")
+            warnings.warn(msg, PendingDeprecationWarning)
+        if data is not None:
+            data_shape = get_data_shape(data)
+            if len(data_shape) == 4 and data_shape[3] > 3:
+                # NOTE this check will not catch all uses of ImageSeries to store volumetric data. if the volume
+                # has length <=3 in the z direction, then we cannot distinguish between volumetric data and
+                # multi-channel data
+                msg = ("Storing volumetric data in an ImageSeries is discouraged and will be deprecated in a future "
+                       "major release. Use VolumeSeries instead.")
+                warnings.warn(msg, PendingDeprecationWarning)
 
         # data and unit are required in TimeSeries, but allowed to be None here, so handle this specially
         if data is None:
@@ -91,6 +103,72 @@ class ImageSeries(TimeSeries):
         if val is not None:
             warnings.warn("bits_per_pixel is no longer used", DeprecationWarning)
             self.fields['bits_per_pixel'] = val
+
+
+@register_class('ExternalImageSeries', CORE_NAMESPACE)
+class ExternalImageSeries(NWBDataInterface):
+    '''
+    General image data that is common between acquisition and stimulus time series.
+    The image data can be stored in the HDF5 file or it will be stored as an external image file.
+    '''
+
+    __nwbfields__ = ('dimension',
+                     'external_file',
+                     'starting_frame',
+                     'timestamps',
+                     'timestamps_unit',
+                     'interval',
+                     'starting_time',
+                     'starting_time_unit',
+                     'rate',
+                     'device')
+
+    @docval(*get_docval(TimeSeries.__init__, 'name'),  # required
+            {'name': 'external_file', 'type': ('array_data', 'data'),
+             'doc': 'Path or URL to one or more external file(s). Field only present if format=external. '
+                    'Either external_file or data must be specified, but not both.'},
+            {'name': 'starting_frame', 'type': Iterable,
+             'doc': 'Each entry is the frame number in the corresponding external_file variable. '
+                    'This serves as an index to what frames each file contains. If external_file is not '
+                    'provided, then this value will be None', 'default': [0]},
+            {'name': 'dimension', 'type': Iterable,
+             'doc': 'Number of pixels on x, y, (and z) axes.', 'default': None},
+            {'name': 'timestamps', 'type': ('array_data', 'data', 'TimeSeries'), 'shape': (None,),
+             'doc': 'Timestamps for samples stored in data', 'default': None},
+            {'name': 'starting_time', 'type': 'float', 'doc': 'The timestamp of the first sample', 'default': None},
+            {'name': 'rate', 'type': 'float', 'doc': 'Sampling rate in Hz', 'default': None},
+            {'name': 'device', 'type': Device,
+             'doc': 'Device used to capture the images/video.', 'default': None},)
+    def __init__(self, **kwargs):
+        dimension, external_file, starting_frame, timestamps, starting_time, rate, device = popargs(
+            'dimension', 'external_file', 'starting_frame', 'timestamps', 'starting_time', 'rate', 'device', kwargs)
+
+        call_docval_func(super().__init__, kwargs)
+
+        if timestamps is not None:
+            if rate is not None:
+                raise ValueError('Specifying rate and timestamps is not supported.')
+            if starting_time is not None:
+                raise ValueError('Specifying starting_time and timestamps is not supported.')
+            self.fields['timestamps'] = timestamps
+            self.timestamps_unit = self.__time_unit
+            self.interval = 1
+            if isinstance(timestamps, TimeSeries):
+                timestamps.__add_link('timestamp_link', self)
+        elif rate is not None:
+            self.rate = rate
+            if starting_time is not None:
+                self.starting_time = starting_time
+            else:
+                self.starting_time = 0.0
+            self.starting_time_unit = self.__time_unit
+        else:
+            raise TypeError("either 'timestamps' or 'rate' must be specified")
+
+        self.dimension = dimension
+        self.external_file = external_file
+        self.starting_frame = starting_frame
+        self.device = device
 
 
 @register_class('IndexSeries', CORE_NAMESPACE)

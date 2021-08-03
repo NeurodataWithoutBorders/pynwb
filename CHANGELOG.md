@@ -4,7 +4,20 @@
 
 ### Breaking changes:
 - ``SweepTable`` has been deprecated in favor of the new icephys metadata tables. Use of ``SweepTable``
-  is still possible but no longer recommended. @oruebel  (#1349)
+  is still possible but no longer recommended. @oruebel  (#1349
+- ``TimeSeries.__init__`` now requires the ``data`` argument because the 'data' dataset is required by the schema.
+  If a ``TimeSeries`` is read without a value for ``data``, it will be set to a default value. For most
+  ``TimeSeries``, this is a 1-dimensional empty array with dtype uint8. For ``ImageSeries`` and
+  ``DecompositionSeries``, this is a 3-dimensional empty array with dtype uint8.
+- ``TimeSeries.__init__`` now requires the ``unit`` argument because the 'unit' attribute is required by the schema.
+  If a ``TimeSeries`` is read without a value for ``unit``, it will be set to a default value. For most
+  ``TimeSeries``, this is "unknown". For ``IndexSeries``, this is "N/A" according to the NWB 2.4.0 schema.
+- Added ``VolumeSeries`` to store a timeseries of volumes (shape: (frame, x, y, z) or (frame, x, y, z, rgb)).
+- Use of ``ImageSeries`` to store volumetric data is no longer supported. Use ``VolumeSeries`` instead.
+- Add support for non-single-channel image data in an ``ImageSeries``.
+- Added ``ExternalImageSeries`` to store relative file paths to images.
+- Use of ``ImageSeries`` to store relative file paths to images is discouraged and will be deprecated in a future
+  major release. Use the new ``ExternalImageSeries`` type instead.
 
 ### New features:
 - Added new intracellular electrophysiology hierarchical table structure from ndx-icephys-meta to NWB core.
