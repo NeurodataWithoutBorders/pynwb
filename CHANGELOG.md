@@ -16,8 +16,10 @@
 - Use of ``ImageSeries`` to store volumetric data is no longer supported. Use ``VolumeSeries`` instead.
 - Add support for non-single-channel image data in an ``ImageSeries``.
 - Added ``ExternalImageSeries`` to store relative file paths to images.
-- Use of ``ImageSeries`` to store relative file paths to images is discouraged and will be deprecated in a future
-  major release. Use the new ``ExternalImageSeries`` type instead.
+- Use of ``ImageSeries`` and types that extend it (i.e., ``ImageMaskSeries``, ``OpticalSeries``, ``TwoPhotonSeries``)
+  to store relative file paths to images is discouraged and will be deprecated in a future major release.
+  Use the new ``ExternalImageSeries``, ``ExternalImageMaskSeries``, ``ExternalOpticalSeries``, and
+  ``ExternalTwoPhotonSeries`` types instead.
 
 ### New features:
 - Added new intracellular electrophysiology hierarchical table structure from ndx-icephys-meta to NWB core.
