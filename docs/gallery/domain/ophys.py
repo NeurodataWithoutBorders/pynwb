@@ -412,8 +412,7 @@ with NWBHDF5IO('ophys_tutorial.nwb', 'r') as io:
     read_nwbfile = io.read()
 
     print(read_nwbfile.acquisition['TwoPhotonSeries1'])
-    print(read_nwbfile.processing['ophys']['Fluorescence'][
-              'RoiResponseSeries'].data[:])
+    print(read_nwbfile.processing['ophys']['Fluorescence']['RoiResponseSeries'].data[:])
 
 ####################
 # Accessing data regions
@@ -431,5 +430,4 @@ with NWBHDF5IO('ophys_tutorial.nwb', 'r') as io:
     read_nwbfile = io.read()
 
     print('section of fluorescence responses:')
-    print(read_nwbfile.processing['ophys']['Fluorescence'][
-              'RoiResponseSeries'].data[0:10, 0:3])
+    print(read_nwbfile.processing['ophys']['Fluorescence']['RoiResponseSeries'].data[0:10, 0:3])
