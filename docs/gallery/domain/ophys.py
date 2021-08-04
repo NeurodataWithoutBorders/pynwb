@@ -60,6 +60,7 @@ nwbfile = NWBFile(
 # .. image:: ../../_static/ImagingPlane.svg
 #   :width: 400
 #   :alt: imaging plane UML diagram
+#   :align: center
 #
 # Create a :py:class:`~pynwb.device.Device` named ``"Microscope"`` in the :py:class:`~pynwb.NWBFile` object. Then
 # create an  :py:class:`~pynwb.ophys.OpticalChannel` named ``"OpticalChannel"`` and an
@@ -199,6 +200,7 @@ ophys_module.add(motion_correction)
 # .. image:: ../../_static/PlaneSegmentation.svg
 #   :width: 400
 #   :alt: plane segmentation UML diagram
+#   :align: center
 #
 # The :py:class:`~pynwb.ophys.ImageSegmentation` class can contain multiple
 # :py:class:`~pynwb.ophys.PlaneSegmentation` tables, so that we can store results
@@ -207,6 +209,7 @@ ophys_module.add(motion_correction)
 # .. image:: ../../_static/ImageSegmentation.svg
 #   :width: 800
 #   :alt: image segmentation UML diagram
+#   :align: center
 #
 # First, we create an :py:class:`~pynwb.ophys.ImageSegmentation` object, then
 # from that object we create a :py:class:`~pynwb.ophys.PlaneSegmentation` table
@@ -303,6 +306,7 @@ ps2.to_dataframe()
 # .. image:: ../../_static/RoiResponseSeries.svg
 #   :width: 600
 #   :alt: RoiResponseSeries UML diagram
+#   :align: center
 #
 # To create a pynwb.ophys.RoiResponseSeries object, we will need to reference
 # a set of rows from a :py:class:`~pynwb.ophys.PlaneSegmentation` table to
@@ -343,6 +347,7 @@ roi_resp_series = RoiResponseSeries(
 # .. image:: ../../_static/Fluorescence.svg
 #   :width: 600
 #   :alt: fluorescence UML diagram
+#   :align: center
 #
 
 
