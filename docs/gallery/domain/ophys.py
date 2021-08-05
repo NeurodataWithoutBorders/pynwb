@@ -57,10 +57,19 @@ nwbfile = NWBFile(
 # method used to collect the optical imaging data. This first requires creation of a :py:class:`~pynwb.device.Device`
 # object for the  microscope and an :py:class:`~pynwb.ophys.OpticalChannel` object.
 #
-# .. image:: ../../_static/ImagingPlane.svg
-#   :width: 400
-#   :alt: imaging plane UML diagram
-#   :align: center
+# .. only:: html
+#
+#   .. image:: ../../_static/ImagingPlane.svg
+#     :width: 400
+#     :alt: imaging plane UML diagram
+#     :align: center
+#
+# .. only:: latex
+#
+#   .. image:: ../../_static/ImagingPlane.png
+#     :width: 400
+#     :alt: imaging plane UML diagram
+#     :align: center
 #
 # Create a :py:class:`~pynwb.device.Device` named ``"Microscope"`` in the :py:class:`~pynwb.file.NWBFile` object. Then
 # create an  :py:class:`~pynwb.ophys.OpticalChannel` named ``"OpticalChannel"`` and an
@@ -103,10 +112,20 @@ imaging_plane = nwbfile.create_imaging_plane(
 # using the data argument. The other option is the provide a path to the image files.
 # These two options have trade-offs, so it is worth spending time considering how you want to store this data.
 #
-# .. image:: ../../_static/TwoPhotonSeries.svg
-#   :width: 800
-#   :alt: two-photon series UML diagram
-
+# .. only:: html
+#
+#   .. image:: ../../_static/TwoPhotonSeries.svg
+#     :width: 800
+#     :alt: two-photon series UML diagram
+#     :align: center
+#
+# .. only:: latex
+#
+#   .. image:: ../../_static/TwoPhotonSeries.png
+#     :width: 800
+#     :alt: two-photon series UML diagram
+#     :align: center
+#
 
 # using internal data. this data will be stored inside the NWB file
 image_series1 = TwoPhotonSeries(
@@ -197,19 +216,37 @@ ophys_module.add(motion_correction)
 # :py:class:`~hdmf.common.table.DynamicTable`, where each row represents a
 # single region of interest (ROI).
 #
-# .. image:: ../../_static/PlaneSegmentation.svg
-#   :width: 400
-#   :alt: plane segmentation UML diagram
-#   :align: center
+# .. only:: html
+#
+#   .. image:: ../../_static/PlaneSegmentation.svg
+#     :width: 800
+#     :alt: plane segmentation UML diagram
+#     :align: center
+#
+# .. only:: latex
+#
+#   .. image:: ../../_static/PlaneSegmentation.png
+#     :width: 800
+#     :alt: plane segmentation UML diagram
+#     :align: center
 #
 # The :py:class:`~pynwb.ophys.ImageSegmentation` class can contain multiple
 # :py:class:`~pynwb.ophys.PlaneSegmentation` tables, so that we can store results
 # of different segmentation algorithms or different segmentation classes.
 #
-# .. image:: ../../_static/ImageSegmentation.svg
-#   :width: 800
-#   :alt: image segmentation UML diagram
-#   :align: center
+# .. only:: html
+#
+#   .. image:: ../../_static/ImageSegmentation.svg
+#     :width: 800
+#     :alt: image segmentation UML diagram
+#     :align: center
+#
+# .. only:: latex
+#
+#   .. image:: ../../_static/ImageSegmentation.png
+#     :width: 800
+#     :alt: image segmentation UML diagram
+#     :align: center
 #
 # First, we create an :py:class:`~pynwb.ophys.ImageSegmentation` object, then
 # from that object we create a :py:class:`~pynwb.ophys.PlaneSegmentation` table
@@ -303,10 +340,19 @@ ps2.to_dataframe()
 # This type of data is stored using the :py:class:`~pynwb.ophys.RoiResponseSeries`
 # and :py:class:`~pynwb.ophys.Fluorescence` classes.
 #
-# .. image:: ../../_static/RoiResponseSeries.svg
-#   :width: 600
-#   :alt: RoiResponseSeries UML diagram
-#   :align: center
+# .. only:: html
+#
+#   .. image:: ../../_static/RoiResponseSeries.svg
+#     :width: 600
+#     :alt: RoiResponseSeries UML diagram
+#     :align: center
+#
+# .. only:: latex
+#
+#   .. image:: ../../_static/RoiResponseSeries.png
+#     :width: 600
+#     :alt: RoiResponseSeries UML diagram
+#     :align: center
 #
 # To create a pynwb.ophys.RoiResponseSeries object, we will need to reference
 # a set of rows from a :py:class:`~pynwb.ophys.PlaneSegmentation` table to
@@ -344,11 +390,19 @@ roi_resp_series = RoiResponseSeries(
 # Then add the :py:class:`~pynwb.ophys.Fluorescence` object into the
 # same :py:class:`~pynwb.base.ProcessingModule` named "ophys" that we created earlier.
 #
-# .. image:: ../../_static/Fluorescence.svg
-#   :width: 600
-#   :alt: fluorescence UML diagram
-#   :align: center
+# .. only:: html
 #
+#   .. image:: ../../_static/Fluorescence.svg
+#     :width: 600
+#     :alt: fluorescence UML diagram
+#     :align: center
+#
+# .. only:: latex
+#
+#   .. image:: ../../_static/Fluorescence.png
+#     :width: 600
+#     :alt: fluorescence UML diagram
+#     :align: center
 
 
 fl = Fluorescence(roi_response_series=roi_resp_series)
