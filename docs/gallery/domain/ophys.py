@@ -71,7 +71,7 @@ nwbfile = NWBFile(
 #     :alt: imaging plane UML diagram
 #     :align: center
 #
-# Create a :py:class:`~pynwb.device.Device` named ``"Microscope"`` in the :py:class:`~pynwb.file.NWBFile` object. Then
+# Create a :py:class:`~pynwb.device.Device` named ``"Microscope"`` in the :py:class:`~pynwb.NWBFile` object. Then
 # create an  :py:class:`~pynwb.ophys.OpticalChannel` named ``"OpticalChannel"`` and an
 # :py:class:`~pynwb.ophys.ImagingPlane` named ``"ImagingPlane"``, passing in the :py:class:`~pynwb.ophys.OpticalChannel`
 # object and the :py:class:`~pynwb.device.Device` object.
@@ -150,7 +150,7 @@ image_series2 = TwoPhotonSeries(
 
 ####################
 # Since these two-photon data are raw, acquired data, we will add the
-# :py:class:`~pynwb.ophys.TwoPhotonSeries` objects to the :py:class:`~pynwb.file.NWBFile`
+# :py:class:`~pynwb.ophys.TwoPhotonSeries` objects to the :py:class:`~pynwb.NWBFile`
 # as acquired data.
 
 
@@ -490,3 +490,4 @@ with NWBHDF5IO('ophys_tutorial.nwb', 'r') as io:
 
     print('section of fluorescence responses:')
     print(read_nwbfile.processing['ophys']['Fluorescence']['RoiResponseSeries'].data[0:10, 0:3])
+
