@@ -34,7 +34,7 @@ import matplotlib.pyplot as plt
 # Creating and Writing NWB files
 # ------------------------------
 #
-# When creating a NWB file, the first step is to create the :py:class:`~pynwb.NWBFile`.
+# When creating a NWB file, the first step is to create the :py:class:`~pynwb.file.NWBFile`.
 
 
 nwbfile = NWBFile(
@@ -62,7 +62,7 @@ nwbfile = NWBFile(
 #   :alt: imaging plane UML diagram
 #   :align: center
 #
-# Create a :py:class:`~pynwb.device.Device` named ``"Microscope"`` in the :py:class:`~pynwb.NWBFile` object. Then
+# Create a :py:class:`~pynwb.device.Device` named ``"Microscope"`` in the :py:class:`~pynwb.file.NWBFile` object. Then
 # create an  :py:class:`~pynwb.ophys.OpticalChannel` named ``"OpticalChannel"`` and an
 # :py:class:`~pynwb.ophys.ImagingPlane` named ``"ImagingPlane"``, passing in the :py:class:`~pynwb.ophys.OpticalChannel`
 # object and the :py:class:`~pynwb.device.Device` object.
@@ -131,7 +131,7 @@ image_series2 = TwoPhotonSeries(
 
 ####################
 # Since these two-photon data are raw, acquired data, we will add the
-# :py:class:`~pynwb.ophys.TwoPhotonSeries` objects to the :py:class:`~pynwb.NWBFile`
+# :py:class:`~pynwb.ophys.TwoPhotonSeries` objects to the :py:class:`~pynwb.file.NWBFile`
 # as acquired data.
 
 
@@ -176,7 +176,7 @@ motion_correction = MotionCorrection(
 
 ####################
 # We will create a :py:class:`~pynwb.base.ProcessingModule` named "ophys" to store optical
-# physiology data and add the motion correction data to the :py:class:`~pynwb.NWBFile`.
+# physiology data and add the motion correction data to the :py:class:`~pynwb.file.NWBFile`.
 #
 
 
@@ -366,7 +366,7 @@ ophys_module.add(fl)
 # Write the file
 # ---------------------------------
 # Once we have finished adding all of our data to our
-# :py:class:`~pynwb.NWBFile`, make sure to write the file.
+# :py:class:`~pynwb.file.NWBFile`, make sure to write the file.
 # IO operations are carried out using :py:class:`~pynwb.NWBHDF5IO`.
 
 
