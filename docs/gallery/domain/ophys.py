@@ -429,7 +429,7 @@ with NWBHDF5IO('ophys_tutorial.nwb', 'w') as io:
 
 ####################
 # Read the NWBFile
-# ------------------
+# ------------------------------
 #
 # We can access the raw data by indexing `nwbfile.acquisition` with a name
 # of the :py:class:`~pynwb.ophys.TwoPhotonSeries`, e.g., "TwoPhotonSeries1".
@@ -456,7 +456,7 @@ with NWBHDF5IO('ophys_tutorial.nwb', 'r') as io:
 
 ####################
 # Accessing your data
-# ---------------------
+# ------------------------------
 #
 # Data arrays are read passively from the file.
 # Calling the data attribute on a :py:class:`~pynwb.base.pynwb.TimeSeries`
@@ -475,7 +475,7 @@ with NWBHDF5IO('ophys_tutorial.nwb', 'r') as io:
 
 ####################
 # Accessing data regions
-# ---------------------
+# ------------------------------
 #
 # It is often preferable to read only a portion of the data. To do this, index
 # or slice into the data attribute just like if you were indexing or slicing a
