@@ -13,7 +13,7 @@ five main steps:
 5. Add fluorescence and dF/F responses
 
 This tutorial assumes that transforming data between these states is done by users--PyNWB does not provide
-analysis functionality. It is recommended to cover NWB Basics before this tutorial.
+analysis functionality. It is recommended to cover :ref:`basics` before this tutorial.
 
 The following examples will reference variables that may not be defined within the block they are used in. For
 clarity, we define them here:
@@ -34,7 +34,7 @@ import matplotlib.pyplot as plt
 # Creating and Writing NWB files
 # ------------------------------
 #
-# When creating a NWB file, the first step is to create the :py:class:`~pynwb.file.NWBFile`.
+# When creating a NWB file, the first step is to create the :py:class:`~pynwb.file.NWBFile` object.
 
 
 nwbfile = NWBFile(
