@@ -490,4 +490,3 @@ with NWBHDF5IO('ophys_tutorial.nwb', 'r') as io:
 
     print('section of fluorescence responses:')
     print(read_nwbfile.processing['ophys']['Fluorescence']['RoiResponseSeries'].data[0:10, 0:3])
-
