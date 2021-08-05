@@ -13,7 +13,7 @@ five main steps:
 5. Add fluorescence and dF/F responses
 
 This tutorial assumes that transforming data between these states is done by users--PyNWB does not provide
-analysis functionality. It is recommended to cover NWB Basics before this tutorial.
+analysis functionality. It is recommended to cover :ref:`basics` before this tutorial.
 
 The following examples will reference variables that may not be defined within the block they are used in. For
 clarity, we define them here:
@@ -34,7 +34,7 @@ import matplotlib.pyplot as plt
 # Creating and Writing NWB files
 # ------------------------------
 #
-# When creating a NWB file, the first step is to create the :py:class:`~pynwb.NWBFile`.
+# When creating a NWB file, the first step is to create the :py:class:`~pynwb.file.NWBFile` object.
 
 
 nwbfile = NWBFile(
@@ -57,9 +57,19 @@ nwbfile = NWBFile(
 # method used to collect the optical imaging data. This first requires creation of a :py:class:`~pynwb.device.Device`
 # object for the  microscope and an :py:class:`~pynwb.ophys.OpticalChannel` object.
 #
-# .. image:: ../../_static/ImagingPlane.svg
-#   :width: 400
-#   :alt: imaging plane UML diagram
+# .. only:: html
+#
+#   .. image:: ../../_static/ImagingPlane.svg
+#     :width: 400
+#     :alt: imaging plane UML diagram
+#     :align: center
+#
+# .. only:: latex
+#
+#   .. image:: ../../_static/ImagingPlane.png
+#     :width: 400
+#     :alt: imaging plane UML diagram
+#     :align: center
 #
 # Create a :py:class:`~pynwb.device.Device` named ``"Microscope"`` in the :py:class:`~pynwb.NWBFile` object. Then
 # create an  :py:class:`~pynwb.ophys.OpticalChannel` named ``"OpticalChannel"`` and an
@@ -102,10 +112,20 @@ imaging_plane = nwbfile.create_imaging_plane(
 # using the data argument. The other option is the provide a path to the image files.
 # These two options have trade-offs, so it is worth spending time considering how you want to store this data.
 #
-# .. image:: ../../_static/TwoPhotonSeries.svg
-#   :width: 800
-#   :alt: two-photon series UML diagram
-
+# .. only:: html
+#
+#   .. image:: ../../_static/TwoPhotonSeries.svg
+#     :width: 800
+#     :alt: two-photon series UML diagram
+#     :align: center
+#
+# .. only:: latex
+#
+#   .. image:: ../../_static/TwoPhotonSeries.png
+#     :width: 800
+#     :alt: two-photon series UML diagram
+#     :align: center
+#
 
 # using internal data. this data will be stored inside the NWB file
 image_series1 = TwoPhotonSeries(
@@ -175,7 +195,7 @@ motion_correction = MotionCorrection(
 
 ####################
 # We will create a :py:class:`~pynwb.base.ProcessingModule` named "ophys" to store optical
-# physiology data and add the motion correction data to the :py:class:`~pynwb.NWBFile`.
+# physiology data and add the motion correction data to the :py:class:`~pynwb.file.NWBFile`.
 #
 
 
@@ -196,17 +216,37 @@ ophys_module.add(motion_correction)
 # :py:class:`~hdmf.common.table.DynamicTable`, where each row represents a
 # single region of interest (ROI).
 #
-# .. image:: ../../_static/PlaneSegmentation.svg
-#   :width: 400
-#   :alt: plane segmentation UML diagram
+# .. only:: html
+#
+#   .. image:: ../../_static/PlaneSegmentation.svg
+#     :width: 800
+#     :alt: plane segmentation UML diagram
+#     :align: center
+#
+# .. only:: latex
+#
+#   .. image:: ../../_static/PlaneSegmentation.png
+#     :width: 800
+#     :alt: plane segmentation UML diagram
+#     :align: center
 #
 # The :py:class:`~pynwb.ophys.ImageSegmentation` class can contain multiple
 # :py:class:`~pynwb.ophys.PlaneSegmentation` tables, so that we can store results
 # of different segmentation algorithms or different segmentation classes.
 #
-# .. image:: ../../_static/ImageSegmentation.svg
-#   :width: 800
-#   :alt: image segmentation UML diagram
+# .. only:: html
+#
+#   .. image:: ../../_static/ImageSegmentation.svg
+#     :width: 800
+#     :alt: image segmentation UML diagram
+#     :align: center
+#
+# .. only:: latex
+#
+#   .. image:: ../../_static/ImageSegmentation.png
+#     :width: 800
+#     :alt: image segmentation UML diagram
+#     :align: center
 #
 # First, we create an :py:class:`~pynwb.ophys.ImageSegmentation` object, then
 # from that object we create a :py:class:`~pynwb.ophys.PlaneSegmentation` table
@@ -300,9 +340,19 @@ ps2.to_dataframe()
 # This type of data is stored using the :py:class:`~pynwb.ophys.RoiResponseSeries`
 # and :py:class:`~pynwb.ophys.Fluorescence` classes.
 #
-# .. image:: ../../_static/RoiResponseSeries.svg
-#   :width: 600
-#   :alt: RoiResponseSeries UML diagram
+# .. only:: html
+#
+#   .. image:: ../../_static/RoiResponseSeries.svg
+#     :width: 600
+#     :alt: RoiResponseSeries UML diagram
+#     :align: center
+#
+# .. only:: latex
+#
+#   .. image:: ../../_static/RoiResponseSeries.png
+#     :width: 600
+#     :alt: RoiResponseSeries UML diagram
+#     :align: center
 #
 # To create a pynwb.ophys.RoiResponseSeries object, we will need to reference
 # a set of rows from a :py:class:`~pynwb.ophys.PlaneSegmentation` table to
@@ -340,10 +390,19 @@ roi_resp_series = RoiResponseSeries(
 # Then add the :py:class:`~pynwb.ophys.Fluorescence` object into the
 # same :py:class:`~pynwb.base.ProcessingModule` named "ophys" that we created earlier.
 #
-# .. image:: ../../_static/Fluorescence.svg
-#   :width: 600
-#   :alt: fluorescence UML diagram
+# .. only:: html
 #
+#   .. image:: ../../_static/Fluorescence.svg
+#     :width: 600
+#     :alt: fluorescence UML diagram
+#     :align: center
+#
+# .. only:: latex
+#
+#   .. image:: ../../_static/Fluorescence.png
+#     :width: 600
+#     :alt: fluorescence UML diagram
+#     :align: center
 
 
 fl = Fluorescence(roi_response_series=roi_resp_series)
@@ -361,7 +420,7 @@ ophys_module.add(fl)
 # Write the file
 # ---------------------------------
 # Once we have finished adding all of our data to our
-# :py:class:`~pynwb.NWBFile`, make sure to write the file.
+# :py:class:`~pynwb.file.NWBFile`, make sure to write the file.
 # IO operations are carried out using :py:class:`~pynwb.NWBHDF5IO`.
 
 
@@ -370,7 +429,7 @@ with NWBHDF5IO('ophys_tutorial.nwb', 'w') as io:
 
 ####################
 # Read the NWBFile
-# ------------------
+# ------------------------------
 #
 # We can access the raw data by indexing `nwbfile.acquisition` with a name
 # of the :py:class:`~pynwb.ophys.TwoPhotonSeries`, e.g., "TwoPhotonSeries1".
@@ -397,7 +456,7 @@ with NWBHDF5IO('ophys_tutorial.nwb', 'r') as io:
 
 ####################
 # Accessing your data
-# ---------------------
+# ------------------------------
 #
 # Data arrays are read passively from the file.
 # Calling the data attribute on a :py:class:`~pynwb.base.pynwb.TimeSeries`
@@ -412,12 +471,11 @@ with NWBHDF5IO('ophys_tutorial.nwb', 'r') as io:
     read_nwbfile = io.read()
 
     print(read_nwbfile.acquisition['TwoPhotonSeries1'])
-    print(read_nwbfile.processing['ophys']['Fluorescence'][
-              'RoiResponseSeries'].data[:])
+    print(read_nwbfile.processing['ophys']['Fluorescence']['RoiResponseSeries'].data[:])
 
 ####################
 # Accessing data regions
-# ---------------------
+# ------------------------------
 #
 # It is often preferable to read only a portion of the data. To do this, index
 # or slice into the data attribute just like if you were indexing or slicing a
@@ -431,5 +489,5 @@ with NWBHDF5IO('ophys_tutorial.nwb', 'r') as io:
     read_nwbfile = io.read()
 
     print('section of fluorescence responses:')
-    print(read_nwbfile.processing['ophys']['Fluorescence'][
-              'RoiResponseSeries'].data[0:10, 0:3])
+    print(read_nwbfile.processing['ophys']['Fluorescence']['RoiResponseSeries'].data[0:10, 0:3])
+
