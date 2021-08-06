@@ -12,14 +12,6 @@
 - ``TimeSeries.__init__`` now requires the ``unit`` argument because the 'unit' attribute is required by the schema.
   If a ``TimeSeries`` is read without a value for ``unit``, it will be set to a default value. For most
   ``TimeSeries``, this is "unknown". For ``IndexSeries``, this is "N/A" according to the NWB 2.4.0 schema.
-- Added ``VolumeSeries`` to store a timeseries of volumes (shape: (frame, x, y, z) or (frame, x, y, z, rgb)).
-- Use of ``ImageSeries`` to store volumetric data is no longer supported. Use ``VolumeSeries`` instead.
-- Add support for non-single-channel image data in an ``ImageSeries``.
-- Added ``ExternalImageSeries`` to store relative file paths to images.
-- Use of ``ImageSeries`` and types that extend it (i.e., ``ImageMaskSeries``, ``OpticalSeries``, ``TwoPhotonSeries``)
-  to store relative file paths to images is discouraged and will be deprecated in a future major release.
-  Use the new ``ExternalImageSeries``, ``ExternalImageMaskSeries``, ``ExternalOpticalSeries``, and
-  ``ExternalTwoPhotonSeries`` types instead.
 
 ### New features:
 - Added new intracellular electrophysiology hierarchical table structure from ndx-icephys-meta to NWB core.
@@ -27,8 +19,8 @@
   ``SimultaneousRecordingsTable``, ``SequentialRecordingsTable``, ``RepetitionsTable`` and
   ``ExperimentalConditionsTable`` as well as corresponding updates to ``NWBFile`` to support interaction
    with the new tables. @oruebel  (#1349)
-- Added support for nwb-schema 2.4.0. See [Release Notes](https://nwb-schema.readthedocs.io/en/latest/format_release_notes.html)
-  for more details. @oruebel (#1349)
+- Added support for NWB 2.4.0. See [Release Notes](https://nwb-schema.readthedocs.io/en/latest/format_release_notes.html)
+  for more details. @oruebel, @rly (#1349)
 - Dropped Python 3.6 support, added Python 3.9 support. @rly (#1377)
 - Updated requirements to allow compatibility with HDMF 3 and h5py 3. @rly (#1377)
 
