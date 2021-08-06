@@ -85,6 +85,7 @@ class IndexSeriesConstructor(TestCase):
         iS = IndexSeries(
             name='test_iS',
             data=[1, 2, 3],
+            unit='N/A',
             indexed_timeseries=ts,
             timestamps=[0.1, 0.2, 0.3]
         )
