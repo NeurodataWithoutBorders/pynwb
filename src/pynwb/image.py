@@ -2,7 +2,7 @@ import warnings
 import numpy as np
 from collections.abc import Iterable
 
-from hdmf.utils import docval, getargs, popargs, call_docval_func, get_docval, get_data_shape
+from hdmf.utils import docval, getargs, popargs, call_docval_func, get_docval
 
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries, Image

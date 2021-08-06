@@ -8,10 +8,10 @@
 - ``TimeSeries.__init__`` now requires the ``data`` argument because the 'data' dataset is required by the schema.
   If a ``TimeSeries`` is read without a value for ``data``, it will be set to a default value. For most
   ``TimeSeries``, this is a 1-dimensional empty array with dtype uint8. For ``ImageSeries`` and
-  ``DecompositionSeries``, this is a 3-dimensional empty array with dtype uint8.
+  ``DecompositionSeries``, this is a 3-dimensional empty array with dtype uint8. @rly (#1274)
 - ``TimeSeries.__init__`` now requires the ``unit`` argument because the 'unit' attribute is required by the schema.
   If a ``TimeSeries`` is read without a value for ``unit``, it will be set to a default value. For most
-  ``TimeSeries``, this is "unknown". For ``IndexSeries``, this is "N/A" according to the NWB 2.4.0 schema.
+  ``TimeSeries``, this is "unknown". For ``IndexSeries``, this is "N/A" according to the NWB 2.4.0 schema. @rly (#1274)
 
 ### New features:
 - Added new intracellular electrophysiology hierarchical table structure from ndx-icephys-meta to NWB core.
@@ -44,8 +44,12 @@
 - Enforced electrode ID uniqueness during insertion into table. @CodyCBakerPhD (#1344)
 - Fixed integration tests with invalid test data that will be caught by future hdmf validator version.
   @dsleiter, @rly (#1366, #1376)
-- Fixed build warnings in docs @oruebel (#1380)
-- Fix intersphinx links in docs for numpy @oruebel (#1386)
+- Fixed build warnings in docs. @oruebel (#1380)
+- Fix intersphinx links in docs for numpy. @oruebel (#1386)
+- Previously, the ``data`` argument was required in ``OpticalSeries.__init__`` even though ``external_file`` could
+  be provided in place of ``data``. ``OpticalSeries.__init__`` now makes ``data`` optional. However, this has the
+  side effect of moving the position of ``data`` to later in the argument list, which may break code that relies
+  on positional arguments for ``OpticalSeries.__init__``. @rly (#1274)
 
 ## PyNWB 1.5.1 (May 24, 2021)
 
