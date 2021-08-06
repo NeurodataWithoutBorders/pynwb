@@ -107,19 +107,19 @@ class IndexSeries(TimeSeries):
 
     __nwbfields__ = ('indexed_timeseries',)
 
-    # value used when an ImageSeries is read and missing data
-    DEFAULT_UNIT = 'N/A'
+    # # value used when an ImageSeries is read and missing data
+    # DEFAULT_UNIT = 'N/A'
 
     @docval(*get_docval(TimeSeries.__init__, 'name'),  # required
             {'name': 'data', 'type': ('array_data', 'data', TimeSeries), 'shape': (None, ),  # required
-             'doc': ('The data values. Must be 1D, where the first dimension must be time (frame)')},
+            'doc': ('The data values. Must be 1D, where the first dimension must be time (frame)')},
+            *get_docval(TimeSeries.__init__, 'unit'),  # required
             {'name': 'indexed_timeseries', 'type': TimeSeries,  # required
              'doc': 'HDF5 link to TimeSeries containing images that are indexed.'},
-            *get_docval(TimeSeries.__init__, 'timestamps', 'starting_time', 'rate',
+            *get_docval(TimeSeries.__init__, 'resolution', 'conversion', 'timestamps', 'starting_time', 'rate',
                         'comments', 'description', 'control', 'control_description'))
     def __init__(self, **kwargs):
         indexed_timeseries = popargs('indexed_timeseries', kwargs)
-        kwargs['unit'] = IndexSeries.DEFAULT_UNIT  # IndexSeries/data.unit has a fixed value of N/A in NWB 2.4.0
         super(IndexSeries, self).__init__(**kwargs)
         self.indexed_timeseries = indexed_timeseries
 
