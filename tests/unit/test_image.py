@@ -90,7 +90,7 @@ class IndexSeriesConstructor(TestCase):
             timestamps=[0.1, 0.2, 0.3]
         )
         self.assertEqual(iS.name, 'test_iS')
-        self.assertEqual(iS.unit, IndexSeries.DEFAULT_UNIT)
+        self.assertEqual(iS.unit, 'N/A')
         self.assertIs(iS.indexed_timeseries, ts)
 
 
