@@ -30,15 +30,19 @@ class ImageSeries(TimeSeries):
             {'name': 'data', 'type': ('array_data', 'data', TimeSeries), 'shape': ([None] * 3, [None] * 4),
              'doc': ('The data values. Can be 3D or 4D. The first dimension must be time (frame). The second and third '
                      'dimensions represent x and y. The optional fourth dimension represents z. Either data or '
-                     'external_file must be specified, but not both.')},
+                     'external_file must be specified (not None), but not both. If data is not specified, '
+                     'data will be set to an empty 3D array.'),
+             'default': None},
             {'name': 'unit', 'type': str,
-             'doc': ('The unit of measurement of the image data, e.g., values between 0 and 255.')},
+             'doc': ('The unit of measurement of the image data, e.g., values between 0 and 255. Required when data '
+                     'is specified. If unit (and data) are not specified, then unit will be set to "unknown".'),
+             'default': None},
             {'name': 'format', 'type': str,
              'doc': 'Format of image. Three types: 1) Image format; tiff, png, jpg, etc. 2) external 3) raw.',
              'default': None},
             {'name': 'external_file', 'type': ('array_data', 'data'),
              'doc': 'Path or URL to one or more external file(s). Field only present if format=external. '
-                    'Either external_file or data must be specified, but not both.', 'default': None},
+                    'Either external_file or data must be specified (not None), but not both.', 'default': None},
             {'name': 'starting_frame', 'type': Iterable,
              'doc': 'Each entry is the frame number in the corresponding external_file variable. '
                     'This serves as an index to what frames each file contains. If external_file is not '
