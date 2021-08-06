@@ -6,7 +6,6 @@ from hdmf.utils import docval, getargs, popargs, call_docval_func, get_docval, g
 
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries, Image
-from .core import NWBDataInterface
 from .device import Device
 
 
