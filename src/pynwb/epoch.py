@@ -4,7 +4,7 @@ from hdmf.utils import docval, getargs, popargs, call_docval_func, get_docval
 from hdmf.data_utils import DataIO
 
 from . import register_class, CORE_NAMESPACE
-from .base import TimeSeries
+from .base import TimeSeries, TimeSeriesReferenceVectorData, TimeSeriesReference
 from hdmf.common import DynamicTable
 
 
@@ -20,7 +20,8 @@ class TimeIntervals(DynamicTable):
         {'name': 'start_time', 'description': 'Start time of epoch, in seconds', 'required': True},
         {'name': 'stop_time', 'description': 'Stop time of epoch, in seconds', 'required': True},
         {'name': 'tags', 'description': 'user-defined tags', 'index': True},
-        {'name': 'timeseries', 'description': 'index into a TimeSeries object', 'index': True}
+        {'name': 'timeseries', 'description': 'index into a TimeSeries object', 'index': True,
+         'class': TimeSeriesReferenceVectorData}
     )
 
     @docval({'name': 'name', 'type': str, 'doc': 'name of this TimeIntervals'},  # required
@@ -51,7 +52,7 @@ class TimeIntervals(DynamicTable):
             tmp = list()
             for ts in timeseries:
                 idx_start, count = self.__calculate_idx_count(start_time, stop_time, ts)
-                tmp.append((idx_start, count, ts))
+                tmp.append(TimeSeriesReference(idx_start=idx_start, count=count, timeseries=ts))
             timeseries = tmp
             rkwargs['timeseries'] = timeseries
         return super(TimeIntervals, self).add_row(**rkwargs)

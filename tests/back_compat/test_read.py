@@ -3,6 +3,7 @@ from pathlib import Path
 import warnings
 
 from pynwb import NWBHDF5IO, validate, TimeSeries
+from pynwb.base import TimeSeriesReference
 from pynwb.image import ImageSeries
 from pynwb.testing import TestCase
 
@@ -67,3 +68,13 @@ class TestReadOldVersions(TestCase):
         with NWBHDF5IO(str(f), 'r') as io:
             read_nwbfile = io.read()
             self.assertEqual(read_nwbfile.acquisition['test_imageseries'].unit, ImageSeries.DEFAULT_UNIT)
+
+    def test_read_timeintervals_non_ndtype_tsref(self):
+        """Test that a TimeIntervals written without using TimeSeriesReference is read correctly."""
+        f = Path(__file__).parent / '1.5.1_timeintervals_non_ndtype_tsref.nwb'
+        with NWBHDF5IO(str(f), 'r') as io:
+            read_nwbfile = io.read()
+            ts = read_nwbfile.acquisition['test_timeseries']
+            ret = read_nwbfile.intervals['test_intervals'][0, 'timeseries']
+            exp = [TimeSeriesReference(0, 2, ts)]
+            self.assertEqual(ret, exp)

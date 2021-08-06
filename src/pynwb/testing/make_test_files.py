@@ -113,6 +113,34 @@ def make_nwbfile_imageseries_no_unit():
     _write(test_name, nwbfile)
 
 
+def make_nwbfile_timeintervals_old_tuple():
+    """Create a test file with a TimeIntervals table using the old non-neurodata-type for referencing a TimeSeries."""
+    nwbfile = NWBFile(session_description='ADDME',
+                      identifier='ADDME',
+                      session_start_time=datetime.now().astimezone())
+    ts = TimeSeries(
+        name='test_timeseries',
+        data=[0, 1, 2, 3, 4],
+        unit='unit',
+        rate=1.,
+    )
+    nwbfile.add_acquisition(ts)
+
+    ti = nwbfile.create_time_intervals(
+        name='test_intervals',
+        description='test table'
+    )
+    ti.add_interval(
+        start_time=0.,
+        stop_time=2.,
+        tags=[],
+        timeseries=ts
+    )
+
+    test_name = 'timeintervals_non_ndtype_tsref'
+    _write(test_name, nwbfile)
+
+
 if __name__ == '__main__':
 
     if __version__ == '1.1.2':
@@ -125,3 +153,4 @@ if __name__ == '__main__':
         make_nwbfile_timeseries_no_unit()
         make_nwbfile_imageseries_no_data()
         make_nwbfile_imageseries_no_unit()
+        make_nwbfile_timeintervals_old_tuple()
