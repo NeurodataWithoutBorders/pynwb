@@ -1,7 +1,6 @@
 from .. import register_map
-from ..image import ImageSeries, ExternalImageSeries
+from ..image import ImageSeries
 from .base import TimeSeriesMap
-from .core import NWBContainerMapper
 
 
 @register_map(ImageSeries)
