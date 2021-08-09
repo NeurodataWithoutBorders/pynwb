@@ -7,7 +7,6 @@ from hdmf.backends.hdf5 import HDF5IO
 from hdmf.common import DynamicTable
 
 from pynwb import NWBFile, TimeSeries, NWBHDF5IO, get_manager
-from pynwb.base import TimeSeriesReference
 from pynwb.file import Subject
 from pynwb.epoch import TimeIntervals
 from pynwb.ecephys import ElectricalSeries
@@ -276,10 +275,10 @@ class TestEpochsIODf(TestEpochsIO):
                 'bar': ['fish', 'fowl', 'dog', 'cat'],
                 'start_time': [0.2, 0.25, 0.30, 0.35],
                 'stop_time': [0.25, 0.30, 0.40, 0.45],
-                'timeseries': [[TimeSeriesReference(2, 1, tsa)],
-                               [TimeSeriesReference(3, 1, tsa)],
-                               [TimeSeriesReference(3, 1, tsa)],
-                               [TimeSeriesReference(4, 1, tsa)]],
+                'timeseries': [[(2, 1, tsa)],
+                               [(3, 1, tsa)],
+                               [(3, 1, tsa)],
+                               [(4, 1, tsa)]],
                 'tags': [[''], [''], ['fizz', 'buzz'], ['qaz']]
             }),
             'epochs',
@@ -306,10 +305,10 @@ class TestEpochsIODf(TestEpochsIO):
                 'bar': ['fish', 'fowl', 'dog', 'cat'],
                 'start_time': [0.2, 0.25, 0.30, 0.35],
                 'stop_time': [0.25, 0.30, 0.40, 0.45],
-                'timeseries': [[TimeSeriesReference(2, 1, tsa)],
-                               [TimeSeriesReference(3, 1, tsa)],
-                               [TimeSeriesReference(3, 1, tsa)],
-                               [TimeSeriesReference(4, 1, tsa)]],
+                'timeseries': [[(2, 1, tsa)],
+                               [(3, 1, tsa)],
+                               [(3, 1, tsa)],
+                               [(4, 1, tsa)]],
                 'tags': [[''], [''], ['fizz', 'buzz'], ['qaz']]
             },
             index=pd.Index(np.arange(4), name='id')
