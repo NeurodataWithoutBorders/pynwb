@@ -19,6 +19,7 @@ The following examples will reference variables that may not be defined within t
 clarity, we define them here:
 '''
 
+# sphinx_gallery_thumbnail_path = 'figures/gallery_thumbnails_ophys.png'
 from datetime import datetime
 from dateutil.tz import tzlocal
 
@@ -305,11 +306,14 @@ plt.imshow(image_mask)
 #    You can add ROIs either using image mask or pixel mask.
 
 
-ps2 = img_seg.create_plane_segmentation(
-    name='PlaneSegmentation2',
-    description='output from segmenting my favorite imaging plane',
-    imaging_plane=imaging_plane,
-    reference_images=image_series1  # optional
+data = [0., 1., 2., 3., 4., 5., 6., 7., 8., 9.]
+timestamps = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
+rrs = fl.create_roi_response_series(
+    name='my_rrs',
+    data=data,
+    rois=rt_region,
+    unit='lumens',
+    timestamps=timestamps
 )
 
 for _ in range(30):

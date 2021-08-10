@@ -175,9 +175,14 @@ class TestPlaneSegmentationIO(NWBH5IOMixin, TestCase):
                     (7, 8, 2.0), (9, 10, 2.)]
 
         ts = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
-        self.image_series = ImageSeries(name='test_iS', dimension=[2],
-                                        external_file=['images.tiff'],
-                                        starting_frame=[1, 2, 3], format='tiff', timestamps=ts)
+        self.image_series = ImageSeries(
+            name='test_iS',
+            dimension=[2],
+            external_file=['images.tiff'],
+            starting_frame=[1, 2, 3],
+            format='tiff',
+            timestamps=ts
+        )
 
         self.device = Device(name='dev1')
         self.optical_channel = OpticalChannel(
@@ -239,9 +244,14 @@ class MaskIO(TestPlaneSegmentationIO, metaclass=ABCMeta):
     def buildPlaneSegmentationNoRois(self):
         """ Return an PlaneSegmentation and set related objects """
         ts = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
-        self.image_series = ImageSeries(name='test_iS', dimension=[2],
-                                        external_file=['images.tiff'],
-                                        starting_frame=[1, 2, 3], format='tiff', timestamps=ts)
+        self.image_series = ImageSeries(
+            name='test_iS',
+            dimension=[2],
+            external_file=['images.tiff'],
+            starting_frame=[1, 2, 3],
+            format='tiff',
+            timestamps=ts
+        )
         self.device = Device(name='dev1')
         self.optical_channel = OpticalChannel(
             name='test_optical_channel',

@@ -1,19 +1,59 @@
 # PyNWB Changelog
 
-## PyNWB 1.6.0 (TBD, 2021)
+## PyNWB 2.0.0 (Upcoming)
 
-## Minor new features:
+### Breaking changes:
+- ``SweepTable`` has been deprecated in favor of the new icephys metadata tables. Use of ``SweepTable``
+  is still possible but no longer recommended. @oruebel  (#1349
+- ``TimeSeries.__init__`` now requires the ``data`` argument because the 'data' dataset is required by the schema.
+  If a ``TimeSeries`` is read without a value for ``data``, it will be set to a default value. For most
+  ``TimeSeries``, this is a 1-dimensional empty array with dtype uint8. For ``ImageSeries`` and
+  ``DecompositionSeries``, this is a 3-dimensional empty array with dtype uint8. @rly (#1274)
+- ``TimeSeries.__init__`` now requires the ``unit`` argument because the 'unit' attribute is required by the schema.
+  If a ``TimeSeries`` is read without a value for ``unit``, it will be set to a default value. For most
+  ``TimeSeries``, this is "unknown". For ``IndexSeries``, this is "N/A" according to the NWB 2.4.0 schema. @rly (#1274)
+
+### New features:
+- Added new intracellular electrophysiology hierarchical table structure from ndx-icephys-meta to NWB core.
+  This includes the new types ``TimeSeriesReferenceVectorData``, ``IntracellularRecordingsTable``,
+  ``SimultaneousRecordingsTable``, ``SequentialRecordingsTable``, ``RepetitionsTable`` and
+  ``ExperimentalConditionsTable`` as well as corresponding updates to ``NWBFile`` to support interaction
+   with the new tables. @oruebel  (#1349)
+- Added support for NWB 2.4.0. See [Release Notes](https://nwb-schema.readthedocs.io/en/latest/format_release_notes.html)
+  for more details. @oruebel, @rly (#1349)
+- Dropped Python 3.6 support, added Python 3.9 support. @rly (#1377)
+- Updated requirements to allow compatibility with HDMF 3 and h5py 3. @rly (#1377)
+
+### Tutorial enhancements:
+- Added new tutorial for intracellular electrophysiology to describe the use of the new metadata tables
+  and declared the previous tutoral using ``SweepTable`` as deprecated.  @oruebel (#1349)
+- Added new tutorial for querying intracellular electrophysiology metadata
+  (``docs/gallery/domain/plot_icephys_pandas.py``). @oruebel (#1349, #1383)
+- Added thumbnails for tutorials to improve presentation of online docs.  @oruebel (#1349)
+- Used `sphinx.ext.extlinks` extension in docs to simplify linking to common targets. @oruebel (#1349)
+- Created new section for advanced I/O tutorials and moved parallel I/O tutorial to its own file. @oruebel (#1349)
+
+### Minor new features:
 - Add RRID for citing PyNWB to the docs. @oruebel (#1372)
+- Update CI and tests to handle deprecations in libraries. @rly (#1377)
+- Add test utilities for icephys (``pynwb.testing.icephys_testutils``) to ease creation of test data
+  for tests and tutorials. @oruebel (#1349, #1383)
 
-## Bug fix:
-- Enforce electrode ID uniqueness during insertion into table. @CodyCBakerPhD (#1344)
-- Fix integration tests with invalid test data that will be caught by future hdmf validator version.
+### Bug fixes:
+- Updated behavior of ``make clean`` command for docs to ensure tutorial files are cleaned up.  @oruebel (#1349)
+- Enforced electrode ID uniqueness during insertion into table. @CodyCBakerPhD (#1344)
+- Fixed integration tests with invalid test data that will be caught by future hdmf validator version.
   @dsleiter, @rly (#1366, #1376)
-- Fix build warnings in docs @oruebel (#1380)
+- Fixed build warnings in docs. @oruebel (#1380)
+- Fix intersphinx links in docs for numpy. @oruebel (#1386)
+- Previously, the ``data`` argument was required in ``OpticalSeries.__init__`` even though ``external_file`` could
+  be provided in place of ``data``. ``OpticalSeries.__init__`` now makes ``data`` optional. However, this has the
+  side effect of moving the position of ``data`` to later in the argument list, which may break code that relies
+  on positional arguments for ``OpticalSeries.__init__``. @rly (#1274)
 
 ## PyNWB 1.5.1 (May 24, 2021)
 
-## Bug fix:
+### Bug fixes:
 - Raise minimum version of pandas from 0.23 to 1.0.5 to be compatible with numpy 1.20, and raise minimum version of
   HDMF to use the corresponding change in HDMF. @rly (#1363)
 - Update documentation and update structure of requirements files. @rly (#1363)
@@ -56,7 +96,7 @@
   - Add capability to add a row to a column after IO.
   - Add method `AbstractContainer.get_fields_conf`.
   - Add functionality for storing external resource references.
-  - Add method `hdmf.utils.get_docval_macro` to get a tuple of the current values for a docval_macro, e.g., 'array_data'  
+  - Add method `hdmf.utils.get_docval_macro` to get a tuple of the current values for a docval_macro, e.g., 'array_data'
     and 'scalar_data'.
   - `DynamicTable` can be automatically generated using `get_class`. Now the HDMF API can read files with extensions
     that contain a DynamicTable without needing to import the extension first.

@@ -2,8 +2,8 @@
 # compute coverage, and create test environments
 codecov==2.1.11
 coverage==5.5
-flake8==3.9.1
+flake8==3.9.2
 flake8-debugger==4.0.0
 flake8-print==4.0.0
-importlib-metadata==4.0.1
-tox==3.23.0
+importlib-metadata==4.6.1
+tox==3.23.1

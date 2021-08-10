@@ -11,7 +11,7 @@ from pynwb.testing import TestCase
 
 class AnnotationSeriesConstructor(TestCase):
     def test_init(self):
-        aS = AnnotationSeries('test_aS', timestamps=list())
+        aS = AnnotationSeries('test_aS', data=[1, 2, 3], timestamps=list())
         self.assertEqual(aS.name, 'test_aS')
         aS.add_annotation(2.0, 'comment')
 

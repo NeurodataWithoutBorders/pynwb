@@ -15,7 +15,7 @@ class TestUnitsIO(AcquisitionH5IOMixin, TestCase):
     def setUpContainer(self):
         """ Return the test Units to read/write """
         ut = Units(name='UnitsTest', description='a simple table for testing Units')
-        ut.add_unit(spike_times=[0, 1, 2], obs_intervals=[[0, 1], [2, 3]],
+        ut.add_unit(spike_times=[0., 1., 2.], obs_intervals=[[0., 1.], [2., 3.]],
                     waveform_mean=[1., 2., 3.], waveform_sd=[4., 5., 6.],
                     waveforms=[
                         [  # elec 1
@@ -28,7 +28,7 @@ class TestUnitsIO(AcquisitionH5IOMixin, TestCase):
                             [1, 2, 3]
                         ]
                     ])
-        ut.add_unit(spike_times=[3, 4, 5], obs_intervals=[[2, 5], [6, 7]],
+        ut.add_unit(spike_times=[3., 4., 5.], obs_intervals=[[2., 5.], [6., 7.]],
                     waveform_mean=[1., 2., 3.], waveform_sd=[4., 5., 6.],
                     waveforms=np.array([
                         [     # elec 1
@@ -56,19 +56,19 @@ class TestUnitsIO(AcquisitionH5IOMixin, TestCase):
         """ Test whether the Units spike times read from file are what was written """
         ut = self.roundtripContainer()
         received = ut.get_unit_spike_times(0)
-        self.assertTrue(np.array_equal(received, [0, 1, 2]))
+        self.assertTrue(np.array_equal(received, [0., 1., 2.]))
         received = ut.get_unit_spike_times(1)
-        self.assertTrue(np.array_equal(received, [3, 4, 5]))
-        self.assertTrue(np.array_equal(ut['spike_times'][:], [[0, 1, 2], [3, 4, 5]]))
+        self.assertTrue(np.array_equal(received, [3., 4., 5.]))
+        self.assertTrue(np.array_equal(ut['spike_times'][:], [[0., 1., 2.], [3., 4., 5.]]))
 
     def test_get_obs_intervals(self):
         """ Test whether the Units observation intervals read from file are what was written """
         ut = self.roundtripContainer()
         received = ut.get_unit_obs_intervals(0)
-        self.assertTrue(np.array_equal(received, [[0, 1], [2, 3]]))
+        self.assertTrue(np.array_equal(received, [[0., 1.], [2., 3.]]))
         received = ut.get_unit_obs_intervals(1)
-        self.assertTrue(np.array_equal(received, [[2, 5], [6, 7]]))
-        self.assertTrue(np.array_equal(ut['obs_intervals'][:], [[[0, 1], [2, 3]], [[2, 5], [6, 7]]]))
+        self.assertTrue(np.array_equal(received, [[2., 5.], [6., 7.]]))
+        self.assertTrue(np.array_equal(ut['obs_intervals'][:], [[[0., 1.], [2., 3.]], [[2., 5.], [6., 7.]]]))
 
 
 class TestUnitsFileIO(NWBH5IOMixin, TestCase):
