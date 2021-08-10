@@ -152,7 +152,13 @@ rt_region = ps.create_roi_table_region('the first of two ROIs', region=[0])
 
 data = [0., 1., 2., 3., 4., 5., 6., 7., 8., 9.]
 timestamps = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
-rrs = fl.create_roi_response_series('my_rrs', data, rt_region, unit='lumens', timestamps=timestamps)
+rrs = fl.create_roi_response_series(
+    name='my_rrs',
+    data=data,
+    rois=rt_region,
+    unit='lumens',
+    timestamps=timestamps
+)
 
 
 ####################

@@ -12,8 +12,8 @@ class TimeIntervalsTest(TestCase):
 
     def test_init(self):
         tstamps = np.arange(1.0, 100.0, 0.1, dtype=np.float64)
-        ts = TimeSeries("test_ts", list(range(len(tstamps))), 'unit', timestamps=tstamps)
-        ept = TimeIntervals('epochs', "TimeIntervals unittest")
+        ts = TimeSeries(name="test_ts", data=list(range(len(tstamps))), unit='unit', timestamps=tstamps)
+        ept = TimeIntervals(name='epochs', description="TimeIntervals unittest")
         self.assertEqual(ept.name, 'epochs')
         ept.add_interval(10.0, 20.0, ["test", "unittest", "pynwb"], ts)
         row = ept[0]
@@ -25,8 +25,8 @@ class TimeIntervalsTest(TestCase):
 
     def get_timeseries(self):
         return [
-            TimeSeries(name='a', timestamps=np.linspace(0, 1, 11)),
-            TimeSeries(name='b', timestamps=np.linspace(0.1, 5, 13)),
+            TimeSeries(name='a', data=[1]*11, unit='unit', timestamps=np.linspace(0, 1, 11)),
+            TimeSeries(name='b', data=[1]*13, unit='unit', timestamps=np.linspace(0.1, 5, 13)),
         ]
 
     def get_dataframe(self):

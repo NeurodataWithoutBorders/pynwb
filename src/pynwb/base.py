@@ -1,11 +1,10 @@
 from warnings import warn
 from collections.abc import Iterable
+import numpy as np
 from typing import NamedTuple
 
 from hdmf.utils import docval, getargs, popargs, call_docval_func, get_docval
 from hdmf.common import DynamicTable, VectorData
-import numpy as np
-
 
 from . import register_class, CORE_NAMESPACE
 from .core import NWBDataInterface, MultiContainerInterface, NWBData
@@ -99,12 +98,15 @@ class TimeSeries(NWBDataInterface):
 
     __time_unit = "seconds"
 
+    # values used when a TimeSeries is read and missing required fields
+    DEFAULT_DATA = np.ndarray(shape=(0, ), dtype=np.uint8)
+    DEFAULT_UNIT = 'unknown'
+
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset'},  # required
             {'name': 'data', 'type': ('array_data', 'data', 'TimeSeries'),
              'doc': ('The data values. The first dimension must be time. '
-                     'Can also store binary data, e.g., image frames'),
-             'default': None},
-            {'name': 'unit', 'type': str, 'doc': 'The base unit of measurement (should be SI unit)', 'default': None},
+                     'Can also store binary data, e.g., image frames')},
+            {'name': 'unit', 'type': str, 'doc': 'The base unit of measurement (should be SI unit)'},
             {'name': 'resolution', 'type': (str, 'float'),
              'doc': 'The smallest meaningful difference (in specified unit) between values in data', 'default': -1.0},
             {'name': 'conversion', 'type': (str, 'float'),
