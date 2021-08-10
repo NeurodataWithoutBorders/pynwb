@@ -13,8 +13,8 @@ including writing and reading of an NWB file.
 # The NWB file
 # ------------
 #
-#
 
+# sphinx_gallery_thumbnail_path = 'figures/gallery_thumbnails_file.png'
 from datetime import datetime
 from dateutil.tz import tzlocal
 from pynwb import NWBFile
@@ -342,7 +342,7 @@ print(nwbfile.trials.to_dataframe())
 #
 # Epochs can be added to an NWB file using the method :py:meth:`~pynwb.file.NWBFile.add_epoch`.
 # The first and second arguments are the start time and stop times, respectively.
-# The third argument is one or more tags for labeling the epoch, and the fifth argument is a
+# The third argument is one or more tags for labeling the epoch, and the fourth argument is a
 # list of all the :py:class:`~pynwb.base.TimeSeries` that the epoch applies
 # to.
 

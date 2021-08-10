@@ -53,6 +53,7 @@ extensions = [
     'sphinx.ext.napoleon',
     'sphinx.ext.intersphinx',
     'sphinx.ext.viewcode',
+    'sphinx.ext.extlinks',
     'sphinx_gallery.gen_gallery'
 ]
 
@@ -63,20 +64,25 @@ sphinx_gallery_conf = {
     'examples_dirs': ['../gallery'],
     # path where to save gallery generated examples
     'gallery_dirs': ['tutorials'],
-    'subsection_order': ExplicitOrder(['../gallery/general', '../gallery/domain']),
+    'subsection_order': ExplicitOrder(['../gallery/general', '../gallery/domain', '../gallery/advanced_io']),
     'backreferences_dir': 'gen_modules/backreferences',
-    'download_section_examples': False,
-    'min_reported_time': 5
+    'min_reported_time': 5,
+    'remove_config_comments': True
 }
 
 intersphinx_mapping = {
     'python': ('https://docs.python.org/3.8', None),
-    'numpy': ('https://docs.scipy.org/doc/numpy/', None),
+    'numpy': ('https://numpy.org/doc/stable/', None),
     'matplotlib': ('https://matplotlib.org', None),
-    'h5py': ('http://docs.h5py.org/en/latest/', None),
+    'h5py': ('https://docs.h5py.org/en/latest/', None),
     'hdmf': ('https://hdmf.readthedocs.io/en/latest/', None),
-    'pandas': ('http://pandas.pydata.org/pandas-docs/stable/', None)
+    'pandas': ('https://pandas.pydata.org/pandas-docs/stable/', None)
 }
+
+extlinks = {'incf_lesson': ('https://training.incf.org/lesson/%s', ''),
+            'incf_collection': ('https://training.incf.org/collection/%s', ''),
+            'nwb_extension': ('https://github.com/nwb-extensions/%s', ''),
+            'pynwb': ('https://github.com/NeurodataWithoutBorders/pynwb/%s', '')}
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -93,7 +99,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'PyNWB'
-copyright = u'2017-2020, Neurodata Without Borders'
+copyright = u'2017-2021, Neurodata Without Borders'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -328,5 +334,5 @@ def skip(app, what, name, obj, skip, options):
 
 def setup(app):
     app.connect('builder-inited', run_apidoc)
-    app.add_stylesheet("theme_overrides.css")  # overrides for wide tables in RTD theme
+    app.add_css_file("theme_overrides.css")  # overrides for wide tables in RTD theme
     app.connect("autodoc-skip-member", skip)

@@ -37,12 +37,23 @@ Build Status
 Overall Health
 ==============
 
+.. image:: https://github.com/NeurodataWithoutBorders/pynwb/workflows/Run%20coverage/badge.svg
+    :target: https://github.com/NeurodataWithoutBorders/pynwb/actions?query=workflow%3A%22Run+coverage%22
+
 .. image:: https://codecov.io/gh/NeurodataWithoutBorders/pynwb/branch/dev/graph/badge.svg
     :target: https://codecov.io/gh/NeurodataWithoutBorders/pynwb
 
 .. image:: https://requires.io/github/NeurodataWithoutBorders/pynwb/requirements.svg?branch=dev
      :target: https://requires.io/github/NeurodataWithoutBorders/pynwb/requirements/?branch=dev
      :alt: Requirements Status
+
+.. image:: https://readthedocs.org/projects/pynwb/badge/?version=latest
+     :target: https://pynwb.readthedocs.io/en/latest/?badge=latest
+     :alt: Documentation Status
+
+.. image:: https://img.shields.io/pypi/l/pynwb.svg
+     :target: https://github.com/neurodatawithoutborders/pynwb/blob/dev/license.txt
+     :alt:    PyPI - License
 
 NWB Format API
 ==============
@@ -74,10 +85,16 @@ Contributing
 
 For details on how to contribute to PyNWB see our `contribution guidelines <docs/CONTRIBUTING.rst>`_.
 
+Citing NWB
+==========
+
+* **Manuscript:** Oliver Rübel, Andrew Tritt, Ryan Ly, Benjamin K. Dichter, Satrajit Ghosh, Lawrence Niu, Ivan Soltesz, Karel Svoboda, Loren Frank, Kristofer E. Bouchard, "The Neurodata Without Borders ecosystem for neurophysiological data science", bioRxiv 2021.03.13.435173, March 15, 2021, doi: https://doi.org/10.1101/2021.03.13.435173
+* **RRID:** (PyNWB, RRID:SCR_017452)
+
 LICENSE
 =======
 
-"pynwb" Copyright (c) 2017-2019, The Regents of the University of California, through Lawrence Berkeley National Laboratory (subject to receipt of any required approvals from the U.S. Dept. of Energy).  All rights reserved.
+"pynwb" Copyright (c) 2017-2021, The Regents of the University of California, through Lawrence Berkeley National Laboratory (subject to receipt of any required approvals from the U.S. Dept. of Energy).  All rights reserved.
 Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
 
 (1) Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
@@ -93,7 +110,7 @@ You are under no obligation whatsoever to provide any bug fixes, patches, or upg
 COPYRIGHT
 =========
 
-"pynwb" Copyright (c) 2017-2020, The Regents of the University of California, through Lawrence Berkeley National Laboratory (subject to receipt of any required approvals from the U.S. Dept. of Energy).  All rights reserved.
+"pynwb" Copyright (c) 2017-2021, The Regents of the University of California, through Lawrence Berkeley National Laboratory (subject to receipt of any required approvals from the U.S. Dept. of Energy).  All rights reserved.
 If you have questions about your rights to use or distribute this software, please contact Berkeley Lab's Innovation & Partnerships Office at IPO@lbl.gov.
 
 NOTICE.  This Software was developed under funding from the U.S. Department of Energy and the U.S. Government consequently retains certain rights. As such, the U.S. Government has been granted for itself and others acting on its behalf a paid-up, nonexclusive, irrevocable, worldwide license in the Software to reproduce, distribute copies to the public, prepare derivative works, and perform publicly and display publicly, and to permit other to do so.

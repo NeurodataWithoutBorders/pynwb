@@ -200,13 +200,47 @@ class TwoPhotonSeriesConstructor(TestCase):
 
 class MotionCorrectionConstructor(TestCase):
     def test_init(self):
-        MotionCorrection(list())
+        corrected = ImageSeries(
+            name='corrected',
+            data=np.ones((1000, 100, 100)),
+            unit='na',
+            format='raw',
+            starting_time=0.0,
+            rate=1.0
+        )
+
+        xy_translation = TimeSeries(
+            name='xy_translation',
+            data=np.ones((1000, 2)),
+            unit='pixels',
+            starting_time=0.0,
+            rate=1.0,
+        )
+
+        ip = create_imaging_plane()
+
+        image_series = TwoPhotonSeries(
+            name='TwoPhotonSeries1',
+            data=np.ones((1000, 100, 100)),
+            imaging_plane=ip,
+            rate=1.0,
+            unit='normalized amplitude'
+        )
+
+        corrected_image_stack = CorrectedImageStack(
+            corrected=corrected,
+            original=image_series,
+            xy_translation=xy_translation,
+        )
+
+        motion_correction = MotionCorrection(corrected_image_stacks=[corrected_image_stack])
+        self.assertEqual(motion_correction.corrected_image_stacks['CorrectedImageStack'], corrected_image_stack)
 
 
 class CorrectedImageStackConstructor(TestCase):
     def test_init(self):
         is1 = ImageSeries(
-            name='is1',
+            name='corrected',
             data=np.ones((2, 2, 2)),
             unit='unit',
             external_file=['external_file'],
@@ -216,16 +250,15 @@ class CorrectedImageStackConstructor(TestCase):
         )
         is2 = ImageSeries(
             name='is2',
-            data=np.ones((2, 2, 2)),
             unit='unit',
             external_file=['external_file'],
             starting_frame=[1, 2, 3],
             format='tiff',
             timestamps=[1., 2.]
         )
-        tstamps = np.arange(1.0, 100.0, 0.1, dtype=np.float)
+        tstamps = np.arange(1.0, 100.0, 0.1, dtype=np.float64)
         ts = TimeSeries(
-            name="test_ts",
+            name='xy_translation',
             data=list(range(len(tstamps))),
             unit='unit',
             timestamps=tstamps
@@ -247,10 +280,10 @@ class RoiResponseSeriesConstructor(TestCase):
 
         ts = RoiResponseSeries(
             name='test_ts',
-            data=list(),
+            data=[1, 2, 3],
             rois=rt_region,
             unit='unit',
-            timestamps=list()
+            timestamps=[0.1, 0.2, 0.3]
         )
         self.assertEqual(ts.name, 'test_ts')
         self.assertEqual(ts.unit, 'unit')
@@ -264,10 +297,10 @@ class DfOverFConstructor(TestCase):
 
         rrs = RoiResponseSeries(
             name='test_ts',
-            data=list(),
+            data=[1, 2, 3],
             rois=rt_region,
             unit='unit',
-            timestamps=list()
+            timestamps=[0.1, 0.2, 0.3]
         )
 
         dof = DfOverF(rrs)
@@ -281,10 +314,10 @@ class FluorescenceConstructor(TestCase):
 
         ts = RoiResponseSeries(
             name='test_ts',
-            data=list(),
+            data=[1, 2, 3],
             rois=rt_region,
             unit='unit',
-            timestamps=list()
+            timestamps=[0.1, 0.2, 0.3]
         )
 
         ff = Fluorescence(ts)

@@ -1,21 +1,31 @@
 import numpy as np
 
 from pynwb import TimeSeries
-from pynwb.image import ImageSeries, IndexSeries, ImageMaskSeries, OpticalSeries, \
-    GrayscaleImage, RGBImage, RGBAImage
+from pynwb.device import Device
+from pynwb.image import ImageSeries, IndexSeries, ImageMaskSeries, OpticalSeries, GrayscaleImage, RGBImage, RGBAImage
 from pynwb.testing import TestCase
 
 
 class ImageSeriesConstructor(TestCase):
 
     def test_init(self):
-        iS = ImageSeries(name='test_iS', data=np.ones((3, 3, 3)), unit='unit',
-                         external_file=['external_file'], starting_frame=[1, 2, 3], format='tiff', timestamps=list())
+        dev = Device('test_device')
+        iS = ImageSeries(
+            name='test_iS',
+            data=np.ones((3, 3, 3)),
+            unit='unit',
+            external_file=['external_file'],
+            starting_frame=[1, 2, 3],
+            format='tiff',
+            timestamps=list(),
+            device=dev,
+        )
         self.assertEqual(iS.name, 'test_iS')
         self.assertEqual(iS.unit, 'unit')
         self.assertEqual(iS.external_file, ['external_file'])
         self.assertEqual(iS.starting_frame, [1, 2, 3])
         self.assertEqual(iS.format, 'tiff')
+        self.assertIs(iS.device, dev)
         # self.assertEqual(iS.bits_per_pixel, np.nan)
 
     def test_no_data_no_file(self):
@@ -45,15 +55,43 @@ class ImageSeriesConstructor(TestCase):
         )
         self.assertIsNone(iS.starting_frame)
 
+    def test_data_no_unit(self):
+        msg = "Must supply 'unit' argument when supplying 'data' to ImageSeries 'test_iS'."
+        with self.assertRaisesWith(ValueError, msg):
+            ImageSeries(
+                name='test_iS',
+                data=np.ones((3, 3, 3)),
+                timestamps=list()
+            )
+
+    def test_external_file_no_unit(self):
+        iS = ImageSeries(
+            name='test_iS',
+            external_file=['external_file'],
+            timestamps=list()
+        )
+        self.assertEqual(iS.unit, ImageSeries.DEFAULT_UNIT)
+
 
 class IndexSeriesConstructor(TestCase):
 
     def test_init(self):
-        ts = TimeSeries('test_ts', list(), 'unit', timestamps=list())
-        iS = IndexSeries('test_iS', list(), ts, unit='unit', timestamps=list())
+        ts = TimeSeries(
+            name='test_ts',
+            data=[1, 2, 3],
+            unit='unit',
+            timestamps=[0.1, 0.2, 0.3]
+        )
+        iS = IndexSeries(
+            name='test_iS',
+            data=[1, 2, 3],
+            unit='N/A',
+            indexed_timeseries=ts,
+            timestamps=[0.1, 0.2, 0.3]
+        )
         self.assertEqual(iS.name, 'test_iS')
-        self.assertEqual(iS.unit, 'unit')
-        self.assertEqual(iS.indexed_timeseries, ts)
+        self.assertEqual(iS.unit, 'N/A')
+        self.assertIs(iS.indexed_timeseries, ts)
 
 
 class ImageMaskSeriesConstructor(TestCase):
@@ -68,7 +106,7 @@ class ImageMaskSeriesConstructor(TestCase):
                               format='tiff', timestamps=[1., 2.])
         self.assertEqual(ims.name, 'test_ims')
         self.assertEqual(ims.unit, 'unit')
-        self.assertEqual(ims.masked_imageseries, iS)
+        self.assertIs(ims.masked_imageseries, iS)
         self.assertEqual(ims.external_file, ['external_file'])
         self.assertEqual(ims.starting_frame, [1, 2, 3])
         self.assertEqual(ims.format, 'tiff')
