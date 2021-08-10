@@ -267,8 +267,8 @@ class PlaneSegmentation(DynamicTable):
         """Converts a 2D pixel_mask of a ROI into an image_mask."""
         image_matrix = np.zeros(np.shape(pixel_mask))
         npmask = np.asarray(pixel_mask)
-        x_coords = npmask[:, 0].astype(np.int)
-        y_coords = npmask[:, 1].astype(np.int)
+        x_coords = npmask[:, 0].astype(np.int32)
+        y_coords = npmask[:, 1].astype(np.int32)
         weights = npmask[:, -1]
         image_matrix[y_coords, x_coords] = weights
         return image_matrix

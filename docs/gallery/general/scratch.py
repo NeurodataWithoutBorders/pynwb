@@ -27,6 +27,7 @@ and scratch space.
 # To demonstrate linking and scratch space, lets assume we are starting with some acquired data.
 #
 
+# sphinx_gallery_thumbnail_path = 'figures/gallery_thumbnails_scratch.png'
 from pynwb import NWBFile, TimeSeries, NWBHDF5IO
 from datetime import datetime
 from dateutil.tz import tzlocal

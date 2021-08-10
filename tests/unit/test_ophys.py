@@ -256,7 +256,7 @@ class CorrectedImageStackConstructor(TestCase):
             format='tiff',
             timestamps=[1., 2.]
         )
-        tstamps = np.arange(1.0, 100.0, 0.1, dtype=np.float)
+        tstamps = np.arange(1.0, 100.0, 0.1, dtype=np.float64)
         ts = TimeSeries(
             name='xy_translation',
             data=list(range(len(tstamps))),
@@ -280,10 +280,10 @@ class RoiResponseSeriesConstructor(TestCase):
 
         ts = RoiResponseSeries(
             name='test_ts',
-            data=list(),
+            data=[1, 2, 3],
             rois=rt_region,
             unit='unit',
-            timestamps=list()
+            timestamps=[0.1, 0.2, 0.3]
         )
         self.assertEqual(ts.name, 'test_ts')
         self.assertEqual(ts.unit, 'unit')
@@ -297,10 +297,10 @@ class DfOverFConstructor(TestCase):
 
         rrs = RoiResponseSeries(
             name='test_ts',
-            data=list(),
+            data=[1, 2, 3],
             rois=rt_region,
             unit='unit',
-            timestamps=list()
+            timestamps=[0.1, 0.2, 0.3]
         )
 
         dof = DfOverF(rrs)
@@ -314,10 +314,10 @@ class FluorescenceConstructor(TestCase):
 
         ts = RoiResponseSeries(
             name='test_ts',
-            data=list(),
+            data=[1, 2, 3],
             rois=rt_region,
             unit='unit',
-            timestamps=list()
+            timestamps=[0.1, 0.2, 0.3]
         )
 
         ff = Fluorescence(ts)
