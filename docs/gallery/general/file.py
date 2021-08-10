@@ -426,10 +426,10 @@ nwbfile.add_unit(id=3, spike_times=[1.2, 2.3, 3.3, 4.5],
 # or really anything.
 #
 # .. note::
-#          All basic image types :py:class:`~pynwb.image.RGBAImage`, py:class:`~pynwb.image.RGBImage`, and 
+#          All basic image types :py:class:`~pynwb.image.RGBAImage`, py:class:`~pynwb.image.RGBImage`, and
 #          py:class:`~pynwb.image.GrayscaleImage` provide the optional: 1) ``description`` parameter to include a
 #          text description about the image and 2) ``resolution`` parameter to specify the *pixels / cm* resolution
-#          of the image. 
+#          of the image.
 
 from PIL import Image
 import numpy as np
@@ -445,8 +445,8 @@ rgba_logo = RGBAImage(name='RGBA_logo', data=np.array(img))
 # or RGB
 rgb_logo = RGBImage(name='RGB_logo', data=np.array(img.convert('RGB')))
 
-# or Grayscale. Here with the optional description and resolution specified. 
-gs_logo = GrayscaleImage(name='Grayscale_logo', 
+# or Grayscale. Here with the optional description and resolution specified.
+gs_logo = GrayscaleImage(name='Grayscale_logo',
                          data=np.array(img.convert('L')),
                          description='Grayscale version of the NWB logo',
                          resolution=35.433071)
