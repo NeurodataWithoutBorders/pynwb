@@ -437,7 +437,7 @@ import numpy as np
 from pynwb.image import RGBAImage, RGBImage, GrayscaleImage
 from pynwb.base import Images
 
-img = Image.open('../../source/logo.png')
+img = Image.open('docs/source/logo.png')  # an example image
 
 # you can store an RGBA image
 rgba_logo = RGBAImage(name='RGBA_logo', data=np.array(img))
