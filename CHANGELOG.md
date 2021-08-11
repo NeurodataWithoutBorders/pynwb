@@ -33,6 +33,7 @@
 - Used `sphinx.ext.extlinks` extension in docs to simplify linking to common targets. @oruebel (#1349)
 - Created new section for advanced I/O tutorials and moved parallel I/O tutorial to its own file. @oruebel (#1349)
 - Updated the optical physiology / Calcium imaging tutorial. @bendichter, @weiglszonja (#1375)
+- Updated the Extracellular electrophysiology tutorial. @bendichter, @weiglszonja (#1391)
 
 ### Minor new features:
 - Add RRID for citing PyNWB to the docs. @oruebel (#1372)
