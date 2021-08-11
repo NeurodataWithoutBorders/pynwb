@@ -40,6 +40,10 @@ class TimeIntervals(DynamicTable):
         """
         if getattr(self, 'timeseries', None) is not None:
             if not isinstance(self.timeseries, TimeSeriesReferenceVectorData):
+                # since the self.timeseries VectorData has the same schema and
+                # memory layout as TimeSeriesReferenceVectorData we can
+                # simply swap out the class to get access to the added functionality
+                # from TimeSeriesReferenceVectorData for old files
                 self.timeseries.__class__ = TimeSeriesReferenceVectorData
                 self.__timeseries_column_type_migrated = True
 

@@ -5,7 +5,7 @@ from dateutil import tz
 
 from pynwb.epoch import TimeIntervals
 from pynwb import TimeSeries, NWBFile
-from pynwb.base import TimeSeriesReference
+from pynwb.base import TimeSeriesReference, TimeSeriesReferenceVectorData
 from pynwb.testing import TestCase
 
 
@@ -52,6 +52,9 @@ class TimeIntervalsTest(TestCase):
         obtained = epochs.to_dataframe()
 
         self.assertTupleEqual(obtained.loc[3, 'timeseries'][1], df.loc[3, 'timeseries'][1])
+        self.assertIsInstance(epochs.timeseries, TimeSeriesReferenceVectorData)
+        self.assertIsInstance(obtained.loc[3, 'timeseries'][1], TimeSeriesReference)
+        self.assertIsInstance(df.loc[3, 'timeseries'][1], TimeSeriesReference)
         self.assertEqual(obtained.loc[2, 'foo'], df.loc[2, 'foo'])
 
     def test_dataframe_roundtrip_drop_ts(self):
@@ -82,7 +85,7 @@ class TimeIntervalsTest(TestCase):
         with self.assertRaises(ValueError):
             TimeIntervals.from_dataframe(df, name='ti_name')
 
-    def test_frorm_dataframe_missing_supplied_col(self):
+    def test_from_dataframe_missing_supplied_col(self):
         df = pd.DataFrame({'start_time': [1., 2., 3.], 'stop_time': [2., 3., 4.], 'label': ['a', 'b', 'c']})
         with self.assertRaises(ValueError):
             TimeIntervals.from_dataframe(df, name='ti_name', columns=[{'name': 'not there'}])
