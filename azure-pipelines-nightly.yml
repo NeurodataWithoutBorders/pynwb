@@ -148,7 +148,7 @@ jobs:
       architecture: 'x64'
 
   - powershell: Write-Host "##vso[task.prependpath]$env:CONDA\Scripts"
-    displayName: Add conda to PATH
+    displayName: 'Add conda to PATH'
 
   - powershell: conda env create -f environment-ros3.yml
     displayName: 'Create conda environment'
@@ -157,7 +157,7 @@ jobs:
       call activate ros3
       pip install -r requirements-dev.txt
       pip install -e .
-    displayName: 'Install PyNWB and dependencies
+    displayName: 'Install PyNWB and dependencies'
 
   - script: |
       call activate ros3
@@ -184,7 +184,7 @@ jobs:
   - bash: |
       echo "##vso[task.prependpath]$CONDA/bin"
       sudo chown -R $USER $CONDA  # Take ownership of conda installation
-    displayName: Add conda to PATH
+    displayName: 'Add conda to PATH'
 
   - bash: |
       conda env create -f environment-ros3.yml
