@@ -47,7 +47,9 @@ def run_test_suite(directory, description="", verbose=True):
     logging.info("running %s" % description)
     directory = os.path.join(os.path.dirname(__file__), directory)
     runner = unittest.TextTestRunner(verbosity=verbose, resultclass=SuccessRecordingResult)
-    test_result = runner.run(unittest.TestLoader().discover(directory))
+    # set top_level_dir below to prevent import name clashes between
+    # tests/unit/test_base.py and tests/integration/hdf5/test_base.py
+    test_result = runner.run(unittest.TestLoader().discover(directory, top_level_dir='tests'))
 
     TOTAL += test_result.testsRun
     FAILURES += len(test_result.failures)
