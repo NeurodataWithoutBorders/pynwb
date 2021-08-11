@@ -150,14 +150,16 @@ jobs:
   - powershell: Write-Host "##vso[task.prependpath]$env:CONDA\Scripts"
     displayName: Add conda to PATH
 
-  - powershell: |
-      conda env create -f environment-ros3.yml
+  - powershell: conda env create -f environment-ros3.yml
+    displayName: 'Create conda environment'
+
+  - script: |
       call activate ros3
       pip install -r requirements-dev.txt
       pip install -e .
-    displayName: 'Create conda environment and install packages'
+    displayName: 'Install PyNWB and dependencies
 
-  - powershell: |
+  - script: |
       call activate ros3
       python test.py --ros3
     displayName: 'Run ROS3 tests'
@@ -189,7 +191,7 @@ jobs:
       source activate ros3
       pip install -r requirements-dev.txt
       pip install -e .
-    displayName: 'Create conda environment and install packages'
+    displayName: 'Create conda environment and install PyNWB and dependencies'
 
   - bash: |
       source activate ros3
