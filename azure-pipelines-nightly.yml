@@ -131,7 +131,7 @@ jobs:
     displayName: 'Run wheel install tests'
 
 
-- job: 'Test ROS3'
+- job: 'Test_ROS3'
   displayName: "Test PyNWB with Conda and ROS3"
 
   strategy:
