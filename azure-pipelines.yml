@@ -92,7 +92,14 @@ jobs:
       versionSpec: '$(pythonVersion)'
       architecture: 'x64'
 
-  - bash: echo "##vso[task.prependpath]$CONDA/bin"
+  - bash: |
+      echo "##vso[task.prependpath]$CONDA/bin"
+      sudo chown -R $USER $CONDA  # Take ownership of conda installation
+    condition: eq( variables['Agent.OS'], 'Darwin' )
+    displayName: Add conda to PATH
+
+  - powershell: Write-Host "##vso[task.prependpath]$env:CONDA\Scripts"
+    condition: eq( variables['Agent.OS'], 'Windows_NT' )
     displayName: Add conda to PATH
 
   - script: |
