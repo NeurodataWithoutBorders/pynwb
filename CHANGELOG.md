@@ -23,6 +23,7 @@
   for more details. @oruebel, @rly (#1349)
 - Dropped Python 3.6 support, added Python 3.9 support. @rly (#1377)
 - Updated requirements to allow compatibility with HDMF 3 and h5py 3. @rly (#1377)
+  - When using HDMF 3 and h5py 3, users can now stream NWB files from an S3 bucket.
 
 ### Tutorial enhancements:
 - Added new tutorial for intracellular electrophysiology to describe the use of the new metadata tables
@@ -33,12 +34,14 @@
 - Used `sphinx.ext.extlinks` extension in docs to simplify linking to common targets. @oruebel (#1349)
 - Created new section for advanced I/O tutorials and moved parallel I/O tutorial to its own file. @oruebel (#1349)
 - Updated the optical physiology / Calcium imaging tutorial. @bendichter, @weiglszonja (#1375)
+- Added a tutorial on streaming using the ROS3 driver. @rly (#1393)
 
 ### Minor new features:
-- Add RRID for citing PyNWB to the docs. @oruebel (#1372)
-- Update CI and tests to handle deprecations in libraries. @rly (#1377)
-- Add test utilities for icephys (``pynwb.testing.icephys_testutils``) to ease creation of test data
+- Added RRID for citing PyNWB to the docs. @oruebel (#1372)
+- Updated CI and tests to handle deprecations in libraries. @rly (#1377)
+- Added test utilities for icephys (``pynwb.testing.icephys_testutils``) to ease creation of test data
   for tests and tutorials. @oruebel (#1349, #1383)
+- Added tests of streaming using the ROS3 driver. @rly (#1393)
 
 ### Bug fixes:
 - Updated behavior of ``make clean`` command for docs to ensure tutorial files are cleaned up.  @oruebel (#1349)
