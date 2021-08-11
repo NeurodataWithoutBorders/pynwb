@@ -357,6 +357,8 @@ workflows:
           <<: *no_filters
       - gallery38:  # TODO replace with gallery39 after allensdk support py39
           <<: *no_filters
+      - miniconda39-ros3:  # TODO add to other sections
+          <<: *no_filters
       - deploy-dev:
           requires:
             - flake8
