@@ -4,7 +4,7 @@ from hdmf.utils import docval, getargs, popargs, call_docval_func, get_docval
 from hdmf.data_utils import DataIO
 
 from . import register_class, CORE_NAMESPACE
-from .base import TimeSeries
+from .base import TimeSeries, TimeSeriesReferenceVectorData, TimeSeriesReference
 from hdmf.common import DynamicTable
 
 
@@ -29,6 +29,39 @@ class TimeIntervals(DynamicTable):
             *get_docval(DynamicTable.__init__, 'id', 'columns', 'colnames'))
     def __init__(self, **kwargs):
         call_docval_func(super(TimeIntervals, self).__init__, kwargs)
+        self.__timeseries_column_type_migrated = False
+        self.__migrate_timeseries_column_type()
+
+    def __migrate_timeseries_column_type(self):
+        """
+        Internal helper function used to migrate the self.timeseries column
+        from a regular VectorData to a TimeSeriesReferenceVectorData object
+        if necessary.
+        """
+        if getattr(self, 'timeseries', None) is not None:
+            if not isinstance(self.timeseries, TimeSeriesReferenceVectorData):
+                self.timeseries.__class__ = TimeSeriesReferenceVectorData
+                self.__timeseries_column_type_migrated = True
+
+    @docval(*get_docval(DynamicTable.add_column))
+    def add_column(self, **kwargs):
+        """
+        Overwrite :py:meth:~hdmf.common.table.VectorData.add_column` to
+        automatically migrate the :py:meth:`~pynwb.epoch.TimeIntervals.timeseries`
+        from a regular :py:class:`~hdmf.common.table.VectorData` to a
+        :py:class:`~pynwb.base.TimeSeriesReferenceVectorData` if necessary.
+        """
+        super(TimeIntervals, self).add_column(**kwargs)
+        self.__migrate_timeseries_column_type()
+
+    @property
+    def timeseries_column_type_migrated(self):
+        """
+        Check whether the :py:meth:`~pynwb.epoch.TimeIntervals.timeseries` column has been automatically migrated
+        from a regular :py:class:`~hdmf.common.table.VectorData` to a
+        :py:class:`~pynwb.base.TimeSeriesReferenceVectorData`
+        """
+        return self.__timeseries_column_type_migrated
 
     @docval({'name': 'start_time', 'type': 'float', 'doc': 'Start time of epoch, in seconds'},
             {'name': 'stop_time', 'type': 'float', 'doc': 'Stop time of epoch, in seconds'},
@@ -51,7 +84,7 @@ class TimeIntervals(DynamicTable):
             tmp = list()
             for ts in timeseries:
                 idx_start, count = self.__calculate_idx_count(start_time, stop_time, ts)
-                tmp.append((idx_start, count, ts))
+                tmp.append(TimeSeriesReference(idx_start, count, ts))
             timeseries = tmp
             rkwargs['timeseries'] = timeseries
         return super(TimeIntervals, self).add_row(**rkwargs)

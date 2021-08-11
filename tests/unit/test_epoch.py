@@ -5,6 +5,7 @@ from dateutil import tz
 
 from pynwb.epoch import TimeIntervals
 from pynwb import TimeSeries, NWBFile
+from pynwb.base import TimeSeriesReference
 from pynwb.testing import TestCase
 
 
@@ -36,7 +37,11 @@ class TimeIntervalsTest(TestCase):
             'bar': ['fish', 'fowl', 'dog', 'cat'],
             'start_time': [0.2, 0.25, 0.30, 0.35],
             'stop_time': [0.25, 0.30, 0.40, 0.45],
-            'timeseries': [[tsa], [tsb], [], [tsb, tsa]],
+            'timeseries': [[TimeSeriesReference(idx_start=0, count=11, timeseries=tsa)],
+                           [TimeSeriesReference(idx_start=0, count=13, timeseries=tsb)],
+                           [],
+                           [TimeSeriesReference(idx_start=4, count=6, timeseries=tsb),
+                            TimeSeriesReference(idx_start=3, count=4, timeseries=tsa)]],
             'keys': ['q', 'w', 'e', 'r'],
             'tags': [[], [], ['fizz', 'buzz'], ['qaz']]
         })
@@ -46,7 +51,7 @@ class TimeIntervalsTest(TestCase):
         epochs = TimeIntervals.from_dataframe(df, name='test epochs')
         obtained = epochs.to_dataframe()
 
-        self.assertIs(obtained.loc[3, 'timeseries'][1], df.loc[3, 'timeseries'][1])
+        self.assertTupleEqual(obtained.loc[3, 'timeseries'][1], df.loc[3, 'timeseries'][1])
         self.assertEqual(obtained.loc[2, 'foo'], df.loc[2, 'foo'])
 
     def test_dataframe_roundtrip_drop_ts(self):
