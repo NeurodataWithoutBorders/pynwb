@@ -252,7 +252,7 @@ jobs:
       - run:
           name: Run the tests
           command: |
-            conda create -f environment-ros3.yml
+            conda env create -f environment-ros3.yml
             pip install -r requirements-dev.txt
             pip install -e .
             python test.py --ros3
@@ -369,57 +369,57 @@ workflows:
   version: 2
   test-package-publish:
     jobs:
-      - flake8:
-          <<: *no_filters
-      - python37-min-req:
-          <<: *no_filters
-      - python39:
-          <<: *no_filters
-      - miniconda37:
-          <<: *no_filters
-      - miniconda39:
-          <<: *no_filters
-      - gallery37-min-req:
-          <<: *no_filters
-      - gallery38:  # TODO replace with gallery39 after allensdk support py39
-          <<: *no_filters
+      # - flake8:
+      #     <<: *no_filters
+      # - python37-min-req:
+      #     <<: *no_filters
+      # - python39:
+      #     <<: *no_filters
+      # - miniconda37:
+      #     <<: *no_filters
+      # - miniconda39:
+      #     <<: *no_filters
+      # - gallery37-min-req:
+      #     <<: *no_filters
+      # - gallery38:  # TODO replace with gallery39 after allensdk support py39
+      #     <<: *no_filters
       - miniconda39-ros3:  # TODO add to other sections
           <<: *no_filters
-      - deploy-dev:
-          requires:
-            - flake8
-            - python37-min-req
-            - python39
-            - miniconda37
-            - miniconda39
-            - gallery37-min-req
-            - gallery38  # gallery39
-          filters:
-            tags:
-              ignore:
-                # exclude tags created by "ci_addons publish_github_release"
-                - /^latest$/
-                - /^latest-tmp$/
-            branches:
-              only: dev
-          context:
-            - docker-hub-creds
-      - deploy-release:
-          requires:
-            - flake8
-            - python37-min-req
-            - python39
-            - miniconda37
-            - miniconda39
-            - gallery37-min-req
-            - gallery38  # gallery39
-          filters:
-            tags:
-              only: /^[0-9]+(\.[0-9]+)*(\.post[0-9]+)?$/
-            branches:
-              ignore: /.*/
-          context:
-            - docker-hub-creds
+      # - deploy-dev:
+      #     requires:
+      #       - flake8
+      #       - python37-min-req
+      #       - python39
+      #       - miniconda37
+      #       - miniconda39
+      #       - gallery37-min-req
+      #       - gallery38  # gallery39
+      #     filters:
+      #       tags:
+      #         ignore:
+      #           # exclude tags created by "ci_addons publish_github_release"
+      #           - /^latest$/
+      #           - /^latest-tmp$/
+      #       branches:
+      #         only: dev
+      #     context:
+      #       - docker-hub-creds
+      # - deploy-release:
+      #     requires:
+      #       - flake8
+      #       - python37-min-req
+      #       - python39
+      #       - miniconda37
+      #       - miniconda39
+      #       - gallery37-min-req
+      #       - gallery38  # gallery39
+      #     filters:
+      #       tags:
+      #         only: /^[0-9]+(\.[0-9]+)*(\.post[0-9]+)?$/
+      #       branches:
+      #         ignore: /.*/
+      #     context:
+      #       - docker-hub-creds
 
   nightly:
     triggers:
