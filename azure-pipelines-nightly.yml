@@ -157,6 +157,9 @@ jobs:
       versionSpec: '$(pythonVersion)'
       architecture: 'x64'
 
+  - bash: echo "##vso[task.prependpath]$CONDA/bin"
+    displayName: Add conda to PATH
+
   - script: |
       conda env create -f environment-ros3.yml
       source activate ros3
