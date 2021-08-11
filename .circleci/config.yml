@@ -230,14 +230,41 @@ jobs:
       - TEST_WHEELINSTALL_ENV: "wheelinstall"
     <<: *conda-steps
 
-  miniconda39-ros3:
+  miniconda39-ros3:   # tox and conda do not play nicely so do not use tox here
     <<: *conda-image
     environment:
       - CONDA_PYTHON_VER: "3.9"
       - TEST_TOX_ENV: "ros3-py39"
       - BUILD_TOX_ENV: "build-py39"
       - TEST_WHEELINSTALL_ENV: "wheelinstall"
-    <<: *conda-steps
+    steps:
+      - checkout
+      - run: git submodule sync
+      - run: git submodule update --init
+      - run:
+          name: Configure conda
+          command: |
+            conda config --set always_yes yes --set changeps1 no
+            conda config --add channels conda-forge
+            conda install python=$CONDA_PYTHON_VER
+            conda install virtualenv
+            conda install tox
+      - run:
+          name: Run the tests
+          command: |
+            pip install -r requirements.txt -r requirements-dev.txt
+            pip uninstall -y h5py
+            conda install -c conda-forge --yes h5py requests
+            pip install -e .
+            python test.py --ros3
+      - run:
+          name: Build wheel and source distribution
+          command: |
+            tox -e $BUILD_TOX_ENV
+      - run:
+          name: Test installation from a wheel
+          command: |
+            tox -e $TEST_WHEELINSTALL_ENV --recreate --installpkg dist/*-none-any.whl
 
   gallery37:
     <<: *py37
