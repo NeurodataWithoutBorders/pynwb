@@ -230,6 +230,15 @@ jobs:
       - TEST_WHEELINSTALL_ENV: "wheelinstall"
     <<: *conda-steps
 
+  miniconda39-ros3:
+    <<: *conda-image
+    environment:
+      - CONDA_PYTHON_VER: "3.9"
+      - TEST_TOX_ENV: "ros3-py39"
+      - BUILD_TOX_ENV: "build-py39"
+      - TEST_WHEELINSTALL_ENV: "wheelinstall"
+    <<: *conda-steps
+
   gallery37:
     <<: *py37
     environment:
