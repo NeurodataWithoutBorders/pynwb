@@ -253,6 +253,7 @@ jobs:
           name: Run the tests
           command: |
             conda env create -f environment-ros3.yml
+            conda activate ros3
             pip install -r requirements-dev.txt
             pip install -e .
             python test.py --ros3
