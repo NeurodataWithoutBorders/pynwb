@@ -6,4 +6,5 @@ flake8==3.9.2
 flake8-debugger==4.0.0
 flake8-print==4.0.0
 importlib-metadata==4.6.1
+requests==2.26.0
 tox==3.23.1
