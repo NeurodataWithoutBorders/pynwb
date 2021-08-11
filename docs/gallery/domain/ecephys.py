@@ -60,7 +60,19 @@ nwbfile = NWBFile(
 # Electrode groups (i.e. experimentally relevant groupings of channels) are represented by
 # :py:class:`~pynwb.ecephys.ElectrodeGroup` objects.
 #
-# image placeholder
+# .. only:: html
+#
+#   .. image:: ../../_static/Electrodes.svg
+#     :width: 500
+#     :alt: electrodes table UML diagram
+#     :align: center
+#
+# .. only:: latex
+#
+#   .. image:: ../../_static/Electrodes.png
+#     :width: 500
+#     :alt: electrodes table UML diagram
+#     :align: center
 #
 # Before creating an :py:class:`~pynwb.ecephys.ElectrodeGroup`, you need to provide some information about the
 # device that was used to record from the electrode. This is done by creating a :py:class:`~pynwb.device.Device`
@@ -147,7 +159,19 @@ all_table_region = nwbfile.create_electrode_table_region(
 # during the experiment, passing in this ``"all_table_region"`` :py:class:`~pynwb.core.DynamicTableRegion`
 # reference to all rows of the electrodes table.
 #
-# image placeholder
+# .. only:: html
+#
+#   .. image:: ../../_static/ElectricalSeries.svg
+#     :width: 800
+#     :alt: electrical series UML diagram
+#     :align: center
+#
+# .. only:: latex
+#
+#   .. image:: ../../_static/ElectricalSeries.png
+#     :width: 800
+#     :alt: electrical series UML diagram
+#     :align: center
 #
 
 
@@ -199,9 +223,20 @@ lfp_electrical_series = ElectricalSeries(
 # This is analogous to how we can store the :py:class:`~pynwb.behavior.SpatialSeries` object inside of a
 # :py:class:`~pynwb.behavior.Position` object.
 #
-# image placeholder
+# .. only:: html
 #
-
+#   .. image:: ../../_static/LFP.svg
+#     :width: 800
+#     :alt: LFP UML diagram
+#     :align: center
+#
+# .. only:: latex
+#
+#   .. image:: ../../_static/LFP.png
+#     :width: 800
+#     :alt: LFP UML diagram
+#     :align: center
+#
 
 lfp = LFP(electrical_series=lfp_electrical_series)
 
