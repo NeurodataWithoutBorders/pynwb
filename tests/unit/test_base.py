@@ -325,16 +325,58 @@ class TestTimeSeriesReferenceVectorData(TestCase):
         self.assertTupleEqual(re[0], TimeSeriesReferenceVectorData.TIME_SERIES_REFERENCE_NONE_TYPE)
         self.assertTupleEqual(re[1], TimeSeriesReferenceVectorData.TIME_SERIES_REFERENCE_TUPLE(*values[1]))
 
+    def test_add_row(self):
+        v = TimeSeriesReferenceVectorData(name='a', description='a')
+        val = TimeSeriesReference(0, 5, TimeSeries(name='test', description='test',
+                                                   data=np.arange(10), unit='unit', starting_time=5.0, rate=0.1))
+        v.add_row(val)
+        self.assertTupleEqual(v[0], val)
+
+    def test_add_row_with_plain_tuple(self):
+        v = TimeSeriesReferenceVectorData(name='a', description='a')
+        val = (0, 5, TimeSeries(name='test', description='test',
+                                data=np.arange(10), unit='unit', starting_time=5.0, rate=0.1))
+        v.add_row(val)
+        self.assertTupleEqual(v[0], val)
+
+    def test_add_row_with_bad_tuple(self):
+        v = TimeSeriesReferenceVectorData(name='a', description='a')
+        val = (0.0, 5, TimeSeries(name='test', description='test',
+                                  data=np.arange(10), unit='unit', starting_time=5.0, rate=0.1))
+        with self.assertRaisesWith(TypeError, "idx_start must be an integer not <class 'float'>"):
+            v.add_row(val)
+
     def test_add_row_restricted_type(self):
         v = TimeSeriesReferenceVectorData(name='a', description='a')
         with self.assertRaisesWith(TypeError, "TimeSeriesReferenceVectorData.add_row: incorrect type for "
-                                              "'val' (got 'int', expected 'TimeSeriesReference')"):
+                                              "'val' (got 'int', expected 'TimeSeriesReference or tuple')"):
             v.add_row(1)
+
+    def test_append(self):
+        v = TimeSeriesReferenceVectorData(name='a', description='a')
+        val = TimeSeriesReference(0, 5, TimeSeries(name='test', description='test',
+                                                   data=np.arange(10), unit='unit', starting_time=5.0, rate=0.1))
+        v.append(val)
+        self.assertTupleEqual(v[0], val)
+
+    def test_append_with_plain_tuple(self):
+        v = TimeSeriesReferenceVectorData(name='a', description='a')
+        val = (0, 5, TimeSeries(name='test', description='test',
+                                data=np.arange(10), unit='unit', starting_time=5.0, rate=0.1))
+        v.append(val)
+        self.assertTupleEqual(v[0], val)
+
+    def test_append_with_bad_tuple(self):
+        v = TimeSeriesReferenceVectorData(name='a', description='a')
+        val = (0.0, 5, TimeSeries(name='test', description='test',
+                                  data=np.arange(10), unit='unit', starting_time=5.0, rate=0.1))
+        with self.assertRaisesWith(TypeError, "idx_start must be an integer not <class 'float'>"):
+            v.append(val)
 
     def test_append_restricted_type(self):
         v = TimeSeriesReferenceVectorData(name='a', description='a')
         with self.assertRaisesWith(TypeError, "TimeSeriesReferenceVectorData.append: incorrect type for "
-                                              "'arg' (got 'float', expected 'TimeSeriesReference')"):
+                                              "'arg' (got 'float', expected 'TimeSeriesReference or tuple')"):
             v.append(2.0)
 
 
