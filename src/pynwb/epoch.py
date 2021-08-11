@@ -30,33 +30,6 @@ class TimeIntervals(DynamicTable):
     def __init__(self, **kwargs):
         call_docval_func(super(TimeIntervals, self).__init__, kwargs)
         self.__timeseries_column_type_migrated = False
-        self.__migrate_timeseries_column_type()
-
-    def __migrate_timeseries_column_type(self):
-        """
-        Internal helper function used to migrate the self.timeseries column
-        from a regular VectorData to a TimeSeriesReferenceVectorData object
-        if necessary.
-        """
-        if getattr(self, 'timeseries', None) is not None:
-            if not isinstance(self.timeseries, TimeSeriesReferenceVectorData):
-                # since the self.timeseries VectorData has the same schema and
-                # memory layout as TimeSeriesReferenceVectorData we can
-                # simply swap out the class to get access to the added functionality
-                # from TimeSeriesReferenceVectorData for old files
-                self.timeseries.__class__ = TimeSeriesReferenceVectorData
-                self.__timeseries_column_type_migrated = True
-
-    @docval(*get_docval(DynamicTable.add_column))
-    def add_column(self, **kwargs):
-        """
-        Overwrite :py:meth:~hdmf.common.table.VectorData.add_column` to
-        automatically migrate the :py:meth:`~pynwb.epoch.TimeIntervals.timeseries`
-        from a regular :py:class:`~hdmf.common.table.VectorData` to a
-        :py:class:`~pynwb.base.TimeSeriesReferenceVectorData` if necessary.
-        """
-        super(TimeIntervals, self).add_column(**kwargs)
-        self.__migrate_timeseries_column_type()
 
     @property
     def timeseries_column_type_migrated(self):
@@ -66,6 +39,36 @@ class TimeIntervals(DynamicTable):
         :py:class:`~pynwb.base.TimeSeriesReferenceVectorData`
         """
         return self.__timeseries_column_type_migrated
+
+    def __getattribute__(self, item):
+        """
+        Behaves the same as the standard ``__getattribute__`` but patches
+        the :py:meth:`~pynwb.epoch.TimeIntervals.timeseries` attribute to use
+        :py:class:`~pynwb.base.TimeSeriesReferenceVectorData` if necessary.
+        """
+        re = super().__getattribute__(item)
+        if item == 'timeseries':
+            if re is not None:
+                if not isinstance(re, TimeSeriesReferenceVectorData):
+                    # since the self.timeseries VectorData has the same schema and
+                    # memory layout as TimeSeriesReferenceVectorData we can
+                    # simply swap out the class to get access to the added functionality
+                    # from TimeSeriesReferenceVectorData for old files
+                    re.__class__ = TimeSeriesReferenceVectorData
+                    self.__timeseries_column_type_migrated = True
+        return re
+
+    def __getitem__(self, item):
+        """
+        Behaves the same as :py:meth:`~hdmf.common.table.VectorData.__getitem__`` but patches
+        the :py:meth:`~pynwb.epoch.TimeIntervals.timeseries` column to use
+        :py:class:`~pynwb.base.TimeSeriesReferenceVectorData` if necessary.
+        """
+        if isinstance(item, str) and item == 'timeseries':
+            # use __getattribute__ to ensure we migrate the column if necessary
+            return self.timeseries
+        else:
+            return super().__getitem__(item)
 
     @docval({'name': 'start_time', 'type': 'float', 'doc': 'Start time of epoch, in seconds'},
             {'name': 'stop_time', 'type': 'float', 'doc': 'Stop time of epoch, in seconds'},
