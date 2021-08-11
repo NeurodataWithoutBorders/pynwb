@@ -67,6 +67,7 @@ jobs:
     displayName: 'Run wheel install tests'
 
 
+
 - job: 'Test_ROS3_Windows'
   displayName: "Test PyNWB with Conda and ROS3 on Windows"
 
@@ -86,14 +87,14 @@ jobs:
   - powershell: Write-Host "##vso[task.prependpath]$env:CONDA\Scripts"
     displayName: Add conda to PATH
 
-  - script: |
+  - powershell: |
       conda env create -f environment-ros3.yml
-      source activate ros3
+      call activate ros3
       pip install -r requirements-dev.txt
       pip install -e .
     displayName: 'Create conda environment and install packages'
 
-  - bash: |
+  - powershell: |
       call activate ros3
       python test.py --ros3
     displayName: 'Run ROS3 tests'
@@ -120,9 +121,9 @@ jobs:
       sudo chown -R $USER $CONDA  # Take ownership of conda installation
     displayName: Add conda to PATH
 
-  - script: |
+  - bash: |
       conda env create -f environment-ros3.yml
-      call activate ros3
+      source activate ros3
       pip install -r requirements-dev.txt
       pip install -e .
     displayName: 'Create conda environment and install packages'
