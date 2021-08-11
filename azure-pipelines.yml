@@ -65,3 +65,40 @@ jobs:
   - bash: |
       tox -e $(testWheelInstallEnv) --recreate --installpkg dist/*-none-any.whl
     displayName: 'Run wheel install tests'
+
+- job: 'Test ROS3'
+  displayName: "Test PyNWB with Conda and ROS3"
+
+  strategy:
+    matrix:
+      macOS-py3.9:
+        imageName: 'macos-10.15'
+        pythonVersion: '3.9'
+
+      Windows-py3.9:
+        imageName: 'vs2017-win2016'
+        pythonVersion: '3.9'
+
+  pool:
+    vmImage: $(imageName)
+
+  steps:
+
+  - checkout: self
+    submodules: true
+
+  - task: UsePythonVersion@0
+    inputs:
+      versionSpec: '$(pythonVersion)'
+      architecture: 'x64'
+
+  - script: |
+      conda env create -f environment-ros3.yml
+      source activate ros3
+      pip install -r requirements-dev.txt
+      pip install -e .
+    displayName: 'Create conda environment and install packages'
+
+  - bash: |
+      python test.py --ros3
+    displayName: 'Run ROS3 tests'
