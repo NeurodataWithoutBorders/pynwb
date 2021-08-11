@@ -252,8 +252,8 @@ jobs:
       - run:
           name: Run the tests
           command: |
-            conda install -c conda-forge --yes "h5py>=3.2" requests
-            pip install -r requirements.txt -r requirements-dev.txt
+            conda create -f environment-ros3.yml
+            pip install -r requirements-dev.txt
             pip install -e .
             python test.py --ros3
       - run:
