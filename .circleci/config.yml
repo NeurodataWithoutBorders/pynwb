@@ -254,7 +254,7 @@ jobs:
           command: |
             pip install -r requirements.txt -r requirements-dev.txt
             pip uninstall -y h5py
-            conda install -c conda-forge --yes h5py requests
+            conda install -c conda-forge --yes h5py>=3.2 requests
             pip install -e .
             python test.py --ros3
       - run:
