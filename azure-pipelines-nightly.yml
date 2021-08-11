@@ -175,5 +175,6 @@ jobs:
     displayName: 'Create conda environment and install packages'
 
   - bash: |
+      source activate ros3
       python test.py --ros3
     displayName: 'Run ROS3 tests'
