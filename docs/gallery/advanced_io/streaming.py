@@ -7,7 +7,7 @@ from the `DANDI Archive <https://dandiarchive.org/>`_. This is especially useful
 from a large NWB file stored remotely.
 '''
 
-# sphinx_gallery_thumbnail_path = ''  # TODO
+# sphinx_gallery_thumbnail_path = 'figures/gallery_thumbnails_streaming.png'
 
 ####################
 # Streaming data from an S3 bucket requires having HDF5 installed with the ROS3 (read-only S3) driver.
