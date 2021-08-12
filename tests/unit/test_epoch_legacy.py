@@ -8,6 +8,17 @@ import h5py
 
 
 class TestTimeIntervalsIO(NWBH5IOMixin, TestCase):
+    """
+    Test that reading NWB files with version 2.4 and earlier function correctly with the TimeIntervals type.
+    In NWB 2.5 TimeIntervals.timeseries was updated to use the TimeSeriesReferenceVectorData type and to
+    keep the API consistent old files are migrated on read to present the same API for those files. This
+    is possible because the previous and updated schema are identical aside from the fact that a dedicated
+    neurodata_type was created for the TimeIntervals.timeseries columns which is also used in the
+    IntracellularRecordingTable type.
+
+    This is technically a round-trip test, but without round-trip we can't test the object-mapper and
+    including it here makes sure this get's included in code-coverage tests as well.
+    """
 
     def setUpContainer(self):
         """ Return placeholder epochs object. Tested epochs are added directly to the NWBFile in addContainer """
