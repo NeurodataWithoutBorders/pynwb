@@ -20,7 +20,8 @@ class TimeIntervals(DynamicTable):
         {'name': 'start_time', 'description': 'Start time of epoch, in seconds', 'required': True},
         {'name': 'stop_time', 'description': 'Stop time of epoch, in seconds', 'required': True},
         {'name': 'tags', 'description': 'user-defined tags', 'index': True},
-        {'name': 'timeseries', 'description': 'index into a TimeSeries object', 'index': True}
+        {'name': 'timeseries', 'description': 'index into a TimeSeries object',
+         'index': True, 'class': TimeSeriesReferenceVectorData}
     )
 
     @docval({'name': 'name', 'type': str, 'doc': 'name of this TimeIntervals'},  # required
@@ -28,8 +29,26 @@ class TimeIntervals(DynamicTable):
              'default': "experimental intervals"},
             *get_docval(DynamicTable.__init__, 'id', 'columns', 'colnames'))
     def __init__(self, **kwargs):
-        call_docval_func(super(TimeIntervals, self).__init__, kwargs)
+        # Migrating the timeseries column from VectorData to TimeSeriesVectorData.
+        # For NWB 2.4 and earlier, the timeseries column was a regular VectorData.
+        # The following code migrates the column to a TimeSeriesReferenceVectorData to make
+        # the new functionality accessible to older files and keep the interface consistent
+        # across file versions. We do the migration by updating the column directly in the
+        # 'columns' argument so that we already have the correct type when calling the
+        # __init__ of DynamicTable and avoid issues of bad column types there.
+        cols = getargs('columns', kwargs)
         self.__timeseries_column_type_migrated = False
+        if cols is not None:
+            for c in cols:
+                if c.name == 'timeseries':
+                    # since the self.timeseries VectorData has the same schema and
+                    # memory layout as TimeSeriesReferenceVectorData we can
+                    # simply swap out the class to get access to the added functionality
+                    # from TimeSeriesReferenceVectorData for old files
+                    c.__class__ = TimeSeriesReferenceVectorData
+                    self.__timeseries_column_type_migrated = True
+        # Call the super constructor
+        call_docval_func(super(TimeIntervals, self).__init__, kwargs)
 
     @property
     def timeseries_column_type_migrated(self):
@@ -39,36 +58,6 @@ class TimeIntervals(DynamicTable):
         :py:class:`~pynwb.base.TimeSeriesReferenceVectorData`
         """
         return self.__timeseries_column_type_migrated
-
-    def __getattribute__(self, item):
-        """
-        Behaves the same as the standard ``__getattribute__`` but patches
-        the :py:meth:`~pynwb.epoch.TimeIntervals.timeseries` attribute to use
-        :py:class:`~pynwb.base.TimeSeriesReferenceVectorData` if necessary.
-        """
-        re = super().__getattribute__(item)
-        if item == 'timeseries':
-            if re is not None:
-                if not isinstance(re, TimeSeriesReferenceVectorData):
-                    # since the self.timeseries VectorData has the same schema and
-                    # memory layout as TimeSeriesReferenceVectorData we can
-                    # simply swap out the class to get access to the added functionality
-                    # from TimeSeriesReferenceVectorData for old files
-                    re.__class__ = TimeSeriesReferenceVectorData
-                    self.__timeseries_column_type_migrated = True
-        return re
-
-    def __getitem__(self, item):
-        """
-        Behaves the same as :py:meth:`~hdmf.common.table.VectorData.__getitem__`` but patches
-        the :py:meth:`~pynwb.epoch.TimeIntervals.timeseries` column to use
-        :py:class:`~pynwb.base.TimeSeriesReferenceVectorData` if necessary.
-        """
-        if isinstance(item, str) and item == 'timeseries':
-            # use __getattribute__ to ensure we migrate the column if necessary
-            return self.timeseries
-        else:
-            return super().__getitem__(item)
 
     @docval({'name': 'start_time', 'type': 'float', 'doc': 'Start time of epoch, in seconds'},
             {'name': 'stop_time', 'type': 'float', 'doc': 'Stop time of epoch, in seconds'},
