@@ -22,22 +22,29 @@ from a large NWB file stored remotely.
 #
 
 ####################
-# Next, use the :py:func:`~pynwb.utils.get_dandi_s3_url` function to get the S3 URL to an NWB file of interest
-# stored in the DANDI Archive.
+# Next, use the ``DandiAPIClient`` to get the S3 URL to an NWB file of interest stored in the DANDI Archive.
+# If you have not already, install the ``dandi`` package.
+#
+# .. code-block:: bash
+#
+#   pip install dandi
 #
 # .. code-block:: python
 #
 #   from pynwb.utils import get_dandi_s3_url
+#   from dandi.dandiapi import DandiAPIClient
 #
 #   dandiset_id = '000006'  # ephys dataset from the Svoboda Lab
 #   filepath = 'sub-anm372795/sub-anm372795_ses-20170718.nwb'  # 450 kB file
-#   s3_path = get_dandi_s3_url(dandiset_id, filepath)
+#   with DandiAPIClient() as client:
+#     asset = client.get_dandiset(dandiset_id, "draft").get_asset_by_path("filepath")
+#     s3_path = asset.get_content_url(follow_redirects=1, strip_query=True)
 
 ####################
 # Finally, instantiate a :py:class:`~pynwb.NWBHDF5IO` object with the S3 URL and specify the driver as "ros3". This
-# will download metadata about the file from the S3 bucket to memory. Datasets are accessed lazily, just like when
-# reading an NWB file stored locally. So, slicing into a dataset will require additional time to download the sliced
-# data to memory.
+# will download metadata about the file from the S3 bucket to memory. The values of Datasets are accessed lazily,
+# just like when reading an NWB file stored locally. So, slicing into a dataset will require additional time to
+# download the sliced data to memory.
 #
 # .. code-block:: python
 #
