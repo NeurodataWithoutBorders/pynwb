@@ -28,7 +28,6 @@ from a large NWB file stored remotely.
 #
 # .. code-block:: python
 #
-#   from pynwb.utils import get_dandi_s3_url
 #   from dandi.dandiapi import DandiAPIClient
 #
 #   dandiset_id = '000006'  # ephys dataset from the Svoboda Lab
