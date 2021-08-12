@@ -4,7 +4,6 @@ from pynwb.testing import TestCase
 
 class TestRos3Streaming(TestCase):
     # requires h5py to be built with the ROS3 driver: conda install -c conda-forge h5py
-    # also requires requests package to be installed
 
     def test_read(self):
         s3_path = 'https://dandiarchive.s3.amazonaws.com/ros3test.nwb'

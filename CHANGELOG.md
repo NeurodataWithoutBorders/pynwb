@@ -1,6 +1,6 @@
 # PyNWB Changelog
 
-## PyNWB 2.0.0 (Upcoming)
+## PyNWB 2.0.0 (August 13, 2021)
 
 ### Breaking changes:
 - ``SweepTable`` has been deprecated in favor of the new icephys metadata tables. Use of ``SweepTable``
@@ -41,7 +41,6 @@
 - Updated CI and tests to handle deprecations in libraries. @rly (#1377)
 - Added test utilities for icephys (``pynwb.testing.icephys_testutils``) to ease creation of test data
   for tests and tutorials. @oruebel (#1349, #1383)
-- Added utility functions for accessing DANDI Archive assets in ``pynwb.utils``. @rly (#1393)
 - Added tests of streaming using the ROS3 driver. @rly (#1393)
 
 ### Bug fixes:
