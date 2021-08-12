@@ -60,6 +60,7 @@ class TimeIntervalsTest(TestCase):
     def test_dataframe_roundtrip_drop_ts(self):
         df = self.get_dataframe()
         epochs = TimeIntervals.from_dataframe(df, name='test epochs')
+        self.assertIsInstance(epochs.timeseries, TimeSeriesReferenceVectorData)
         obtained = epochs.to_dataframe(exclude=set(['timeseries', 'timeseries_index']))
 
         self.assertNotIn('timeseries', obtained.columns)

@@ -29,35 +29,7 @@ class TimeIntervals(DynamicTable):
              'default': "experimental intervals"},
             *get_docval(DynamicTable.__init__, 'id', 'columns', 'colnames'))
     def __init__(self, **kwargs):
-        # Migrating the timeseries column from VectorData to TimeSeriesVectorData.
-        # For NWB 2.4 and earlier, the timeseries column was a regular VectorData.
-        # The following code migrates the column to a TimeSeriesReferenceVectorData to make
-        # the new functionality accessible to older files and keep the interface consistent
-        # across file versions. We do the migration by updating the column directly in the
-        # 'columns' argument so that we already have the correct type when calling the
-        # __init__ of DynamicTable and avoid issues of bad column types there.
-        cols = getargs('columns', kwargs)
-        self.__timeseries_column_type_migrated = False
-        if cols is not None:
-            for c in cols:
-                if c.name == 'timeseries':
-                    # since the self.timeseries VectorData has the same schema and
-                    # memory layout as TimeSeriesReferenceVectorData we can
-                    # simply swap out the class to get access to the added functionality
-                    # from TimeSeriesReferenceVectorData for old files
-                    c.__class__ = TimeSeriesReferenceVectorData
-                    self.__timeseries_column_type_migrated = True
-        # Call the super constructor
         call_docval_func(super(TimeIntervals, self).__init__, kwargs)
-
-    @property
-    def timeseries_column_type_migrated(self):
-        """
-        Check whether the :py:meth:`~pynwb.epoch.TimeIntervals.timeseries` column has been automatically migrated
-        from a regular :py:class:`~hdmf.common.table.VectorData` to a
-        :py:class:`~pynwb.base.TimeSeriesReferenceVectorData`
-        """
-        return self.__timeseries_column_type_migrated
 
     @docval({'name': 'start_time', 'type': 'float', 'doc': 'Start time of epoch, in seconds'},
             {'name': 'stop_time', 'type': 'float', 'doc': 'Stop time of epoch, in seconds'},
