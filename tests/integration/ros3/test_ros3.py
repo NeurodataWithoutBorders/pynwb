@@ -1,6 +1,5 @@
 from pynwb import NWBHDF5IO
 from pynwb.testing import TestCase
-from pynwb.utils import get_dandi_s3_url
 
 
 class TestRos3Streaming(TestCase):
@@ -8,10 +7,7 @@ class TestRos3Streaming(TestCase):
     # also requires requests package to be installed
 
     def test_read(self):
-        # ephys, Svoboda Lab (450 kB)
-        dandiset_id = '000006'
-        filepath = 'sub-anm372795/sub-anm372795_ses-20170718.nwb'
-        s3_path = get_dandi_s3_url(dandiset_id, filepath)
+        s3_path = 'https://dandiarchive.s3.amazonaws.com/ros3test.nwb'
 
         with NWBHDF5IO(s3_path, mode='r', load_namespaces=True, driver='ros3') as io:
             nwbfile = io.read()
