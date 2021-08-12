@@ -33,8 +33,8 @@ from a large NWB file stored remotely.
 #   dandiset_id = '000006'  # ephys dataset from the Svoboda Lab
 #   filepath = 'sub-anm372795/sub-anm372795_ses-20170718.nwb'  # 450 kB file
 #   with DandiAPIClient() as client:
-#     asset = client.get_dandiset(dandiset_id, 'draft').get_asset_by_path('filepath')
-#     s3_path = asset.get_content_url(follow_redirects=1, strip_query=True)
+#       asset = client.get_dandiset(dandiset_id, 'draft').get_asset_by_path(filepath)
+#       s3_path = asset.get_content_url(follow_redirects=1, strip_query=True)
 
 ####################
 # Finally, instantiate a :py:class:`~pynwb.NWBHDF5IO` object with the S3 URL and specify the driver as "ros3". This
