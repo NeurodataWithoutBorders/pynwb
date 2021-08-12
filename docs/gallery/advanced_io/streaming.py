@@ -20,7 +20,7 @@ from a large NWB file stored remotely.
 
 ####################
 # Next, use the ``DandiAPIClient`` to get the S3 URL to an NWB file of interest stored in the DANDI Archive.
-# If you have not already, install the latest version of the ``dandi`` package (0.27 or larger).
+# If you have not already, install the latest release of the ``dandi`` package (version 0.27 or larger).
 #
 # .. code-block:: bash
 #
