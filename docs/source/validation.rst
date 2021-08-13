@@ -18,7 +18,7 @@ If the file contains no NWB extensions, then this command will validate the file
   Validating test.nwb against cached namespace information using namespace 'core'.
    - no errors found.
 
-and the program exit code is ``0``. On error the program exit code is ``1`` and the list of errors is outputted.
+and the program exit code is ``0``. On error, the program exit code is ``1`` and the list of errors is outputted.
 
 If the file contains NWB extensions, then the above validation command will validate the file ``test.nwb`` against
 all extensions in the file and the core NWB specification.
@@ -27,14 +27,17 @@ To validate against only one NWB extension that is cached within the file, use t
 For example, the following command will validate against the "ndx-my-extension" namespace that is cached
 within the ``test.nwb`` file.
 
+.. code-block:: bash
+
+  python -m pynwb.validate -n ndx-my-extension test.nwb
+
 To validate against the version of the **core** NWB specification that is included with the installed version of
 PyNWB, use the ``--no-cached-namespace`` flag. This can be useful in validating files against newer or older versions
 of the **core** NWB specification.
 
-
 .. code-block:: bash
 
-  python -m pynwb.validate -n ndx-my-extension test.nwb
+  python -m pynwb.validate--no-cached-namespace test.nwb
 
 .. Last updated 8/13/2021
 .. code-block:: text
