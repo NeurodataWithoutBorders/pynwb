@@ -3,42 +3,44 @@
 Validating NWB files
 ====================
 
-Validating NWB files is handled by a command-line tool available in :py:mod:`~pynwb`. The validator can be invoked like so:
+Validating NWB files is handled by a command-line tool available in :py:mod:`~pynwb`.
+The validator can be invoked like so:
 
 .. code-block:: bash
 
   python -m pynwb.validate test.nwb
 
-This will validate the file ``test.nwb`` against the *core* NWB specification. In case of success the output looks like
+If the file contains no NWB extensions, then this command will validate the file ``test.nwb`` against the
+*core* NWB specification. On success, the output will is:
 
 .. code-block:: text
 
-  Validating test.nwb against cached namespace information using namespace core.
+  Validating test.nwb against cached namespace information using namespace 'core'.
    - no errors found.
 
-and the program exit code is ``0``. On error the program exit code is ``1`` and
-the list of errors is outputted.
+and the program exit code is ``0``. On error the program exit code is ``1`` and the list of errors is outputted.
 
-If possible the file is validated against the cached namespace specification
-read from the file itself. This can be tweaked with the command line options given below.
+If the file contains NWB extensions, then the above validation command will validate the file ``test.nwb`` against
+all extensions in the file and the core NWB specification.
 
-CURRENTLY BROKEN!!!
+To validate against only one NWB extension that is cached within the file, use the ``-n`` flag.
+For example, the following command will validate against the "ndx-my-extension" namespace that is cached
+within the ``test.nwb`` file.
 
-Validating against other specifications i.e. extensions
-can be done using the ``-p`` and ``-n`` flags. For example, the following command will validate against the specifications referenced in the namespace
-file ``mylab.namespace.yaml`` in addition to the core specification.
+To validate against the version of the **core** NWB specification that is included with the installed version of
+PyNWB, use the ``--no-cached-namespace`` flag. This can be useful in validating files against newer or older versions
+of the **core** NWB specification.
+
 
 .. code-block:: bash
 
-  python -m pynwb.validate -p mylab.namespace.yaml test.nwb
+  python -m pynwb.validate -n ndx-my-extension test.nwb
 
-.. Last updated 2/2020
+.. Last updated 8/13/2021
 .. code-block:: text
 
   $python -m pynwb.validate --help
-  usage: validate.py [-h] [-p NSPATH] [-n NS] [-lns]
-                     [--cached-namespace | --no-cached-namespace]
-                     paths [paths ...]
+  usage: validate.py [-h] [-n NS] [-lns] [--cached-namespace | --no-cached-namespace] paths [paths ...]
 
   Validate an NWB file
 
@@ -47,8 +49,6 @@ file ``mylab.namespace.yaml`` in addition to the core specification.
 
   optional arguments:
     -h, --help            show this help message and exit
-    -p NSPATH, --nspath NSPATH
-                          the path to the namespace YAML file
     -n NS, --ns NS        the namespace to validate against
     -lns, --list-namespaces
                           List the available namespaces and exit.
@@ -56,5 +56,7 @@ file ``mylab.namespace.yaml`` in addition to the core specification.
     --no-cached-namespace
                           Don't use the cached namespace.
 
-  use --nspath to validate against an extension. If --ns is not specified,
-  validate against all namespaces in namespace file.
+  If --ns is not specified, validate against all namespaces in the NWB file.
+
+Validation against a namespace that is not cached within the schema is not currently possible but is a planned
+feature.
