@@ -37,7 +37,7 @@ of the **core** NWB specification.
 
 .. code-block:: bash
 
-  python -m pynwb.validate--no-cached-namespace test.nwb
+  python -m pynwb.validate --no-cached-namespace test.nwb
 
 .. Last updated 8/13/2021
 .. code-block:: text
