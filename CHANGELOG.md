@@ -33,6 +33,7 @@
 - Added thumbnails for tutorials to improve presentation of online docs.  @oruebel (#1349)
 - Used `sphinx.ext.extlinks` extension in docs to simplify linking to common targets. @oruebel (#1349)
 - Created new section for advanced I/O tutorials and moved parallel I/O tutorial to its own file. @oruebel (#1349)
+- Overhauled documentation on extensions. @bendichter, @rly, @oruebel (#1350)
 - Updated the optical physiology / Calcium imaging tutorial. @bendichter, @weiglszonja (#1375)
 - Added a tutorial on streaming using the ROS3 driver. @rly (#1393)
 
@@ -43,6 +44,7 @@
   for tests and tutorials. @oruebel (#1349, #1383)
 - Added on-push and nightly tests of streaming using the ROS3 driver. @rly (#1393)
   - These tests make use of a new dandiset for testing the API: https://gui.dandiarchive.org/#/dandiset/000126
+- Improve documentation and test for ``CorrectedImageStack``, ``MotionCorrection``. @rly, @bendichter (#1306, #1374)
 
 ### Bug fixes:
 - Updated behavior of ``make clean`` command for docs to ensure tutorial files are cleaned up.  @oruebel (#1349)
