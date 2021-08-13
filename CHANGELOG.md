@@ -55,6 +55,7 @@
   be provided in place of ``data``. ``OpticalSeries.__init__`` now makes ``data`` optional. However, this has the
   side effect of moving the position of ``data`` to later in the argument list, which may break code that relies
   on positional arguments for ``OpticalSeries.__init__``. @rly (#1274)
+- Fixed `setup.py` not being able to import `versioneer` when installing in an embedded Python environment. @ikhramts (#1395)
 
 ## PyNWB 1.5.1 (May 24, 2021)
 
