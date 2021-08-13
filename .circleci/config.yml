@@ -230,6 +230,34 @@ jobs:
       - TEST_WHEELINSTALL_ENV: "wheelinstall"
     <<: *conda-steps
 
+  miniconda39-ros3:   # tox and conda do not play nicely so do not use tox here
+    <<: *conda-image
+    environment:
+      - CONDA_PYTHON_VER: "3.9"
+      - TEST_TOX_ENV: "ros3-py39"
+      - BUILD_TOX_ENV: "build-py39"
+      - TEST_WHEELINSTALL_ENV: "wheelinstall"
+    steps:
+      - checkout
+      - run: git submodule sync
+      - run: git submodule update --init
+      - run:
+          name: Configure conda
+          command: |
+            conda config --set always_yes yes --set changeps1 no
+            conda config --add channels conda-forge
+            conda install python=$CONDA_PYTHON_VER
+            conda install virtualenv
+            conda install tox
+      - run:
+          name: Run the tests
+          command: |
+            conda env create -f environment-ros3.yml
+            source activate ros3
+            pip install -r requirements-dev.txt
+            pip install -e .
+            python test.py --ros3
+
   gallery37:
     <<: *py37
     environment:
@@ -348,6 +376,8 @@ workflows:
           <<: *no_filters
       - gallery38:  # TODO replace with gallery39 after allensdk support py39
           <<: *no_filters
+      - miniconda39-ros3:
+          <<: *no_filters
       - deploy-dev:
           requires:
             - flake8
@@ -357,6 +387,7 @@ workflows:
             - miniconda39
             - gallery37-min-req
             - gallery38  # gallery39
+            - miniconda39-ros3
           filters:
             tags:
               ignore:
@@ -376,6 +407,7 @@ workflows:
             - miniconda39
             - gallery37-min-req
             - gallery38  # gallery39
+            - miniconda39-ros3
           filters:
             tags:
               only: /^[0-9]+(\.[0-9]+)*(\.post[0-9]+)?$/
@@ -423,4 +455,8 @@ workflows:
       - gallery39-upgrade-dev:
           <<: *no_filters
       - gallery39-upgrade-dev-pre:
+          <<: *no_filters
+      - miniconda39-ros3:
+          <<: *no_filters
+      - test-validation:
           <<: *no_filters
