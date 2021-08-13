@@ -41,7 +41,8 @@
 - Updated CI and tests to handle deprecations in libraries. @rly (#1377)
 - Added test utilities for icephys (``pynwb.testing.icephys_testutils``) to ease creation of test data
   for tests and tutorials. @oruebel (#1349, #1383)
-- Added tests of streaming using the ROS3 driver. @rly (#1393)
+- Added on-push and nightly tests of streaming using the ROS3 driver. @rly (#1393)
+  - These tests make use of a new dandiset for testing the API: https://gui.dandiarchive.org/#/dandiset/000126
 
 ### Bug fixes:
 - Updated behavior of ``make clean`` command for docs to ensure tutorial files are cleaned up.  @oruebel (#1349)
