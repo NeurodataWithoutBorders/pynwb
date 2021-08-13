@@ -1,5 +1,20 @@
 # PyNWB Changelog
 
+## PyNWB 3.0.0 (upcoming)
+
+### Breaking changes:
+- Updated ``TimeIntervals`` to use the new  ``TimeSeriesReferenceVectorData`` type. This does not alter the overall structure
+  of ``TimeIntervals`` in a major way aside from changing the value of the ``neurodata_type`` attribute of the
+  ``TimeIntervals.timeseries`` column from ``VectorData`` to ``TimeSeriesReferenceVectorData``. This change facilitate
+  creating common functionality around ``TimeSeriesReferenceVectorData``. For NWB files with v2.4.0 and earlier,
+  the ``TimeIntervals.timeseries`` column is automatically migrated on read in the ``TimeIntervalsMap``
+  object mapper class to use the ``TimeSeriesReferenceVectorData`` container class, so that users are presented a
+  consistent API for existing and new files.  This change affects all existing ``TimeIntervals`` tables
+  e.g., ``NBWFil.epochs``, ``NWBFile.trials``, and ``NWBFile.invalid_times``. While this is technically a breaking
+  change, the impact user codes should be minimal as this change primarily adds functionality while the overall
+  behavior of the API is largely consistent with existing behavior.
+
+
 ## PyNWB 2.0.0 (Upcoming)
 
 ### Breaking changes:
