@@ -14,10 +14,11 @@ a :py:class:`~hdmf.common.table.DynamicTable` with the following columns:
    :py:meth:`~pynwb.file.NWBFile.timestamps_reference_time` of the file. In addition,
 2. :py:class:`~pynwb.epoch.TimeIntervals.tags` is an optional, indexed column used to associate user-defined string
    tags with intervals (0 or more tags per time interval)
-3. :py:class:`~pynwb.epoch.TimeIntervals.timeseries` is an optional, indexed :py:class:`~pynwb.base.TimeSeriesReferenceVectorData`
-   column to map intervals directly to ranges in select, relevant :py:class:`~pynwb.base.TimeSeries` (0 or more per time interval)
-4. as a :py:class:`~hdmf.common.table.DynamicTable` user may add additional columns to :py:meth:`~pynwb.epoch.TimeIntervals`
-   via :py:class:`~hdmf.common.table.DynamicTable.add_column`
+3. :py:class:`~pynwb.epoch.TimeIntervals.timeseries` is an optional, indexed
+   :py:class:`~pynwb.base.TimeSeriesReferenceVectorData` column to map intervals directly to ranges in select,
+   relevant :py:class:`~pynwb.base.TimeSeries` (0 or more per time interval)
+4. as a :py:class:`~hdmf.common.table.DynamicTable` user may add additional columns to
+   :py:meth:`~pynwb.epoch.TimeIntervals` via :py:class:`~hdmf.common.table.DynamicTable.add_column`
 
 
 .. hint:: :py:meth:`~pynwb.epoch.TimeIntervals` is intended for storing general annotations of time ranges.
@@ -74,12 +75,12 @@ nwbfile.add_acquisition(rate_ts)
 # Trials can be added to an NWB file using the methods :py:meth:`~pynwb.file.NWBFile.add_trial`
 # By default, NWBFile only requires trial :py:meth:`~pynwb.file.NWBFile.add_trial.start_time`
 # and :py:meth:`~pynwb.file.NWBFile.add_trial.end_time`. The :py:meth:`~pynwb.file.NWBFile.add_trial.tags`
-# and :py:meth:`~pynwb.file.NWBFile.add_trial.timeseries` are optional. For :py:meth:`~pynwb.file.NWBFile.add_trial.timeseries`
-# we only need to supply the :py:class:`~pynwb.base.TimeSeries`. PyNWB automatically calculates the
-# corresponding index range (described by ``idx_start`` and ``count``) for the supplied  :py:class:`~pynwb.base.TimeSeries
-# based on the given ``start_time`` and ``stop_time`` and the :py:meth:`~pynwb.base.TimeSeries.timestamps`
-# (or :py:class:`~pynwb.base.TimeSeries.starting_time` and :py:meth:`~pynwb.base.TimeSeries.rate`) of
-# the given :py:class:`~pynwb.base.TimeSeries`.
+# and :py:meth:`~pynwb.file.NWBFile.add_trial.timeseries` are optional. For
+# :py:meth:`~pynwb.file.NWBFile.add_trial.timeseries` we only need to supply the :py:class:`~pynwb.base.TimeSeries`.
+# PyNWB automatically calculates the corresponding index range (described by ``idx_start`` and ``count``) for
+# the supplied  :py:class:`~pynwb.base.TimeSeries based on the given ``start_time`` and ``stop_time`` and
+# the :py:meth:`~pynwb.base.TimeSeries.timestamps` (or :py:class:`~pynwb.base.TimeSeries.starting_time`
+# and :py:meth:`~pynwb.base.TimeSeries.rate`) of the given :py:class:`~pynwb.base.TimeSeries`.
 #
 # Additional columns can be added using :py:meth:`~pynwb.file.NWBFile.add_trial_column`. This method takes a name
 # for the column and a description of what the column stores. You do not need to supply data
@@ -90,12 +91,18 @@ nwbfile.add_acquisition(rate_ts)
 
 nwbfile.add_trial_column(name='stim', description='the visual stimuli during the trial')
 
-nwbfile.add_trial(start_time=0.0, stop_time=2.0, stim='person', tags=['A1'], timeseries=[test_ts, rate_ts])
-nwbfile.add_trial(start_time=3.0, stop_time=5.0, stim='ocean', tags=['A2', 'B2'], timeseries=[test_ts, rate_ts])
-nwbfile.add_trial(start_time=6.0, stop_time=8.0, stim='desert', tags=[], timeseries=[test_ts, rate_ts])
-nwbfile.add_trial(start_time=9.0, stop_time=11.0, stim='desert', tags=[], timeseries=[test_ts, rate_ts])
-nwbfile.add_trial(start_time=12.0, stop_time=14.0, stim='desert', tags=[], timeseries=[test_ts, rate_ts])
-nwbfile.add_trial(start_time=15.0, stop_time=17.0, stim='desert', tags=[], timeseries=[test_ts, rate_ts])
+nwbfile.add_trial(start_time=0.0, stop_time=2.0, stim='dog',
+                  tags=['animal'], timeseries=[test_ts, rate_ts])
+nwbfile.add_trial(start_time=3.0, stop_time=5.0, stim='mountain',
+                  tags=['landscape'], timeseries=[test_ts, rate_ts])
+nwbfile.add_trial(start_time=6.0, stop_time=8.0, stim='desert',
+                  tags=['landscape'], timeseries=[test_ts, rate_ts])
+nwbfile.add_trial(start_time=9.0, stop_time=11.0, stim='tree',
+                  tags=['landscape', 'plant'], timeseries=[test_ts, rate_ts])
+nwbfile.add_trial(start_time=12.0, stop_time=14.0, stim='bird',
+                  tags=['animal'], timeseries=[test_ts, rate_ts])
+nwbfile.add_trial(start_time=15.0, stop_time=17.0, stim='flower',
+                  tags=['animal'], timeseries=[test_ts, rate_ts])
 
 ####################
 # Epochs
@@ -122,9 +129,10 @@ nwbfile.add_epoch(6.0, 8.0, ['second', 'example'], [test_ts, ])
 # ^^^^^^^^^^^^^^^^^^^^^
 #
 # To define custom, experiment-specific :py:class:`~pynwb.epoch.TimeIntervals` we can wither add them
-# either: 1) when creating the :py:class:`~pynwb.file.NWBFile` by defining the :py:meth:`~pynwb.file.NWBFile.__init__.intervals`
-# constructor argument or 2) via the :py:meth:`~pynwb.file.NWBFile.add_time_intervals` or
-# :py:meth:`~pynwb.file.NWBFile.create_time_intervals` after the :py:class:`~pynwb.file.NWBFile` has been created.
+# either: 1) when creating the :py:class:`~pynwb.file.NWBFile` by defining the
+# :py:meth:`~pynwb.file.NWBFile.__init__.intervals` constructor argument or 2) via the
+# :py:meth:`~pynwb.file.NWBFile.add_time_intervals` or :py:meth:`~pynwb.file.NWBFile.create_time_intervals`
+# after the :py:class:`~pynwb.file.NWBFile` has been created.
 #
 
 from pynwb.epoch import TimeIntervals
@@ -179,35 +187,31 @@ trials_df.query('(start_time > 2.0) & (stop_time < 9.0)')
 # to :py:class:`~pynwb.base.TimeSeries` are described via :py:class:`~pynwb.base.TimeSeriesReference` tuples
 # with the :py:class:`~pynwb.base.TimeSeriesReference.idx_start`, :py:class:`~pynwb.base.TimeSeriesReference.count`,
 # and :py:class:`~pynwb.base.TimeSeriesReference.timeseries`.
+# Using :py:class:`~pynwb.base.TimeSeriesReference` we can easily access the relevant
+# :py:meth:`~pynwb.base.TimeSeriesReference.data` and :py:meth:`~pynwb.base.TimeSeriesReference.timestamps`
+# for the corresponding time range from the :py:class:`~pynwb.base.TimeSeries`.
 
-example_tsr = nwbfile.trials['timeseries'][0][0]  # get a single TimeSeriesReference
-
-####################
-# Using :py:class:`~pynwb.base.TimeSeriesReference` to represent references to timeseries allows us to easily access
-# the relevant ``data``  and  ``timestamps``  for the corresponding time range from the :py:class:`~pynwb.base.TimeSeries`
-# via the :py:meth:`~pynwb.base.TimeSeriesReference.data` and :py:meth:`~pynwb.base.TimeSeriesReference.timestamps`
+# Get a single example TimeSeriesReference from the trials table
+example_tsr = nwbfile.trials['timeseries'][0][0]
 
 # Get the data values from the timeseries. This is a shorthand for:
 # _ = example_tsr.timeseries.data[example_tsr.idx_start: (example_tsr.idx_start + example_tsr.count)]
-
 _ = example_tsr.data
 
-# Get the timestamps
+# Get the timestamps. Timestamps are either loaded from the TimeSeries or
+# computed from the starting_time and rate
 example_tsr.timestamps
 
 ####################
 # Using :py:class:`~pynwb.base.TimeSeriesReference.isvalid` we can further check if the reference is valid.
+# A :py:class:`~pynwb.base.TimeSeriesReference` is defined as invalid if both
+# :py:class:`~pynwb.base.TimeSeriesReference.idx_start`, :py:class:`~pynwb.base.TimeSeriesReference.count` are
+# set to ``-1``. :py:class:`~pynwb.base.TimeSeriesReference.isvalid` further also checks that the indicated
+# index range and types are valid, raising ``IndexError`` and ``TypeError`` respectively, if bad
+# :py:class:`~pynwb.base.TimeSeriesReference.idx_start`, :py:class:`~pynwb.base.TimeSeriesReference.count` or
+# :py:class:`~pynwb.base.TimeSeriesReference.timeseries` are found.
 
 example_tsr.isvalid()
-
-####################
-# A :py:class:`~pynwb.base.TimeSeriesReference` is defined as invalid (or None) if both
-# :py:class:`~pynwb.base.TimeSeriesReference.idx_start`, :py:class:`~pynwb.base.TimeSeriesReference.count` are
-# set to ``-1``. :py:class:`~pynwb.base.TimeSeriesReference.isvalid` further also checks that: 1) the indicated
-# index range is valid for the given :py:class:`~pynwb.base.TimeSeries`, raising ``IndexError`` if
-# :py:class:`~pynwb.base.TimeSeriesReference.idx_start`, :py:class:`~pynwb.base.TimeSeriesReference.count` are bad
-# and 2) raising ``TypeError`` if  :py:class:`~pynwb.base.TimeSeriesReference.idx_start`, :py:class:`~pynwb.base.TimeSeriesReference.count`
-# or :py:class:`~pynwb.base.TimeSeriesReference.timeseries` have a bad dtype.
 
 ####################
 # Adding TimeSeries references to other tables
@@ -219,5 +223,3 @@ example_tsr.isvalid()
 # it is used to reference the recording of the stimulus and response associated with a particular intracellular
 # electrophysiology recording.
 #
-
-
