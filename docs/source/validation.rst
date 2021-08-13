@@ -33,7 +33,7 @@ within the ``test.nwb`` file.
 
 To validate against the version of the **core** NWB specification that is included with the installed version of
 PyNWB, use the ``--no-cached-namespace`` flag. This can be useful in validating files against newer or older versions
-of the **core** NWB specification.
+of the **core** NWB specification that are installed with newer or older versions of PyNWB.
 
 .. code-block:: bash
 
