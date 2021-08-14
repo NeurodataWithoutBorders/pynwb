@@ -455,6 +455,18 @@ class TimeSeriesReferenceVectorData(VectorData):
             *get_docval(VectorData.__init__, 'data'))
     def __init__(self, **kwargs):
         call_docval_func(super().__init__, kwargs)
+        # CAUTION: Define any logic specific for init in the self._init_internal function, not here!
+        self._init_internal()
+
+    def _init_internal(self):
+        """
+        Called from __init__ to perform initialization specific to this class. This is done
+        here due to the :py:class:`~pynwb.io.epoch.TimeIntervalsMap` having to migrate legacy VectorData
+        to TimeSeriesReferenceVectorData. In this way, if dedicated logic init logic needs
+        to be added to this class then we have a place for it without having to also
+        update :py:class:`~pynwb.io.epoch.TimeIntervalsMap` (which would likely get forgotten)
+        """
+        pass
 
     @docval({'name': 'val', 'type': (TIME_SERIES_REFERENCE_TUPLE, tuple),
              'doc': 'the value to add to this column. If this is a regular tuple then it '
