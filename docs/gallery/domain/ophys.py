@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 '''
-Calcium imaging data
-============================
+Calcium Imaging Data
+====================
 
 This tutorial will demonstrate how to write calcium imaging data. The workflow demonstrated here involves
 five main steps:

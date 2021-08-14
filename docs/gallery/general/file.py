@@ -1,8 +1,8 @@
 """
 .. _basics:
 
-NWB basics
-==========
+1. NWB File Basics
+==================
 
 This example will focus on the basics of working with an :py:class:`~pynwb.file.NWBFile` object,
 including writing and reading of an NWB file.

@@ -2,7 +2,7 @@
 '''
 .. _icephys_tutorial_new:
 
-Intracellular electrophysiology
+Intracellular Electrophysiology
 ===============================
 
 The following tutorial describes storage of intracellular electrophysiology data in NWB.
