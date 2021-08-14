@@ -2,7 +2,7 @@
 '''
 .. _icephys_pandas_tutorial:
 
-Intracellular Electrophysiology Metadata Query
+Query Intracellular Electrophysiology Metadata
 ==============================================
 
 This tutorial focuses on using pandas to query experiment metadata for
