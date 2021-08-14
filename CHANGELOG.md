@@ -14,6 +14,10 @@
   change, the impact user codes should be minimal as this change primarily adds functionality while the overall
   behavior of the API is largely consistent with existing behavior.
 
+## PyNWB 2.0.1 (Upcoming)
+
+### Bug fixes:
+- Add `environment-ros3.yml` to `MANIFEST.in` for inclusion in source distributions. @rly (#1398)
 
 ## PyNWB 2.0.0 (August 13, 2021)
 
@@ -48,6 +52,7 @@
 - Added thumbnails for tutorials to improve presentation of online docs.  @oruebel (#1349)
 - Used `sphinx.ext.extlinks` extension in docs to simplify linking to common targets. @oruebel (#1349)
 - Created new section for advanced I/O tutorials and moved parallel I/O tutorial to its own file. @oruebel (#1349)
+- Overhauled documentation on extensions. @bendichter, @rly, @oruebel (#1350)
 - Updated the optical physiology / Calcium imaging tutorial. @bendichter, @weiglszonja (#1375)
 - Added a tutorial on streaming using the ROS3 driver. @rly (#1393)
 
@@ -58,6 +63,7 @@
   for tests and tutorials. @oruebel (#1349, #1383)
 - Added on-push and nightly tests of streaming using the ROS3 driver. @rly (#1393)
   - These tests make use of a new dandiset for testing the API: https://gui.dandiarchive.org/#/dandiset/000126
+- Improve documentation and test for ``CorrectedImageStack``, ``MotionCorrection``. @rly, @bendichter (#1306, #1374)
 
 ### Bug fixes:
 - Updated behavior of ``make clean`` command for docs to ensure tutorial files are cleaned up.  @oruebel (#1349)
@@ -70,6 +76,9 @@
   be provided in place of ``data``. ``OpticalSeries.__init__`` now makes ``data`` optional. However, this has the
   side effect of moving the position of ``data`` to later in the argument list, which may break code that relies
   on positional arguments for ``OpticalSeries.__init__``. @rly (#1274)
+- Fixed `setup.py` not being able to import `versioneer` when installing in an embedded Python environment. @ikhramts
+  (#1395)
+- Removed broken option to validate against a given namespace file and updated associated documentation. @rly (#1397)
 
 ## PyNWB 1.5.1 (May 24, 2021)
 
