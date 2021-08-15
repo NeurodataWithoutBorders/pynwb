@@ -61,14 +61,14 @@ nwbfile = NWBFile(
 # .. only:: html
 #
 #   .. image:: ../../_static/ImagingPlane.svg
-#     :width: 400
+#     :width: 50%
 #     :alt: imaging plane UML diagram
 #     :align: center
 #
 # .. only:: latex
 #
 #   .. image:: ../../_static/ImagingPlane.png
-#     :width: 400
+#     :width: 50%
 #     :alt: imaging plane UML diagram
 #     :align: center
 #
@@ -116,14 +116,14 @@ imaging_plane = nwbfile.create_imaging_plane(
 # .. only:: html
 #
 #   .. image:: ../../_static/TwoPhotonSeries.svg
-#     :width: 800
+#     :width: 80%
 #     :alt: two-photon series UML diagram
 #     :align: center
 #
 # .. only:: latex
 #
 #   .. image:: ../../_static/TwoPhotonSeries.png
-#     :width: 800
+#     :width: 80%
 #     :alt: two-photon series UML diagram
 #     :align: center
 #
@@ -221,14 +221,14 @@ ophys_module.add(motion_correction)
 # .. only:: html
 #
 #   .. image:: ../../_static/PlaneSegmentation.svg
-#     :width: 800
+#     :width: 60%
 #     :alt: plane segmentation UML diagram
 #     :align: center
 #
 # .. only:: latex
 #
 #   .. image:: ../../_static/PlaneSegmentation.png
-#     :width: 800
+#     :width: 60%
 #     :alt: plane segmentation UML diagram
 #     :align: center
 #
@@ -239,14 +239,14 @@ ophys_module.add(motion_correction)
 # .. only:: html
 #
 #   .. image:: ../../_static/ImageSegmentation.svg
-#     :width: 800
+#     :width: 100%
 #     :alt: image segmentation UML diagram
 #     :align: center
 #
 # .. only:: latex
 #
 #   .. image:: ../../_static/ImageSegmentation.png
-#     :width: 800
+#     :width: 100%
 #     :alt: image segmentation UML diagram
 #     :align: center
 #
@@ -345,14 +345,14 @@ ps2.to_dataframe()
 # .. only:: html
 #
 #   .. image:: ../../_static/RoiResponseSeries.svg
-#     :width: 600
+#     :width: 80%
 #     :alt: RoiResponseSeries UML diagram
 #     :align: center
 #
 # .. only:: latex
 #
 #   .. image:: ../../_static/RoiResponseSeries.png
-#     :width: 600
+#     :width: 80%
 #     :alt: RoiResponseSeries UML diagram
 #     :align: center
 #
@@ -396,14 +396,14 @@ roi_resp_series = RoiResponseSeries(
 # .. only:: html
 #
 #   .. image:: ../../_static/Fluorescence.svg
-#     :width: 600
+#     :width: 100%
 #     :alt: fluorescence UML diagram
 #     :align: center
 #
 # .. only:: latex
 #
 #   .. image:: ../../_static/Fluorescence.png
-#     :width: 600
+#     :width: 100%
 #     :alt: fluorescence UML diagram
 #     :align: center
 
