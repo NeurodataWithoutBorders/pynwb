@@ -1,6 +1,14 @@
 # PyNWB Changelog
 
-## PyNWB 2.0.0 (Upcoming)
+## PyNWB 2.0.1 (Upcoming)
+
+### Bug fixes:
+- Add `environment-ros3.yml` to `MANIFEST.in` for inclusion in source distributions. @rly (#1398)
+
+### Tutorial enhancements:
+- Updated the general tutorial to add documentation about the ``Images`` type. @bendichter (#1353)
+
+## PyNWB 2.0.0 (August 13, 2021)
 
 ### Breaking changes:
 - ``SweepTable`` has been deprecated in favor of the new icephys metadata tables. Use of ``SweepTable``
@@ -23,6 +31,7 @@
   for more details. @oruebel, @rly (#1349)
 - Dropped Python 3.6 support, added Python 3.9 support. @rly (#1377)
 - Updated requirements to allow compatibility with HDMF 3 and h5py 3. @rly (#1377)
+  - When using HDMF 3 and h5py 3, users can now stream NWB files from an S3 bucket.
 
 ### Tutorial enhancements:
 - Added new tutorial for intracellular electrophysiology to describe the use of the new metadata tables
@@ -32,14 +41,18 @@
 - Added thumbnails for tutorials to improve presentation of online docs.  @oruebel (#1349)
 - Used `sphinx.ext.extlinks` extension in docs to simplify linking to common targets. @oruebel (#1349)
 - Created new section for advanced I/O tutorials and moved parallel I/O tutorial to its own file. @oruebel (#1349)
+- Overhauled documentation on extensions. @bendichter, @rly, @oruebel (#1350)
 - Updated the optical physiology / Calcium imaging tutorial. @bendichter, @weiglszonja (#1375)
-- Updated the general tutorial to add documentation about the ``Images`` type. @bendichter (#1353)
+- Added a tutorial on streaming using the ROS3 driver. @rly (#1393)
 
 ### Minor new features:
-- Add RRID for citing PyNWB to the docs. @oruebel (#1372)
-- Update CI and tests to handle deprecations in libraries. @rly (#1377)
-- Add test utilities for icephys (``pynwb.testing.icephys_testutils``) to ease creation of test data
+- Added RRID for citing PyNWB to the docs. @oruebel (#1372)
+- Updated CI and tests to handle deprecations in libraries. @rly (#1377)
+- Added test utilities for icephys (``pynwb.testing.icephys_testutils``) to ease creation of test data
   for tests and tutorials. @oruebel (#1349, #1383)
+- Added on-push and nightly tests of streaming using the ROS3 driver. @rly (#1393)
+  - These tests make use of a new dandiset for testing the API: https://gui.dandiarchive.org/#/dandiset/000126
+- Improve documentation and test for ``CorrectedImageStack``, ``MotionCorrection``. @rly, @bendichter (#1306, #1374)
 
 ### Bug fixes:
 - Updated behavior of ``make clean`` command for docs to ensure tutorial files are cleaned up.  @oruebel (#1349)
@@ -52,6 +65,9 @@
   be provided in place of ``data``. ``OpticalSeries.__init__`` now makes ``data`` optional. However, this has the
   side effect of moving the position of ``data`` to later in the argument list, which may break code that relies
   on positional arguments for ``OpticalSeries.__init__``. @rly (#1274)
+- Fixed `setup.py` not being able to import `versioneer` when installing in an embedded Python environment. @ikhramts
+  (#1395)
+- Removed broken option to validate against a given namespace file and updated associated documentation. @rly (#1397)
 
 ## PyNWB 1.5.1 (May 24, 2021)
 

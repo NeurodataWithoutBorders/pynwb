@@ -12,7 +12,7 @@ import sys
 import traceback
 import unittest
 
-flags = {'pynwb': 2, 'integration': 3, 'example': 4, 'backwards': 5, 'validation': 6}
+flags = {'pynwb': 2, 'integration': 3, 'example': 4, 'backwards': 5, 'validation': 6, 'ros3': 7}
 
 TOTAL = 0
 FAILURES = 0
@@ -47,7 +47,9 @@ def run_test_suite(directory, description="", verbose=True):
     logging.info("running %s" % description)
     directory = os.path.join(os.path.dirname(__file__), directory)
     runner = unittest.TextTestRunner(verbosity=verbose, resultclass=SuccessRecordingResult)
-    test_result = runner.run(unittest.TestLoader().discover(directory))
+    # set top_level_dir below to prevent import name clashes between
+    # tests/unit/test_base.py and tests/integration/hdf5/test_base.py
+    test_result = runner.run(unittest.TestLoader().discover(directory, top_level_dir='tests'))
 
     TOTAL += test_result.testsRun
     FAILURES += len(test_result.failures)
@@ -161,7 +163,7 @@ def validate_nwbs():
 
 
 def run_integration_tests(verbose=True):
-    pynwb_test_result = run_test_suite("tests/integration", "integration tests", verbose=verbose)
+    pynwb_test_result = run_test_suite("tests/integration/hdf5", "integration tests", verbose=verbose)
     test_cases = pynwb_test_result.get_all_cases_run()
 
     import pynwb
@@ -208,11 +210,14 @@ def main():
                         help='run backwards compatibility tests')
     parser.add_argument('-w', '--validation', action='append_const', const=flags['validation'], dest='suites',
                         help='run validation tests')
+    parser.add_argument('-r', '--ros3', action='append_const', const=flags['ros3'], dest='suites',
+                        help='run ros3 streaming tests')
     args = parser.parse_args()
     if not args.suites:
         args.suites = list(flags.values())
         args.suites.pop(args.suites.index(flags['example']))  # remove example as a suite run by default
         args.suites.pop(args.suites.index(flags['validation']))  # remove validation as a suite run by default
+        args.suites.pop(args.suites.index(flags['ros3']))  # remove ros3 as a suite run by default (different reqs)
 
     # set up logger
     root = logging.getLogger()
@@ -250,6 +255,10 @@ def main():
     # Run backwards compatibility tests
     if flags['backwards'] in args.suites:
         run_test_suite("tests/back_compat", "pynwb backwards compatibility tests", verbose=args.verbosity)
+
+    # Run ros3 streaming tests
+    if flags['ros3'] in args.suites:
+        run_test_suite("tests/integration/ros3", "pynwb ros3 streaming tests", verbose=args.verbosity)
 
     final_message = 'Ran %s tests' % TOTAL
     exitcode = 0

@@ -29,13 +29,12 @@ def _validate_helper(**kwargs):
 def main():  # noqa: C901
 
     ep = """
-    use --nspath to validate against an extension. If --ns is not specified,
-    validate against all namespaces in namespace file.
+    If --ns is not specified, validate against all namespaces in the NWB file.
     """
 
     parser = ArgumentParser(description="Validate an NWB file", epilog=ep)
     parser.add_argument("paths", type=str, nargs='+', help="NWB file paths")
-    parser.add_argument('-p', '--nspath', type=str, help="the path to the namespace YAML file")
+    # parser.add_argument('-p', '--nspath', type=str, help="the path to the namespace YAML file")
     parser.add_argument("-n", "--ns", type=str, help="the namespace to validate against")
     parser.add_argument("-lns", "--list-namespaces", dest="list_namespaces",
                         action='store_true', help="List the available namespaces and exit.")
@@ -50,15 +49,16 @@ def main():  # noqa: C901
     args = parser.parse_args()
     ret = 0
 
-    if args.nspath:
-        if not os.path.isfile(args.nspath):
-            print("The namespace file {} is not a valid file.".format(args.nspath), file=sys.stderr)
-            sys.exit(1)
-
-        if args.cached_namespace:
-            print("Turning off validation against cached namespace information "
-                  "as --nspath was passed.", file=sys.stderr)
-            args.cached_namespace = False
+    # TODO Validation against a specific namespace file is currently broken. See pynwb#1396
+    # if args.nspath:
+    #     if not os.path.isfile(args.nspath):
+    #         print("The namespace file {} is not a valid file.".format(args.nspath), file=sys.stderr)
+    #         sys.exit(1)
+    #
+    #     if args.cached_namespace:
+    #         print("Turning off validation against cached namespace information "
+    #               "as --nspath was passed.", file=sys.stderr)
+    #         args.cached_namespace = False
 
     for path in args.paths:
 
@@ -87,17 +87,17 @@ def main():  # noqa: C901
                 specloc = "pynwb namespace information"
                 print("The file {} has no cached namespace information. "
                       "Falling back to {}.".format(path, specloc), file=sys.stderr)
-        elif args.nspath:
-            catalog = NamespaceCatalog(NWBGroupSpec, NWBDatasetSpec, NWBNamespace)
-            namespaces = catalog.load_namespaces(args.nspath)
-
-            if len(namespaces) == 0:
-                print("Could not load namespaces from file {}.".format(args.nspath), file=sys.stderr)
-                sys.exit(1)
-
-            tm = TypeMap(catalog)
-            manager = BuildManager(tm)
-            specloc = "--nspath namespace information"
+        # elif args.nspath:
+        #     catalog = NamespaceCatalog(NWBGroupSpec, NWBDatasetSpec, NWBNamespace)
+        #     namespaces = catalog.load_namespaces(args.nspath)
+        #
+        #     if len(namespaces) == 0:
+        #         print("Could not load namespaces from file {}.".format(args.nspath), file=sys.stderr)
+        #         sys.exit(1)
+        #
+        #     tm = TypeMap(catalog)
+        #     manager = BuildManager(tm)
+        #     specloc = "--nspath namespace information"
         else:
             manager = None
             namespaces = [CORE_NAMESPACE]
