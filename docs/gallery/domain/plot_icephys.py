@@ -51,7 +51,7 @@ enabling users to add columns for custom metadata.
 - :py:class:`~pynwb.icephys.RepetitionsTable` groups sequential recordings from
   the :py:class:`~pynwb.icephys.SequentialRecordingsTable`. In practice a
   repetition is often also referred to a run. A typical use of the
-  py:class:`~pynwb.icephys.RepetitionsTable` is to group sets of different stimuli
+  :py:class:`~pynwb.icephys.RepetitionsTable` is to group sets of different stimuli
   that are applied in sequence that may be repeated.
 - :py:class:`~pynwb.icephys.ExperimentalConditionsTable` groups repetitions of
   intracellular recording from the :py:class:`~pynwb.icephys.RepetitionsTable`
