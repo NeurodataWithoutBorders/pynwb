@@ -387,13 +387,13 @@ nwbfile.intracellular_recordings.add_column(
 
 #####################################################################
 # The :py:class:`~pynwb.icephys.IntracellularRecordingsTable` table is not just a ``DynamicTable``
-# but an ``AlignedDynamicTable`. The ``AlignedDynamicTable` type is itself a ``DynamicTable``
+# but an ``AlignedDynamicTable``. The ``AlignedDynamicTable`` type is itself a ``DynamicTable``
 # that may contain an arbitrary number of additional ``DynamicTable``, each of which defines
 # a "category". This is similar to a table with "sub-headings". In the case of the
 # :py:class:`~pynwb.icephys.IntracellularRecordingsTable`, we have three predefined categories,
 # i.e., electrodes, stimuli, and responses. We can also dynamically add new categories to
-# the table. As each category corresponds to a DynamicTable, this means we have to create a
-# new DynamicTable and add it to our table.
+# the table. As each category corresponds to a ``DynamicTable``, this means we have to create a
+# new ``DynamicTable`` and add it to our table.
 
 # Create a new DynamicTable for our category that contains a location column of type VectorData
 location_column = VectorData(
