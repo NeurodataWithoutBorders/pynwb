@@ -25,7 +25,6 @@ breaking down the barriers to data sharing in neuroscience.
 
    install_users
    tutorials/index
-   overview_nwbfile
    overview_citing
 
 .. toctree::
