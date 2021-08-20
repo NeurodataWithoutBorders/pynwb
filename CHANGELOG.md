@@ -5,6 +5,11 @@
 ### Bug fixes:
 - Add `environment-ros3.yml` to `MANIFEST.in` for inclusion in source distributions. @rly (#1398)
 
+### Documentation enhancements:
+- Updated the main index of the documentation to make the documentation easier to navigate. @oruebel (#1402)
+- Merged the "NWB File" overview section with the "NWB File Basics" tutorial. @oruebel (#1402)
+- Updated and created separated installation instructions for users and developers . @oruebel (#1402)
+
 ## PyNWB 2.0.0 (August 13, 2021)
 
 ### Breaking changes:
