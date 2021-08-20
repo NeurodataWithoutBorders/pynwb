@@ -23,15 +23,8 @@ breaking down the barriers to data sharing in neuroscience.
    :maxdepth: 2
    :caption: Getting Started
 
-   getting_started
-   contributing
-
-.. toctree::
-   :maxdepth: 2
-   :caption: Overview
-
-   overview_intro
-   overview_software_architecture
+   install_users
+   tutorials/index
    overview_nwbfile
    overview_citing
 
@@ -39,24 +32,26 @@ breaking down the barriers to data sharing in neuroscience.
    :maxdepth: 2
    :caption: Resources
 
-   tutorials/index
    extensions_tutorial/extensions_tutorial_home
    validation
    api_docs
+
+.. toctree::
+   :maxdepth: 2
+   :caption: For Developers
+
+   install_developers
+   overview_software_architecture
+   update_requirements
    software_process
+   make_a_release
    make_roundtrip_test
 
 .. toctree::
    :maxdepth: 2
-   :caption: For Maintainers
+   :caption: Contributing
 
-   make_a_release
-   update_requirements
-
-.. toctree::
-   :maxdepth: 2
-   :caption: Legal
-
+   contributing
    legal
 
 Indices and tables
