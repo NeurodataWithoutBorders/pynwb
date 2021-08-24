@@ -56,16 +56,16 @@ serves as the base class for all other :py:class:`~pynwb.base.TimeSeries` types,
 
     * **Optical physiology and imaging:** :py:class:`~pynwb.image.ImageSeries` is the base type
       for image recordings and is further refined by the
-      :py:class:`~pynwb.image.ImageMaskSeries`, 
+      :py:class:`~pynwb.image.ImageMaskSeries`,
       :py:class:`~pynwb.image.OpticalSeries`, and
-      :py:class:`~pynwb.ophys.TwoPhotonSeries` types. 
+      :py:class:`~pynwb.ophys.TwoPhotonSeries` types.
       Other related time series types are:
-      :py:class:`~pynwb.image.IndexSeries` and 
+      :py:class:`~pynwb.image.IndexSeries` and
       :py:class:`~pynwb.ophys.RoiResponseSeries`.
 
-    * **Others** :py:class:`~pynwb.ogen.OptogeneticSeries`, 
+    * **Others** :py:class:`~pynwb.ogen.OptogeneticSeries`,
       :py:class:`~pynwb.behavior.SpatialSeries`,
-      :py:class:`~pynwb.misc.DecompositionSeries`, 
+      :py:class:`~pynwb.misc.DecompositionSeries`,
       :py:class:`~pynwb.misc.AnnotationSeries`,
       :py:class:`~pynwb.misc.AbstractFeatureSeries`, and
       :py:class:`~pynwb.misc.IntervalSeries`.
@@ -107,7 +107,7 @@ More commonly, you will be creating instances of classes that extend this class.
       :py:class:`~pynwb.ophys.ImageSegmentation`,
       :py:class:`~pynwb.ophys.MotionCorrection`.
 
-    * **Others:** :py:class:`~pynwb.retinotopy.ImagingRetinotopy`, 
+    * **Others:** :py:class:`~pynwb.retinotopy.ImagingRetinotopy`,
       :py:class:`~pynwb.base.Images`.
 
     * **TimeSeries:** Any :ref:`timeseries_overview` is also a subclass of :py:class:`~pynwb.core.NWBDataInterface`
