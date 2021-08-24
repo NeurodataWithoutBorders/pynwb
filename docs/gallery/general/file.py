@@ -6,7 +6,7 @@ NWB File Basics
 
 This example will focus on the basics of working with an :py:class:`~pynwb.file.NWBFile` object,
 including writing and reading of an NWB file. Before we dive into code showing how to use an
-:py:class:`~pynwb.file.NWBFile`, we first provide a brief overview the basic concepts of NWB. If you
+:py:class:`~pynwb.file.NWBFile`, we first provide a brief overview of the basic concepts of NWB. If you
 are already familiar with the concepts of :ref:`timeseries_overview` and :ref:`modules_overview`, then
 feel free to skip the :ref:`basics_background` part and go directly to :ref:`basics_nwbfile`.
 
@@ -15,8 +15,8 @@ feel free to skip the :ref:`basics_background` part and go directly to :ref:`bas
 Background: Basic concepts
 --------------------------
 
-In the  `NWB Format <https://nwb-schema.readthedocs.io>`_, each experimental session is typically
-represented by a separated NWB file. NWB files are represented in PyNWB by :py:class:`~pynwb.file.NWBFile`
+In the `NWB Format <https://nwb-schema.readthedocs.io>`_, each experimental session is typically
+represented by a separate NWB file. NWB files are represented in PyNWB by :py:class:`~pynwb.file.NWBFile`
 objects which provide functionality for creating and retrieving:
 
  * :ref:`timeseries_overview` datasets, i.e., objects for storing time series data
@@ -36,7 +36,7 @@ provided by the `NWB Format`_ . Like the NWB specification, :py:class:`~pynwb.ba
 follow an object-oriented inheritance pattern, i.e., the class :py:class:`~pynwb.base.TimeSeries`
 serves as the base class for all other :py:class:`~pynwb.base.TimeSeries` types, such as,
 :py:class:`~pynwb.ecephys.ElectricalSeries`, which itself may have further subtypes, e.g.,
-:py:class:`~pynwb.ecephys.SpikeEventSeries`
+:py:class:`~pynwb.ecephys.SpikeEventSeries`.
 
 .. seealso::
 
@@ -56,13 +56,19 @@ serves as the base class for all other :py:class:`~pynwb.base.TimeSeries` types,
 
     * **Optical physiology and imaging:** :py:class:`~pynwb.image.ImageSeries` is the base type
       for image recordings and is further refined by the
-      :py:class:`~pynwb.image.ImageMaskSeries`, :py:class:`~pynwb.image.OpticalSeries`, and
-      :py:class:`~pynwb.ophys.TwoPhotonSeries` types. Other related time series are also
-      :py:class:`~pynwb.image.IndexSeries` and :py:class:`~pynwb.ophys.RoiResponseSeries`
+      :py:class:`~pynwb.image.ImageMaskSeries`, 
+      :py:class:`~pynwb.image.OpticalSeries`, and
+      :py:class:`~pynwb.ophys.TwoPhotonSeries` types. 
+      Other related time series types are:
+      :py:class:`~pynwb.image.IndexSeries` and 
+      :py:class:`~pynwb.ophys.RoiResponseSeries`.
 
-    * **Others** :py:class:`~pynwb.ogen.OptogeneticSeries`, ::py:class:`~pynwb.behavior.SpatialSeries`,
-      :py:class:`~pynwb.misc.DecompositionSeries`, :py:class:`~pynwb.misc.AnnotationSeries`,
-      :py:class:`~pynwb.misc.AbstractFeatureSeries`, or :py:class:`~pynwb.misc.IntervalSeries`.
+    * **Others** :py:class:`~pynwb.ogen.OptogeneticSeries`, 
+      :py:class:`~pynwb.behavior.SpatialSeries`,
+      :py:class:`~pynwb.misc.DecompositionSeries`, 
+      :py:class:`~pynwb.misc.AnnotationSeries`,
+      :py:class:`~pynwb.misc.AbstractFeatureSeries`, and
+      :py:class:`~pynwb.misc.IntervalSeries`.
 
 
 .. _modules_overview:
@@ -101,9 +107,10 @@ More commonly, you will be creating instances of classes that extend this class.
       :py:class:`~pynwb.ophys.ImageSegmentation`,
       :py:class:`~pynwb.ophys.MotionCorrection`.
 
-    * **Others:** :py:class:`~pynwb.retinotopy.ImagingRetinotopy`, :py:class:`~pynwb.base.Images`.
+    * **Others:** :py:class:`~pynwb.retinotopy.ImagingRetinotopy`, 
+      :py:class:`~pynwb.base.Images`.
 
-    * **TimeSeries:** Any :ref:`timeseries_overview` is also a subclasses of :py:class:`~pynwb.core.NWBDataInterface`
+    * **TimeSeries:** Any :ref:`timeseries_overview` is also a subclass of :py:class:`~pynwb.core.NWBDataInterface`
       and can be used anywhere :py:class:`~pynwb.core.NWBDataInterface` is allowed.
 
 .. note::
@@ -129,10 +136,11 @@ import numpy as np
 start_time = datetime(2017, 4, 3, 11, tzinfo=tzlocal())
 create_date = datetime(2017, 4, 15, 12, tzinfo=tzlocal())
 
-nwbfile = NWBFile(session_description='demonstrate NWBFile basics',  # required
-                  identifier='NWB123',  # required
-                  session_start_time=start_time,  # required
-                  file_create_date=create_date)  # optional
+nwbfile = NWBFile(
+    session_description='demonstrate NWBFile basics',
+    identifier='NWB123',
+    session_start_time=start_time
+)
 
 ####################
 # .. _basic_timeseries:
