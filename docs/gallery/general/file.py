@@ -412,17 +412,59 @@ nwbfile.add_unit(id=3, spike_times=[1.2, 2.3, 3.3, 4.5],
                  obs_intervals=[[1, 10], [20, 30]], location='CA1', quality=0.90)
 
 ####################
-# Now we overwrite the file with all of the data
-
-with NWBHDF5IO('example_file_path.nwb', 'w') as io:
-    io.write(nwbfile)
-
-####################
 # .. _units_fields_ref:
 #
 # .. note::
 #    The Units table has some predefined optional columns. Please review the documentation for
 #    :py:meth:`~pynwb.file.NWBFile.add_unit` before adding custom columns.
+
+####################
+# Images
+# ------
+#
+# You can store static images within the NWB file as well. These can be images of the subject, the environment, stimuli,
+# or really anything.
+#
+# .. note::
+#          All basic image types :py:class:`~pynwb.image.RGBAImage`, py:class:`~pynwb.image.RGBImage`, and
+#          py:class:`~pynwb.image.GrayscaleImage` provide the optional: 1) ``description`` parameter to include a
+#          text description about the image and 2) ``resolution`` parameter to specify the *pixels / cm* resolution
+#          of the image.
+
+from PIL import Image
+import numpy as np
+
+from pynwb.image import RGBAImage, RGBImage, GrayscaleImage
+from pynwb.base import Images
+
+img = Image.open('docs/source/logo.png')  # an example image
+
+# you can store an RGBA image
+rgba_logo = RGBAImage(name='RGBA_logo', data=np.array(img))
+
+# or RGB
+rgb_logo = RGBImage(name='RGB_logo', data=np.array(img.convert('RGB')))
+
+# or Grayscale. Here with the optional description and resolution specified.
+gs_logo = GrayscaleImage(name='Grayscale_logo',
+                         data=np.array(img.convert('L')),
+                         description='Grayscale version of the NWB logo',
+                         resolution=35.433071)
+
+# Images is a container that accepts any of these image types
+images = Images(
+    name='logo_images',
+    images=[rgb_logo, rgba_logo, gs_logo]
+)
+
+# Finally, do not forget to add the images object to the nwb file.
+nwbfile.processing['behavior'].add(images)
+
+####################
+# Now we overwrite the file with all of the data
+
+with NWBHDF5IO('example_file_path.nwb', 'w') as io:
+    io.write(nwbfile)
 
 ####################
 # .. _basic_appending:
