@@ -567,58 +567,6 @@ sleep_stages.add_row(start_time=1.3, stop_time=3.0, stage=3, confidence=0.7)
 nwbfile.add_time_intervals(sleep_stages)
 
 ####################
-# .. _basic_units:
-#
-# Units
-# ------
-#
-# Units are putative cells in your analysis. Unit metadata can be added to an NWB file using the methods
-# :py:meth:`~pynwb.file.NWBFile.add_unit` and :py:meth:`~pynwb.file.NWBFile.add_unit_column`. These methods
-# work like the methods for adding trials described :ref:`above <basic_trials>`
-#
-# A unit is only required to contain a unique integer identifier in the 'id' column
-# (this will be automatically assigned if not provided). Additional optional values for each unit
-# include: `spike_times`, `electrodes`, `electrode_group`, `obs_intervals`, `waveform_mean`, and `waveform_sd`.
-# Additional user-defined columns can be added using :py:meth:`~pynwb.file.NWBFile.add_unit_column`. Like
-# :py:meth:`~pynwb.file.NWBFile.add_trial_column`, this method also takes a name
-# for the column, a description of what the column stores and does not need a data type.
-# Once all columns have been added, unit data can be populated using :py:meth:`~pynwb.file.NWBFile.add_unit`.
-#
-# When providing `spike_times`, you may also wish to specify the time intervals during which the unit was
-# being observed, so that it is possible to distinguish times when the unit was silent from times when the
-# unit was not being recorded (and thus correctly compute firing rates, for example). This information
-# should be provided as a list of [start, end] time pairs in the `obs_intervals` field. If `obs_intervals` is
-# provided, then all entries in `spike_times` should occur within one of the listed intervals. In the example
-# below, all 3 units are observed during the time period from 1 to 10 s and fired spikes during that period.
-# Units 2 and 3 were also observed during the time period from 20-30s; but only unit 2 fired spikes in that
-# period.
-#
-# Lets specify some unit metadata and then add some units:
-
-nwbfile.add_unit_column('location', 'the anatomical location of this unit')
-nwbfile.add_unit_column('quality', 'the quality for the inference of this unit')
-
-nwbfile.add_unit(id=1, spike_times=[2.2, 3.0, 4.5],
-                 obs_intervals=[[1, 10]], location='CA1', quality=0.95)
-nwbfile.add_unit(id=2, spike_times=[2.2, 3.0, 25.0, 26.0],
-                 obs_intervals=[[1, 10], [20, 30]], location='CA3', quality=0.85)
-nwbfile.add_unit(id=3, spike_times=[1.2, 2.3, 3.3, 4.5],
-                 obs_intervals=[[1, 10], [20, 30]], location='CA1', quality=0.90)
-
-####################
-# Now we overwrite the file with all of the data
-
-with NWBHDF5IO('example_file_path.nwb', 'w') as io:
-    io.write(nwbfile)
-
-####################
-# .. _units_fields_ref:
-#
-# .. note::
-#    The Units table has some predefined optional columns. Please review the documentation for
-#    :py:meth:`~pynwb.file.NWBFile.add_unit` before adding custom columns.
-
-####################
 # .. _basic_appending:
 #
 # Appending to an NWB file
