@@ -5,10 +5,11 @@ NWB File Basics
 ===============
 
 This example will focus on the basics of working with an :py:class:`~pynwb.file.NWBFile` object,
-including writing and reading of an NWB file. Before we dive into code showing how to use an
-:py:class:`~pynwb.file.NWBFile`, we first provide a brief overview of the basic concepts of NWB. If you
-are already familiar with the concepts of :ref:`timeseries_overview` and :ref:`modules_overview`, then
-feel free to skip the :ref:`basics_background` part and go directly to :ref:`basics_nwbfile`.
+including writing and reading of an NWB file, and giving you an introduction to the basic data types.
+Before we dive into code showing how to use an :py:class:`~pynwb.file.NWBFile`, we first provide
+a brief overview of the basic concepts of NWB. If you are already familiar with the concepts of
+:ref:`timeseries_overview` and :ref:`modules_overview`, then feel free to skip the :ref:`basics_background`
+part and go directly to :ref:`basics_nwbfile`.
 
 .. _basics_background:
 
@@ -134,8 +135,10 @@ from datetime import datetime
 from dateutil import tz
 
 ####################
+# .. _basics_nwbfile:
+#
 # The NWB file
-# ------------------------------
+# ------------
 #
 # An :py:class:`~pynwb.file.NWBFile` represents a single session of an experiment.
 # Each :py:class:`~pynwb.file.NWBFile` must have a session description, identifier, and session start time.
@@ -146,8 +149,9 @@ from dateutil import tz
 # Create an :py:class:`~pynwb.file.NWBFile` object with the required fields
 # (``session_description``, ``identifier``, ``session_start_time``) and additional metadata.
 #
-# We recommend using keyword arguments for clarity when constructing :py:class:`~pynwb` objects.
-
+# .. note::
+#     Use keyword arguments when constructing :py:class:`~pynwb.file.NWBFile` objects.
+#
 
 session_start_time = datetime(2018, 4, 25, 2, 30, 3,
                               tzinfo=tz.gettz('US/Pacific'))
@@ -459,18 +463,18 @@ with NWBHDF5IO('basics_tutorial.nwb', 'r') as io:
 # Adding More Data
 # ----------------
 #
-# The following illustrates basic data organizational structures that are used throughout NWB:N.
+# The following illustrates basic data organizational structures that are used throughout NWB.
 #
 # .. _reuse_timestamps:
 #
 # Reusing timestamps
-# ~~~~~~~~~~~~~~~~~~
+# ^^^^^^^^^^^^^^^^^^^^
 #
 # When working with multi-modal data, it can be convenient and efficient to store timestamps once and associate multiple
 # data with the single timestamps instance. PyNWB enables this by letting you reuse timestamps across
-# :class:`~pynwb.base.TimeSeries` objects. To reuse a :class:`~pynwb.base.TimeSeries` timestamps in a new
-# :class:`~pynwb.base.TimeSeries`, pass the existing :class:`~pynwb.base.TimeSeries` as the new
-# :class:`~pynwb.base.TimeSeries` timestamps:
+# ::py:class:`~pynwb.base.TimeSeries` objects. To reuse a :py:class:`~pynwb.base.TimeSeries` timestamps in a new
+# :py:class:`~pynwb.base.TimeSeries`, pass the existing :py:class:`~pynwb.base.TimeSeries` as the new
+# :py:class:`~pynwb.base.TimeSeries` timestamps:
 
 data = list(range(101, 201, 10))
 reuse_ts = TimeSeries(name='reusing_timeseries',
@@ -541,14 +545,6 @@ nwbfile.add_trial(start_time=6.0, stop_time=10.0, correct=False)
 print(nwbfile.trials.to_dataframe())
 
 ####################
-# ::
-#
-#           start_time  stop_time    stim
-#       id
-#       0          0.0        2.0  person
-#       1          3.0        5.0   ocean
-#       2          6.0        8.0  desert
-#
 # .. _basic_epochs:
 #
 # Epochs
@@ -634,15 +630,15 @@ io.write(nwbfile)
 io.close()
 
 ####################
+# .. [#] Some data interface objects have a default name. This default name is the type of the data interface. For
+#    example, the default name for :py:class:`~pynwb.ophys.ImageSegmentation` is "ImageSegmentation" and the default
+#    name for :py:class:`~pynwb.ecephys.EventWaveform` is "EventWaveform".
+#
 # .. [#] HDF5 is currently the only backend supported by NWB.
 #
 # .. [#] Neurodata sets can be *very* large, so individual components of the dataset are only loaded into memory when
 #    you request them. This functionality is only possible if an open file handle is kept around until users want to
 #    load data.
-#
-# .. [#] Some data interface objects have a default name. This default name is the type of the data interface. For
-#    example, the default name for :py:class:`~pynwb.ophys.ImageSegmentation` is "ImageSegmentation" and the default
-#    name for :py:class:`~pynwb.ecephys.EventWaveform` is "EventWaveform".
 #
 # .. [#] NWB only supports *adding* to files. Removal and modifying of existing data is not allowed.
 
