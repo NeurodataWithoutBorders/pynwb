@@ -172,13 +172,26 @@ print(nwbfile)
 
 ####################
 # .. _basic_subject:
-# Subject information
-# ------------------------------
+#
+# Subject Information
+# ----------------
 #
 # In the :py:class:`~pynwb.file.Subject` object we can store information about the experimental subject,
 # such as age, species, genotype, sex, and a description.
 #
-# image placeholder
+# .. only:: html
+#
+#   .. image:: ../../_static/Subject.svg
+#     :width: 150
+#     :alt: subject UML diagram
+#     :align: center
+#
+# .. only:: latex
+#
+#   .. image:: ../../_static/Subject.png
+#     :width: 150
+#     :alt: subject UML diagram
+#     :align: center
 #
 # :py:class:`~pynwb.file.Subject` fields are all free-form text (any format will be valid),
 # however it is recommended to follow particular conventions to help software tools interpret the data:
@@ -199,27 +212,21 @@ nwbfile.subject = Subject(
 )
 
 ####################
-# .. _basic_data_interfaces:
-#
-# Basic Data Interfaces
-# ------------------------------
-#
-# **Data Interfaces** are objects for storing specific types of data in a standardized way --
-# through the :py:class:`~pynwb.core.NWBDataInterface` class.
-# This tutorial covers the basic data interfaces (e.g. :py:class:`~pynwb.base.TimeSeries`,
-# :py:class:`~pynwb.behavior.Position`). For a comprehensive list of available data interfaces,
-# see the :ref:`overview page <modules_overview>`.
-
-####################
 # .. _basic_timeseries:
 #
-# Time series data
+# Time Series Data
 # ----------------
 #
 # :py:class:`~pynwb.base.TimeSeries` is a common base class for measurements sampled over time,
 # and provides fields for ``data`` and ``timestamps`` (regularly or irregularly sampled).
 # You will also need to supply the ``name`` and ``unit`` of measurement
-# (`SI unit <https://en.wikipedia.org/wiki/International_System_of_Units>`_) for ``data``.
+# (`SI unit <https://en.wikipedia.org/wiki/International_System_of_Units>`_).
+#
+# .. image:: ../../_static/TimeSeries.png
+#   :width: 200
+#   :alt: timeseries UML diagram
+#   :align: center
+#
 # For instance, we can store a :py:class:`~pynwb.base.TimeSeries` data where recording started
 # ``0.0`` seconds after ``start_time`` and sampled every second:
 
@@ -240,13 +247,12 @@ time_series_with_timestamps = TimeSeries(name='test_timeseries',
                                          timestamps=timestamps)
 
 ####################
-# :py:class:`~pynwb.base.TimeSeries` objects can be added directly to :py:class:`~pynwb.file.NWBFile` using
-# the :py:meth:`~pynwb.file.NWBFile.add_acquisition`, :py:meth:`~pynwb.file.NWBFile.add_stimulus`
-# or :py:meth:`~pynwb.file.NWBFile.add_stimulus_template` methods depending on the source of data.
-# Use :py:meth:`~pynwb.file.NWBFile.add_acquisition` to  add *acquisition* data (raw, acquired data that should never change);
-# :py:meth:`~pynwb.file.NWBFile.add_stimulus` to add *stimulus* data; and use
-# :py:meth:`~pynwb.file.NWBFile.add_stimulus_template` to store stimulus templates.
-# Here, we will add it as *acquisition* data:
+# :py:class:`~pynwb.base.TimeSeries` objects can be added directly to :py:class:`~pynwb.file.NWBFile` using:
+#
+# * :py:meth:`~pynwb.file.NWBFile.add_acquisition` to  add *acquisition* data (raw, acquired data that should never change),
+# * :py:meth:`~pynwb.file.NWBFile.add_stimulus` to add *stimulus* data, or
+# * :py:meth:`~pynwb.file.NWBFile.add_stimulus_template` to store *stimulus templates*.
+#
 
 nwbfile.add_acquisition(time_series_with_timestamps)
 
