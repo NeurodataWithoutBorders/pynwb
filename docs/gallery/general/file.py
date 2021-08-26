@@ -473,7 +473,10 @@ with NWBHDF5IO('basics_tutorial.nwb', 'r') as io:
 # :class:`~pynwb.base.TimeSeries` timestamps:
 
 data = list(range(101, 201, 10))
-reuse_ts = TimeSeries('reusing_timeseries', data, 'SIunit', timestamps=test_ts)
+reuse_ts = TimeSeries(name='reusing_timeseries',
+                      data=data,
+                      unit='SIunit',
+                      timestamps=time_series_with_timestamps)
 
 
 ####################
@@ -557,8 +560,15 @@ print(nwbfile.trials.to_dataframe())
 # list of all the :py:class:`~pynwb.base.TimeSeries` that the epoch applies
 # to.
 
-nwbfile.add_epoch(2.0, 4.0, ['first', 'example'], [test_ts, ])
-nwbfile.add_epoch(6.0, 8.0, ['second', 'example'], [test_ts, ])
+nwbfile.add_epoch(start_time=2.0,
+                  stop_time=4.0,
+                  tags=['first', 'example'],
+                  timeseries=[time_series_with_timestamps])
+
+nwbfile.add_epoch(start_time=6.0,
+                  stop_time=8.0,
+                  tags=['second', 'example'],
+                  timeseries=[time_series_with_timestamps])
 
 ####################
 # Other time intervals
