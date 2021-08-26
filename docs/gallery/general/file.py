@@ -485,27 +485,55 @@ reuse_ts = TimeSeries('reusing_timeseries', data, 'SIunit', timestamps=test_ts)
 # Trials
 # ^^^^^^
 #
-# Trials can be added to an NWB file using the methods :py:meth:`~pynwb.file.NWBFile.add_trial`
-# and :py:meth:`~pynwb.file.NWBFile.add_trial_column`. Together, these methods maintains a
-# table-like structure that can define arbitrary columns without having to go through the
-# extension process.
+# Trials are stored in :py:class:`pynwb.epoch.TimeIntervals` object which is
+# a subclass of :py:class:`pynwb.core.DynamicTable`.
+# :py:class:`pynwb.core.DynamicTable` objects are used to store tabular metadata
+# throughout NWB, including trials, electrodes and sorted units. They offer
+# flexibility for tabular data by allowing required columns, optional columns,
+# and custom columns which are not defined in the standard.
 #
-# By default, NWBFile only requires trial start time and trial end time. Additional columns
-# can be added using :py:meth:`~pynwb.file.NWBFile.add_trial_column`. This method takes a name
-# for the column and a description of what the column stores. You do not need to supply data
-# type, as this will inferred.
-# Once all columns have been added, trial data can be populated using :py:meth:`~pynwb.file.NWBFile.add_trial`.
+# .. only:: html
 #
-# Lets add an additional column and some trial data.
+#   .. image:: ../../_static/Trials.svg
+#     :width: 300
+#     :alt: trials UML diagram
+#     :align: center
+#
+# .. only:: latex
+#
+#   .. image:: ../../_static/Trials.png
+#     :width: 300
+#     :alt: trials UML diagram
+#     :align: center
+#
+# The ``trials`` :py:class:`pynwb.core.DynamicTable` can be thought of
+# as a table with this structure:
+#
+# .. image:: ../../_static/trials_example.png
+#   :width: 400
+#   :alt: trials table example
+#   :align: center
+#
+# Trials can be added to the :py:class:`~pynwb.file.NWBFile` using the
+# methods :py:meth:`~pynwb.file.NWBFile.add_trial_column` and :py:meth:`~pynwb.file.NWBFile.add_trial`
+# We can add custom, user-defined columns to the trials table to hold data
+# and metadata specific to this experiment or session.
+# By default, :py:class:`~pynwb.file.NWBFile` only requires the ``start_time``
+# and ``end_time`` of the trial. Additional columns can be added using
+# the :py:meth:`~pynwb.file.NWBFile.add_trial_column` method.
+#
+# Continue adding to our :py:class:`~pynwb.file.NWBFile` by creating a new
+# column for the trials table named ``'correct'``, which will be a boolean array.
+# Once all columns have been added, trial data can be populated using
+# :py:meth:`~pynwb.file.NWBFile.add_trial`.
 
-nwbfile.add_trial_column(name='stim', description='the visual stimuli during the trial')
-
-nwbfile.add_trial(start_time=0.0, stop_time=2.0, stim='person')
-nwbfile.add_trial(start_time=3.0, stop_time=5.0, stim='ocean')
-nwbfile.add_trial(start_time=6.0, stop_time=8.0, stim='desert')
+nwbfile.add_trial_column(name='correct',
+                         description='whether the trial was correct')
+nwbfile.add_trial(start_time=1.0, stop_time=5.0, correct=True)
+nwbfile.add_trial(start_time=6.0, stop_time=10.0, correct=False)
 
 ####################
-# Tabular data such as trials can be converted to a `pandas.DataFrame`.
+# Tabular data such as trials can be converted to a :py:class:`~pandas.DataFrame`.
 
 print(nwbfile.trials.to_dataframe())
 
