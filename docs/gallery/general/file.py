@@ -440,37 +440,26 @@ print(test_timeseries_in)
 #      unit: SIunit
 
 ####################
-# Accessing the data field, you will notice that it does not return the data values, but instead an HDF5 dataset.
-
-print(test_timeseries_in.data)
-
-####################
-# ::
+# Accessing data
+# ^^^^^^
 #
-#   <HDF5 dataset "data": shape (10,), type "<i8">
+# We can also access the :py:class:`~pynwb.behavior.SpatialSeries` data by referencing the names
+# of the objects in the hierarchy that contain it. We can access a processing module by indexing
+# ``"nwbfile.processing"`` with the name of the processing module, ``"behavior"``.
 #
-# This object lets you only read in a section of the dataset without reading the entire thing.
+# Then, we can access the :py:class:`~pynwb.behavior.Position` object inside of the ``"behavior"``
+# processing module by indexing it with the name of the :py:class:`~pynwb.behavior.Position` object,
+# ``"Position"``.
+#
+# Finally, we can access the :py:class:`~pynwb.behavior.SpatialSeries` object inside of the
+# :py:class:`~pynwb.behavior.Position` object by indexing it with the name of the
+# :py:class:`~pynwb.behavior.SpatialSeries` object, ``"SpatialSeries"``.
 
-print(test_timeseries_in.data[:2])
-
-####################
-# ::
-#
-#   [100 110]
-#
-# To load the entire dataset, use `[:]`.
-
-print(test_timeseries_in.data[:])
-io.close()
-
-####################
-# ::
-#
-#   [100 110 120 130 140 150 160 170 180 190]
-#
-# If you use :py:class:`~pynwb.NWBHDF5IO` as a context manager during read, be aware that the
-# :py:class:`~pynwb.NWBHDF5IO` gets closed and when the context completes and the data will not be
-# available outside of the context manager [#]_.
+with NWBHDF5IO('basics_tutorial.nwb', 'r') as io:
+    read_nwbfile = io.read()
+    print(read_nwbfile.processing['behavior'])
+    print(read_nwbfile.processing['behavior']['Position'])
+    print(read_nwbfile.processing['behavior']['Position']['SpatialSeries'])
 
 ####################
 # Adding More Data
@@ -589,7 +578,7 @@ nwbfile.add_time_intervals(sleep_stages)
 #
 # First, read the file and get the interface object.
 
-io = NWBHDF5IO('example_file_path.nwb', mode='a')
+io = NWBHDF5IO('basics_tutorial.nwb', mode='a')
 nwbfile = io.read()
 position = nwbfile.processing['behavior'].data_interfaces['Position']
 
@@ -598,10 +587,15 @@ position = nwbfile.processing['behavior'].data_interfaces['Position']
 
 data = list(range(300, 400, 10))
 timestamps = list(range(10))
-test_spatial_series = SpatialSeries('test_spatialseries2', data,
-                                    reference_frame='starting_gate',
-                                    timestamps=timestamps)
-position.add_spatial_series(test_spatial_series)
+
+new_spatial_series = SpatialSeries(
+    name='SpatialSeriesAppended',
+    data=data,
+    timestamps=timestamps,
+    reference_frame='starting_gate',
+)
+position.add_spatial_series(new_spatial_series)
+print(position)
 
 ####################
 # Finally, write the changes back to the file and close it.
