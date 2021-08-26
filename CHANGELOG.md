@@ -46,6 +46,7 @@
 - Overhauled documentation on extensions. @bendichter, @rly, @oruebel (#1350)
 - Updated the optical physiology / Calcium imaging tutorial. @bendichter, @weiglszonja (#1375)
 - Added a tutorial on streaming using the ROS3 driver. @rly (#1393)
+- Extended the NWB Basics tutorial with adding more data types. @weiglszonja (#1403)
 
 ### Minor new features:
 - Added RRID for citing PyNWB to the docs. @oruebel (#1372)
