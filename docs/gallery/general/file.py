@@ -260,6 +260,118 @@ nwbfile.acquisition['test_timeseries']
 # or using the :py:meth:`~pynwb.file.NWBFile.get_acquisition` method:
 nwbfile.get_acquisition('test_timeseries')
 
+
+####################
+# .. _basic_spatialseries:
+#
+# Spatial Series and Position
+# ----------------
+#
+# :py:class:`~pynwb.behavior.SpatialSeries` is a subclass of :py:class:`~pynwb.base.TimeSeries`
+# that represents the spatial position of an animal over time.
+#
+# .. only:: html
+#
+#   .. image:: ../../_static/SpatialSeries.svg
+#     :width: 200
+#     :alt: spatialseries UML diagram
+#     :align: center
+#
+# .. only:: latex
+#
+#   .. image:: ../../_static/SpatialSeries.png
+#     :width: 200
+#     :alt: spatialseries UML diagram
+#     :align: center
+#
+# Create a :py:class:`~pynwb.behavior.SpatialSeries` object named ``"SpatialSeries"`` with some fake data.
+
+# create fake data with shape (50, 2)
+# the first dimension should always represent time
+position_data = np.array([np.linspace(0, 10, 50),
+                          np.linspace(0, 8, 50)]).T
+position_timestamps = np.linspace(0, 50) / 200
+
+spatial_series_obj = SpatialSeries(
+    name='SpatialSeries',
+    description='(x,y) position in open field',
+    data=position_data,
+    timestamps=position_timestamps,
+    reference_frame='(0,0) is bottom left corner'
+)
+print(spatial_series_obj)
+
+####################
+# To help data analysis and visualization tools know that this :py:class:`~pynwb.behavior.SpatialSeries` object
+# represents the position of the subject, store the :py:class:`~pynwb.behavior.SpatialSeries` object inside
+# of a :py:class:`~pynwb.behavior.Position` object, which can hold one or more :py:class:`~pynwb.behavior.SpatialSeries` objects.
+#
+# .. only:: html
+#
+#   .. image:: ../../_static/Position.svg
+#     :width: 450
+#     :alt: position UML diagram
+#     :align: center
+#
+# .. only:: latex
+#
+#   .. image:: ../../_static/Position.png
+#     :width: 450
+#     :alt: position UML diagram
+#     :align: center
+#
+# Create a :py:class:`~pynwb.behavior.Position` object named ``"Position"`` [#]_.
+
+# name is set to "Position" by default
+position_obj = Position(spatial_series=spatial_series_obj)
+
+####################
+# Behavior Processing Module
+# ----------------
+#
+# :py:class:`~pynwb.base.ProcessingModule` is a container for data interfaces that are related to a particular
+# processing workflow. NWB differentiates between raw, acquired data (*acquisition*), which should never change,
+# and processed data (*processing*), which are the results of preprocessing algorithms and could change.
+# Processing modules can be thought of as folders within the file for storing the related processed data.
+#
+# .. tip:: Use the NWB schema module names as processing module names where appropriate.
+#    These are: ``"behavior"``, ``"ecephys"``, ``"icephys"``, ``"ophys"``, ``"ogen"``, ``"retinotopy"``, and ``"misc"``.
+#
+# Let's assume that the subject's position was computed from a video tracking algorithm,
+# so it would be classified as processed data.
+#
+# Create a processing module called ``"behavior"`` for storing behavioral data in the :py:class:`~pynwb.file.NWBFile`
+# and add the :py:class:`~pynwb.behavior.Position` object to the processing module using the
+# :py:meth:`~pynwb.file.NWBFile.create_processing_module` method:
+
+
+behavior_module = nwbfile.create_processing_module(
+    name='behavior',
+    description='processed behavioral data'
+)
+behavior_module.add(position_obj)
+
+####################
+#
+# .. only:: html
+#
+#   .. image:: ../../_static/Behavior.svg
+#     :width: 600
+#     :alt: behavior UML diagram
+#     :align: center
+#
+# .. only:: latex
+#
+#   .. image:: ../../_static/Behavior.png
+#     :width: 600
+#     :alt: behavior UML diagram
+#     :align: center
+#
+# Once the behavior processing module is added to the :py:class:`~pynwb.file.NWBFile`,
+# you can access it with:
+
+print(nwbfile.processing['behavior'])
+
 ####################
 # .. _basic_writing:
 #
