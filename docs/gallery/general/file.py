@@ -387,16 +387,14 @@ print(nwbfile.processing['behavior'])
 #
 # To write an :py:class:`~pynwb.file.NWBFile`, use the :py:meth:`~hdmf.backends.io.HDMFIO.write` method.
 
-from pynwb import NWBHDF5IO
-
-io = NWBHDF5IO('example_file_path.nwb', mode='w')
+io = NWBHDF5IO('basics_tutorial.nwb', mode='w')
 io.write(nwbfile)
 io.close()
 
 ####################
 # You can also use :py:meth:`~pynwb.NWBHDF5IO` as a context manager:
 
-with NWBHDF5IO('example_file_path.nwb', 'w') as io:
+with NWBHDF5IO('basics_tutorial.nwb', 'w') as io:
     io.write(nwbfile)
 
 ####################
@@ -409,33 +407,33 @@ with NWBHDF5IO('example_file_path.nwb', 'w') as io:
 # To read the NWB file we just wrote, use another :py:class:`~pynwb.NWBHDF5IO` object,
 # and use the :py:meth:`~hdmf.backends.io.HDMFIO.read` method to retrieve an
 # :py:class:`~pynwb.file.NWBFile` object.
+#
+# Data arrays are read passively from the file.
+# Accessing the ``data`` attribute of the :py:class:`~pynwb.base.TimeSeries` object
+# does not read the data values, but presents an HDF5 object that can be indexed to read data.
+# You can use the ``[:]`` operator to read the entire data array into memory.
 
-io = NWBHDF5IO('example_file_path.nwb', 'r')
-nwbfile_in = io.read()
+with NWBHDF5IO('basics_tutorial.nwb', 'r') as io:
+    read_nwbfile = io.read()
+    print(read_nwbfile.acquisition['test_timeseries'])
+    print(read_nwbfile.acquisition['test_timeseries'].data[:])
 
 ####################
-# .. _basic_retrieving_data:
-#
-# Retrieving data from an NWB file
-# --------------------------------
+# It is often preferable to read only a portion of the data.
+# To do this, index or slice into the ``data`` attribute just like if you were
+# indexing or slicing a numpy array.
 
-test_timeseries_in = nwbfile_in.acquisition['test_timeseries']
-print(test_timeseries_in)
+with NWBHDF5IO('basics_tutorial.nwb', 'r') as io:
+    read_nwbfile = io.read()
+    print(read_nwbfile.acquisition['test_timeseries'])
+    print(read_nwbfile.acquisition['test_timeseries'].data[:2])
 
 ####################
-# ::
-#
-#    test_timeseries <class 'pynwb.base.TimeSeries'>
-#    Fields:
-#      comments: no comments
-#      conversion: 1.0
-#      data: <HDF5 dataset "data": shape (10,), type "<i8">
-#      description: no description
-#      interval: 1
-#      resolution: 0.0
-#      timestamps: <HDF5 dataset "timestamps": shape (10,), type "<f8">
-#      timestamps_unit: Seconds
-#      unit: SIunit
+# .. note::
+#     If you use :py:class:`~pynwb.NWBHDF5IO` as a context manager during read,
+#     be aware that the :py:class:`~pynwb.NWBHDF5IO` gets closed and when the
+#     context completes and the data will not be available outside of the
+#     context manager [#]_.
 
 ####################
 # Accessing data
