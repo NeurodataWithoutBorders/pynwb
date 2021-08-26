@@ -124,16 +124,10 @@ More commonly, you will be creating instances of classes that extend this class.
 The following examples will reference variables that may not be defined within the block they are used in. For
 clarity, we define them here:
 """
-####################
-# .. _basics_nwbfile:
-#
-# The NWB file
-# ------------
-#
-
 # sphinx_gallery_thumbnail_path = 'figures/gallery_thumbnails_file.png'
 import numpy as np
-from pynwb import NWBFile, TimeSeries
+from pynwb import NWBFile, TimeSeries, NWBHDF5IO
+from pynwb.epoch import TimeIntervals
 from pynwb.file import Subject
 from pynwb.behavior import SpatialSeries, Position
 from datetime import datetime
@@ -544,8 +538,6 @@ nwbfile.add_epoch(6.0, 8.0, ['second', 'example'], [test_ts, ])
 # Both ``epochs`` and ``trials`` are of of data type :py:class:`~pynwb.epoch.TimeIntervals`, which is a type of
 # ``DynamicTable`` for storing information about time intervals. ``"epochs"`` and ``"trials"``
 # are the two default names for :py:class:`~pynwb.base.TimeIntervals` objects, but you can also add your own
-
-from pynwb.epoch import TimeIntervals
 
 sleep_stages = TimeIntervals(
     name="sleep_stages",
