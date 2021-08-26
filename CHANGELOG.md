@@ -4,6 +4,7 @@
 
 ### Bug fixes:
 - Add `environment-ros3.yml` to `MANIFEST.in` for inclusion in source distributions. @rly (#1398)
+- Update HDMF minimum version to `3.1.2` to fix bug when converting the icephys metadata tables via `to_hierarchical_dataframe` when the tables contain indexed columns and add corresponding unit tests. @oruebel (#1404)
 
 ### Tutorial enhancements:
 - Updated the general tutorial to add documentation about the ``Images`` type. @bendichter (#1353)

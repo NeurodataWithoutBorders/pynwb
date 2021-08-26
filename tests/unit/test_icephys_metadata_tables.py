@@ -22,6 +22,8 @@ from pynwb.icephys import (VoltageClampStimulusSeries, VoltageClampSeries, Curre
 from pynwb.base import TimeSeriesReferenceVectorData
 from pynwb import NWBHDF5IO
 from hdmf.utils import docval, popargs
+from pynwb.testing import create_icephys_testfile
+from hdmf.common.hierarchicaltable import to_hierarchical_dataframe
 
 
 class ICEphysMetaTestBase(TestCase):
@@ -888,6 +890,61 @@ class ExperimentalConditionsTableTests(ICEphysMetaTestBase):
         cond.add_experimental_condition(repetitions=[0, ], id=np.int64(10))
         with self.assertRaises(ValueError):
             cond.add_experimental_condition(repetitions=[0, ], id=np.int64(10))
+
+    def test_to_hierarchical_dataframe(self):
+        # test that to_hierarchical_dataframe works for the icephys tables when only containing regular VectorData
+        nwbfile = create_icephys_testfile()
+        temp = to_hierarchical_dataframe(nwbfile.icephys_experimental_conditions)
+        expected_index = [
+            (100000, 32.0, 10000, 'R1', 1000, 'StimType_1', 'T1', 100, 0),
+            (100000, 32.0, 10000, 'R1', 1000, 'StimType_1', 'T1', 100, 0),
+            (100000, 32.0, 10000, 'R1', 1000, 'StimType_1', 'T1', 101, 1),
+            (100000, 32.0, 10000, 'R1', 1000, 'StimType_1', 'T1', 101, 1),
+            (100000, 32.0, 10001, 'R2', 1001, 'StimType_2', 'T2', 102, 2),
+            (100000, 32.0, 10001, 'R2', 1001, 'StimType_2', 'T2', 102, 2),
+            (100000, 32.0, 10001, 'R2', 1001, 'StimType_2', 'T2', 102, 2),
+            (100000, 32.0, 10001, 'R2', 1002, 'StimType_3', 'T3', 103, 3),
+            (100000, 32.0, 10001, 'R2', 1002, 'StimType_3', 'T3', 103, 3),
+            (100000, 32.0, 10001, 'R2', 1002, 'StimType_3', 'T3', 103, 3),
+            (100001, 24.0, 10002, 'R1', 1003, 'StimType_1', 'T1', 104, 4),
+            (100001, 24.0, 10002, 'R1', 1003, 'StimType_1', 'T1', 104, 4),
+            (100001, 24.0, 10002, 'R1', 1003, 'StimType_1', 'T1', 105, 5),
+            (100001, 24.0, 10002, 'R1', 1003, 'StimType_1', 'T1', 105, 5),
+            (100001, 24.0, 10003, 'R2', 1004, 'StimType_2', 'T2', 106, 6),
+            (100001, 24.0, 10003, 'R2', 1004, 'StimType_2', 'T2', 106, 6),
+            (100001, 24.0, 10003, 'R2', 1004, 'StimType_2', 'T2', 106, 6),
+            (100001, 24.0, 10003, 'R2', 1005, 'StimType_3', 'T3', 107, 7),
+            (100001, 24.0, 10003, 'R2', 1005, 'StimType_3', 'T3', 107, 7),
+            (100001, 24.0, 10003, 'R2', 1005, 'StimType_3', 'T3', 107, 7)]
+        self.assertListEqual(temp.index.tolist(), expected_index)
+
+    def test_to_hierarchical_dataframe_with_indexed_custom_column(self):
+        # test that to_hierarchical_dataframe works for the icephys tables when containing also VectorIndex columns
+        nwbfile = create_icephys_testfile()
+        nwbfile.icephys_experimental_conditions.add_column('newcol', 'abc', data=[1, 2, 3], index=[2, 3])
+        temp = to_hierarchical_dataframe(nwbfile.icephys_experimental_conditions)
+        expected_index = [
+            (100000, 32.0, (1, 2), 10000, 'R1', 1000, 'StimType_1', 'T1', 100, 0),
+            (100000, 32.0, (1, 2), 10000, 'R1', 1000, 'StimType_1', 'T1', 100, 0),
+            (100000, 32.0, (1, 2), 10000, 'R1', 1000, 'StimType_1', 'T1', 101, 1),
+            (100000, 32.0, (1, 2), 10000, 'R1', 1000, 'StimType_1', 'T1', 101, 1),
+            (100000, 32.0, (1, 2), 10001, 'R2', 1001, 'StimType_2', 'T2', 102, 2),
+            (100000, 32.0, (1, 2), 10001, 'R2', 1001, 'StimType_2', 'T2', 102, 2),
+            (100000, 32.0, (1, 2), 10001, 'R2', 1001, 'StimType_2', 'T2', 102, 2),
+            (100000, 32.0, (1, 2), 10001, 'R2', 1002, 'StimType_3', 'T3', 103, 3),
+            (100000, 32.0, (1, 2), 10001, 'R2', 1002, 'StimType_3', 'T3', 103, 3),
+            (100000, 32.0, (1, 2), 10001, 'R2', 1002, 'StimType_3', 'T3', 103, 3),
+            (100001, 24.0, (3,), 10002, 'R1', 1003, 'StimType_1', 'T1', 104, 4),
+            (100001, 24.0, (3,), 10002, 'R1', 1003, 'StimType_1', 'T1', 104, 4),
+            (100001, 24.0, (3,), 10002, 'R1', 1003, 'StimType_1', 'T1', 105, 5),
+            (100001, 24.0, (3,), 10002, 'R1', 1003, 'StimType_1', 'T1', 105, 5),
+            (100001, 24.0, (3,), 10003, 'R2', 1004, 'StimType_2', 'T2', 106, 6),
+            (100001, 24.0, (3,), 10003, 'R2', 1004, 'StimType_2', 'T2', 106, 6),
+            (100001, 24.0, (3,), 10003, 'R2', 1004, 'StimType_2', 'T2', 106, 6),
+            (100001, 24.0, (3,), 10003, 'R2', 1005, 'StimType_3', 'T3', 107, 7),
+            (100001, 24.0, (3,), 10003, 'R2', 1005, 'StimType_3', 'T3', 107, 7),
+            (100001, 24.0, (3,), 10003, 'R2', 1005, 'StimType_3', 'T3', 107, 7)]
+        self.assertListEqual(temp.index.tolist(), expected_index)
 
 
 class NWBFileTests(TestCase):
