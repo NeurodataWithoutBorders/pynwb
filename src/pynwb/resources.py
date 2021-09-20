@@ -1,7 +1,7 @@
 from hdmf.common import ExternalResources
-from . import EXP_NAMESPACE, register_class, get_type_map
+from . import CORE_NAMESPACE, register_class, get_type_map
 
-@register_class('NWBExternalResources', EXP_NAMESPACE)
+@register_class('NWBExternalResources', CORE_NAMESPACE)
 class NWBExternalResources(ExternalResources):
 
     @docval({@docval(*get_docval(ExternalResources.__init__))})
