@@ -255,7 +255,7 @@ class IntracellularRecordingsTableTests(ICEphysMetaTestBase):
                 id=np.int64(10)
             )
 
-    def test_noerror_if_IZeroClampSeries_with_stimulus(self):
+    def test_noerror_if_IZeroClampSeries(self):
         local_response = IZeroClampSeries(
             name="ccss",
             data=[1, 2, 3, 4, 5],
