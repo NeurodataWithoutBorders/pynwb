@@ -236,7 +236,7 @@ class IntracellularRecordingsTableTests(ICEphysMetaTestBase):
                 id=np.int64(10)
             )
 
-    def test_warn_if_IZeroClampSeries_with_stimulus(self):
+    def test_error_if_IZeroClampSeries_with_stimulus(self):
         local_response = IZeroClampSeries(
             name="ccss",
             data=[1, 2, 3, 4, 5],
@@ -254,6 +254,26 @@ class IntracellularRecordingsTableTests(ICEphysMetaTestBase):
                 response=local_response,
                 id=np.int64(10)
             )
+
+    def test_noerror_if_IZeroClampSeries_with_stimulus(self):
+        local_response = IZeroClampSeries(
+            name="ccss",
+            data=[1, 2, 3, 4, 5],
+            starting_time=123.6,
+            rate=10e3,
+            electrode=self.electrode,
+            gain=0.02,
+            sweep_number=np.uint64(100000)
+        )
+        ir = IntracellularRecordingsTable()
+        try:
+            _ = ir.add_recording(
+                electrode=self.electrode,
+                response=local_response,
+                id=np.int64(10)
+            )
+        except ValueError as e:
+            self.fail("Adding IZeroClampSeries falsely resulted in error" + str(e))
 
     def test_inconsistent_PatchClampSeries(self):
         local_electrode = self.nwbfile.create_icephys_electrode(
