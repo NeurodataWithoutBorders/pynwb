@@ -4,6 +4,7 @@
 
 ### Bug fixes:
 - Add `environment-ros3.yml` to `MANIFEST.in` for inclusion in source distributions. @rly (#1398)
+- Fix bad error check in ``IntracellularRecordingsTable.add_recording`` when adding ``IZeroClampSeries``. @oruebel (#1410)
 
 ## PyNWB 2.0.0 (August 13, 2021)
 
