@@ -42,6 +42,7 @@ breaking down the barriers to data sharing in neuroscience.
    tutorials/index
    extensions_tutorial/extensions_tutorial_home
    validation
+   versions
    api_docs
    software_process
    make_roundtrip_test
