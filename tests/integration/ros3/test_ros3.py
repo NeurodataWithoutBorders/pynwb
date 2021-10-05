@@ -16,7 +16,7 @@ class TestRos3Streaming(TestCase):
             urllib.request.urlopen('https://dandiarchive.s3.amazonaws.com/ros3test.nwb', timeout=1)
         except urllib.request.URLError:
             self.skipTest("Internet access to DANDI failed. Skipping all Ros3 streaming tests.")
-        if'ros3' not in h5py.registered_drivers():
+        if 'ros3' not in h5py.registered_drivers():
             self.skipTest("ROS3 driver not installed. Skipping all Ros3 streaming tests.")
 
     def test_read(self):
