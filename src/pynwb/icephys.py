@@ -516,9 +516,10 @@ class IntracellularRecordingsTable(AlignedDynamicTable):
                                                                           response, 'response')
         # If either stimulus or response are None, then set them to the same TimeSeries to keep the I/O happy
         response = response if response is not None else stimulus
-        stimulus = stimulus if stimulus is not None else response
+        stimulus_provided_is_not_none = stimulus is not None  # Store if stimulus is None for error checks later
+        stimulus = stimulus if stimulus_provided_is_not_none else response
 
-        # Make sure the types are compatible
+        # Make sure the types are compatible.
         if ((response.neurodata_type.startswith("CurrentClamp") and
                 stimulus.neurodata_type.startswith("VoltageClamp")) or
                 (response.neurodata_type.startswith("VoltageClamp") and
@@ -527,7 +528,7 @@ class IntracellularRecordingsTable(AlignedDynamicTable):
                              "'stimulus' is of type %s and 'response' is of type %s." %
                              (stimulus.neurodata_type, response.neurodata_type))
         if response.neurodata_type == 'IZeroClampSeries':
-            if stimulus is not None:
+            if stimulus_provided_is_not_none:
                 raise ValueError("stimulus should usually be None for IZeroClampSeries response")
         if isinstance(response, PatchClampSeries) and isinstance(stimulus, PatchClampSeries):
             # # We could also check sweep_number, but since it is mostly relevant to the deprecated SweepTable
