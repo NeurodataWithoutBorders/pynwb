@@ -593,8 +593,8 @@ nwbfile.add_time_intervals(sleep_stages)
 # or really anything.
 #
 # .. note::
-#          All basic image types :py:class:`~pynwb.image.RGBAImage`, py:class:`~pynwb.image.RGBImage`, and
-#          py:class:`~pynwb.image.GrayscaleImage` provide the optional: 1) ``description`` parameter to include a
+#          All basic image types :py:class:`~pynwb.image.RGBAImage`, :py:class:`~pynwb.image.RGBImage`, and
+#          :py:class:`~pynwb.image.GrayscaleImage` provide the optional: 1) ``description`` parameter to include a
 #          text description about the image and 2) ``resolution`` parameter to specify the *pixels / cm* resolution
 #          of the image.
 
