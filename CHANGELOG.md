@@ -9,6 +9,7 @@
 
 ### Tutorial enhancements:
 - Updated the general tutorial to add documentation about the ``Images`` type. @bendichter (#1353)
+- Extended the general tutorial with more data types (e.g. ``Subject``, ``SpatialSeries``, ``Position``). @weiglszonja (#1403)
 
 ### Documentation enhancements:
 - Updated the main index of the documentation to make the documentation easier to navigate. @oruebel (#1402)
@@ -54,7 +55,6 @@
 - Overhauled documentation on extensions. @bendichter, @rly, @oruebel (#1350)
 - Updated the optical physiology / Calcium imaging tutorial. @bendichter, @weiglszonja (#1375)
 - Added a tutorial on streaming using the ROS3 driver. @rly (#1393)
-- Extended the NWB Basics tutorial with adding more data types. @weiglszonja (#1403)
 
 ### Minor new features:
 - Added RRID for citing PyNWB to the docs. @oruebel (#1372)
