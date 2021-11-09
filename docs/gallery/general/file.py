@@ -128,6 +128,9 @@ from pynwb import NWBFile, TimeSeries, NWBHDF5IO
 from pynwb.epoch import TimeIntervals
 from pynwb.file import Subject
 from pynwb.behavior import SpatialSeries, Position
+from pynwb.image import RGBAImage, RGBImage, GrayscaleImage
+from pynwb.base import Images
+from PIL import Image
 from datetime import datetime
 from dateutil import tz
 
@@ -581,6 +584,48 @@ sleep_stages.add_row(start_time=0.7, stop_time=0.9, stage=2, confidence=.99)
 sleep_stages.add_row(start_time=1.3, stop_time=3.0, stage=3, confidence=0.7)
 
 nwbfile.add_time_intervals(sleep_stages)
+
+####################
+# Images
+# ------
+#
+# You can store static images within the NWB file as well. These can be images of the subject, the environment, stimuli,
+# or really anything.
+#
+# .. note::
+#          All basic image types :py:class:`~pynwb.image.RGBAImage`, py:class:`~pynwb.image.RGBImage`, and
+#          py:class:`~pynwb.image.GrayscaleImage` provide the optional: 1) ``description`` parameter to include a
+#          text description about the image and 2) ``resolution`` parameter to specify the *pixels / cm* resolution
+#          of the image.
+
+img = Image.open('docs/source/logo.png')  # an example image
+
+# you can store an RGBA image
+rgba_logo = RGBAImage(name='RGBA_logo', data=np.array(img))
+
+# or RGB
+rgb_logo = RGBImage(name='RGB_logo', data=np.array(img.convert('RGB')))
+
+# or Grayscale. Here with the optional description and resolution specified.
+gs_logo = GrayscaleImage(name='Grayscale_logo',
+                         data=np.array(img.convert('L')),
+                         description='Grayscale version of the NWB logo',
+                         resolution=35.433071)
+
+# Images is a container that accepts any of these image types
+images = Images(
+    name='logo_images',
+    images=[rgb_logo, rgba_logo, gs_logo]
+)
+
+# Finally, do not forget to add the images object to the nwb file.
+nwbfile.processing['behavior'].add(images)
+
+####################
+# Now we overwrite the file with all of the data
+
+with NWBHDF5IO('example_file_path.nwb', 'w') as io:
+    io.write(nwbfile)
 
 ####################
 # .. _basic_appending:

@@ -15,6 +15,9 @@
 - Merged the "NWB File" overview section with the "NWB File Basics" tutorial. @oruebel (#1402)
 - Updated and created separated installation instructions for users and developers . @oruebel (#1402)
 
+### Tutorial enhancements:
+- Updated the general tutorial to add documentation about the ``Images`` type. @bendichter (#1353)
+
 ## PyNWB 2.0.0 (August 13, 2021)
 
 ### Breaking changes:
