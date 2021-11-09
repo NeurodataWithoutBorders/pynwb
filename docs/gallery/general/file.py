@@ -119,9 +119,6 @@ More commonly, you will be creating instances of classes that extend this class.
     In addition to :py:class:`~pynwb.core.NWBContainer`, which functions as a common base type for Group objects,
     :py:class:`~pynwb.core.NWBData` provides a common base for the specification of datasets in the NWB format.
 
-.. contents:: :local:
-    :depth: 3
-
 The following examples will reference variables that may not be defined within the block they are used in. For
 clarity, we define them here:
 """
@@ -175,7 +172,7 @@ print(nwbfile)
 # ----------------
 #
 # In the :py:class:`~pynwb.file.Subject` object we can store information about the experimental subject,
-# such as age, species, genotype, sex, and a description.
+# such as ``age``, ``species``, ``genotype``, ``sex``, and a ``description``.
 #
 # .. only:: html
 #
@@ -191,7 +188,7 @@ print(nwbfile)
 #     :alt: subject UML diagram
 #     :align: center
 #
-# :py:class:`~pynwb.file.Subject` fields are all free-form text (any format will be valid),
+# The fields in the :py:class:`~pynwb.file.Subject` object are all free-form text (any format will be valid),
 # however it is recommended to follow particular conventions to help software tools interpret the data:
 #
 # * **age**: `ISO 8601 Duration format <https://en.wikipedia.org/wiki/ISO_8601#Durations>`_, e.g., ``"P90D"`` for 90 days old
@@ -470,7 +467,7 @@ with NWBHDF5IO('basics_tutorial.nwb', 'r') as io:
 #
 # When working with multi-modal data, it can be convenient and efficient to store timestamps once and associate multiple
 # data with the single timestamps instance. PyNWB enables this by letting you reuse timestamps across
-# ::py:class:`~pynwb.base.TimeSeries` objects. To reuse a :py:class:`~pynwb.base.TimeSeries` timestamps in a new
+# :py:class:`~pynwb.base.TimeSeries` objects. To reuse a :py:class:`~pynwb.base.TimeSeries` timestamps in a new
 # :py:class:`~pynwb.base.TimeSeries`, pass the existing :py:class:`~pynwb.base.TimeSeries` as the new
 # :py:class:`~pynwb.base.TimeSeries` timestamps:
 
