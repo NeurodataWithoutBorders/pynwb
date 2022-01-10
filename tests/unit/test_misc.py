@@ -246,6 +246,29 @@ class UnitsTests(TestCase):
         self.assertEqual(ut['electrode_group'][0], electrode_group)
 
     def test_waveform_attrs(self):
-        ut = Units(waveform_rate=40000.)
-        self.assertEqual(ut.waveform_rate, 40000.)
+        waveform_rate = 40000.
+        ut = Units(waveform_rate=waveform_rate)
+        self.assertEqual(ut.waveform_rate, waveform_rate)
         self.assertEqual(ut.waveform_unit, 'volts')
+        self.assertIsNone(ut.waveform_conversion)
+        self.assertIsNone(ut.waveform_offset)
+
+        waveform_unit = 'microvolts'
+        ut = Units(waveform_unit=waveform_unit)
+        self.assertEqual(ut.waveform_unit, waveform_unit)
+        self.assertIsNone(ut.waveform_conversion)
+        self.assertIsNone(ut.waveform_offset)
+
+        waveform_conversion = 0.195
+        ut = Units(waveform_conversion=waveform_conversion)
+        self.assertIsNone(ut.waveform_rate)
+        self.assertEqual(ut.waveform_unit, 'volts')
+        self.assertEqual(ut.waveform_conversion, waveform_conversion)
+        self.assertIsNone(ut.waveform_offset)
+
+        waveform_offset = 0.195 * 2**15
+        ut = Units(waveform_offset=waveform_offset)
+        self.assertIsNone(ut.waveform_rate)
+        self.assertEqual(ut.waveform_unit, 'volts')
+        self.assertIsNone(ut.waveform_conversion)
+        self.assertEqual(ut.waveform_offset, waveform_offset)

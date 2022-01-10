@@ -164,9 +164,9 @@ class Units(DynamicTable):
             {'name': 'waveform_unit', 'type': str,
              'doc': 'Unit of measurement of the waveform means', 'default': 'volts'},
             {'name': 'waveform_conversion', 'type': float,
-             'doc': 'Scaling factor to apply to waveforms to convert them to waveform_unit', 'default': np.nan},
+             'doc': 'Scaling factor to apply to waveforms to convert them to waveform_unit', 'default': None},
             {'name': 'waveform_offset', 'type': float,
-             'doc': 'Offset to apply to waveforms after scaling them to waveform_units', 'default': np.nan},
+             'doc': 'Offset to apply to waveforms after scaling them to waveform_units', 'default': None},
             {'name': 'resolution', 'type': 'float',
              'doc': 'The smallest possible difference between two spike times', 'default': None}
             )
