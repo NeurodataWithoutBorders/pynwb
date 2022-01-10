@@ -132,6 +132,8 @@ class Units(DynamicTable):
     __fields__ = (
         'waveform_rate',
         'waveform_unit',
+        'waveform_conversion',
+        'waveform_offset',
         'resolution'
     )
 
@@ -161,6 +163,10 @@ class Units(DynamicTable):
              'doc': 'Sampling rate of the waveform means', 'default': None},
             {'name': 'waveform_unit', 'type': str,
              'doc': 'Unit of measurement of the waveform means', 'default': 'volts'},
+            {'name': 'waveform_conversion', 'type': float,
+             'doc': 'Scaling factor to apply to waveforms to convert them to waveform_unit', 'default': np.nan},
+            {'name': 'waveform_offset', 'type': float,
+             'doc': 'Offset to apply to waveforms after scaling them to waveform_units', 'default': np.nan},
             {'name': 'resolution', 'type': 'float',
              'doc': 'The smallest possible difference between two spike times', 'default': None}
             )
@@ -173,6 +179,8 @@ class Units(DynamicTable):
         self.__electrode_table = getargs('electrode_table', kwargs)
         self.waveform_rate = getargs('waveform_rate', kwargs)
         self.waveform_unit = getargs('waveform_unit', kwargs)
+        self.waveform_conversion = getargs('waveform_conversion', kwargs)
+        self.waveform_offset = getargs('waveform_offset', kwargs)
         self.resolution = getargs('resolution', kwargs)
 
     @docval({'name': 'spike_times', 'type': 'array_data', 'doc': 'the spike times for each unit',
