@@ -133,8 +133,6 @@ class Units(DynamicTable):
     __fields__ = (
         'waveform_rate',
         'waveform_unit',
-        'waveform_conversion',
-        'waveform_offset',
         'resolution'
     )
 
