@@ -3,7 +3,7 @@ from collections.abc import Iterable
 import warnings
 from bisect import bisect_left, bisect_right
 
-# from hdmf.common.table import MeasurementData
+from hdmf.common.table import MeasurementData
 from hdmf.utils import docval, getargs, popargs, call_docval_func, get_docval
 
 from . import register_class, CORE_NAMESPACE
@@ -152,8 +152,8 @@ class Units(DynamicTable):
         {'name': 'electrode_group', 'description': 'the electrode group that each spike unit came from'},
         {'name': 'waveform_mean', 'description': 'the spike waveform mean for each spike unit'},
         {'name': 'waveform_sd', 'description': 'the spike waveform standard deviation for each spike unit'},
-        {'name': 'waveforms', 'description': waveforms_desc, 'index': 2}
-         # 'class': MeasurementData}
+        {'name': 'waveforms', 'description': waveforms_desc, 'index': 2,
+         'class': MeasurementData, 'unit': 'volts', 'conversion': 1., 'offset': 0.}
     )
 
     @docval({'name': 'name', 'type': str, 'doc': 'Name of this Units interface', 'default': 'Units'},
@@ -202,6 +202,8 @@ class Units(DynamicTable):
         """
         Add a unit to this table
         """
+        # if 'waveforms' not in self:
+        #     self.add_column(name='waveforms', description=waveforms_desc, index=2, class=MeasurementData)
         super(Units, self).add_row(**kwargs)
         if 'electrodes' in self:
             elec_col = self['electrodes'].target
@@ -213,8 +215,6 @@ class Units(DynamicTable):
                         warnings.warn('Reference to electrode table that does not yet exist')
                 else:
                     elec_col.table = self.__electrode_table
-        if 'waveforms' in self:
-            self.waveform.units = self.waveform_unit
 
     @docval({'name': 'index', 'type': (int, list, tuple, np.ndarray),
              'doc': 'the index of the unit in unit_ids to retrieve spike times for'},

@@ -173,7 +173,7 @@ class UnitsTests(TestCase):
                     [1, 2, 3]   # spike 4
                 ]
             ]
-        ut.add_unit(waveforms=wf1)
+        ut.add_unit(waveforms=wf1, unit='volts', conversion=1., offset=0.)
         ut.add_unit(waveforms=wf2)
         self.assertEqual(ut.id.data, [0, 1])
         self.assertEqual(ut['waveforms'].target.data, [3, 6, 10, 14, 18])
