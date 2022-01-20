@@ -78,10 +78,6 @@ class VectorDataMap(ObjectMapper):
                     return container.parent.waveform_rate
                 if spec.name == 'unit':
                     return container.parent.waveform_unit
-                if spec.name == 'conversion_factor':
-                    return container.parent.waveform_conversion
-                if spec.name == 'offset':
-                    return container.parent.waveform_offset
             if container.name == 'spike_times':
                 if spec.name == 'resolution':
                     return container.parent.resolution

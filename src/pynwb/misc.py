@@ -3,6 +3,7 @@ from collections.abc import Iterable
 import warnings
 from bisect import bisect_left, bisect_right
 
+# from hdmf.common.table import MeasurementData
 from hdmf.utils import docval, getargs, popargs, call_docval_func, get_docval
 
 from . import register_class, CORE_NAMESPACE
@@ -152,6 +153,7 @@ class Units(DynamicTable):
         {'name': 'waveform_mean', 'description': 'the spike waveform mean for each spike unit'},
         {'name': 'waveform_sd', 'description': 'the spike waveform standard deviation for each spike unit'},
         {'name': 'waveforms', 'description': waveforms_desc, 'index': 2}
+         # 'class': MeasurementData}
     )
 
     @docval({'name': 'name', 'type': str, 'doc': 'Name of this Units interface', 'default': 'Units'},
@@ -163,10 +165,6 @@ class Units(DynamicTable):
              'doc': 'Sampling rate of the waveform means', 'default': None},
             {'name': 'waveform_unit', 'type': str,
              'doc': 'Unit of measurement of the waveform means', 'default': 'volts'},
-            {'name': 'waveform_conversion', 'type': float,
-             'doc': 'Scaling factor to apply to waveforms to convert them to waveform_unit', 'default': None},
-            {'name': 'waveform_offset', 'type': float,
-             'doc': 'Offset to apply to waveforms after scaling them to waveform_units', 'default': None},
             {'name': 'resolution', 'type': 'float',
              'doc': 'The smallest possible difference between two spike times', 'default': None}
             )
@@ -179,8 +177,6 @@ class Units(DynamicTable):
         self.__electrode_table = getargs('electrode_table', kwargs)
         self.waveform_rate = getargs('waveform_rate', kwargs)
         self.waveform_unit = getargs('waveform_unit', kwargs)
-        self.waveform_conversion = getargs('waveform_conversion', kwargs)
-        self.waveform_offset = getargs('waveform_offset', kwargs)
         self.resolution = getargs('resolution', kwargs)
 
     @docval({'name': 'spike_times', 'type': 'array_data', 'doc': 'the spike times for each unit',
@@ -217,6 +213,8 @@ class Units(DynamicTable):
                         warnings.warn('Reference to electrode table that does not yet exist')
                 else:
                     elec_col.table = self.__electrode_table
+        if 'waveforms' in self:
+            self.waveform.units = self.waveform_unit
 
     @docval({'name': 'index', 'type': (int, list, tuple, np.ndarray),
              'doc': 'the index of the unit in unit_ids to retrieve spike times for'},

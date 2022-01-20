@@ -24,14 +24,6 @@ class UnitsMap(DynamicTableMap):
     def waveform_unit_carg(self, builder, manager):
         return self._get_waveform_stat(builder, 'unit')
 
-    @DynamicTableMap.constructor_arg('waveform_conversion')
-    def waveform_conversion_carg(self, builder, manager):
-        return self._get_waveform_stat(builder, 'conversion_factor')
-
-    @DynamicTableMap.constructor_arg('waveform_offset')
-    def waveform_offset_carg(self, builder, manager):
-        return self._get_waveform_stat(builder, 'offset')
-
     def _get_waveform_stat(self, builder, attribute):
         if 'waveform_mean' not in builder and 'waveform_sd' not in builder:
             return None

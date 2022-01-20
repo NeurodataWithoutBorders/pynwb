@@ -180,6 +180,7 @@ class UnitsTests(TestCase):
         self.assertEqual(ut['waveforms'].data, [2, 5])
         self.assertListEqual(ut['waveforms'][0], wf1)
         self.assertListEqual(ut['waveforms'][1], wf2)
+        self.assertEqual(ut.waveforms.units, "volts")
 
     def test_get_spike_times(self):
         ut = Units()
@@ -250,25 +251,7 @@ class UnitsTests(TestCase):
         ut = Units(waveform_rate=waveform_rate)
         self.assertEqual(ut.waveform_rate, waveform_rate)
         self.assertEqual(ut.waveform_unit, 'volts')
-        self.assertIsNone(ut.waveform_conversion)
-        self.assertIsNone(ut.waveform_offset)
 
         waveform_unit = 'microvolts'
         ut = Units(waveform_unit=waveform_unit)
         self.assertEqual(ut.waveform_unit, waveform_unit)
-        self.assertIsNone(ut.waveform_conversion)
-        self.assertIsNone(ut.waveform_offset)
-
-        waveform_conversion = 0.195
-        ut = Units(waveform_conversion=waveform_conversion)
-        self.assertIsNone(ut.waveform_rate)
-        self.assertEqual(ut.waveform_unit, 'volts')
-        self.assertEqual(ut.waveform_conversion, waveform_conversion)
-        self.assertIsNone(ut.waveform_offset)
-
-        waveform_offset = 0.195 * 2**15
-        ut = Units(waveform_offset=waveform_offset)
-        self.assertIsNone(ut.waveform_rate)
-        self.assertEqual(ut.waveform_unit, 'volts')
-        self.assertIsNone(ut.waveform_conversion)
-        self.assertEqual(ut.waveform_offset, waveform_offset)
