@@ -202,8 +202,6 @@ class Units(DynamicTable):
         """
         Add a unit to this table
         """
-        # if 'waveforms' not in self:
-        #     self.add_column(name='waveforms', description=waveforms_desc, index=2, class=MeasurementData)
         super(Units, self).add_row(**kwargs)
         if 'electrodes' in self:
             elec_col = self['electrodes'].target
