@@ -293,7 +293,7 @@ class RoiResponseSeriesConstructor(TestCase):
 
     def test_warnings(self):
         ps = create_plane_segmentation()
-        rt_region = ps.create_roi_table_region(description='the second ROI', region=[0,1])
+        rt_region = ps.create_roi_table_region(description='the second ROI', region=[0, 1])
 
         with warnings.catch_warnings(record=True) as w:
             # Cause all warnings to always be triggered.
@@ -322,10 +322,9 @@ class RoiResponseSeriesConstructor(TestCase):
             )
             self.assertEqual(len(w), 1)
             assert (
-                       "The second dimension of data does not match the length of rois, but instead the first does. "
-                       "Data is oriented incorrectly and should be transposed."
+               "The second dimension of data does not match the length of rois, but instead the first does. "
+               "Data is oriented incorrectly and should be transposed."
                    ) in str(w[-1].message)
-
 
 
 class DfOverFConstructor(TestCase):
