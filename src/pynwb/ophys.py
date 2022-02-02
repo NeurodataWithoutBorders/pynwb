@@ -342,6 +342,16 @@ class RoiResponseSeries(TimeSeries):
                         'comments', 'description', 'control', 'control_description'))
     def __init__(self, **kwargs):
         rois = popargs('rois', kwargs)
+        if (
+                isinstance(kwargs["data"], np.ndarray)
+                and not kwargs["data"].shape[1] == len(rois.data)
+        ):
+            if len(kwargs["data"]) == len(rois.data):
+                warnings.warn("The second dimension of data does not match the length of rois, but instead the "
+                              "first does. Data is oriented incorrectly and should be transposed.")
+            else:
+                warnings.warn("The second dimension of data does not match the length of rois. Your data may be "
+                              "transposed.")
         call_docval_func(super(RoiResponseSeries, self).__init__, kwargs)
         self.rois = rois
 
