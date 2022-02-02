@@ -222,7 +222,6 @@ class TestTimeSeries(TestCase):
                    ) in str(w[-1].message)
 
 
-
 class TestImage(TestCase):
 
     def test_image(self):
