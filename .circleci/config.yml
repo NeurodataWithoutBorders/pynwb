@@ -14,6 +14,7 @@ references:
   initialize-venv: &initialize-venv
     name: Initialize Virtual Environment
     command: |
+      pip install --upgrade pip
       python -m virtualenv ../venv || python -m venv ../venv
       . ../venv/bin/activate
 
@@ -95,10 +96,16 @@ references:
       - run:
           name: Configure conda
           command: |
+            pip install --upgrade pip
+            conda update -n base -c defaults conda
             conda config --set always_yes yes --set changeps1 no
             conda config --add channels conda-forge
             conda install python=$CONDA_PYTHON_VER
-            conda install virtualenv
+            if [[ "${TEST_TOX_ENV}" == *"py37"* ]]; then
+              conda install "virtualenv<20.11"
+            else
+              conda install virtualenv
+            fi
             conda install tox
       - run:
           name: Run the tests
