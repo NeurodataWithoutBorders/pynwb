@@ -102,7 +102,7 @@ references:
             conda config --add channels conda-forge
             conda install python=$CONDA_PYTHON_VER
             if [[ "${TEST_TOX_ENV}" == *"py37"* ]]; then
-              conda install "virtualenv<20.11"
+              conda install "virtualenv<20.5"
             else
               conda install virtualenv
             fi
