@@ -1,7 +1,8 @@
 from warnings import warn
 from collections.abc import Iterable
-import numpy as np
 from typing import NamedTuple
+
+import numpy as np
 
 from hdmf.utils import docval, getargs, popargs, call_docval_func, get_docval
 from hdmf.common import DynamicTable, VectorData
@@ -146,6 +147,14 @@ class TimeSeries(NWBDataInterface):
                 "control",
                 "control_description",
                 "continuity")
+
+        if (
+            isinstance(kwargs["data"], (np.ndarray, list))
+            and isinstance(kwargs["timestamps"], (np.ndarray, list))
+            and not len(kwargs["data"]) == len(kwargs["timestamps"])
+        ):
+            warn("Length of data does not match length of timestamps. Your data may be transposed. Time should be on "
+                 "the 0th dimension")
         for key in keys:
             val = kwargs.get(key)
             if val is not None:
