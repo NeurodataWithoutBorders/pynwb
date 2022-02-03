@@ -6,6 +6,7 @@ import numpy as np
 
 from hdmf.utils import docval, getargs, popargs, call_docval_func, get_docval
 from hdmf.common import DynamicTable, VectorData
+from hdmf.utils import get_data_shape
 
 from . import register_class, CORE_NAMESPACE
 from .core import NWBDataInterface, MultiContainerInterface, NWBData
@@ -148,10 +149,20 @@ class TimeSeries(NWBDataInterface):
                 "control_description",
                 "continuity")
 
+        data_shape = get_data_shape(data=kwargs["data"], strict_no_data_load=True)
+        timestamps_shape = get_data_shape(data=kwargs["timestamps"], strict_no_data_load=True)
         if (
-            isinstance(kwargs["data"], (np.ndarray, list))
-            and isinstance(kwargs["timestamps"], (np.ndarray, list))
-            and not len(kwargs["data"]) == len(kwargs["timestamps"])
+            # check that the shape is known
+            data_shape is not None and timestamps_shape is not None
+
+            # check for scalars. Should never happen
+            and (len(data_shape) > 0 and len(timestamps_shape) > 0)
+
+            # check that the length of the first dimension is known
+            and (data_shape[0] is not None and timestamps_shape[0] is not None)
+
+            # check that the data and timestamps match
+            and (data_shape[0] != timestamps_shape[0])
         ):
             warn("Length of data does not match length of timestamps. Your data may be transposed. Time should be on "
                  "the 0th dimension")
