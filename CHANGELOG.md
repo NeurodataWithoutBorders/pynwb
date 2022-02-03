@@ -1,6 +1,6 @@
 # PyNWB Changelog
 
-## PyNWB 2.0.1 (Upcoming)
+## PyNWB 2.0.1 (February 3, 2022)
 
 ### Bug fixes:
 - Add `environment-ros3.yml` to `MANIFEST.in` for inclusion in source distributions. @rly (#1398)
