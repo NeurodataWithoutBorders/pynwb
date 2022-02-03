@@ -1,7 +1,7 @@
 """
 .. _modifying_data:
 
-Adding/removing containers from an NWB file
+Adding/Removing Containers from an NWB File
 ============================================
 
 This tutorial explains how to add and remove containers from an existing NWB file and either write the data back to the
