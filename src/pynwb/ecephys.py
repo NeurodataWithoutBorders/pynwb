@@ -4,7 +4,6 @@ import warnings
 from hdmf.utils import docval, getargs, popargs, call_docval_func, get_docval
 from hdmf.data_utils import DataChunkIterator, assertEqualShape
 from hdmf.utils import get_data_shape
-import numpy as np
 
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries

@@ -2,7 +2,7 @@ from collections.abc import Iterable
 import numpy as np
 import warnings
 
-from hdmf.utils import docval, getargs, popargs, call_docval_func, get_docval
+from hdmf.utils import docval, getargs, popargs, call_docval_func, get_docval, get_data_shape
 
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries
@@ -342,11 +342,21 @@ class RoiResponseSeries(TimeSeries):
                         'comments', 'description', 'control', 'control_description'))
     def __init__(self, **kwargs):
         rois = popargs('rois', kwargs)
+
+        data_shape = get_data_shape(data=kwargs["data"], strict_no_data_load=True)
+        rois_shape = get_data_shape(data=rois.data, strict_no_data_load=True)
         if (
-                isinstance(kwargs["data"], np.ndarray)
-                and not kwargs["data"].shape[1] == len(rois.data)
+            data_shape is not None and rois_shape is not None
+
+            # check that data is 2d and rois is 1d
+            and len(data_shape) == 2 and len(rois_shape) == 1
+
+            # check that key dimensions are known
+            and data_shape[1] is not None and rois_shape[0] is not None
+
+            and data_shape[1] != rois_shape
         ):
-            if len(kwargs["data"]) == len(rois.data):
+            if data_shape[0] == rois_shape[0]:
                 warnings.warn("The second dimension of data does not match the length of rois, but instead the "
                               "first does. Data is oriented incorrectly and should be transposed.")
             else:
