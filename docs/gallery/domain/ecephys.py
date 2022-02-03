@@ -2,8 +2,8 @@
 '''
 .. _ecephys_tutorial:
 
-Extracellular electrophysiology data
-============================================
+Extracellular Electrophysiology Data
+====================================
 
 '''
 
