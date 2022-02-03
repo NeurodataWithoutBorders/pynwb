@@ -8,6 +8,7 @@
 - Skip ros3 tests if internet access or the ros3 driver are not available. @oruebel (#1414)
 
 ### Tutorial enhancements:
+- Enhanced ordering of sphinx gallery tutorials to use alphabetic ordering based on tutorial headings. @oruebel (#1399)
 - Updated the general tutorial to add documentation about the ``Images`` type. @bendichter (#1353)
 
 ### Minor improvements:
@@ -18,7 +19,7 @@
 
 ### Breaking changes:
 - ``SweepTable`` has been deprecated in favor of the new icephys metadata tables. Use of ``SweepTable``
-  is still possible but no longer recommended. @oruebel  (#1349
+  is still possible but no longer recommended. @oruebel  (#1349)
 - ``TimeSeries.__init__`` now requires the ``data`` argument because the 'data' dataset is required by the schema.
   If a ``TimeSeries`` is read without a value for ``data``, it will be set to a default value. For most
   ``TimeSeries``, this is a 1-dimensional empty array with dtype uint8. For ``ImageSeries`` and

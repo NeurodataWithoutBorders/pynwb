@@ -2,7 +2,7 @@
 '''
 .. _icephys_tutorial_new:
 
-Intracellular electrophysiology
+Intracellular Electrophysiology
 ===============================
 
 The following tutorial describes storage of intracellular electrophysiology data in NWB.
@@ -17,7 +17,7 @@ experiment.
        at the INCF Training Space.
 
 .. figure:: ../../figures/plot_icephys_table_hierarchy.png
-    :width: 700
+    :figwidth: 100%
     :alt: Intracellular electrophysiology metadata table hierarchy
 
     Illustration of the hierarchy of metadata tables used to describe the organization of
@@ -302,7 +302,7 @@ response = VoltageClampSeries(
 # and response pairs and describes metadata specific to individual recordings.
 #
 # .. figure:: ../../figures/plot_icephys_intracellular_recordings_table.png
-#    :width: 700
+#    :figwidth: 90%
 #    :alt: IntracellularRecordingsTable
 #
 #    Illustration of the structure of the IntracellularRecordingsTable

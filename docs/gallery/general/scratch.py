@@ -1,7 +1,7 @@
 """
 .. _scratch:
 
-Exploratory data analysis with NWB
+Exploratory Data Analysis with NWB
 ==================================
 
 This example will focus on the basics of working with an :py:class:`~pynwb.file.NWBFile` to do more than
