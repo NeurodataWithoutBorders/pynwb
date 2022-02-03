@@ -1,5 +1,5 @@
-How to contribute to NWB:N software and documents
-=================================================
+How to contribute to NWB software and documents
+===============================================
 
 .. _sec-code-of-conduct:
 
@@ -152,29 +152,9 @@ Endorsement
 
 Please don’t take the fact that you worked with an organization (e.g., during a hackathon or via GitHub) as an endorsement of your work or your organization. It is okay to say e.g., “We worked with XXXXX to advance science” but not e.g., “XXXXX supports our work on NWB”.”
 
-FAQ
-===
-
-1.  I am using a git cloned copy of PyNWB and getting the error:
-    ``RuntimeError: Unable to load a TypeMap - no namespace file found``
-
-    - The PyNWB repo uses git submodules that have to be checked out when cloning the repos. Please make sure you
-      are using the ``--recurse-submodules`` flag when running ``git clone``:
-
-      .. code-block:: bash
-
-          git clone --recurse-submodules git@github.com:NeurodataWithoutBorders/pynwb.git
-
-      You can also run the following on your existing cloned repo.
-
-      .. code-block:: bash
-
-          git submodule init
-          git submodule update --checkout --force
-
 
 License and Copyright
-=======================
+---------------------
 
 See the `license <https://raw.githubusercontent.com/NeurodataWithoutBorders/pynwb/dev/license.txt>`_ files for details about the copyright and license.
 

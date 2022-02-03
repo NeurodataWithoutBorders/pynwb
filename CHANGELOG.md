@@ -7,9 +7,12 @@
 - Fix bad error check in ``IntracellularRecordingsTable.add_recording`` when adding ``IZeroClampSeries``. @oruebel (#1410)
 - Skip ros3 tests if internet access or the ros3 driver are not available. @oruebel (#1414)
 
-### Tutorial enhancements:
+### Documentation and tutorial enhancements:
 - Enhanced ordering of sphinx gallery tutorials to use alphabetic ordering based on tutorial headings. @oruebel (#1399)
 - Updated the general tutorial to add documentation about the ``Images`` type. @bendichter (#1353)
+- Updated the main index of the documentation to make the documentation easier to navigate. @oruebel (#1402)
+- Merged the "NWB File" overview section with the "NWB File Basics" tutorial. @oruebel (#1402)
+- Updated and created separated installation instructions for users and developers . @oruebel (#1402)
 
 ### Minor improvements:
 - Improve constructor docstrings for Image types. @weiglszonja (#1418)
