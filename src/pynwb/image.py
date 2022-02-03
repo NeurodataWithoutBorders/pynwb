@@ -193,7 +193,8 @@ class OpticalSeries(ImageSeries):
 class GrayscaleImage(Image):
 
     @docval(*get_docval(Image.__init__, 'name'),
-            {'name': 'data', 'type': ('array_data', 'data'), 'doc': 'Data of image. Must be 2D',
+            {'name': 'data', 'type': ('array_data', 'data'),
+             'doc': 'Data of grayscale image. Must be 2D where the dimensions represent x and y.',
              'shape': (None, None)},
             *get_docval(Image.__init__, 'resolution', 'description'))
     def __init__(self, **kwargs):
@@ -205,7 +206,8 @@ class RGBImage(Image):
 
     @docval(*get_docval(Image.__init__, 'name'),
             {'name': 'data', 'type': ('array_data', 'data'),
-             'doc': 'Data of image. Must be 3D where the third dimension has length 3 and represents the RGB value',
+             'doc': 'Data of color image. Must be 3D where the first and second dimensions represent x and y. '
+                    'The third dimension has length 3 and represents the RGB value.',
              'shape': (None, None, 3)},
             *get_docval(Image.__init__, 'resolution', 'description'))
     def __init__(self, **kwargs):
@@ -217,7 +219,8 @@ class RGBAImage(Image):
 
     @docval(*get_docval(Image.__init__, 'name'),
             {'name': 'data', 'type': ('array_data', 'data'),
-             'doc': 'Data of image. Must be 3D where the third dimension has length 4 and represents the RGBA value',
+             'doc': 'Data of color image with transparency. Must be 3D where the first and second dimensions '
+                    'represent x and y. The third dimension has length 4 and represents the RGBA value.',
              'shape': (None, None, 4)},
             *get_docval(Image.__init__, 'resolution', 'description'))
     def __init__(self, **kwargs):

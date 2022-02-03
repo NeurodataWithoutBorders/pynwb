@@ -5,10 +5,14 @@
 ### Bug fixes:
 - Add `environment-ros3.yml` to `MANIFEST.in` for inclusion in source distributions. @rly (#1398)
 - Fix bad error check in ``IntracellularRecordingsTable.add_recording`` when adding ``IZeroClampSeries``. @oruebel (#1410)
--  Skip ros3 tests if internet access or the ros3 driver are not available. @oruebel (#1414)
+- Skip ros3 tests if internet access or the ros3 driver are not available. @oruebel (#1414)
 
 ### Tutorial enhancements:
 - Updated the general tutorial to add documentation about the ``Images`` type. @bendichter (#1353)
+
+### Minor improvements:
+- Improve constructor docstrings for Image types. @weiglszonja (#1418)
+
 
 ## PyNWB 2.0.0 (August 13, 2021)
 
