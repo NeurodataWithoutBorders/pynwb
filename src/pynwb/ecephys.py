@@ -3,6 +3,7 @@ import warnings
 
 from hdmf.utils import docval, getargs, popargs, call_docval_func, get_docval
 from hdmf.data_utils import DataChunkIterator, assertEqualShape
+from hdmf.utils import get_data_shape
 import numpy as np
 
 from . import register_class, CORE_NAMESPACE
@@ -80,11 +81,13 @@ class ElectricalSeries(TimeSeries):
     def __init__(self, **kwargs):
         name, electrodes, data, channel_conversion, filtering = popargs('name', 'electrodes', 'data',
                                                                         'channel_conversion', 'filtering', kwargs)
+        data_shape = get_data_shape(data, strict_no_data_load=True)
         if (
-            isinstance(data, np.ndarray)
-            and not data.shape[1] == len(electrodes.data)
+            data_shape is not None
+            and len(data_shape) == 2
+            and data_shape[1] != len(electrodes.data)
         ):
-            if len(data) == len(electrodes.data):
+            if data_shape[0] == len(electrodes.data):
                 warnings.warn("The second dimension of data does not match the length of electrodes, but instead the "
                               "first does. Data is oriented incorrectly and should be transposed.")
             else:
