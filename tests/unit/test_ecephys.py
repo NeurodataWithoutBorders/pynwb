@@ -1,3 +1,5 @@
+import warnings
+
 import numpy as np
 
 from pynwb.ecephys import ElectricalSeries, SpikeEventSeries, EventDetection, Clustering, EventWaveform,\
@@ -65,6 +67,38 @@ class ElectricalSeriesConstructor(TestCase):
         with self.assertRaisesWith(ValueError, ("ElectricalSeries.__init__: incorrect shape for 'data' (got '(2, 2, 2, "
                                                 "2)', expected '((None,), (None, None), (None, None, None))')")):
             ElectricalSeries('test_ts1', np.ones((2, 2, 2, 2)), region, timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5])
+
+    def test_dimensions_warning(self):
+        table = make_electrode_table()
+        region = DynamicTableRegion('electrodes', [0, 2], 'the first and third electrodes', table)
+        with warnings.catch_warnings(record=True) as w:
+            # Cause all warnings to always be triggered.
+            warnings.simplefilter("always")
+            ElectricalSeries(
+                name="test_ts1",
+                data=np.ones((6, 3)),
+                electrodes=region,
+                timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5]
+            )
+            self.assertEqual(len(w), 1)
+            assert (
+                "The second dimension of data does not match the length of electrodes. Your data may be transposed."
+                ) in str(w[-1].message)
+
+        with warnings.catch_warnings(record=True) as w:
+            # Cause all warnings to always be triggered.
+            warnings.simplefilter("always")
+            ElectricalSeries(
+                name="test_ts1",
+                data=np.ones((2, 6)),
+                electrodes=region,
+                rate=30000.,
+            )
+            self.assertEqual(len(w), 1)
+            assert (
+               "The second dimension of data does not match the length of electrodes, but instead the first does. Data "
+               "is oriented incorrectly and should be transposed."
+                   ) in str(w[-1].message)
 
 
 class SpikeEventSeriesConstructor(TestCase):
