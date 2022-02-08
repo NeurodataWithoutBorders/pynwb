@@ -37,9 +37,9 @@ from pynwb.ecephys import ElectricalSeries, LFP
 
 
 nwbfile = NWBFile(
-    'my first synthetic recording',
-    'EXAMPLE_ID',
-    datetime.now(tzlocal()),
+    session_description='my first synthetic recording',
+    identifier='EXAMPLE_ID',
+    session_start_time=datetime.now(tzlocal()),
     experimenter='Dr. Bilbo Baggins',
     lab='Bag End Laboratory',
     institution='University of Middle Earth at the Shire',
