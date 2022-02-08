@@ -180,8 +180,8 @@ raw_electrical_series = ElectricalSeries(
     name='ElectricalSeries',
     data=raw_data,
     electrodes=all_table_region,
-    starting_time=0.,
-    rate=20000.
+    starting_time=0.,  # timestamp of the first sample in seconds relative to the session start time
+    rate=20000.  # in Hz
 )
 
 ####################
