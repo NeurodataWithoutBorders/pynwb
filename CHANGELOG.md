@@ -1,10 +1,30 @@
 # PyNWB Changelog
 
-## PyNWB 2.0.0 (Upcoming)
+## PyNWB 2.0.1 (Upcoming)
+
+### Bug fixes:
+- Add `environment-ros3.yml` to `MANIFEST.in` for inclusion in source distributions. @rly (#1398)
+- Fix bad error check in ``IntracellularRecordingsTable.add_recording`` when adding ``IZeroClampSeries``. @oruebel (#1410)
+- Skip ros3 tests if internet access or the ros3 driver are not available. @oruebel (#1414)
+
+### Documentation and tutorial enhancements:
+- Enhanced ordering of sphinx gallery tutorials to use alphabetic ordering based on tutorial headings. @oruebel (#1399)
+- Updated the general tutorial to add documentation about the ``Images`` type. @bendichter (#1353)
+- Updated the main index of the documentation to make the documentation easier to navigate. @oruebel (#1402)
+- Merged the "NWB File" overview section with the "NWB File Basics" tutorial. @oruebel (#1402)
+- Updated and created separated installation instructions for users and developers . @oruebel (#1402)
+- Updated the Extracellular electrophysiology tutorial. @bendichter, @weiglszonja (#1391)
+
+### Minor improvements:
+- Improve constructor docstrings for Image types. @weiglszonja (#1418)
+- Add checks for data orientation in ``TimeSeries``, ``ElectricalSeries``, and ``RoiResponseSeries`` @bendichter (#1428)
+
+
+## PyNWB 2.0.0 (August 13, 2021)
 
 ### Breaking changes:
 - ``SweepTable`` has been deprecated in favor of the new icephys metadata tables. Use of ``SweepTable``
-  is still possible but no longer recommended. @oruebel  (#1349
+  is still possible but no longer recommended. @oruebel  (#1349)
 - ``TimeSeries.__init__`` now requires the ``data`` argument because the 'data' dataset is required by the schema.
   If a ``TimeSeries`` is read without a value for ``data``, it will be set to a default value. For most
   ``TimeSeries``, this is a 1-dimensional empty array with dtype uint8. For ``ImageSeries`` and
@@ -23,6 +43,7 @@
   for more details. @oruebel, @rly (#1349)
 - Dropped Python 3.6 support, added Python 3.9 support. @rly (#1377)
 - Updated requirements to allow compatibility with HDMF 3 and h5py 3. @rly (#1377)
+  - When using HDMF 3 and h5py 3, users can now stream NWB files from an S3 bucket.
 
 ### Tutorial enhancements:
 - Added new tutorial for intracellular electrophysiology to describe the use of the new metadata tables
@@ -32,14 +53,18 @@
 - Added thumbnails for tutorials to improve presentation of online docs.  @oruebel (#1349)
 - Used `sphinx.ext.extlinks` extension in docs to simplify linking to common targets. @oruebel (#1349)
 - Created new section for advanced I/O tutorials and moved parallel I/O tutorial to its own file. @oruebel (#1349)
+- Overhauled documentation on extensions. @bendichter, @rly, @oruebel (#1350)
 - Updated the optical physiology / Calcium imaging tutorial. @bendichter, @weiglszonja (#1375)
-- Updated the Extracellular electrophysiology tutorial. @bendichter, @weiglszonja (#1391)
+- Added a tutorial on streaming using the ROS3 driver. @rly (#1393)
 
 ### Minor new features:
-- Add RRID for citing PyNWB to the docs. @oruebel (#1372)
-- Update CI and tests to handle deprecations in libraries. @rly (#1377)
-- Add test utilities for icephys (``pynwb.testing.icephys_testutils``) to ease creation of test data
+- Added RRID for citing PyNWB to the docs. @oruebel (#1372)
+- Updated CI and tests to handle deprecations in libraries. @rly (#1377)
+- Added test utilities for icephys (``pynwb.testing.icephys_testutils``) to ease creation of test data
   for tests and tutorials. @oruebel (#1349, #1383)
+- Added on-push and nightly tests of streaming using the ROS3 driver. @rly (#1393)
+  - These tests make use of a new dandiset for testing the API: https://gui.dandiarchive.org/#/dandiset/000126
+- Improve documentation and test for ``CorrectedImageStack``, ``MotionCorrection``. @rly, @bendichter (#1306, #1374)
 
 ### Bug fixes:
 - Updated behavior of ``make clean`` command for docs to ensure tutorial files are cleaned up.  @oruebel (#1349)
@@ -52,6 +77,9 @@
   be provided in place of ``data``. ``OpticalSeries.__init__`` now makes ``data`` optional. However, this has the
   side effect of moving the position of ``data`` to later in the argument list, which may break code that relies
   on positional arguments for ``OpticalSeries.__init__``. @rly (#1274)
+- Fixed `setup.py` not being able to import `versioneer` when installing in an embedded Python environment. @ikhramts
+  (#1395)
+- Removed broken option to validate against a given namespace file and updated associated documentation. @rly (#1397)
 
 ## PyNWB 1.5.1 (May 24, 2021)
 

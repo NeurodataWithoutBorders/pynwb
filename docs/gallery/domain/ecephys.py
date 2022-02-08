@@ -2,8 +2,8 @@
 '''
 .. _ecephys_tutorial:
 
-Extracellular electrophysiology data
-============================================
+Extracellular Electrophysiology Data
+====================================
 
 The following tutorial describes storage of extracellular electrophysiology data in NWB.
 The workflow demonstrated here involves four main steps:

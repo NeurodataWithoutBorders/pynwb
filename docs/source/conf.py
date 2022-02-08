@@ -58,6 +58,7 @@ extensions = [
 ]
 
 from sphinx_gallery.sorting import ExplicitOrder
+from sphinx_gallery.sorting import ExampleTitleSortKey
 
 sphinx_gallery_conf = {
     # path to your examples scripts
@@ -67,7 +68,8 @@ sphinx_gallery_conf = {
     'subsection_order': ExplicitOrder(['../gallery/general', '../gallery/domain', '../gallery/advanced_io']),
     'backreferences_dir': 'gen_modules/backreferences',
     'min_reported_time': 5,
-    'remove_config_comments': True
+    'remove_config_comments': True,
+    'within_subsection_order': ExampleTitleSortKey
 }
 
 intersphinx_mapping = {
@@ -157,7 +159,9 @@ html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
 # documentation.
-# html_theme_options = {}
+html_theme_options = {
+    "style_nav_header_background": "#AFD2E8"
+}
 
 # Add any paths that contain custom themes here, relative to this directory.
 # html_theme_path = []
