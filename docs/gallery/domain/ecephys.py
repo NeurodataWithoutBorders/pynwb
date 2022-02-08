@@ -246,7 +246,7 @@ lfp = LFP(electrical_series=lfp_electrical_series)
 #
 # Create a processing module named ``"ecephys"`` and add the :py:class:`~pynwb.ecephys.LFP` object to it.
 # This is analogous to how we can store the :py:class:`~pynwb.behavior.Position` object in a processing module
-# with the :py:class:`~pynwb.file.NWBFile.create_processing_module` method.
+# created with the :py:class:`~pynwb.file.NWBFile.create_processing_module` method.
 
 
 ecephys_module = nwbfile.create_processing_module(
