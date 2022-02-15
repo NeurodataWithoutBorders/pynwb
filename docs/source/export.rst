@@ -59,7 +59,8 @@ file and not the read file.
 Can I export a newly instantiated `NWBFile`?
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 No, you can only export containers that have been read from a file. The ``src_io`` argument is required in
-:py:meth:`NWBHDF5IO.export <pynwb.NWBHDF5IO.export>`.
+:py:meth:`NWBHDF5IO.export <pynwb.NWBHDF5IO.export>`. To write newly created `NWBFile` objects use 
+always the regular :py:meth:`NWBHDF5IO.write` method.
 
 Can I read a `NWBFile` from disk and export only part of the `NWBFile`?
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
