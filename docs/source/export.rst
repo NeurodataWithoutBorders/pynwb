@@ -71,7 +71,7 @@ only a sub-container of the `NWBFile` hierarchy.
 Can I write a newly instantiated `NWBFile` to two different files?
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 PyNWB does not allow you to write an `NWBFile` that was not read from a file to two different files. For example, if you
-instantiate `NWBFile` A and write it file 1 and then try to write it to file 2, an error will be raised. However, you
+instantiate `NWBFile` A and write it to file 1 and then try to write it to file 2, an error will be raised. However, you
 can read `NWBFile` A from file 1 and then export it to file 2, with or without modifications to `NWBFile` A in
 memory.
 
