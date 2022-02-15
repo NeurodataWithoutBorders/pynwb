@@ -1,7 +1,7 @@
 Exporting NWB files
 ===================
 
-Export is a new feature in PyNWB 2.0 (adapted from HDMF 2.0). You can use export to take an
+Export is a feature in PyNWB 2.0 (adapted from HDMF 2.0). You can use export to take an
 :py:class:`~pynwb.file.NWBFile` that was read from a file and write it to
 a different file, with or without modifications to the `NWBFile` in memory.
 The in-memory `NWBFile` being exported will be written to the exported file as if it was never read from a file.
