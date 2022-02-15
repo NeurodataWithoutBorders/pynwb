@@ -11,7 +11,7 @@
 - Updated the general tutorial to add documentation about the ``Images`` type. @bendichter (#1353)
 
 ### Documentation enhancements:
-- Added documentation for exporting NWB files. @bendichter (#1417)
+- Added documentation for exporting NWB files. @rly (#1417)
 
 ## PyNWB 2.0.0 (August 13, 2021)
 
