@@ -74,6 +74,11 @@ PyNWB does not allow you to write an `NWBFile` that was not read from a file to 
 instantiate `NWBFile` A and write it to file 1 and then try to write it to file 2, an error will be raised. However, you
 can read `NWBFile` A from file 1 and then export it to file 2, with or without modifications to `NWBFile` A in
 memory.
+What happens to NWB file versions when I export?
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+The exported file will use the latest schema version supported by the version of PyNWB used. For example, if
+the input file uses the NWB schema version 2.1 and the latest schema version supported by PyNWB is 2.3, 
+then the exported file will use the 2.3 NWB schema. 
 
 What happens to links when I export?
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
