@@ -99,8 +99,11 @@ copy of externally linked datasets.
 What happens to references when I export?
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 References will be preserved in the exported file.
-NOTE: Exporting a file involves loading into memory all datasets that contain references and attributes that are
-references. The HDF5 reference IDs within an exported file may differ from the reference IDs in the original file.
+.. note::
+
+    Exporting a file involves loading into memory all datasets that contain references and attributes that are
+    references. The HDF5 reference IDs within an exported file may differ from the reference IDs in the 
+    original file.
 
 What happens to object IDs when I export?
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
