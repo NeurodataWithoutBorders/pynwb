@@ -122,7 +122,7 @@ PyPI: Step-by-step
 
 
 8. Once the builds are completed, check that the distributions are available on `PyPI`_ and that
-   a new `GitHub release <https://github.com/NeurodataWithoutBorders/pynwb/releases>`_ was created.
+   a new :pynwb:`GitHub release <releases>` was created.
 
 
 9. Create a clean testing environment to test the installation

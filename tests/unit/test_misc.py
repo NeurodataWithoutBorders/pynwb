@@ -1,9 +1,9 @@
 import numpy as np
 
-from hdmf.common import DynamicTable, VectorData
+from hdmf.common import DynamicTable, VectorData, DynamicTableRegion
 
 from pynwb.misc import AnnotationSeries, AbstractFeatureSeries, IntervalSeries, Units, DecompositionSeries
-from pynwb.file import TimeSeries
+from pynwb.file import TimeSeries, ElectrodeTable as get_electrode_table
 from pynwb.device import Device
 from pynwb.ecephys import ElectrodeGroup
 from pynwb.testing import TestCase
@@ -11,7 +11,7 @@ from pynwb.testing import TestCase
 
 class AnnotationSeriesConstructor(TestCase):
     def test_init(self):
-        aS = AnnotationSeries('test_aS', timestamps=list())
+        aS = AnnotationSeries('test_aS', data=[1, 2, 3], timestamps=list())
         self.assertEqual(aS.name, 'test_aS')
         aS.add_annotation(2.0, 'comment')
 
@@ -74,6 +74,35 @@ class DecompositionSeriesConstructor(TestCase):
         self.assertEqual(spec_anal.source_timeseries, timeseries)
         self.assertEqual(spec_anal.metric, 'amplitude')
 
+    @staticmethod
+    def make_electrode_table(self):
+        """ Make an electrode table, electrode group, and device """
+        self.table = get_electrode_table()
+        self.dev1 = Device(name='dev1')
+        self.group = ElectrodeGroup(name='tetrode1',
+                                    description='tetrode description',
+                                    location='tetrode location',
+                                    device=self.dev1)
+        for i in range(4):
+            self.table.add_row(x=i, y=2.0, z=3.0, imp=-1.0, location='CA1', filtering='none', group=self.group,
+                               group_name='tetrode1')
+
+    def test_init_with_source_channels(self):
+        self.make_electrode_table(self)
+        region = DynamicTableRegion(name='source_channels',
+                                    data=[0, 2],
+                                    description='the first and third electrodes',
+                                    table=self.table)
+        data = np.random.randn(100, 2, 30)
+        timestamps = np.arange(100)/100
+        ds = DecompositionSeries(name='test_DS',
+                                 data=data,
+                                 source_channels=region,
+                                 timestamps=timestamps,
+                                 metric='amplitude')
+
+        self.assertIs(ds.source_channels, region)
+
 
 class IntervalSeriesConstructor(TestCase):
     def test_init(self):
@@ -112,6 +141,45 @@ class UnitsTests(TestCase):
         self.assertEqual(ut['spike_times'].data, [3, 6])
         self.assertEqual(ut['spike_times'][0], [0, 1, 2])
         self.assertEqual(ut['spike_times'][1], [3, 4, 5])
+
+    def test_add_waveforms(self):
+        ut = Units()
+        wf1 = [
+                [  # elec 1
+                    [1, 2, 3],
+                    [1, 2, 3],
+                    [1, 2, 3]
+                ], [  # elec 2
+                    [1, 2, 3],
+                    [1, 2, 3],
+                    [1, 2, 3]
+                ]
+            ]
+        wf2 = [
+                [     # elec 1
+                    [1, 2, 3],  # spike 1, [sample 1, sample 2, sample 3]
+                    [1, 2, 3],  # spike 2
+                    [1, 2, 3],  # spike 3
+                    [1, 2, 3]   # spike 4
+                ], [  # elec 2
+                    [1, 2, 3],  # spike 1
+                    [1, 2, 3],  # spike 2
+                    [1, 2, 3],  # spike 3
+                    [1, 2, 3]   # spike 4
+                ], [  # elec 3
+                    [1, 2, 3],  # spike 1
+                    [1, 2, 3],  # spike 2
+                    [1, 2, 3],  # spike 3
+                    [1, 2, 3]   # spike 4
+                ]
+            ]
+        ut.add_unit(waveforms=wf1)
+        ut.add_unit(waveforms=wf2)
+        self.assertEqual(ut.id.data, [0, 1])
+        self.assertEqual(ut['waveforms'].target.data, [3, 6, 10, 14, 18])
+        self.assertEqual(ut['waveforms'].data, [2, 5])
+        self.assertListEqual(ut['waveforms'][0], wf1)
+        self.assertListEqual(ut['waveforms'][1], wf2)
 
     def test_get_spike_times(self):
         ut = Units()

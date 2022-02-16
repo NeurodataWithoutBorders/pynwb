@@ -26,16 +26,15 @@ def _validate_helper(**kwargs):
     return (errors is not None and len(errors) > 0)
 
 
-def main():
+def main():  # noqa: C901
 
     ep = """
-    use --nspath to validate against an extension. If --ns is not specified,
-    validate against all namespaces in namespace file.
+    If --ns is not specified, validate against all namespaces in the NWB file.
     """
 
     parser = ArgumentParser(description="Validate an NWB file", epilog=ep)
     parser.add_argument("paths", type=str, nargs='+', help="NWB file paths")
-    parser.add_argument('-p', '--nspath', type=str, help="the path to the namespace YAML file")
+    # parser.add_argument('-p', '--nspath', type=str, help="the path to the namespace YAML file")
     parser.add_argument("-n", "--ns", type=str, help="the namespace to validate against")
     parser.add_argument("-lns", "--list-namespaces", dest="list_namespaces",
                         action='store_true', help="List the available namespaces and exit.")
@@ -50,15 +49,16 @@ def main():
     args = parser.parse_args()
     ret = 0
 
-    if args.nspath:
-        if not os.path.isfile(args.nspath):
-            print("The namespace file {} is not a valid file.".format(args.nspath), file=sys.stderr)
-            sys.exit(1)
-
-        if args.cached_namespace:
-            print("Turning off validation against cached namespace information "
-                  "as --nspath was passed.", file=sys.stderr)
-            args.cached_namespace = False
+    # TODO Validation against a specific namespace file is currently broken. See pynwb#1396
+    # if args.nspath:
+    #     if not os.path.isfile(args.nspath):
+    #         print("The namespace file {} is not a valid file.".format(args.nspath), file=sys.stderr)
+    #         sys.exit(1)
+    #
+    #     if args.cached_namespace:
+    #         print("Turning off validation against cached namespace information "
+    #               "as --nspath was passed.", file=sys.stderr)
+    #         args.cached_namespace = False
 
     for path in args.paths:
 
@@ -73,6 +73,9 @@ def main():
             s = set(ns_deps.keys())       # determine which namespaces are the most
             for k in ns_deps:             # specific (i.e. extensions) and validate
                 s -= ns_deps[k].keys()    # against those
+            # TODO remove this workaround for issue https://github.com/NeurodataWithoutBorders/pynwb/issues/1357
+            if 'hdmf-experimental' in s:
+                s.remove('hdmf-experimental')  # remove validation of hdmf-experimental for now
             namespaces = list(sorted(s))
             if len(namespaces) > 0:
                 tm = TypeMap(catalog)
@@ -84,17 +87,17 @@ def main():
                 specloc = "pynwb namespace information"
                 print("The file {} has no cached namespace information. "
                       "Falling back to {}.".format(path, specloc), file=sys.stderr)
-        elif args.nspath:
-            catalog = NamespaceCatalog(NWBGroupSpec, NWBDatasetSpec, NWBNamespace)
-            namespaces = catalog.load_namespaces(args.nspath)
-
-            if len(namespaces) == 0:
-                print("Could not load namespaces from file {}.".format(args.nspath), file=sys.stderr)
-                sys.exit(1)
-
-            tm = TypeMap(catalog)
-            manager = BuildManager(tm)
-            specloc = "--nspath namespace information"
+        # elif args.nspath:
+        #     catalog = NamespaceCatalog(NWBGroupSpec, NWBDatasetSpec, NWBNamespace)
+        #     namespaces = catalog.load_namespaces(args.nspath)
+        #
+        #     if len(namespaces) == 0:
+        #         print("Could not load namespaces from file {}.".format(args.nspath), file=sys.stderr)
+        #         sys.exit(1)
+        #
+        #     tm = TypeMap(catalog)
+        #     manager = BuildManager(tm)
+        #     specloc = "--nspath namespace information"
         else:
             manager = None
             namespaces = [CORE_NAMESPACE]
@@ -108,15 +111,22 @@ def main():
         if args.ns:
             if args.ns in namespaces:
                 namespaces = [args.ns]
+            elif args.cached_namespace and args.ns in ns_deps:  # validating against a dependency
+                for k in ns_deps:
+                    if args.ns in ns_deps[k]:
+                        print(("The namespace '{}' is included by the namespace '{}'. Please validate against "
+                               "that namespace instead.").format(args.ns, k), file=sys.stderr)
+                ret = 1
+                continue
             else:
-                print("The namespace {} could not be found in {} as only {} is present.".format(
+                print("The namespace '{}' could not be found in {} as only {} is present.".format(
                       args.ns, specloc, namespaces), file=sys.stderr)
                 ret = 1
                 continue
 
         with NWBHDF5IO(path, mode='r', manager=manager) as io:
             for ns in namespaces:
-                print("Validating {} against {} using namespace {}.".format(path, specloc, ns))
+                print("Validating {} against {} using namespace '{}'.".format(path, specloc, ns))
                 ret = ret or _validate_helper(io=io, namespace=ns)
 
     sys.exit(ret)

@@ -2,7 +2,7 @@ from collections.abc import Iterable
 import numpy as np
 import warnings
 
-from hdmf.utils import docval, getargs, popargs, call_docval_func, get_docval
+from hdmf.utils import docval, getargs, popargs, call_docval_func, get_docval, get_data_shape
 
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries
@@ -142,7 +142,7 @@ class TwoPhotonSeries(ImageSeries):
              'default': None},
             *get_docval(ImageSeries.__init__, 'external_file', 'starting_frame', 'bits_per_pixel',
                         'dimension', 'resolution', 'conversion', 'timestamps', 'starting_time', 'rate',
-                        'comments', 'description', 'control', 'control_description'))
+                        'comments', 'description', 'control', 'control_description', 'device'))
     def __init__(self, **kwargs):
         field_of_view, imaging_plane, pmt_gain, scan_line_rate = popargs(
             'field_of_view', 'imaging_plane', 'pmt_gain', 'scan_line_rate', kwargs)
@@ -161,19 +161,19 @@ class CorrectedImageStack(NWBDataInterface):
     assumed to be 2-D (has only x & y dimensions).
     """
 
-    __nwbfields__ = ({'name': 'corrected', 'child': True},
-                     {'name': 'xy_translation', 'child': True},
+    __nwbfields__ = ({'name': 'corrected', 'child': True, 'required_name': 'corrected'},
+                     {'name': 'xy_translation', 'child': True, 'required_name': 'xy_translation'},
                      'original')
 
     @docval({'name': 'name', 'type': str,
              'doc': 'The name of this CorrectedImageStack container', 'default': 'CorrectedImageStack'},
             {'name': 'corrected', 'type': ImageSeries,
-             'doc': 'Image stack with frames shifted to the common coordinates.'},
+             'doc': 'Image stack with frames shifted to the common coordinates. This must have the name "corrected".'},
             {'name': 'original', 'type': ImageSeries,
              'doc': 'Link to image series that is being registered.'},
             {'name': 'xy_translation', 'type': TimeSeries,
              'doc': 'Stores the x,y delta necessary to align each frame to the common coordinates, '
-                    'for example, to align each frame to a reference image.'})
+                    'for example, to align each frame to a reference image. This must have the name "xy_translation".'})
     def __init__(self, **kwargs):
         corrected, original, xy_translation = popargs('corrected', 'original', 'xy_translation', kwargs)
         call_docval_func(super(CorrectedImageStack, self).__init__, kwargs)
@@ -193,7 +193,7 @@ class MotionCorrection(MultiContainerInterface):
         'get': 'get_corrected_image_stack',
         'create': 'create_corrected_image_stack',
         'type': CorrectedImageStack,
-        'attr': 'corrected_images_stacks'
+        'attr': 'corrected_image_stacks'
     }
 
 
@@ -267,8 +267,8 @@ class PlaneSegmentation(DynamicTable):
         """Converts a 2D pixel_mask of a ROI into an image_mask."""
         image_matrix = np.zeros(np.shape(pixel_mask))
         npmask = np.asarray(pixel_mask)
-        x_coords = npmask[:, 0].astype(np.int)
-        y_coords = npmask[:, 1].astype(np.int)
+        x_coords = npmask[:, 0].astype(np.int32)
+        y_coords = npmask[:, 1].astype(np.int32)
         weights = npmask[:, -1]
         image_matrix[y_coords, x_coords] = weights
         return image_matrix
@@ -342,6 +342,26 @@ class RoiResponseSeries(TimeSeries):
                         'comments', 'description', 'control', 'control_description'))
     def __init__(self, **kwargs):
         rois = popargs('rois', kwargs)
+
+        data_shape = get_data_shape(data=kwargs["data"], strict_no_data_load=True)
+        rois_shape = get_data_shape(data=rois.data, strict_no_data_load=True)
+        if (
+            data_shape is not None and rois_shape is not None
+
+            # check that data is 2d and rois is 1d
+            and len(data_shape) == 2 and len(rois_shape) == 1
+
+            # check that key dimensions are known
+            and data_shape[1] is not None and rois_shape[0] is not None
+
+            and data_shape[1] != rois_shape
+        ):
+            if data_shape[0] == rois_shape[0]:
+                warnings.warn("The second dimension of data does not match the length of rois, but instead the "
+                              "first does. Data is oriented incorrectly and should be transposed.")
+            else:
+                warnings.warn("The second dimension of data does not match the length of rois. Your data may be "
+                              "transposed.")
         call_docval_func(super(RoiResponseSeries, self).__init__, kwargs)
         self.rois = rois
 

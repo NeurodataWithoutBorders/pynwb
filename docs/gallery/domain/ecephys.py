@@ -2,15 +2,10 @@
 '''
 .. _ecephys_tutorial:
 
-Extracellular electrophysiology data
-============================================
+Extracellular Electrophysiology Data
+====================================
 
-The following examples will reference variables that may not be defined within the block they are used in. For
-clarity, we define them here:
 '''
-
-
-import numpy as np
 
 #######################
 # Creating and Writing NWB files
@@ -19,6 +14,9 @@ import numpy as np
 # When creating a NWB file, the first step is to create the :py:class:`~pynwb.file.NWBFile`. The first
 # argument is the name of the NWB file, and the second argument is a brief description of the dataset.
 
+# sphinx_gallery_thumbnail_path = 'figures/gallery_thumbnails_ecephys.png'
+
+import numpy as np
 from datetime import datetime
 from dateutil.tz import tzlocal
 from pynwb import NWBFile
@@ -94,7 +92,7 @@ for idx in [1, 2, 3, 4]:
 # top-level :py:class:`~pynwb.misc.Units` table.
 #
 # In addition to the *data* and *timestamps* fields inherited
-# from :py:class:`~pynwb.base.TimeSeries` class, these two classs will require metadata about the elctrodes
+# from :py:class:`~pynwb.base.TimeSeries` class, these two classes will require metadata about the electrodes
 # from which *data* was generated. This is done by providing an :py:class:`~pynwb.core.DynamicTableRegion`,
 # which you can create using the :py:class:`~pynwb.file.NWBFile.create_electrode_table_region`
 #

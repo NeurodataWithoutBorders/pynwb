@@ -1,7 +1,7 @@
 """
 .. _modifying_data:
 
-Adding/removing containers from an NWB file
+Adding/Removing Containers from an NWB File
 ============================================
 
 This tutorial explains how to add and remove containers from an existing NWB file and either write the data back to the
@@ -22,6 +22,7 @@ same file or export the data to a new file.
 #
 # For example:
 
+# sphinx_gallery_thumbnail_path = 'figures/gallery_thumbnails_add_remove_containers.png'
 from pynwb import NWBFile, NWBHDF5IO, TimeSeries
 import datetime
 import numpy as np

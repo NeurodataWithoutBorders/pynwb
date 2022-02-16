@@ -2,6 +2,7 @@
 for reading and writing data in NWB format
 '''
 import os.path
+from pathlib import Path
 from copy import deepcopy
 from warnings import warn
 import h5py
@@ -10,7 +11,6 @@ from hdmf.spec import NamespaceCatalog
 from hdmf.utils import docval, getargs, popargs, call_docval_func, get_docval
 from hdmf.backends.io import HDMFIO
 from hdmf.backends.hdf5 import HDF5IO as _HDF5IO
-from hdmf.backends.zarr import ZarrIO as _ZarrIO
 from hdmf.validate import ValidatorMap
 from hdmf.build import BuildManager, TypeMap
 import hdmf.common
@@ -41,10 +41,8 @@ global __TYPE_MAP
 __NS_CATALOG = NamespaceCatalog(NWBGroupSpec, NWBDatasetSpec, NWBNamespace)
 
 hdmf_typemap = hdmf.common.get_type_map()
-__NS_CATALOG.merge(hdmf_typemap.namespace_catalog)
-
 __TYPE_MAP = TypeMap(__NS_CATALOG)
-__TYPE_MAP.merge(hdmf_typemap)
+__TYPE_MAP.merge(hdmf_typemap, ns_catalog=True)
 
 
 @docval({'name': 'extensions', 'type': (str, TypeMap, list),
@@ -185,7 +183,7 @@ def get_class(**kwargs):
 
     """
     neurodata_type, namespace = getargs('neurodata_type', 'namespace', kwargs)
-    return __TYPE_MAP.get_container_cls(namespace, neurodata_type)
+    return __TYPE_MAP.get_dt_container_cls(neurodata_type, namespace)
 
 
 @docval({'name': 'io', 'type': HDMFIO, 'doc': 'the HDMFIO object to read from'},
@@ -202,7 +200,7 @@ def validate(**kwargs):
 
 class NWBHDF5IO(_HDF5IO):
 
-    @docval({'name': 'path', 'type': str, 'doc': 'the path to the HDF5 file'},
+    @docval({'name': 'path', 'type': (str, Path), 'doc': 'the path to the HDF5 file'},
             {'name': 'mode', 'type': str,
              'doc': 'the mode to open the HDF5 file with, one of ("w", "r", "r+", "a", "w-", "x")'},
             {'name': 'load_namespaces', 'type': bool,
@@ -214,10 +212,11 @@ class NWBHDF5IO(_HDF5IO):
              'default': None},
             {'name': 'file', 'type': h5py.File, 'doc': 'a pre-existing h5py.File object', 'default': None},
             {'name': 'comm', 'type': "Intracomm", 'doc': 'the MPI communicator to use for parallel I/O',
-             'default': None})
+             'default': None},
+            {'name': 'driver', 'type': str, 'doc': 'driver for h5py to use when opening HDF5 file', 'default': None})
     def __init__(self, **kwargs):
-        path, mode, manager, extensions, load_namespaces, file_obj, comm =\
-            popargs('path', 'mode', 'manager', 'extensions', 'load_namespaces', 'file', 'comm', kwargs)
+        path, mode, manager, extensions, load_namespaces, file_obj, comm, driver =\
+            popargs('path', 'mode', 'manager', 'extensions', 'load_namespaces', 'file', 'comm', 'driver', kwargs)
         if load_namespaces:
             if manager is not None:
                 warn("loading namespaces from file - ignoring 'manager'")
@@ -227,7 +226,7 @@ class NWBHDF5IO(_HDF5IO):
                 raise ValueError("cannot load namespaces from file when writing to it")
 
             tm = get_type_map()
-            super().load_namespaces(tm, path, file=file_obj)
+            super(NWBHDF5IO, self).load_namespaces(tm, path, file=file_obj, driver=driver)
             manager = BuildManager(tm)
 
             # XXX: Leaving this here in case we want to revert to this strategy for
@@ -243,7 +242,7 @@ class NWBHDF5IO(_HDF5IO):
                 manager = get_manager(extensions=extensions)
             elif manager is None:
                 manager = get_manager()
-        super().__init__(path, manager=manager, mode=mode, file=file_obj, comm=comm)
+        super(NWBHDF5IO, self).__init__(path, manager=manager, mode=mode, file=file_obj, comm=comm, driver=driver)
 
     @docval({'name': 'src_io', 'type': HDMFIO, 'doc': 'the HDMFIO object for reading the data to export'},
             {'name': 'nwbfile', 'type': 'NWBFile',
@@ -256,56 +255,64 @@ class NWBHDF5IO(_HDF5IO):
         kwargs['container'] = nwbfile
         call_docval_func(super().export, kwargs)
 
+try:
+    from hdmf.backends.zarr.zarr_tools import ZarrIO as _ZarrIO
+    import zarr
 
-class NWBZarrIO(_ZarrIO):
+    class NWBZarrIO(_ZarrIO):
 
-    @docval({'name': 'path', 'type': str, 'doc': 'the path to the Zarr file'},
-            {'name': 'mode', 'type': str,
-             'doc': 'the mode to open the Zarr file with, one of ("w", "r", "r+", "a", "w-")'},
-            {'name': 'load_namespaces', 'type': bool,
-             'doc': 'whether or not to load cached namespaces from given path - not applicable in write mode',
-             'default': False},
-            {'name': 'manager', 'type': BuildManager, 'doc': 'the BuildManager to use for I/O', 'default': None},
-            {'name': 'extensions', 'type': (str, TypeMap, list),
-             'doc': 'a path to a namespace, a TypeMap, or a list consisting paths to namespaces and TypeMaps',
-             'default': None},
-            {'name': 'comm', 'type': 'Intracomm',
-             'doc': 'the MPI communicator to use for parallel I/O', 'default': None},
-            {'name': 'chunking', 'type': bool, 'doc': 'Enable/Disable chunking of datasets by default',
-             'default': True})
-    def __init__(self, **kwargs):
-        path, mode, manager, extensions, load_namespaces, comm, chunking =\
-            popargs('path', 'mode', 'manager', 'extensions', 'load_namespaces', 'comm', 'chunking', kwargs)
-        if load_namespaces:
-            if manager is not None:
-                warn("loading namespaces from file - ignoring 'manager'")
-            if extensions is not None:
-                warn("loading namespaces from file - ignoring 'extensions' argument")
-            if 'w' in mode or mode == 'x':  # namespaces are not loaded in write mode
-                raise ValueError("cannot load namespaces from file when writing to it")
+        @docval({'name': 'path', 'type': str, 'doc': 'the path to the Zarr file'},
+                {'name': 'mode', 'type': str,
+                 'doc': 'the mode to open the Zarr file with, one of ("w", "r", "r+", "a", "w-")'},
+                {'name': 'load_namespaces', 'type': bool,
+                 'doc': 'whether or not to load cached namespaces from given path - not applicable in write mode',
+                 'default': False},
+                {'name': 'manager', 'type': BuildManager, 'doc': 'the BuildManager to use for I/O', 'default': None},
+                {'name': 'extensions', 'type': (str, TypeMap, list),
+                 'doc': 'a path to a namespace, a TypeMap, or a list consisting paths to namespaces and TypeMaps',
+                 'default': None},
+                {'name': 'comm', 'type': 'Intracomm',
+                 'doc': 'the MPI communicator to use for parallel I/O', 'default': None},
+                {'name': 'chunking', 'type': bool, 'doc': 'Enable/Disable chunking of datasets by default',
+                 'default': True})
+        def __init__(self, **kwargs):
+            path, mode, manager, extensions, load_namespaces, comm, chunking =\
+                popargs('path', 'mode', 'manager', 'extensions', 'load_namespaces', 'comm', 'chunking', kwargs)
+            if load_namespaces:
+                if manager is not None:
+                    warn("loading namespaces from file - ignoring 'manager'")
+                if extensions is not None:
+                    warn("loading namespaces from file - ignoring 'extensions' argument")
+                if 'w' in mode or mode == 'x':  # namespaces are not loaded in write mode
+                    raise ValueError("cannot load namespaces from file when writing to it")
 
-            tm = get_type_map()
-            super().load_namespaces(tm, path)
-            manager = BuildManager(tm)
-        else:
-            if manager is not None and extensions is not None:
-                raise ValueError("'manager' and 'extensions' cannot be specified together")
-            elif extensions is not None:
-                manager = get_manager(extensions=extensions)
-            elif manager is None:
-                manager = get_manager()
-        super().__init__(path, manager=manager, mode=mode, comm=comm, chunking=chunking)
+                tm = get_type_map()
+                super().load_namespaces(tm, path)
+                manager = BuildManager(tm)
+            else:
+                if manager is not None and extensions is not None:
+                    raise ValueError("'manager' and 'extensions' cannot be specified together")
+                elif extensions is not None:
+                    manager = get_manager(extensions=extensions)
+                elif manager is None:
+                    manager = get_manager()
+            super(NWBZarrIO, self).__init__(path, manager=manager, mode=mode, comm=comm, chunking=chunking)
 
-    @docval({'name': 'src_io', 'type': HDMFIO, 'doc': 'the HDMFIO object for reading the data to export'},
-            {'name': 'nwbfile', 'type': 'NWBFile',
-             'doc': 'the NWBFile object to export. If None, then the entire contents of src_io will be exported',
-             'default': None},
-            {'name': 'write_args', 'type': dict, 'doc': 'arguments to pass to :py:meth:`write_builder`',
-             'default': dict()})
-    def export(self, **kwargs):
-        nwbfile = popargs('nwbfile', kwargs)
-        kwargs['container'] = nwbfile
-        call_docval_func(super().export, kwargs)
+
+        @docval({'name': 'src_io', 'type': HDMFIO, 'doc': 'the HDMFIO object for reading the data to export'},
+                {'name': 'nwbfile', 'type': 'NWBFile',
+                 'doc': 'the NWBFile object to export. If None, then the entire contents of src_io will be exported',
+                 'default': None},
+                {'name': 'write_args', 'type': dict, 'doc': 'arguments to pass to :py:meth:`write_builder`',
+                 'default': dict()})
+        def export(self, **kwargs):
+            nwbfile = popargs('nwbfile', kwargs)
+            kwargs['container'] = nwbfile
+            call_docval_func(super().export, kwargs)
+
+except ImportError:
+    from warnings import info
+    info("Ignoring optional NWBZarrIO. Zarr is not installed")
 
 
 from . import io as __io  # noqa: F401,E402
@@ -330,3 +337,21 @@ from hdmf.backends.hdf5 import H5DataIO  # noqa: F401,E402
 from ._version import get_versions  # noqa: E402
 __version__ = get_versions()['version']
 del get_versions
+
+from ._due import due, BibTeX  # noqa: E402
+due.cite(BibTeX("""
+@article {R{\"u}bel2021.03.13.435173,
+    author = {R{\"u}bel, Oliver and Tritt, Andrew and Ly, Ryan and Dichter, Benjamin K. and Ghosh, Satrajit and Niu, Lawrence and Soltesz, Ivan and Svoboda, Karel and Frank, Loren and Bouchard, Kristofer E.},
+    title = {The Neurodata Without Borders ecosystem for neurophysiological data science},
+    elocation-id = {2021.03.13.435173},
+    year = {2021},
+    doi = {10.1101/2021.03.13.435173},
+    publisher = {Cold Spring Harbor Laboratory},
+    abstract = {The neurophysiology of cells and tissues are monitored electrophysiologically and optically in diverse experiments and species, ranging from flies to humans. Understanding the brain requires integration of data across this diversity, and thus these data must be findable, accessible, interoperable, and reusable (FAIR). This requires a standard language for data and metadata that can coevolve with neuroscience. We describe design and implementation principles for a language for neurophysiology data. Our software (Neurodata Without Borders, NWB) defines and modularizes the interdependent, yet separable, components of a data language. We demonstrate NWB{\textquoteright}s impact through unified description of neurophysiology data across diverse modalities and species. NWB exists in an ecosystem which includes data management, analysis, visualization, and archive tools. Thus, the NWB data language enables reproduction, interchange, and reuse of diverse neurophysiology data. More broadly, the design principles of NWB are generally applicable to enhance discovery across biology through data FAIRness.Competing Interest StatementThe authors have declared no competing interest.},
+    URL = {https://www.biorxiv.org/content/early/2021/03/15/2021.03.13.435173},
+    eprint = {https://www.biorxiv.org/content/early/2021/03/15/2021.03.13.435173.full.pdf},
+    journal = {bioRxiv}
+}
+"""), description="The Neurodata Without Borders ecosystem for neurophysiological data science",  # noqa: E501
+         path="pynwb/", version=__version__, cite_module=True)
+del due, BibTeX

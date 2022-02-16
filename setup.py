@@ -1,6 +1,12 @@
 # -*- coding: utf-8 -*-
 
+import sys
+
 from setuptools import setup, find_packages
+
+# Some Python installations don't add the current directory to path.
+if '' not in sys.path:
+    sys.path.insert(0, '')
 
 import versioneer
 
@@ -12,10 +18,14 @@ print('found these packages:', pkgs)
 
 schema_dir = 'nwb-schema/core'
 
-with open('requirements-min.txt', 'r') as fp:
-    # replace == with >= and remove trailing comments and spaces
-    reqs = [x.replace('==', '>=').split('#')[0].strip() for x in fp]
-    reqs = [x for x in reqs if x]  # remove empty strings
+reqs = [
+    'h5py>=2.9,<4',
+    'hdmf>=3.1.1,<4',
+    'numpy>=1.16,<1.22',
+    'pandas>=1.0.5,<2',
+    'python-dateutil>=2.7,<3',
+    'setuptools'
+]
 
 print(reqs)
 
@@ -36,10 +46,9 @@ setup_args = {
     'package_data': {'pynwb': ["%s/*.yaml" % schema_dir, "%s/*.json" % schema_dir]},
     'classifiers': [
         "Programming Language :: Python",
-        "Programming Language :: Python :: 3.5",
-        "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
         "License :: OSI Approved :: BSD License",
         "Development Status :: 5 - Production/Stable",
         "Intended Audience :: Developers",

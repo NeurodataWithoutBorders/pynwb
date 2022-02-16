@@ -20,13 +20,14 @@ assignees: ''
 <!--Please describe your environment according to the following bullet points.-->
 
     Python Executable: Conda or Python
-    Python Version: Python 3.5, 3.6, or 3.7
+    Python Version: Python 3.7, 3.8, or 3.9
     Operating System: Windows, macOS or Linux
-    HDMF Version: Version of PyNWB used
+    HDMF Version:
+    PyNWB Version:
 
 ## Checklist
 
-- [ ] Have you ensured the feature or change was not already [reported](https://github.com/NeurodataWithoutBorders/pynwb/issues)?
+- [ ] Have you ensured the bug was not already [reported](https://github.com/NeurodataWithoutBorders/pynwb/issues)?
 - [ ] Have you included a brief and descriptive title?
 - [ ] Have you included a clear description of the problem you are trying to solve?
 - [ ] Have you included a minimal code snippet that reproduces the issue you are encountering?

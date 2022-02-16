@@ -56,7 +56,7 @@ PyNWB supports linking between files using external links.
 # In the following we are creating two :py:meth:`~pynwb.base.TimeSeries` each written to a separate file.
 # We then show how we can integrate these files into a single NWBFile.
 
-
+# sphinx_gallery_thumbnail_path = 'figures/gallery_thumbnails_linking_data.png'
 from datetime import datetime
 from dateutil.tz import tzlocal
 from pynwb import NWBFile
@@ -222,7 +222,7 @@ timeseries_2 = nwbfile2.get_acquisition('test_timeseries2')
 ####################
 # Step 2: Add the container to another NWBFile
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-# To intergrate both :py:meth:`~pynwb.base.TimeSeries` into a single file we simply create a new
+# To integrate both :py:meth:`~pynwb.base.TimeSeries` into a single file we simply create a new
 # :py:meth:`~pynwb.file.NWBFile` and our existing :py:meth:`~pynwb.base.TimeSeries` to it. PyNWB's
 # :py:class:`~pynwb.NWBHDF5IO` backend then automatically detects that the TimeSeries have already
 # been written to another file and will create external links for us.

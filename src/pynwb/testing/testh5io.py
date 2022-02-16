@@ -7,7 +7,7 @@ import warnings
 from pynwb import NWBFile, NWBHDF5IO, validate as pynwb_validate
 from .utils import remove_test_file
 from hdmf.backends.warnings import BrokenLinkWarning
-from hdmf.build.warnings import MissingRequiredWarning, OrphanContainerWarning
+from hdmf.build.warnings import MissingRequiredBuildWarning
 
 
 class NWBH5IOMixin(metaclass=ABCMeta):
@@ -58,9 +58,7 @@ class NWBH5IOMixin(metaclass=ABCMeta):
         raise NotImplementedError('Cannot run test unless setUpContainer is implemented')
 
     def test_roundtrip(self):
-        """
-        Test whether the test Container read from file has the same contents as the original test Container and
-        validate the file
+        """Test whether the read Container has the same contents as the original Container and validate the file.
         """
         self.read_container = self.roundtripContainer()
         self.assertIsNotNone(str(self.container))  # added as a test to make sure printing works
@@ -85,9 +83,7 @@ class NWBH5IOMixin(metaclass=ABCMeta):
         self.assertContainerEqual(self.read_container, self.container, ignore_hdmf_attrs=True)
 
     def roundtripContainer(self, cache_spec=False):
-        """
-        Add the test Container to an NWBFile, write it to file, read the file, and return the test Container from the
-        file
+        """Add the Container to an NWBFile, write it to file, read the file, and return the Container from the file.
         """
         description = 'a file to test writing and reading a %s' % self.container_type
         identifier = 'TEST_%s' % self.container_type
@@ -105,8 +101,7 @@ class NWBH5IOMixin(metaclass=ABCMeta):
 
         if ws:
             for w in ws:
-                if issubclass(w.category, (MissingRequiredWarning,
-                                           OrphanContainerWarning,
+                if issubclass(w.category, (MissingRequiredBuildWarning,
                                            BrokenLinkWarning)):
                     raise Exception('%s: %s' % (w.category.__name__, w.message))
                 else:
@@ -140,8 +135,7 @@ class NWBH5IOMixin(metaclass=ABCMeta):
 
         if ws:
             for w in ws:
-                if issubclass(w.category, (MissingRequiredWarning,
-                                           OrphanContainerWarning,
+                if issubclass(w.category, (MissingRequiredBuildWarning,
                                            BrokenLinkWarning)):
                     raise Exception('%s: %s' % (w.category.__name__, w.message))
                 else:

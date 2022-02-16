@@ -1,5 +1,139 @@
 # PyNWB Changelog
 
+## PyNWB 2.0.1 (Upcoming)
+
+### Bug fixes:
+- Add `environment-ros3.yml` to `MANIFEST.in` for inclusion in source distributions. @rly (#1398)
+- Fix bad error check in ``IntracellularRecordingsTable.add_recording`` when adding ``IZeroClampSeries``. @oruebel (#1410)
+- Skip ros3 tests if internet access or the ros3 driver are not available. @oruebel (#1414)
+
+### Documentation and tutorial enhancements:
+- Enhanced ordering of sphinx gallery tutorials to use alphabetic ordering based on tutorial headings. @oruebel (#1399)
+- Updated the general tutorial to add documentation about the ``Images`` type. @bendichter (#1353)
+- Updated the main index of the documentation to make the documentation easier to navigate. @oruebel (#1402)
+- Merged the "NWB File" overview section with the "NWB File Basics" tutorial. @oruebel (#1402)
+- Updated and created separated installation instructions for users and developers . @oruebel (#1402)
+
+### Minor improvements:
+- Improve constructor docstrings for Image types. @weiglszonja (#1418)
+- Add checks for data orientation in ``TimeSeries``, ``ElectricalSeries``, and ``RoiResponseSeries`` @bendichter (#1428)
+
+
+## PyNWB 2.0.0 (August 13, 2021)
+
+### Breaking changes:
+- ``SweepTable`` has been deprecated in favor of the new icephys metadata tables. Use of ``SweepTable``
+  is still possible but no longer recommended. @oruebel  (#1349)
+- ``TimeSeries.__init__`` now requires the ``data`` argument because the 'data' dataset is required by the schema.
+  If a ``TimeSeries`` is read without a value for ``data``, it will be set to a default value. For most
+  ``TimeSeries``, this is a 1-dimensional empty array with dtype uint8. For ``ImageSeries`` and
+  ``DecompositionSeries``, this is a 3-dimensional empty array with dtype uint8. @rly (#1274)
+- ``TimeSeries.__init__`` now requires the ``unit`` argument because the 'unit' attribute is required by the schema.
+  If a ``TimeSeries`` is read without a value for ``unit``, it will be set to a default value. For most
+  ``TimeSeries``, this is "unknown". For ``IndexSeries``, this is "N/A" according to the NWB 2.4.0 schema. @rly (#1274)
+
+### New features:
+- Added new intracellular electrophysiology hierarchical table structure from ndx-icephys-meta to NWB core.
+  This includes the new types ``TimeSeriesReferenceVectorData``, ``IntracellularRecordingsTable``,
+  ``SimultaneousRecordingsTable``, ``SequentialRecordingsTable``, ``RepetitionsTable`` and
+  ``ExperimentalConditionsTable`` as well as corresponding updates to ``NWBFile`` to support interaction
+   with the new tables. @oruebel  (#1349)
+- Added support for NWB 2.4.0. See [Release Notes](https://nwb-schema.readthedocs.io/en/latest/format_release_notes.html)
+  for more details. @oruebel, @rly (#1349)
+- Dropped Python 3.6 support, added Python 3.9 support. @rly (#1377)
+- Updated requirements to allow compatibility with HDMF 3 and h5py 3. @rly (#1377)
+  - When using HDMF 3 and h5py 3, users can now stream NWB files from an S3 bucket.
+
+### Tutorial enhancements:
+- Added new tutorial for intracellular electrophysiology to describe the use of the new metadata tables
+  and declared the previous tutoral using ``SweepTable`` as deprecated.  @oruebel (#1349)
+- Added new tutorial for querying intracellular electrophysiology metadata
+  (``docs/gallery/domain/plot_icephys_pandas.py``). @oruebel (#1349, #1383)
+- Added thumbnails for tutorials to improve presentation of online docs.  @oruebel (#1349)
+- Used `sphinx.ext.extlinks` extension in docs to simplify linking to common targets. @oruebel (#1349)
+- Created new section for advanced I/O tutorials and moved parallel I/O tutorial to its own file. @oruebel (#1349)
+- Overhauled documentation on extensions. @bendichter, @rly, @oruebel (#1350)
+- Updated the optical physiology / Calcium imaging tutorial. @bendichter, @weiglszonja (#1375)
+- Added a tutorial on streaming using the ROS3 driver. @rly (#1393)
+
+### Minor new features:
+- Added RRID for citing PyNWB to the docs. @oruebel (#1372)
+- Updated CI and tests to handle deprecations in libraries. @rly (#1377)
+- Added test utilities for icephys (``pynwb.testing.icephys_testutils``) to ease creation of test data
+  for tests and tutorials. @oruebel (#1349, #1383)
+- Added on-push and nightly tests of streaming using the ROS3 driver. @rly (#1393)
+  - These tests make use of a new dandiset for testing the API: https://gui.dandiarchive.org/#/dandiset/000126
+- Improve documentation and test for ``CorrectedImageStack``, ``MotionCorrection``. @rly, @bendichter (#1306, #1374)
+
+### Bug fixes:
+- Updated behavior of ``make clean`` command for docs to ensure tutorial files are cleaned up.  @oruebel (#1349)
+- Enforced electrode ID uniqueness during insertion into table. @CodyCBakerPhD (#1344)
+- Fixed integration tests with invalid test data that will be caught by future hdmf validator version.
+  @dsleiter, @rly (#1366, #1376)
+- Fixed build warnings in docs. @oruebel (#1380)
+- Fix intersphinx links in docs for numpy. @oruebel (#1386)
+- Previously, the ``data`` argument was required in ``OpticalSeries.__init__`` even though ``external_file`` could
+  be provided in place of ``data``. ``OpticalSeries.__init__`` now makes ``data`` optional. However, this has the
+  side effect of moving the position of ``data`` to later in the argument list, which may break code that relies
+  on positional arguments for ``OpticalSeries.__init__``. @rly (#1274)
+- Fixed `setup.py` not being able to import `versioneer` when installing in an embedded Python environment. @ikhramts
+  (#1395)
+- Removed broken option to validate against a given namespace file and updated associated documentation. @rly (#1397)
+
+## PyNWB 1.5.1 (May 24, 2021)
+
+### Bug fixes:
+- Raise minimum version of pandas from 0.23 to 1.0.5 to be compatible with numpy 1.20, and raise minimum version of
+  HDMF to use the corresponding change in HDMF. @rly (#1363)
+- Update documentation and update structure of requirements files. @rly (#1363)
+
+## PyNWB 1.5.0 (May 17, 2021)
+
+### New features:
+- `NWBFile.add_scratch(...)` and `ScratchData.__init__(...)` now accept scalar data in addition to the currently
+  accepted types. @rly (#1309)
+- Support `pathlib.Path` paths when opening files with `NWBHDF5IO`. @dsleiter (#1314)
+- Use HDMF 2.5.1. See the [HDMF release notes](https://github.com/hdmf-dev/hdmf/releases/tag/2.5.1) for details.
+- Support `driver='ros3'` in `NWBHDF5IO` for streaming NWB files directly from s3. @bendichter (#1331)
+- Update documentation, CI GitHub processes. @oruebel @yarikoptic, @bendichter, @TomDonoghue, @rly
+  (#1311, #1336, #1351, #1352, #1345, #1340, #1327)
+- Set default `neurodata_type_inc` for `NWBGroupSpec`, `NWBDatasetSpec`. @rly (#1295)
+- Block usage of h5py 3+ for now. h5py>=2.9, <3 is supported. (#1355)
+- Fix incompatibility issue with downstream github-release tool used to deploy releases to GitHub. @rly (#1245)
+- Fix issue with Sphinx gallery. @rly
+- Add citation information to documentation and support for duecredit tool. @rly
+- Remove use of ColoredTestRunner for more readable verbose test output. @rly
+- Add support for nwb-schema 2.3.0. @rly (#1245, #1330)
+  - Add optional `waveforms` column to the `Units` table.
+  - Add optional `strain` field to `Subject`.
+  - Add to `DecompositionSeries` an optional `DynamicTableRegion` called `source_channels`.
+  - Add to `ImageSeries` an optional link to `Device`.
+  - Add optional `continuity` field to `TimeSeries`.
+  - Add optional `filtering` attribute to `ElectricalSeries`.
+  - Clarify documentation for electrode impedance and filtering.
+  - Set the `stimulus_description` for `IZeroCurrentClamp` to have the fixed value "N/A".
+  - See https://nwb-schema.readthedocs.io/en/latest/format_release_notes.html for full schema release notes.
+- Add support for HDMF 2.5.5 and upgrade HDMF requirement from 2.1.0 to 2.5.5. @rly @ajtritt
+  (#1325, #1355, #1360, #1245, #1287). This includes several relevant features and bug fixes, including:
+  - Fix issue where dependencies of included types were not being loaded in namespaces / extensions.
+  - Add `HDF5IO.get_namespaces(path=path, file=file)` method which returns a dict of namespace name mapped to the
+    namespace version (the largest one if there are multiple) for each namespace cached in the given HDF5 file.
+  - Add methods for automatic creation of `MultiContainerInterface` classes.
+  - Add ability to specify a custom class for new columns to a `DynamicTable` that are not `VectorData`,
+    `DynamicTableRegion`, or `VocabData` using `DynamicTable.__columns__` or `DynamicTable.add_column(...)`.
+  - Add support for creating and specifying multi-index columns in a `DynamicTable` using `add_column(...)`.
+  - Add capability to add a row to a column after IO.
+  - Add method `AbstractContainer.get_fields_conf`.
+  - Add functionality for storing external resource references.
+  - Add method `hdmf.utils.get_docval_macro` to get a tuple of the current values for a docval_macro, e.g., 'array_data'
+    and 'scalar_data'.
+  - `DynamicTable` can be automatically generated using `get_class`. Now the HDMF API can read files with extensions
+    that contain a DynamicTable without needing to import the extension first.
+  - Add `EnumData` type for storing data that comes from a fixed set of values.
+  - Add `AlignedDynamicTable` type which defines a DynamicTable that supports storing a collection of subtables.
+  - Allow `np.bool_` as a valid `bool` dtype when validating.
+  - See https://github.com/hdmf-dev/hdmf/releases for full HDMF release notes.
+
 ## PyNWB 1.4.0 (August 12, 2020)
 
 Users can now add/remove containers from a written NWB file and export the modified NWBFile to a new file path.
