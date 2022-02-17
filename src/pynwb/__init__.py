@@ -255,6 +255,7 @@ class NWBHDF5IO(_HDF5IO):
         kwargs['container'] = nwbfile
         call_docval_func(super().export, kwargs)
 
+
 try:
     from hdmf.backends.zarr.zarr_tools import ZarrIO as _ZarrIO
     import zarr
@@ -267,27 +268,31 @@ try:
                 {'name': 'load_namespaces', 'type': bool,
                  'doc': 'whether or not to load cached namespaces from given path - not applicable in write mode',
                  'default': False},
-                {'name': 'manager', 'type': BuildManager, 'doc': 'the BuildManager to use for I/O', 'default': None},
-                {'name': 'extensions', 'type': (str, TypeMap, list),
-                 'doc': 'a path to a namespace, a TypeMap, or a list consisting paths to namespaces and TypeMaps',
+                {'name': 'manager', 'type': BuildManager, 'doc': 'the BuildManager to use for I/O',
                  'default': None},
-                {'name': 'comm', 'type': 'Intracomm',
-                 'doc': 'the MPI communicator to use for parallel I/O', 'default': None},
-                {'name': 'chunking', 'type': bool, 'doc': 'Enable/Disable chunking of datasets by default',
+                {'name': 'extensions', 'type': (str, TypeMap, list),
+                 'doc': 'a path to a namespace, a TypeMap, or a list consisting paths  to namespaces and TypeMaps',
+                 'default': None},
+                {'name': 'synchronizer', 'type': (zarr.ProcessSynchronizer, zarr.ThreadSynchronizer, bool),
+                 'doc': 'Zarr synchronizer to use for parallel I/O. If set to True a ProcessSynchronizer is used.',
+                 'default': None},
+                {'name': 'chunking', 'type': bool, 'doc': "Enable/Disable chunking of datasets by default",
                  'default': True})
         def __init__(self, **kwargs):
-            path, mode, manager, extensions, load_namespaces, comm, chunking =\
-                popargs('path', 'mode', 'manager', 'extensions', 'load_namespaces', 'comm', 'chunking', kwargs)
+            path, mode, manager, extensions, load_namespaces, synchronizer, chunking = \
+                popargs('path', 'mode', 'manager', 'extensions',
+                        'load_namespaces', 'synchronizer', 'chunking', kwargs)
             if load_namespaces:
                 if manager is not None:
                     warn("loading namespaces from file - ignoring 'manager'")
                 if extensions is not None:
                     warn("loading namespaces from file - ignoring 'extensions' argument")
-                if 'w' in mode or mode == 'x':  # namespaces are not loaded in write mode
+                # namespaces are not loaded when creating an NWBZarrIO object in write mode
+                if 'w' in mode or mode == 'x':
                     raise ValueError("cannot load namespaces from file when writing to it")
 
                 tm = get_type_map()
-                super().load_namespaces(tm, path)
+                super(NWBZarrIO, self).load_namespaces(tm, path)
                 manager = BuildManager(tm)
             else:
                 if manager is not None and extensions is not None:
@@ -296,8 +301,11 @@ try:
                     manager = get_manager(extensions=extensions)
                 elif manager is None:
                     manager = get_manager()
-            super(NWBZarrIO, self).__init__(path, manager=manager, mode=mode, comm=comm, chunking=chunking)
-
+            super(NWBZarrIO, self).__init__(path,
+                                            manager=manager,
+                                            mode=mode,
+                                            synchronizer=synchronizer,
+                                            chunking=chunking)
 
         @docval({'name': 'src_io', 'type': HDMFIO, 'doc': 'the HDMFIO object for reading the data to export'},
                 {'name': 'nwbfile', 'type': 'NWBFile',
