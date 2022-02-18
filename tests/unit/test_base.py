@@ -105,7 +105,7 @@ class TestTimeSeries(TestCase):
 
     def test_init_offset(self):
         dat = [0, 1, 2, 3, 4]
-        offset = 0.0
+        offset = 1.2
         ts = TimeSeries('test_ts', dat, 'volts', timestamps=[0.1, 0.2, 0.3, 0.4], offset=offset)
         self.assertIs(ts.data, dat)
         self.assertEqual(ts.offset, offset)
