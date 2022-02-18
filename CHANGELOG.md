@@ -1,6 +1,10 @@
 # PyNWB Changelog
 
-## PyNWB 2.0.1 (Upcoming)
+## PyNWB 2.1.0 (Upcoming)
+
+### New features
+- Added ``pywnb.validate.get_chached_namespaces_to_validate`` function to facilitate validation of files against cached
+  namespaces when using ``pynwb.validate`` from Python directly. @oruebel (#1432)
 
 ### Bug fixes:
 - Add `environment-ros3.yml` to `MANIFEST.in` for inclusion in source distributions. @rly (#1398)
