@@ -35,6 +35,7 @@ def get_chached_namespaces_to_validate(path):
     :return: Tuple with:
       - List of strings with the most specific namespace(s) to use for validation.
       - BuildManager object for opening the file for validation
+      - Dict with the full result from NWBHDF5IO.load_namespaces
     """
     catalog = NamespaceCatalog(NWBGroupSpec, NWBDatasetSpec, NWBNamespace)
     ns_deps = NWBHDF5IO.load_namespaces(catalog, path)
@@ -52,7 +53,9 @@ def get_chached_namespaces_to_validate(path):
     else:
         manager = None
 
-    return namespaces, manager
+    print(ns_deps.keys())
+
+    return namespaces, manager, ns_deps
 
 
 def main():  # noqa: C901
@@ -97,7 +100,7 @@ def main():  # noqa: C901
             continue
 
         if args.cached_namespace:
-            namespaces, manager = get_chached_namespaces_to_validate(path)
+            namespaces, manager,  ns_deps = get_chached_namespaces_to_validate(path)
             if len(namespaces) > 0:
                 specloc = "cached namespace information"
             else:
