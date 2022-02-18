@@ -26,6 +26,35 @@ def _validate_helper(**kwargs):
     return (errors is not None and len(errors) > 0)
 
 
+def get_chached_namespaces_to_validate(path):
+    """
+    Determine the most specific namespace(s) (i.e., extensions) that are chached in the given
+    NWB file that should be used for validation.
+
+    :param path: Path for the NWB file
+    :return: Tuple with:
+      - List of strings with the most specific namespace(s) to use for validation.
+      - BuildManager object for opening the file for validation
+    """
+    catalog = NamespaceCatalog(NWBGroupSpec, NWBDatasetSpec, NWBNamespace)
+    ns_deps = NWBHDF5IO.load_namespaces(catalog, path)
+    s = set(ns_deps.keys())  # determine which namespaces are the most
+    for k in ns_deps:  # specific (i.e. extensions) and validate
+        s -= ns_deps[k].keys()  # against those
+    # TODO remove this workaround for issue https://github.com/NeurodataWithoutBorders/pynwb/issues/1357
+    if 'hdmf-experimental' in s:
+        s.remove('hdmf-experimental')  # remove validation of hdmf-experimental for now
+    namespaces = list(sorted(s))
+
+    if len(namespaces) > 0:
+        tm = TypeMap(catalog)
+        manager = BuildManager(tm)
+    else:
+        manager = None
+
+    return namespaces, manager
+
+
 def main():  # noqa: C901
 
     ep = """
@@ -68,21 +97,10 @@ def main():  # noqa: C901
             continue
 
         if args.cached_namespace:
-            catalog = NamespaceCatalog(NWBGroupSpec, NWBDatasetSpec, NWBNamespace)
-            ns_deps = NWBHDF5IO.load_namespaces(catalog, path)
-            s = set(ns_deps.keys())       # determine which namespaces are the most
-            for k in ns_deps:             # specific (i.e. extensions) and validate
-                s -= ns_deps[k].keys()    # against those
-            # TODO remove this workaround for issue https://github.com/NeurodataWithoutBorders/pynwb/issues/1357
-            if 'hdmf-experimental' in s:
-                s.remove('hdmf-experimental')  # remove validation of hdmf-experimental for now
-            namespaces = list(sorted(s))
+            namespaces, manager = get_chached_namespaces_to_validate(path)
             if len(namespaces) > 0:
-                tm = TypeMap(catalog)
-                manager = BuildManager(tm)
                 specloc = "cached namespace information"
             else:
-                manager = None
                 namespaces = [CORE_NAMESPACE]
                 specloc = "pynwb namespace information"
                 print("The file {} has no cached namespace information. "
