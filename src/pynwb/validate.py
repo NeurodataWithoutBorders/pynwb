@@ -68,8 +68,6 @@ def get_chached_namespaces_to_validate(path):
     else:
         manager = None
 
-    print(ns_deps.keys())
-
     return namespaces, manager, ns_deps
 
 
