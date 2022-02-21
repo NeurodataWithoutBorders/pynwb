@@ -1,3 +1,5 @@
+import warnings
+
 import numpy as np
 
 from pynwb.base import TimeSeries
@@ -288,6 +290,41 @@ class RoiResponseSeriesConstructor(TestCase):
         self.assertEqual(ts.name, 'test_ts')
         self.assertEqual(ts.unit, 'unit')
         self.assertEqual(ts.rois, rt_region)
+
+    def test_warnings(self):
+        ps = create_plane_segmentation()
+        rt_region = ps.create_roi_table_region(description='the second ROI', region=[0, 1])
+
+        with warnings.catch_warnings(record=True) as w:
+            # Cause all warnings to always be triggered.
+            warnings.simplefilter("always")
+            RoiResponseSeries(
+                name="test_ts1",
+                data=np.ones((6, 3)),
+                rois=rt_region,
+                unit="n.a.",
+                timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5]
+            )
+            self.assertEqual(len(w), 1)
+            assert (
+                    "The second dimension of data does not match the length of rois. Your data may be transposed."
+                ) in str(w[-1].message)
+
+        with warnings.catch_warnings(record=True) as w:
+            # Cause all warnings to always be triggered.
+            warnings.simplefilter("always")
+            RoiResponseSeries(
+                name="test_ts1",
+                data=np.ones((2, 6)),
+                rois=rt_region,
+                rate=30000.,
+                unit="n.a.",
+            )
+            self.assertEqual(len(w), 1)
+            assert (
+               "The second dimension of data does not match the length of rois, but instead the first does. "
+               "Data is oriented incorrectly and should be transposed."
+                   ) in str(w[-1].message)
 
 
 class DfOverFConstructor(TestCase):
