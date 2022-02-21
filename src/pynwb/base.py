@@ -120,8 +120,8 @@ class TimeSeries(NWBDataInterface):
                 'doc': (
                     "Scalar to add to each element in the data scaled by 'conversion' to finish converting it to the "
                     "specified unit."
-             ),
-             'default': 0.0
+                    ),
+                'default': 0.0
             },
             {'name': 'timestamps', 'type': ('array_data', 'data', 'TimeSeries'), 'shape': (None,),
              'doc': 'Timestamps for samples stored in data', 'default': None},
@@ -153,6 +153,7 @@ class TimeSeries(NWBDataInterface):
                 "comments",
                 "description",
                 "conversion",
+                "offset",
                 "unit",
                 "control",
                 "control_description",
