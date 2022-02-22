@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: NWB Community and Contact
+    url: https://www.nwb.org/contact-us/
+    about: Have a bunch of really specific questions? Just looking to learn more about NWB? Connect with the greater NWB community!
+  - name: NWB Best Practices
+    url: https://www.nwb.org/best-practices/
+    about: Check out the full list of Best Practices for making NWBFiles.

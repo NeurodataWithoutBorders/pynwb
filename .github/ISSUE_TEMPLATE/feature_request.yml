@@ -1,0 +1,47 @@
+name: Feature Request
+description: Suggest an idea for a brand new feature, or a change to an existing one.
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Thank you for your suggestion!
+
+        We welcome any ideas about how to make the **NWBInspector** better for the community.
+
+        Please keep in mind that new features may not get implemented immediately.
+  - type: textarea
+    id: summary
+    attributes:
+      label: What would you like to see added to the NWBInspector?
+      description: |
+        What are you trying to achieve with the **NWBInspector**?
+
+        Is this a more convenient way to do something that is already possible, or is a workaround (via `ignore` and `select`) currently unfeasible?
+    validations:
+      required: true
+  - type: dropdown
+    id: interest
+    attributes:
+      label: Do you have any interest in helping implement the feature?
+      description: |
+        We appreciate any help you can offer!
+
+        For information on how to contribute, please refer to our [contributing guidelines]() (TODO).
+      options:
+        - Yes.
+        - Yes, but I would need guidance.
+        - No.
+    validations:
+      required: true
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: Code of Conduct
+      description: By submitting this issue, you agree to follow our [Code of Conduct](https://github.com/NeurodataWithoutBorders/nwbinspector/blob/dev/.github/CODE_OF_CONDUCT.rst)
+      options:
+        - label: I agree to follow this project's [Code of Conduct](https://github.com/NeurodataWithoutBorders/nwbinspector/blob/dev/.github/CODE_OF_CONDUCT.rst)
+          required: true
+        - label: Have you ensured this feature was not already [requested](https://github.com/neurodatawithoutborders/nwbinspector/issues)?
+          required: true
