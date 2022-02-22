@@ -19,7 +19,6 @@
 - Add checks for data orientation in ``TimeSeries``, ``ElectricalSeries``, and ``RoiResponseSeries`` @bendichter (#1428)
 
 
-
 ## PyNWB 2.0.0 (August 13, 2021)
 
 ### Breaking changes:
