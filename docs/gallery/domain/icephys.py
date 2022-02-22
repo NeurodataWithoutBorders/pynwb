@@ -2,7 +2,7 @@
 '''
 .. _icephys_tutorial:
 
-Intracellular electrophysiology data using SweepTable
+Intracellular Electrophysiology Data using SweepTable
 =====================================================
 
 The following tutorial describes storage of intracellular electrophysiology data in NWB using the
