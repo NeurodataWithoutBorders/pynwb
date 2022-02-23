@@ -43,7 +43,7 @@ body:
       description: |
         We appreciate any help you can offer!
 
-        For information on how to contribute, please refer to our [contributing guidelines]().
+        For information on how to contribute, please refer to our [contributing guidelines](https://github.com/NeurodataWithoutBorders/pynwb/blob/dev/docs/CONTRIBUTING.rst).
       options:
         - Yes.
         - Yes, but I would need guidance.
@@ -54,7 +54,7 @@ body:
     id: terms
     attributes:
       label: Code of Conduct
-      description: By submitting this issue, you agree to follow our [Code of Conduct](https://github.com/catalystneuro/matnwb/blob/improved_issue_templates/.github/CODE_OF_CONDUCT.md)
+      description: By submitting this issue, you agree to follow our [Code of Conduct](https://github.com/NeurodataWithoutBorders/pynwb/blob/dev/.github/CODE_OF_CONDUCT.rst)
       options:
         - label: I agree to follow this project's [Code of Conduct](https://github.com/NeurodataWithoutBorders/pynwb/blob/dev/.github/CODE_OF_CONDUCT.rst)
           required: true
