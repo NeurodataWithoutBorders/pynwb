@@ -82,11 +82,16 @@ body:
     id: terms
     attributes:
       label: Code of Conduct
-      description: By submitting this issue, you agree to follow our [Code of Conduct](https://github.com/NeurodataWithoutBorders/nwbinspector/blob/dev/.github/CODE_OF_CONDUCT.rst)
+      description: By submitting this issue, you agree to follow our [Code of Conduct](https://github.com/NeurodataWithoutBorders/pynwb/blob/dev/.github/CODE_OF_CONDUCT.rst)
       options:
+        - label: I agree to follow this project's [Code of Conduct](https://github.com/NeurodataWithoutBorders/pynwb/blob/dev/.github/CODE_OF_CONDUCT.rst)
+          required: true
+        - label: Have you checked the [Contributing](https://github.com/NeurodataWithoutBorders/pynwb/blob/dev/docs/CONTRIBUTING.rst) document?
+          required: true
+        - label: Have you ensured this bug was not already [reported](https://github.com/NeurodataWithoutBorders/pynwb/issues)?
+          required: true
+      
         - label: I agree to follow this project's [Code of Conduct](https://github.com/NeurodataWithoutBorders/nwbinspector/blob/dev/.github/CODE_OF_CONDUCT.rst)
           required: true
-        - label: Have you ensured this bug was not already [reported](https://github.com/neurodatawithoutborders/nwbinspector/issues)?
-          required: true
-        - label: To the best of your ability, have you ensured this is a bug within the code that checks the NWBFile, rather than a bug in the NWBFile reader (e.g., [PyNWB](https://github.com/NeurodataWithoutBorders/pynwb) or [MatNWB](https://github.com/NeurodataWithoutBorders/matnwb))?
-          required: true
+
+
