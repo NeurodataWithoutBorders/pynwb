@@ -34,7 +34,7 @@ body:
     attributes:
       label: Traceback
       description: |
-        Please copy and paste the traceback produced by the error. This may have been saved to the NWBInspector report under the section titled 'ERROR'.
+        Please copy and paste the traceback produced by the error.
 
         This section will be automatically formatted into code, so no need for backticks.
       render: python
