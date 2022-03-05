@@ -581,10 +581,18 @@ class NWBFile(MultiContainerInterface):
              'doc': 'description of hardware filtering, including the filter name and frequency cutoffs'},
             {'name': 'group', 'type': ElectrodeGroup, 'doc': 'the ElectrodeGroup object to add to this NWBFile'},
             {'name': 'id', 'type': int, 'doc': 'a unique identifier for the electrode', 'default': None},
-            {'name': 'rel_x', 'type': 'float', 'doc': 'the x coordinate within the electrode group', 'default': None},
-            {'name': 'rel_y', 'type': 'float', 'doc': 'the y coordinate within the electrode group', 'default': None},
-            {'name': 'rel_z', 'type': 'float', 'doc': 'the z coordinate within the electrode group', 'default': None},
-            {'name': 'reference', 'type': str, 'doc': 'Description of the reference used for this electrode.',
+            {'name': 'rel_x', 'type': 'float',
+             'doc': 'x coordinate relative to the x coordinate of the electrode group (+x is posterior)',
+             'default': None},
+            {'name': 'rel_y', 'type': 'float',
+             'doc': 'y coordinate relative to the y coordinate of the electrode group (+y is inferior)',
+             'default': None},
+            {'name': 'rel_z', 'type': 'float',
+             'doc': 'z coordinate relative to the z coordinate of the electrode group (+z is right).',
+             'default': None},
+            {'name': 'reference', 'type': str,
+             'doc': ('Description of the reference electrode and/or reference scheme used for this electrode, e.g.,'
+                     '"stainless steel skull screw" or "online common average referencing".'),
              'default': None},
             {'name': 'enforce_unique_id', 'type': bool, 'doc': 'enforce that the id in the table must be unique',
              'default': True},
@@ -603,10 +611,12 @@ class NWBFile(MultiContainerInterface):
         if d.get('group_name', None) is None:
             d['group_name'] = d['group'].name
 
-        new_cols = [('rel_x', 'the x coordinate within the electrode group'),
-                    ('rel_y', 'the y coordinate within the electrode group'),
-                    ('rel_z', 'the z coordinate within the electrode group'),
-                    ('reference', 'Description of the reference used for this electrode.')]
+        new_cols = [('rel_x', 'x coordinate relative to the x coordinate of the electrode group (+x is posterior)'),
+                    ('rel_y', 'y coordinate relative to the y coordinate of the electrode group (+y is inferior)'),
+                    ('rel_z', 'z coordinate relative to the z coordinate of the electrode group (+z is right).'),
+                    ('reference', ('Description of the reference electrode and/or reference scheme used for '
+                                   'this electrode, e.g., "stainless steel skull screw" or "online common average '
+                                   'referencing".'))]
         # add column if the arg is supplied and column does not yet exist
         # do not pass arg to add_row if arg is not supplied
         for col_name, col_doc in new_cols:
