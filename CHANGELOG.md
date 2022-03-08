@@ -13,6 +13,7 @@
 - Updated the main index of the documentation to make the documentation easier to navigate. @oruebel (#1402)
 - Merged the "NWB File" overview section with the "NWB File Basics" tutorial. @oruebel (#1402)
 - Updated and created separated installation instructions for users and developers . @oruebel (#1402)
+- Updated docstrings for the electrodes table. @rly (#1435)
 
 ### Minor improvements:
 - Improve constructor docstrings for Image types. @weiglszonja (#1418)
