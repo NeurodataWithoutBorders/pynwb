@@ -154,7 +154,7 @@ references:
 
 jobs:
   flake8:
-    <<: *py310
+    <<: *py39
     steps:
       - checkout
       - run:
