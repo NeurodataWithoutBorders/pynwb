@@ -1,10 +1,10 @@
 '''
 .. _tutorial-extending-nwb:
 
-Extensions
-=========================
+Extending NWB
+=============
 
-The NWB:N format was designed to be easily extendable. Here we will demonstrate how to extend NWB using the
+The NWB format was designed to be easily extendable. Here we will demonstrate how to extend NWB using the
 PyNWB API.
 
 .. note::
