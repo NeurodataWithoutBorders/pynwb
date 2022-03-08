@@ -6,6 +6,7 @@
 - Add `environment-ros3.yml` to `MANIFEST.in` for inclusion in source distributions. @rly (#1398)
 - Fix bad error check in ``IntracellularRecordingsTable.add_recording`` when adding ``IZeroClampSeries``. @oruebel (#1410)
 - Skip ros3 tests if internet access or the ros3 driver are not available. @oruebel (#1414)
+- Fix CI issues. @rly (#1427)
 
 ### Documentation and tutorial enhancements:
 - Enhanced ordering of sphinx gallery tutorials to use alphabetic ordering based on tutorial headings. @oruebel (#1399)
