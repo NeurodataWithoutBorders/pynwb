@@ -4,5 +4,5 @@ matplotlib
 sphinx_rtd_theme
 sphinx-gallery
 allensdk>=2.11.0  # python 3.8 is not supported in allensdk<2.11
-MarkupSafe=2.0.1  # resolve incompatibility between jinja2 and markupsafe: https://github.com/AllenInstitute/AllenSDK/issues/2308
+MarkupSafe==2.0.1  # resolve incompatibility between jinja2 and markupsafe: https://github.com/AllenInstitute/AllenSDK/issues/2308
 Pillow
