@@ -382,7 +382,7 @@ workflows:
           <<: *no_filters
       - gallery37-min-req:
           <<: *no_filters
-      - gallery39:
+      - gallery38: # TODO replace with gallery39 after allensdk support py39
           <<: *no_filters
       - miniconda39-ros3:
           <<: *no_filters
@@ -394,7 +394,7 @@ workflows:
             - miniconda37
             - miniconda39
             - gallery37-min-req
-            - gallery38  # gallery39
+            - gallery38  # TODO gallery39
             - miniconda39-ros3
           filters:
             tags:
@@ -414,7 +414,7 @@ workflows:
             - miniconda37
             - miniconda39
             - gallery37-min-req
-            - gallery38  # gallery39
+            - gallery38  # TODO gallery39
             - miniconda39-ros3
           filters:
             tags:
