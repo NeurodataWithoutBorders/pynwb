@@ -5,10 +5,20 @@
 ### Bug fixes:
 - Add `environment-ros3.yml` to `MANIFEST.in` for inclusion in source distributions. @rly (#1398)
 - Fix bad error check in ``IntracellularRecordingsTable.add_recording`` when adding ``IZeroClampSeries``. @oruebel (#1410)
--  Skip ros3 tests if internet access or the ros3 driver are not available. @oruebel (#1414)
+- Skip ros3 tests if internet access or the ros3 driver are not available. @oruebel (#1414)
+- Fix CI issues. @rly (#1427)
 
-### Tutorial enhancements:
+### Documentation and tutorial enhancements:
+- Enhanced ordering of sphinx gallery tutorials to use alphabetic ordering based on tutorial headings. @oruebel (#1399)
 - Updated the general tutorial to add documentation about the ``Images`` type. @bendichter (#1353)
+- Updated the main index of the documentation to make the documentation easier to navigate. @oruebel (#1402)
+- Merged the "NWB File" overview section with the "NWB File Basics" tutorial. @oruebel (#1402)
+- Updated and created separated installation instructions for users and developers . @oruebel (#1402)
+
+### Minor improvements:
+- Improve constructor docstrings for Image types. @weiglszonja (#1418)
+- Add checks for data orientation in ``TimeSeries``, ``ElectricalSeries``, and ``RoiResponseSeries`` @bendichter (#1428)
+
 
 ### Documentation enhancements:
 - Added documentation for exporting NWB files. @rly (#1417)
@@ -17,7 +27,7 @@
 
 ### Breaking changes:
 - ``SweepTable`` has been deprecated in favor of the new icephys metadata tables. Use of ``SweepTable``
-  is still possible but no longer recommended. @oruebel  (#1349
+  is still possible but no longer recommended. @oruebel  (#1349)
 - ``TimeSeries.__init__`` now requires the ``data`` argument because the 'data' dataset is required by the schema.
   If a ``TimeSeries`` is read without a value for ``data``, it will be set to a default value. For most
   ``TimeSeries``, this is a 1-dimensional empty array with dtype uint8. For ``ImageSeries`` and

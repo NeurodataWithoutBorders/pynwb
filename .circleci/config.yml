@@ -14,33 +14,34 @@ references:
   initialize-venv: &initialize-venv
     name: Initialize Virtual Environment
     command: |
+      pip install --upgrade pip
       python -m virtualenv ../venv || python -m venv ../venv
       . ../venv/bin/activate
 
   py39: &py39
     docker:
-    - image: circleci/python:3.9.2-buster
+    - image: circleci/python:3.9
       auth:
         username: hdmf
         password: $DOCKERHUB_PASSWORD
 
   py38: &py38
     docker:
-    - image: circleci/python:3.8.8-buster
+    - image: circleci/python:3.8
       auth:
         username: hdmf
         password: $DOCKERHUB_PASSWORD
 
   py37: &py37
     docker:
-    - image: circleci/python:3.7.10-buster
+    - image: circleci/python:3.7
       auth:
         username: hdmf
         password: $DOCKERHUB_PASSWORD
 
   conda-image: &conda-image
     docker:
-    - image: continuumio/miniconda3:4.9.2
+    - image: continuumio/miniconda3:latest
       auth:
         username: hdmf
         password: $DOCKERHUB_PASSWORD
@@ -95,10 +96,17 @@ references:
       - run:
           name: Configure conda
           command: |
+            pip install --upgrade pip
+            conda update -n base -c defaults conda
             conda config --set always_yes yes --set changeps1 no
             conda config --add channels conda-forge
             conda install python=$CONDA_PYTHON_VER
-            conda install virtualenv
+            # work around incompatibilities between virtualenv & importlib-metadata
+            if [[ "${TEST_TOX_ENV}" == *"py37"* ]]; then
+              conda install "importlib-metadata=1.7"
+            else
+              conda install importlib-metadata
+            fi
             conda install tox
       - run:
           name: Run the tests
@@ -146,7 +154,7 @@ references:
 
 jobs:
   flake8:
-    <<: *py38
+    <<: *py39
     steps:
       - checkout
       - run:
@@ -176,7 +184,6 @@ jobs:
       - TEST_TOX_ENV: "py39"
       - BUILD_TOX_ENV: "build-py39"
       - TEST_WHEELINSTALL_ENV: "wheelinstall"
-      - UPLOAD_WHEELS: "true"  # upload distributions from only this job to pypi
     <<: *ci-steps
 
   python39-upgrade-dev:
@@ -185,6 +192,7 @@ jobs:
       - TEST_TOX_ENV: "py39-upgrade-dev"
       - BUILD_TOX_ENV: "build-py39-upgrade-dev"
       - TEST_WHEELINSTALL_ENV: "wheelinstall"
+      - UPLOAD_WHEELS: "true"  # upload distributions from only this job to pypi
     <<: *ci-steps
 
   python39-upgrade-dev-pre:
@@ -366,7 +374,7 @@ workflows:
           <<: *no_filters
       - python37-min-req:
           <<: *no_filters
-      - python39:
+      - python39-upgrade-dev:
           <<: *no_filters
       - miniconda37:
           <<: *no_filters
@@ -374,7 +382,7 @@ workflows:
           <<: *no_filters
       - gallery37-min-req:
           <<: *no_filters
-      - gallery38:  # TODO replace with gallery39 after allensdk support py39
+      - gallery38: # TODO replace with gallery39 after allensdk support py39
           <<: *no_filters
       - miniconda39-ros3:
           <<: *no_filters
@@ -382,11 +390,11 @@ workflows:
           requires:
             - flake8
             - python37-min-req
-            - python39
+            - python39-upgrade-dev  # distributions from this job uploaded to PyPI
             - miniconda37
             - miniconda39
             - gallery37-min-req
-            - gallery38  # gallery39
+            - gallery38  # TODO gallery39
             - miniconda39-ros3
           filters:
             tags:
@@ -402,11 +410,11 @@ workflows:
           requires:
             - flake8
             - python37-min-req
-            - python39
+            - python39-upgrade-dev  # distributions from this job uploaded to PyPI
             - miniconda37
             - miniconda39
             - gallery37-min-req
-            - gallery38  # gallery39
+            - gallery38  # TODO gallery39
             - miniconda39-ros3
           filters:
             tags:
