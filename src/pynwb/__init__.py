@@ -245,13 +245,45 @@ class NWBHDF5IO(_HDF5IO):
                 manager = get_manager()
         super(NWBHDF5IO, self).__init__(path, manager=manager, mode=mode, file=file_obj, comm=comm, driver=driver)
 
-    @docval({'name': 'src_io', 'type': HDMFIO, 'doc': 'the HDMFIO object for reading the data to export'},
+    @docval({'name': 'src_io', 'type': HDMFIO, 'doc': 'the HDMFIO object that was used to read the data to export'},
             {'name': 'nwbfile', 'type': 'NWBFile',
              'doc': 'the NWBFile object to export. If None, then the entire contents of src_io will be exported',
              'default': None},
             {'name': 'write_args', 'type': dict, 'doc': 'arguments to pass to :py:meth:`write_builder`',
              'default': dict()})
     def export(self, **kwargs):
+        """Export an NWB file to a new NWB file using the HDF5 backend.
+
+        If `nwbfile` is provided, then the build manager of `src_io` is used to build the container, and the resulting
+        builder will be exported to the new backend. So if `nwbfile` is provided, `src_io` must have a non-None
+        manager property. If `nwbfile` is None, then the contents of `src_io` will be read and exported to the new
+        backend.
+
+        Arguments can be passed in for the `write_builder` method using `write_args`. Some arguments may not be
+        supported during export. {'link_data': False} can be used to copy any datasets linked to from the original file
+        instead of creating a new link to those datasets in the exported file.
+
+        The exported file will not contain any links to the original file. All links, internal and external,
+        will be preserved in the exported file. All references will also be preserved in the exported file.
+
+        The exported file will use the latest schema version supported by the version of PyNWB used. For example, if
+        the input file uses the NWB schema version 2.1 and the latest schema version supported by PyNWB is 2.3,
+        then the exported file will use the 2.3 NWB schema.
+
+        Example usage:
+
+        .. code-block:: python
+
+           with NWBHDF5IO(self.read_path, mode='r') as read_io:
+               nwbfile = read_io.read()
+               # ...  # modify nwbfile
+               nwbfile.set_modified()  # this may be necessary if the modifications are changes to attributes
+
+               with NWBHDF5IO(self.export_path, mode='w') as export_io:
+                   export_io.export(src_io=read_io, nwbfile=nwbfile)
+
+        See :ref:`export` and :ref:`modifying_data` for more information and examples.
+        """
         nwbfile = popargs('nwbfile', kwargs)
         kwargs['container'] = nwbfile
         call_docval_func(super().export, kwargs)
