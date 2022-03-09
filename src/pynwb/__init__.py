@@ -245,23 +245,24 @@ class NWBHDF5IO(_HDF5IO):
                 manager = get_manager()
         super(NWBHDF5IO, self).__init__(path, manager=manager, mode=mode, file=file_obj, comm=comm, driver=driver)
 
-    @docval({'name': 'src_io', 'type': HDMFIO, 'doc': 'the HDMFIO object that was used to read the data to export'},
+    @docval({'name': 'src_io', 'type': HDMFIO,
+             'doc': 'the HDMFIO object (such as NWBHDF5IO) that was used to read the data to export'},
             {'name': 'nwbfile', 'type': 'NWBFile',
              'doc': 'the NWBFile object to export. If None, then the entire contents of src_io will be exported',
              'default': None},
             {'name': 'write_args', 'type': dict, 'doc': 'arguments to pass to :py:meth:`write_builder`',
-             'default': dict()})
+             'default': None})
     def export(self, **kwargs):
         """Export an NWB file to a new NWB file using the HDF5 backend.
 
-        If `nwbfile` is provided, then the build manager of `src_io` is used to build the container, and the resulting
-        builder will be exported to the new backend. So if `nwbfile` is provided, `src_io` must have a non-None
-        manager property. If `nwbfile` is None, then the contents of `src_io` will be read and exported to the new
-        backend.
+        If ``nwbfile`` is provided, then the build manager of ``src_io`` is used to build the container,
+        and the resulting builder will be exported to the new backend. So if ``nwbfile`` is provided,
+        ``src_io`` must have a non-None manager property. If ``nwbfile`` is None, then the contents of
+        ``src_io`` will be read and exported to the new backend.
 
-        Arguments can be passed in for the `write_builder` method using `write_args`. Some arguments may not be
-        supported during export. {'link_data': False} can be used to copy any datasets linked to from the original file
-        instead of creating a new link to those datasets in the exported file.
+        Arguments can be passed in for the ``write_builder`` method using ``write_args``. Some arguments may not be
+        supported during export. ``{'link_data': False}`` can be used to copy any datasets linked to from
+        the original file instead of creating a new link to those datasets in the exported file.
 
         The exported file will not contain any links to the original file. All links, internal and external,
         will be preserved in the exported file. All references will also be preserved in the exported file.

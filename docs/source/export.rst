@@ -1,16 +1,20 @@
+.. _export:
+
 Exporting NWB files
 ===================
 
-How do I create a modified version of an existing NWB file, while preserving the original file?
----------------------------------------------------------------------------------------------------------
-First, open the NWB file using `NWBHDF5IO`. Then, read the NWB file into an `NWBFile` object,
-modify the `NWBFile` object or its child objects, and export the modified `NWBFile` object to a new file path.
+You can use the export feature of PyNWB to create a modified version of an existing NWB file, while preserving the
+original file.
+
+To do so, first open the NWB file using :py:class:`~pynwb.NWBHDF5IO`. Then, read the NWB file into an
+:py:class:`~pynwb.file.NWBFile` object,
+modify the ``NWBFile`` object or its child objects, and export the modified ``NWBFile`` object to a new file path.
 The modifications will appear in the exported file and not the original file.
 
 These modifications can consist of removals of containers, additions of containers, and changes to container attributes.
 If container attributes are changed, then
-:py:meth:`Container.set_modified() <hdmf.container.AbstractContainer.set_modified>` must be called
-on the `NWBFile` before exporting.
+:py:meth:`NWBFile.set_modified() <hdmf.container.AbstractContainer.set_modified>` must be called
+on the ``NWBFile`` before exporting.
 
 .. code-block:: python
 
@@ -32,37 +36,37 @@ on the `NWBFile` before exporting.
 .. note::
 
     Moving containers within the same file is currently not supported directly via export. See the following
-    [discussion on the NWB Help Desk](https://github.com/NeurodataWithoutBorders/helpdesk/discussions/21)
+    `discussion on the NWB Help Desk <https://github.com/NeurodataWithoutBorders/helpdesk/discussions/21>`_
     for details.
 
 .. note::
 
-    After exporting an `NWBFile`, the object IDs of the `NWBFile` and its child containers will be identical to the
-    object IDs of the read `NWBFile` and its child containers. The object ID of a container uniquely identifies the
+    After exporting an ``NWBFile``, the object IDs of the ``NWBFile`` and its child containers will be identical to the
+    object IDs of the read ``NWBFile`` and its child containers. The object ID of a container uniquely identifies the
     container within a file, but should *not* be used to distinguish between two different files.
 
 .. seealso::
 
-    :ref:`modifying_data`
+    The tutorial :ref:`modifying_data` provides additional examples of adding and removing containers from an NWB file.
 
 
 How do I create a copy of an NWB file with different data layouts (e.g., applying compression)?
 ---------------------------------------------------------------------------------------------------------
-Use the [h5repack](https://support.hdfgroup.org/HDF5/doc/RM/Tools.html#Tools-Repack) command line tool from the HDF5 Group.
-See also this [h5repack tutorial](https://support.hdfgroup.org/HDF5/Tutor/cmdtooledit.html#chglayout).
+Use the `h5repack <https://support.hdfgroup.org/HDF5/doc/RM/Tools.html#Tools-Repack>`_ command line tool from the HDF5 Group.
+See also this `h5repack tutorial <https://support.hdfgroup.org/HDF5/Tutor/cmdtooledit.html#chglayout>`_.
 
 
 How do I create a copy of an NWB file with different controls over how links are treated and whether copies are deep or shallow?
----------------------------------------------------------------------------------------------------------
-Use the [h5copy](https://support.hdfgroup.org/HDF5/doc/RM/Tools.html#Tools-Copy) command line tool from the HDF5 Group.
-See also this [h5copy tutorial](https://support.hdfgroup.org/HDF5/Tutor/cmdtooledit.html#copy).
+---------------------------------------------------------------------------------------------------------------------------------
+Use the `h5copy <https://support.hdfgroup.org/HDF5/doc/RM/Tools.html#Tools-Copy>`_ command line tool from the HDF5 Group.
+See also this `h5copy tutorial <https://support.hdfgroup.org/HDF5/Tutor/cmdtooledit.html#copy>`_.
 
 
 How do I generate new object IDs for a newly exported NWB file?
 ---------------------------------------------------------------------------------------------------------
-Before calling `export`, call the method
-:py:meth:`generate_new_id <hdmf.container.AbstractContainer.generate_new_id>` on the `NWBFile` to generate
-a new set of object IDs for the `NWBFile` and all of its children, recursively. Then export the `NWBFile`.
+Before calling ``export``, call the method
+:py:meth:`generate_new_id <hdmf.container.AbstractContainer.generate_new_id>` on the ``NWBFile`` to generate
+a new set of object IDs for the ``NWBFile`` and all of its children, recursively. Then export the ``NWBFile``.
 The original NWB file is preserved.
 
 .. code-block:: python
@@ -96,15 +100,16 @@ For example:
            export_io.export(src_io=read_io, nwbfile=nwbfile, write_args={'link_data': False})  # copy linked datasets
            # the written file will contain no links to external datasets
 
-You can also use the [h5copy](https://support.hdfgroup.org/HDF5/doc/RM/Tools.html#Tools-Copy) command line tool
-from the HDF5 Group. See also this [h5copy tutorial](https://support.hdfgroup.org/HDF5/Tutor/cmdtooledit.html#copy).
+You can also the `h5copy <https://support.hdfgroup.org/HDF5/doc/RM/Tools.html#Tools-Copy>`_ command line tool \
+from the HDF5 Group. See also this `h5copy tutorial <https://support.hdfgroup.org/HDF5/Tutor/cmdtooledit.html#copy>`_.
 
 
-How do I write a newly instantiated `NWBFile` to two different file paths?
+How do I write a newly instantiated ``NWBFile`` to two different file paths?
 -----------------------------------------------------------------------------------------------------------------------
-PyNWB does not allow you to write an `NWBFile` that was not read from a file to two different files. For example, if you
-instantiate `NWBFile` A and write it to file 1 and then try to write it to file 2, an error will be raised. However, you
-can first write the `NWBFile` to file 1, read the `NWBFile` from file 1, and then export it to file 2.
+PyNWB does not support writing an ``NWBFile`` that was not read from a file to two different files.
+For example, if you instantiate ``NWBFile`` A and write it to file path 1, you cannot also write it to file path 2.
+However, you can first write the ``NWBFile`` to file path 1, read the ``NWBFile`` from file path 1, and
+then export it to file path 2.
 
 .. code-block:: python
 

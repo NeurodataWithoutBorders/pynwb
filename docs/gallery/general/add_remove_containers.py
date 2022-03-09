@@ -213,5 +213,5 @@ with NWBHDF5IO(filename, mode='r') as read_io:
 ###############################################################################
 # More information about export
 # ---------------------------------
-# For more information about the export functionality, see https://pynwb.readthedocs.io/en/latest/export.html
+# For more information about the export functionality, see :ref:`export`
 # and the PyNWB documentation for :py:meth:`NWBHDF5IO.export <pynwb.NWBHDF5IO.export>`.
