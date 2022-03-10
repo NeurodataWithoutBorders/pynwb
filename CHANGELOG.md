@@ -20,6 +20,9 @@
 - Add checks for data orientation in ``TimeSeries``, ``ElectricalSeries``, and ``RoiResponseSeries`` @bendichter (#1428)
 
 
+### Documentation enhancements:
+- Added documentation for exporting NWB files. @rly (#1417)
+
 ## PyNWB 2.0.0 (August 13, 2021)
 
 ### Breaking changes:
