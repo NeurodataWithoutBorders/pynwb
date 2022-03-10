@@ -1,6 +1,6 @@
 # PyNWB Changelog
 
-## PyNWB 2.0.1 (February 3, 2022)
+## PyNWB 2.0.1 (March 10, 2022)
 
 ### Bug fixes:
 - Add `environment-ros3.yml` to `MANIFEST.in` for inclusion in source distributions. @rly (#1398)
@@ -14,14 +14,12 @@
 - Updated the main index of the documentation to make the documentation easier to navigate. @oruebel (#1402)
 - Merged the "NWB File" overview section with the "NWB File Basics" tutorial. @oruebel (#1402)
 - Updated and created separated installation instructions for users and developers . @oruebel (#1402)
+- Added documentation for exporting NWB files. @rly (#1417)
 
 ### Minor improvements:
 - Improve constructor docstrings for Image types. @weiglszonja (#1418)
 - Add checks for data orientation in ``TimeSeries``, ``ElectricalSeries``, and ``RoiResponseSeries`` @bendichter (#1428)
 
-
-### Documentation enhancements:
-- Added documentation for exporting NWB files. @rly (#1417)
 
 ## PyNWB 2.0.0 (August 13, 2021)
 
