@@ -1,15 +1,128 @@
 """
 .. _basics:
 
-NWB basics
-==========
+1. NWB File Basics
+==================
 
 This example will focus on the basics of working with an :py:class:`~pynwb.file.NWBFile` object,
-including writing and reading of an NWB file.
+including writing and reading of an NWB file. Before we dive into code showing how to use an
+:py:class:`~pynwb.file.NWBFile`, we first provide a brief overview of the basic concepts of NWB. If you
+are already familiar with the concepts of :ref:`timeseries_overview` and :ref:`modules_overview`, then
+feel free to skip the :ref:`basics_background` part and go directly to :ref:`basics_nwbfile`.
+
+.. _basics_background:
+
+Background: Basic concepts
+--------------------------
+
+In the `NWB Format <https://nwb-schema.readthedocs.io>`_, each experimental session is typically
+represented by a separate NWB file. NWB files are represented in PyNWB by :py:class:`~pynwb.file.NWBFile`
+objects which provide functionality for creating and retrieving:
+
+ * :ref:`timeseries_overview` datasets, i.e., objects for storing time series data
+ * :ref:`modules_overview`, i.e., objects for storing and grouping analyses, and
+ * experimental metadata and other metadata related to data provenance.
+
+The following sections describe the :py:class:`~pynwb.base.TimeSeries` and :py:class:`~pynwb.base.ProcessingModules`
+classes in further detail.
+
+.. _timeseries_overview:
+
+TimeSeries
+^^^^^^^^^^
+
+:py:class:`~pynwb.base.TimeSeries` objects store time series data and correspond to the *TimeSeries* specifications
+provided by the `NWB Format`_ . Like the NWB specification, :py:class:`~pynwb.base.TimeSeries` Python objects
+follow an object-oriented inheritance pattern, i.e., the class :py:class:`~pynwb.base.TimeSeries`
+serves as the base class for all other :py:class:`~pynwb.base.TimeSeries` types, such as,
+:py:class:`~pynwb.ecephys.ElectricalSeries`, which itself may have further subtypes, e.g.,
+:py:class:`~pynwb.ecephys.SpikeEventSeries`.
+
+.. seealso::
+
+    For your reference, NWB defines the following main :py:class:`~pynwb.base.TimeSeries` subtypes:
+
+    * **Extracellular electrophysiology:**
+      :py:class:`~pynwb.ecephys.ElectricalSeries`, :py:class:`~pynwb.ecephys.SpikeEventSeries`
+
+    * **Intracellular electrophysiology:**
+      :py:class:`~pynwb.icephys.PatchClampSeries` is the base type for all intracellular time series, which
+      is further refined into subtypes depending on the type of recording:
+      :py:class:`~pynwb.icephys.CurrentClampSeries`,
+      :py:class:`~pynwb.icephys.IZeroClampSeries`,
+      :py:class:`~pynwb.icephys.CurrentClampStimulusSeries`,
+      :py:class:`~pynwb.icephys.VoltageClampSeries`,
+      :py:class:`~pynwb.icephys.VoltageClampStimulusSeries`.
+
+    * **Optical physiology and imaging:** :py:class:`~pynwb.image.ImageSeries` is the base type
+      for image recordings and is further refined by the
+      :py:class:`~pynwb.image.ImageMaskSeries`,
+      :py:class:`~pynwb.image.OpticalSeries`, and
+      :py:class:`~pynwb.ophys.TwoPhotonSeries` types.
+      Other related time series types are:
+      :py:class:`~pynwb.image.IndexSeries` and
+      :py:class:`~pynwb.ophys.RoiResponseSeries`.
+
+    * **Others** :py:class:`~pynwb.ogen.OptogeneticSeries`,
+      :py:class:`~pynwb.behavior.SpatialSeries`,
+      :py:class:`~pynwb.misc.DecompositionSeries`,
+      :py:class:`~pynwb.misc.AnnotationSeries`,
+      :py:class:`~pynwb.misc.AbstractFeatureSeries`, and
+      :py:class:`~pynwb.misc.IntervalSeries`.
+
+
+.. _modules_overview:
+
+Processing Modules
+^^^^^^^^^^^^^^^^^^
+
+Processing modules are objects that group together common analyses done during processing of data.
+Processing module objects are unique collections of analysis results. To standardize the storage of
+common analyses, NWB provides the concept of an :py:class:`~pynwb.core.NWBDataInterface`, where the output of
+common analyses are represented as objects that extend the :py:class:`~pynwb.core.NWBDataInterface` class.
+In most cases, you will not need to interact with the :py:class:`~pynwb.core.NWBDataInterface` class directly.
+More commonly, you will be creating instances of classes that extend this class.
+
+
+.. seealso::
+
+    For your reference, NWB defines the following main analysis :py:class:`~pynwb.core.NWBDataInterface` subtypes:
+
+    * **Behavior:** :py:class:`~pynwb.behavior.BehavioralEpochs`,
+      :py:class:`~pynwb.behavior.BehavioralEvents`,
+      :py:class:`~pynwb.behavior.BehavioralTimeSeries`,
+      :py:class:`~pynwb.behavior.CompassDirection`,
+      :py:class:`~pynwb.behavior.PupilTracking`,
+      :py:class:`~pynwb.behavior.Position`,
+      :py:class:`~pynwb.behavior.EyeTracking`.
+
+    * **Extracellular electrophysiology:** :py:class:`~pynwb.ecephys.EventDetection`,
+      :py:class:`~pynwb.ecephys.EventWaveform`,
+      :py:class:`~pynwb.ecephys.FeatureExtraction`,
+      :py:class:`~pynwb.ecephys.FilteredEphys`,
+      :py:class:`~pynwb.ecephys.LFP`.
+
+    * **Optical physiology:** :py:class:`~pynwb.ophys.DfOverF`,
+      :py:class:`~pynwb.ophys.Fluorescence`,
+      :py:class:`~pynwb.ophys.ImageSegmentation`,
+      :py:class:`~pynwb.ophys.MotionCorrection`.
+
+    * **Others:** :py:class:`~pynwb.retinotopy.ImagingRetinotopy`,
+      :py:class:`~pynwb.base.Images`.
+
+    * **TimeSeries:** Any :ref:`timeseries_overview` is also a subclass of :py:class:`~pynwb.core.NWBDataInterface`
+      and can be used anywhere :py:class:`~pynwb.core.NWBDataInterface` is allowed.
+
+.. note::
+
+    In addition to :py:class:`~pynwb.core.NWBContainer`, which functions as a common base type for Group objects,
+    :py:class:`~pynwb.core.NWBData` provides a common base for the specification of datasets in the NWB format.
 
 """
 
 ####################
+# .. _basics_nwbfile:
+#
 # The NWB file
 # ------------
 #
@@ -23,10 +136,11 @@ import numpy as np
 start_time = datetime(2017, 4, 3, 11, tzinfo=tzlocal())
 create_date = datetime(2017, 4, 15, 12, tzinfo=tzlocal())
 
-nwbfile = NWBFile(session_description='demonstrate NWBFile basics',  # required
-                  identifier='NWB123',  # required
-                  session_start_time=start_time,  # required
-                  file_create_date=create_date)  # optional
+nwbfile = NWBFile(
+    session_description='demonstrate NWBFile basics',
+    identifier='NWB123',
+    session_start_time=start_time
+)
 
 ####################
 # .. _basic_timeseries:
@@ -300,7 +414,7 @@ nwbfile.processing['behavior'].add(position)
 # .. _basic_trials:
 #
 # Trials
-# ~~~~~~~~~~~~~~~~~~~~~~
+# ^^^^^^
 #
 # Trials can be added to an NWB file using the methods :py:meth:`~pynwb.file.NWBFile.add_trial`
 # and :py:meth:`~pynwb.file.NWBFile.add_trial_column`. Together, these methods maintains a
@@ -338,7 +452,7 @@ print(nwbfile.trials.to_dataframe())
 # .. _basic_epochs:
 #
 # Epochs
-# ~~~~~~~~~~~~~~~~~~~~~~
+# ^^^^^^
 #
 # Epochs can be added to an NWB file using the method :py:meth:`~pynwb.file.NWBFile.add_epoch`.
 # The first and second arguments are the start time and stop times, respectively.
@@ -351,7 +465,7 @@ nwbfile.add_epoch(6.0, 8.0, ['second', 'example'], [test_ts, ])
 
 ####################
 # Other time intervals
-# ~~~~~~~~~~~~~~~~~~~~~~
+# ^^^^^^^^^^^^^^^^^^^^
 # Both ``epochs`` and ``trials`` are of of data type :py:class:`~pynwb.epoch.TimeIntervals`, which is a type of
 # ``DynamicTable`` for storing information about time intervals. ``"epochs"`` and ``"trials"``
 # are the two default names for :py:class:`~pynwb.base.TimeIntervals` objects, but you can also add your own

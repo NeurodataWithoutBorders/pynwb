@@ -1,6 +1,6 @@
 .. _sec_nwbformat_overview:
 
-NWB:N File Format
+NWB File Format
 =================
 
 The `NWB Format <https://nwb-schema.readthedocs.io>`_ is built around two concepts:

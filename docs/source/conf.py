@@ -58,6 +58,7 @@ extensions = [
 ]
 
 from sphinx_gallery.sorting import ExplicitOrder
+from sphinx_gallery.sorting import ExampleTitleSortKey
 
 sphinx_gallery_conf = {
     # path to your examples scripts
@@ -67,7 +68,8 @@ sphinx_gallery_conf = {
     'subsection_order': ExplicitOrder(['../gallery/general', '../gallery/domain', '../gallery/advanced_io']),
     'backreferences_dir': 'gen_modules/backreferences',
     'min_reported_time': 5,
-    'remove_config_comments': True
+    'remove_config_comments': True,
+    'within_subsection_order': ExampleTitleSortKey
 }
 
 intersphinx_mapping = {
