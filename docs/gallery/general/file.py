@@ -345,11 +345,13 @@ nwbfile.subject = Subject(
 # ``0.0`` seconds after ``start_time`` and sampled every second:
 
 data = list(range(100, 200, 10))
-time_series_with_rate = TimeSeries(name='test_timeseries',
-                                   data=data,
-                                   unit='m',
-                                   starting_time=0.0,
-                                   rate=1.0)
+time_series_with_rate = TimeSeries(
+    name='test_timeseries',
+    data=data,
+    unit='m',
+    starting_time=0.0,
+    rate=1.0,
+)
 
 ####################
 # For irregularly sampled recordings, we need to provide the ``timestamps`` for the ``data``:
