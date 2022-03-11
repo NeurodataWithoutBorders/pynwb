@@ -273,13 +273,13 @@ session_start_time = datetime(2018, 4, 25, 2, 30, 3,
                               tzinfo=tz.gettz('US/Pacific'))
 
 nwbfile = NWBFile(
-    session_description='Mouse exploring an open field',     # required
-    identifier='Mouse5_Day3',                                # required
-    session_start_time=session_start_time,                   # required
-    session_id='session_1234',                               # optional
-    experimenter='My Name',                                  # optional
-    lab='My Lab Name',                                       # optional
-    institution='University of My Institution',              # optional
+    session_description='Mouse exploring an open field',      # required
+    identifier='Mouse5_Day3',                                 # required
+    session_start_time=session_start_time,                    # required
+    session_id='session_1234',                                # optional
+    experimenter='My Name',                                   # optional
+    lab='My Lab Name',                                        # optional
+    institution='University of My Institution',               # optional
     related_publications='DOI:10.1016/j.neuron.2016.12.011',  # optional
 )
 print(nwbfile)
