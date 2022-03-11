@@ -1,21 +1,15 @@
 """
 .. _basics:
 
+NWB File Basics
+==================
+
 This example will focus on the basics of working with an :py:class:`~pynwb.file.NWBFile` object,
 including writing and reading of an NWB file, and giving you an introduction to the basic data types.
 Before we dive into code showing how to use an :py:class:`~pynwb.file.NWBFile`, we first provide
 a brief overview of the basic concepts of NWB. If you are already familiar with the concepts of
 :ref:`timeseries_overview` and :ref:`modules_overview`, then feel free to skip the :ref:`basics_background`
 part and go directly to :ref:`basics_nwbfile`.
-
-NWB File Basics
-==================
-
-This example will focus on the basics of working with an :py:class:`~pynwb.file.NWBFile` object,
-including writing and reading of an NWB file. Before we dive into code showing how to use an
-:py:class:`~pynwb.file.NWBFile`, we first provide a brief overview of the basic concepts of NWB. If you
-are already familiar with the concepts of :ref:`timeseries_overview` and :ref:`modules_overview`, then
-feel free to skip the :ref:`basics_background` part and go directly to :ref:`basics_nwbfile`.
 
 .. _basics_background:
 
