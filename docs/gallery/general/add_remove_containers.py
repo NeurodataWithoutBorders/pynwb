@@ -91,7 +91,7 @@ with NWBHDF5IO(filename, 'r') as io:
 ###############################################################################
 # Exporting a written NWB file to a new file path
 # ---------------------------------------------------
-# Use the :py:meth:`NWBHDF5IO.export <pynwb.NWBHDF5IO.export>` method to read data to an existing NWB file,
+# Use the :py:meth:`NWBHDF5IO.export <pynwb.NWBHDF5IO.export>` method to read data from an existing NWB file,
 # modify the data, and write the modified data to a new file path. Modifications to the data can be additions or
 # removals of objects, such as :py:class:`~pynwb.base.TimeSeries` objects. This is especially useful if you
 # have raw data and processed data in the same NWB file and you want to create a new NWB file with all of the
@@ -164,7 +164,7 @@ with NWBHDF5IO(filename, mode='r') as read_io:
     # use the pop method to remove a TimeSeries from a processing module
     read_nwbfile.processing['behavior'].data_interfaces.pop('test_timeseries2')
 
-    # call the export method to write the modified NWBFile instance to a new file path
+    # call the export method to write the modified NWBFile instance to a new file path.
     # the original file is not modified
     with NWBHDF5IO(export_filename, mode='w') as export_io:
         export_io.export(src_io=read_io, nwbfile=read_nwbfile)
@@ -213,4 +213,5 @@ with NWBHDF5IO(filename, mode='r') as read_io:
 ###############################################################################
 # More information about export
 # ---------------------------------
-# For more information about the export functionality, see https://hdmf.readthedocs.io/en/latest/export.html
+# For more information about the export functionality, see :ref:`export`
+# and the PyNWB documentation for :py:meth:`NWBHDF5IO.export <pynwb.NWBHDF5IO.export>`.
