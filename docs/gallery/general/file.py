@@ -280,7 +280,7 @@ nwbfile = NWBFile(
     experimenter='My Name',                                  # optional
     lab='My Lab Name',                                       # optional
     institution='University of My Institution',              # optional
-    related_publications='DOI:10.1016/j.neuron.2016.12.011'  # optional
+    related_publications='DOI:10.1016/j.neuron.2016.12.011',  # optional
 )
 print(nwbfile)
 
