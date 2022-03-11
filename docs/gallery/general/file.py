@@ -547,7 +547,7 @@ with NWBHDF5IO('basics_tutorial.nwb', 'r') as io:
 
 ####################
 # Accessing data
-# ^^^^^^
+# ^^^^^^^^^^^^^^^
 #
 # We can also access the :py:class:`~pynwb.behavior.SpatialSeries` data by referencing the names
 # of the objects in the hierarchy that contain it. We can access a processing module by indexing
@@ -734,7 +734,7 @@ nwbfile.processing['behavior'].add(images)
 ####################
 # Now we overwrite the file with all of the data
 
-with NWBHDF5IO('example_file_path.nwb', 'w') as io:
+with NWBHDF5IO('basics_tutorial.nwb', 'w') as io:
     io.write(nwbfile)
 
 ####################
