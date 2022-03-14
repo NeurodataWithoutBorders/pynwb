@@ -261,18 +261,17 @@ from dateutil import tz
 #     Use keyword arguments when constructing :py:class:`~pynwb.file.NWBFile` objects.
 #
 
-session_start_time = datetime(2018, 4, 25, 2, 30, 3,
-                              tzinfo=tz.gettz('US/Pacific'))
+session_start_time = datetime(2018, 4, 25, 2, 30, 3, tzinfo=tz.gettz("US/Pacific"))
 
 nwbfile = NWBFile(
-    session_description='Mouse exploring an open field',      # required
-    identifier='Mouse5_Day3',                                 # required
-    session_start_time=session_start_time,                    # required
-    session_id='session_1234',                                # optional
-    experimenter='My Name',                                   # optional
-    lab='My Lab Name',                                        # optional
-    institution='University of My Institution',               # optional
-    related_publications='DOI:10.1016/j.neuron.2016.12.011',  # optional
+    session_description="Mouse exploring an open field",  # required
+    identifier="Mouse5_Day3",  # required
+    session_start_time=session_start_time,  # required
+    session_id="session_1234",  # optional
+    experimenter="My Name",  # optional
+    lab="My Lab Name",  # optional
+    institution="University of My Institution",  # optional
+    related_publications="DOI:10.1016/j.neuron.2016.12.011",  # optional
 )
 print(nwbfile)
 
@@ -310,11 +309,11 @@ print(nwbfile)
 # by setting the ``subject`` field to the new :py:class:`~pynwb.file.Subject` object.
 
 nwbfile.subject = Subject(
-    subject_id='001',
-    age='P90D',
-    description='mouse 5',
-    species='Mus musculus',
-    sex='M'
+    subject_id="001",
+    age="P90D",
+    description="mouse 5",
+    species="Mus musculus",
+    sex="M",
 )
 
 ####################
@@ -338,9 +337,9 @@ nwbfile.subject = Subject(
 
 data = list(range(100, 200, 10))
 time_series_with_rate = TimeSeries(
-    name='test_timeseries',
+    name="test_timeseries",
     data=data,
-    unit='m',
+    unit="m",
     starting_time=0.0,
     rate=1.0,
 )
@@ -349,10 +348,12 @@ time_series_with_rate = TimeSeries(
 # For irregularly sampled recordings, we need to provide the ``timestamps`` for the ``data``:
 
 timestamps = list(range(10))
-time_series_with_timestamps = TimeSeries(name='test_timeseries',
-                                         data=data,
-                                         unit='m',
-                                         timestamps=timestamps)
+time_series_with_timestamps = TimeSeries(
+    name="test_timeseries",
+    data=data,
+    unit="m",
+    timestamps=timestamps,
+)
 
 ####################
 # :py:class:`~pynwb.base.TimeSeries` objects can be added directly to :py:class:`~pynwb.file.NWBFile` using:
@@ -368,11 +369,11 @@ nwbfile.add_acquisition(time_series_with_timestamps)
 # We can access the :py:class:`~pynwb.base.TimeSeries` object ``'test_timeseries'``
 # in :py:class:`~pynwb.file.NWBFile` from ``acquisition``:
 
-nwbfile.acquisition['test_timeseries']
+nwbfile.acquisition["test_timeseries"]
 
 ####################
 # or using the :py:meth:`~pynwb.file.NWBFile.get_acquisition` method:
-nwbfile.get_acquisition('test_timeseries')
+nwbfile.get_acquisition("test_timeseries")
 
 
 ####################
@@ -402,16 +403,15 @@ nwbfile.get_acquisition('test_timeseries')
 
 # create fake data with shape (50, 2)
 # the first dimension should always represent time
-position_data = np.array([np.linspace(0, 10, 50),
-                          np.linspace(0, 8, 50)]).T
+position_data = np.array([np.linspace(0, 10, 50), np.linspace(0, 8, 50)]).T
 position_timestamps = np.linspace(0, 50) / 200
 
 spatial_series_obj = SpatialSeries(
-    name='SpatialSeries',
-    description='(x,y) position in open field',
+    name="SpatialSeries",
+    description="(x,y) position in open field",
     data=position_data,
     timestamps=position_timestamps,
-    reference_frame='(0,0) is bottom left corner'
+    reference_frame="(0,0) is bottom left corner",
 )
 print(spatial_series_obj)
 
@@ -460,8 +460,7 @@ position_obj = Position(spatial_series=spatial_series_obj)
 
 
 behavior_module = nwbfile.create_processing_module(
-    name='behavior',
-    description='processed behavioral data'
+    name="behavior", description="processed behavioral data"
 )
 behavior_module.add(position_obj)
 
@@ -484,7 +483,7 @@ behavior_module.add(position_obj)
 # Once the behavior processing module is added to the :py:class:`~pynwb.file.NWBFile`,
 # you can access it with:
 
-print(nwbfile.processing['behavior'])
+print(nwbfile.processing["behavior"])
 
 ####################
 # .. _basic_writing:
@@ -497,14 +496,14 @@ print(nwbfile.processing['behavior'])
 #
 # To write an :py:class:`~pynwb.file.NWBFile`, use the :py:meth:`~hdmf.backends.io.HDMFIO.write` method.
 
-io = NWBHDF5IO('basics_tutorial.nwb', mode='w')
+io = NWBHDF5IO("basics_tutorial.nwb", mode="w")
 io.write(nwbfile)
 io.close()
 
 ####################
 # You can also use :py:meth:`~pynwb.NWBHDF5IO` as a context manager:
 
-with NWBHDF5IO('basics_tutorial.nwb', 'w') as io:
+with NWBHDF5IO("basics_tutorial.nwb", "w") as io:
     io.write(nwbfile)
 
 ####################
@@ -515,7 +514,7 @@ with NWBHDF5IO('basics_tutorial.nwb', 'w') as io:
 #
 # As with writing, reading is also carried out using the :py:class:`~pynwb.NWBHDF5IO` class.
 # To read the NWB file we just wrote, use another :py:class:`~pynwb.NWBHDF5IO` object,
-# and use the :py:meth:`~hdmf.backends.io.HDMFIO.read` method to retrieve an
+# and use the :py:meth:`~pynwb.NWBHDF5IO.read` method to retrieve an
 # :py:class:`~pynwb.file.NWBFile` object.
 #
 # Data arrays are read passively from the file.
@@ -523,20 +522,20 @@ with NWBHDF5IO('basics_tutorial.nwb', 'w') as io:
 # does not read the data values, but presents an HDF5 object that can be indexed to read data.
 # You can use the ``[:]`` operator to read the entire data array into memory.
 
-with NWBHDF5IO('basics_tutorial.nwb', 'r') as io:
+with NWBHDF5IO("basics_tutorial.nwb", "r") as io:
     read_nwbfile = io.read()
-    print(read_nwbfile.acquisition['test_timeseries'])
-    print(read_nwbfile.acquisition['test_timeseries'].data[:])
+    print(read_nwbfile.acquisition["test_timeseries"])
+    print(read_nwbfile.acquisition["test_timeseries"].data[:])
 
 ####################
 # It is often preferable to read only a portion of the data.
 # To do this, index or slice into the ``data`` attribute just like if you were
 # indexing or slicing a numpy array.
 
-with NWBHDF5IO('basics_tutorial.nwb', 'r') as io:
+with NWBHDF5IO("basics_tutorial.nwb", "r") as io:
     read_nwbfile = io.read()
-    print(read_nwbfile.acquisition['test_timeseries'])
-    print(read_nwbfile.acquisition['test_timeseries'].data[:2])
+    print(read_nwbfile.acquisition["test_timeseries"])
+    print(read_nwbfile.acquisition["test_timeseries"].data[:2])
 
 ####################
 # .. note::
@@ -561,22 +560,18 @@ with NWBHDF5IO('basics_tutorial.nwb', 'r') as io:
 # :py:class:`~pynwb.behavior.Position` object by indexing it with the name of the
 # :py:class:`~pynwb.behavior.SpatialSeries` object, ``"SpatialSeries"``.
 
-with NWBHDF5IO('basics_tutorial.nwb', 'r') as io:
+with NWBHDF5IO("basics_tutorial.nwb", "r") as io:
     read_nwbfile = io.read()
-    print(read_nwbfile.processing['behavior'])
-    print(read_nwbfile.processing['behavior']['Position'])
-    print(read_nwbfile.processing['behavior']['Position']['SpatialSeries'])
+    print(read_nwbfile.processing["behavior"])
+    print(read_nwbfile.processing["behavior"]["Position"])
+    print(read_nwbfile.processing["behavior"]["Position"]["SpatialSeries"])
 
 ####################
-# Adding More Data
-# ----------------
-#
-# The following illustrates basic data organizational structures that are used throughout NWB.
-#
+
 # .. _reuse_timestamps:
 #
 # Reusing timestamps
-# ^^^^^^^^^^^^^^^^^^^^
+# ------------------
 #
 # When working with multi-modal data, it can be convenient and efficient to store timestamps once and associate multiple
 # data with the single timestamps instance. PyNWB enables this by letting you reuse timestamps across
@@ -585,10 +580,12 @@ with NWBHDF5IO('basics_tutorial.nwb', 'r') as io:
 # :py:class:`~pynwb.base.TimeSeries` timestamps:
 
 data = list(range(101, 201, 10))
-reuse_ts = TimeSeries(name='reusing_timeseries',
-                      data=data,
-                      unit='SIunit',
-                      timestamps=time_series_with_timestamps)
+reuse_ts = TimeSeries(
+    name="reusing_timeseries",
+    data=data,
+    unit="SIunit",
+    timestamps=time_series_with_timestamps,
+)
 
 
 ####################
@@ -642,8 +639,10 @@ reuse_ts = TimeSeries(name='reusing_timeseries',
 # Once all columns have been added, trial data can be populated using
 # :py:meth:`~pynwb.file.NWBFile.add_trial`.
 
-nwbfile.add_trial_column(name='correct',
-                         description='whether the trial was correct')
+nwbfile.add_trial_column(
+    name="correct",
+    description="whether the trial was correct",
+)
 nwbfile.add_trial(start_time=1.0, stop_time=5.0, correct=True)
 nwbfile.add_trial(start_time=6.0, stop_time=10.0, correct=False)
 
@@ -664,15 +663,19 @@ print(nwbfile.trials.to_dataframe())
 # list of all the :py:class:`~pynwb.base.TimeSeries` that the epoch applies
 # to.
 
-nwbfile.add_epoch(start_time=2.0,
-                  stop_time=4.0,
-                  tags=['first', 'example'],
-                  timeseries=[time_series_with_timestamps])
+nwbfile.add_epoch(
+    start_time=2.0,
+    stop_time=4.0,
+    tags=["first", "example"],
+    timeseries=[time_series_with_timestamps],
+)
 
-nwbfile.add_epoch(start_time=6.0,
-                  stop_time=8.0,
-                  tags=['second', 'example'],
-                  timeseries=[time_series_with_timestamps])
+nwbfile.add_epoch(
+    start_time=6.0,
+    stop_time=8.0,
+    tags=["second", "example"],
+    timeseries=[time_series_with_timestamps],
+)
 
 ####################
 # Other time intervals
@@ -689,8 +692,8 @@ sleep_stages = TimeIntervals(
 sleep_stages.add_column(name="stage", description="stage of sleep")
 sleep_stages.add_column(name="confidence", description="confidence in stage (0-1)")
 
-sleep_stages.add_row(start_time=0.3, stop_time=0.5, stage=1, confidence=.5)
-sleep_stages.add_row(start_time=0.7, stop_time=0.9, stage=2, confidence=.99)
+sleep_stages.add_row(start_time=0.3, stop_time=0.5, stage=1, confidence=0.5)
+sleep_stages.add_row(start_time=0.7, stop_time=0.9, stage=2, confidence=0.99)
 sleep_stages.add_row(start_time=1.3, stop_time=3.0, stage=3, confidence=0.7)
 
 nwbfile.add_time_intervals(sleep_stages)
@@ -708,33 +711,32 @@ nwbfile.add_time_intervals(sleep_stages)
 #          text description about the image and 2) ``resolution`` parameter to specify the *pixels / cm* resolution
 #          of the image.
 
-img = Image.open('docs/source/logo.png')  # an example image
+img = Image.open("docs/source/logo.png")  # an example image
 
 # you can store an RGBA image
-rgba_logo = RGBAImage(name='RGBA_logo', data=np.array(img))
+rgba_logo = RGBAImage(name="RGBA_logo", data=np.array(img))
 
 # or RGB
-rgb_logo = RGBImage(name='RGB_logo', data=np.array(img.convert('RGB')))
+rgb_logo = RGBImage(name="RGB_logo", data=np.array(img.convert("RGB")))
 
 # or Grayscale. Here with the optional description and resolution specified.
-gs_logo = GrayscaleImage(name='Grayscale_logo',
-                         data=np.array(img.convert('L')),
-                         description='Grayscale version of the NWB logo',
-                         resolution=35.433071)
-
-# Images is a container that accepts any of these image types
-images = Images(
-    name='logo_images',
-    images=[rgb_logo, rgba_logo, gs_logo]
+gs_logo = GrayscaleImage(
+    name="Grayscale_logo",
+    data=np.array(img.convert("L")),
+    description="Grayscale version of the NWB logo",
+    resolution=35.433071,
 )
 
+# Images is a container that accepts any of these image types
+images = Images(name="logo_images", images=[rgb_logo, rgba_logo, gs_logo])
+
 # Finally, do not forget to add the images object to the nwb file.
-nwbfile.processing['behavior'].add(images)
+nwbfile.processing["behavior"].add(images)
 
 ####################
 # Now we overwrite the file with all of the data
 
-with NWBHDF5IO('basics_tutorial.nwb', 'w') as io:
+with NWBHDF5IO("basics_tutorial.nwb", "w") as io:
     io.write(nwbfile)
 
 ####################
@@ -754,9 +756,9 @@ with NWBHDF5IO('basics_tutorial.nwb', 'w') as io:
 #
 # First, read the file and get the interface object.
 
-io = NWBHDF5IO('basics_tutorial.nwb', mode='a')
+io = NWBHDF5IO("basics_tutorial.nwb", mode="a")
 nwbfile = io.read()
-position = nwbfile.processing['behavior'].data_interfaces['Position']
+position = nwbfile.processing["behavior"].data_interfaces["Position"]
 
 ####################
 # Next, add a new :py:class:`~pynwb.behavior.SpatialSeries`.
@@ -765,10 +767,10 @@ data = list(range(300, 400, 10))
 timestamps = list(range(10))
 
 new_spatial_series = SpatialSeries(
-    name='SpatialSeriesAppended',
+    name="SpatialSeriesAppended",
     data=data,
     timestamps=timestamps,
-    reference_frame='starting_gate',
+    reference_frame="starting_gate",
 )
 position.add_spatial_series(new_spatial_series)
 print(position)
