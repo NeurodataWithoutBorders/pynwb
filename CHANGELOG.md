@@ -14,6 +14,7 @@
 - Updated the main index of the documentation to make the documentation easier to navigate. @oruebel (#1402)
 - Merged the "NWB File" overview section with the "NWB File Basics" tutorial. @oruebel (#1402)
 - Updated and created separated installation instructions for users and developers . @oruebel (#1402)
+- Updated the Extracellular electrophysiology tutorial. @bendichter, @weiglszonja (#1391)
 - Extended the general tutorial with more data types (e.g., ``Subject``, ``SpatialSeries``, ``Position``).
   @weiglszonja (#1403)
 - Improved constructor docstrings for Image types. @weiglszonja (#1418)
