@@ -163,6 +163,12 @@ html_theme_options = {
     "style_nav_header_background": "#AFD2E8"
 }
 
+# These paths are either relative to html_static_path
+# or fully qualified paths (eg. https://...)
+html_css_files = [
+    'css/custom.css',
+]
+
 # Add any paths that contain custom themes here, relative to this directory.
 # html_theme_path = []
 
