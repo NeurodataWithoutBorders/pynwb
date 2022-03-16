@@ -22,7 +22,7 @@
 ### Minor improvements:
 - Added checks for data orientation in ``TimeSeries``, ``ElectricalSeries``, and ``RoiResponseSeries``.
   @bendichter (#1428)
-
+- Enhanced issue template forms on GitHub. @CodyCBakerPHD (#1434)
 
 
 ## PyNWB 2.0.0 (August 13, 2021)
