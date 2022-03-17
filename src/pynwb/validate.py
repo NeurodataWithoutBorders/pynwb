@@ -54,9 +54,10 @@ def get_cached_namespaces_to_validate(path):
     """
     catalog = NamespaceCatalog(NWBGroupSpec, NWBDatasetSpec, NWBNamespace)
     ns_deps = NWBHDF5IO.load_namespaces(catalog, path)
-    s = set(ns_deps.keys())  # determine which namespaces are the most
-    for k in ns_deps:  # specific (i.e. extensions) and validate
-        s -= ns_deps[k].keys()  # against those
+    # determine which namespaces are the most specific (i.e. extensions) and validate against those
+    s = set(ns_deps.keys())
+    for k in ns_deps:
+        s -= ns_deps[k].keys()
     # TODO remove this workaround for issue https://github.com/NeurodataWithoutBorders/pynwb/issues/1357
     if 'hdmf-experimental' in s:
         s.remove('hdmf-experimental')  # remove validation of hdmf-experimental for now
