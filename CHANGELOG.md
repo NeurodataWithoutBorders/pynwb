@@ -3,13 +3,17 @@
 ## PyNWB 2.1.0 (Upcoming)
 
 ### New features
-- Added ``pywnb.validate.get_chached_namespaces_to_validate`` function to facilitate validation of files against cached
+- Added ``pywnb.validate.get_cached_namespaces_to_validate`` function to facilitate validation of files against cached
   namespaces when using ``pynwb.validate`` from Python directly. @oruebel (#1432)
+
+
+## PyNWB 2.0.1 (March 16, 2022)
 
 ### Bug fixes:
 - Add `environment-ros3.yml` to `MANIFEST.in` for inclusion in source distributions. @rly (#1398)
 - Fix bad error check in ``IntracellularRecordingsTable.add_recording`` when adding ``IZeroClampSeries``. @oruebel (#1410)
 - Skip ros3 tests if internet access or the ros3 driver are not available. @oruebel (#1414)
+- Fix CI issues. @rly (#1427)
 
 ### Documentation and tutorial enhancements:
 - Enhanced ordering of sphinx gallery tutorials to use alphabetic ordering based on tutorial headings. @oruebel (#1399)
@@ -17,10 +21,18 @@
 - Updated the main index of the documentation to make the documentation easier to navigate. @oruebel (#1402)
 - Merged the "NWB File" overview section with the "NWB File Basics" tutorial. @oruebel (#1402)
 - Updated and created separated installation instructions for users and developers . @oruebel (#1402)
+- Updated the Extracellular electrophysiology tutorial. @bendichter, @weiglszonja (#1391)
+- Extended the general tutorial with more data types (e.g., ``Subject``, ``SpatialSeries``, ``Position``).
+  @weiglszonja (#1403)
+- Improved constructor docstrings for Image types. @weiglszonja (#1418)
+- Added documentation for exporting NWB files. @rly (#1417)
+- Improved documentation formatting. @bendichter (#1438)
+- Minor text fixes. @bendichter (#1437, #1400)
 
 ### Minor improvements:
-- Improve constructor docstrings for Image types. @weiglszonja (#1418)
-- Add checks for data orientation in ``TimeSeries``, ``ElectricalSeries``, and ``RoiResponseSeries`` @bendichter (#1428)
+- Added checks for data orientation in ``TimeSeries``, ``ElectricalSeries``, and ``RoiResponseSeries``.
+  @bendichter (#1426)
+- Enhanced issue template forms on GitHub. @CodyCBakerPHD (#1434)
 
 
 ## PyNWB 2.0.0 (August 13, 2021)

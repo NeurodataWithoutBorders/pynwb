@@ -373,16 +373,16 @@ mbfactor = 1000. * 1000  # Factor used to convert to MegaBytes
 print("1) Sparse Matrix Size:")
 print("   Expected Size :  %.2f MB" % (expected_size / mbfactor))
 print("   Occupied Size :  %.5f MB" % (occupied_size / mbfactor))
-print("2) NWB:N HDF5 file (no compression):")
+print("2) NWB HDF5 file (no compression):")
 print("   File Size     :  %.2f MB" % (file_size / mbfactor))
 print("   Reduction     :  %.2f x" % (expected_size / file_size))
-print("3) NWB:N HDF5 file (with GZIP compression):")
+print("3) NWB HDF5 file (with GZIP compression):")
 print("   File Size     :  %.5f MB" % (file_size_compressed / mbfactor))
 print("   Reduction     :  %.2f x" % (expected_size / file_size_compressed))
-print("4) NWB:N HDF5 file (large chunks):")
+print("4) NWB HDF5 file (large chunks):")
 print("   File Size     :  %.5f MB" % (file_size_largechunks / mbfactor))
 print("   Reduction     :  %.2f x" % (expected_size / file_size_largechunks))
-print("5) NWB:N HDF5 file (large chunks with compression):")
+print("5) NWB HDF5 file (large chunks with compression):")
 print("   File Size     :  %.5f MB" % (file_size_largechunks_compressed / mbfactor))
 print("   Reduction     :  %.2f x" % (expected_size / file_size_largechunks_compressed))
 
@@ -394,16 +394,16 @@ print("   Reduction     :  %.2f x" % (expected_size / file_size_largechunks_comp
 #        1) Sparse Matrix Size:
 #           Expected Size :  8000000.00 MB
 #           Occupied Size :  0.80000 MB
-#        2) NWB:N HDF5 file (no compression):
+#        2) NWB HDF5 file (no compression):
 #           File Size     :  0.89 MB
 #           Reduction     :  9035219.28 x
-#        3) NWB:N HDF5 file (with GZIP compression):
+#        3) NWB HDF5 file (with GZIP compression):
 #           File Size     :  0.88847 MB
 #           Reduction     :  9004283.79 x
-#        4) NWB:N HDF5 file (large chunks):
+#        4) NWB HDF5 file (large chunks):
 #           File Size     :  80.08531 MB
 #           Reduction     :  99893.47 x
-#        5) NWB:N HDF5 file (large chunks with compression):
+#        5) NWB HDF5 file (large chunks with compression):
 #           File Size     :  1.14671 MB
 #           Reduction     :  6976450.12 x
 #
@@ -694,7 +694,7 @@ write_test_file(filename='basic_sparse_iterwrite_multifile.nwb',
 #
 # In the above cases we used the built-in capabilities of PyNWB to perform iterative data write. To
 # gain more fine-grained control of the write process we can alternatively use PyNWB to setup the full
-# structure of our NWB:N file and then update select datasets afterwards. This approach is useful, e.g.,
+# structure of our NWB file and then update select datasets afterwards. This approach is useful, e.g.,
 # in context of parallel write and any time we need to optimize write patterns.
 #
 #
