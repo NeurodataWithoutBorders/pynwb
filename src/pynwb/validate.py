@@ -26,9 +26,9 @@ def _validate_helper(**kwargs):
     return (errors is not None and len(errors) > 0)
 
 
-def get_chached_namespaces_to_validate(path):
+def get_cached_namespaces_to_validate(path):
     """
-    Determine the most specific namespace(s) (i.e., extensions) that are chached in the given
+    Determine the most specific namespace(s) (i.e., extensions) that are cached in the given
     NWB file that should be used for validation.
 
     Example
@@ -38,9 +38,9 @@ def get_chached_namespaces_to_validate(path):
     cached in a file. This is useful, e.g., when a file was created using an extension
 
     >>> from pynwb import validate
-    >>> from pynwb.validate import get_chached_namespaces_to_validate
+    >>> from pynwb.validate import get_cached_namespaces_to_validate
     >>> path = "my_nwb_file.nwb"
-    >>> validate_namespaces, manager, chached_namespaces = get_chached_namespaces_to_validate(path)
+    >>> validate_namespaces, manager, cached_namespaces = get_cached_namespaces_to_validate(path)
     >>> with NWBHDF5IO(path, "r", manager=manager) as reader:
     >>>     errors = []
     >>>     for ns in validate_namespaces:
@@ -113,7 +113,7 @@ def main():  # noqa: C901
             continue
 
         if args.cached_namespace:
-            namespaces, manager,  ns_deps = get_chached_namespaces_to_validate(path)
+            namespaces, manager,  ns_deps = get_cached_namespaces_to_validate(path)
             if len(namespaces) > 0:
                 specloc = "cached namespace information"
             else:
