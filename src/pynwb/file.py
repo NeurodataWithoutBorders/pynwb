@@ -572,7 +572,8 @@ class NWBFile(MultiContainerInterface):
         self.__check_electrodes()
         call_docval_func(self.electrodes.add_column, kwargs)
 
-    @docval({'name': 'x', 'type': 'float', 'doc': 'the x coordinate of the position (+x is posterior)', 'default': None},
+    @docval({'name': 'x', 'type': 'float', 'doc': 'the x coordinate of the position (+x is posterior)',
+             'default': None},
             {'name': 'y', 'type': 'float', 'doc': 'the y coordinate of the position (+y is inferior)', 'default': None},
             {'name': 'z', 'type': 'float', 'doc': 'the z coordinate of the position (+z is right)', 'default': None},
             {'name': 'imp', 'type': 'float', 'doc': 'the impedance of the electrode, in ohms', 'default': None},
