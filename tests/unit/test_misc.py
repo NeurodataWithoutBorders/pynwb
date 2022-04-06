@@ -84,8 +84,7 @@ class DecompositionSeriesConstructor(TestCase):
                                     location='tetrode location',
                                     device=self.dev1)
         for i in range(4):
-            self.table.add_row(x=i, y=2.0, z=3.0, imp=-1.0, location='CA1', filtering='none', group=self.group,
-                               group_name='tetrode1')
+            self.table.add_row(location='CA1', group=self.group, group_name='tetrode1')
 
     def test_init_with_source_channels(self):
         self.make_electrode_table(self)

@@ -86,7 +86,7 @@ class NWBFileTest(TestCase):
         device = nwbfile.create_device('a')
         elecgrp = nwbfile.create_electrode_group('a', 'b', device=device, location='a')
         for i in range(4):
-            nwbfile.add_electrode(np.nan, np.nan, np.nan, np.nan, 'a', 'a', elecgrp, id=i)
+            nwbfile.add_electrode(location='a', group=elecgrp, id=i)
         with self.assertRaises(IndexError):
             nwbfile.create_electrode_table_region(list(range(6)), 'test')
 
@@ -97,7 +97,7 @@ class NWBFileTest(TestCase):
         nwbfile = NWBFile('a', 'b', datetime.now(tzlocal()))
         device = nwbfile.create_device('a')
         elecgrp = nwbfile.create_electrode_group('a', 'b', device=device, location='a')
-        nwbfile.add_electrode(np.nan, np.nan, np.nan, np.nan, 'a', 'a', elecgrp, id=0)
+        nwbfile.add_electrode(location='a', group=elecgrp, id=0)
 
         with NWBHDF5IO('electrodes_mwe.nwb', 'w') as io:
             io.write(nwbfile)
@@ -108,7 +108,7 @@ class NWBFileTest(TestCase):
                 self.assertEqual(aa.name, bb.name)
 
         for i in range(4):
-            nwbfile.add_electrode(np.nan, np.nan, np.nan, np.nan, 'a', 'a', elecgrp, id=i + 1)
+            nwbfile.add_electrode(location='a', group=elecgrp, id=i + 1)
 
         with NWBHDF5IO('electrodes_mwe.nwb', 'w') as io:
             io.write(nwbfile)
@@ -189,14 +189,12 @@ class NWBFileTest(TestCase):
         table = ElectrodeTable()
         dev1 = self.nwbfile.create_device('dev1')
         group = self.nwbfile.create_electrode_group('tetrode1', 'tetrode description', 'tetrode location', dev1)
-        table.add_row(x=1.0, y=2.0, z=3.0, imp=-1.0, location='CA1', filtering='none', group=group,
-                      group_name='tetrode1')
-        table.add_row(x=1.0, y=2.0, z=3.0, imp=-2.0, location='CA1', filtering='none', group=group,
-                      group_name='tetrode1')
-        table.add_row(x=1.0, y=2.0, z=3.0, imp=-3.0, location='CA1', filtering='none', group=group,
-                      group_name='tetrode1')
-        table.add_row(x=1.0, y=2.0, z=3.0, imp=-4.0, location='CA1', filtering='none', group=group,
-                      group_name='tetrode1')
+
+        table.add_row(location='CA1', group=group, group_name='tetrode1')
+        table.add_row(location='CA1', group=group, group_name='tetrode1')
+        table.add_row(location='CA1', group=group, group_name='tetrode1')
+        table.add_row(location='CA1', group=group, group_name='tetrode1')
+
         self.nwbfile.set_electrode_table(table)
 
         self.assertIs(self.nwbfile.electrodes, table)
@@ -358,8 +356,8 @@ Fields:
         self.nwbfile.add_unit(spike_times=[1., 2., 3.])
         device = self.nwbfile.create_device('a')
         elecgrp = self.nwbfile.create_electrode_group('a', 'b', device=device, location='a')
-        self.nwbfile.add_electrode(np.nan, np.nan, np.nan, np.nan, 'a', 'a', elecgrp, id=0)
-        self.nwbfile.add_electrode(np.nan, np.nan, np.nan, np.nan, 'b', 'b', elecgrp)
+        self.nwbfile.add_electrode(x=1.0, location='a', group=elecgrp, id=0)
+        self.nwbfile.add_electrode(x=2.0, location='b', group=elecgrp)
         elec_region = self.nwbfile.create_electrode_table_region([1], 'name')
 
         ts1 = TimeSeries('test_ts1', [0, 1, 2, 3, 4, 5], 'grams', timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5])
