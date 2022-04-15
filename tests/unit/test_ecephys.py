@@ -5,49 +5,30 @@ import numpy as np
 from pynwb.ecephys import ElectricalSeries, SpikeEventSeries, EventDetection, Clustering, EventWaveform,\
                           ClusterWaveforms, LFP, FilteredEphys, FeatureExtraction, ElectrodeGroup
 from pynwb.device import Device
-from pynwb.file import ElectrodeTable
 from pynwb.testing import TestCase
 
 from hdmf.common import DynamicTableRegion
 
-
-def make_electrode_table():
-    table = ElectrodeTable()
-    dev1 = Device('dev1')
-    group = ElectrodeGroup('tetrode1', 'tetrode description', 'tetrode location', dev1)
-    table.add_row(id=1, x=1.0, y=2.0, z=3.0, imp=-1.0, location='CA1', filtering='none',
-                  group=group, group_name='tetrode1')
-    table.add_row(id=2, x=1.0, y=2.0, z=3.0, imp=-2.0, location='CA1', filtering='none',
-                  group=group, group_name='tetrode1')
-    table.add_row(id=3, x=1.0, y=2.0, z=3.0, imp=-3.0, location='CA1', filtering='none',
-                  group=group, group_name='tetrode1')
-    table.add_row(id=4, x=1.0, y=2.0, z=3.0, imp=-4.0, location='CA1', filtering='none',
-                  group=group, group_name='tetrode1')
-    return table
+from pynwb.testing.dummy.ecephys import make_ElectricalSeries, make_electrode_table, make_ElectrodeGroup, \
+    make_Device
 
 
 class ElectricalSeriesConstructor(TestCase):
 
     def test_init(self):
-        data = list(range(10))
+        data = np.ones((10, 5))
         ts = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
-        channel_conversion = [2., 6.3]
         filtering = 'Low-pass filter at 300 Hz'
-        table = make_electrode_table()
-        region = DynamicTableRegion('electrodes', [0, 2], 'the first and third electrodes', table)
-        eS = ElectricalSeries(
-            name='test_eS',
+        eS = make_ElectricalSeries(
+            name="test_eS",
             data=data,
-            electrodes=region,
-            channel_conversion=channel_conversion,
-            filtering=filtering,
-            timestamps=ts
+            timestamps=ts,
+            rate=None,
+            filtering=filtering
         )
         self.assertEqual(eS.name, 'test_eS')
-        self.assertEqual(eS.data, data)
-        self.assertEqual(eS.electrodes, region)
+        np.testing.assert_array_equal(data, eS.data)
         self.assertEqual(eS.timestamps, ts)
-        self.assertEqual(eS.channel_conversion, [2., 6.3])
         self.assertEqual(eS.filtering, filtering)
 
     def test_link(self):
@@ -62,24 +43,15 @@ class ElectricalSeriesConstructor(TestCase):
         self.assertEqual(ts3.timestamps, [0.0, 0.1, 0.2, 0.3, 0.4, 0.5])
 
     def test_invalid_data_shape(self):
-        table = make_electrode_table()
-        region = DynamicTableRegion('electrodes', [0, 2], 'the first and third electrodes', table)
         with self.assertRaisesWith(ValueError, ("ElectricalSeries.__init__: incorrect shape for 'data' (got '(2, 2, 2, "
                                                 "2)', expected '((None,), (None, None), (None, None, None))')")):
-            ElectricalSeries('test_ts1', np.ones((2, 2, 2, 2)), region, timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5])
+            make_ElectricalSeries(data=np.ones((2, 2, 2, 2)))
 
     def test_dimensions_warning(self):
-        table = make_electrode_table()
-        region = DynamicTableRegion('electrodes', [0, 2], 'the first and third electrodes', table)
         with warnings.catch_warnings(record=True) as w:
             # Cause all warnings to always be triggered.
             warnings.simplefilter("always")
-            ElectricalSeries(
-                name="test_ts1",
-                data=np.ones((6, 3)),
-                electrodes=region,
-                timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5]
-            )
+            make_ElectricalSeries(data=np.ones((2, 6))),
             self.assertEqual(len(w), 1)
             assert (
                 "The second dimension of data does not match the length of electrodes. Your data may be transposed."
@@ -88,11 +60,8 @@ class ElectricalSeriesConstructor(TestCase):
         with warnings.catch_warnings(record=True) as w:
             # Cause all warnings to always be triggered.
             warnings.simplefilter("always")
-            ElectricalSeries(
-                name="test_ts1",
-                data=np.ones((2, 6)),
-                electrodes=region,
-                rate=30000.,
+            make_ElectricalSeries(
+                data=np.ones((5, 10))
             )
             self.assertEqual(len(w), 1)
             assert (
@@ -125,12 +94,18 @@ class SpikeEventSeriesConstructor(TestCase):
 class ElectrodeGroupConstructor(TestCase):
 
     def test_init(self):
-        dev1 = Device('dev1')
-        group = ElectrodeGroup('elec1', 'electrode description', 'electrode location', dev1, (1, 2, 3))
+        device = make_Device()
+        group = make_ElectrodeGroup(
+            name="elec1",
+            description='electrode description',
+            location='electrode location',
+            device=device,
+            position=(1, 2, 3),
+        )
         self.assertEqual(group.name, 'elec1')
         self.assertEqual(group.description, 'electrode description')
         self.assertEqual(group.location, 'electrode location')
-        self.assertEqual(group.device, dev1)
+        self.assertEqual(group.device, device)
         self.assertEqual(group.position, (1, 2, 3))
 
     def test_init_position_none(self):
@@ -150,12 +125,8 @@ class ElectrodeGroupConstructor(TestCase):
 
 class EventDetectionConstructor(TestCase):
 
-    def test_init(self):
-        data = list(range(10))
-        ts = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
-        table = make_electrode_table()
-        region = DynamicTableRegion('electrodes', [0, 2], 'the first and third electrodes', table)
-        eS = ElectricalSeries('test_eS', data, region, timestamps=ts)
+    def test_event_detection(self):
+        eS = make_ElectricalSeries()
         eD = EventDetection('detection_method', eS, (1, 2, 3), (0.1, 0.2, 0.3))
         self.assertEqual(eD.detection_method, 'detection_method')
         self.assertEqual(eD.source_electricalseries, eS)
@@ -215,9 +186,7 @@ class LFPTest(TestCase):
 
     def test_add_electrical_series(self):
         lfp = LFP()
-        table = make_electrode_table()
-        region = DynamicTableRegion('electrodes', [0, 2], 'the first and third electrodes', table)
-        eS = ElectricalSeries('test_eS', [0, 1, 2, 3], region, timestamps=[0.1, 0.2, 0.3, 0.4])
+        eS = make_ElectricalSeries(name="test_eS")
         lfp.add_electrical_series(eS)
         self.assertEqual(lfp.electrical_series.get('test_eS'), eS)
 
@@ -225,18 +194,14 @@ class LFPTest(TestCase):
 class FilteredEphysTest(TestCase):
 
     def test_init(self):
-        table = make_electrode_table()
-        region = DynamicTableRegion('electrodes', [0, 2], 'the first and third electrodes', table)
-        eS = ElectricalSeries('test_eS', [0, 1, 2, 3], region, timestamps=[0.1, 0.2, 0.3, 0.4])
+        eS = make_ElectricalSeries(name="test_eS")
         fe = FilteredEphys(eS)
         self.assertEqual(fe.electrical_series.get('test_eS'), eS)
         self.assertEqual(fe['test_eS'], fe.electrical_series.get('test_eS'))
 
     def test_add_electrical_series(self):
         fe = FilteredEphys()
-        table = make_electrode_table()
-        region = DynamicTableRegion('electrodes', [0, 2], 'the first and third electrodes', table)
-        eS = ElectricalSeries('test_eS', [0, 1, 2, 3], region, timestamps=[0.1, 0.2, 0.3, 0.4])
+        eS = make_ElectricalSeries(name="test_eS")
         fe.add_electrical_series(eS)
         self.assertEqual(fe.electrical_series.get('test_eS'), eS)
         self.assertEqual(fe['test_eS'], fe.electrical_series.get('test_eS'))
