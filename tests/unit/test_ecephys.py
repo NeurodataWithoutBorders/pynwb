@@ -9,8 +9,8 @@ from pynwb.testing import TestCase
 
 from hdmf.common import DynamicTableRegion
 
-from pynwb.testing.dummy.ecephys import make_ElectricalSeries, make_electrode_table, make_ElectrodeGroup, \
-    make_Device
+from pynwb.testing.dummy.ecephys import make_ElectricalSeries, make_ElectrodeTable, make_ElectrodeGroup, \
+    make_Device, make_SpikeEventSeries
 
 
 class ElectricalSeriesConstructor(TestCase):
@@ -32,7 +32,7 @@ class ElectricalSeriesConstructor(TestCase):
         self.assertEqual(eS.filtering, filtering)
 
     def test_link(self):
-        table = make_electrode_table()
+        table = make_ElectrodeTable()
         region = DynamicTableRegion('electrodes', [0, 2], 'the first and third electrodes', table)
         ts1 = ElectricalSeries('test_ts1', [0, 1, 2, 3, 4, 5], region, timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5])
         ts2 = ElectricalSeries('test_ts2', ts1, region, timestamps=ts1)
@@ -73,22 +73,21 @@ class ElectricalSeriesConstructor(TestCase):
 class SpikeEventSeriesConstructor(TestCase):
 
     def test_init(self):
-        table = make_electrode_table()
-        region = DynamicTableRegion('electrodes', [1, 3], 'the second and fourth electrodes', table)
-        data = ((1, 1, 1), (2, 2, 2))
         timestamps = np.arange(2)
-        sES = SpikeEventSeries('test_sES', data, timestamps, region)
+        data = ((1, 1, 1), (2, 2, 2))
+        sES = make_SpikeEventSeries(
+            name='test_sES',
+            data=data,
+            timestamps=timestamps,
+        )
         self.assertEqual(sES.name, 'test_sES')
-        # self.assertListEqual(sES.data, data)
         np.testing.assert_array_equal(sES.data, data)
         np.testing.assert_array_equal(sES.timestamps, timestamps)
 
     def test_no_rate(self):
-        table = make_electrode_table()
-        region = DynamicTableRegion('electrodes', [1, 3], 'the second and fourth electrodes', table)
-        data = ((1, 1, 1), (2, 2, 2))
+
         with self.assertRaises(TypeError):
-            SpikeEventSeries('test_sES', data, region, rate=1.)
+            make_SpikeEventSeries(rate=1.)
 
 
 class ElectrodeGroupConstructor(TestCase):
@@ -138,7 +137,7 @@ class EventDetectionConstructor(TestCase):
 class EventWaveformConstructor(TestCase):
 
     def test_init(self):
-        table = make_electrode_table()
+        table = make_ElectrodeTable()
         region = DynamicTableRegion('electrodes', [0, 2], 'the first and third electrodes', table)
         sES = SpikeEventSeries('test_sES', list(range(10)), list(range(10)), region)
 
@@ -211,7 +210,7 @@ class FeatureExtractionConstructor(TestCase):
 
     def test_init(self):
         event_times = [1.9, 3.5]
-        table = make_electrode_table()
+        table = make_ElectrodeTable()
         region = DynamicTableRegion('electrodes', [0, 2], 'the first and third electrodes', table)
         description = ['desc1', 'desc2', 'desc3']
         features = [[[0, 1, 2], [3, 4, 5]], [[6, 7, 8], [9, 10, 11]]]
@@ -222,7 +221,7 @@ class FeatureExtractionConstructor(TestCase):
 
     def test_invalid_init_mismatched_event_times(self):
         event_times = []  # Need 1 event time but give 0
-        table = make_electrode_table()
+        table = make_ElectrodeTable()
         electrodes = DynamicTableRegion('electrodes', [0, 2], 'the first and third electrodes', table)
         description = ['desc1', 'desc2', 'desc3']
         features = [[[0, 1, 2], [3, 4, 5]]]
@@ -230,7 +229,7 @@ class FeatureExtractionConstructor(TestCase):
 
     def test_invalid_init_mismatched_electrodes(self):
         event_times = [1]
-        table = make_electrode_table()
+        table = make_ElectrodeTable()
         electrodes = DynamicTableRegion('electrodes', [0], 'the first electrodes', table)
         description = ['desc1', 'desc2', 'desc3']
         features = [[[0, 1, 2], [3, 4, 5]]]
@@ -238,7 +237,7 @@ class FeatureExtractionConstructor(TestCase):
 
     def test_invalid_init_mismatched_description(self):
         event_times = [1]
-        table = make_electrode_table()
+        table = make_ElectrodeTable()
         electrodes = DynamicTableRegion('electrodes', [0, 2], 'the first and third electrodes', table)
         description = ['desc1', 'desc2', 'desc3', 'desc4']  # Need 3 descriptions but give 4
         features = [[[0, 1, 2], [3, 4, 5]]]
@@ -246,7 +245,7 @@ class FeatureExtractionConstructor(TestCase):
 
     def test_invalid_init_mismatched_description2(self):
         event_times = [1]
-        table = make_electrode_table()
+        table = make_ElectrodeTable()
         electrodes = DynamicTableRegion('electrodes', [0, 2], 'the first and third electrodes', table)
         description = ['desc1', 'desc2', 'desc3']
         features = [[0, 1, 2], [3, 4, 5]]  # Need 3D feature array but give only 2D array

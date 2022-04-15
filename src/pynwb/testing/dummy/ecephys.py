@@ -29,7 +29,7 @@ def make_ElectrodeGroup(
         )
 
 
-def make_electrode_table(n_rows=5, group=make_ElectrodeGroup()):
+def make_ElectrodeTable(n_rows=5, group=make_ElectrodeGroup()):
     table = ElectrodeTable()
     for i in range(n_rows):
         table.add_row(
@@ -45,7 +45,7 @@ def make_electrode_table(n_rows=5, group=make_ElectrodeGroup()):
     return table
 
 
-def make_electrodes(n_electrodes=5, table=make_electrode_table(n_rows=5)):
+def make_electrodes(n_electrodes=5, table=make_ElectrodeTable(n_rows=5)):
     return DynamicTableRegion(
         "electrodes", list(range(n_electrodes)), "the first and third electrodes", table
     )
@@ -75,17 +75,13 @@ def make_SpikeEventSeries(
     name="ElectricalSeries",
     description="description",
     data=np.ones((10, 5)),
-    rate=30000.0,
-    timestamps=None,
+    timestamps=(1., 2., 3, 4., 5.),
     electrodes=make_electrodes(),
-    filtering=None,
 ):
     return SpikeEventSeries(
         name=name,
         description=description,
         data=data,
-        rate=rate,
         timestamps=timestamps,
         electrodes=electrodes,
-        filtering=filtering,
     )
