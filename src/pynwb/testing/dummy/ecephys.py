@@ -18,11 +18,11 @@ electrode_group_name = name_electrode_group()
 
 
 def make_ElectrodeGroup(
-        name=next(electrode_group_name),
-        description="description",
-        location="location",
-        device=make_Device(),
-        position=None,
+    name=next(electrode_group_name),
+    description="description",
+    location="location",
+    device=make_Device(),
+    position=None,
     ):
         return ElectrodeGroup(
             name=name, description=description, location=location, device=device, position=position,
