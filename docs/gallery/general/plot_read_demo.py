@@ -185,14 +185,15 @@ for unit in range(3):
 ####################
 # Access Trials
 # --------
-# Trials are stored as :py:class:`pynwb.epoch.TimeIntervals` object which is a subclass
-# of :py:class:`pynwb.core.DynamicTable`. :py:class:`pynwb.core.DynamicTable` objects are used to store metadata
-# about each trial in a tabular form, where each row represents a trial and has a start time, stop time, and additional metadata.
+# Trials are stored as :py:class:`~pynwb.epoch.TimeIntervals` object which is a subclass
+# of :py:class:`~hdmf.common.table.DynamicTable`. :py:class:`~hdmf.common.table.DynamicTable` objects are used to store
+# metadata about each trial in a tabular form, where each row represents a trial and has a start time, stop time,
+# and additional metadata.
 #
 # .. seealso::
 #     You can learn more about trials in the :ref:`basic_trials` tutorial section.
 #
-# Similarly to :py:class:`~pynwb.misc.Units` we can view trials as a :py:class:`~pandas.DataFrame`.
+# Similarly to :py:class:`~pynwb.misc.Units` we can view trials as a :py:class:`pandas.DataFrame`.
 
 trials_df = nwbfile.trials.to_dataframe()
 print(trials_df)
@@ -222,7 +223,7 @@ for time in stim_on_times_landscapes[:3]:
 # more interactive, visual way.
 # You can use `NWBWidgets <https://github.com/NeurodataWithoutBorders/nwb-jupyter-widgets>`_,
 # a package containing interactive widgets for visualizing NWB data,
-# or you can use the `HDFView <https://www.hdfgroup.org/downloads/hdfview`_
+# or you can use the `HDFView <https://www.hdfgroup.org/downloads/hdfview>`_
 # tool, which can open any generic HDF5 file, which an NWB file is.
 #
 # NWBWidgets
