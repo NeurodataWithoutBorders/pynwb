@@ -5,10 +5,17 @@ Reading and Exploring an NWB File
 ==================================
 
 This tutorial will demonstrate how to read, explore and do basic visualizations with
-an NWB File downloaded from the downloaded from the `DANDI <https://gui.dandiarchive.org/#/>`_ neurophysiology data archive.
+an NWB File using different tools.
 
 An :py:class:`~pynwb.file.NWBFile` represents a single session of an experiment.
 It contains all the data of that session and the metadata required to understand the data.
+
+We will demonstrate how to use `DANDI <https://gui.dandiarchive.org/#/>`_ neurophysiology data archive to access
+the data: (1) by downloading it to your computer, (2) streaming it from S3.
+
+We will briefly show tools for exploring NWB Files interactively, and refer the reader to
+`Analysis and Visualization Tools <https://nwb-overview.readthedocs.io/en/latest/tools/tools_home.html#analysis-and-visualization-tools>`_
+documentation for more details on the available tools.
 
 
 .. seealso::
@@ -23,13 +30,18 @@ from pynwb import NWBHDF5IO
 
 import matplotlib.pyplot as plt
 ####################
-# Download the data
+# Read the data
 # --------
+# We will use the `DANDI <https://gui.dandiarchive.org/#/>`_ neurophysiology data archive
+# to access an NWB File. We will use data from one session of an experiment by
+# `Chandravadia et al. (2020) <https://www.nature.com/articles/s41597-020-0415-9>`_, where
+# the authors recorded single neuron activity from the medial temporal lobes of human subjects
+# while they performed a recognition memory task.
 #
-# First, we will download an NWB data file from the `DANDI <https://gui.dandiarchive.org/#/>`_ neurophysiology data archive.
-#
-# We will use data from one session of an experiment by `Chandravadia et al. (2020) <https://www.nature.com/articles/s41597-020-0415-9>`_, where
-# the authors recorded single neuron activity from the medial temporal lobes of human subjects while they performed a recognition memory task.
+# Download the data
+# ^^^^^^
+# First, we will demonstrate how to download an NWB data file from `DANDI <https://gui.dandiarchive.org/#/>`_
+# to your machine.
 #
 # 1. Go to the DANDI archive and open `this <https://gui.dandiarchive.org/#/dandiset/000004/draft>`_ dataset
 # 2. List the files in this dataset by clicking the "Files" button in Dandiset Actions (top right column within the page).
@@ -54,6 +66,50 @@ import matplotlib.pyplot as plt
 #   :alt: selecting a folder on dandi
 #   :align: center
 #
+# Stream the data
+# ^^^^^^
+#
+# Next, we will demonstrate how to stream the data from the DANDI archive without
+# having to download it to your machine.
+# Streaming data requires having HDF5 installed with the ROS3 (read-only S3) driver.
+# You can install from `conda-forge <https://conda-forge.org>`_ using ``conda``.
+# You might need to first uninstall a currently installed version of ``h5py``.
+#
+# .. code-block:: bash
+#
+#    $ pip uninstall h5py
+#    $ conda install -c conda-forge "h5py>=3.2"
+#
+# We can access the data stored in an S3 bucket using the DANDI API,
+# which can be installed from pip:
+#
+# .. code-block:: bash
+#
+#    $ pip install -U dandi
+#
+# .. seealso::
+#     You can learn more about streaming data in the :ref:`streaming` tutorial.
+#
+# Then, we will use the ``DandiAPIClient`` to obtain the S3 URL that points to the NWB File
+# stored in S3. We will need the identifier of the dataset (``dandiset_id``) and the path
+# to the NWB File.
+# We can read these from the DANDI archive URL where ``dandiset_id`` is "000004" and
+# file is located in "sub-P11HMH" folder.
+#
+# .. image:: ../../_static/demo_dandi_url.png
+#   :width: 700
+#   :alt: dandi url explained
+#   :align: center
+
+from dandi.dandiapi import DandiAPIClient
+
+dandiset_id = "000004"
+filepath = "sub-P11HMH/sub-P11HMH_ses-20061101_ecephys+image.nwb"
+with DandiAPIClient() as client:
+    asset = client.get_dandiset(dandiset_id, 'draft').get_asset_by_path(filepath)
+    s3_path = asset.get_content_url(follow_redirects=1, strip_query=True)
+
+####################
 # Using NWBHDF5IO
 # ------------------------------
 #
@@ -62,12 +118,11 @@ import matplotlib.pyplot as plt
 # storage format, a popular, hierarchical format for storing large-scale scientific data.
 #
 # Use the ``read`` method to read the data into a :py:class:`~pynwb.file.NWBFile` object.
+# The ``file_path`` can be the path that points to the downloaded file on your computer or
+# it can be an S3 URL.
 
-# Change the string below to the path of the file on your computer
-file_path = 'sub-P11HMH_ses-20061101_ecephys+image.nwb'
-
-# Open the file in read mode "r"
-io = NWBHDF5IO(file_path, mode="r")
+# Open the file in read mode "r", and specify the driver as "ros3" for S3 files
+io = NWBHDF5IO(s3_path, mode="r", driver="ros3")
 nwbfile = io.read()
 
 ####################
