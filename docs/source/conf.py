@@ -101,7 +101,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'PyNWB'
-copyright = u'2017-2021, Neurodata Without Borders'
+copyright = u'2017-2022, Neurodata Without Borders'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -162,6 +162,12 @@ html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 html_theme_options = {
     "style_nav_header_background": "#AFD2E8"
 }
+
+# These paths are either relative to html_static_path
+# or fully qualified paths (eg. https://...)
+html_css_files = [
+    'css/custom.css',
+]
 
 # Add any paths that contain custom themes here, relative to this directory.
 # html_theme_path = []
