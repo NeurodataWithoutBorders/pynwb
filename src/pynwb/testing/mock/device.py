@@ -11,7 +11,7 @@ def name_device():
 device_name = name_device()
 
 
-def make_Device(
+def mock_Device(
     name=next(device_name),
     description="description",
     manufacturer=None,

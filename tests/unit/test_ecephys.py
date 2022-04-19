@@ -9,8 +9,8 @@ from pynwb.testing import TestCase
 
 from hdmf.common import DynamicTableRegion
 
-from pynwb.testing.dummy.ecephys import make_ElectricalSeries, make_ElectrodeTable, make_ElectrodeGroup, \
-    make_Device, make_SpikeEventSeries
+from pynwb.testing.mock.ecephys import mock_ElectricalSeries, mock_ElectrodeTable, mock_ElectrodeGroup, \
+    mock_Device, mock_SpikeEventSeries
 
 
 class ElectricalSeriesConstructor(TestCase):
@@ -19,7 +19,7 @@ class ElectricalSeriesConstructor(TestCase):
         data = np.ones((10, 5))
         ts = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
         filtering = 'Low-pass filter at 300 Hz'
-        eS = make_ElectricalSeries(
+        eS = mock_ElectricalSeries(
             name="test_eS",
             data=data,
             timestamps=ts,
@@ -32,7 +32,7 @@ class ElectricalSeriesConstructor(TestCase):
         self.assertEqual(eS.filtering, filtering)
 
     def test_link(self):
-        table = make_ElectrodeTable()
+        table = mock_ElectrodeTable()
         region = DynamicTableRegion('electrodes', [0, 2], 'the first and third electrodes', table)
         ts1 = ElectricalSeries('test_ts1', [0, 1, 2, 3, 4, 5], region, timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5])
         ts2 = ElectricalSeries('test_ts2', ts1, region, timestamps=ts1)
@@ -45,13 +45,13 @@ class ElectricalSeriesConstructor(TestCase):
     def test_invalid_data_shape(self):
         with self.assertRaisesWith(ValueError, ("ElectricalSeries.__init__: incorrect shape for 'data' (got '(2, 2, 2, "
                                                 "2)', expected '((None,), (None, None), (None, None, None))')")):
-            make_ElectricalSeries(data=np.ones((2, 2, 2, 2)))
+            mock_ElectricalSeries(data=np.ones((2, 2, 2, 2)))
 
     def test_dimensions_warning(self):
         with warnings.catch_warnings(record=True) as w:
             # Cause all warnings to always be triggered.
             warnings.simplefilter("always")
-            make_ElectricalSeries(data=np.ones((2, 6))),
+            mock_ElectricalSeries(data=np.ones((2, 6))),
             self.assertEqual(len(w), 1)
             assert (
                 "The second dimension of data does not match the length of electrodes. Your data may be transposed."
@@ -60,7 +60,7 @@ class ElectricalSeriesConstructor(TestCase):
         with warnings.catch_warnings(record=True) as w:
             # Cause all warnings to always be triggered.
             warnings.simplefilter("always")
-            make_ElectricalSeries(
+            mock_ElectricalSeries(
                 data=np.ones((5, 10))
             )
             self.assertEqual(len(w), 1)
@@ -75,7 +75,7 @@ class SpikeEventSeriesConstructor(TestCase):
     def test_init(self):
         timestamps = np.arange(2)
         data = ((1, 1, 1), (2, 2, 2))
-        sES = make_SpikeEventSeries(
+        sES = mock_SpikeEventSeries(
             name='test_sES',
             data=data,
             timestamps=timestamps,
@@ -87,14 +87,14 @@ class SpikeEventSeriesConstructor(TestCase):
     def test_no_rate(self):
 
         with self.assertRaises(TypeError):
-            make_SpikeEventSeries(rate=1.)
+            mock_SpikeEventSeries(rate=1.)
 
 
 class ElectrodeGroupConstructor(TestCase):
 
     def test_init(self):
-        device = make_Device()
-        group = make_ElectrodeGroup(
+        device = mock_Device()
+        group = mock_ElectrodeGroup(
             name="elec1",
             description='electrode description',
             location='electrode location',
@@ -125,7 +125,7 @@ class ElectrodeGroupConstructor(TestCase):
 class EventDetectionConstructor(TestCase):
 
     def test_event_detection(self):
-        eS = make_ElectricalSeries()
+        eS = mock_ElectricalSeries()
         eD = EventDetection('detection_method', eS, (1, 2, 3), (0.1, 0.2, 0.3))
         self.assertEqual(eD.detection_method, 'detection_method')
         self.assertEqual(eD.source_electricalseries, eS)
@@ -137,7 +137,7 @@ class EventDetectionConstructor(TestCase):
 class EventWaveformConstructor(TestCase):
 
     def test_init(self):
-        table = make_ElectrodeTable()
+        table = mock_ElectrodeTable()
         region = DynamicTableRegion('electrodes', [0, 2], 'the first and third electrodes', table)
         sES = SpikeEventSeries('test_sES', list(range(10)), list(range(10)), region)
 
@@ -185,7 +185,7 @@ class LFPTest(TestCase):
 
     def test_add_electrical_series(self):
         lfp = LFP()
-        eS = make_ElectricalSeries(name="test_eS")
+        eS = mock_ElectricalSeries(name="test_eS")
         lfp.add_electrical_series(eS)
         self.assertEqual(lfp.electrical_series.get('test_eS'), eS)
 
@@ -193,14 +193,14 @@ class LFPTest(TestCase):
 class FilteredEphysTest(TestCase):
 
     def test_init(self):
-        eS = make_ElectricalSeries(name="test_eS")
+        eS = mock_ElectricalSeries(name="test_eS")
         fe = FilteredEphys(eS)
         self.assertEqual(fe.electrical_series.get('test_eS'), eS)
         self.assertEqual(fe['test_eS'], fe.electrical_series.get('test_eS'))
 
     def test_add_electrical_series(self):
         fe = FilteredEphys()
-        eS = make_ElectricalSeries(name="test_eS")
+        eS = mock_ElectricalSeries(name="test_eS")
         fe.add_electrical_series(eS)
         self.assertEqual(fe.electrical_series.get('test_eS'), eS)
         self.assertEqual(fe['test_eS'], fe.electrical_series.get('test_eS'))
@@ -210,7 +210,7 @@ class FeatureExtractionConstructor(TestCase):
 
     def test_init(self):
         event_times = [1.9, 3.5]
-        table = make_ElectrodeTable()
+        table = mock_ElectrodeTable()
         region = DynamicTableRegion('electrodes', [0, 2], 'the first and third electrodes', table)
         description = ['desc1', 'desc2', 'desc3']
         features = [[[0, 1, 2], [3, 4, 5]], [[6, 7, 8], [9, 10, 11]]]
@@ -221,7 +221,7 @@ class FeatureExtractionConstructor(TestCase):
 
     def test_invalid_init_mismatched_event_times(self):
         event_times = []  # Need 1 event time but give 0
-        table = make_ElectrodeTable()
+        table = mock_ElectrodeTable()
         electrodes = DynamicTableRegion('electrodes', [0, 2], 'the first and third electrodes', table)
         description = ['desc1', 'desc2', 'desc3']
         features = [[[0, 1, 2], [3, 4, 5]]]
@@ -229,7 +229,7 @@ class FeatureExtractionConstructor(TestCase):
 
     def test_invalid_init_mismatched_electrodes(self):
         event_times = [1]
-        table = make_ElectrodeTable()
+        table = mock_ElectrodeTable()
         electrodes = DynamicTableRegion('electrodes', [0], 'the first electrodes', table)
         description = ['desc1', 'desc2', 'desc3']
         features = [[[0, 1, 2], [3, 4, 5]]]
@@ -237,7 +237,7 @@ class FeatureExtractionConstructor(TestCase):
 
     def test_invalid_init_mismatched_description(self):
         event_times = [1]
-        table = make_ElectrodeTable()
+        table = mock_ElectrodeTable()
         electrodes = DynamicTableRegion('electrodes', [0, 2], 'the first and third electrodes', table)
         description = ['desc1', 'desc2', 'desc3', 'desc4']  # Need 3 descriptions but give 4
         features = [[[0, 1, 2], [3, 4, 5]]]
@@ -245,7 +245,7 @@ class FeatureExtractionConstructor(TestCase):
 
     def test_invalid_init_mismatched_description2(self):
         event_times = [1]
-        table = make_ElectrodeTable()
+        table = mock_ElectrodeTable()
         electrodes = DynamicTableRegion('electrodes', [0, 2], 'the first and third electrodes', table)
         description = ['desc1', 'desc2', 'desc3']
         features = [[0, 1, 2], [3, 4, 5]]  # Need 3D feature array but give only 2D array

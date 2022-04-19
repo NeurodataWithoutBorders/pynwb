@@ -1,35 +1,31 @@
-import itertools
-
 import numpy as np
 
 from pynwb.file import ElectrodeTable
 
 from pynwb.ecephys import ElectricalSeries, ElectrodeGroup, SpikeEventSeries
 from hdmf.common.table import DynamicTableRegion
-from .device import make_Device
+from .device import mock_Device
+from .utils import name_generator
 
 
-def name_electrode_group():
-    for i in itertools.count(start=1):
-        yield f"ElectrodeGroup{i}"
 
 
-electrode_group_name = name_electrode_group()
+electrode_group_name = name_generator("ElectrodeGroup")
 
 
-def make_ElectrodeGroup(
+def mock_ElectrodeGroup(
     name=next(electrode_group_name),
     description="description",
     location="location",
-    device=make_Device(),
+    device=mock_Device(),
     position=None,
-    ):
-        return ElectrodeGroup(
-            name=name, description=description, location=location, device=device, position=position,
-        )
+):
+    return ElectrodeGroup(
+        name=name, description=description, location=location, device=device, position=position,
+    )
 
 
-def make_ElectrodeTable(n_rows=5, group=make_ElectrodeGroup()):
+def mock_ElectrodeTable(n_rows=5, group=mock_ElectrodeGroup()):
     table = ElectrodeTable()
     for i in range(n_rows):
         table.add_row(
@@ -45,19 +41,19 @@ def make_ElectrodeTable(n_rows=5, group=make_ElectrodeGroup()):
     return table
 
 
-def make_electrodes(n_electrodes=5, table=make_ElectrodeTable(n_rows=5)):
+def mock_electrodes(n_electrodes=5, table=mock_ElectrodeTable(n_rows=5)):
     return DynamicTableRegion(
         "electrodes", list(range(n_electrodes)), "the first and third electrodes", table
     )
 
 
-def make_ElectricalSeries(
+def mock_ElectricalSeries(
     name="ElectricalSeries",
     description="description",
     data=np.ones((10, 5)),
     rate=30000.0,
     timestamps=None,
-    electrodes=make_electrodes(),
+    electrodes=mock_electrodes(),
     filtering="filtering",
 ):
     return ElectricalSeries(
@@ -71,12 +67,12 @@ def make_ElectricalSeries(
     )
 
 
-def make_SpikeEventSeries(
+def mock_SpikeEventSeries(
     name="ElectricalSeries",
     description="description",
     data=np.ones((10, 5)),
     timestamps=(1., 2., 3, 4., 5.),
-    electrodes=make_electrodes(),
+    electrodes=mock_electrodes(),
 ):
     return SpikeEventSeries(
         name=name,
