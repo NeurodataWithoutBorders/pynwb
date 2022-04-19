@@ -77,7 +77,7 @@ nwbfile = io.read()
 # Data representing stimuli that were presented to the experimental subject are stored in
 # :py:class:`~pynwb.file.NWBFile.stimulus` within the :py:class:`~pynwb.file.NWBFile` object.
 
-print(nwbfile.stimulus)
+nwbfile.stimulus
 
 ####################
 # ``NWBFile.stimulus`` is a dictionary that can contain PyNWB objects representing
@@ -85,7 +85,7 @@ print(nwbfile.stimulus)
 # In this file, ``NWBFile.stimulus`` contains a single key "StimulusPresentation" with an
 # :py:class:`~pynwb.image.OpticalSeries` object representing what images were shown to the subject and at what times.
 
-print(nwbfile.stimulus["StimulusPresentation"])
+nwbfile.stimulus["StimulusPresentation"]
 
 ####################
 # Lazy loading of datasets
@@ -103,7 +103,7 @@ all_stimulus_data = stimulus_presentation.data[:]
 # The second and third dimensions represent x and y.
 # The fourth dimension represents the RGB value (length of 3) for color images.
 
-print(stimulus_presentation.data.shape)
+stimulus_presentation.data.shape
 
 ####################
 # This :py:class:`~pynwb.image.OpticalSeries` data contains 200 images of size 400x300 pixels with three channels (red, green, and blue).
@@ -138,14 +138,14 @@ units = nwbfile.units
 # We can view the single unit data as a :py:class:`~pandas.DataFrame`.
 
 units_df = units.to_dataframe()
-print(units_df)
+units_df
 
 ####################
 # To access the spike times of the first single unit, index nwb.units with the column
 # name "spike_times" and then the row index, 0. All times in NWB are stored in seconds
 # relative to the session start time.
 
-print(units["spike_times"][0])
+units["spike_times"][0]
 
 ####################
 # Visualize spiking activity relative to stimulus onset
@@ -196,7 +196,7 @@ for unit in range(3):
 # Similarly to :py:class:`~pynwb.misc.Units` we can view trials as a :py:class:`pandas.DataFrame`.
 
 trials_df = nwbfile.trials.to_dataframe()
-print(trials_df)
+trials_df
 
 ####################
 # The :py:class:`~pynwb.file.NWBFile.stimulus` can be mapped one to one to each row (trial)
