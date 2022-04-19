@@ -4,11 +4,26 @@ import numpy as np
 
 from pynwb.base import TimeSeries
 from pynwb.image import ImageSeries
-from pynwb.ophys import (TwoPhotonSeries, RoiResponseSeries, DfOverF, Fluorescence, PlaneSegmentation,
-                         ImageSegmentation, OpticalChannel, ImagingPlane, MotionCorrection, CorrectedImageStack)
+from pynwb.ophys import (
+    TwoPhotonSeries,
+    RoiResponseSeries,
+    DfOverF,
+    Fluorescence,
+    PlaneSegmentation,
+    ImageSegmentation,
+    OpticalChannel,
+    ImagingPlane,
+    MotionCorrection,
+    CorrectedImageStack
+)
 from pynwb.testing import TestCase
-from pynwb.testing.mock.ophys import mock_ImagingPlane, mock_TwoPhotonSeries, mock_RoiResponseSeries, \
-    mock_PlaneSegmentation, mock_OpticalChannel
+from pynwb.testing.mock.ophys import (
+    mock_ImagingPlane,
+    mock_TwoPhotonSeries,
+    mock_RoiResponseSeries,
+    mock_PlaneSegmentation,
+    mock_OpticalChannel,
+)
 from pynwb.testing.mock.device import mock_Device
 
 
