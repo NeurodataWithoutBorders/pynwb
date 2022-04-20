@@ -1,5 +1,8 @@
 # PyNWB Changelog
 
+### Breaking changes:
+- The arguments x, y, z, imp, location, filtering are no longer required in the electrodes table.
+
 ## PyNWB 2.0.1 (March 16, 2022)
 
 ### Bug fixes:
