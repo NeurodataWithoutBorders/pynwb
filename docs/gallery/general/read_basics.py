@@ -139,11 +139,25 @@ nwbfile.stimulus
 nwbfile.stimulus["StimulusPresentation"]
 
 ####################
+# .. code-block:: none
 #
-# .. image:: ../../_static/demo_nwbfile_stimulus.png
-#   :width: 700
-#   :alt: NWBFile stimulus output
-#   :align: center
+#     {'StimulusPresentation': StimulusPresentation pynwb.image.OpticalSeries at 0x140385583638560
+#     Fields:
+#       comments: no comments
+#       conversion: 1.0
+#       data: <HDF5 dataset "data": shape (200, 400, 300, 3), type "|u1">
+#       description: no description
+#       dimension: <HDF5 dataset "dimension": shape (3,), type "<i4">
+#       distance: 0.7
+#       field_of_view: <HDF5 dataset "field_of_view": shape (3,), type "<f8">
+#       format: raw
+#       interval: 1
+#       orientation: lower left
+#       resolution: -1.0
+#       timestamps: <HDF5 dataset "timestamps": shape (200,), type "<f8">
+#       timestamps_unit: seconds
+#       unit: meters
+#     }
 #
 #
 # Lazy loading of datasets
