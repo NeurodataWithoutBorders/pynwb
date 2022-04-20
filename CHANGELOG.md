@@ -1,5 +1,11 @@
 # PyNWB Changelog
 
+## PyNWB 2.1.0 (Upcoming)
+
+### Breaking changes:
+- Restrict `SpatialSeries.data` to have no more than 3 columns (#1455)
+
+
 ## PyNWB 2.0.1 (March 16, 2022)
 
 ### Bug fixes:
