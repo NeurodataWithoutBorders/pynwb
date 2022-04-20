@@ -96,10 +96,6 @@ import matplotlib.pyplot as plt
 # We can read these from the DANDI archive URL where ``dandiset_id`` is "000004" and
 # file is located in "sub-P11HMH" folder.
 #
-# .. image:: ../../_static/demo_dandi_url.png
-#   :width: 700
-#   :alt: dandi url explained
-#   :align: center
 
 from dandi.dandiapi import DandiAPIClient
 
