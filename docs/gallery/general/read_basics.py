@@ -139,6 +139,13 @@ nwbfile.stimulus
 nwbfile.stimulus["StimulusPresentation"]
 
 ####################
+#
+# .. image:: ../../_static/demo_nwbfile_stimulus.png
+#   :width: 700
+#   :alt: NWBFile stimulus output
+#   :align: center
+#
+#
 # Lazy loading of datasets
 # --------
 # Data arrays are read passively from the NWB file.
@@ -173,6 +180,13 @@ image = image[..., ::-1]
 plt.imshow(image, aspect='auto')
 
 ####################
+#
+# .. image:: ../../_static/demo_nwbfile_stimulus_plot_1.png
+#   :width: 500
+#   :alt: NWBFile stimulus image
+#   :align: center
+#
+#
 # Access single unit data
 # --------
 # Data and metadata about sorted single units are stored in :py:class:`~pynwb.misc.Units`
@@ -234,6 +248,12 @@ for unit in range(3):
     axs[1].axvline(0, color=[.5, .5, .5])
 
 ####################
+#
+# .. image:: ../../_static/demo_nwbfile_units_plot.png
+#   :width: 500
+#   :alt: NWBFile units visualization
+#   :align: center
+#
 # Access Trials
 # --------
 # Trials are stored as :py:class:`~pynwb.epoch.TimeIntervals` object which is a subclass
@@ -267,6 +287,12 @@ for time in stim_on_times_landscapes[:3]:
     plt.imshow(img, aspect='auto')
 
 ####################
+#
+# .. image:: ../../_static/demo_nwbfile_stimulus_plot_2.png
+#   :width: 500
+#   :alt: NWBFile landscapes stimuli image
+#   :align: center
+#
 # Exploring the NWB file
 # --------
 # So far we have explored the NWB file by printing the :py:class:`~pynwb.file.NWBFile`
