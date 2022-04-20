@@ -52,7 +52,7 @@ class ImageSeries(TimeSeries):
             {'name': 'dimension', 'type': Iterable,
              'doc': 'Number of pixels on x, y, (and z) axes.', 'default': None},
             *get_docval(TimeSeries.__init__, 'resolution', 'conversion', 'timestamps', 'starting_time', 'rate',
-                        'comments', 'description', 'control', 'control_description'),
+                        'comments', 'description', 'control', 'control_description', 'offset'),
             {'name': 'device', 'type': Device,
              'doc': 'Device used to capture the images/video.', 'default': None},)
     def __init__(self, **kwargs):

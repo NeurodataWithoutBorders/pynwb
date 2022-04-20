@@ -43,7 +43,8 @@ class ImagingPlane(NWBContainer):
                      'manifold',
                      'conversion',
                      'unit',
-                     'reference_frame')
+                     'reference_frame',
+                     'offset')
 
     @docval(*get_docval(NWBContainer.__init__, 'name'),  # required
             {'name': 'optical_channel', 'type': (list, OpticalChannel),  # required
@@ -85,7 +86,16 @@ class ImagingPlane(NWBContainer):
              'default': None},
             {'name': 'grid_spacing_unit', 'type': str,
              'doc': "Measurement units for grid_spacing. The default value is 'meters'.",
-             'default': 'meters'})
+             'default': 'meters'},
+            {
+                'name': 'offset',
+                'type': 'float',
+                'doc': (
+                    "Scalar to add to each element in the data scaled by 'conversion' to finish converting it to the "
+                    "specified unit."
+                    ),
+                'default': 0.0
+            })
     def __init__(self, **kwargs):
         optical_channel, description, device, excitation_lambda, imaging_rate, \
             indicator, location, manifold, conversion, unit, reference_frame, origin_coords, origin_coords_unit, \
