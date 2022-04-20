@@ -3,6 +3,7 @@ from collections.abc import Iterable
 import warnings
 from bisect import bisect_left, bisect_right
 
+from hdmf.common.table import MeasurementData
 from hdmf.utils import docval, getargs, popargs, call_docval_func, get_docval
 
 from . import register_class, CORE_NAMESPACE
@@ -149,7 +150,8 @@ class Units(DynamicTable):
         {'name': 'electrode_group', 'description': 'the electrode group that each spike unit came from'},
         {'name': 'waveform_mean', 'description': 'the spike waveform mean for each spike unit'},
         {'name': 'waveform_sd', 'description': 'the spike waveform standard deviation for each spike unit'},
-        {'name': 'waveforms', 'description': waveforms_desc, 'index': 2}
+        {'name': 'waveforms', 'description': waveforms_desc, 'index': 2,
+         'class': MeasurementData, 'unit': 'volts', 'conversion': 1., 'offset': 0.}
     )
 
     @docval({'name': 'name', 'type': str, 'doc': 'Name of this Units interface', 'default': 'Units'},

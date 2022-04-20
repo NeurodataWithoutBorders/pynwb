@@ -1,6 +1,6 @@
 # pinned dependencies to reproduce an entire development environment to use PyNWB
 h5py==3.3.0
-hdmf==3.1.1
+hdmf @ git+https://github.com/catalystneuro/hdmf.git@add_measurement_vector_data
 numpy==1.21.0
 pandas==1.3.0
 python-dateutil==2.8.1

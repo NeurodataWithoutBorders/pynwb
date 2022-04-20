@@ -173,13 +173,14 @@ class UnitsTests(TestCase):
                     [1, 2, 3]   # spike 4
                 ]
             ]
-        ut.add_unit(waveforms=wf1)
+        ut.add_unit(waveforms=wf1, unit='volts', conversion=1., offset=0.)
         ut.add_unit(waveforms=wf2)
         self.assertEqual(ut.id.data, [0, 1])
         self.assertEqual(ut['waveforms'].target.data, [3, 6, 10, 14, 18])
         self.assertEqual(ut['waveforms'].data, [2, 5])
         self.assertListEqual(ut['waveforms'][0], wf1)
         self.assertListEqual(ut['waveforms'][1], wf2)
+        self.assertEqual(ut.waveforms.units, "volts")
 
     def test_get_spike_times(self):
         ut = Units()
@@ -246,6 +247,11 @@ class UnitsTests(TestCase):
         self.assertEqual(ut['electrode_group'][0], electrode_group)
 
     def test_waveform_attrs(self):
-        ut = Units(waveform_rate=40000.)
-        self.assertEqual(ut.waveform_rate, 40000.)
+        waveform_rate = 40000.
+        ut = Units(waveform_rate=waveform_rate)
+        self.assertEqual(ut.waveform_rate, waveform_rate)
         self.assertEqual(ut.waveform_unit, 'volts')
+
+        waveform_unit = 'microvolts'
+        ut = Units(waveform_unit=waveform_unit)
+        self.assertEqual(ut.waveform_unit, waveform_unit)
