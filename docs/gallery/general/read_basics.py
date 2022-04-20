@@ -178,6 +178,10 @@ all_stimulus_data = stimulus_presentation.data[:]
 stimulus_presentation.data.shape
 
 ####################
+# .. code-block:: none
+#
+#     (200, 400, 300, 3)
+#
 # This :py:class:`~pynwb.image.OpticalSeries` data contains 200 images of size 400x300 pixels with three channels (red, green, and blue).
 #
 # Slicing datasets
@@ -227,6 +231,12 @@ units_df
 units["spike_times"][0]
 
 ####################
+# .. code-block:: none
+#
+#     array([5932.811644, 6081.077044, 6091.982364, 6093.127644, 6095.068204,
+#        6097.438244, 6116.694804, 6129.827604, 6134.825004, 6142.583924, ...])
+#
+#
 # Visualize spiking activity relative to stimulus onset
 # --------
 # We can look at when these single units spike relative to when image stimuli were presented to the subject.
