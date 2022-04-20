@@ -30,7 +30,6 @@ class SpatialSeriesConstructor(TestCase):
         )
 
 
-
 class BehavioralEpochsConstructor(TestCase):
     def test_init(self):
         data = [0, 1, 0, 1]
