@@ -43,8 +43,7 @@ class ImagingPlane(NWBContainer):
                      'manifold',
                      'conversion',
                      'unit',
-                     'reference_frame',
-                     'offset')
+                     'reference_frame')
 
     @docval(*get_docval(NWBContainer.__init__, 'name'),  # required
             {'name': 'optical_channel', 'type': (list, OpticalChannel),  # required
