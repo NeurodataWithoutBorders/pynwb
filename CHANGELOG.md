@@ -5,6 +5,8 @@
 ### Breaking changes:
 - Restrict `SpatialSeries.data` to have no more than 3 columns (#1455)
 
+### Documentation and tutorial enhancements:
+- Add copy button to code blocks @weiglszonja (#1460)
 
 ## PyNWB 2.0.1 (March 16, 2022)
 
