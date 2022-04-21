@@ -45,7 +45,7 @@ class OptogeneticSeries(TimeSeries):
             {'name': 'site', 'type': OptogeneticStimulusSite,  # required
              'doc': 'The site to which this stimulus was applied.'},
             *get_docval(TimeSeries.__init__, 'resolution', 'conversion', 'timestamps', 'starting_time', 'rate',
-                        'comments', 'description', 'control', 'control_description'))
+                        'comments', 'description', 'control', 'control_description', 'offset'))
     def __init__(self, **kwargs):
         name, data, site = popargs('name', 'data', 'site', kwargs)
         super(OptogeneticSeries, self).__init__(name, data, 'watts', **kwargs)

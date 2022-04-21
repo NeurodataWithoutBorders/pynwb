@@ -118,7 +118,7 @@ class SpikeEventSeries(ElectricalSeries):
              'doc': 'Timestamps for samples stored in data'},
             *get_docval(ElectricalSeries.__init__, 'electrodes'),  # required
             *get_docval(ElectricalSeries.__init__, 'resolution', 'conversion', 'comments', 'description', 'control',
-                        'control_description'))
+                        'control_description', 'offset'))
     def __init__(self, **kwargs):
         name, data, electrodes = popargs('name', 'data', 'electrodes', kwargs)
         timestamps = getargs('timestamps', kwargs)
