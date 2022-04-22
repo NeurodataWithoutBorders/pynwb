@@ -51,7 +51,7 @@ installing PyNWB.
 The second one is :pynwb:`requirements.txt <blob/dev/requirements.txt>`, which lists the pinned (concrete) dependencies to reproduce
 an entire development environment to use PyNWB.
 
-The third one is ':pynwb:`requirements-dev.txt <blob/dev/requirements-dev.txt>`, which lists the pinned (concrete) dependencies to reproduce
+The third one is :pynwb:`requirements-dev.txt <blob/dev/requirements-dev.txt>`, which lists the pinned (concrete) dependencies to reproduce
 an entire development environment to use PyNWB, run PyNWB tests, check code style, compute coverage, and create test
 environments.
 
