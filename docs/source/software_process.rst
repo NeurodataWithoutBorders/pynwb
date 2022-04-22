@@ -45,20 +45,20 @@ Requirement Specifications
 
 There are 5 kinds of requirements specification in PyNWB.
 
-The first one is the :pynwb:`blob/dev/requirements-min.txt` file, which lists the package dependencies and their minimum versions for
+The first one is the :pynwb:`requirements-min.txt <blob/dev/requirements-min.txt>` file, which lists the package dependencies and their minimum versions for
 installing PyNWB.
 
-The second one is :pynwb:`blob/dev/requirements.txt`, which lists the pinned (concrete) dependencies to reproduce
+The second one is :pynwb:`requirements.txt <blob/dev/requirements.txt>`, which lists the pinned (concrete) dependencies to reproduce
 an entire development environment to use PyNWB.
 
-The third one is ':pynwb:`blob/dev/requirements-dev.txt`, which lists the pinned (concrete) dependencies to reproduce
+The third one is ':pynwb:`requirements-dev.txt <blob/dev/requirements-dev.txt>`, which lists the pinned (concrete) dependencies to reproduce
 an entire development environment to use PyNWB, run PyNWB tests, check code style, compute coverage, and create test
 environments.
 
-The fourth one is :pynwb:`blob/dev/requirements-doc.txt`, which lists the dependencies to generate the documentation for PyNWB.
-Both this file and `requirements.txt` are used by ReadTheDocs_ to initialize the local environment for Sphinx to run.
+The fourth one is :pynwb:`requirements-doc.txt <blob/dev/requirements-doc.txt>`, which lists the dependencies to generate the documentation for PyNWB.
+Both this file and :pynwb:`requirements.txt <blob/dev/requirements.txt>` are used by ReadTheDocs_ to initialize the local environment for Sphinx to run.
 
-The final one is within :pynwb:`blob/dev/setup.py`, which contains a list of package dependencies and their version ranges allowed for
+The final one is within :pynwb:`setup.py <blob/dev/setup.py>`, which contains a list of package dependencies and their version ranges allowed for
 running PyNWB.
 
 In order to check the status of the required packages, requires.io_ is used to create a badge on the project
