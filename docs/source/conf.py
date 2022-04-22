@@ -263,7 +263,7 @@ latex_elements = {
 
 # The name of an image file (relative to this directory) to place at the top of
 # the title page.
-latex_logo = 'figures/logo_nwb.pdf'
+latex_logo = 'figures/logo_pynwb_with_margin.png'
 
 # For "manual" documents, if this is true, then toplevel headings are parts,
 # not chapters.
