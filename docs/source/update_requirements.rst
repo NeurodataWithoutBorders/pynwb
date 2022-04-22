@@ -7,15 +7,10 @@ How to Update Requirements Files
 
 The different requirements files introduced in :ref:`software_process` section are the following:
 
-* requirements.txt_
-* requirements-dev.txt_
-* requirements-doc.txt_
-* requirements-min.txt_
-
-.. _requirements.txt: https://github.com/NeurodataWithoutBorders/pynwb/blob/dev/requirements.txt
-.. _requirements-dev.txt: https://github.com/NeurodataWithoutBorders/pynwb/blob/dev/requirements-dev.txt
-.. _requirements-doc.txt: https://github.com/NeurodataWithoutBorders/pynwb/blob/dev/requirements-doc.txt
-.. _requirements-min.txt: https://github.com/NeurodataWithoutBorders/pynwb/blob/dev/requirements-min.txt
+* :pynwb:`requirements.txt <blob/dev/requirements.txt>`
+* :pynwb:`requirements-dev.txt <blob/dev/requirements-dev.txt>`
+* :pynwb:`requirements-doc.txt <blob/dev/requirements-doc.txt>`
+* :pynwb:`requirements-min.txt <blob/dev/requirements-min.txt>`
 
 requirements.txt
 ================
