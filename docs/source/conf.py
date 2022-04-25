@@ -85,7 +85,8 @@ intersphinx_mapping = {
 extlinks = {'incf_lesson': ('https://training.incf.org/lesson/%s', ''),
             'incf_collection': ('https://training.incf.org/collection/%s', ''),
             'nwb_extension': ('https://github.com/nwb-extensions/%s', ''),
-            'pynwb': ('https://github.com/NeurodataWithoutBorders/pynwb/%s', '')}
+            'pynwb': ('https://github.com/NeurodataWithoutBorders/pynwb/%s', ''),
+            'nwb_overview': ('https://nwb-overview.readthedocs.io/en/latest/%s', '')}
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
