@@ -87,6 +87,7 @@ class TimeSeries(NWBDataInterface):
                      "data",
                      "resolution",
                      "conversion",
+                     "offset",
                      "unit",
                      "timestamps",
                      "timestamps_unit",
@@ -109,11 +110,19 @@ class TimeSeries(NWBDataInterface):
              'doc': ('The data values. The first dimension must be time. '
                      'Can also store binary data, e.g., image frames')},
             {'name': 'unit', 'type': str, 'doc': 'The base unit of measurement (should be SI unit)'},
-            {'name': 'resolution', 'type': (str, 'float'),
+            {'name': 'resolution', 'type': 'float',
              'doc': 'The smallest meaningful difference (in specified unit) between values in data', 'default': -1.0},
-            {'name': 'conversion', 'type': (str, 'float'),
+            {'name': 'conversion', 'type': 'float',
              'doc': 'Scalar to multiply each element in data to convert it to the specified unit', 'default': 1.0},
-
+            {
+                'name': 'offset',
+                'type': 'float',
+                'doc': (
+                    "Scalar to add to each element in the data scaled by 'conversion' to finish converting it to the "
+                    "specified unit."
+                    ),
+                'default': 0.0
+            },
             {'name': 'timestamps', 'type': ('array_data', 'data', 'TimeSeries'), 'shape': (None,),
              'doc': 'Timestamps for samples stored in data', 'default': None},
             {'name': 'starting_time', 'type': 'float', 'doc': 'The timestamp of the first sample', 'default': None},
@@ -144,6 +153,7 @@ class TimeSeries(NWBDataInterface):
                 "comments",
                 "description",
                 "conversion",
+                "offset",
                 "unit",
                 "control",
                 "control_description",
