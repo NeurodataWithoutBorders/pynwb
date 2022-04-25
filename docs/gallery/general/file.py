@@ -2,7 +2,7 @@
 .. _basics:
 
 NWB File Basics
-==================
+===============
 
 This example will focus on the basics of working with an :py:class:`~pynwb.file.NWBFile` object,
 including writing and reading of an NWB file, and giving you an introduction to the basic data types.
@@ -171,7 +171,7 @@ print(nwbfile)
 # .. _basic_subject:
 #
 # Subject Information
-# ----------------
+# -------------------
 #
 # In the :py:class:`~pynwb.file.Subject` object we can store information about the experimental subject,
 # such as ``age``, ``species``, ``genotype``, ``sex``, and a ``description``.
@@ -272,7 +272,7 @@ nwbfile.get_acquisition("test_timeseries")
 # .. _basic_spatialseries:
 #
 # Spatial Series and Position
-# ----------------
+# ---------------------------
 #
 # :py:class:`~pynwb.behavior.SpatialSeries` is a subclass of :py:class:`~pynwb.base.TimeSeries`
 # that represents the spatial position of an animal over time.
@@ -333,7 +333,7 @@ position_obj = Position(spatial_series=spatial_series_obj)
 
 ####################
 # Behavior Processing Module
-# ----------------
+# --------------------------
 #
 # :py:class:`~pynwb.base.ProcessingModule` is a container for data interfaces that are related to a particular
 # processing workflow. NWB differentiates between raw, acquired data (*acquisition*), which should never change,
@@ -603,7 +603,7 @@ nwbfile.add_time_intervals(sleep_stages)
 #          text description about the image and 2) ``resolution`` parameter to specify the *pixels / cm* resolution
 #          of the image.
 
-img = Image.open("docs/source/logo.png")  # an example image
+img = Image.open("docs/source/figures/logo_nwb.png")  # an example image
 
 # you can store an RGBA image
 rgba_logo = RGBAImage(name="RGBA_logo", data=np.array(img))
