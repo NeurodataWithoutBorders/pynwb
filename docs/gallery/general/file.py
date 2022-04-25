@@ -603,7 +603,7 @@ nwbfile.add_time_intervals(sleep_stages)
 #          text description about the image and 2) ``resolution`` parameter to specify the *pixels / cm* resolution
 #          of the image.
 
-img = Image.open("docs/source/logo.png")  # an example image
+img = Image.open("docs/source/figures/logo_nwb.png")  # an example image
 
 # you can store an RGBA image
 rgba_logo = RGBAImage(name="RGBA_logo", data=np.array(img))
