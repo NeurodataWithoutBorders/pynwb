@@ -31,7 +31,7 @@ class SpatialSeries(TimeSeries):
             {'name': 'unit', 'type': str, 'doc': 'The base unit of measurement (should be SI unit)',
              'default': 'meters'},
             *get_docval(TimeSeries.__init__, 'conversion', 'resolution', 'timestamps', 'starting_time', 'rate',
-                        'comments', 'description', 'control', 'control_description'))
+                        'comments', 'description', 'control', 'control_description', 'offset'))
     def __init__(self, **kwargs):
         """
         Create a SpatialSeries TimeSeries dataset
