@@ -23,8 +23,13 @@ import numpy as np
 from dateutil import tz
 
 from pynwb import NWBFile, TimeSeries
-from pynwb.behavior import SpatialSeries, BehavioralTimeSeries, Position, \
-    BehavioralEvents, CompassDirection
+from pynwb.behavior import (
+    SpatialSeries,
+    BehavioralTimeSeries,
+    Position,
+    BehavioralEvents,
+    CompassDirection,
+)
 
 ####################
 # Create an NWB File
@@ -127,11 +132,12 @@ direction_spatial_series = SpatialSeries(
     data=view_angle_data,
     timestamps=timestamps,
     reference_frame="bottom left",
-    unit="radians"
+    unit="radians",
 )
 
-direction = CompassDirection(spatial_series=direction_spatial_series,
-                             name='CompassDirection')
+direction = CompassDirection(
+    spatial_series=direction_spatial_series, name="CompassDirection"
+)
 
 ####################
 # TODO
@@ -158,7 +164,7 @@ speed_time_series = TimeSeries(
 behavioral_time_series = BehavioralTimeSeries(
     time_series=speed_time_series,
     name="BehavioralTimeSeries",
-    )
+)
 
 ####################
 # BehavioralEvents
@@ -180,8 +186,7 @@ time_series = TimeSeries(
     unit="seconds",
 )
 
-behavioral_events = BehavioralEvents(time_series=time_series,
-                                     name='BehavioralEvents')
+behavioral_events = BehavioralEvents(time_series=time_series, name="BehavioralEvents")
 
 ####################
 # BehavioralEpochs
