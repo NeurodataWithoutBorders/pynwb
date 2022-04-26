@@ -155,8 +155,10 @@ speed_time_series = TimeSeries(
     unit="m/s",
 )
 
-behavioral_time_series = BehavioralTimeSeries(time_series=speed_time_series,
-                                              name='BehavioralTimeSeries')
+behavioral_time_series = BehavioralTimeSeries(
+    time_series=speed_time_series,
+    name="BehavioralTimeSeries",
+    )
 
 ####################
 # BehavioralEvents
