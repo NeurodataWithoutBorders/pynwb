@@ -52,7 +52,7 @@ class ImageSeries(TimeSeries):
             {'name': 'dimension', 'type': Iterable,
              'doc': 'Number of pixels on x, y, (and z) axes.', 'default': None},
             *get_docval(TimeSeries.__init__, 'resolution', 'conversion', 'timestamps', 'starting_time', 'rate',
-                        'comments', 'description', 'control', 'control_description'),
+                        'comments', 'description', 'control', 'control_description', 'offset'),
             {'name': 'device', 'type': Device,
              'doc': 'Device used to capture the images/video.', 'default': None},)
     def __init__(self, **kwargs):
@@ -117,7 +117,7 @@ class IndexSeries(TimeSeries):
             {'name': 'indexed_timeseries', 'type': TimeSeries,  # required
              'doc': 'HDF5 link to TimeSeries containing images that are indexed.'},
             *get_docval(TimeSeries.__init__, 'resolution', 'conversion', 'timestamps', 'starting_time', 'rate',
-                        'comments', 'description', 'control', 'control_description'))
+                        'comments', 'description', 'control', 'control_description', 'offset'))
     def __init__(self, **kwargs):
         indexed_timeseries = popargs('indexed_timeseries', kwargs)
         super(IndexSeries, self).__init__(**kwargs)
@@ -140,7 +140,7 @@ class ImageMaskSeries(ImageSeries):
              'doc': 'Link to ImageSeries that mask is applied to.'},
             *get_docval(ImageSeries.__init__, 'data', 'unit', 'format', 'external_file', 'starting_frame',
                         'bits_per_pixel', 'dimension', 'resolution', 'conversion', 'timestamps', 'starting_time',
-                        'rate', 'comments', 'description', 'control', 'control_description'),
+                        'rate', 'comments', 'description', 'control', 'control_description', 'offset'),
             {'name': 'device', 'type': Device,
              'doc': ('Device used to capture the mask data. This field will likely not be needed. '
                      'The device used to capture the masked ImageSeries data should be stored in the ImageSeries.'),
@@ -180,7 +180,7 @@ class OpticalSeries(ImageSeries):
              'default': None},
             *get_docval(ImageSeries.__init__, 'unit', 'format', 'external_file', 'starting_frame', 'bits_per_pixel',
                         'dimension', 'resolution', 'conversion', 'timestamps', 'starting_time', 'rate', 'comments',
-                        'description', 'control', 'control_description', 'device'))
+                        'description', 'control', 'control_description', 'device', 'offset'))
     def __init__(self, **kwargs):
         distance, field_of_view, orientation = popargs('distance', 'field_of_view', 'orientation', kwargs)
         super(OpticalSeries, self).__init__(**kwargs)

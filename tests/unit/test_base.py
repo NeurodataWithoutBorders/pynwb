@@ -94,8 +94,23 @@ class TestTimeSeries(TestCase):
         ts = TimeSeries('test_ts', dat, 'volts', timestamps=[0.1, 0.2, 0.3, 0.4])
         self.assertIs(ts.data, dat)
         self.assertEqual(ts.conversion, 1.0)
+        self.assertEqual(ts.offset, 0.0)
         self.assertEqual(ts.resolution, -1.0)
         self.assertEqual(ts.unit, 'volts')
+
+    def test_init_conversion(self):
+        dat = [0, 1, 2, 3, 4]
+        conversion = 2.1
+        ts = TimeSeries('test_ts', dat, 'volts', timestamps=[0.1, 0.2, 0.3, 0.4], conversion=conversion)
+        self.assertIs(ts.data, dat)
+        self.assertEqual(ts.conversion, conversion)
+
+    def test_init_offset(self):
+        dat = [0, 1, 2, 3, 4]
+        offset = 1.2
+        ts = TimeSeries('test_ts', dat, 'volts', timestamps=[0.1, 0.2, 0.3, 0.4], offset=offset)
+        self.assertIs(ts.data, dat)
+        self.assertEqual(ts.offset, offset)
 
     def test_init_timestamps(self):
         dat = [0, 1, 2, 3, 4]

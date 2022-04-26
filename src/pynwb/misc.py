@@ -61,7 +61,7 @@ class AbstractFeatureSeries(TimeSeries):
                      'dimension represents features'),
              'default': list()},
             *get_docval(TimeSeries.__init__, 'resolution', 'conversion', 'timestamps', 'starting_time', 'rate',
-                        'comments', 'description', 'control', 'control_description'))
+                        'comments', 'description', 'control', 'control_description', 'offset'))
     def __init__(self, **kwargs):
         name, data, features, feature_units = popargs('name', 'data',
                                                               'features', 'feature_units', kwargs)
@@ -272,7 +272,7 @@ class DecompositionSeries(TimeSeries):
                      'similar to ElectricalSeries.electrodes.'),
              'default': None},
             *get_docval(TimeSeries.__init__, 'resolution', 'conversion', 'timestamps', 'starting_time', 'rate',
-                        'comments', 'control', 'control_description'))
+                        'comments', 'control', 'control_description', 'offset'))
     def __init__(self, **kwargs):
         metric, source_timeseries, bands, source_channels = popargs('metric', 'source_timeseries', 'bands',
                                                                     'source_channels', kwargs)

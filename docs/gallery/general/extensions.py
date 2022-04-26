@@ -4,13 +4,14 @@
 Extending NWB
 =============
 
-The NWB format was designed to be easily extendable. Here we will demonstrate how to extend NWB using the
-PyNWB API.
+The NWB format was designed to be easily extendable. Here we discuss some of the basic functionality
+in PyNWB for creating  Neurodata Extensions (NDX).
 
 .. note::
 
-    A more in-depth discussion of the components and steps for creating and using extensions is
-    available as part of the docs at :ref:`extending-nwb`.
+    For a more in-depth, step-by-step guide on how to create, document, and publish NWB extensions, we highly
+    recommend visiting the :nwb-overview:`extension tutorial <extensions_tutorial/6_documenting_extension.html>`
+    on the :nwb-overview:`nwb overview <>` website.
 
 '''
 
