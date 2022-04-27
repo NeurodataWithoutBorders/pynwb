@@ -76,7 +76,7 @@ class ElectricalSeries(TimeSeries):
              "filter is unknown, then this value could be 'Low-pass filter at 300 Hz'. If a non-standard filter "
              "type is used, provide as much detail about the filter properties as possible.", 'default': None},
             *get_docval(TimeSeries.__init__, 'resolution', 'conversion', 'timestamps', 'starting_time', 'rate',
-                        'comments', 'description', 'control', 'control_description'))
+                        'comments', 'description', 'control', 'control_description', 'offset'))
     def __init__(self, **kwargs):
         name, electrodes, data, channel_conversion, filtering = popargs('name', 'electrodes', 'data',
                                                                         'channel_conversion', 'filtering', kwargs)
@@ -118,7 +118,7 @@ class SpikeEventSeries(ElectricalSeries):
              'doc': 'Timestamps for samples stored in data'},
             *get_docval(ElectricalSeries.__init__, 'electrodes'),  # required
             *get_docval(ElectricalSeries.__init__, 'resolution', 'conversion', 'comments', 'description', 'control',
-                        'control_description'))
+                        'control_description', 'offset'))
     def __init__(self, **kwargs):
         name, data, electrodes = popargs('name', 'data', 'electrodes', kwargs)
         timestamps = getargs('timestamps', kwargs)

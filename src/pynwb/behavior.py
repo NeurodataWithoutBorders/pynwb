@@ -21,15 +21,17 @@ class SpatialSeries(TimeSeries):
     __nwbfields__ = ('reference_frame',)
 
     @docval(*get_docval(TimeSeries.__init__, 'name'),  # required
-            {'name': 'data', 'type': ('array_data', 'data', TimeSeries), 'shape': ((None, ), (None, None)),  # required
-             'doc': ('The data values. Can be 1D or 2D. The first dimension must be time. The optional second '
-                     'dimension represents different features, e.g., x, y position')},
+            {'name': 'data', 'type': ('array_data', 'data', TimeSeries), 'shape': (
+                    (None, ), (None, 1), (None, 2), (None, 3)
+            ),  # required
+             'doc': ('The data values. Can be 1D or 2D. The first dimension must be time. If 2D, there can be 1, 2, '
+                     'or 3 columns, which represent x, y, and z.')},
             {'name': 'reference_frame', 'type': str,   # required
              'doc': 'description defining what the zero-position is'},
             {'name': 'unit', 'type': str, 'doc': 'The base unit of measurement (should be SI unit)',
              'default': 'meters'},
             *get_docval(TimeSeries.__init__, 'conversion', 'resolution', 'timestamps', 'starting_time', 'rate',
-                        'comments', 'description', 'control', 'control_description'))
+                        'comments', 'description', 'control', 'control_description', 'offset'))
     def __init__(self, **kwargs):
         """
         Create a SpatialSeries TimeSeries dataset

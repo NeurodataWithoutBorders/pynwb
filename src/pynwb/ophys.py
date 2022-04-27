@@ -142,7 +142,7 @@ class TwoPhotonSeries(ImageSeries):
              'default': None},
             *get_docval(ImageSeries.__init__, 'external_file', 'starting_frame', 'bits_per_pixel',
                         'dimension', 'resolution', 'conversion', 'timestamps', 'starting_time', 'rate',
-                        'comments', 'description', 'control', 'control_description', 'device'))
+                        'comments', 'description', 'control', 'control_description', 'device', 'offset'))
     def __init__(self, **kwargs):
         field_of_view, imaging_plane, pmt_gain, scan_line_rate = popargs(
             'field_of_view', 'imaging_plane', 'pmt_gain', 'scan_line_rate', kwargs)
@@ -339,7 +339,7 @@ class RoiResponseSeries(TimeSeries):
             {'name': 'rois', 'type': DynamicTableRegion,  # required
              'doc': 'a table region corresponding to the ROIs that were used to generate this data'},
             *get_docval(TimeSeries.__init__, 'resolution', 'conversion', 'timestamps', 'starting_time', 'rate',
-                        'comments', 'description', 'control', 'control_description'))
+                        'comments', 'description', 'control', 'control_description', 'offset'))
     def __init__(self, **kwargs):
         rois = popargs('rois', kwargs)
 

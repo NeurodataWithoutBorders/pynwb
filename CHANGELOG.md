@@ -1,11 +1,20 @@
 # PyNWB Changelog
 
+## PyNWB 2.1.0 (Upcoming)
+
+### Breaking changes:
+- Restrict `SpatialSeries.data` to have no more than 3 columns (#1455)
+
+### Documentation and tutorial enhancements:
+- Add copy button to code blocks @weiglszonja (#1460)
+
 ## PyNWB 2.0.1 (March 16, 2022)
 
 ### Bug fixes:
 - Add `environment-ros3.yml` to `MANIFEST.in` for inclusion in source distributions. @rly (#1398)
 - Fix bad error check in ``IntracellularRecordingsTable.add_recording`` when adding ``IZeroClampSeries``. @oruebel (#1410)
 - Skip ros3 tests if internet access or the ros3 driver are not available. @oruebel (#1414)
+-  Fixed input data types to allow only `float` for fields `conversion` and `offset` in definition of ``TimeSeries``. @codycbakerphd (#1424)
 - Fix CI issues. @rly (#1427)
 
 ### Documentation and tutorial enhancements:
@@ -23,6 +32,9 @@
 - Minor text fixes. @bendichter (#1437, #1400)
 
 ### Minor improvements:
+- Improve constructor docstrings for Image types. @weiglszonja (#1418)
+- Add checks for data orientation in ``TimeSeries``, ``ElectricalSeries``, and ``RoiResponseSeries`` @bendichter (#1428)
+- Added `offset` field to `TimeSeries` and its subtypes. @codycbakerphd (#1424)
 - Added checks for data orientation in ``TimeSeries``, ``ElectricalSeries``, and ``RoiResponseSeries``.
   @bendichter (#1426)
 - Enhanced issue template forms on GitHub. @CodyCBakerPHD (#1434)
