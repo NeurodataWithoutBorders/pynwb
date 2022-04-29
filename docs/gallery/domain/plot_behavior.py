@@ -33,6 +33,8 @@ from pynwb.behavior import (
     BehavioralEvents,
     CompassDirection,
     BehavioralEpochs,
+    PupilTracking,
+    EyeTracking,
 )
 
 ####################
@@ -114,6 +116,26 @@ position_spatial_series
 
 position = Position(spatial_series=position_spatial_series)
 
+
+####################
+# Create a Behavior Processing Module
+# --------------------------
+#
+# .. seealso::
+#    You can read more about the basic concepts of processing modules in the :ref:`modules_overview` tutorial.
+#
+# Create a processing module called ``"behavior"`` for storing behavioral data in the :py:class:`~pynwb.file.NWBFile`
+# and add the :py:class:`~pynwb.behavior.Position` object to the processing module using the
+# :py:meth:`~pynwb.file.NWBFile.create_processing_module` method:
+
+
+behavior_module = nwbfile.create_processing_module(
+    name="behavior", description="processed behavioral data"
+)
+
+behavior_module.add(position)
+
+
 ####################
 # CompassDirection
 # ------------
@@ -144,9 +166,10 @@ direction = CompassDirection(
 )
 
 ####################
-# TODO
-# mention compression of data, timestamps with H5DataIO
-# H5DataIO(timestamps, compression="gzip")
+# We can add a :py:class:`~pynwb.behavior.CompassDirection` object to the ``behavior`` processing module
+# the same way as we have added the position data:
+
+behavior_module.add(direction)
 
 
 ####################
@@ -250,31 +273,82 @@ sleep_intervals.add_row(start_time=1.3, stop_time=3.0, stage=3)
 nwbfile.add_time_intervals(sleep_intervals)
 
 ####################
-# Create a Behavior Processing Module
-# --------------------------
-#
-# .. seealso::
-#    You can read more about the basic concepts of processing modules in the :ref:`modules_overview` tutorial.
-#
-# Create a processing module called ``"behavior"`` for storing behavioral data in the :py:class:`~pynwb.file.NWBFile`
-# and add the :py:class:`~pynwb.behavior.Position` object to the processing module using the
-# :py:meth:`~pynwb.file.NWBFile.create_processing_module` method:
-
-
-behavior_module = nwbfile.create_processing_module(
-    name="behavior", description="processed behavioral data"
-)
-
-behavior_module.add(position)
-
-####################
-# Analogous to how position can be added to the ``behavior`` processing module,
+# Analogous to how position and direction data can be added to the ``behavior`` processing module,
 # we can add the other behavior data:
 
-behavior_module.add(direction)
 behavior_module.add(behavioral_time_series)
 behavior_module.add(behavioral_events)
 behavior_module.add(behavioral_epochs)
+
+
+####################
+# PupilTracking
+# --------------------------
+#
+# :py:class:`~pynwb.behavior.PupilTracking` is for storing eye-tracking data which
+# represents pupil size. :py:class:`~pynwb.behavior.PupilTracking` holds one or more
+# :py:class:`~pynwb.base.TimeSeries` objects that can represent different features
+# such as the dilation of the pupil measured over time by a pupil tracking algorithm.
+#
+
+pupil_diameter = TimeSeries(
+    name="pupil_diameter",
+    description="pupil diameter extracted from the video of the right eye",
+    data=np.linspace(0.001, 0.002, 50),
+    timestamps=timestamps,
+    unit="meters",
+)
+
+
+pupil_tracking = PupilTracking(time_series=pupil_diameter, name="PupilTracking")
+
+####################
+# We can add a :py:class:`~pynwb.behavior.PupilTracking` object to the ``behavior``
+# processing module the same way as we have added the other data types.
+
+behavior_module.add(pupil_tracking)
+
+####################
+# EyeTracking
+# --------------------------
+#
+# :py:class:`~pynwb.behavior.EyeTracking` is for storing eye-tracking data which
+# represents direction of gaze as measured by an eye tracking algorithm.
+# An :py:class:`~pynwb.behavior.EyeTracking` object holds one or more
+# :py:class:`~pynwb.behavior.SpatialSeries` objects that represents spatial features
+# such as the vertical and horizontal gaze positions extracted from a video.
+#
+
+right_eye_position = np.linspace(-20, 30, 50)
+
+right_eye_positions = SpatialSeries(
+    name="right_eye_position",
+    description="position of the right eye",
+    data=right_eye_position,
+    timestamps=timestamps,
+    reference_frame="bottom left",
+    unit="degrees",
+)
+
+eye_tracking = EyeTracking(name="EyeTracking", spatial_series=right_eye_positions)
+
+####################
+# We can add another :py:class:`~pynwb.behavior.SpatialSeries` representing the position
+# of the left eye in degrees.
+
+left_eye_position = np.linspace(-2, 20, 50)
+
+left_eye_positions = SpatialSeries(
+    name="left_eye_position",
+    description="position of the left eye",
+    data=left_eye_position,
+    timestamps=timestamps,
+    reference_frame="bottom left",
+    unit="degrees",
+)
+
+eye_tracking.add_spatial_series(spatial_series=left_eye_positions)
+
 
 ####################
 # Writing the file
