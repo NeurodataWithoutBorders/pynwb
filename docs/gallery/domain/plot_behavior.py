@@ -4,12 +4,8 @@
 Behavior Data
 ==================================
 
-This tutorial will demonstrate the usage of the :py:class:`~pynwb.behavior` module for adding
-behavior data to an :py:class:`~pynwb.file.NWBFile`.
-
-An :py:class:`~pynwb.file.NWBFile` represents a single session of an experiment.
-It contains all the data of that session and the metadata required to understand the data.
-
+This tutorial will demonstrate the usage of the :py:mod:`pynwb.behavior` module for adding
+behavioral data to an :py:class:`~pynwb.file.NWBFile`.
 
 .. seealso::
     You can learn more about the :py:class:`~pynwb.file.NWBFile` format in the :ref:`basics` tutorial.
@@ -40,7 +36,7 @@ from pynwb.behavior import (
 
 ####################
 # Create an NWB File
-# ------------
+# ------------------
 #
 # Create an :py:class:`~pynwb.file.NWBFile` object with the required fields
 # (``session_description``, ``identifier``, ``session_start_time``) and additional metadata.
@@ -61,14 +57,12 @@ nwbfile = NWBFile(
 nwbfile
 
 ####################
-# Position
-# ------------
-#
-# Spatial Series
-# ^^^^^^^^^^^^^^^
+# SpatialSeries
+# --------------
 #
 # :py:class:`~pynwb.behavior.SpatialSeries` is a subclass of :py:class:`~pynwb.base.TimeSeries`
-# that represents the spatial direction, e.g., of gaze or travel, or position of an animal over time.
+# that represents data in space, such as the spatial direction, e.g., of gaze or travel,
+# or position of an animal over time.
 #
 # .. seealso::
 #    You can learn more about the :py:class:`~pynwb.behavior.SpatialSeries` data type and
@@ -111,9 +105,13 @@ position_spatial_series
 #    You can learn more about best practices that can be applied to
 #    :py:class:`~pynwb.behavior.SpatialSeries` `here <https://www.nwb.org/best-practices/#timeseries>`_.
 #
+# Position
+# --------
+#
 # To help data analysis and visualization tools know that this :py:class:`~pynwb.behavior.SpatialSeries` object
 # represents the position of the subject, store the :py:class:`~pynwb.behavior.SpatialSeries` object inside
-# of a :py:class:`~pynwb.behavior.Position` object, which can hold one or more :py:class:`~pynwb.behavior.SpatialSeries` objects.
+# a :py:class:`~pynwb.behavior.Position` object, which can hold one or more :py:class:`~pynwb.behavior.SpatialSeries`
+# objects.
 
 position = Position(spatial_series=position_spatial_series)
 
@@ -126,8 +124,8 @@ position = Position(spatial_series=position_spatial_series)
 #    You can read more about the basic concepts of processing modules in the :ref:`modules_overview` tutorial.
 #
 # Create a processing module called ``"behavior"`` for storing behavioral data in the :py:class:`~pynwb.file.NWBFile`
-# and add the :py:class:`~pynwb.behavior.Position` object to the processing module using the
-# :py:meth:`~pynwb.file.NWBFile.create_processing_module` method:
+# using the :py:meth:`~pynwb.file.NWBFile.create_processing_module` method, then and add the
+# :py:class:`~pynwb.behavior.Position` object to the processing module.
 
 
 behavior_module = nwbfile.create_processing_module(
@@ -139,10 +137,7 @@ behavior_module.add(position)
 
 ####################
 # CompassDirection
-# ------------
-#
-# Spatial Series
-# ^^^^^^^^^^^^^^^
+# ----------------
 #
 # Analogous to how position can be stored, we can create a :py:class:`~pynwb.behavior.SpatialSeries`
 # object for representing the view angle of the subject.
@@ -158,7 +153,7 @@ direction_spatial_series = SpatialSeries(
     description="view angle",
     data=view_angle_data,
     timestamps=timestamps,
-    reference_frame="bottom left",
+    reference_frame="straight ahead",
     unit="radians",
 )
 
@@ -175,10 +170,10 @@ behavior_module.add(direction)
 
 ####################
 # BehavioralTimeSeries
-# ------------
+# --------------------
 #
-# :py:class:`~pynwb.behavior.BehavioralTimeSeries` is an interface for storing continuous behavior data.
-# Create a :py:class:`~pynwb.base.TimeSeries` object that represents the speed/velocity of an animal.
+# :py:class:`~pynwb.behavior.BehavioralTimeSeries` is an interface for storing continuous behavior data, such as the
+# speed of an subject.
 
 speed_data = np.linspace(0, 0.4, 50)
 
@@ -194,67 +189,71 @@ behavioral_time_series = BehavioralTimeSeries(
     name="BehavioralTimeSeries",
 )
 
+behavior_module.add(behavioral_time_series)
+
 ####################
 # BehavioralEvents
-# ------------
+# ----------------
 #
 # :py:class:`~pynwb.behavior.BehavioralEvents` is an interface for storing behavioral events.
-# We can use it for storing the amount of reward (e.g. water amount) - floats
-# or duration of stimulus (floats of timestamps) happened irregularly
-# Create a :py:class:`~pynwb.base.TimeSeries` object that represents the speed/velocity of an animal.
+# We can use it for storing the timing and amount of rewards (e.g. water amount) or lever press times.
 
-data = np.full(50, np.nan)
-duration_of_stimulus = np.ones(10, dtype=float)
-data[::5] = duration_of_stimulus
-
-events_timestamps = np.full(50, np.nan)
-events_timestamps[::5] = timestamps[np.where(~np.isnan(data))]
+reward_amount = [1., 1.5, 1., 1.5]
+events_timestamps = [1., 2., 5., 6.]
 
 time_series = TimeSeries(
-    name="stimulus_duration",
-    data=data,
+    name="lever_presses",
+    data=reward_amount,
     timestamps=events_timestamps,
-    unit="seconds",
+    unit="ml",
 )
 
 behavioral_events = BehavioralEvents(time_series=time_series, name="BehavioralEvents")
 
+behavior_module.add(behavioral_events)
+
 ####################
 # BehavioralEpochs
-# ------------
+# ----------------
 # :py:class:`~pynwb.behavior.BehavioralEpochs` is for storing intervals of behavior data.
 # :py:class:`~pynwb.behavior.BehavioralEpochs` uses :py:class:`~pynwb.misc.IntervalSeries`
 # to represent behavioral epochs.
 #
 # Create :py:class:`~pynwb.misc.IntervalSeries` object that represents the time intervals
-# when the animal was running.
+# when the animal was running. :py:class:`~pynwb.misc.IntervalSeries` uses 1 to indicate
+# the beginning of an interval and -1 to indicate the end.
 
 
-run_intervals_1 = IntervalSeries(
-    name="run_intervals_1",
-    description="intervals when the animal was running",
-    data=np.arange(6, 18, 1),
-    timestamps=np.arange(6, 18, 1).astype(float),
-)
-
-run_intervals_2 = IntervalSeries(
-    name="run_intervals_2",
-    description="intervals when the animal was running",
-    data=np.arange(22, 34, 1),
-    timestamps=np.arange(22, 34, 1).astype(float),
+run_intervals = IntervalSeries(
+    name="running",
+    description="intervals when the animal was running.",
+    data=[1, -1, 1, -1, 1, -1],
+    timestamps=[0.5, 1.5, 3.5, 4.0, 7.0, 7.3],
 )
 
 behavioral_epochs = BehavioralEpochs(name="BehavioralEpochs")
 
-behavioral_epochs.add_interval_series(run_intervals_1)
-behavioral_epochs.add_interval_series(run_intervals_2)
+behavioral_epochs.add_interval_series(run_intervals)
+
+####################
+# you can add more than one :py:class:`~pynwb.misc.IntervalSeries` to a
+# :py:class:`~pynwb.behavior.BehavioralEpochs`
+
+sleep_intervals = IntervalSeries(
+    name="sleeping",
+    description="intervals when the animal was sleeping.",
+    data=[1, -1, 1, -1],
+    timestamps=[15.0, 30.0, 60.0, 95.0],
+)
+behavioral_epochs.add_interval_series(sleep_intervals)
+
+behavior_module.add(behavioral_epochs)
 
 ####################
 # Using :py:class:`~pynwb.epoch.TimeIntervals` representing time intervals
-# is preferred over :py:class:`~pynwb.behavior.BehavioralEpochs`.
-# :py:class:`~pynwb.epoch.TimeIntervals` is a subclass of :py:class:`~pynwb.core.DynamicTable`
-# which offers flexibility for tabular data by allowing the addition of optional columns
-# which are not defined in the standard.
+# is often preferred over :py:class:`~pynwb.behavior.BehavioralEpochs` and :py:class:`~pynwb.misc.IntervalSeries`.
+# :py:class:`~pynwb.epoch.TimeIntervals` is a subclass of :py:class:`~pynwb.core.DynamicTable` which offers
+# flexibility for tabular data by allowing the addition of optional columns which are not defined in the standard.
 #
 # Create a :py:class:`~pynwb.epoch.TimeIntervals` object that represents the time
 # intervals when the animal was sleeping.
@@ -272,18 +271,10 @@ sleep_intervals.add_row(start_time=1.3, stop_time=3.0, stage=3)
 
 nwbfile.add_time_intervals(sleep_intervals)
 
-####################
-# Analogous to how position and direction data can be added to the ``behavior`` processing module,
-# we can add the other behavior data:
-
-behavior_module.add(behavioral_time_series)
-behavior_module.add(behavioral_events)
-behavior_module.add(behavioral_epochs)
-
 
 ####################
 # PupilTracking
-# --------------------------
+# -------------
 #
 # :py:class:`~pynwb.behavior.PupilTracking` is for storing eye-tracking data which
 # represents pupil size. :py:class:`~pynwb.behavior.PupilTracking` holds one or more
@@ -299,25 +290,19 @@ pupil_diameter = TimeSeries(
     unit="meters",
 )
 
-
 pupil_tracking = PupilTracking(time_series=pupil_diameter, name="PupilTracking")
-
-####################
-# We can add a :py:class:`~pynwb.behavior.PupilTracking` object to the ``behavior``
-# processing module the same way as we have added the other data types.
 
 behavior_module.add(pupil_tracking)
 
 ####################
 # EyeTracking
-# --------------------------
+# -----------
 #
 # :py:class:`~pynwb.behavior.EyeTracking` is for storing eye-tracking data which
 # represents direction of gaze as measured by an eye tracking algorithm.
 # An :py:class:`~pynwb.behavior.EyeTracking` object holds one or more
-# :py:class:`~pynwb.behavior.SpatialSeries` objects that represents spatial features
-# such as the vertical and horizontal gaze positions extracted from a video.
-#
+# :py:class:`~pynwb.behavior.SpatialSeries` objects that represents the vertical and
+# horizontal gaze positions extracted from a video.
 
 right_eye_position = np.linspace(-20, 30, 50)
 
@@ -348,10 +333,6 @@ left_eye_positions = SpatialSeries(
 )
 
 eye_tracking.add_spatial_series(spatial_series=left_eye_positions)
-
-####################
-# We can add an :py:class:`~pynwb.behavior.EyeTracking` object to the ``behavior``
-# processing module the same way as we have added the other data types.
 
 behavior_module.add(eye_tracking)
 
@@ -385,9 +366,9 @@ with NWBHDF5IO("behavioral_tutorial.nwb", "r") as io:
 ####################
 # For instance, we can access the :py:class:`~pynwb.behavior.SpatialSeries` data
 # by referencing the names of the objects in the hierarchy that contain it.
-# We can access the :py:class:`~pynwb.behavior.Position` object inside of the ``behavior``
+# We can access the :py:class:`~pynwb.behavior.Position` object inside the ``behavior``
 # processing module by indexing it with the name of the :py:class:`~pynwb.behavior.Position` object,
-# ``"Position"``. Then, we can access the :py:class:`~pynwb.behavior.SpatialSeries` object inside of the
+# ``"Position"``. Then, we can access the :py:class:`~pynwb.behavior.SpatialSeries` object inside the
 # :py:class:`~pynwb.behavior.Position` object by indexing it with the name of the
 # :py:class:`~pynwb.behavior.SpatialSeries` object, ``"SpatialSeries"``.
 
