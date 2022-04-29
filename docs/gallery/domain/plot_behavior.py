@@ -4,7 +4,8 @@
 Behavior Data
 ==================================
 
-This tutorial will demonstrate how to add basic behavior data to an NWB File.
+This tutorial will demonstrate the usage of the :py:class:`~pynwb.behavior` module for adding
+behavior data to an :py:class:`~pynwb.file.NWBFile`.
 
 An :py:class:`~pynwb.file.NWBFile` represents a single session of an experiment.
 It contains all the data of that session and the metadata required to understand the data.
@@ -25,7 +26,7 @@ from pynwb.misc import IntervalSeries
 
 from pynwb.epoch import TimeIntervals
 
-from pynwb import NWBFile, TimeSeries
+from pynwb import NWBFile, TimeSeries, NWBHDF5IO
 from pynwb.behavior import (
     SpatialSeries,
     BehavioralTimeSeries,
@@ -232,17 +233,16 @@ behavioral_events = BehavioralEvents(time_series=time_series, name="BehavioralEv
 run_intervals_1 = IntervalSeries(
     name="run_intervals_1",
     description="intervals when the animal was running",
-    data=np.arange(6.12, 18.36, 0.2),
-    timestamps=np.arange(6.12, 18.36, 0.2),
+    data=np.arange(6, 18, 1),
+    timestamps=np.arange(6, 18, 1).astype(float),
 )
 
 run_intervals_2 = IntervalSeries(
     name="run_intervals_2",
     description="intervals when the animal was running",
-    data=np.arange(6.12, 18.36, 0.2),
-    timestamps=np.arange(6.12, 18.36, 0.2),
+    data=np.arange(22, 34, 1),
+    timestamps=np.arange(22, 34, 1).astype(float),
 )
-
 
 behavioral_epochs = BehavioralEpochs(name="BehavioralEpochs")
 
@@ -349,10 +349,67 @@ left_eye_positions = SpatialSeries(
 
 eye_tracking.add_spatial_series(spatial_series=left_eye_positions)
 
+####################
+# We can add an :py:class:`~pynwb.behavior.EyeTracking` object to the ``behavior``
+# processing module the same way as we have added the other data types.
+
+behavior_module.add(eye_tracking)
+
 
 ####################
-# Writing the file
-# TODO
-# Reading the file
-# TODO
-# Access the data
+# Writing the behavior data to an NWB file
+# -------------------
+#
+# As demonstrated in the :ref:`basic_writing` tutorial, we will use :py:class:`~pynwb.NWBHDF5IO`
+# to write the file.
+
+with NWBHDF5IO("behavioral_tutorial.nwb", "w") as io:
+    io.write(nwbfile)
+
+####################
+# Reading and accessing the behavior data
+# -------------------
+#
+# To read the NWB file we just wrote, use another :py:class:`~pynwb.NWBHDF5IO` object,
+# and use the :py:meth:`~pynwb.NWBHDF5IO.read` method to retrieve an
+# :py:class:`~pynwb.file.NWBFile` object.
+#
+# We can access the behavior processing module by indexing ``nwbfile.processing``
+# with the name of the processing module ``"behavior"``. We can also inspect the objects
+# hierarchy within this processing module with the ``.children`` attribute.
+
+with NWBHDF5IO("behavioral_tutorial.nwb", "r") as io:
+    read_nwbfile = io.read()
+    print(read_nwbfile.processing["behavior"].children)
+
+####################
+# For instance, we can access the :py:class:`~pynwb.behavior.SpatialSeries` data
+# by referencing the names of the objects in the hierarchy that contain it.
+# We can access the :py:class:`~pynwb.behavior.Position` object inside of the ``behavior``
+# processing module by indexing it with the name of the :py:class:`~pynwb.behavior.Position` object,
+# ``"Position"``. Then, we can access the :py:class:`~pynwb.behavior.SpatialSeries` object inside of the
+# :py:class:`~pynwb.behavior.Position` object by indexing it with the name of the
+# :py:class:`~pynwb.behavior.SpatialSeries` object, ``"SpatialSeries"``.
+
+
+with NWBHDF5IO("behavioral_tutorial.nwb", "r") as io:
+    read_nwbfile = io.read()
+    print(read_nwbfile.processing["behavior"]["Position"]["SpatialSeries"])
+
+####################
+# Data arrays are read passively from the file.
+# Accessing the ``data`` attribute of the :py:class:`~pynwb.behavior.SpatialSeries` object
+# does not read the data values, but presents an HDF5 object that can be indexed to read data.
+# You can use the ``[:]`` operator to read the entire data array into memory.
+
+with NWBHDF5IO("behavioral_tutorial.nwb", "r") as io:
+    read_nwbfile = io.read()
+    print(read_nwbfile.processing["behavior"]["Position"]["SpatialSeries"].data[:])
+
+####################
+# Alternatively, you can read only a portion of the data by indexing or slicing into
+# the ``data`` attribute just like if you were indexing or slicing a numpy array.
+
+with NWBHDF5IO("behavioral_tutorial.nwb", "r") as io:
+    read_nwbfile = io.read()
+    print(read_nwbfile.processing["behavior"]["Position"]["SpatialSeries"].data[:2])
