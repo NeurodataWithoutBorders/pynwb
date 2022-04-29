@@ -21,6 +21,9 @@ from datetime import datetime
 
 import numpy as np
 from dateutil import tz
+from pynwb.misc import IntervalSeries
+
+from pynwb.epoch import TimeIntervals
 
 from pynwb import NWBFile, TimeSeries
 from pynwb.behavior import (
@@ -29,6 +32,7 @@ from pynwb.behavior import (
     Position,
     BehavioralEvents,
     CompassDirection,
+    BehavioralEpochs,
 )
 
 ####################
@@ -175,14 +179,17 @@ behavioral_time_series = BehavioralTimeSeries(
 # or duration of stimulus (floats of timestamps) happened irregularly
 # Create a :py:class:`~pynwb.base.TimeSeries` object that represents the speed/velocity of an animal.
 
-duration_of_stimulus = np.full(50, np.nan)
-x = np.ones(10, dtype=float)
-duration_of_stimulus[::5] = x
+data = np.full(50, np.nan)
+duration_of_stimulus = np.ones(10, dtype=float)
+data[::5] = duration_of_stimulus
+
+events_timestamps = np.full(50, np.nan)
+events_timestamps[::5] = timestamps[np.where(~np.isnan(data))]
 
 time_series = TimeSeries(
     name="stimulus_duration",
-    data=duration_of_stimulus,
-    timestamps=timestamps,
+    data=data,
+    timestamps=events_timestamps,
     unit="seconds",
 )
 
@@ -191,7 +198,56 @@ behavioral_events = BehavioralEvents(time_series=time_series, name="BehavioralEv
 ####################
 # BehavioralEpochs
 # ------------
-# TODO
+# :py:class:`~pynwb.behavior.BehavioralEpochs` is for storing intervals of behavior data.
+# :py:class:`~pynwb.behavior.BehavioralEpochs` uses :py:class:`~pynwb.misc.IntervalSeries`
+# to represent behavioral epochs.
+#
+# Create :py:class:`~pynwb.misc.IntervalSeries` object that represents the time intervals
+# when the animal was running.
+
+
+run_intervals_1 = IntervalSeries(
+    name="run_intervals_1",
+    description="intervals when the animal was running",
+    data=np.arange(6.12, 18.36, 0.2),
+    timestamps=np.arange(6.12, 18.36, 0.2),
+)
+
+run_intervals_2 = IntervalSeries(
+    name="run_intervals_2",
+    description="intervals when the animal was running",
+    data=np.arange(6.12, 18.36, 0.2),
+    timestamps=np.arange(6.12, 18.36, 0.2),
+)
+
+
+behavioral_epochs = BehavioralEpochs(name="BehavioralEpochs")
+
+behavioral_epochs.add_interval_series(run_intervals_1)
+behavioral_epochs.add_interval_series(run_intervals_2)
+
+####################
+# Using :py:class:`~pynwb.epoch.TimeIntervals` representing time intervals
+# is preferred over :py:class:`~pynwb.behavior.BehavioralEpochs`.
+# :py:class:`~pynwb.epoch.TimeIntervals` is a subclass of :py:class:`~pynwb.core.DynamicTable`
+# which offers flexibility for tabular data by allowing the addition of optional columns
+# which are not defined in the standard.
+#
+# Create a :py:class:`~pynwb.epoch.TimeIntervals` object that represents the time
+# intervals when the animal was sleeping.
+
+sleep_intervals = TimeIntervals(
+    name="sleep_intervals",
+    description="intervals when the animal was sleeping",
+)
+
+sleep_intervals.add_column(name="stage", description="stage of sleep")
+
+sleep_intervals.add_row(start_time=0.3, stop_time=0.35, stage=1)
+sleep_intervals.add_row(start_time=0.7, stop_time=0.9, stage=2)
+sleep_intervals.add_row(start_time=1.3, stop_time=3.0, stage=3)
+
+nwbfile.add_time_intervals(sleep_intervals)
 
 ####################
 # Create a Behavior Processing Module
@@ -218,6 +274,7 @@ behavior_module.add(position)
 behavior_module.add(direction)
 behavior_module.add(behavioral_time_series)
 behavior_module.add(behavioral_events)
+behavior_module.add(behavioral_epochs)
 
 ####################
 # Writing the file
