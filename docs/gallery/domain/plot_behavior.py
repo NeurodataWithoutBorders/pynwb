@@ -173,7 +173,7 @@ behavior_module.add(direction)
 # --------------------
 #
 # :py:class:`~pynwb.behavior.BehavioralTimeSeries` is an interface for storing continuous behavior data, such as the
-# speed of an subject.
+# speed of a subject.
 
 speed_data = np.linspace(0, 0.4, 50)
 
