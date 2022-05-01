@@ -30,7 +30,8 @@ class IntracellularElectrode(NWBContainer):
     '''
     '''
 
-    __nwbfields__ = ('slice',
+    __nwbfields__ = ('cell_id',
+                     'slice',
                      'seal',
                      'description',
                      'location',
@@ -51,11 +52,12 @@ class IntracellularElectrode(NWBContainer):
             {'name': 'resistance', 'type': str, 'doc': 'Electrode resistance COMMENT: unit: Ohm.', 'default': None},
             {'name': 'filtering', 'type': str, 'doc': 'Electrode specific filtering.', 'default': None},
             {'name': 'initial_access_resistance', 'type': str, 'doc': 'Initial access resistance.', 'default': None},
+            {'name': 'cell_id', 'type': str, 'doc': 'Unique ID of cell.', 'default': None}
             )
     def __init__(self, **kwargs):
-        slice, seal, description, location, resistance, filtering, initial_access_resistance, device = popargs(
+        slice, seal, description, location, resistance, filtering, initial_access_resistance, device, cell_id = popargs(
             'slice', 'seal', 'description', 'location', 'resistance',
-            'filtering', 'initial_access_resistance', 'device', kwargs)
+            'filtering', 'initial_access_resistance', 'device', 'cell_id', kwargs)
         call_docval_func(super().__init__, kwargs)
         self.slice = slice
         self.seal = seal
@@ -65,6 +67,7 @@ class IntracellularElectrode(NWBContainer):
         self.filtering = filtering
         self.initial_access_resistance = initial_access_resistance
         self.device = device
+        self.cell_id = cell_id
 
 
 @register_class('PatchClampSeries', CORE_NAMESPACE)
