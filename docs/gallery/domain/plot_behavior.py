@@ -87,7 +87,7 @@ timestamps = np.linspace(0, 50) / 200
 
 position_spatial_series = SpatialSeries(
     name="SpatialSeries",
-    description="(x,y) position in open field",
+    description="Position (x, y) in an open field.",
     data=position_data,
     timestamps=timestamps,
     reference_frame="(0,0) is bottom left corner",
@@ -127,7 +127,7 @@ position = Position(spatial_series=position_spatial_series)
 
 
 behavior_module = nwbfile.create_processing_module(
-    name="behavior", description="processed behavioral data"
+    name="behavior", description="Processed behavioral data"
 )
 
 behavior_module.add(position)
@@ -152,7 +152,7 @@ view_angle_data = np.linspace(0, 4, 50)
 
 direction_spatial_series = SpatialSeries(
     name="SpatialSeries",
-    description="view angle",
+    description="View angle of the subject measured in radians.",
     data=view_angle_data,
     timestamps=timestamps,
     reference_frame="straight ahead",
@@ -183,6 +183,7 @@ speed_time_series = TimeSeries(
     name="speed",
     data=speed_data,
     timestamps=timestamps,
+    description="The speed of the subject measured over time.",
     unit="m/s",
 )
 
@@ -207,6 +208,7 @@ time_series = TimeSeries(
     name="lever_presses",
     data=reward_amount,
     timestamps=events_timestamps,
+    description="The water amount the subject received as a reward.",
     unit="ml",
 )
 
@@ -236,7 +238,7 @@ behavior_module.add(behavioral_events)
 
 run_intervals = IntervalSeries(
     name="running",
-    description="intervals when the animal was running.",
+    description="Intervals when the animal was running.",
     data=[1, -1, 1, -1, 1, -1],
     timestamps=[0.5, 1.5, 3.5, 4.0, 7.0, 7.3],
 )
@@ -251,7 +253,7 @@ behavioral_epochs.add_interval_series(run_intervals)
 
 sleep_intervals = IntervalSeries(
     name="sleeping",
-    description="intervals when the animal was sleeping.",
+    description="Intervals when the animal was sleeping.",
     data=[1, -1, 1, -1],
     timestamps=[15.0, 30.0, 60.0, 95.0],
 )
@@ -270,10 +272,10 @@ behavior_module.add(behavioral_epochs)
 
 sleep_intervals = TimeIntervals(
     name="sleep_intervals",
-    description="intervals when the animal was sleeping",
+    description="Intervals when the animal was sleeping.",
 )
 
-sleep_intervals.add_column(name="stage", description="stage of sleep")
+sleep_intervals.add_column(name="stage", description="The stage of sleep.")
 
 sleep_intervals.add_row(start_time=0.3, stop_time=0.35, stage=1)
 sleep_intervals.add_row(start_time=0.7, stop_time=0.9, stage=2)
@@ -283,7 +285,7 @@ nwbfile.add_time_intervals(sleep_intervals)
 
 
 ####################
-# PupilTracking: : Storing continuous eye-tracking data of pupil size
+# PupilTracking: Storing continuous eye-tracking data of pupil size
 # -------------------------------------------------------------------
 #
 # :py:class:`~pynwb.behavior.PupilTracking` is for storing eye-tracking data which
@@ -294,7 +296,7 @@ nwbfile.add_time_intervals(sleep_intervals)
 
 pupil_diameter = TimeSeries(
     name="pupil_diameter",
-    description="pupil diameter extracted from the video of the right eye",
+    description="Pupil diameter extracted from the video of the right eye.",
     data=np.linspace(0.001, 0.002, 50),
     timestamps=timestamps,
     unit="meters",
@@ -318,7 +320,7 @@ right_eye_position = np.linspace(-20, 30, 50)
 
 right_eye_positions = SpatialSeries(
     name="right_eye_position",
-    description="position of the right eye",
+    description="The position of the right eye measured in degrees.",
     data=right_eye_position,
     timestamps=timestamps,
     reference_frame="bottom left",
@@ -335,7 +337,7 @@ left_eye_position = np.linspace(-2, 20, 50)
 
 left_eye_positions = SpatialSeries(
     name="left_eye_position",
-    description="position of the left eye",
+    description="The position of the left eye measured in degrees.",
     data=left_eye_position,
     timestamps=timestamps,
     reference_frame="bottom left",
