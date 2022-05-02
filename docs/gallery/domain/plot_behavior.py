@@ -58,7 +58,7 @@ nwbfile
 
 ####################
 # SpatialSeries: Storing continuous spatial data
-# --------------
+# ----------------------------------------------
 #
 # :py:class:`~pynwb.behavior.SpatialSeries` is a subclass of :py:class:`~pynwb.base.TimeSeries`
 # that represents data in space, such as the spatial direction, e.g., of gaze or travel,
@@ -97,7 +97,7 @@ position_spatial_series
 
 ####################
 # Position: Storing position measured over time
-# --------
+# ---------------------------------------------
 #
 # To help data analysis and visualization tools know that this :py:class:`~pynwb.behavior.SpatialSeries` object
 # represents the position of the subject, store the :py:class:`~pynwb.behavior.SpatialSeries` object inside
@@ -119,7 +119,7 @@ position = Position(spatial_series=position_spatial_series)
 
 ####################
 # Create a Behavior Processing Module
-# --------------------------
+# -----------------------------------
 #
 # Create a processing module called ``"behavior"`` for storing behavioral data in the :py:class:`~pynwb.file.NWBFile`
 # using the :py:meth:`~pynwb.file.NWBFile.create_processing_module` method, then and add the
@@ -139,7 +139,7 @@ behavior_module.add(position)
 
 ####################
 # CompassDirection: Storing view angle measured over time
-# ----------------
+# -------------------------------------------------------
 #
 # Analogous to how position can be stored, we can create a :py:class:`~pynwb.behavior.SpatialSeries`
 # object for representing the view angle of the subject.
@@ -172,7 +172,7 @@ behavior_module.add(direction)
 
 ####################
 # BehavioralTimeSeries: Storing continuous behavior data
-# --------------------
+# ------------------------------------------------------
 #
 # :py:class:`~pynwb.behavior.BehavioralTimeSeries` is an interface for storing continuous behavior data, such as the
 # speed of a subject.
@@ -194,8 +194,8 @@ behavioral_time_series = BehavioralTimeSeries(
 behavior_module.add(behavioral_time_series)
 
 ####################
-# BehavioralEvents
-# ----------------
+# BehavioralEvents: Storing behavioral events
+# -------------------------------------------
 #
 # :py:class:`~pynwb.behavior.BehavioralEvents` is an interface for storing behavioral events.
 # We can use it for storing the timing and amount of rewards (e.g. water amount) or lever press times.
@@ -216,7 +216,7 @@ behavior_module.add(behavioral_events)
 
 ####################
 # BehavioralEpochs: Storing intervals of behavior data
-# ----------------
+# ----------------------------------------------------
 # :py:class:`~pynwb.behavior.BehavioralEpochs` is for storing intervals of behavior data.
 # :py:class:`~pynwb.behavior.BehavioralEpochs` uses :py:class:`~pynwb.misc.IntervalSeries`
 # to represent behavioral epochs.
@@ -276,7 +276,7 @@ nwbfile.add_time_intervals(sleep_intervals)
 
 ####################
 # PupilTracking: : Storing continuous eye-tracking data of pupil size
-# -------------
+# -------------------------------------------------------------------
 #
 # :py:class:`~pynwb.behavior.PupilTracking` is for storing eye-tracking data which
 # represents pupil size. :py:class:`~pynwb.behavior.PupilTracking` holds one or more
@@ -298,7 +298,7 @@ behavior_module.add(pupil_tracking)
 
 ####################
 # EyeTracking: Storing continuous eye-tracking data of gaze direction
-# -----------
+# -------------------------------------------------------------------
 #
 # :py:class:`~pynwb.behavior.EyeTracking` is for storing eye-tracking data which
 # represents direction of gaze as measured by an eye tracking algorithm.
@@ -341,7 +341,7 @@ behavior_module.add(eye_tracking)
 
 ####################
 # Writing the behavior data to an NWB file
-# -------------------
+# ----------------------------------------
 #
 # As demonstrated in the :ref:`basic_writing` tutorial, we will use :py:class:`~pynwb.NWBHDF5IO`
 # to write the file.
@@ -351,7 +351,7 @@ with NWBHDF5IO("behavioral_tutorial.nwb", "w") as io:
 
 ####################
 # Reading and accessing the behavior data
-# -------------------
+# ---------------------------------------
 #
 # To read the NWB file we just wrote, use another :py:class:`~pynwb.NWBHDF5IO` object,
 # and use the :py:meth:`~pynwb.NWBHDF5IO.read` method to retrieve an
