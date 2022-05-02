@@ -181,7 +181,7 @@ clarity, we define them here:
 #       resolution: -1.0
 #       timestamps: <HDF5 dataset "timestamps": shape (200,), type "<f8">
 #       timestamps_unit: seconds
-#       unit: meters
+#       unit: pixels
 #     }
 #
 #
