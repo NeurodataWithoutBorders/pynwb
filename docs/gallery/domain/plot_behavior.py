@@ -57,16 +57,12 @@ nwbfile = NWBFile(
 nwbfile
 
 ####################
-# SpatialSeries
+# SpatialSeries: Storing continuous spatial data
 # --------------
 #
 # :py:class:`~pynwb.behavior.SpatialSeries` is a subclass of :py:class:`~pynwb.base.TimeSeries`
 # that represents data in space, such as the spatial direction, e.g., of gaze or travel,
 # or position of an animal over time.
-#
-# .. seealso::
-#    You can learn more about the :py:class:`~pynwb.behavior.SpatialSeries` data type and
-#    :py:class:`~pynwb.behavior.Position` interface in the :ref:`basic_spatialseries` tutorial.
 #
 # Create data that corresponds to x, y position over time.
 
@@ -100,12 +96,7 @@ position_spatial_series = SpatialSeries(
 position_spatial_series
 
 ####################
-#
-# .. seealso::
-#    You can learn more about best practices that can be applied to
-#    :py:class:`~pynwb.behavior.SpatialSeries` `here <https://www.nwb.org/best-practices/#timeseries>`_.
-#
-# Position
+# Position: Storing position measured over time
 # --------
 #
 # To help data analysis and visualization tools know that this :py:class:`~pynwb.behavior.SpatialSeries` object
@@ -115,13 +106,20 @@ position_spatial_series
 
 position = Position(spatial_series=position_spatial_series)
 
+####################
+#
+# .. seealso::
+#    You can learn more about the :py:class:`~pynwb.behavior.SpatialSeries` data type and
+#    :py:class:`~pynwb.behavior.Position` interface in the :ref:`basic_spatialseries` tutorial.
+#
+# .. seealso::
+#    You can learn more about best practices that can be applied to
+#    :py:class:`~pynwb.behavior.SpatialSeries` `here <https://www.nwb.org/best-practices/#timeseries>`_.
+#
 
 ####################
 # Create a Behavior Processing Module
 # --------------------------
-#
-# .. seealso::
-#    You can read more about the basic concepts of processing modules in the :ref:`modules_overview` tutorial.
 #
 # Create a processing module called ``"behavior"`` for storing behavioral data in the :py:class:`~pynwb.file.NWBFile`
 # using the :py:meth:`~pynwb.file.NWBFile.create_processing_module` method, then and add the
@@ -134,9 +132,13 @@ behavior_module = nwbfile.create_processing_module(
 
 behavior_module.add(position)
 
+####################
+# .. seealso::
+#    You can read more about the basic concepts of processing modules in the :ref:`modules_overview` tutorial.
+#
 
 ####################
-# CompassDirection
+# CompassDirection: Storing view angle measured over time
 # ----------------
 #
 # Analogous to how position can be stored, we can create a :py:class:`~pynwb.behavior.SpatialSeries`
@@ -169,7 +171,7 @@ behavior_module.add(direction)
 
 
 ####################
-# BehavioralTimeSeries
+# BehavioralTimeSeries: Storing continuous behavior data
 # --------------------
 #
 # :py:class:`~pynwb.behavior.BehavioralTimeSeries` is an interface for storing continuous behavior data, such as the
@@ -213,7 +215,7 @@ behavioral_events = BehavioralEvents(time_series=time_series, name="BehavioralEv
 behavior_module.add(behavioral_events)
 
 ####################
-# BehavioralEpochs
+# BehavioralEpochs: Storing intervals of behavior data
 # ----------------
 # :py:class:`~pynwb.behavior.BehavioralEpochs` is for storing intervals of behavior data.
 # :py:class:`~pynwb.behavior.BehavioralEpochs` uses :py:class:`~pynwb.misc.IntervalSeries`
@@ -273,7 +275,7 @@ nwbfile.add_time_intervals(sleep_intervals)
 
 
 ####################
-# PupilTracking
+# PupilTracking: : Storing continuous eye-tracking data of pupil size
 # -------------
 #
 # :py:class:`~pynwb.behavior.PupilTracking` is for storing eye-tracking data which
@@ -295,7 +297,7 @@ pupil_tracking = PupilTracking(time_series=pupil_diameter, name="PupilTracking")
 behavior_module.add(pupil_tracking)
 
 ####################
-# EyeTracking
+# EyeTracking: Storing continuous eye-tracking data of gaze direction
 # -----------
 #
 # :py:class:`~pynwb.behavior.EyeTracking` is for storing eye-tracking data which
