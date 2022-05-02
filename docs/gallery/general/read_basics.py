@@ -36,7 +36,7 @@ clarity, we define them here:
 
 ####################
 # Read the data
-# --------
+# -------------
 # We will use the `DANDI <https://gui.dandiarchive.org/#/>`_ neurophysiology data archive
 # to access an NWB File. We will use data from one session of an experiment by
 # `Chandravadia et al. (2020) <https://www.nature.com/articles/s41597-020-0415-9>`_, where
@@ -44,7 +44,7 @@ clarity, we define them here:
 # while they performed a recognition memory task.
 #
 # Download the data
-# ^^^^^^
+# ^^^^^^^^^^^^^^^^^
 # First, we will demonstrate how to download an NWB data file from `DANDI <https://gui.dandiarchive.org/#/>`_
 # to your machine.
 #
@@ -72,7 +72,7 @@ clarity, we define them here:
 #   :align: center
 #
 # Stream the data
-# ^^^^^^
+# ^^^^^^^^^^^^^^^
 #
 # Next, we will demonstrate how to stream the data from the DANDI archive without
 # having to download it to your machine.
@@ -117,7 +117,7 @@ clarity, we define them here:
 
 ####################
 # Using NWBHDF5IO
-# ------------------------------
+# ---------------
 #
 # Reading and writing NWB data is carried out using the :py:class:`~pynwb.NWBHDF5IO` class.
 # ``NWBHDF5IO`` reads NWB data that is in `HDF5 <https://www.hdfgroup.org/solutions/hdf5/>`_
@@ -138,7 +138,7 @@ clarity, we define them here:
 
 ####################
 # Access stimulus data
-# --------
+# --------------------
 #
 # Data representing stimuli that were presented to the experimental subject are stored in
 # :py:class:`~pynwb.file.NWBFile.stimulus` within the :py:class:`~pynwb.file.NWBFile` object.
@@ -186,7 +186,7 @@ clarity, we define them here:
 #
 #
 # Lazy loading of datasets
-# --------
+# ------------------------
 # Data arrays are read passively from the NWB file.
 # Accessing the ``data`` attribute of the :py:class:`~pynwb.image.OpticalSeries` object
 # does not read the data values, but presents an HDF5 object that can be indexed to read data.
@@ -220,7 +220,7 @@ clarity, we define them here:
 # This :py:class:`~pynwb.image.OpticalSeries` data contains 200 images of size 400x300 pixels with three channels (red, green, and blue).
 #
 # Slicing datasets
-# --------
+# ----------------
 # It is often preferable to read only a portion of the data.
 # To do this, index or slice into the ``data`` attribute just like if you were
 # indexing or slicing a numpy array.
@@ -245,7 +245,7 @@ clarity, we define them here:
 #
 #
 # Access single unit data
-# --------
+# -----------------------
 # Data and metadata about sorted single units are stored in :py:class:`~pynwb.misc.Units`
 # object. It stores metadata about each single unit in a tabular form, where each row represents
 # a unit with spike times and additional metadata.
@@ -292,7 +292,7 @@ clarity, we define them here:
 #
 #
 # Visualize spiking activity relative to stimulus onset
-# --------
+# -----------------------------------------------------
 # We can look at when these single units spike relative to when image stimuli were presented to the subject.
 # We will iterate over the first 3 units and get their spike times.
 # Then for each unit, we iterate over each stimulus onset time and compute the spike times relative
@@ -338,7 +338,7 @@ clarity, we define them here:
 #   :align: center
 #
 # Access Trials
-# --------
+# -------------
 # Trials are stored as :py:class:`~pynwb.epoch.TimeIntervals` object which is a subclass
 # of :py:class:`~hdmf.common.table.DynamicTable`. :py:class:`~hdmf.common.table.DynamicTable` objects are used to store
 # metadata about each trial in a tabular form, where each row represents a trial and has a start time, stop time,
@@ -392,7 +392,7 @@ clarity, we define them here:
 #   :align: center
 #
 # Exploring the NWB file
-# --------
+# ----------------------
 # So far we have explored the NWB file by printing the :py:class:`~pynwb.file.NWBFile`
 # object and accessed its attributes, but it may be useful to explore the data in a
 # more interactive, visual way.
@@ -402,7 +402,7 @@ clarity, we define them here:
 # tool, which can open any generic HDF5 file, which an NWB file is.
 #
 # NWBWidgets
-# ^^^^^^
+# ^^^^^^^^^^
 # Install NWBWidgets using pip install:
 #
 # .. code-block:: bash
@@ -429,7 +429,7 @@ clarity, we define them here:
 #
 #
 # HDFView
-# ^^^^^^
+# ^^^^^^^
 # To use `HDFView <https://www.hdfgroup.org/downloads/hdfview>`_ to inspect and explore the NWB file,
 # download and install HDFView from `here <https://www.hdfgroup.org/downloads/hdfview>`_
 # and then open the NWB file using the application.
