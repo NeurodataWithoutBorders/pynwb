@@ -215,6 +215,14 @@ behavioral_events = BehavioralEvents(time_series=time_series, name="BehavioralEv
 behavior_module.add(behavioral_events)
 
 ####################
+# Storing only the timestamps of the events is possible with the `ndx-events <https://pypi.org/project/ndx-events/>`_
+# NWB extension. You can also add labels associated with the events with this extension.
+# You can find information about installation and example usage `here <https://github.com/rly/ndx-events#ndx-events-extension-for-nwb>`_.
+#
+# .. seealso::
+#    You can learn more about using extensions in the :ref:`tutorial-extending-nwb` tutorial.
+
+####################
 # BehavioralEpochs: Storing intervals of behavior data
 # ----------------------------------------------------
 # :py:class:`~pynwb.behavior.BehavioralEpochs` is for storing intervals of behavior data.
