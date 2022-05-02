@@ -11,20 +11,24 @@ behavioral data to an :py:class:`~pynwb.file.NWBFile`.
     You can learn more about the :py:class:`~pynwb.file.NWBFile` format in the :ref:`basics` tutorial.
 
 The examples below follow this general workflow for adding behavior data to an :py:class:`~pynwb.file.NWBFile`:
-(1) create an object:
-- :py:class:`~pynwb.base.TimeSeries` for continuous time series data,
-- :py:class:`~pynwb.base.SpatialSeries` for continuous spatial data (e.g. position, direction
-relative to some reference frame),
-- :py:class:`~pynwb.misc.IntervalSeries` or :py:class:`~pynwb.epoch.TimeIntervals` for time intervals
-(2) store that object inside a behavior interface object:
-- :py:class:`~pynwb.behavior.Position` for position measured over time
-- :py:class:`~pynwb.behavior.CompassDirection` for view angle measured over time
-- :py:class:`~pynwb.behavior.BehavioralTimeSeries` for continuous time series data
-- :py:class:`~pynwb.behavior.BehavioralEvents` for behavioral events (e.g. reward amount)
-- :py:class:`~pynwb.behavior.BehavioralEpochs` for behavioral intervals (e.g. sleep intervals)
-- :py:class:`~pynwb.behavior.PupilTracking` for eye-tracking data of pupil size
-- :py:class:`~pynwb.behavior.EyeTracking` for eye-tracking data of gaze direction
-(3) create a behavior processing module for the :py:class:`~pynwb.file.NWBFile` and add the interface object(s) to it
+
+* create an object:
+
+  * :py:class:`~pynwb.base.TimeSeries` for continuous time series data,
+  * :py:class:`~pynwb.base.SpatialSeries` for continuous spatial data (e.g. position, direction relative to some reference frame),
+  * :py:class:`~pynwb.misc.IntervalSeries` or :py:class:`~pynwb.epoch.TimeIntervals` for time intervals
+
+* store that object inside a behavior interface object:
+
+  * :py:class:`~pynwb.behavior.Position` for position measured over time
+  * :py:class:`~pynwb.behavior.CompassDirection` for view angle measured over time
+  * :py:class:`~pynwb.behavior.BehavioralTimeSeries` for continuous time series data
+  * :py:class:`~pynwb.behavior.BehavioralEvents` for behavioral events (e.g. reward amount)
+  * :py:class:`~pynwb.behavior.BehavioralEpochs` for behavioral intervals (e.g. sleep intervals)
+  * :py:class:`~pynwb.behavior.PupilTracking` for eye-tracking data of pupil size
+  * :py:class:`~pynwb.behavior.EyeTracking` for eye-tracking data of gaze direction
+
+* create a behavior processing module for the :py:class:`~pynwb.file.NWBFile` and add the interface object(s) to it
 
 
 The following examples will reference variables that may not be defined within the block they are used in. For
@@ -130,7 +134,7 @@ position = Position(spatial_series=position_spatial_series)
 #
 # .. seealso::
 #    You can learn more about best practices that can be applied to
-#    :py:class:`~pynwb.behavior.SpatialSeries` `here <https://www.nwb.org/best-practices/#timeseries>`_.
+#    :py:class:`~pynwb.behavior.SpatialSeries` at `NWB Best Practices <https://www.nwb.org/best-practices/#timeseries>`_.
 #
 
 ####################
