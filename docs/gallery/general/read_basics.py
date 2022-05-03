@@ -25,14 +25,9 @@ documentation for more details on the available tools.
 The following examples will reference variables that may not be defined within the block they are used in. For
 clarity, we define them here:
 """
-#####################
-#
-# .. code-block:: python
-#
-#     import numpy as np
-#     from pynwb import NWBHDF5IO
-#     import matplotlib.pyplot as plt
-#
+import numpy as np
+from pynwb import NWBHDF5IO
+import matplotlib.pyplot as plt
 
 ####################
 # Read the data
@@ -102,18 +97,13 @@ clarity, we define them here:
 # file is located in "sub-P11HMH" folder.
 #
 
-#####################
-#
-# .. code-block:: python
-#
-#     from dandi.dandiapi import DandiAPIClient
-#
-#     dandiset_id = "000004"
-#     filepath = "sub-P11HMH/sub-P11HMH_ses-20061101_ecephys+image.nwb"
-#     with DandiAPIClient() as client:
-#          asset = client.get_dandiset(dandiset_id, 'draft').get_asset_by_path(filepath)
-#          s3_path = asset.get_content_url(follow_redirects=1, strip_query=True)
-#
+from dandi.dandiapi import DandiAPIClient
+
+dandiset_id = "000004"
+filepath = "sub-P11HMH/sub-P11HMH_ses-20061101_ecephys+image.nwb"
+with DandiAPIClient() as client:
+    asset = client.get_dandiset(dandiset_id, "draft").get_asset_by_path(filepath)
+    s3_path = asset.get_content_url(follow_redirects=1, strip_query=True)
 
 ####################
 # Using NWBHDF5IO
@@ -127,14 +117,9 @@ clarity, we define them here:
 # The ``file_path`` can be the path that points to the downloaded file on your computer or
 # it can be an S3 URL.
 
-#####################
-#
-# .. code-block:: python
-#
-#     # Open the file in read mode "r", and specify the driver as "ros3" for S3 files
-#     io = NWBHDF5IO(s3_path, mode="r", driver="ros3")
-#     nwbfile = io.read()
-#
+# Open the file in read mode "r", and specify the driver as "ros3" for S3 files
+io = NWBHDF5IO(s3_path, mode="r", driver="ros3")
+nwbfile = io.read()
 
 ####################
 # Access stimulus data
@@ -143,12 +128,7 @@ clarity, we define them here:
 # Data representing stimuli that were presented to the experimental subject are stored in
 # :py:class:`~pynwb.file.NWBFile.stimulus` within the :py:class:`~pynwb.file.NWBFile` object.
 
-#####################
-#
-# .. code-block:: python
-#
-#     nwbfile.stimulus
-#
+nwbfile.stimulus
 
 ####################
 # ``NWBFile.stimulus`` is a dictionary that can contain PyNWB objects representing
@@ -156,12 +136,7 @@ clarity, we define them here:
 # In this file, ``NWBFile.stimulus`` contains a single key "StimulusPresentation" with an
 # :py:class:`~pynwb.image.OpticalSeries` object representing what images were shown to the subject and at what times.
 
-#####################
-#
-# .. code-block:: python
-#
-#     nwbfile.stimulus["StimulusPresentation"]
-#
+nwbfile.stimulus["StimulusPresentation"]
 
 ####################
 # .. code-block:: none
@@ -192,25 +167,15 @@ clarity, we define them here:
 # does not read the data values, but presents an HDF5 object that can be indexed to read data.
 # You can use the ``[:]`` operator to read the entire data array into memory.
 
-#####################
-#
-# .. code-block:: python
-#
-#     stimulus_presentation = nwbfile.stimulus["StimulusPresentation"]
-#     all_stimulus_data = stimulus_presentation.data[:]
-#
+stimulus_presentation = nwbfile.stimulus["StimulusPresentation"]
+all_stimulus_data = stimulus_presentation.data[:]
 
 ####################
 # Images may be 3D or 4D (grayscale or RBG), where the first dimension must be time (frame).
 # The second and third dimensions represent x and y.
 # The fourth dimension represents the RGB value (length of 3) for color images.
 
-#####################
-#
-# .. code-block:: python
-#
-#     stimulus_presentation.data.shape
-#
+stimulus_presentation.data.shape
 
 ####################
 # .. code-block:: none
@@ -225,16 +190,11 @@ clarity, we define them here:
 # To do this, index or slice into the ``data`` attribute just like if you were
 # indexing or slicing a numpy array.
 
-#####################
-#
-# .. code-block:: python
-#
-#     frame_index = 31
-#     image = stimulus_presentation.data[frame_index]
-#     # Reverse the last dimension because the data were stored in BGR instead of RGB
-#     image = image[..., ::-1]
-#     plt.imshow(image, aspect='auto')
-#
+frame_index = 31
+image = stimulus_presentation.data[frame_index]
+# Reverse the last dimension because the data were stored in BGR instead of RGB
+image = image[..., ::-1]
+plt.imshow(image, aspect="auto")
 
 ####################
 #
@@ -254,35 +214,20 @@ clarity, we define them here:
 #     You can learn more about units in the :ref:`ecephys_tutorial` tutorial.
 #
 
-#####################
-#
-# .. code-block:: python
-#
-#     units = nwbfile.units
-#
+units = nwbfile.units
 
 ####################
 # We can view the single unit data as a :py:class:`~pandas.DataFrame`.
 
-#####################
-#
-# .. code-block:: python
-#
-#     units_df = units.to_dataframe()
-#     units_df
-#
+units_df = units.to_dataframe()
+units_df
 
 ####################
 # To access the spike times of the first single unit, index nwb.units with the column
 # name "spike_times" and then the row index, 0. All times in NWB are stored in seconds
 # relative to the session start time.
 
-#####################
-#
-# .. code-block:: python
-#
-#     units["spike_times"][0]
-#
+units["spike_times"][0]
 
 ####################
 # .. code-block:: none
@@ -298,37 +243,33 @@ clarity, we define them here:
 # Then for each unit, we iterate over each stimulus onset time and compute the spike times relative
 # to stimulus onset. Finally, create a raster plot and histogram of these aligned spike times.
 
-#####################
-#
-# .. code-block:: python
-#
-#     before = 1.  # in seconds
-#     after = 3.
-#
-#     # Get the stimulus times for all stimuli
-#     stim_on_times = stimulus_presentation.timestamps[:]
-#
-#     for unit in range(3):
-#         unit_spike_times = nwbfile.units["spike_times"][unit]
-#         trial_spikes = []
-#         for time in stim_on_times:
-#             # Compute spike times relative to stimulus onset
-#             aligned_spikes = unit_spike_times - time
-#             # Keep only spike times in a given time window around the stimulus onset
-#             aligned_spikes = aligned_spikes[
-#                 (-before < aligned_spikes) & (aligned_spikes < after)]
-#             trial_spikes.append(aligned_spikes)
-#         fig, axs = plt.subplots(2, 1, sharex="all")
-#         plt.xlabel('time (s)')
-#         axs[0].eventplot(trial_spikes)
-#
-#         axs[0].set_ylabel('trial')
-#         axs[0].set_title('unit {}'.format(unit))
-#         axs[0].axvline(0, color=[.5, .5, .5])
-#
-#         axs[1].hist(np.hstack(trial_spikes), 30)
-#         axs[1].axvline(0, color=[.5, .5, .5])
-#
+before = 1.0  # in seconds
+after = 3.0
+
+# Get the stimulus times for all stimuli
+stim_on_times = stimulus_presentation.timestamps[:]
+
+for unit in range(3):
+    unit_spike_times = nwbfile.units["spike_times"][unit]
+    trial_spikes = []
+    for time in stim_on_times:
+        # Compute spike times relative to stimulus onset
+        aligned_spikes = unit_spike_times - time
+        # Keep only spike times in a given time window around the stimulus onset
+        aligned_spikes = aligned_spikes[
+            (-before < aligned_spikes) & (aligned_spikes < after)
+        ]
+        trial_spikes.append(aligned_spikes)
+    fig, axs = plt.subplots(2, 1, sharex="all")
+    plt.xlabel("time (s)")
+    axs[0].eventplot(trial_spikes)
+
+    axs[0].set_ylabel("trial")
+    axs[0].set_title("unit {}".format(unit))
+    axs[0].axvline(0, color=[0.5, 0.5, 0.5])
+
+    axs[1].hist(np.hstack(trial_spikes), 30)
+    axs[1].axvline(0, color=[0.5, 0.5, 0.5])
 
 ####################
 #
@@ -349,40 +290,31 @@ clarity, we define them here:
 #
 # Similarly to :py:class:`~pynwb.misc.Units` we can view trials as a :py:class:`pandas.DataFrame`.
 
-#####################
-#
-# .. code-block:: python
-#
-#     trials_df = nwbfile.trials.to_dataframe()
-#     trials_df
-#
+trials_df = nwbfile.trials.to_dataframe()
+trials_df
 
 ####################
 # The :py:class:`~pynwb.file.NWBFile.stimulus` can be mapped one to one to each row (trial)
 # of :py:class:`~pynwb.file.NWBFile.trials` based on the ``stim_on_time`` column.
 
-#####################
-#
-# .. code-block:: python
-#
-#     assert np.all(stimulus_presentation.timestamps[:] == trials_df.stim_on_time[:])
-#
+assert np.all(stimulus_presentation.timestamps[:] == trials_df.stim_on_time[:])
 
 ####################
 # Visualize the first 3 images that were categorized as landscapes in the session:
 
-#####################
-#
-# .. code-block:: python
-#
-#     stim_on_times_landscapes = trials_df[trials_df.category_name == 'landscapes'].stim_on_time
-#     for time in stim_on_times_landscapes[:3]:
-#         img = np.squeeze(stimulus_presentation.data[np.where(stimulus_presentation.timestamps[:] == time)])
-#         # Reverse the last dimension because the data were stored in BGR instead of RGB
-#         img = img[..., ::-1]
-#         plt.figure()
-#         plt.imshow(img, aspect='auto')
-#
+stim_on_times_landscapes = trials_df[
+    trials_df.category_name == "landscapes"
+].stim_on_time
+for time in stim_on_times_landscapes[:3]:
+    img = np.squeeze(
+        stimulus_presentation.data[
+            np.where(stimulus_presentation.timestamps[:] == time)
+        ]
+    )
+    # Reverse the last dimension because the data were stored in BGR instead of RGB
+    img = img[..., ::-1]
+    plt.figure()
+    plt.imshow(img, aspect="auto")
 
 ####################
 #
@@ -408,6 +340,7 @@ clarity, we define them here:
 # .. code-block:: bash
 #
 #    $ pip install -U nwbwidgets
+#
 # Then import the ``nwbwidgets`` package and run the ``nwb2widget()`` function on
 # the :py:class:`~pynwb.file.NWBFile` object.
 
