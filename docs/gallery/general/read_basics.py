@@ -118,7 +118,8 @@ with DandiAPIClient() as client:
 # it can be an S3 URL.
 
 # Open the file in read mode "r", and specify the driver as "ros3" for S3 files
-io = NWBHDF5IO(s3_path, mode="r", driver="ros3")
+# driver="ros3"
+io = NWBHDF5IO(s3_path, mode="r")
 nwbfile = io.read()
 
 ####################
