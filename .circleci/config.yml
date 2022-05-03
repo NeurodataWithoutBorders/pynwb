@@ -295,7 +295,7 @@ jobs:
       - TEST_TOX_ENV: "gallery-py37-min-req"
     <<: *gallery-steps
 
-  gallery39-ros3:   # tox and conda do not play nicely so do not use tox here
+  gallery38-ros3:   # tox and conda do not play nicely so do not use tox here
     <<: *conda-image
     steps:
       - checkout
@@ -306,7 +306,7 @@ jobs:
           command: |
             conda config --set always_yes yes --set changeps1 no
             conda config --add channels conda-forge
-            conda install python=3.9
+            conda install python=3.8
       - run:
           name: Run the tests
           command: |
@@ -398,7 +398,7 @@ workflows:
           <<: *no_filters
       - gallery38: # TODO replace with gallery39 after allensdk support py39
           <<: *no_filters
-      - gallery39-ros3:
+      - gallery38-ros3:
           <<: *no_filters
       - miniconda39-ros3:
           <<: *no_filters
@@ -411,7 +411,7 @@ workflows:
             - miniconda39
             - gallery37-min-req
             - gallery38  # TODO gallery39
-            - gallery39-ros3
+            - gallery38-ros3
             - miniconda39-ros3
           filters:
             tags:
@@ -432,7 +432,7 @@ workflows:
             - miniconda39
             - gallery37-min-req
             - gallery38  # TODO gallery39
-            - gallery39-ros3
+            - gallery38-ros3
             - miniconda39-ros3
           filters:
             tags:
@@ -482,7 +482,7 @@ workflows:
           <<: *no_filters
       - gallery39-upgrade-dev-pre:
           <<: *no_filters
-      - gallery39-ros3:
+      - gallery38-ros3:
           <<: *no_filters
       - miniconda39-ros3:
           <<: *no_filters
