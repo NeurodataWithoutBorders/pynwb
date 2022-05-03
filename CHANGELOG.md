@@ -7,7 +7,7 @@
 
 ### Documentation and tutorial enhancements:
 - Add copy button to code blocks @weiglszonja (#1460)
-- Create behavioral tutorial (#1464) 
+- Create behavioral tutorial @weiglszonja (#1464) 
 
 ## PyNWB 2.0.1 (March 16, 2022)
 
