@@ -38,6 +38,9 @@ except NameError:
 df_basedir = os.path.abspath(os.path.join(
     os.path.dirname(tutorial_path),
     "../../source/tutorials/domain/images/"))
+# for gallery tests only
+if not os.path.exists(df_basedir):
+    os.makedirs(df_basedir, exist_ok=True)
 
 # Set rendering options for tables
 pandas.set_option("display.max_colwidth", 30)
