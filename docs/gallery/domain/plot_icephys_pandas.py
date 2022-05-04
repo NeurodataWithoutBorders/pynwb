@@ -28,12 +28,24 @@ tables and how to create an NWBFile for intracellular electrophysiology data.
 import numpy as np
 import pandas
 import dataframe_image
-df_basedir = "../../source/tutorials/domain/images/"  # directory to save rendered dataframe images for display
+import os
+# Get the path to the this tutorial
+try:
+    tutorial_path = os.path.abspath(__file__)    # when running as a .py
+except NameError:
+    tutorial_path = os.path.abspath("__file__")  # When running as a script or as a jupyter notebook
+# directory to save rendered dataframe images for display
+df_basedir = os.path.abspath(os.path.join(
+    os.path.dirname(tutorial_path),
+    "../../source/tutorials/domain/images/"))
 
-# Set pandas rendering option to avoid very wide tables in the html docs
+# Set rendering options for tables
 pandas.set_option("display.max_colwidth", 30)
 pandas.set_option("display.max_rows", 10)
 pandas.set_option("display.max_columns", 6)
+pandas.set_option("display.colheader_justify", "right")
+dfi_fontsize = 8  # Fontsize to use when rendering with dataframe_image
+
 
 #####################################################################
 # Example setup
@@ -178,8 +190,9 @@ ir_df = nwbfile.intracellular_recordings.to_dataframe(
 # save the table as image to display in the docs
 dataframe_image.export(
     obj=ir_df,
-    filename=df_basedir + 'intracellular_recordings_dataframe.png',
-    table_conversion='matplotlib')
+    filename=os.path.join(df_basedir, 'intracellular_recordings_dataframe.png'),
+    table_conversion='matplotlib',
+    fontsize=dfi_fontsize)
 
 #####################################################################
 # .. image:: images/intracellular_recordings_dataframe.png
@@ -248,8 +261,9 @@ icephys_meta_df = to_hierarchical_dataframe(root_table)
 # save table as image to display in the docs
 dataframe_image.export(
     obj=icephys_meta_df,
-    filename=df_basedir + 'icephys_meta_dataframe.png',
-    table_conversion='matplotlib')
+    filename=os.path.join(df_basedir, 'icephys_meta_dataframe.png'),
+    table_conversion='matplotlib',
+    fontsize=dfi_fontsize)
 
 #####################################################################
 # .. image:: images/icephys_meta_dataframe.png
@@ -283,8 +297,9 @@ drid_icephys_meta_df = drop_id_columns(dataframe=icephys_meta_df, inplace=False)
 # save the table as image to display in the docs
 dataframe_image.export(
     obj=drid_icephys_meta_df,
-    filename=df_basedir + 'icephys_meta_dataframe_drop_id.png',
-    table_conversion='matplotlib')
+    filename=os.path.join(df_basedir, 'icephys_meta_dataframe_drop_id.png'),
+    table_conversion='matplotlib',
+    fontsize=dfi_fontsize)
 
 #####################################################################
 # .. image:: images/icephys_meta_dataframe_drop_id.png
@@ -320,8 +335,9 @@ icephys_meta_df = pandas.concat([icephys_meta_df, stimulus_df], axis=1)
 # save the table as image to display in the docs
 dataframe_image.export(
     obj=icephys_meta_df,
-    filename=df_basedir + 'icephys_meta_dataframe_expand_tsr.png',
-    table_conversion='matplotlib')
+    filename=os.path.join(df_basedir, 'icephys_meta_dataframe_expand_tsr.png'),
+    table_conversion='matplotlib',
+    fontsize=dfi_fontsize)
 
 #####################################################################
 # .. image:: images/icephys_meta_dataframe_expand_tsr.png
@@ -366,9 +382,10 @@ for field in ['neurodata_type', 'gain', 'rate', 'starting_time', 'object_id']:
 # save the table as image to display in the docs
 dataframe_image.export(
     obj=icephys_meta_df,
-    filename=df_basedir + 'icephys_meta_dataframe_add_stimres.png',
+    filename=os.path.join(df_basedir, 'icephys_meta_dataframe_add_stimres.png'),
     table_conversion='matplotlib',
-    max_cols=10)
+    max_cols=10,
+    fontsize=dfi_fontsize)
 
 #####################################################################
 # .. image:: images/icephys_meta_dataframe_add_stimres.png
@@ -507,9 +524,10 @@ query_res_df = icephys_meta_df[
 # save the table as image to display in the docs
 dataframe_image.export(
     obj=query_res_df,
-    filename=df_basedir + 'icephys_meta_query_result_dataframe.png',
+    filename=os.path.join(df_basedir, 'icephys_meta_query_result_dataframe.png'),
     table_conversion='matplotlib',
-    max_cols=10)
+    max_cols=10,
+    fontsize=dfi_fontsize)
 
 #####################################################################
 # .. image:: images/icephys_meta_query_result_dataframe.png
