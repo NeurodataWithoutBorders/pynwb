@@ -27,21 +27,23 @@ tables and how to create an NWBFile for intracellular electrophysiology data.
 # Standard Python imports
 import numpy as np
 import pandas
+
+#####################################################################
+# Settings for improving rendering of tables in the online tutorial
 import dataframe_image
 import os
 # Get the path to the this tutorial
 try:
     tutorial_path = os.path.abspath(__file__)    # when running as a .py
 except NameError:
-    tutorial_path = os.path.abspath("__file__")  # When running as a script or as a jupyter notebook
+    tutorial_path = os.path.abspath("__file__")  # when running as a script or notebook
 # directory to save rendered dataframe images for display
 df_basedir = os.path.abspath(os.path.join(
     os.path.dirname(tutorial_path),
     "../../source/tutorials/domain/images/"))
-# for gallery tests only
-if not os.path.exists(df_basedir):
-    os.makedirs(df_basedir, exist_ok=True)
-
+# Create the image directory. This is necessary only for gallery tests on GitHub
+# but not for normal doc builds the output path already exists
+os.makedirs(df_basedir, exist_ok=True)
 # Set rendering options for tables
 pandas.set_option("display.max_colwidth", 30)
 pandas.set_option("display.max_rows", 10)
