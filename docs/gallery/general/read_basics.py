@@ -14,8 +14,7 @@ We will demonstrate how to use `DANDI <https://gui.dandiarchive.org/#/>`_ neurop
 the data: (1) by downloading it to your computer, (2) streaming it from S3.
 
 We will briefly show tools for exploring NWB Files interactively, and refer the reader to
-`Analysis and Visualization Tools <https://nwb-overview.readthedocs.io/en/latest/tools/tools_home.html#analysis-and-visualization-tools>`_
-documentation for more details on the available tools.
+:nwb_overview:`NWB Overview <tools/tools_home.html>` documentation for more details about the available tools.
 
 
 .. seealso::
@@ -90,7 +89,7 @@ import matplotlib.pyplot as plt
 # .. seealso::
 #     You can learn more about streaming data in the :ref:`streaming` tutorial.
 #
-# Then, we will use the ``DandiAPIClient`` to obtain the S3 URL that points to the NWB File
+# Then, we will use the :py:class:`~dandi.dandiapi.DandiAPIClient` to obtain the S3 URL that points to the NWB File
 # stored in S3. We will need the identifier of the dataset (``dandiset_id``) and the path
 # to the NWB File.
 # We can read these from the DANDI archive URL where ``dandiset_id`` is "000004" and
@@ -110,7 +109,7 @@ with DandiAPIClient() as client:
 # ---------------
 #
 # Reading and writing NWB data is carried out using the :py:class:`~pynwb.NWBHDF5IO` class.
-# ``NWBHDF5IO`` reads NWB data that is in `HDF5 <https://www.hdfgroup.org/solutions/hdf5/>`_
+# :py:class:`~pynwb.NWBHDF5IO` reads NWB data that is in `HDF5 <https://www.hdfgroup.org/solutions/hdf5/>`_
 # storage format, a popular, hierarchical format for storing large-scale scientific data.
 #
 # Use the ``read`` method to read the data into a :py:class:`~pynwb.file.NWBFile` object.
