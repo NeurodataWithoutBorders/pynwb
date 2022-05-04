@@ -178,7 +178,8 @@ ir_df = nwbfile.intracellular_recordings.to_dataframe(
 # save the table as image to display in the docs
 dataframe_image.export(
     obj=ir_df,
-    filename=df_basedir + 'intracellular_recordings_dataframe.png')
+    filename=df_basedir + 'intracellular_recordings_dataframe.png',
+    table_conversion='matplotlib')
 
 #####################################################################
 # .. image:: images/intracellular_recordings_dataframe.png
@@ -245,7 +246,10 @@ from hdmf.common.hierarchicaltable import to_hierarchical_dataframe
 icephys_meta_df = to_hierarchical_dataframe(root_table)
 
 # save table as image to display in the docs
-dataframe_image.export(icephys_meta_df, df_basedir + 'icephys_meta_dataframe.png')
+dataframe_image.export(
+    obj=icephys_meta_df,
+    filename=df_basedir + 'icephys_meta_dataframe.png',
+    table_conversion='matplotlib')
 
 #####################################################################
 # .. image:: images/icephys_meta_dataframe.png
@@ -279,7 +283,8 @@ drid_icephys_meta_df = drop_id_columns(dataframe=icephys_meta_df, inplace=False)
 # save the table as image to display in the docs
 dataframe_image.export(
     obj=drid_icephys_meta_df,
-    filename=df_basedir + 'icephys_meta_dataframe_drop_id.png')
+    filename=df_basedir + 'icephys_meta_dataframe_drop_id.png',
+    table_conversion='matplotlib')
 
 #####################################################################
 # .. image:: images/icephys_meta_dataframe_drop_id.png
@@ -315,7 +320,8 @@ icephys_meta_df = pandas.concat([icephys_meta_df, stimulus_df], axis=1)
 # save the table as image to display in the docs
 dataframe_image.export(
     obj=icephys_meta_df,
-    filename=df_basedir + 'icephys_meta_dataframe_expand_tsr.png')
+    filename=df_basedir + 'icephys_meta_dataframe_expand_tsr.png',
+    table_conversion='matplotlib')
 
 #####################################################################
 # .. image:: images/icephys_meta_dataframe_expand_tsr.png
@@ -361,6 +367,7 @@ for field in ['neurodata_type', 'gain', 'rate', 'starting_time', 'object_id']:
 dataframe_image.export(
     obj=icephys_meta_df,
     filename=df_basedir + 'icephys_meta_dataframe_add_stimres.png',
+    table_conversion='matplotlib',
     max_cols=10)
 
 #####################################################################
@@ -501,6 +508,7 @@ query_res_df = icephys_meta_df[
 dataframe_image.export(
     obj=query_res_df,
     filename=df_basedir + 'icephys_meta_query_result_dataframe.png',
+    table_conversion='matplotlib',
     max_cols=10)
 
 #####################################################################
