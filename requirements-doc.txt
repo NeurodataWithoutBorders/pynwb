@@ -8,3 +8,4 @@ MarkupSafe==2.0.1  # resolve incompatibility between jinja2 and markupsafe: http
 Pillow
 sphinx-copybutton
 dataframe_image   # used to render large dataframe as image in the sphinx gallery to improve html display
+lxml  # used by dataframe_image when using the matplotlib backend
