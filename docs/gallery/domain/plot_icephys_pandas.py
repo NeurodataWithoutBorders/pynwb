@@ -44,7 +44,7 @@ pandas.set_option("display.max_colwidth", 30)
 pandas.set_option("display.max_rows", 10)
 pandas.set_option("display.max_columns", 6)
 pandas.set_option("display.colheader_justify", "right")
-dfi_fontsize = 8  # Fontsize to use when rendering with dataframe_image
+dfi_fontsize = 7  # Fontsize to use when rendering with dataframe_image
 
 
 #####################################################################
