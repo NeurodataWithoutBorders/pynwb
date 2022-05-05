@@ -8,6 +8,8 @@
 ### Documentation and tutorial enhancements:
 - Add copy button to code blocks @weiglszonja (#1460)
 - Create behavioral tutorial @weiglszonja (#1464) 
+- Enhance display of icephys pandas tutorial by using ``dataframe_image`` to render and display large tables as images. @oruebel (#1469)
+
 - Create tutorial about reading and exploring an existing `NWBFile` @weiglszonja (#1453)
 
 ## PyNWB 2.0.1 (March 16, 2022)
