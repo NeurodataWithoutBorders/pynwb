@@ -286,7 +286,7 @@ nwbfile.units.to_dataframe()
 #
 # As mentioned above, :py:class:`~pynwb.ecephys.ElectricalSeries` objects
 # are meant for storing specific types of extracellular recordings. In addition to this
-# :py:class:`~pynwb.base.TimeSeries` class, NWB provides some :ref:`basic_data_interfaces`
+# :py:class:`~pynwb.base.TimeSeries` class, NWB provides some :ref:`modules_overview`
 # for designating the type of data you are storing. We will briefly discuss them here, and refer the reader to
 # :py:mod:`API documentation <pynwb.ecephys>` and :ref:`basics` for more details on
 # using these objects.
