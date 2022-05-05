@@ -208,7 +208,7 @@ for k, v in nwbfile.acquisition.items():
 # how ``h5py.Dataset`` objects should be handled on write by the PyNWBs HDF5 backend via the ``link_data``
 # parameter. If ``link_data`` is set to ``True`` then a ``SoftLink`` or ``ExternalLink`` will be created to
 # point to the HDF5 dataset On the other hand, if ``link_data`` is set to ``False`` then the dataset
-# be copied using `h5py.Group.copy <http://docs.h5py.org/en/latest/high/group.html#Group.copy>`__
+# be copied using `h5py.Group.copy <https://docs.h5py.org/en/latest/high/group.html#h5py.Group.copy>`__
 # **without copying attributes** and **without expanding soft links, external links, or references**.
 #
 # .. note::
