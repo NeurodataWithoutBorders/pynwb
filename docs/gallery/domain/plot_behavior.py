@@ -239,7 +239,7 @@ behavior_module.add(behavioral_events)
 ####################
 # Storing only the timestamps of the events is possible with the `ndx-events <https://pypi.org/project/ndx-events/>`_
 # NWB extension. You can also add labels associated with the events with this extension.
-# You can find information about installation and example usage `here <https://github.com/rly/ndx-events>`_.
+# You can find information about installation and example usage `here <https://github.com/nwb-extensions/ndx-events-record>`_.
 #
 # .. seealso::
 #    You can learn more about using extensions in the :ref:`tutorial-extending-nwb` tutorial.
