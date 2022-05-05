@@ -24,6 +24,7 @@ We will briefly show tools for exploring NWB Files interactively, and refer the 
 The following examples will reference variables that may not be defined within the block they are used in. For
 clarity, we define them here:
 """
+# sphinx_gallery_thumbnail_path = 'figures/gallery_thumbnails_read_basics.png'
 import numpy as np
 from pynwb import NWBHDF5IO
 import matplotlib.pyplot as plt
