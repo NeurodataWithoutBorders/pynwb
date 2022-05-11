@@ -4,16 +4,16 @@
 Reading and Exploring an NWB File
 ==================================
 
-This tutorial will demonstrate how to read, explore and do basic visualizations with
+This tutorial will demonstrate how to read, explore, and do basic visualizations with
 an NWB File using different tools.
 
 An :py:class:`~pynwb.file.NWBFile` represents a single session of an experiment.
 It contains all the data of that session and the metadata required to understand the data.
 
-We will demonstrate how to use `DANDI <https://gui.dandiarchive.org/#/>`_ neurophysiology data archive to access
-the data: (1) by downloading it to your computer, (2) streaming it from S3.
+We will demonstrate how to use the `DANDI <https://gui.dandiarchive.org/#/>`_ neurophysiology data archive to access
+the data in two different ways: (1) by downloading it to your computer and (2) streaming it.
 
-We will briefly show tools for exploring NWB Files interactively, and refer the reader to
+We will briefly show tools for exploring NWB Files interactively and refer the reader to the
 :nwb_overview:`NWB Overview <tools/tools_home.html>` documentation for more details about the available tools.
 
 
@@ -44,7 +44,7 @@ import matplotlib.pyplot as plt
 # to your machine.
 #
 # 1. Go to the DANDI archive and open `this <https://gui.dandiarchive.org/#/dandiset/000004/draft>`_ dataset
-# 2. List the files in this dataset by clicking the "Files" button in Dandiset Actions (top right column within the page).
+# 2. List the files in this dataset by clicking the "Files" button in Dandiset Actions (top right column of the page).
 #
 # .. image:: ../../_static/demo_dandi_view_files_in_dataset.png
 #   :width: 700
@@ -95,7 +95,6 @@ import matplotlib.pyplot as plt
 # to the NWB File.
 # We can read these from the DANDI archive URL where ``dandiset_id`` is "000004" and
 # file is located in "sub-P11HMH" folder.
-#
 
 from dandi.dandiapi import DandiAPIClient
 
@@ -110,12 +109,14 @@ with DandiAPIClient() as client:
 # ---------------
 #
 # Reading and writing NWB data is carried out using the :py:class:`~pynwb.NWBHDF5IO` class.
-# :py:class:`~pynwb.NWBHDF5IO` reads NWB data that is in `HDF5 <https://www.hdfgroup.org/solutions/hdf5/>`_
+# :py:class:`~pynwb.NWBHDF5IO` reads NWB data that is in the `HDF5 <https://www.hdfgroup.org/solutions/hdf5/>`_
 # storage format, a popular, hierarchical format for storing large-scale scientific data.
 #
-# Use the ``read`` method to read the data into a :py:class:`~pynwb.file.NWBFile` object.
-# The ``file_path`` can be the path that points to the downloaded file on your computer or
+# The first argument to the constructor of :py:class:`~pynwb.NWBHDF5IO` is the ``file_path`` -
+# this can be the path that points to the downloaded file on your computer or
 # it can be an S3 URL.
+#
+# Use the ``read`` method to read the data into a :py:class:`~pynwb.file.NWBFile` object.
 
 # Open the file in read mode "r", and specify the driver as "ros3" for S3 files
 io = NWBHDF5IO(s3_path, mode="r", driver="ros3")
@@ -171,7 +172,7 @@ stimulus_presentation = nwbfile.stimulus["StimulusPresentation"]
 all_stimulus_data = stimulus_presentation.data[:]
 
 ####################
-# Images may be 3D or 4D (grayscale or RBG), where the first dimension must be time (frame).
+# Images may be 3D or 4D (grayscale or RGB), where the first dimension must be time (frame).
 # The second and third dimensions represent x and y.
 # The fourth dimension represents the RGB value (length of 3) for color images.
 
@@ -223,7 +224,7 @@ units_df = units.to_dataframe()
 units_df
 
 ####################
-# To access the spike times of the first single unit, index nwb.units with the column
+# To access the spike times of the first single unit, index :py:class:`~pynwb.file.NWBFile.units` with the column
 # name "spike_times" and then the row index, 0. All times in NWB are stored in seconds
 # relative to the session start time.
 
@@ -240,8 +241,8 @@ units["spike_times"][0]
 # -----------------------------------------------------
 # We can look at when these single units spike relative to when image stimuli were presented to the subject.
 # We will iterate over the first 3 units and get their spike times.
-# Then for each unit, we iterate over each stimulus onset time and compute the spike times relative
-# to stimulus onset. Finally, create a raster plot and histogram of these aligned spike times.
+# Then for each unit, we will iterate over each stimulus onset time and compute the spike times relative
+# to stimulus onset. Finally, we will create a raster plot and histogram of these aligned spike times.
 
 before = 1.0  # in seconds
 after = 3.0
@@ -288,13 +289,13 @@ for unit in range(3):
 # .. seealso::
 #     You can learn more about trials in the :ref:`basic_trials` tutorial section.
 #
-# Similarly to :py:class:`~pynwb.misc.Units` we can view trials as a :py:class:`pandas.DataFrame`.
+# Similarly to :py:class:`~pynwb.misc.Units`, we can view trials as a :py:class:`pandas.DataFrame`.
 
 trials_df = nwbfile.trials.to_dataframe()
 trials_df
 
 ####################
-# The :py:class:`~pynwb.file.NWBFile.stimulus` can be mapped one to one to each row (trial)
+# The :py:class:`~pynwb.file.NWBFile.stimulus` can be mapped one-to-one to each row (trial)
 # of :py:class:`~pynwb.file.NWBFile.trials` based on the ``stim_on_time`` column.
 
 assert np.all(stimulus_presentation.timestamps[:] == trials_df.stim_on_time[:])
@@ -326,8 +327,9 @@ for time in stim_on_times_landscapes[:3]:
 # Exploring the NWB file
 # ----------------------
 # So far we have explored the NWB file by printing the :py:class:`~pynwb.file.NWBFile`
-# object and accessed its attributes, but it may be useful to explore the data in a
+# object and accessing its attributes, but it may be useful to explore the data in a
 # more interactive, visual way.
+#
 # You can use `NWBWidgets <https://github.com/NeurodataWithoutBorders/nwb-jupyter-widgets>`_,
 # a package containing interactive widgets for visualizing NWB data,
 # or you can use the `HDFView <https://www.hdfgroup.org/downloads/hdfview>`_
