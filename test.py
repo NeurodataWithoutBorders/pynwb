@@ -12,7 +12,7 @@ import sys
 import traceback
 import unittest
 
-flags = {'pynwb': 2, 'integration': 3, 'example': 4, 'backwards': 5, 'validation': 6, 'ros3': 7}
+flags = {'pynwb': 2, 'integration': 3, 'example': 4, 'backwards': 5, 'validation': 6, 'ros3': 7, 'example-ros3': 8}
 
 TOTAL = 0
 FAILURES = 0
@@ -66,15 +66,44 @@ def _import_from_file(script):
 warning_re = re.compile("Parent module '[a-zA-Z0-9]+' not found while handling absolute import")
 
 
+ros3_examples = [
+    os.path.join('general', 'read_basics.py'),
+    os.path.join('advanced_io', 'streaming.py'),
+]
+
+
 def run_example_tests():
-    global TOTAL, FAILURES, ERRORS
     logging.info('running example tests')
     examples_scripts = list()
     for root, dirs, files in os.walk(os.path.join(os.path.dirname(__file__), "docs", "gallery")):
         for f in files:
             if f.endswith(".py"):
+                name_with_parent_dir = os.path.join(os.path.basename(root), f)
+                if name_with_parent_dir in ros3_examples:
+                    logging.info("Skipping %s" % name_with_parent_dir)
+                    continue
                 examples_scripts.append(os.path.join(root, f))
 
+    __run_example_tests_helper(examples_scripts)
+
+
+def run_example_ros3_tests():
+    logging.info('running example ros3 tests')
+    examples_scripts = list()
+    for root, dirs, files in os.walk(os.path.join(os.path.dirname(__file__), "docs", "gallery")):
+        for f in files:
+            if f.endswith(".py"):
+                name_with_parent_dir = os.path.join(os.path.basename(root), f)
+                if name_with_parent_dir not in ros3_examples:
+                    logging.info("Skipping %s" % name_with_parent_dir)
+                    continue
+                examples_scripts.append(os.path.join(root, f))
+
+    __run_example_tests_helper(examples_scripts)
+
+
+def __run_example_tests_helper(examples_scripts):
+    global TOTAL, FAILURES, ERRORS
     TOTAL += len(examples_scripts)
     for script in examples_scripts:
         try:
@@ -206,6 +235,8 @@ def main():
                         help='run integration tests')
     parser.add_argument('-e', '--example', action='append_const', const=flags['example'], dest='suites',
                         help='run example tests')
+    parser.add_argument('-f', '--example-ros3', action='append_const', const=flags['example-ros3'], dest='suites',
+                        help='run example tests with ros3 streaming')
     parser.add_argument('-b', '--backwards', action='append_const', const=flags['backwards'], dest='suites',
                         help='run backwards compatibility tests')
     parser.add_argument('-w', '--validation', action='append_const', const=flags['validation'], dest='suites',
@@ -215,9 +246,11 @@ def main():
     args = parser.parse_args()
     if not args.suites:
         args.suites = list(flags.values())
-        args.suites.pop(args.suites.index(flags['example']))  # remove example as a suite run by default
-        args.suites.pop(args.suites.index(flags['validation']))  # remove validation as a suite run by default
-        args.suites.pop(args.suites.index(flags['ros3']))  # remove ros3 as a suite run by default (different reqs)
+        # remove from test suites run by default
+        args.suites.pop(args.suites.index(flags['example']))
+        args.suites.pop(args.suites.index(flags['example-ros3']))
+        args.suites.pop(args.suites.index(flags['validation']))
+        args.suites.pop(args.suites.index(flags['ros3']))
 
     # set up logger
     root = logging.getLogger()
@@ -243,9 +276,14 @@ def main():
     if flags['example'] in args.suites:
         run_example_tests()
 
+    # Run example tests with ros3 streaming examples
+    if flags['example-ros3'] in args.suites:
+        run_example_ros3_tests()
+
     # Run validation tests
     if flags['validation'] in args.suites:
         run_example_tests()
+        run_example_ros3_tests()
         validate_nwbs()
 
     # Run integration tests

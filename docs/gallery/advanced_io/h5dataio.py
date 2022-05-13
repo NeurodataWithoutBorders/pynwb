@@ -109,9 +109,9 @@ nwbfile.add_acquisition(test_ts)
 # .. note::
 #
 #    Chunking can help improve data read/write performance by allowing us to align chunks with common
-#    read/write operations. The following blog post provides an example
-#    `http://geology.beer/2015/02/10/hdf-for-large-arrays/ <http://geology.beer/2015/02/10/hdf-for-large-arrays/>`__.
-#    for this. But you should also know that, with great power comes great responsibility! I.e., if you choose a
+#    read/write operations. You can find a discussion on how chunking can help in the
+#    `Python and HDF5 book  <https://www.oreilly.com/library/view/python-and-hdf5/9781491944981/ch04.html>`__.
+#    by Andrew Collette. But you should also know that, with great power comes great responsibility! I.e., if you choose a
 #    bad chunk size e.g., too small chunks that don't align with our read/write operations, then chunking can
 #    also harm I/O performance.
 
@@ -208,7 +208,7 @@ for k, v in nwbfile.acquisition.items():
 # how ``h5py.Dataset`` objects should be handled on write by the PyNWBs HDF5 backend via the ``link_data``
 # parameter. If ``link_data`` is set to ``True`` then a ``SoftLink`` or ``ExternalLink`` will be created to
 # point to the HDF5 dataset On the other hand, if ``link_data`` is set to ``False`` then the dataset
-# be copied using `h5py.Group.copy <http://docs.h5py.org/en/latest/high/group.html#Group.copy>`__
+# be copied using `h5py.Group.copy <https://docs.h5py.org/en/latest/high/group.html#h5py.Group.copy>`__
 # **without copying attributes** and **without expanding soft links, external links, or references**.
 #
 # .. note::

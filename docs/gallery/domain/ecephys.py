@@ -125,7 +125,7 @@ for ishank in range(nshanks):
 nwbfile.electrodes.to_dataframe()
 
 #######################
-# .. note:: When we added an electrode with the :py:method:`~pynwb.file.NWBFile.add_electrode`
+# .. note:: When we added an electrode with the :py:meth:`~pynwb.file.NWBFile.add_electrode`
 #    method, we passed in the :py:class:`~pynwb.ecephys.ElectrodeGroup` object for the ``"group"`` argument.
 #    This creates a reference from the ``"electrodes"`` table to the individual :py:class:`~pynwb.ecephys.ElectrodeGroup`
 #    objects, one per row (electrode).
@@ -141,7 +141,7 @@ nwbfile.electrodes.to_dataframe()
 # To create the :py:class:`~pynwb.ecephys.ElectricalSeries` objects, we need to reference a set of rows
 # in the ``"electrodes"`` table to indicate which electrodes were recorded.
 # We will do this by creating a :py:class:`~pynwb.core.DynamicTableRegion`, which is a type of link that allows you to reference
-# :py:method:~pynwb.file.NWBFile.create_electrode_table_region` is a convenience function that creates a :py:class:`~pynwb.core.DynamicTableRegion` which references the ``"electrodes"`` table.
+# :py:meth:~pynwb.file.NWBFile.create_electrode_table_region` is a convenience function that creates a :py:class:`~pynwb.core.DynamicTableRegion` which references the ``"electrodes"`` table.
 #
 
 
@@ -263,7 +263,7 @@ ecephys_module.add(lfp)
 # Spike times are stored in the :py:class:`~pynwb.misc.Units` table, which is a subclass of :py:class:`~hdmf.common.table.DynamicTable`.
 # Adding columns to the :py:class:`~pynwb.misc.Units` table is analogous to how we can add columns to the ``"electrodes"`` and ``"trials"`` tables.
 #
-# We will generate some random spike data and populate the :py:method:`~pynwb.misc.Units` table using the :py:class:`~pynwb.file.NWBFile.add_unit`
+# We will generate some random spike data and populate the :py:meth:`~pynwb.misc.Units` table using the :py:class:`~pynwb.file.NWBFile.add_unit`
 # method. Then we can display the :py:class:`~pynwb.misc.Units` table as a pandas :py:class:`~pandas.DataFrame`.
 
 nwbfile.add_unit_column(name='quality', description='sorting quality')
@@ -286,7 +286,7 @@ nwbfile.units.to_dataframe()
 #
 # As mentioned above, :py:class:`~pynwb.ecephys.ElectricalSeries` objects
 # are meant for storing specific types of extracellular recordings. In addition to this
-# :py:class:`~pynwb.base.TimeSeries` class, NWB provides some :ref:`basic_data_interfaces`
+# :py:class:`~pynwb.base.TimeSeries` class, NWB provides some :ref:`modules_overview`
 # for designating the type of data you are storing. We will briefly discuss them here, and refer the reader to
 # :py:mod:`API documentation <pynwb.ecephys>` and :ref:`basics` for more details on
 # using these objects.

@@ -1,4 +1,6 @@
 '''
+.. _streaming:
+
 Streaming from an S3 Bucket
 ===========================
 
