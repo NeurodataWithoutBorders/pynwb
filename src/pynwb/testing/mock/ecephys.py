@@ -1,20 +1,15 @@
 import numpy as np
 
-from pynwb.file import ElectrodeTable
-
-from pynwb.ecephys import ElectricalSeries, ElectrodeGroup, SpikeEventSeries
 from hdmf.common.table import DynamicTableRegion
+
+from ...file import ElectrodeTable
+from ...ecephys import ElectricalSeries, ElectrodeGroup, SpikeEventSeries
 from .device import mock_Device
 from .utils import name_generator
 
 
-
-
-electrode_group_name = name_generator("ElectrodeGroup")
-
-
 def mock_ElectrodeGroup(
-    name=next(electrode_group_name),
+    name=name_generator("ElectrodeGroup"),
     description="description",
     location="location",
     device=mock_Device(),
@@ -48,7 +43,7 @@ def mock_electrodes(n_electrodes=5, table=mock_ElectrodeTable(n_rows=5)):
 
 
 def mock_ElectricalSeries(
-    name="ElectricalSeries",
+    name=name_generator("ElectricalSeries"),
     description="description",
     data=np.ones((10, 5)),
     rate=30000.0,
@@ -68,7 +63,7 @@ def mock_ElectricalSeries(
 
 
 def mock_SpikeEventSeries(
-    name="ElectricalSeries",
+    name=name_generator("SpikeEventSeries"),
     description="description",
     data=np.ones((10, 5)),
     timestamps=(1., 2., 3, 4., 5.),

@@ -15,25 +15,18 @@ from .device import mock_Device
 from .utils import name_generator
 
 
-optical_channel_name = name_generator("OpticalChannel")
-imaging_plane_name = name_generator("ImagingPlane")
-two_photon_series_name = name_generator("TwoPhotonSeries")
-roi_response_series_name = name_generator("RoiResponseSeries")
-df_over_f_name = name_generator("DfOverF")
-
-
 def mock_OpticalChannel(
-    name=None, description="description", emission_lambda=500.0,
+    name=name_generator("OpticalChannel"),
+    description="description",
+    emission_lambda=500.0,
 ):
     return OpticalChannel(
-        name=name or next(optical_channel_name),
-        description=description,
-        emission_lambda=emission_lambda,
+        name=name, description=description, emission_lambda=emission_lambda,
     )
 
 
 def mock_ImagingPlane(
-    name=None,
+    name=name_generator("ImagingPlane"),
     optical_channel=mock_OpticalChannel(),
     description="description",
     device=mock_Device(),
@@ -51,7 +44,7 @@ def mock_ImagingPlane(
     grid_spacing_unit="meters",
 ):
     return ImagingPlane(
-        name=name or next(imaging_plane_name),
+        name=name,
         optical_channel=optical_channel,
         description=description,
         device=device,
@@ -71,11 +64,11 @@ def mock_ImagingPlane(
 
 
 def mock_TwoPhotonSeries(
-    name=next(two_photon_series_name),
+    name=name_generator("TwoPhotonSeries"),
     imaging_plane=mock_ImagingPlane(),
     data=np.ones((20, 5, 5)),
     rate=50.0,
-    unit='n.a.',
+    unit="n.a.",
     format=None,
     field_of_view=None,
     pmt_gain=None,
@@ -120,20 +113,17 @@ def mock_TwoPhotonSeries(
     )
 
 
-plane_segmentation_name = name_generator("PlaneSegmentation")
-
-
 def mock_PlaneSegmentation(
     description="no description",
     imaging_plane=mock_ImagingPlane(),
-    name=None,
+    name=name_generator("PlaneSegmentation"),
     reference_images=None,
     n_rois=5,
 ):
     plane_segmentation = PlaneSegmentation(
         description=description,
         imaging_plane=imaging_plane,
-        name=name or next(plane_segmentation_name),
+        name=name,
         reference_images=reference_images,
     )
 
@@ -153,7 +143,7 @@ def mock_ImageSegmentation(
 
 
 def mock_RoiResponseSeries(
-    name=None,
+    name=name_generator("RoiResponseSeries"),
     data=np.ones((30, 5)),
     unit="n.a.",
     rois=None,
@@ -161,7 +151,7 @@ def mock_RoiResponseSeries(
     conversion=1.0,
     timestamps=None,
     starting_time=None,
-    rate=50.,
+    rate=50.0,
     comments="no comments",
     description="no description",
     control=None,
@@ -169,7 +159,7 @@ def mock_RoiResponseSeries(
     n_rois=5,
 ):
     return RoiResponseSeries(
-        name=name or next(roi_response_series_name),
+        name=name,
         data=data,
         unit=unit,
         rois=rois
@@ -191,20 +181,14 @@ def mock_RoiResponseSeries(
     )
 
 
-def mock_DfOverF(
-    roi_response_series=None,
-    name="DfOverF"
-):
+def mock_DfOverF(roi_response_series=None, name=name_generator("DfOverF")):
     return DfOverF(
         roi_response_series=roi_response_series or [mock_RoiResponseSeries()],
         name=name,
     )
 
 
-def mock_Fluorescence(
-        roi_response_series=None,
-        name="Fluorescence"
-):
+def mock_Fluorescence(roi_response_series=None, name="Fluorescence"):
     return Fluorescence(
         roi_response_series=roi_response_series or [mock_RoiResponseSeries()],
         name=name,

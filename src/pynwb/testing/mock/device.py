@@ -1,18 +1,10 @@
-import itertools
-
 from ...device import Device
 
-
-def name_device():
-    for i in itertools.count(start=1):
-        yield f"Device{i}"
-
-
-device_name = name_device()
+from .utils import name_generator
 
 
 def mock_Device(
-    name=next(device_name),
+    name=name_generator("Device"),
     description="description",
     manufacturer=None,
 ):

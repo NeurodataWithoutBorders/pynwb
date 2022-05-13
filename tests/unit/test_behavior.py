@@ -6,6 +6,8 @@ from pynwb.behavior import SpatialSeries, BehavioralEpochs, BehavioralEvents, Be
                            EyeTracking, CompassDirection, Position
 from pynwb.testing import TestCase
 
+from pynwb.testing.mock.behavior import mock_SpatialSeries, mock_Position, mock_PupilTracking, mock_CompassDirection
+
 
 class SpatialSeriesConstructor(TestCase):
     def test_init(self):
@@ -77,3 +79,10 @@ class PositionConstructor(TestCase):
 
         pc = Position(sS)
         self.assertEqual(pc.spatial_series.get('test_sS'), sS)
+
+
+def test_mocks():
+    mock_Position()
+    mock_CompassDirection()
+    mock_PupilTracking()
+    mock_SpatialSeries()
