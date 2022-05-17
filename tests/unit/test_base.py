@@ -1,3 +1,5 @@
+import warnings
+
 import numpy as np
 
 from pynwb.base import ProcessingModule, TimeSeries, Images, Image, TimeSeriesReferenceVectorData, TimeSeriesReference
@@ -92,8 +94,23 @@ class TestTimeSeries(TestCase):
         ts = TimeSeries('test_ts', dat, 'volts', timestamps=[0.1, 0.2, 0.3, 0.4])
         self.assertIs(ts.data, dat)
         self.assertEqual(ts.conversion, 1.0)
+        self.assertEqual(ts.offset, 0.0)
         self.assertEqual(ts.resolution, -1.0)
         self.assertEqual(ts.unit, 'volts')
+
+    def test_init_conversion(self):
+        dat = [0, 1, 2, 3, 4]
+        conversion = 2.1
+        ts = TimeSeries('test_ts', dat, 'volts', timestamps=[0.1, 0.2, 0.3, 0.4], conversion=conversion)
+        self.assertIs(ts.data, dat)
+        self.assertEqual(ts.conversion, conversion)
+
+    def test_init_offset(self):
+        dat = [0, 1, 2, 3, 4]
+        offset = 1.2
+        ts = TimeSeries('test_ts', dat, 'volts', timestamps=[0.1, 0.2, 0.3, 0.4], offset=offset)
+        self.assertIs(ts.data, dat)
+        self.assertEqual(ts.offset, offset)
 
     def test_init_timestamps(self):
         dat = [0, 1, 2, 3, 4]
@@ -202,6 +219,22 @@ class TestTimeSeries(TestCase):
         with self.assertRaises(ValueError):
             TimeSeries('test_ts2', [10, 11, 12, 13, 14, 15], 'grams',
                        starting_time=30., timestamps=[.3, .4, .5, .6, .7, .8])
+
+    def test_dimension_warning(self):
+        with warnings.catch_warnings(record=True) as w:
+            # Cause all warnings to always be triggered.
+            warnings.simplefilter("always")
+            TimeSeries(
+                name='test_ts2',
+                data=[10, 11, 12],
+                unit='grams',
+                timestamps=[.3, .4, .5, .6, .7, .8],
+            )
+            assert len(w) == 1
+            assert (
+                "Length of data does not match length of timestamps. Your data may be "
+                "transposed. Time should be on the 0th dimension"
+                   ) in str(w[-1].message)
 
 
 class TestImage(TestCase):

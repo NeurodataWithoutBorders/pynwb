@@ -54,10 +54,12 @@ extensions = [
     'sphinx.ext.intersphinx',
     'sphinx.ext.viewcode',
     'sphinx.ext.extlinks',
-    'sphinx_gallery.gen_gallery'
+    'sphinx_gallery.gen_gallery',
+    'sphinx_copybutton',
 ]
 
 from sphinx_gallery.sorting import ExplicitOrder
+from sphinx_gallery.sorting import ExampleTitleSortKey
 
 sphinx_gallery_conf = {
     # path to your examples scripts
@@ -67,7 +69,8 @@ sphinx_gallery_conf = {
     'subsection_order': ExplicitOrder(['../gallery/general', '../gallery/domain', '../gallery/advanced_io']),
     'backreferences_dir': 'gen_modules/backreferences',
     'min_reported_time': 5,
-    'remove_config_comments': True
+    'remove_config_comments': True,
+    'within_subsection_order': ExampleTitleSortKey
 }
 
 intersphinx_mapping = {
@@ -76,13 +79,15 @@ intersphinx_mapping = {
     'matplotlib': ('https://matplotlib.org', None),
     'h5py': ('https://docs.h5py.org/en/latest/', None),
     'hdmf': ('https://hdmf.readthedocs.io/en/latest/', None),
-    'pandas': ('https://pandas.pydata.org/pandas-docs/stable/', None)
+    'pandas': ('https://pandas.pydata.org/pandas-docs/stable/', None),
+    'dandi': ('https://dandi.readthedocs.io/en/stable/', None),
 }
 
 extlinks = {'incf_lesson': ('https://training.incf.org/lesson/%s', ''),
             'incf_collection': ('https://training.incf.org/collection/%s', ''),
             'nwb_extension': ('https://github.com/nwb-extensions/%s', ''),
-            'pynwb': ('https://github.com/NeurodataWithoutBorders/pynwb/%s', '')}
+            'pynwb': ('https://github.com/NeurodataWithoutBorders/pynwb/%s', ''),
+            'nwb_overview': ('https://nwb-overview.readthedocs.io/en/latest/%s', '')}
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -99,7 +104,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'PyNWB'
-copyright = u'2017-2021, Neurodata Without Borders'
+copyright = u'2017-2022, Neurodata Without Borders'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -157,7 +162,16 @@ html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
 # documentation.
-# html_theme_options = {}
+html_theme_options = {
+    # "style_nav_header_background": "#AFD2E8"
+    "style_nav_header_background": "#000000"
+}
+
+# These paths are either relative to html_static_path
+# or fully qualified paths (eg. https://...)
+html_css_files = [
+    'css/custom.css',
+]
 
 # Add any paths that contain custom themes here, relative to this directory.
 # html_theme_path = []
@@ -172,12 +186,12 @@ html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 # The name of an image file (relative to this directory) to place at the top
 # of the sidebar.
 # html_logo = None
-html_logo = 'logo.png'
+html_logo = 'figures/logo_pynwb_with_margin.png'
 
 # The name of an image file (within the static path) to use as favicon of the
 # docs.  This file should be a Windows icon file (.ico) being 16x16 or 32x32
 # pixels large.
-html_favicon = 'favicon_96.png'
+html_favicon = 'figures/favicon_96.png'
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
@@ -251,7 +265,7 @@ latex_elements = {
 
 # The name of an image file (relative to this directory) to place at the top of
 # the title page.
-latex_logo = 'logo.pdf'
+latex_logo = 'figures/logo_pynwb_with_margin.png'
 
 # For "manual" documents, if this is true, then toplevel headings are parts,
 # not chapters.

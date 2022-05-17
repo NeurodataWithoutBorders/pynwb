@@ -1,32 +1,64 @@
 # PyNWB Changelog
 
-## PyNWB 3.0.0 (upcoming)
+## PyNWB 2.1.0 (Upcoming)
 
 ### Breaking changes:
+- Restrict `SpatialSeries.data` to have no more than 3 columns (#1455)
 - Updated ``TimeIntervals`` to use the new  ``TimeSeriesReferenceVectorData`` type. This does not alter the overall
   structure of ``TimeIntervals`` in a major way aside from changing the value of the ``neurodata_type`` attribute of the
-  ``TimeIntervals.timeseries`` column from ``VectorData`` to ``TimeSeriesReferenceVectorData``. This change facilitate
-  creating common functionality around ``TimeSeriesReferenceVectorData``. For NWB files with v2.4.0 and earlier,
+  ``TimeIntervals.timeseries`` column from ``VectorData`` to ``TimeSeriesReferenceVectorData``. This change facilitates
+  creating common functionality around ``TimeSeriesReferenceVectorData``. For NWB files with version 2.4.0 and earlier,
   the ``TimeIntervals.timeseries`` column is automatically migrated on read in the ``TimeIntervalsMap``
   object mapper class to use the ``TimeSeriesReferenceVectorData`` container class, so that users are presented a
-  consistent API for existing and new files.  This change affects all existing ``TimeIntervals`` tables
-  e.g., ``NBWFil.epochs``, ``NWBFile.trials``, and ``NWBFile.invalid_times``. While this is technically a breaking
+  consistent API for existing and new files. This change affects all existing ``TimeIntervals`` tables
+  e.g., ``NBWFile.epochs``, ``NWBFile.trials``, and ``NWBFile.invalid_times``. While this is technically a breaking
   change, the impact user codes should be minimal as this change primarily adds functionality while the overall
   behavior of the API is largely consistent with existing behavior. @oruebel, @rly (#1390)
 
-### Tutorial enhancements:
+### Documentation and tutorial enhancements:
 - Added tutorial on annotating data via ``TimeIntervals``. @oruebel (#1390)
+- Add copy button to code blocks @weiglszonja (#1460)
+- Create behavioral tutorial @weiglszonja (#1464)
+- Enhance display of icephys pandas tutorial by using ``dataframe_image`` to render and display large tables as images. @oruebel (#1469)
+- Create tutorial about reading and exploring an existing `NWBFile` @weiglszonja (#1453)
 
-## PyNWB 2.0.1 (Upcoming)
+## PyNWB 2.0.1 (March 16, 2022)
 
 ### Bug fixes:
 - Add `environment-ros3.yml` to `MANIFEST.in` for inclusion in source distributions. @rly (#1398)
+- Fix bad error check in ``IntracellularRecordingsTable.add_recording`` when adding ``IZeroClampSeries``. @oruebel (#1410)
+- Skip ros3 tests if internet access or the ros3 driver are not available. @oruebel (#1414)
+-  Fixed input data types to allow only `float` for fields `conversion` and `offset` in definition of ``TimeSeries``. @codycbakerphd (#1424)
+- Fix CI issues. @rly (#1427)
+
+### Documentation and tutorial enhancements:
+- Enhanced ordering of sphinx gallery tutorials to use alphabetic ordering based on tutorial headings. @oruebel (#1399)
+- Updated the general tutorial to add documentation about the ``Images`` type. @bendichter (#1353)
+- Updated the main index of the documentation to make the documentation easier to navigate. @oruebel (#1402)
+- Merged the "NWB File" overview section with the "NWB File Basics" tutorial. @oruebel (#1402)
+- Updated and created separated installation instructions for users and developers . @oruebel (#1402)
+- Updated the Extracellular electrophysiology tutorial. @bendichter, @weiglszonja (#1391)
+- Extended the general tutorial with more data types (e.g., ``Subject``, ``SpatialSeries``, ``Position``).
+  @weiglszonja (#1403)
+- Improved constructor docstrings for Image types. @weiglszonja (#1418)
+- Added documentation for exporting NWB files. @rly (#1417)
+- Improved documentation formatting. @bendichter (#1438)
+- Minor text fixes. @bendichter (#1437, #1400)
+
+### Minor improvements:
+- Improve constructor docstrings for Image types. @weiglszonja (#1418)
+- Add checks for data orientation in ``TimeSeries``, ``ElectricalSeries``, and ``RoiResponseSeries`` @bendichter (#1428)
+- Added `offset` field to `TimeSeries` and its subtypes. @codycbakerphd (#1424)
+- Added checks for data orientation in ``TimeSeries``, ``ElectricalSeries``, and ``RoiResponseSeries``.
+  @bendichter (#1426)
+- Enhanced issue template forms on GitHub. @CodyCBakerPHD (#1434)
+
 
 ## PyNWB 2.0.0 (August 13, 2021)
 
 ### Breaking changes:
 - ``SweepTable`` has been deprecated in favor of the new icephys metadata tables. Use of ``SweepTable``
-  is still possible but no longer recommended. @oruebel  (#1349
+  is still possible but no longer recommended. @oruebel  (#1349)
 - ``TimeSeries.__init__`` now requires the ``data`` argument because the 'data' dataset is required by the schema.
   If a ``TimeSeries`` is read without a value for ``data``, it will be set to a default value. For most
   ``TimeSeries``, this is a 1-dimensional empty array with dtype uint8. For ``ImageSeries`` and

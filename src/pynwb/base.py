@@ -1,10 +1,12 @@
 from warnings import warn
 from collections.abc import Iterable
-import numpy as np
 from typing import NamedTuple
+
+import numpy as np
 
 from hdmf.utils import docval, getargs, popargs, call_docval_func, get_docval
 from hdmf.common import DynamicTable, VectorData
+from hdmf.utils import get_data_shape
 
 from . import register_class, CORE_NAMESPACE
 from .core import NWBDataInterface, MultiContainerInterface, NWBData
@@ -85,6 +87,7 @@ class TimeSeries(NWBDataInterface):
                      "data",
                      "resolution",
                      "conversion",
+                     "offset",
                      "unit",
                      "timestamps",
                      "timestamps_unit",
@@ -107,11 +110,19 @@ class TimeSeries(NWBDataInterface):
              'doc': ('The data values. The first dimension must be time. '
                      'Can also store binary data, e.g., image frames')},
             {'name': 'unit', 'type': str, 'doc': 'The base unit of measurement (should be SI unit)'},
-            {'name': 'resolution', 'type': (str, 'float'),
+            {'name': 'resolution', 'type': 'float',
              'doc': 'The smallest meaningful difference (in specified unit) between values in data', 'default': -1.0},
-            {'name': 'conversion', 'type': (str, 'float'),
+            {'name': 'conversion', 'type': 'float',
              'doc': 'Scalar to multiply each element in data to convert it to the specified unit', 'default': 1.0},
-
+            {
+                'name': 'offset',
+                'type': 'float',
+                'doc': (
+                    "Scalar to add to each element in the data scaled by 'conversion' to finish converting it to the "
+                    "specified unit."
+                    ),
+                'default': 0.0
+            },
             {'name': 'timestamps', 'type': ('array_data', 'data', 'TimeSeries'), 'shape': (None,),
              'doc': 'Timestamps for samples stored in data', 'default': None},
             {'name': 'starting_time', 'type': 'float', 'doc': 'The timestamp of the first sample', 'default': None},
@@ -142,10 +153,29 @@ class TimeSeries(NWBDataInterface):
                 "comments",
                 "description",
                 "conversion",
+                "offset",
                 "unit",
                 "control",
                 "control_description",
                 "continuity")
+
+        data_shape = get_data_shape(data=kwargs["data"], strict_no_data_load=True)
+        timestamps_shape = get_data_shape(data=kwargs["timestamps"], strict_no_data_load=True)
+        if (
+            # check that the shape is known
+            data_shape is not None and timestamps_shape is not None
+
+            # check for scalars. Should never happen
+            and (len(data_shape) > 0 and len(timestamps_shape) > 0)
+
+            # check that the length of the first dimension is known
+            and (data_shape[0] is not None and timestamps_shape[0] is not None)
+
+            # check that the data and timestamps match
+            and (data_shape[0] != timestamps_shape[0])
+        ):
+            warn("Length of data does not match length of timestamps. Your data may be transposed. Time should be on "
+                 "the 0th dimension")
         for key in keys:
             val = kwargs.get(key)
             if val is not None:

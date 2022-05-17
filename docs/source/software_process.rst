@@ -45,20 +45,20 @@ Requirement Specifications
 
 There are 5 kinds of requirements specification in PyNWB.
 
-The first one is the requirements-min.txt_ file, which lists the package dependencies and their minimum versions for
+The first one is the :pynwb:`requirements-min.txt <blob/dev/requirements-min.txt>` file, which lists the package dependencies and their minimum versions for
 installing PyNWB.
 
-The second one is requirements.txt_, which lists the pinned (concrete) dependencies to reproduce
+The second one is :pynwb:`requirements.txt <blob/dev/requirements.txt>`, which lists the pinned (concrete) dependencies to reproduce
 an entire development environment to use PyNWB.
 
-The third one is requirements-dev.txt_, which lists the pinned (concrete) dependencies to reproduce
+The third one is :pynwb:`requirements-dev.txt <blob/dev/requirements-dev.txt>`, which lists the pinned (concrete) dependencies to reproduce
 an entire development environment to use PyNWB, run PyNWB tests, check code style, compute coverage, and create test
 environments.
 
-The fourth one is requirements-doc.txt_, which lists the dependencies to generate the documentation for PyNWB.
-Both this file and `requirements.txt` are used by ReadTheDocs_ to initialize the local environment for Sphinx to run.
+The fourth one is :pynwb:`requirements-doc.txt <blob/dev/requirements-doc.txt>`, which lists the dependencies to generate the documentation for PyNWB.
+Both this file and :pynwb:`requirements.txt <blob/dev/requirements.txt>` are used by ReadTheDocs_ to initialize the local environment for Sphinx to run.
 
-The final one is within setup.py_, which contains a list of package dependencies and their version ranges allowed for
+The final one is within :pynwb:`setup.py <blob/dev/setup.py>`, which contains a list of package dependencies and their version ranges allowed for
 running PyNWB.
 
 In order to check the status of the required packages, requires.io_ is used to create a badge on the project
@@ -66,11 +66,6 @@ README_. If all the required packages are up to date, a green badge appears.
 
 If some of the packages are outdated, see :ref:`update_requirements_files`.
 
-.. _requirements-min.txt: https://github.com/NeurodataWithoutBorders/pynwb/blob/dev/requirements-min.txt
-.. _setup.py: https://github.com/NeurodataWithoutBorders/pynwb/blob/dev/setup.py
-.. _requirements.txt: https://github.com/NeurodataWithoutBorders/pynwb/blob/dev/requirements.txt
-.. _requirements-dev.txt: https://github.com/NeurodataWithoutBorders/pynwb/blob/dev/requirements-dev.txt
-.. _requirements-doc.txt: https://github.com/NeurodataWithoutBorders/pynwb/blob/dev/requirements-doc.txt
 .. _ReadTheDocs: https://readthedocs.org/projects/pynwb/
 .. _requires.io: https://requires.io/github/NeurodataWithoutBorders/pynwb/requirements/?branch=dev
 
@@ -82,7 +77,7 @@ Versioning and Releasing
 PyNWB uses versioneer_ for versioning source and wheel distributions. Versioneer creates a semi-unique release
 name for the wheels that are created. It requires a version control system (git in PyNWB's case) to generate a release
 name. After all the tests pass, CircleCI creates both a wheel (\*.whl) and source distribution (\*.tar.gz) for Python 3
-and uploads them back to GitHub as a release_. Versioneer makes it possible to get the source distribution from GitHub
+and uploads them back to GitHub as a :pynwb:`releases`. Versioneer makes it possible to get the source distribution from GitHub
 and create wheels directly without having to use a version control system because it hardcodes versions in the source
 distribution.
 

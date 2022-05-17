@@ -1,0 +1,14 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Learn more about NWB
+    url: https://www.nwb.org/
+    about: Initial entrypoint to NWB ecosystem.
+  - name: NWB Schema Documentation
+    url: https://nwb-schema.readthedocs.io/en/latest/
+    about: Current schema definitions.
+  - name: NWB Community and Contact
+    url: https://www.nwb.org/contact-us/
+    about: Have a bunch of really specific questions? Connect with the greater NWB community!
+  - name: NWB Best Practices
+    url: https://www.nwb.org/best-practices/
+    about: Check out the full list of Best Practices for making NWBFiles.

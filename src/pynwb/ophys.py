@@ -2,7 +2,7 @@ from collections.abc import Iterable
 import numpy as np
 import warnings
 
-from hdmf.utils import docval, getargs, popargs, call_docval_func, get_docval
+from hdmf.utils import docval, getargs, popargs, call_docval_func, get_docval, get_data_shape
 
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries
@@ -142,7 +142,7 @@ class TwoPhotonSeries(ImageSeries):
              'default': None},
             *get_docval(ImageSeries.__init__, 'external_file', 'starting_frame', 'bits_per_pixel',
                         'dimension', 'resolution', 'conversion', 'timestamps', 'starting_time', 'rate',
-                        'comments', 'description', 'control', 'control_description', 'device'))
+                        'comments', 'description', 'control', 'control_description', 'device', 'offset'))
     def __init__(self, **kwargs):
         field_of_view, imaging_plane, pmt_gain, scan_line_rate = popargs(
             'field_of_view', 'imaging_plane', 'pmt_gain', 'scan_line_rate', kwargs)
@@ -339,9 +339,29 @@ class RoiResponseSeries(TimeSeries):
             {'name': 'rois', 'type': DynamicTableRegion,  # required
              'doc': 'a table region corresponding to the ROIs that were used to generate this data'},
             *get_docval(TimeSeries.__init__, 'resolution', 'conversion', 'timestamps', 'starting_time', 'rate',
-                        'comments', 'description', 'control', 'control_description'))
+                        'comments', 'description', 'control', 'control_description', 'offset'))
     def __init__(self, **kwargs):
         rois = popargs('rois', kwargs)
+
+        data_shape = get_data_shape(data=kwargs["data"], strict_no_data_load=True)
+        rois_shape = get_data_shape(data=rois.data, strict_no_data_load=True)
+        if (
+            data_shape is not None and rois_shape is not None
+
+            # check that data is 2d and rois is 1d
+            and len(data_shape) == 2 and len(rois_shape) == 1
+
+            # check that key dimensions are known
+            and data_shape[1] is not None and rois_shape[0] is not None
+
+            and data_shape[1] != rois_shape
+        ):
+            if data_shape[0] == rois_shape[0]:
+                warnings.warn("The second dimension of data does not match the length of rois, but instead the "
+                              "first does. Data is oriented incorrectly and should be transposed.")
+            else:
+                warnings.warn("The second dimension of data does not match the length of rois. Your data may be "
+                              "transposed.")
         call_docval_func(super(RoiResponseSeries, self).__init__, kwargs)
         self.rois = rois
 
