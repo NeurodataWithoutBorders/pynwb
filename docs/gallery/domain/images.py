@@ -27,7 +27,7 @@ from PIL.Image import Image
 
 from pynwb import NWBFile
 from pynwb.base import Images
-from pynwb.image import RGBAImage, RGBImage, GrayscaleImage, OpticalSeries
+from pynwb.image import RGBAImage, RGBImage, GrayscaleImage, OpticalSeries, ImageSeries
 
 ####################
 # Create an NWB File
@@ -52,9 +52,70 @@ nwbfile = NWBFile(
 nwbfile
 
 ####################
+#
 # .. seealso::
 #    You can learn more about the :py:class:`~pynwb.file.NWBFile` format in the :ref:`basics` tutorial.
 #
+# OpticalSeries: Storing series of images as stimuli
+# --------------------------------------------------
+#
+# :py:class:`~pynwb.image.OpticalSeries` is for series of images that were presented
+# to the experimental subject as stimuli.
+# We will create an :py:class:`~pynwb.image.OpticalSeries` object with the name
+# ``"StimulusPresentation"`` representing what images were shown to the subject and at what times.
+#
+# Image data can be stored either in the HDF5 file or as an external image file.
+# For this tutorial, we will use a fake image data with shape of (200, 50, 50, 3).
+# Images may be 3D or 4D (grayscale or RBG), where the first dimension must be time (frame).
+# The second and third dimensions represent x and y.
+# The fourth dimension represents the RGB value (length of 3) for color images.
+#
+# NWB differentiates between raw, acquired data and data that was presented as stimulus.
+# We can add it to the :py:class:`~pynwb.file.NWBFile` object as stimulus data using
+# the :py:meth:`~pynwb.file.NWBFile.add_stimulus` method.
+#
+
+image_data = np.random.uniform(low=0, high=255, size=(200, 50, 50, 3)).astype(int)
+optical_series = OpticalSeries(
+    name="StimulusPresentation",  # required
+    distance=0.7,  # required
+    field_of_view=[0.2, 0.3, 0.7],  # required
+    orientation="lower left",  # required
+    data=image_data,
+    unit="m",
+    format="raw",
+    starting_frame=[0.0],
+    rate=1.0,
+    comments="no comments",
+    description="The images presented to the subject as stimuli",
+)
+
+nwbfile.add_stimulus(timeseries=optical_series)
+
+####################
+# ImageSeries: Storing series of images as acquisition
+# ----------------------------------------------------
+#
+# :py:class:`~pynwb.image.ImageSeries` is a general container for series of images acquired during
+# the experiment. Image data can be stored either in the HDF5 file or as an external image file.
+#
+# We can add raw data to the :py:class:`~pynwb.file.NWBFile` object as *acquisition* using
+# the :py:meth:`~pynwb.file.NWBFile.add_acquisition` method.
+#
+
+image_data = np.random.uniform(low=0, high=255, size=(200, 50, 50, 3)).astype(int)
+
+behavior_images = ImageSeries(
+    name="ImageSeries",
+    data=image_data,
+    description="Image data of an animal moving in environment.",
+    unit="pixels",
+    format="raw",
+    starting_frame=[0.0],
+    rate=1.0,
+)
+
+nwbfile.add_acquisition(behavior_images)
 
 ####################
 # Static images
@@ -120,8 +181,8 @@ gs_logo = GrayscaleImage(
 )
 
 ####################
-# Images: a container for static images
-# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+# Images: a container for images
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 #
 # Add the images to an :py:class:`~pynwb.base.Images` container
 # that accepts any of these image types.
@@ -133,7 +194,7 @@ images = Images(
 )
 
 ####################
-# Create an Images Processing Module
+# Create a Processing Module
 # ----------------------------------
 #
 # Create a processing module called ``"images"`` for storing image data in the :py:class:`~pynwb.file.NWBFile`
@@ -151,38 +212,3 @@ images_module.add(images)
 # .. seealso::
 #    You can read more about the basic concepts of processing modules in the :ref:`modules_overview` tutorial.
 #
-#
-# OpticalSeries: Storing series of images
-# ---------------------------------------
-#
-# :py:class:`~pynwb.image.OpticalSeries`
-# Second, we will add a stimulus to the :py:class:`~pynwb.file.NWBFile` representing
-# what images were shown to the subject and at what times. For that we will create an
-# :py:class:`~pynwb.image.OpticalSeries` object with the name
-# ``"StimulusPresentation"``.
-#
-# Create fake image data with shape of (200, 50, 50, 3).
-# Images may be 3D or 4D (grayscale or RBG), where the first dimension must be time (frame).
-# The second and third dimensions represent x and y.
-# The fourth dimension represents the RGB value (length of 3) for color images.
-#
-# We can add it to the :py:class:`~pynwb.file.NWBFile` object as stimulus data using
-# the :py:meth:`~pynwb.file.NWBFile.add_stimulus` method.
-#
-
-image_data = np.random.uniform(low=0, high=255, size=(200, 50, 50, 3)).astype(int)
-optical_series = OpticalSeries(
-    name="StimulusPresentation",  # required
-    distance=0.7,  # required
-    field_of_view=[0.2, 0.3, 0.7],  # required
-    orientation="lower left",  # required
-    data=image_data,
-    unit="m",
-    format="raw",
-    starting_frame=[0.0],
-    rate=1.0,
-    comments="no comments",
-    description="no description",
-)
-
-nwbfile.add_stimulus(timeseries=optical_series)
