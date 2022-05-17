@@ -252,6 +252,7 @@ class CorrectedImageStackConstructor(TestCase):
         )
         is2 = ImageSeries(
             name='is2',
+            data=np.ones((2, 2, 2)),
             unit='unit',
             external_file=['external_file'],
             starting_frame=[1, 2, 3],
@@ -382,7 +383,7 @@ class PlaneSegmentationConstructor(TestCase):
             external_file=['external_file'],
             starting_frame=[1, 2, 3],
             format='tiff',
-            timestamps=list()
+            timestamps=[1., 2.]
         )
 
         ip = create_imaging_plane()

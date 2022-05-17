@@ -37,7 +37,7 @@ class SpatialSeries(TimeSeries):
         Create a SpatialSeries TimeSeries dataset
         """
         name, data, reference_frame, unit = popargs('name', 'data', 'reference_frame', 'unit', kwargs)
-        super(SpatialSeries, self).__init__(name, data, unit, **kwargs)
+        super().__init__(name, data, unit, **kwargs)
         self.reference_frame = reference_frame
 
 

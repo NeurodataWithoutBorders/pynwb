@@ -104,7 +104,7 @@ ns_builder.export(ns_path)
 
 from pynwb import register_class, load_namespaces
 from pynwb.ecephys import ElectricalSeries
-from hdmf.utils import docval, call_docval_func, getargs, get_docval
+from hdmf.utils import docval, get_docval, popargs
 
 ns_path = "mylab.namespace.yaml"
 load_namespaces(ns_path)
@@ -118,16 +118,16 @@ class TetrodeSeries(ElectricalSeries):
     @docval(*get_docval(ElectricalSeries.__init__) + (
         {'name': 'trode_id', 'type': int, 'doc': 'the tetrode id'},))
     def __init__(self, **kwargs):
-        call_docval_func(super(TetrodeSeries, self).__init__, kwargs)
-        self.trode_id = getargs('trode_id', kwargs)
+        trode_id = popargs('trode_id', kwargs)
+        super().__init__(**kwargs)
+        self.trode_id = trode_id
 
 
 ####################
 # .. note::
 #
-#     See the API docs for more information about :py:func:`~hdmf.utils.docval`
-#     :py:func:`~hdmf.utils.call_docval_func`, :py:func:`~hdmf.utils.getargs`
-#     and :py:func:`~hdmf.utils.get_docval`
+#     See the API docs for more information about :py:func:`~hdmf.utils.docval`,
+#     :py:func:`~hdmf.utils.popargs`, and :py:func:`~hdmf.utils.get_docval`
 #
 # When extending :py:class:`~pynwb.core.NWBContainer` or :py:class:`~pynwb.core.NWBContainer`
 # subclasses, you should define the class field ``__nwbfields__``. This will
@@ -301,7 +301,7 @@ class Potato(NWBContainer):
             {'name': 'weight', 'type': float, 'doc': 'weight of potato in grams'},
             {'name': 'age', 'type': float, 'doc': 'age of potato in days'})
     def __init__(self, **kwargs):
-        super(Potato, self).__init__(name=kwargs['name'])
+        super().__init__(name=kwargs['name'])
         self.weight = kwargs['weight']
         self.age = kwargs['age']
 

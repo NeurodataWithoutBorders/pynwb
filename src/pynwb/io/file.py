@@ -9,7 +9,7 @@ from ..core import ScratchData
 class NWBFileMap(ObjectMapper):
 
     def __init__(self, spec):
-        super(NWBFileMap, self).__init__(spec)
+        super().__init__(spec)
 
         acq_spec = self.spec.get_group('acquisition')
         self.unmap(acq_spec)
