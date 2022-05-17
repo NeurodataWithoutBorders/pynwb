@@ -15,7 +15,7 @@ The examples below follow this general workflow for adding behavior data to an :
 * create an object:
 
   * :py:class:`~pynwb.base.TimeSeries` for continuous time series data,
-  * :py:class:`~pynwb.base.SpatialSeries` for continuous spatial data (e.g. position, direction relative to some reference frame),
+  * :py:class:`~pynwb.behavior.SpatialSeries` for continuous spatial data (e.g. position, direction relative to some reference frame),
   * :py:class:`~pynwb.misc.IntervalSeries` or :py:class:`~pynwb.epoch.TimeIntervals` for time intervals
 
 * store that object inside a behavior interface object:
@@ -34,6 +34,8 @@ The examples below follow this general workflow for adding behavior data to an :
 The following examples will reference variables that may not be defined within the block they are used in. For
 clarity, we define them here:
 """
+# sphinx_gallery_thumbnail_path = 'figures/gallery_thumbnails_behavior.png'
+
 from datetime import datetime
 
 import numpy as np
@@ -239,7 +241,7 @@ behavior_module.add(behavioral_events)
 ####################
 # Storing only the timestamps of the events is possible with the `ndx-events <https://pypi.org/project/ndx-events/>`_
 # NWB extension. You can also add labels associated with the events with this extension.
-# You can find information about installation and example usage `here <https://github.com/rly/ndx-events#ndx-events-extension-for-nwb>`_.
+# You can find information about installation and example usage `here <https://github.com/nwb-extensions/ndx-events-record>`_.
 #
 # .. seealso::
 #    You can learn more about using extensions in the :ref:`tutorial-extending-nwb` tutorial.
@@ -284,7 +286,7 @@ behavior_module.add(behavioral_epochs)
 ####################
 # Using :py:class:`~pynwb.epoch.TimeIntervals` representing time intervals
 # is often preferred over :py:class:`~pynwb.behavior.BehavioralEpochs` and :py:class:`~pynwb.misc.IntervalSeries`.
-# :py:class:`~pynwb.epoch.TimeIntervals` is a subclass of :py:class:`~pynwb.core.DynamicTable` which offers
+# :py:class:`~pynwb.epoch.TimeIntervals` is a subclass of :py:class:`~hdmf.common.table.DynamicTable` which offers
 # flexibility for tabular data by allowing the addition of optional columns which are not defined in the standard.
 #
 # Create a :py:class:`~pynwb.epoch.TimeIntervals` object that represents the time
