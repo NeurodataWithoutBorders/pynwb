@@ -485,18 +485,38 @@ class TimeSeriesReferenceVectorData(VectorData):
             *get_docval(VectorData.__init__, 'data'))
     def __init__(self, **kwargs):
         call_docval_func(super().__init__, kwargs)
+        # CAUTION: Define any logic specific for init in the self._init_internal function, not here!
+        self._init_internal()
 
-    @docval({'name': 'val', 'type': TIME_SERIES_REFERENCE_TUPLE, 'doc': 'the value to add to this column'})
+    def _init_internal(self):
+        """
+        Called from __init__ to perform initialization specific to this class. This is done
+        here due to the :py:class:`~pynwb.io.epoch.TimeIntervalsMap` having to migrate legacy VectorData
+        to TimeSeriesReferenceVectorData. In this way, if dedicated logic init logic needs
+        to be added to this class then we have a place for it without having to also
+        update :py:class:`~pynwb.io.epoch.TimeIntervalsMap` (which would likely get forgotten)
+        """
+        pass
+
+    @docval({'name': 'val', 'type': (TIME_SERIES_REFERENCE_TUPLE, tuple),
+             'doc': 'the value to add to this column. If this is a regular tuple then it '
+                    'must be convertible to a TimeSeriesReference'})
     def add_row(self, **kwargs):
         """Append a data value to this column."""
         val = getargs('val', kwargs)
+        if not (isinstance(val, self.TIME_SERIES_REFERENCE_TUPLE)):
+            val = self.TIME_SERIES_REFERENCE_TUPLE(*val)
         val.check_types()
         super().append(val)
 
-    @docval({'name': 'arg', 'type': TIME_SERIES_REFERENCE_TUPLE, 'doc': 'the value to append to this column'})
+    @docval({'name': 'arg', 'type': (TIME_SERIES_REFERENCE_TUPLE, tuple),
+             'doc': 'the value to append to this column. If this is a regular tuple then it '
+                    'must be convertible to a TimeSeriesReference'})
     def append(self, **kwargs):
         """Append a data value to this column."""
         arg = getargs('arg', kwargs)
+        if not (isinstance(arg, self.TIME_SERIES_REFERENCE_TUPLE)):
+            arg = self.TIME_SERIES_REFERENCE_TUPLE(*arg)
         arg.check_types()
         super().append(arg)
 
@@ -535,7 +555,7 @@ class TimeSeriesReferenceVectorData(VectorData):
                 return self.TIME_SERIES_REFERENCE_TUPLE(*vals)
         else:  # key selected multiple rows
             # When loading from HDF5 we get an np.ndarray otherwise we get list-of-list. This
-            # makes the values consistent and tranforms the data to use our namedtuple type
+            # makes the values consistent and transforms the data to use our namedtuple type
             re = [self.TIME_SERIES_REFERENCE_NONE_TYPE
                   if (v[0] < 0 or v[1] < 0) else self.TIME_SERIES_REFERENCE_TUPLE(*v)
                   for v in vals]

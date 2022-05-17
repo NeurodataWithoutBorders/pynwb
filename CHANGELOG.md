@@ -4,10 +4,21 @@
 
 ### Breaking changes:
 - Restrict `SpatialSeries.data` to have no more than 3 columns (#1455)
+- Updated ``TimeIntervals`` to use the new  ``TimeSeriesReferenceVectorData`` type. This does not alter the overall
+  structure of ``TimeIntervals`` in a major way aside from changing the value of the ``neurodata_type`` attribute of the
+  ``TimeIntervals.timeseries`` column from ``VectorData`` to ``TimeSeriesReferenceVectorData``. This change facilitates
+  creating common functionality around ``TimeSeriesReferenceVectorData``. For NWB files with version 2.4.0 and earlier,
+  the ``TimeIntervals.timeseries`` column is automatically migrated on read in the ``TimeIntervalsMap``
+  object mapper class to use the ``TimeSeriesReferenceVectorData`` container class, so that users are presented a
+  consistent API for existing and new files. This change affects all existing ``TimeIntervals`` tables
+  e.g., ``NBWFile.epochs``, ``NWBFile.trials``, and ``NWBFile.invalid_times``. While this is technically a breaking
+  change, the impact user codes should be minimal as this change primarily adds functionality while the overall
+  behavior of the API is largely consistent with existing behavior. @oruebel, @rly (#1390)
 
 ### Documentation and tutorial enhancements:
+- Added tutorial on annotating data via ``TimeIntervals``. @oruebel (#1390)
 - Add copy button to code blocks @weiglszonja (#1460)
-- Create behavioral tutorial @weiglszonja (#1464) 
+- Create behavioral tutorial @weiglszonja (#1464)
 - Enhance display of icephys pandas tutorial by using ``dataframe_image`` to render and display large tables as images. @oruebel (#1469)
 - Create tutorial about reading and exploring an existing `NWBFile` @weiglszonja (#1453)
 
