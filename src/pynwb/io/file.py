@@ -30,7 +30,6 @@ class NWBFileMap(ObjectMapper):
         self.unmap(stimulus_spec.get_group('templates'))
         self.map_spec('stimulus', stimulus_spec.get_group('presentation').get_neurodata_type('TimeSeries'))
         self.map_spec('stimulus_template', stimulus_spec.get_group('templates').get_neurodata_type('TimeSeries'))
-        self.map_spec('stimulus_template', stimulus_spec.get_group('templates').get_neurodata_type('Images'))
 
         intervals_spec = self.spec.get_group('intervals')
         self.unmap(intervals_spec)
