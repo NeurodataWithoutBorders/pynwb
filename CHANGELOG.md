@@ -3,7 +3,7 @@
 ## PyNWB 2.1.0 (Upcoming)
 
 ### Breaking changes:
-- Restrict `SpatialSeries.data` to have no more than 3 columns (#1455)
+- Raise a warning if `SpatialSeries.data` has more than 3 columns (#1455, #1480)
 - Updated ``TimeIntervals`` to use the new  ``TimeSeriesReferenceVectorData`` type. This does not alter the overall
   structure of ``TimeIntervals`` in a major way aside from changing the value of the ``neurodata_type`` attribute of the
   ``TimeIntervals.timeseries`` column from ``VectorData`` to ``TimeSeriesReferenceVectorData``. This change facilitates
