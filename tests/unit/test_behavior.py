@@ -20,14 +20,9 @@ class SpatialSeriesConstructor(TestCase):
         self.assertEqual(sS.unit, 'degrees')
 
     def test_gt_3_cols(self):
-        with self.assertRaises(ValueError) as error:
+        msg = "SpatialSeries 'test_sS' has data shape (5, 4) which is not compliant with NWB 2.5 and greater."
+        with self.assertWarnsWith(UserWarning, msg):
             SpatialSeries("test_sS", np.ones((5, 4)), "reference_frame", "meters", rate=30.)
-
-        self.assertEqual(
-            "SpatialSeries.__init__: incorrect shape for 'data' (got '(5, 4)', expected "
-            "'((None,), (None, 1), (None, 2), (None, 3))')",
-            str(error.exception)
-        )
 
 
 class BehavioralEpochsConstructor(TestCase):
