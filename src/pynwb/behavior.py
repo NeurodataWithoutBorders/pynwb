@@ -1,4 +1,6 @@
-from hdmf.utils import docval, popargs, get_docval
+import warnings
+
+from hdmf.utils import docval, popargs, get_docval, get_data_shape
 
 from . import register_class, CORE_NAMESPACE
 from .core import MultiContainerInterface
@@ -21,9 +23,7 @@ class SpatialSeries(TimeSeries):
     __nwbfields__ = ('reference_frame',)
 
     @docval(*get_docval(TimeSeries.__init__, 'name'),  # required
-            {'name': 'data', 'type': ('array_data', 'data', TimeSeries), 'shape': (
-                    (None, ), (None, 1), (None, 2), (None, 3)
-            ),  # required
+            {'name': 'data', 'type': ('array_data', 'data', TimeSeries), 'shape': ((None, ), (None, None)),  # required
              'doc': ('The data values. Can be 1D or 2D. The first dimension must be time. If 2D, there can be 1, 2, '
                      'or 3 columns, which represent x, y, and z.')},
             {'name': 'reference_frame', 'type': str,   # required
@@ -38,7 +38,25 @@ class SpatialSeries(TimeSeries):
         """
         name, data, reference_frame, unit = popargs('name', 'data', 'reference_frame', 'unit', kwargs)
         super(SpatialSeries, self).__init__(name, data, unit, **kwargs)
+
+        # NWB 2.5 restricts length of second dimension to be <= 3
+        allowed_data_shapes = ((None, ), (None, 1), (None, 2), (None, 3))
+        data_shape = get_data_shape(data)
+        if not any(self._validate_data_shape(data_shape, a) for a in allowed_data_shapes):
+            warnings.warn("SpatialSeries '%s' has data shape %s which is not compliant with NWB 2.5 and greater. "
+                          "The second dimension should have length <= 3 to represent at most x, y, z." %
+                          (name, str(data_shape)))
+
         self.reference_frame = reference_frame
+
+    @staticmethod
+    def _validate_data_shape(valshape, argshape):
+        if not len(valshape) == len(argshape):
+            return False
+        for a, b in zip(valshape, argshape):
+            if b not in (a, None):
+                return False
+        return True
 
 
 @register_class('BehavioralEpochs', CORE_NAMESPACE)
