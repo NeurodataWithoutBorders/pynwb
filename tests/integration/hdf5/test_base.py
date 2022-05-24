@@ -2,10 +2,8 @@ import numpy as np
 from datetime import datetime
 from dateutil.tz import tzlocal
 
-from hdmf.common import VectorData
-
 from pynwb import TimeSeries, NWBFile, NWBHDF5IO
-from pynwb.base import Images, Image
+from pynwb.base import Images, Image, ImageReferences
 from pynwb.testing import AcquisitionH5IOMixin, TestCase, remove_test_file
 
 
@@ -55,7 +53,7 @@ class TestImagesIO(AcquisitionH5IOMixin, TestCase):
         """ Return the test Images to read/write """
         image1 = Image(name='test_image', data=np.ones((10, 10)))
         image2 = Image(name='test_image2', data=np.ones((10, 10)))
-        order_of_images = VectorData(name='order_of_images', description='test', data=[image2, image1])
-        images = Images(name='images_name', images=[image1, image2], order_of_images=order_of_images)
+        image_references = ImageReferences(name='order_of_images', data=[image2, image1])
+        images = Images(name='images_name', images=[image1, image2], order_of_images=image_references)
 
         return images

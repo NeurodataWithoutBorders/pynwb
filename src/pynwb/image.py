@@ -123,21 +123,22 @@ class IndexSeries(TimeSeries):
             *get_docval(TimeSeries.__init__, 'resolution', 'conversion', 'timestamps', 'starting_time', 'rate',
                         'comments', 'description', 'control', 'control_description', 'offset'))
     def __init__(self, **kwargs):
-        indexed_timeseries = popargs('indexed_timeseries', kwargs)
+        indexed_timeseries, indexed_images = popargs('indexed_timeseries', 'indexed_images', kwargs)
         if kwargs['unit'] and kwargs['unit'] != 'N/A':
             msg = ("The 'unit' field of IndexSeries is fixed to the value 'N/A' starting in NWB 2.5. Passing "
                    "a different value for 'unit' will raise an error in PyNWB 3.0.")
             warnings.warn(msg, PendingDeprecationWarning)
-        if not kwargs['indexed_timeseries'] and not kwargs['indexed_images']:
+        if not indexed_timeseries and not indexed_images:
             msg = "Either indexed_timeseries or indexed_images must be provided when creating an IndexSeries."
             raise ValueError(msg)
-        if kwargs['indexed_timeseries']:
+        if indexed_timeseries:
             msg = ("The indexed_timeseries field of IndexSeries is discouraged and will be deprecated in "
                    "a future version of NWB. Use the indexed_images field instead.")
             warnings.warn(msg, PendingDeprecationWarning)
         kwargs['unit'] = 'N/A'  # fixed value starting in NWB 2.5
         super(IndexSeries, self).__init__(**kwargs)
         self.indexed_timeseries = indexed_timeseries
+        self.indexed_images = indexed_images
         if kwargs['conversion'] and kwargs['conversion'] != self.DEFAULT_CONVERSION:
             warnings.warn("The conversion attribute is not used by IndexSeries.")
         if kwargs['resolution'] and kwargs['resolution'] != self.DEFAULT_RESOLUTION:

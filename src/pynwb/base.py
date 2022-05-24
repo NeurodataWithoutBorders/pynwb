@@ -301,6 +301,24 @@ class Image(NWBData):
         self.description = kwargs['description']
 
 
+@register_class('ImageReferences', CORE_NAMESPACE)
+class ImageReferences(NWBData):
+    """
+    Ordered dataset of references to Image objects.
+    """
+    __nwbfields__ = ('data', )
+
+    @docval({'name': 'name', 'type': str, 'doc': 'The name of this ImageReferences object.'},
+            {'name': 'data', 'type': 'array_data', 'doc': 'The images in order.'},)
+    def __init__(self, **kwargs):
+        # NOTE we do not use the docval shape validator here because it will recognize a list of P MxN images as
+        # having shape (P, M, N)
+        # check type and dimensionality
+        for image in kwargs['data']:
+            assert isinstance(image, Image), "Images used in ImageReferences must have type Image, not %s" % type(image)
+        super().__init__(**kwargs)
+
+
 @register_class('Images', CORE_NAMESPACE)
 class Images(MultiContainerInterface):
     """An collection of images with an optional way to specify the order of the images
@@ -309,7 +327,7 @@ class Images(MultiContainerInterface):
     """
 
     __nwbfields__ = ('description',
-                     {'name': 'order_of_images', 'child': True})
+                     {'name': 'order_of_images', 'child': True, 'required_name': 'order_of_images'})
 
     __clsconf__ = {
         'attr': 'images',
@@ -322,7 +340,7 @@ class Images(MultiContainerInterface):
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this set of images'},
             {'name': 'images', 'type': 'array_data', 'doc': 'image objects', 'default': None},
             {'name': 'description', 'type': str, 'doc': 'description of images', 'default': 'no description'},
-            {'name': 'order_of_images', 'type': VectorData,
+            {'name': 'order_of_images', 'type': 'ImageReferences',
              'doc': 'Ordered dataset of references to Image objects stored in the parent group.', 'default': None},)
     def __init__(self, **kwargs):
         name, description, images, order_of_images = popargs('name', 'description', 'images', 'order_of_images', kwargs)
