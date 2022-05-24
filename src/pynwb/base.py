@@ -105,15 +105,21 @@ class TimeSeries(NWBDataInterface):
     DEFAULT_DATA = np.ndarray(shape=(0, ), dtype=np.uint8)
     DEFAULT_UNIT = 'unknown'
 
+    DEFAULT_RESOLUTION = -1.0
+    DEFAULT_CONVERSION = 1.0
+    DEFAULT_OFFSET = 0.0
+
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset'},  # required
             {'name': 'data', 'type': ('array_data', 'data', 'TimeSeries'),
              'doc': ('The data values. The first dimension must be time. '
                      'Can also store binary data, e.g., image frames')},
             {'name': 'unit', 'type': str, 'doc': 'The base unit of measurement (should be SI unit)'},
             {'name': 'resolution', 'type': 'float',
-             'doc': 'The smallest meaningful difference (in specified unit) between values in data', 'default': -1.0},
+             'doc': 'The smallest meaningful difference (in specified unit) between values in data',
+             'default': DEFAULT_RESOLUTION},
             {'name': 'conversion', 'type': 'float',
-             'doc': 'Scalar to multiply each element in data to convert it to the specified unit', 'default': 1.0},
+             'doc': 'Scalar to multiply each element in data to convert it to the specified unit',
+             'default': DEFAULT_CONVERSION},
             {
                 'name': 'offset',
                 'type': 'float',
@@ -121,7 +127,7 @@ class TimeSeries(NWBDataInterface):
                     "Scalar to add to each element in the data scaled by 'conversion' to finish converting it to the "
                     "specified unit."
                     ),
-                'default': 0.0
+                'default': DEFAULT_OFFSET
             },
             {'name': 'timestamps', 'type': ('array_data', 'data', 'TimeSeries'), 'shape': (None,),
              'doc': 'Timestamps for samples stored in data', 'default': None},
@@ -295,10 +301,33 @@ class Image(NWBData):
         self.description = kwargs['description']
 
 
+@register_class('ImageReferences', CORE_NAMESPACE)
+class ImageReferences(NWBData):
+    """
+    Ordered dataset of references to Image objects.
+    """
+    __nwbfields__ = ('data', )
+
+    @docval({'name': 'name', 'type': str, 'doc': 'The name of this ImageReferences object.'},
+            {'name': 'data', 'type': 'array_data', 'doc': 'The images in order.'},)
+    def __init__(self, **kwargs):
+        # NOTE we do not use the docval shape validator here because it will recognize a list of P MxN images as
+        # having shape (P, M, N)
+        # check type and dimensionality
+        for image in kwargs['data']:
+            assert isinstance(image, Image), "Images used in ImageReferences must have type Image, not %s" % type(image)
+        super().__init__(**kwargs)
+
+
 @register_class('Images', CORE_NAMESPACE)
 class Images(MultiContainerInterface):
+    """An collection of images with an optional way to specify the order of the images
+    using the "order_of_images" dataset. An order must be specified if the images are
+    referenced by index, e.g., from an IndexSeries.
+    """
 
-    __nwbfields__ = ('description',)
+    __nwbfields__ = ('description',
+                     {'name': 'order_of_images', 'child': True, 'required_name': 'order_of_images'})
 
     __clsconf__ = {
         'attr': 'images',
@@ -310,12 +339,15 @@ class Images(MultiContainerInterface):
 
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this set of images'},
             {'name': 'images', 'type': 'array_data', 'doc': 'image objects', 'default': None},
-            {'name': 'description', 'type': str, 'doc': 'description of images', 'default': 'no description'})
+            {'name': 'description', 'type': str, 'doc': 'description of images', 'default': 'no description'},
+            {'name': 'order_of_images', 'type': 'ImageReferences',
+             'doc': 'Ordered dataset of references to Image objects stored in the parent group.', 'default': None},)
     def __init__(self, **kwargs):
-        name, description, images = popargs('name', 'description', 'images', kwargs)
+        name, description, images, order_of_images = popargs('name', 'description', 'images', 'order_of_images', kwargs)
         super(Images, self).__init__(name, **kwargs)
         self.description = description
         self.images = images
+        self.order_of_images = order_of_images
 
 
 class TimeSeriesReference(NamedTuple):

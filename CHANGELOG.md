@@ -15,6 +15,11 @@
   change, the impact user codes should be minimal as this change primarily adds functionality while the overall
   behavior of the API is largely consistent with existing behavior. @oruebel, @rly (#1390)
 
+# Enhancements
+- Added support for NWB 2.5.0.
+  - Added support for updated ``IndexSeries`` type, new ``order_of_images`` field in ``Images``, and new neurodata_type
+    ``ImageReferences``. @rly (#1483)
+
 ### Documentation and tutorial enhancements:
 - Added tutorial on annotating data via ``TimeIntervals``. @oruebel (#1390)
 - Add copy button to code blocks @weiglszonja (#1460)

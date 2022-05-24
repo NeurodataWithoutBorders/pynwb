@@ -1,6 +1,7 @@
 import numpy as np
 
 from pynwb import TimeSeries
+from pynwb.base import Image, Images, ImageReferences
 from pynwb.device import Device
 from pynwb.image import ImageSeries, IndexSeries, ImageMaskSeries, OpticalSeries, GrayscaleImage, RGBImage, RGBAImage
 from pynwb.testing import TestCase
@@ -76,21 +77,58 @@ class ImageSeriesConstructor(TestCase):
 class IndexSeriesConstructor(TestCase):
 
     def test_init(self):
+        image1 = Image(name='test_image', data=np.ones((10, 10)))
+        image2 = Image(name='test_image2', data=np.ones((10, 10)))
+        image_references = ImageReferences(name='order_of_images', data=[image2, image1])
+        images = Images(name='images_name', images=[image1, image2], order_of_images=image_references)
+
+        iS = IndexSeries(
+            name='test_iS',
+            data=[1, 2, 3],
+            unit='N/A',
+            indexed_images=images,
+            timestamps=[0.1, 0.2, 0.3]
+        )
+        self.assertEqual(iS.name, 'test_iS')
+        self.assertEqual(iS.unit, 'N/A')
+        self.assertIs(iS.indexed_images, images)
+
+    def test_init_bad_unit(self):
         ts = TimeSeries(
             name='test_ts',
             data=[1, 2, 3],
             unit='unit',
             timestamps=[0.1, 0.2, 0.3]
         )
-        iS = IndexSeries(
-            name='test_iS',
+        msg = ("The 'unit' field of IndexSeries is fixed to the value 'N/A' starting in NWB 2.5. Passing "
+               "a different value for 'unit' will raise an error in PyNWB 3.0.")
+        with self.assertWarnsWith(PendingDeprecationWarning, msg):
+            iS = IndexSeries(
+                name='test_iS',
+                data=[1, 2, 3],
+                unit='na',
+                indexed_timeseries=ts,
+                timestamps=[0.1, 0.2, 0.3]
+            )
+        self.assertEqual(iS.unit, 'N/A')
+
+    def test_init_indexed_ts(self):
+        ts = TimeSeries(
+            name='test_ts',
             data=[1, 2, 3],
-            unit='N/A',
-            indexed_timeseries=ts,
+            unit='unit',
             timestamps=[0.1, 0.2, 0.3]
         )
-        self.assertEqual(iS.name, 'test_iS')
-        self.assertEqual(iS.unit, 'N/A')
+        msg = ("The indexed_timeseries field of IndexSeries is discouraged and will be deprecated in "
+               "a future version of NWB. Use the indexed_images field instead.")
+        with self.assertWarnsWith(PendingDeprecationWarning, msg):
+            iS = IndexSeries(
+                name='test_iS',
+                data=[1, 2, 3],
+                unit='N/A',
+                indexed_timeseries=ts,
+                timestamps=[0.1, 0.2, 0.3]
+            )
         self.assertIs(iS.indexed_timeseries, ts)
 
 
