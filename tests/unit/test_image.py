@@ -132,8 +132,6 @@ class IndexSeriesConstructor(TestCase):
         self.assertIs(iS.indexed_timeseries, ts)
 
 
-
-
 class ImageMaskSeriesConstructor(TestCase):
 
     def test_init(self):
