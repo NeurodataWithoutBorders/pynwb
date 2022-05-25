@@ -289,6 +289,15 @@ class NWBHDF5IO(_HDF5IO):
         kwargs['container'] = nwbfile
         call_docval_func(super().export, kwargs)
 
+    def read(self, **kwargs):
+
+        nwbfile = super().read(**kwargs)
+
+        if self.mode != 'r':
+            nwbfile._appendModificationEntry()
+
+        return nwbfile
+
 
 from . import io as __io  # noqa: F401,E402
 from .core import NWBContainer, NWBData  # noqa: F401,E402

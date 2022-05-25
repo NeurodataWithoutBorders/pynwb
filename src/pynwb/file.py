@@ -370,10 +370,12 @@ class NWBFile(MultiContainerInterface):
             raise ValueError("'timestamps_reference_time' must be a timezone-aware datetime object.")
 
         self.fields['file_create_date'] = getargs('file_create_date', kwargs)
+
         if self.fields['file_create_date'] is None:
-            self.fields['file_create_date'] = datetime.now(tzlocal())
-        if isinstance(self.fields['file_create_date'], datetime):
+            self.fields['file_create_date'] = [datetime.now(tzlocal())]
+        elif isinstance(self.fields['file_create_date'], datetime):
             self.fields['file_create_date'] = [self.fields['file_create_date']]
+
         self.fields['file_create_date'] = list(map(_add_missing_timezone, self.fields['file_create_date']))
 
         fieldnames = [
@@ -1025,6 +1027,13 @@ class NWBFile(MultiContainerInterface):
                 kwargs[dt] = [v.copy() if isinstance(v, DynamicTable) else v for v in kwargs[dt]]
 
         return NWBFile(**kwargs)
+
+    def _appendModificationEntry(self):
+        """
+        Append an entry with the current timestamp to the file_create_date array
+        """
+
+        self.fields['file_create_date'].append(datetime.now(tzlocal()))
 
 
 def _add_missing_timezone(date):
