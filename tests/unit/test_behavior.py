@@ -30,13 +30,13 @@ class SpatialSeriesConstructor(TestCase):
         self.assertEqual(sS.unit, 'degrees')
 
     def test_gt_3_cols(self):
-        msg = ("SpatialSeries.__init__: incorrect shape for 'data' (got '(5, 4)', expected "
-               "'((None,), (None, 1), (None, 2), (None, 3))')")
-        with self.assertRaisesWith(ValueError, msg):
+        msg = ("SpatialSeries 'test_sS' has data shape (5, 4) which is not compliant with NWB 2.5 and greater. "
+               "The second dimension should have length <= 3 to represent at most x, y, z.")
+        with self.assertWarnsWith(UserWarning, msg):
             SpatialSeries(
-                name='test_sS',
+                name="test_sS",
                 data=np.ones((5, 4)),
-                reference_frame='reference_frame',
+                reference_frame="reference_frame",
                 rate=30.
             )
 

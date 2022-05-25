@@ -7,6 +7,7 @@ from pynwb.base import (
     Image,
     TimeSeriesReferenceVectorData,
     TimeSeriesReference,
+    ImageReferences
 )
 from pynwb.testing import TestCase
 from hdmf.data_utils import DataChunkIterator
@@ -394,12 +395,17 @@ class TestImage(TestCase):
 
 
 class TestImages(TestCase):
-    def test_init(self):
-        image1 = Image(name="test_image1", data=np.ones((10, 10)))
-        image2 = Image(name="test_image2", data=np.ones((10, 10)))
-        images = Images(name="images_name", images=[image1, image2])
+
+    def test_images(self):
+        image1 = Image(name='test_image', data=np.ones((10, 10)))
+        image2 = Image(name='test_image2', data=np.ones((10, 10)))
+        image_references = ImageReferences(name='order_of_images', data=[image2, image1])
+        images = Images(name='images_name', images=[image1, image2], order_of_images=image_references)
+
         assert images.name == "images_name"
         assert images.images == dict(test_image1=image1, test_image2=image2)
+        self.assertIs(images.order_of_images[0], image2)
+        self.assertIs(images.order_of_images[1], image1)
 
 
 class TestTimeSeriesReferenceVectorData(TestCase):
@@ -595,21 +601,63 @@ class TestTimeSeriesReferenceVectorData(TestCase):
             re[1], TimeSeriesReferenceVectorData.TIME_SERIES_REFERENCE_TUPLE(*values[1])
         )
 
+    def test_add_row(self):
+        v = TimeSeriesReferenceVectorData(name='a', description='a')
+        val = TimeSeriesReference(0, 5, TimeSeries(name='test', description='test',
+                                                   data=np.arange(10), unit='unit', starting_time=5.0, rate=0.1))
+        v.add_row(val)
+        self.assertTupleEqual(v[0], val)
+
+    def test_add_row_with_plain_tuple(self):
+        v = TimeSeriesReferenceVectorData(name='a', description='a')
+        val = (0, 5, TimeSeries(name='test', description='test',
+                                data=np.arange(10), unit='unit', starting_time=5.0, rate=0.1))
+        v.add_row(val)
+        self.assertTupleEqual(v[0], val)
+
+    def test_add_row_with_bad_tuple(self):
+        v = TimeSeriesReferenceVectorData(name='a', description='a')
+        val = (0.0, 5, TimeSeries(name='test', description='test',
+                                  data=np.arange(10), unit='unit', starting_time=5.0, rate=0.1))
+        with self.assertRaisesWith(TypeError, "idx_start must be an integer not <class 'float'>"):
+            v.add_row(val)
+
     def test_add_row_restricted_type(self):
         v = TimeSeriesReferenceVectorData(name="a", description="a")
         with self.assertRaisesWith(
             TypeError,
             "TimeSeriesReferenceVectorData.add_row: incorrect type for "
-            "'val' (got 'int', expected 'TimeSeriesReference')",
+            "'val' (got 'int', expected 'TimeSeriesReference or tuple')",
         ):
             v.add_row(1)
+
+    def test_append(self):
+        v = TimeSeriesReferenceVectorData(name='a', description='a')
+        val = TimeSeriesReference(0, 5, TimeSeries(name='test', description='test',
+                                                   data=np.arange(10), unit='unit', starting_time=5.0, rate=0.1))
+        v.append(val)
+        self.assertTupleEqual(v[0], val)
+
+    def test_append_with_plain_tuple(self):
+        v = TimeSeriesReferenceVectorData(name='a', description='a')
+        val = (0, 5, TimeSeries(name='test', description='test',
+                                data=np.arange(10), unit='unit', starting_time=5.0, rate=0.1))
+        v.append(val)
+        self.assertTupleEqual(v[0], val)
+
+    def test_append_with_bad_tuple(self):
+        v = TimeSeriesReferenceVectorData(name='a', description='a')
+        val = (0.0, 5, TimeSeries(name='test', description='test',
+                                  data=np.arange(10), unit='unit', starting_time=5.0, rate=0.1))
+        with self.assertRaisesWith(TypeError, "idx_start must be an integer not <class 'float'>"):
+            v.append(val)
 
     def test_append_restricted_type(self):
         v = TimeSeriesReferenceVectorData(name="a", description="a")
         with self.assertRaisesWith(
             TypeError,
             "TimeSeriesReferenceVectorData.append: incorrect type for "
-            "'arg' (got 'float', expected 'TimeSeriesReference')",
+            "'arg' (got 'float', expected 'TimeSeriesReference or tuple')",
         ):
             v.append(2.0)
 

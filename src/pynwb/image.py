@@ -5,7 +5,7 @@ from collections.abc import Iterable
 from hdmf.utils import docval, getargs, popargs, popargs_to_dict, get_docval
 
 from . import register_class, CORE_NAMESPACE
-from .base import TimeSeries, Image
+from .base import TimeSeries, Image, Images
 from .device import Device
 
 
@@ -111,13 +111,36 @@ class IndexSeries(TimeSeries):
             'doc': ('The data values. Must be 1D, where the first dimension must be time (frame)')},
             *get_docval(TimeSeries.__init__, 'unit'),  # required
             {'name': 'indexed_timeseries', 'type': TimeSeries,  # required
-             'doc': 'HDF5 link to TimeSeries containing images that are indexed.'},
+             'doc': 'Link to TimeSeries containing images that are indexed.', 'default': None},
+            {'name': 'indexed_images', 'type': Images,  # required
+             'doc': ("Link to Images object containing an ordered set of images that are indexed. The Images object "
+                     "must contain a 'ordered_images' dataset specifying the order of the images in the Images type."),
+             'default': None},
             *get_docval(TimeSeries.__init__, 'resolution', 'conversion', 'timestamps', 'starting_time', 'rate',
                         'comments', 'description', 'control', 'control_description', 'offset'))
     def __init__(self, **kwargs):
-        indexed_timeseries = popargs('indexed_timeseries', kwargs)
+        indexed_timeseries, indexed_images = popargs('indexed_timeseries', 'indexed_images', kwargs)
+        if kwargs['unit'] and kwargs['unit'] != 'N/A':
+            msg = ("The 'unit' field of IndexSeries is fixed to the value 'N/A' starting in NWB 2.5. Passing "
+                   "a different value for 'unit' will raise an error in PyNWB 3.0.")
+            warnings.warn(msg, PendingDeprecationWarning)
+        if not indexed_timeseries and not indexed_images:
+            msg = "Either indexed_timeseries or indexed_images must be provided when creating an IndexSeries."
+            raise ValueError(msg)
+        if indexed_timeseries:
+            msg = ("The indexed_timeseries field of IndexSeries is discouraged and will be deprecated in "
+                   "a future version of NWB. Use the indexed_images field instead.")
+            warnings.warn(msg, PendingDeprecationWarning)
+        kwargs['unit'] = 'N/A'  # fixed value starting in NWB 2.5
         super().__init__(**kwargs)
         self.indexed_timeseries = indexed_timeseries
+        self.indexed_images = indexed_images
+        if kwargs['conversion'] and kwargs['conversion'] != self.DEFAULT_CONVERSION:
+            warnings.warn("The conversion attribute is not used by IndexSeries.")
+        if kwargs['resolution'] and kwargs['resolution'] != self.DEFAULT_RESOLUTION:
+            warnings.warn("The resolution attribute is not used by IndexSeries.")
+        if kwargs['offset'] and kwargs['offset'] != self.DEFAULT_OFFSET:
+            warnings.warn("The offset attribute is not used by IndexSeries.")
 
 
 @register_class('ImageMaskSeries', CORE_NAMESPACE)

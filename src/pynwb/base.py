@@ -99,15 +99,21 @@ class TimeSeries(NWBDataInterface):
     DEFAULT_DATA = np.ndarray(shape=(0, ), dtype=np.uint8)
     DEFAULT_UNIT = 'unknown'
 
+    DEFAULT_RESOLUTION = -1.0
+    DEFAULT_CONVERSION = 1.0
+    DEFAULT_OFFSET = 0.0
+
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset'},  # required
             {'name': 'data', 'type': ('array_data', 'data', 'TimeSeries'),
              'doc': ('The data values. The first dimension must be time. '
                      'Can also store binary data, e.g., image frames')},
             {'name': 'unit', 'type': str, 'doc': 'The base unit of measurement (should be SI unit)'},
             {'name': 'resolution', 'type': 'float',
-             'doc': 'The smallest meaningful difference (in specified unit) between values in data', 'default': -1.0},
+             'doc': 'The smallest meaningful difference (in specified unit) between values in data',
+             'default': DEFAULT_RESOLUTION},
             {'name': 'conversion', 'type': 'float',
-             'doc': 'Scalar to multiply each element in data to convert it to the specified unit', 'default': 1.0},
+             'doc': 'Scalar to multiply each element in data to convert it to the specified unit',
+             'default': DEFAULT_CONVERSION},
             {
                 'name': 'offset',
                 'type': 'float',
@@ -115,7 +121,7 @@ class TimeSeries(NWBDataInterface):
                     "Scalar to add to each element in the data scaled by 'conversion' to finish converting it to the "
                     "specified unit."
                     ),
-                'default': 0.0
+                'default': DEFAULT_OFFSET
             },
             {'name': 'timestamps', 'type': ('array_data', 'data', 'TimeSeries'), 'shape': (None,),
              'doc': 'Timestamps for samples stored in data', 'default': None},
@@ -292,10 +298,33 @@ class Image(NWBData):
             setattr(self, key, val)
 
 
+@register_class('ImageReferences', CORE_NAMESPACE)
+class ImageReferences(NWBData):
+    """
+    Ordered dataset of references to Image objects.
+    """
+    __nwbfields__ = ('data', )
+
+    @docval({'name': 'name', 'type': str, 'doc': 'The name of this ImageReferences object.'},
+            {'name': 'data', 'type': 'array_data', 'doc': 'The images in order.'},)
+    def __init__(self, **kwargs):
+        # NOTE we do not use the docval shape validator here because it will recognize a list of P MxN images as
+        # having shape (P, M, N)
+        # check type and dimensionality
+        for image in kwargs['data']:
+            assert isinstance(image, Image), "Images used in ImageReferences must have type Image, not %s" % type(image)
+        super().__init__(**kwargs)
+
+
 @register_class('Images', CORE_NAMESPACE)
 class Images(MultiContainerInterface):
+    """An collection of images with an optional way to specify the order of the images
+    using the "order_of_images" dataset. An order must be specified if the images are
+    referenced by index, e.g., from an IndexSeries.
+    """
 
-    __nwbfields__ = ('description',)
+    __nwbfields__ = ('description',
+                     {'name': 'order_of_images', 'child': True, 'required_name': 'order_of_images'})
 
     __clsconf__ = {
         'attr': 'images',
@@ -307,9 +336,12 @@ class Images(MultiContainerInterface):
 
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this set of images'},
             {'name': 'images', 'type': 'array_data', 'doc': 'image objects', 'default': None},
-            {'name': 'description', 'type': str, 'doc': 'description of images', 'default': 'no description'})
+            {'name': 'description', 'type': str, 'doc': 'description of images', 'default': 'no description'},
+            {'name': 'order_of_images', 'type': 'ImageReferences',
+             'doc': 'Ordered dataset of references to Image objects stored in the parent group.', 'default': None},)
     def __init__(self, **kwargs):
-        args_to_set = popargs_to_dict(("description", "images"), kwargs)
+
+        args_to_set = popargs_to_dict(("description", "images", "order_of_images"), kwargs)
         super().__init__(**kwargs)
         for key, val in args_to_set.items():
             setattr(self, key, val)
@@ -482,18 +514,38 @@ class TimeSeriesReferenceVectorData(VectorData):
             *get_docval(VectorData.__init__, 'data'))
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+        # CAUTION: Define any logic specific for init in the self._init_internal function, not here!
+        self._init_internal()
 
-    @docval({'name': 'val', 'type': TIME_SERIES_REFERENCE_TUPLE, 'doc': 'the value to add to this column'})
+    def _init_internal(self):
+        """
+        Called from __init__ to perform initialization specific to this class. This is done
+        here due to the :py:class:`~pynwb.io.epoch.TimeIntervalsMap` having to migrate legacy VectorData
+        to TimeSeriesReferenceVectorData. In this way, if dedicated logic init logic needs
+        to be added to this class then we have a place for it without having to also
+        update :py:class:`~pynwb.io.epoch.TimeIntervalsMap` (which would likely get forgotten)
+        """
+        pass
+
+    @docval({'name': 'val', 'type': (TIME_SERIES_REFERENCE_TUPLE, tuple),
+             'doc': 'the value to add to this column. If this is a regular tuple then it '
+                    'must be convertible to a TimeSeriesReference'})
     def add_row(self, **kwargs):
         """Append a data value to this column."""
         val = kwargs['val']
+        if not isinstance(val, self.TIME_SERIES_REFERENCE_TUPLE):
+            val = self.TIME_SERIES_REFERENCE_TUPLE(*val)
         val.check_types()
         super().append(val)
 
-    @docval({'name': 'arg', 'type': TIME_SERIES_REFERENCE_TUPLE, 'doc': 'the value to append to this column'})
+    @docval({'name': 'arg', 'type': (TIME_SERIES_REFERENCE_TUPLE, tuple),
+             'doc': 'the value to append to this column. If this is a regular tuple then it '
+                    'must be convertible to a TimeSeriesReference'})
     def append(self, **kwargs):
         """Append a data value to this column."""
         arg = kwargs['arg']
+        if not isinstance(arg, self.TIME_SERIES_REFERENCE_TUPLE):
+            arg = self.TIME_SERIES_REFERENCE_TUPLE(*arg)
         arg.check_types()
         super().append(arg)
 
@@ -532,7 +584,7 @@ class TimeSeriesReferenceVectorData(VectorData):
                 return self.TIME_SERIES_REFERENCE_TUPLE(*vals)
         else:  # key selected multiple rows
             # When loading from HDF5 we get an np.ndarray otherwise we get list-of-list. This
-            # makes the values consistent and tranforms the data to use our namedtuple type
+            # makes the values consistent and transforms the data to use our namedtuple type
             re = [self.TIME_SERIES_REFERENCE_NONE_TYPE
                   if (v[0] < 0 or v[1] < 0) else self.TIME_SERIES_REFERENCE_TUPLE(*v)
                   for v in vals]
