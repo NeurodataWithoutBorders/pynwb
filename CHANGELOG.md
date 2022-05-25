@@ -19,6 +19,7 @@
 - Added support for NWB 2.5.0.
   - Added support for updated ``IndexSeries`` type, new ``order_of_images`` field in ``Images``, and new neurodata_type
     ``ImageReferences``. @rly (#1483)
+- Added support for HDMF 3.3.1. This is now the minimum version of HDMF supported. @rly
 
 ### Documentation and tutorial enhancements:
 - Added tutorial on annotating data via ``TimeIntervals``. @oruebel (#1390)
