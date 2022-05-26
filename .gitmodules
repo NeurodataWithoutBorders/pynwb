@@ -1,3 +1,4 @@
 [submodule "src/pynwb/nwb-schema"]
 	path = src/pynwb/nwb-schema
-	url = http://github.com/NeurodataWithoutBorders/nwb-schema.git
+	url = git@github.com:catalystneuro/nwb-schema.git
+	branch = update_required_condition_for_extracellular_electrode_table
