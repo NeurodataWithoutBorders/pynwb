@@ -8,7 +8,7 @@ from warnings import warn
 import h5py
 
 from hdmf.spec import NamespaceCatalog
-from hdmf.utils import docval, getargs, popargs, call_docval_func, get_docval
+from hdmf.utils import docval, getargs, popargs, get_docval
 from hdmf.backends.io import HDMFIO
 from hdmf.backends.hdf5 import HDF5IO as _HDF5IO
 from hdmf.validate import ValidatorMap
@@ -87,7 +87,7 @@ def get_manager(**kwargs):
     Get a BuildManager to use for I/O using the given extensions. If no extensions are provided,
     return a BuildManager that uses the core namespace
     '''
-    type_map = call_docval_func(get_type_map, kwargs)
+    type_map = get_type_map(**kwargs)
     return BuildManager(type_map)
 
 
@@ -227,13 +227,13 @@ class NWBHDF5IO(_HDF5IO):
                 raise ValueError("cannot load namespaces from file when writing to it")
 
             tm = get_type_map()
-            super(NWBHDF5IO, self).load_namespaces(tm, path, file=file_obj, driver=driver)
+            super().load_namespaces(tm, path, file=file_obj, driver=driver)
             manager = BuildManager(tm)
 
             # XXX: Leaving this here in case we want to revert to this strategy for
             #      loading cached namespaces
             # ns_catalog = NamespaceCatalog(NWBGroupSpec, NWBDatasetSpec, NWBNamespace)
-            # super(NWBHDF5IO, self).load_namespaces(ns_catalog, path)
+            # super().load_namespaces(ns_catalog, path)
             # tm = TypeMap(ns_catalog)
             # tm.copy_mappers(get_type_map())
         else:
@@ -243,7 +243,7 @@ class NWBHDF5IO(_HDF5IO):
                 manager = get_manager(extensions=extensions)
             elif manager is None:
                 manager = get_manager()
-        super(NWBHDF5IO, self).__init__(path, manager=manager, mode=mode, file=file_obj, comm=comm, driver=driver)
+        super().__init__(path, manager=manager, mode=mode, file=file_obj, comm=comm, driver=driver)
 
     @docval({'name': 'src_io', 'type': HDMFIO,
              'doc': 'the HDMFIO object (such as NWBHDF5IO) that was used to read the data to export'},
@@ -287,7 +287,7 @@ class NWBHDF5IO(_HDF5IO):
         """
         nwbfile = popargs('nwbfile', kwargs)
         kwargs['container'] = nwbfile
-        call_docval_func(super().export, kwargs)
+        super().export(**kwargs)
 
 
 from . import io as __io  # noqa: F401,E402

@@ -7,7 +7,7 @@ import copy as _copy
 import numpy as np
 import pandas as pd
 
-from hdmf.utils import docval, getargs, call_docval_func, get_docval, popargs
+from hdmf.utils import docval, getargs, get_docval, popargs, popargs_to_dict
 
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries, ProcessingModule
@@ -30,9 +30,10 @@ def _not_parent(arg):
 
 @register_class('LabMetaData', CORE_NAMESPACE)
 class LabMetaData(NWBContainer):
+
     @docval({'name': 'name', 'type': str, 'doc': 'name of metadata'})
     def __init__(self, **kwargs):
-        super(LabMetaData, self).__init__(kwargs['name'])
+        super().__init__(**kwargs)
 
 
 @register_class('Subject', CORE_NAMESPACE)
@@ -74,24 +75,29 @@ class Subject(NWBContainer):
              'doc': 'The datetime of the date of birth. May be supplied instead of age.'},
             {'name': 'strain', 'type': str, 'doc': 'The strain of the subject, e.g., "C57BL/6J"', 'default': None})
     def __init__(self, **kwargs):
+        keys_to_set = ("age",
+                       "description",
+                       "genotype",
+                       "sex",
+                       "species",
+                       "subject_id",
+                       "weight",
+                       "date_of_birth",
+                       "strain")
+        args_to_set = popargs_to_dict(keys_to_set, kwargs)
         kwargs['name'] = 'subject'
-        call_docval_func(super(Subject, self).__init__, kwargs)
-        self.age = getargs('age', kwargs)
-        self.description = getargs('description', kwargs)
-        self.genotype = getargs('genotype', kwargs)
-        self.sex = getargs('sex', kwargs)
-        self.species = getargs('species', kwargs)
-        self.subject_id = getargs('subject_id', kwargs)
-        weight = getargs('weight', kwargs)
+        super().__init__(**kwargs)
+
+        weight = args_to_set['weight']
         if isinstance(weight, float):
-            weight = str(weight) + ' kg'
-        self.weight = weight
-        self.strain = getargs('strain', kwargs)
-        date_of_birth = getargs('date_of_birth', kwargs)
+            args_to_set['weight'] = str(weight) + ' kg'
+
+        date_of_birth = args_to_set['date_of_birth']
         if date_of_birth and date_of_birth.tzinfo is None:
-            self.date_of_birth = _add_missing_timezone(date_of_birth)
-        else:
-            self.date_of_birth = date_of_birth
+            args_to_set['date_of_birth'] = _add_missing_timezone(date_of_birth)
+
+        for key, val in args_to_set.items():
+            setattr(self, key, val)
 
 
 @register_class('NWBFile', CORE_NAMESPACE)
@@ -354,29 +360,16 @@ class NWBFile(MultiContainerInterface):
             {'name': 'icephys_experimental_conditions', 'type': ExperimentalConditionsTable, 'default': None,
              'doc': 'the ExperimentalConditionsTable table that belongs to this NWBFile'})
     def __init__(self, **kwargs):
-        kwargs['name'] = 'root'
-        call_docval_func(super(NWBFile, self).__init__, kwargs)
-        self.fields['session_description'] = getargs('session_description', kwargs)
-        self.fields['identifier'] = getargs('identifier', kwargs)
-
-        self.fields['session_start_time'] = getargs('session_start_time', kwargs)
-        if self.fields['session_start_time'].tzinfo is None:
-            self.fields['session_start_time'] = _add_missing_timezone(self.fields['session_start_time'])
-
-        self.fields['timestamps_reference_time'] = getargs('timestamps_reference_time', kwargs)
-        if self.fields['timestamps_reference_time'] is None:
-            self.fields['timestamps_reference_time'] = self.fields['session_start_time']
-        elif self.fields['timestamps_reference_time'].tzinfo is None:
-            raise ValueError("'timestamps_reference_time' must be a timezone-aware datetime object.")
-
-        self.fields['file_create_date'] = getargs('file_create_date', kwargs)
-        if self.fields['file_create_date'] is None:
-            self.fields['file_create_date'] = datetime.now(tzlocal())
-        if isinstance(self.fields['file_create_date'], datetime):
-            self.fields['file_create_date'] = [self.fields['file_create_date']]
-        self.fields['file_create_date'] = list(map(_add_missing_timezone, self.fields['file_create_date']))
-
-        fieldnames = [
+        keys_to_set = [
+            'session_description',
+            'identifier',
+            'session_start_time',
+            'experimenter',
+            'file_create_date',
+            'ic_electrodes',
+            'icephys_electrodes',
+            'related_publications',
+            'timestamps_reference_time',
             'acquisition',
             'analysis',
             'stimulus',
@@ -419,29 +412,69 @@ class NWBFile(MultiContainerInterface):
             'icephys_repetitions',
             'icephys_experimental_conditions'
         ]
-        for attr in fieldnames:
-            setattr(self, attr, kwargs.get(attr, None))
+        args_to_set = popargs_to_dict(keys_to_set, kwargs)
+        kwargs['name'] = 'root'
+        super().__init__(**kwargs)
+
+        # add timezone to session_start_time if missing
+        session_start_time = args_to_set['session_start_time']
+        if session_start_time.tzinfo is None:
+            args_to_set['session_start_time'] = _add_missing_timezone(session_start_time)
+
+        # set timestamps_reference_time to session_start_time if not provided
+        # if provided, ensure that it has a timezone
+        timestamps_reference_time = args_to_set['timestamps_reference_time']
+        if timestamps_reference_time is None:
+            args_to_set['timestamps_reference_time'] = args_to_set['session_start_time']
+        elif timestamps_reference_time.tzinfo is None:
+            raise ValueError("'timestamps_reference_time' must be a timezone-aware datetime object.")
+
+        # convert file_create_date to list and add timezone if missing
+        file_create_date = args_to_set['file_create_date']
+        if file_create_date is None:
+            file_create_date = datetime.now(tzlocal())
+        if isinstance(file_create_date, datetime):
+            file_create_date = [file_create_date]
+        args_to_set['file_create_date'] = list(map(_add_missing_timezone, file_create_date))
 
         # backwards-compatibility code for ic_electrodes / icephys_electrodes
-        ic_elec_val = kwargs.get('icephys_electrodes', None)
-        if ic_elec_val is None and kwargs.get('ic_electrodes', None) is not None:
-            ic_elec_val = kwargs.get('ic_electrodes', None)
+        icephys_electrodes = args_to_set['icephys_electrodes']
+        ic_electrodes = args_to_set['ic_electrodes']
+        if icephys_electrodes is None and ic_electrodes is not None:
             warn("Use of the ic_electrodes parameter is deprecated. "
                  "Use the icephys_electrodes parameter instead", DeprecationWarning)
-        setattr(self, 'icephys_electrodes', ic_elec_val)
+            args_to_set['icephys_electrodes'] = ic_electrodes
+        args_to_set.pop('ic_electrodes')  # do not set this arg
 
-        experimenter = kwargs.get('experimenter', None)
+        # convert single experimenter to tuple
+        experimenter = args_to_set['experimenter']
         if isinstance(experimenter, str):
-            experimenter = (experimenter,)
-        setattr(self, 'experimenter', experimenter)
+            args_to_set['experimenter'] = (experimenter,)
 
-        related_pubs = kwargs.get('related_publications', None)
+        # convert single related_publications to tuple
+        related_pubs = args_to_set['related_publications']
         if isinstance(related_pubs, str):
-            related_pubs = (related_pubs,)
-        setattr(self, 'related_publications', related_pubs)
+            args_to_set['related_publications'] = (related_pubs,)
 
-        if getargs('source_script', kwargs) is None and getargs('source_script_file_name', kwargs) is not None:
+        # ensure source_script is provided if source_script_file_name is provided
+        if args_to_set['source_script'] is None and args_to_set['source_script_file_name'] is not None:
             raise ValueError("'source_script' cannot be None when 'source_script_file_name' is set")
+
+        # these attributes have no setters and can only be set using self.fields
+        keys_to_set_via_fields = (
+            'session_description',
+            'identifier',
+            'session_start_time',
+            'timestamps_reference_time',
+            'file_create_date'
+        )
+        args_to_set_via_fields = popargs_to_dict(keys_to_set_via_fields, args_to_set)
+
+        for key, val in args_to_set_via_fields.items():
+            self.fields[key] = val
+
+        for key, val in args_to_set.items():
+            setattr(self, key, val)
 
         self.__obj = None
 
@@ -524,7 +557,7 @@ class NWBFile(MultiContainerInterface):
 
     def __check_epochs(self):
         if self.epochs is None:
-            self.epochs = TimeIntervals('epochs', 'experimental epochs')
+            self.epochs = TimeIntervals(name='epochs', description='experimental epochs')
 
     @docval(*get_docval(TimeIntervals.add_column))
     def add_epoch_column(self, **kwargs):
@@ -534,7 +567,7 @@ class NWBFile(MultiContainerInterface):
         """
         self.__check_epochs()
         self.epoch_tags.update(kwargs.pop('tags', list()))
-        call_docval_func(self.epochs.add_column, kwargs)
+        self.epochs.add_column(**kwargs)
 
     def add_epoch_metadata_column(self, *args, **kwargs):
         """
@@ -557,7 +590,7 @@ class NWBFile(MultiContainerInterface):
         self.__check_epochs()
         if kwargs['tags'] is not None:
             self.epoch_tags.update(kwargs['tags'])
-        call_docval_func(self.epochs.add_interval, kwargs)
+        self.epochs.add_interval(**kwargs)
 
     def __check_electrodes(self):
         if self.electrodes is None:
@@ -570,7 +603,7 @@ class NWBFile(MultiContainerInterface):
         See :py:meth:`~hdmf.common.DynamicTable.add_column` for more details
         """
         self.__check_electrodes()
-        call_docval_func(self.electrodes.add_column, kwargs)
+        self.electrodes.add_column(**kwargs)
 
     @docval({'name': 'x', 'type': 'float', 'doc': 'the x coordinate of the position (+x is posterior)',
              'default': None},
@@ -626,7 +659,7 @@ class NWBFile(MultiContainerInterface):
             else:
                 d.pop(col_name)  # remove args from d if not set
 
-        call_docval_func(self.electrodes.add_row, d)
+        self.electrodes.add_row(**d)
 
     @docval({'name': 'region', 'type': (slice, list, tuple), 'doc': 'the indices of the table'},
             {'name': 'description', 'type': str, 'doc': 'a brief description of what this electrode is'},
@@ -643,7 +676,7 @@ class NWBFile(MultiContainerInterface):
                                  + str(len(self.electrodes)))
         desc = getargs('description', kwargs)
         name = getargs('name', kwargs)
-        return DynamicTableRegion(name, region, desc, self.electrodes)
+        return DynamicTableRegion(name=name, data=region, description=desc, table=self.electrodes)
 
     def __check_units(self):
         if self.units is None:
@@ -656,7 +689,7 @@ class NWBFile(MultiContainerInterface):
         See :py:meth:`~hdmf.common.DynamicTable.add_column` for more details
         """
         self.__check_units()
-        call_docval_func(self.units.add_column, kwargs)
+        self.units.add_column(**kwargs)
 
     @docval(*get_docval(Units.add_unit), allow_extra=True)
     def add_unit(self, **kwargs):
@@ -666,11 +699,11 @@ class NWBFile(MultiContainerInterface):
 
         """
         self.__check_units()
-        call_docval_func(self.units.add_unit, kwargs)
+        self.units.add_unit(**kwargs)
 
     def __check_trials(self):
         if self.trials is None:
-            self.trials = TimeIntervals('trials', 'experimental trials')
+            self.trials = TimeIntervals(name='trials', description='experimental trials')
 
     @docval(*get_docval(DynamicTable.add_column))
     def add_trial_column(self, **kwargs):
@@ -679,7 +712,7 @@ class NWBFile(MultiContainerInterface):
         See :py:meth:`~hdmf.common.DynamicTable.add_column` for more details
         """
         self.__check_trials()
-        call_docval_func(self.trials.add_column, kwargs)
+        self.trials.add_column(**kwargs)
 
     @docval(*get_docval(TimeIntervals.add_interval), allow_extra=True)
     def add_trial(self, **kwargs):
@@ -691,11 +724,14 @@ class NWBFile(MultiContainerInterface):
         been added (through calls to `add_trial_columns`).
         """
         self.__check_trials()
-        call_docval_func(self.trials.add_interval, kwargs)
+        self.trials.add_interval(**kwargs)
 
     def __check_invalid_times(self):
         if self.invalid_times is None:
-            self.invalid_times = TimeIntervals('invalid_times', 'time intervals to be removed from analysis')
+            self.invalid_times = TimeIntervals(
+                name='invalid_times',
+                description='time intervals to be removed from analysis'
+            )
 
     @docval(*get_docval(DynamicTable.add_column))
     def add_invalid_times_column(self, **kwargs):
@@ -704,8 +740,9 @@ class NWBFile(MultiContainerInterface):
         See :py:meth:`~hdmf.common.DynamicTable.add_column` for more details
         """
         self.__check_invalid_times()
-        call_docval_func(self.invalid_times.add_column, kwargs)
+        self.invalid_times.add_column(**kwargs)
 
+    @docval(*get_docval(TimeIntervals.add_interval), allow_extra=True)
     def add_invalid_time_interval(self, **kwargs):
         """
         Add a trial to the trial table.
@@ -715,7 +752,7 @@ class NWBFile(MultiContainerInterface):
         been added (through calls to `add_invalid_times_columns`).
         """
         self.__check_invalid_times()
-        call_docval_func(self.invalid_times.add_interval, kwargs)
+        self.invalid_times.add_interval(**kwargs)
 
     @docval({'name': 'electrode_table', 'type': DynamicTable, 'doc': 'the ElectrodeTable for this file'})
     def set_electrode_table(self, **kwargs):
@@ -813,7 +850,7 @@ class NWBFile(MultiContainerInterface):
             self.add_icephys_electrode(electrode)
         # make sure the intracellular recordings table exists and if not create it using get_intracellular_recordings
         # Add the recoding to the intracellular_recordings table
-        return call_docval_func(self.get_intracellular_recordings().add_recording, kwargs)
+        return self.get_intracellular_recordings().add_recording(**kwargs)
 
     @docval(returns='The NWBFile.icephys_simultaneous_recordings table', rtype=SimultaneousRecordingsTable)
     def get_icephys_simultaneous_recordings(self):
@@ -836,7 +873,7 @@ class NWBFile(MultiContainerInterface):
         """
         Add a new simultaneous recording to the icephys_simultaneous_recordings table
         """
-        return call_docval_func(self.get_icephys_simultaneous_recordings().add_simultaneous_recording, kwargs)
+        return self.get_icephys_simultaneous_recordings().add_simultaneous_recording(**kwargs)
 
     @docval(returns='The NWBFile.icephys_sequential_recordings table', rtype=SequentialRecordingsTable)
     def get_icephys_sequential_recordings(self):
@@ -860,7 +897,7 @@ class NWBFile(MultiContainerInterface):
         Add a new sequential recording to the icephys_sequential_recordings table
         """
         self.get_icephys_sequential_recordings()
-        return call_docval_func(self.icephys_sequential_recordings.add_sequential_recording, kwargs)
+        return self.icephys_sequential_recordings.add_sequential_recording(**kwargs)
 
     @docval(returns='The NWBFile.icephys_repetitions table', rtype=RepetitionsTable)
     def get_icephys_repetitions(self):
@@ -883,7 +920,7 @@ class NWBFile(MultiContainerInterface):
         """
         Add a new repetition to the RepetitionsTable table
         """
-        return call_docval_func(self.get_icephys_repetitions().add_repetition, kwargs)
+        return self.get_icephys_repetitions().add_repetition(**kwargs)
 
     @docval(returns='The NWBFile.icephys_experimental_conditions table', rtype=ExperimentalConditionsTable)
     def get_icephys_experimental_conditions(self):
@@ -906,7 +943,7 @@ class NWBFile(MultiContainerInterface):
         """
         Add a new condition to the ExperimentalConditionsTable table
         """
-        return call_docval_func(self.get_icephys_experimental_conditions().add_experimental_condition, kwargs)
+        return self.get_icephys_experimental_conditions().add_experimental_condition(**kwargs)
 
     def get_icephys_meta_parent_table(self):
         """
@@ -1050,7 +1087,7 @@ def _add_missing_timezone(date):
 
 
 def _tablefunc(table_name, description, columns):
-    t = DynamicTable(table_name, description)
+    t = DynamicTable(name=table_name, description=description)
     for c in columns:
         if isinstance(c, tuple):
             t.add_column(c[0], c[1])

@@ -17,7 +17,7 @@ class TestImageSeriesIO(AcquisitionH5IOMixin, TestCase):
             external_file=['external_file'],
             starting_frame=[1, 2, 3],
             format='tiff',
-            timestamps=list(),
+            timestamps=[1., 2., 3.],
             device=self.dev1,
         )
         return iS
