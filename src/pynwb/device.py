@@ -1,4 +1,4 @@
-from hdmf.utils import docval, call_docval_func, popargs
+from hdmf.utils import docval, popargs
 from . import register_class, CORE_NAMESPACE
 from .core import NWBContainer
 
@@ -21,6 +21,6 @@ class Device(NWBContainer):
             'default': None})
     def __init__(self, **kwargs):
         description, manufacturer = popargs('description', 'manufacturer', kwargs)
-        call_docval_func(super().__init__, kwargs)
+        super().__init__(**kwargs)
         self.description = description
         self.manufacturer = manufacturer

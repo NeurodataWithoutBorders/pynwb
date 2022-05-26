@@ -33,7 +33,7 @@ class TimeIntervalsMap(DynamicTableMap):
                         # schema are compatible (i.e., only the neurodata_type was changed in 2.5)
                         dset_obj.__class__ = TimeSeriesReferenceVectorData
                         # Execute init logic specific for TimeSeriesReferenceVectorData
-                        dset_obj. _init_internal()
+                        dset_obj._init_internal()
                     columns.append(dset_obj)
             # overwrite the columns constructor argument
             return columns

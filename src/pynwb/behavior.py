@@ -37,7 +37,7 @@ class SpatialSeries(TimeSeries):
         Create a SpatialSeries TimeSeries dataset
         """
         name, data, reference_frame, unit = popargs('name', 'data', 'reference_frame', 'unit', kwargs)
-        super(SpatialSeries, self).__init__(name, data, unit, **kwargs)
+        super().__init__(name, data, unit, **kwargs)
 
         # NWB 2.5 restricts length of second dimension to be <= 3
         allowed_data_shapes = ((None, ), (None, 1), (None, 2), (None, 3))

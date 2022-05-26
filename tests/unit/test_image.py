@@ -18,7 +18,7 @@ class ImageSeriesConstructor(TestCase):
             external_file=['external_file'],
             starting_frame=[1, 2, 3],
             format='tiff',
-            timestamps=list(),
+            timestamps=[1., 2., 3.],
             device=dev,
         )
         self.assertEqual(iS.name, 'test_iS')
@@ -35,7 +35,7 @@ class ImageSeriesConstructor(TestCase):
             ImageSeries(
                 name='test_iS',
                 unit='unit',
-                timestamps=list()
+                rate=2.,
             )
 
     def test_external_file_no_frame(self):
@@ -43,7 +43,7 @@ class ImageSeriesConstructor(TestCase):
             name='test_iS',
             unit='unit',
             external_file=['external_file'],
-            timestamps=list()
+            timestamps=[1., 2., 3.]
         )
         self.assertListEqual(iS.starting_frame, [0])
 
@@ -52,7 +52,7 @@ class ImageSeriesConstructor(TestCase):
             name='test_iS',
             unit='unit',
             data=np.ones((3, 3, 3)),
-            timestamps=list()
+            timestamps=[1., 2., 3.]
         )
         self.assertIsNone(iS.starting_frame)
 
