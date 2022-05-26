@@ -1,21 +1,16 @@
 from .. import register_map
 
-from pynwb.icephys import SweepTable, VoltageClampSeries, IntracellularRecordingsTable
+from pynwb.icephys import VoltageClampSeries, IntracellularRecordingsTable
 from hdmf.common.io.table import DynamicTableMap
 from hdmf.common.io.alignedtable import AlignedDynamicTableMap
 from .base import TimeSeriesMap
-
-
-@register_map(SweepTable)
-class SweepTableMap(DynamicTableMap):
-    pass
 
 
 @register_map(VoltageClampSeries)
 class VoltageClampSeriesMap(TimeSeriesMap):
 
     def __init__(self, spec):
-        super(VoltageClampSeriesMap, self).__init__(spec)
+        super().__init__(spec)
 
         fields_with_unit = ('capacitance_fast',
                             'capacitance_slow',

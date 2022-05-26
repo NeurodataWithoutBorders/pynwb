@@ -11,7 +11,7 @@ from pynwb.testing import TestCase
 
 class AnnotationSeriesConstructor(TestCase):
     def test_init(self):
-        aS = AnnotationSeries('test_aS', data=[1, 2, 3], timestamps=list())
+        aS = AnnotationSeries('test_aS', data=[1, 2, 3], timestamps=[1., 2., 3.])
         self.assertEqual(aS.name, 'test_aS')
         aS.add_annotation(2.0, 'comment')
 
@@ -30,7 +30,7 @@ class DecompositionSeriesConstructor(TestCase):
     def test_init(self):
         timeseries = TimeSeries(name='dummy timeseries', description='desc',
                                 data=np.ones((3, 3)), unit='Volts',
-                                timestamps=np.ones((3,)))
+                                timestamps=[1., 2., 3.])
         bands = DynamicTable(name='bands', description='band info for LFPSpectralAnalysis', columns=[
             VectorData(name='band_name', description='name of bands', data=['alpha', 'beta', 'gamma']),
             VectorData(name='band_limits', description='low and high cutoffs in Hz', data=np.ones((3, 2)))
@@ -38,7 +38,7 @@ class DecompositionSeriesConstructor(TestCase):
         spec_anal = DecompositionSeries(name='LFPSpectralAnalysis',
                                         description='my description',
                                         data=np.ones((3, 3, 3)),
-                                        timestamps=np.ones((3,)),
+                                        timestamps=[1., 2., 3.],
                                         source_timeseries=timeseries,
                                         metric='amplitude',
                                         bands=bands)
@@ -46,7 +46,7 @@ class DecompositionSeriesConstructor(TestCase):
         self.assertEqual(spec_anal.name, 'LFPSpectralAnalysis')
         self.assertEqual(spec_anal.description, 'my description')
         np.testing.assert_equal(spec_anal.data, np.ones((3, 3, 3)))
-        np.testing.assert_equal(spec_anal.timestamps, np.ones((3,)))
+        np.testing.assert_equal(spec_anal.timestamps, [1., 2., 3.])
         self.assertEqual(spec_anal.bands['band_name'].data, ['alpha', 'beta', 'gamma'])
         np.testing.assert_equal(spec_anal.bands['band_limits'].data, np.ones((3, 2)))
         self.assertEqual(spec_anal.source_timeseries, timeseries)
@@ -59,7 +59,7 @@ class DecompositionSeriesConstructor(TestCase):
         spec_anal = DecompositionSeries(name='LFPSpectralAnalysis',
                                         description='my description',
                                         data=np.ones((3, 3, 3)),
-                                        timestamps=np.ones((3,)),
+                                        timestamps=[1., 2., 3.],
                                         source_timeseries=timeseries,
                                         metric='amplitude')
         for band_name in ['alpha', 'beta', 'gamma']:
@@ -68,7 +68,7 @@ class DecompositionSeriesConstructor(TestCase):
         self.assertEqual(spec_anal.name, 'LFPSpectralAnalysis')
         self.assertEqual(spec_anal.description, 'my description')
         np.testing.assert_equal(spec_anal.data, np.ones((3, 3, 3)))
-        np.testing.assert_equal(spec_anal.timestamps, np.ones((3,)))
+        np.testing.assert_equal(spec_anal.timestamps, [1., 2., 3.])
         self.assertEqual(spec_anal.bands['band_name'].data, ['alpha', 'beta', 'gamma'])
         np.testing.assert_equal(spec_anal.bands['band_limits'].data, np.ones((3, 2)))
         self.assertEqual(spec_anal.source_timeseries, timeseries)

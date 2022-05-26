@@ -166,8 +166,8 @@ class EventWaveformConstructor(AcquisitionH5IOMixin, TestCase):
                                     description='the first and third electrodes',
                                     table=self.table)
         sES = SpikeEventSeries(name='test_sES',
-                               data=((1, 1, 1), (2, 2, 2)),
-                               timestamps=[0., 1.],
+                               data=((1, 1), (2, 2), (3, 3)),
+                               timestamps=[0., 1., 2.],
                                electrodes=region)
         ew = EventWaveform(sES)
         return ew

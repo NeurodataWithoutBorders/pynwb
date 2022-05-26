@@ -9,7 +9,7 @@ from hdmf.common.io.table import DynamicTableMap
 class PlaneSegmentationMap(DynamicTableMap):
 
     def __init__(self, spec):
-        super(PlaneSegmentationMap, self).__init__(spec)
+        super().__init__(spec)
 
         reference_images_spec = self.spec.get_group('reference_images').get_neurodata_type('ImageSeries')
         self.map_spec('reference_images', reference_images_spec)
@@ -19,7 +19,7 @@ class PlaneSegmentationMap(DynamicTableMap):
 class ImagingPlaneMap(NWBContainerMapper):
 
     def __init__(self, spec):
-        super(ImagingPlaneMap, self).__init__(spec)
+        super().__init__(spec)
         manifold_spec = self.spec.get_dataset('manifold')
         origin_coords_spec = self.spec.get_dataset('origin_coords')
         grid_spacing_spec = self.spec.get_dataset('grid_spacing')

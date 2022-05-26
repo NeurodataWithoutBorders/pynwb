@@ -1,7 +1,7 @@
 from datetime import datetime
 from dateutil.tz import tzlocal
 
-from hdmf.utils import docval, call_docval_func
+from hdmf.utils import docval
 
 from pynwb import NWBFile, TimeSeries, available_namespaces
 from pynwb.core import NWBContainer
@@ -14,7 +14,7 @@ class MyTestClass(NWBContainer):
 
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this container'})
     def __init__(self, **kwargs):
-        call_docval_func(super(MyTestClass, self).__init__, kwargs)
+        super().__init__(**kwargs)
         self.prop1 = 'test1'
 
 
@@ -43,26 +43,26 @@ class TestPrint(TestCase):
                           identifier='identifier', session_start_time=datetime.now(tzlocal()))
         ts1 = TimeSeries(
             name='name1',
-            data=[1., 2., 3.] * 1000,
+            data=[1000, 2000, 3000],
             unit='unit',
-            timestamps=[1, 2, 3]
+            timestamps=[1., 2., 3.]
         )
         ts2 = TimeSeries(
             name='name2',
-            data=[1, 2, 3] * 1000,
+            data=[1000, 2000, 3000],
             unit='unit',
-            timestamps=[1, 2, 3]
+            timestamps=[1., 2., 3.]
         )
         expected = """name1 pynwb.base.TimeSeries at 0x%d
 Fields:
   comments: no comments
   conversion: 1.0
-  data: [1. 2. 3. ... 1. 2. 3.]
+  data: [1000 2000 3000]
   description: no description
   interval: 1
   offset: 0.0
   resolution: -1.0
-  timestamps: [1 2 3]
+  timestamps: [1. 2. 3.]
   timestamps_unit: seconds
   unit: unit
 """

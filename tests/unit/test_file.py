@@ -19,9 +19,9 @@ class NWBFileTest(TestCase):
                        datetime(2017, 5, 2, 13, 0, 0, 1, tzinfo=tzutc()),
                        datetime(2017, 5, 2, 14, tzinfo=tzutc())]
         self.path = 'nwbfile_test.h5'
-        self.nwbfile = NWBFile('a test session description for a test NWBFile',
-                               'FILE123',
-                               self.start,
+        self.nwbfile = NWBFile(session_description='a test session description for a test NWBFile',
+                               identifier='FILE123',
+                               session_start_time=self.start,
                                file_create_date=self.create,
                                timestamps_reference_time=self.ref_time,
                                experimenter='A test experimenter',

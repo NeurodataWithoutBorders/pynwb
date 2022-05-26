@@ -105,7 +105,7 @@ class TestExtension(TestCase):
                     {'name': 'test_attr', 'type': float, 'doc': 'test attribute'})
             def __init__(self, **kwargs):
                 test_attr = popargs('test_attr', kwargs)
-                super(MyTestMetaData, self).__init__(**kwargs)
+                super().__init__(**kwargs)
                 self.test_attr = test_attr
 
         nwbfile = NWBFile("a file with header data", "NB123A",  datetime(2017, 5, 1, 12, 0, 0, tzinfo=tzlocal()))
