@@ -7,7 +7,7 @@ import copy as _copy
 import numpy as np
 import pandas as pd
 
-from hdmf.utils import docval, getargs, get_docval, popargs, popargs_to_dict
+from hdmf.utils import docval, getargs, get_docval, popargs, popargs_to_dict, AllowPositional
 
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries, ProcessingModule
@@ -610,10 +610,15 @@ class NWBFile(MultiContainerInterface):
             {'name': 'y', 'type': 'float', 'doc': 'the y coordinate of the position (+y is inferior)', 'default': None},
             {'name': 'z', 'type': 'float', 'doc': 'the z coordinate of the position (+z is right)', 'default': None},
             {'name': 'imp', 'type': 'float', 'doc': 'the impedance of the electrode, in ohms', 'default': None},
-            {'name': 'location', 'type': str, 'doc': 'the location of electrode within the subject e.g. brain region'},
-            {'name': 'filtering', 'type': str, 'doc': 'description of hardware filtering, including the filter\
-                name and frequency cutoffs', 'default': None},
-            {'name': 'group', 'type': ElectrodeGroup, 'doc': 'the ElectrodeGroup object to add to this NWBFile'},
+            {'name': 'location', 'type': str,
+             'doc': 'the location of electrode within the subject e.g. brain region. Required.',
+             'default': None},
+            {'name': 'filtering', 'type': str,
+             'doc': 'description of hardware filtering, including the filter name and frequency cutoffs',
+             'default': None},
+            {'name': 'group', 'type': ElectrodeGroup,
+             'doc': 'the ElectrodeGroup object to add to this NWBFile. Required.',
+             'default': None},
             {'name': 'id', 'type': int, 'doc': 'a unique identifier for the electrode', 'default': None},
             {'name': 'rel_x', 'type': 'float', 'doc': 'the x coordinate within the electrode group', 'default': None},
             {'name': 'rel_y', 'type': 'float', 'doc': 'the y coordinate within the electrode group', 'default': None},
@@ -623,7 +628,8 @@ class NWBFile(MultiContainerInterface):
                 'default': None},
             {'name': 'enforce_unique_id', 'type': bool, 'doc': 'enforce that the id in the table must be unique',
              'default': True},
-            allow_extra=True)
+            allow_extra=True,
+            allow_positional=AllowPositional.WARNING)
     def add_electrode(self, **kwargs):
         """
         Add an electrode to the electrodes table.
@@ -635,6 +641,16 @@ class NWBFile(MultiContainerInterface):
         """
         self.__check_electrodes()
         d = _copy.copy(kwargs['data']) if kwargs.get('data') is not None else kwargs
+
+        # NOTE location and group are required arguments. in PyNWB 2.1.0 we made x, y, z optional arguments, and
+        # in order to avoid breaking API changes, the order of the arguments needed to be maintained even though
+        # these optional arguments came before the required arguments, so in docval these required arguments are
+        # displayed as optional when really they are required. this should be changed when positional arguments
+        # are not allowed
+        if not d['location']:
+            raise ValueError("The 'location' argument is required when creating an electrode.")
+        if not kwargs['group']:
+            raise ValueError("The 'group' argument is required when creating an electrode.")
         if d.get('group_name', None) is None:
             d['group_name'] = d['group'].name
 

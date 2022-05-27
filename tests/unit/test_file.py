@@ -303,6 +303,28 @@ class NWBFileTest(TestCase):
         self.assertEqual(elec.iloc[0]['rel_z'], 9.0)
         self.assertEqual(elec.iloc[0]['reference'], 'ref2')
 
+    def test_add_electrode_missing_location(self):
+        """
+        Test the case where the user creates an electrode table region with
+        indexes that are out of range of the amount of electrodes added.
+        """
+        nwbfile = NWBFile('a', 'b', datetime.now(tzlocal()))
+        device = nwbfile.create_device('a')
+        elecgrp = nwbfile.create_electrode_group('a', 'b', device=device, location='a')
+        msg = "The 'location' argument is required when creating an electrode."
+        with self.assertRaisesWith(ValueError, msg):
+            nwbfile.add_electrode(group=elecgrp, id=0)
+
+    def test_add_electrode_missing_group(self):
+        """
+        Test the case where the user creates an electrode table region with
+        indexes that are out of range of the amount of electrodes added.
+        """
+        nwbfile = NWBFile('a', 'b', datetime.now(tzlocal()))
+        msg = "The 'group' argument is required when creating an electrode."
+        with self.assertRaisesWith(ValueError, msg):
+            nwbfile.add_electrode(location='a', id=0)
+
     def test_all_children(self):
         ts1 = TimeSeries('test_ts1', [0, 1, 2, 3, 4, 5], 'grams', timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5])
         ts2 = TimeSeries('test_ts2', [0, 1, 2, 3, 4, 5], 'grams', timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5])
