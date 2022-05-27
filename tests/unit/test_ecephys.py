@@ -15,10 +15,10 @@ def make_electrode_table():
     table = ElectrodeTable()
     dev1 = Device('dev1')
     group = ElectrodeGroup('tetrode1', 'tetrode description', 'tetrode location', dev1)
-    table.add_row(id=1, location='CA1', group=group, group_name='tetrode1')
-    table.add_row(id=1, location='CA1', group=group, group_name='tetrode1')
-    table.add_row(id=1, location='CA1', group=group, group_name='tetrode1')
-    table.add_row(id=1, location='CA1', group=group, group_name='tetrode1')
+    table.add_row(location='CA1', group=group, group_name='tetrode1')
+    table.add_row(location='CA1', group=group, group_name='tetrode1')
+    table.add_row(location='CA1', group=group, group_name='tetrode1')
+    table.add_row(location='CA1', group=group, group_name='tetrode1')
 
     return table
 
