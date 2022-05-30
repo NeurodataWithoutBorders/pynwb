@@ -1,3 +1,5 @@
+import warnings
+
 import numpy as np
 
 from pynwb import TimeSeries
@@ -72,6 +74,19 @@ class ImageSeriesConstructor(TestCase):
             timestamps=list()
         )
         self.assertEqual(iS.unit, ImageSeries.DEFAULT_UNIT)
+
+    def test_external_file_no_warning(self):
+        with warnings.catch_warnings(record=True) as w:
+            ImageSeries(
+                name='test_iS',
+                data=None,
+                unit='Frames',
+                external_file=['external_file'],
+                starting_frame=[0],
+                format='external',
+                timestamps=[1, 2, 3, 4]
+            )
+            self.assertEqual(w, [])
 
 
 class IndexSeriesConstructor(TestCase):
