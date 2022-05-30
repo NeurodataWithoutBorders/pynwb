@@ -180,6 +180,9 @@ class TimeSeries(NWBDataInterface):
 
             # check that the data and timestamps match
             and (data_shape[0] != timestamps_shape[0])
+
+            # check that data has any values
+            and np.any(args_to_process["data"])
         ):
             warn("Length of data does not match length of timestamps. Your data may be transposed. Time should be on "
                  "the 0th dimension")
