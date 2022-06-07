@@ -7,7 +7,7 @@ import copy as _copy
 import numpy as np
 import pandas as pd
 
-from hdmf.utils import docval, getargs, get_docval, popargs, popargs_to_dict
+from hdmf.utils import docval, getargs, get_docval, popargs, popargs_to_dict, AllowPositional
 
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries, ProcessingModule
@@ -605,41 +605,67 @@ class NWBFile(MultiContainerInterface):
         self.__check_electrodes()
         self.electrodes.add_column(**kwargs)
 
-    @docval({'name': 'x', 'type': 'float', 'doc': 'the x coordinate of the position (+x is posterior)'},
-            {'name': 'y', 'type': 'float', 'doc': 'the y coordinate of the position (+y is inferior)'},
-            {'name': 'z', 'type': 'float', 'doc': 'the z coordinate of the position (+z is right)'},
-            {'name': 'imp', 'type': 'float', 'doc': 'the impedance of the electrode, in ohms'},
-            {'name': 'location', 'type': str, 'doc': 'the location of electrode within the subject e.g. brain region'},
+    @docval({'name': 'x', 'type': 'float', 'doc': 'the x coordinate of the position (+x is posterior)',
+             'default': None},
+            {'name': 'y', 'type': 'float', 'doc': 'the y coordinate of the position (+y is inferior)', 'default': None},
+            {'name': 'z', 'type': 'float', 'doc': 'the z coordinate of the position (+z is right)', 'default': None},
+            {'name': 'imp', 'type': 'float', 'doc': 'the impedance of the electrode, in ohms', 'default': None},
+            {'name': 'location', 'type': str,
+             'doc': 'the location of electrode within the subject e.g. brain region. Required.',
+             'default': None},
             {'name': 'filtering', 'type': str,
-             'doc': 'description of hardware filtering, including the filter name and frequency cutoffs'},
-            {'name': 'group', 'type': ElectrodeGroup, 'doc': 'the ElectrodeGroup object to add to this NWBFile'},
+             'doc': 'description of hardware filtering, including the filter name and frequency cutoffs',
+             'default': None},
+            {'name': 'group', 'type': ElectrodeGroup,
+             'doc': 'the ElectrodeGroup object to add to this NWBFile. Required.',
+             'default': None},
             {'name': 'id', 'type': int, 'doc': 'a unique identifier for the electrode', 'default': None},
             {'name': 'rel_x', 'type': 'float', 'doc': 'the x coordinate within the electrode group', 'default': None},
             {'name': 'rel_y', 'type': 'float', 'doc': 'the y coordinate within the electrode group', 'default': None},
             {'name': 'rel_z', 'type': 'float', 'doc': 'the z coordinate within the electrode group', 'default': None},
-            {'name': 'reference', 'type': str, 'doc': 'Description of the reference used for this electrode.',
-             'default': None},
+            {'name': 'reference', 'type': str, 'doc': 'Description of the reference electrode and/or reference scheme\
+                used for this  electrode, e.g.,"stainless steel skull screw" or "online common average referencing". ',
+                'default': None},
             {'name': 'enforce_unique_id', 'type': bool, 'doc': 'enforce that the id in the table must be unique',
              'default': True},
-            allow_extra=True)
+            allow_extra=True,
+            allow_positional=AllowPositional.WARNING)
     def add_electrode(self, **kwargs):
         """
         Add an electrode to the electrodes table.
         See :py:meth:`~hdmf.common.DynamicTable.add_row` for more details.
 
-        Required fields are *x*, *y*, *z*, *imp*, *location*, *filtering*,
+        Required fields are *location* and
         *group* and any columns that have been added
         (through calls to `add_electrode_columns`).
         """
         self.__check_electrodes()
         d = _copy.copy(kwargs['data']) if kwargs.get('data') is not None else kwargs
+
+        # NOTE location and group are required arguments. in PyNWB 2.1.0 we made x, y, z optional arguments, and
+        # in order to avoid breaking API changes, the order of the arguments needed to be maintained even though
+        # these optional arguments came before the required arguments, so in docval these required arguments are
+        # displayed as optional when really they are required. this should be changed when positional arguments
+        # are not allowed
+        if not d['location']:
+            raise ValueError("The 'location' argument is required when creating an electrode.")
+        if not kwargs['group']:
+            raise ValueError("The 'group' argument is required when creating an electrode.")
         if d.get('group_name', None) is None:
             d['group_name'] = d['group'].name
 
-        new_cols = [('rel_x', 'the x coordinate within the electrode group'),
+        new_cols = [('x', 'the x coordinate of the position (+x is posterior)'),
+                    ('y', 'the y coordinate of the position (+y is inferior)'),
+                    ('z', 'the z coordinate of the position (+z is right)'),
+                    ('imp', 'the impedance of the electrode, in ohms'),
+                    ('filtering', 'description of hardware filtering, including the filter name and frequency cutoffs'),
+                    ('rel_x', 'the x coordinate within the electrode group'),
                     ('rel_y', 'the y coordinate within the electrode group'),
                     ('rel_z', 'the z coordinate within the electrode group'),
-                    ('reference', 'Description of the reference used for this electrode.')]
+                    ('reference', 'Description of the reference electrode and/or reference scheme used for this \
+                        electrode, e.g.,"stainless steel skull screw" or "online common average referencing".')
+                    ]
+
         # add column if the arg is supplied and column does not yet exist
         # do not pass arg to add_row if arg is not supplied
         for col_name, col_doc in new_cols:
@@ -1091,12 +1117,7 @@ def _tablefunc(table_name, description, columns):
 def ElectrodeTable(name='electrodes',
                    description='metadata about extracellular electrodes'):
     return _tablefunc(name, description,
-                      [('x', 'the x coordinate of the channel location'),
-                       ('y', 'the y coordinate of the channel location'),
-                       ('z', 'the z coordinate of the channel location'),
-                       ('imp', 'the impedance of the channel'),
-                       ('location', 'the location of channel within the subject e.g. brain region'),
-                       ('filtering', 'description of hardware filtering'),
+                      [('location', 'the location of channel within the subject e.g. brain region'),
                        ('group', 'a reference to the ElectrodeGroup this electrode is a part of'),
                        ('group_name', 'the name of the ElectrodeGroup this electrode is a part of')
                        ]
