@@ -4,7 +4,7 @@ from typing import NamedTuple
 
 import numpy as np
 
-from hdmf.utils import docval, popargs_to_dict, get_docval, popargs
+from hdmf.utils import docval, popargs_to_dict, get_docval, popargs, getargs
 from hdmf.common import DynamicTable, VectorData
 from hdmf.utils import get_data_shape
 
@@ -166,23 +166,9 @@ class TimeSeries(NWBDataInterface):
         for key, val in args_to_set.items():
             setattr(self, key, val)
 
-        data_shape = get_data_shape(data=args_to_process["data"], strict_no_data_load=True)
-        timestamps_shape = get_data_shape(data=args_to_process["timestamps"], strict_no_data_load=True)
-        if (
-            # check that the shape is known
-            data_shape is not None and timestamps_shape is not None
-
-            # check for scalars. Should never happen
-            and (len(data_shape) > 0 and len(timestamps_shape) > 0)
-
-            # check that the length of the first dimension is known
-            and (data_shape[0] is not None and timestamps_shape[0] is not None)
-
-            # check that the data and timestamps match
-            and (data_shape[0] != timestamps_shape[0])
-
-            # check that data has any values
-            and np.any(args_to_process["data"])
+        if self._check_data_timestamps_mismatch(
+                data=args_to_process["data"],
+                timestamps=args_to_process["timestamps"],
         ):
             warn("Length of data does not match length of timestamps. Your data may be transposed. Time should be on "
                  "the 0th dimension")
@@ -209,6 +195,24 @@ class TimeSeries(NWBDataInterface):
             self.starting_time_unit = self.__time_unit
         else:
             raise TypeError("either 'timestamps' or 'rate' must be specified")
+
+    @staticmethod
+    def _check_data_timestamps_mismatch(data, timestamps):
+        data_shape = get_data_shape(data=data, strict_no_data_load=True)
+        timestamps_shape = get_data_shape(data=timestamps, strict_no_data_load=True)
+        return (
+                # check that the shape is known
+                data_shape is not None and timestamps_shape is not None
+
+                # check for scalars. Should never happen
+                and (len(data_shape) > 0 and len(timestamps_shape) > 0)
+
+                # check that the length of the first dimension is known
+                and (data_shape[0] is not None and timestamps_shape[0] is not None)
+
+                # check that the data and timestamps match
+                and (data_shape[0] != timestamps_shape[0])
+        )
 
     @property
     def num_samples(self):
