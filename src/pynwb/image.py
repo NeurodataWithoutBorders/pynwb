@@ -2,7 +2,8 @@ import warnings
 import numpy as np
 from collections.abc import Iterable
 
-from hdmf.utils import docval, getargs, popargs, popargs_to_dict, get_docval
+from hdmf.utils import docval, getargs, popargs, popargs_to_dict, get_docval, \
+    get_data_shape
 
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries, Image, Images
@@ -79,6 +80,10 @@ class ImageSeries(TimeSeries):
             args_to_set["starting_frame"] = None  # overwrite starting_frame
         for key, val in args_to_set.items():
             setattr(self, key, val)
+
+    @staticmethod
+    def _check_data_timestamps_mismatch(data, timestamps):
+        return not np.array_equal(data, ImageSeries.DEFAULT_DATA) and timestamps is not None
 
     @property
     def bits_per_pixel(self):
