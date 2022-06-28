@@ -80,9 +80,19 @@ class ImageSeries(TimeSeries):
         for key, val in args_to_set.items():
             setattr(self, key, val)
 
-    @staticmethod
-    def _check_data_timestamps_mismatch(data, timestamps):
-        return not np.array_equal(data, ImageSeries.DEFAULT_DATA) and timestamps is not None
+        if self._check_image_series_dimension():
+            warnings.warn("Length of data does not match length of timestamps. Your data may be transposed. Time should be on "
+                 "the 0th dimension")
+
+    def _check_time_series_dimension(self):
+        pass
+
+    def _check_image_series_dimension(self):
+        """Triggers ImageSeries dimension check when 'external_file' is None. """
+        if getattr(self, 'external_file', None):
+            return False
+        return super()._check_time_series_dimension()
+
 
     @property
     def bits_per_pixel(self):
