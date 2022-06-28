@@ -80,19 +80,27 @@ class ImageSeries(TimeSeries):
         for key, val in args_to_set.items():
             setattr(self, key, val)
 
-        if self._check_image_series_dimension():
+        if not self._check_image_series_dimension():
             warnings.warn(
                 "Length of data does not match length of timestamps. "
                 "Your data may be transposed. Time should be on the 0th dimension"
             )
 
     def _check_time_series_dimension(self):
+        """Override _check_time_series_dimension to do nothing.
+        The _check_image_series_dimension method will be called instead.
+        """
         pass
 
     def _check_image_series_dimension(self):
-        """Triggers ImageSeries dimension check when 'external_file' is None. """
-        if getattr(self, 'external_file', None):
-            return False
+        """Check that the 0th dimension of data equals the length of timestamps, when applicable.
+
+        ImageSeries objects can have an external file instead of data stored. The external file cannot be
+        queried for the number of frames it contains, so this check will return True when an external file
+        is provided. Otherwise, this function calls the parent class' _check_time_series_dimension method.
+        """
+        if self.external_file is not None:
+            return True
         return super()._check_time_series_dimension()
 
     @property
