@@ -166,13 +166,6 @@ class TimeSeries(NWBDataInterface):
         for key, val in args_to_set.items():
             setattr(self, key, val)
 
-        if self._check_data_timestamps_mismatch(
-                data=args_to_process["data"],
-                timestamps=args_to_process["timestamps"],
-        ):
-            warn("Length of data does not match length of timestamps. Your data may be transposed. Time should be on "
-                 "the 0th dimension")
-
         data = args_to_process['data']
         self.fields['data'] = data
         if isinstance(data, TimeSeries):
@@ -196,10 +189,13 @@ class TimeSeries(NWBDataInterface):
         else:
             raise TypeError("either 'timestamps' or 'rate' must be specified")
 
-    @staticmethod
-    def _check_data_timestamps_mismatch(data, timestamps):
-        data_shape = get_data_shape(data=data, strict_no_data_load=True)
-        timestamps_shape = get_data_shape(data=timestamps, strict_no_data_load=True)
+        if self._check_time_series_dimension():
+            warn("Length of data does not match length of timestamps. Your data may be transposed. Time should be on "
+                 "the 0th dimension")
+
+    def _check_time_series_dimension(self):
+        data_shape = get_data_shape(data=self.fields["data"], strict_no_data_load=True)
+        timestamps_shape = get_data_shape(data=self.fields["timestamps"], strict_no_data_load=True)
         return (
                 # check that the shape is known
                 data_shape is not None and timestamps_shape is not None
