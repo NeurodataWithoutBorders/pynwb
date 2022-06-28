@@ -210,7 +210,7 @@ class TimeSeries(NWBDataInterface):
         if data_shape[0] is None or timestamps_shape[0] is None:
             return True
 
-        return data_shape[0] != timestamps_shape[0]
+        return data_shape[0] == timestamps_shape[0]
 
     @property
     def num_samples(self):

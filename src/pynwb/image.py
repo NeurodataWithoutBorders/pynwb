@@ -72,7 +72,6 @@ class ImageSeries(TimeSeries):
         if unit is None:
             kwargs['unit'] = ImageSeries.DEFAULT_UNIT
 
-        # TODO catch warning when default data is used and timestamps are provided
         super().__init__(**kwargs)
 
         if args_to_set["external_file"] is None:
