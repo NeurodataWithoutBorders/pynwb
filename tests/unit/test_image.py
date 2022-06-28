@@ -75,15 +75,31 @@ class ImageSeriesConstructor(TestCase):
         )
         self.assertEqual(iS.unit, ImageSeries.DEFAULT_UNIT)
 
-    def test_external_file_no_warning(self):
+    def test_dimension_warning(self):
+        """Test that a warning is raised when the dimensions of the data are not the
+        same as the dimensions of the timestamps."""
+        msg = (
+            "Length of data does not match length of timestamps. Your data may be "
+            "transposed. Time should be on the 0th dimension"
+        )
+        with self.assertWarnsWith(UserWarning, msg):
+            ImageSeries(
+                name='test_iS',
+                data=np.ones((3, 3, 3)),
+                unit='Frames',
+                starting_frame=[0],
+                timestamps=[1, 2, 3, 4]
+            )
+
+    def test_dimension_warning_external_file(self):
+        """Test that a warning is not raised when external file is used."""
         with warnings.catch_warnings(record=True) as w:
             ImageSeries(
                 name='test_iS',
-                data=None,
-                unit='Frames',
                 external_file=['external_file'],
-                starting_frame=[0],
                 format='external',
+                unit='Frames',
+                starting_frame=[0],
                 timestamps=[1, 2, 3, 4]
             )
             self.assertEqual(w, [])
