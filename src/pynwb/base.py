@@ -195,26 +195,22 @@ class TimeSeries(NWBDataInterface):
 
     def _check_time_series_dimension(self):
         """Check that the 0th dimension of data equals the length of timestamps, when applicable.
-
-        If timestamps are not provided, return True.
         """
         if self.timestamps is None:
             return True
+
         data_shape = get_data_shape(data=self.fields["data"], strict_no_data_load=True)
         timestamps_shape = get_data_shape(data=self.fields["timestamps"], strict_no_data_load=True)
-        return (
-                # check that the shape is known
-                data_shape is not None and timestamps_shape is not None
 
-                # check for scalars. Should never happen
-                and (len(data_shape) > 0 and len(timestamps_shape) > 0)
+        # skip check if shape of data or timestamps cannot be computed
+        if data_shape is None or timestamps_shape is None:
+            return True
 
-                # check that the length of the first dimension is known
-                and (data_shape[0] is not None and timestamps_shape[0] is not None)
+        # skip check if length of the first dimension is not known
+        if data_shape[0] is None or timestamps_shape[0] is None:
+            return True
 
-                # check that the data and timestamps match
-                and (data_shape[0] != timestamps_shape[0])
-        )
+        return data_shape[0] != timestamps_shape[0]
 
     @property
     def num_samples(self):
