@@ -81,8 +81,10 @@ class ImageSeries(TimeSeries):
             setattr(self, key, val)
 
         if self._check_image_series_dimension():
-            warnings.warn("Length of data does not match length of timestamps. Your data may be transposed. Time should be on "
-                 "the 0th dimension")
+            warnings.warn(
+                "Length of data does not match length of timestamps. "
+                "Your data may be transposed. Time should be on the 0th dimension"
+            )
 
     def _check_time_series_dimension(self):
         pass
@@ -92,7 +94,6 @@ class ImageSeries(TimeSeries):
         if getattr(self, 'external_file', None):
             return False
         return super()._check_time_series_dimension()
-
 
     @property
     def bits_per_pixel(self):
