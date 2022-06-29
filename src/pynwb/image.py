@@ -72,13 +72,35 @@ class ImageSeries(TimeSeries):
         if unit is None:
             kwargs['unit'] = ImageSeries.DEFAULT_UNIT
 
-        # TODO catch warning when default data is used and timestamps are provided
         super().__init__(**kwargs)
 
         if args_to_set["external_file"] is None:
             args_to_set["starting_frame"] = None  # overwrite starting_frame
         for key, val in args_to_set.items():
             setattr(self, key, val)
+
+        if not self._check_image_series_dimension():
+            warnings.warn(
+                "Length of data does not match length of timestamps. "
+                "Your data may be transposed. Time should be on the 0th dimension"
+            )
+
+    def _check_time_series_dimension(self):
+        """Override _check_time_series_dimension to do nothing.
+        The _check_image_series_dimension method will be called instead.
+        """
+        return True
+
+    def _check_image_series_dimension(self):
+        """Check that the 0th dimension of data equals the length of timestamps, when applicable.
+
+        ImageSeries objects can have an external file instead of data stored. The external file cannot be
+        queried for the number of frames it contains, so this check will return True when an external file
+        is provided. Otherwise, this function calls the parent class' _check_time_series_dimension method.
+        """
+        if self.external_file is not None:
+            return True
+        return super()._check_time_series_dimension()
 
     @property
     def bits_per_pixel(self):

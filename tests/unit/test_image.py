@@ -1,3 +1,5 @@
+import warnings
+
 import numpy as np
 
 from pynwb import TimeSeries
@@ -72,6 +74,48 @@ class ImageSeriesConstructor(TestCase):
             timestamps=list()
         )
         self.assertEqual(iS.unit, ImageSeries.DEFAULT_UNIT)
+
+    def test_dimension_warning(self):
+        """Test that a warning is raised when the dimensions of the data are not the
+        same as the dimensions of the timestamps."""
+        msg = (
+            "Length of data does not match length of timestamps. Your data may be "
+            "transposed. Time should be on the 0th dimension"
+        )
+        with self.assertWarnsWith(UserWarning, msg):
+            ImageSeries(
+                name='test_iS',
+                data=np.ones((3, 3, 3)),
+                unit='Frames',
+                starting_frame=[0],
+                timestamps=[1, 2, 3, 4]
+            )
+
+    def test_dimension_warning_external_file_with_timestamps(self):
+        """Test that a warning is not raised when external file is used with timestamps."""
+        with warnings.catch_warnings(record=True) as w:
+            ImageSeries(
+                name='test_iS',
+                external_file=['external_file'],
+                format='external',
+                unit='Frames',
+                starting_frame=[0],
+                timestamps=[1, 2, 3, 4]
+            )
+            self.assertEqual(w, [])
+
+    def test_dimension_warning_external_file_with_rate(self):
+        """Test that a warning is not raised when external file is used with rate."""
+        with warnings.catch_warnings(record=True) as w:
+            ImageSeries(
+                name='test_iS',
+                external_file=['external_file'],
+                format='external',
+                unit='Frames',
+                starting_frame=[0],
+                rate=0.2,
+            )
+            self.assertEqual(w, [])
 
 
 class IndexSeriesConstructor(TestCase):

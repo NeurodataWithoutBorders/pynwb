@@ -166,24 +166,6 @@ class TimeSeries(NWBDataInterface):
         for key, val in args_to_set.items():
             setattr(self, key, val)
 
-        data_shape = get_data_shape(data=args_to_process["data"], strict_no_data_load=True)
-        timestamps_shape = get_data_shape(data=args_to_process["timestamps"], strict_no_data_load=True)
-        if (
-            # check that the shape is known
-            data_shape is not None and timestamps_shape is not None
-
-            # check for scalars. Should never happen
-            and (len(data_shape) > 0 and len(timestamps_shape) > 0)
-
-            # check that the length of the first dimension is known
-            and (data_shape[0] is not None and timestamps_shape[0] is not None)
-
-            # check that the data and timestamps match
-            and (data_shape[0] != timestamps_shape[0])
-        ):
-            warn("Length of data does not match length of timestamps. Your data may be transposed. Time should be on "
-                 "the 0th dimension")
-
         data = args_to_process['data']
         self.fields['data'] = data
         if isinstance(data, TimeSeries):
@@ -206,6 +188,29 @@ class TimeSeries(NWBDataInterface):
             self.starting_time_unit = self.__time_unit
         else:
             raise TypeError("either 'timestamps' or 'rate' must be specified")
+
+        if not self._check_time_series_dimension():
+            warn("Length of data does not match length of timestamps. Your data may be transposed. Time should be on "
+                 "the 0th dimension")
+
+    def _check_time_series_dimension(self):
+        """Check that the 0th dimension of data equals the length of timestamps, when applicable.
+        """
+        if self.timestamps is None:
+            return True
+
+        data_shape = get_data_shape(data=self.fields["data"], strict_no_data_load=True)
+        timestamps_shape = get_data_shape(data=self.fields["timestamps"], strict_no_data_load=True)
+
+        # skip check if shape of data or timestamps cannot be computed
+        if data_shape is None or timestamps_shape is None:
+            return True
+
+        # skip check if length of the first dimension is not known
+        if data_shape[0] is None or timestamps_shape[0] is None:
+            return True
+
+        return data_shape[0] == timestamps_shape[0]
 
     @property
     def num_samples(self):
