@@ -59,8 +59,7 @@ def get_cached_namespaces_to_validate(path):
     for k in ns_deps:
         s -= ns_deps[k].keys()
     # TODO remove this workaround for issue https://github.com/NeurodataWithoutBorders/pynwb/issues/1357
-    if 'hdmf-experimental' in s:
-        s.remove('hdmf-experimental')  # remove validation of hdmf-experimental for now
+    s.discard('hdmf-experimental')  # remove validation of hdmf-experimental for now
     namespaces = list(sorted(s))
 
     if len(namespaces) > 0:
