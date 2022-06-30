@@ -3,7 +3,7 @@ from copy import copy, deepcopy
 from hdmf.spec import (LinkSpec, GroupSpec, DatasetSpec, SpecNamespace, NamespaceBuilder, AttributeSpec, DtypeSpec,
                        RefSpec)
 from hdmf.spec.write import export_spec  # noqa: F401
-from hdmf.utils import docval, get_docval, call_docval_func
+from hdmf.utils import docval, get_docval
 
 from . import CORE_NAMESPACE
 
@@ -32,7 +32,7 @@ class NWBRefSpec(RefSpec):
 
     @docval(*deepcopy(_ref_docval))
     def __init__(self, **kwargs):
-        call_docval_func(super(NWBRefSpec, self).__init__, kwargs)
+        super().__init__(**kwargs)
 
 
 _attr_docval = __swap_inc_def(AttributeSpec)
@@ -42,7 +42,7 @@ class NWBAttributeSpec(AttributeSpec):
 
     @docval(*deepcopy(_attr_docval))
     def __init__(self, **kwargs):
-        call_docval_func(super(NWBAttributeSpec, self).__init__, kwargs)
+        super().__init__(**kwargs)
 
 
 _link_docval = __swap_inc_def(LinkSpec)
@@ -52,7 +52,7 @@ class NWBLinkSpec(LinkSpec):
 
     @docval(*deepcopy(_link_docval))
     def __init__(self, **kwargs):
-        call_docval_func(super(NWBLinkSpec, self).__init__, kwargs)
+        super().__init__(**kwargs)
 
     @property
     def neurodata_type_inc(self):
@@ -60,7 +60,7 @@ class NWBLinkSpec(LinkSpec):
         return self.data_type_inc
 
 
-class BaseStorageOverride(object):
+class BaseStorageOverride:
     ''' This class is used for the purpose of overriding
         BaseStorageSpec classmethods, without creating diamond
         inheritance hierarchies.
@@ -97,7 +97,7 @@ class BaseStorageOverride(object):
     def build_const_args(cls, spec_dict):
         """Extend base functionality to remap data_type_def and data_type_inc keys"""
         spec_dict = copy(spec_dict)
-        proxy = super(BaseStorageOverride, cls)
+        proxy = super()
         if proxy.inc_key() in spec_dict:
             spec_dict[cls.inc_key()] = spec_dict.pop(proxy.inc_key())
         if proxy.def_key() in spec_dict:
@@ -108,7 +108,7 @@ class BaseStorageOverride(object):
     @classmethod
     def _translate_kwargs(cls, kwargs):
         """Swap neurodata_type_def and neurodata_type_inc for data_type_def and data_type_inc, respectively"""
-        proxy = super(BaseStorageOverride, cls)
+        proxy = super()
         kwargs[proxy.def_key()] = kwargs.pop(cls.def_key())
         kwargs[proxy.inc_key()] = kwargs.pop(cls.inc_key())
         return kwargs
@@ -121,7 +121,7 @@ class NWBDtypeSpec(DtypeSpec):
 
     @docval(*deepcopy(_dtype_docval))
     def __init__(self, **kwargs):
-        call_docval_func(super(NWBDtypeSpec, self).__init__, kwargs)
+        super().__init__(**kwargs)
 
 
 _dataset_docval = __swap_inc_def(DatasetSpec)
@@ -139,7 +139,7 @@ class NWBDatasetSpec(BaseStorageOverride, DatasetSpec):
         # set data_type_inc to NWBData only if it is not specified and the type is not an HDMF base type
         if kwargs['data_type_inc'] is None and kwargs['data_type_def'] not in (None, 'Data'):
             kwargs['data_type_inc'] = 'NWBData'
-        super(NWBDatasetSpec, self).__init__(**kwargs)
+        super().__init__(**kwargs)
 
 
 _group_docval = __swap_inc_def(GroupSpec)
@@ -159,7 +159,7 @@ class NWBGroupSpec(BaseStorageOverride, GroupSpec):
         # NWBContainer. This will be fixed in hdmf-common-schema 1.2.1.
         if kwargs['data_type_inc'] is None and kwargs['data_type_def'] not in (None, 'Container', 'CSRMatrix'):
             kwargs['data_type_inc'] = 'NWBContainer'
-        super(NWBGroupSpec, self).__init__(**kwargs)
+        super().__init__(**kwargs)
 
     @classmethod
     def dataset_spec_cls(cls):
@@ -168,7 +168,7 @@ class NWBGroupSpec(BaseStorageOverride, GroupSpec):
     @docval({'name': 'neurodata_type', 'type': str, 'doc': 'the neurodata_type to retrieve'})
     def get_neurodata_type(self, **kwargs):
         ''' Get a specification by "neurodata_type" '''
-        return super(NWBGroupSpec, self).get_data_type(kwargs['neurodata_type'])
+        return super().get_data_type(kwargs['neurodata_type'])
 
     @docval(*deepcopy(_group_docval))
     def add_group(self, **kwargs):
@@ -215,5 +215,5 @@ class NWBNamespaceBuilder(NamespaceBuilder):
     def __init__(self, **kwargs):
         ''' Create a NWBNamespaceBuilder '''
         kwargs['namespace_cls'] = NWBNamespace
-        call_docval_func(super(NWBNamespaceBuilder, self).__init__, kwargs)
+        super().__init__(**kwargs)
         self.include_namespace(CORE_NAMESPACE)

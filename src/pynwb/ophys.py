@@ -2,7 +2,7 @@ from collections.abc import Iterable
 import numpy as np
 import warnings
 
-from hdmf.utils import docval, getargs, popargs, call_docval_func, get_docval, get_data_shape
+from hdmf.utils import docval, popargs, get_docval, get_data_shape, popargs_to_dict
 
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries
@@ -24,7 +24,7 @@ class OpticalChannel(NWBContainer):
             {'name': 'emission_lambda', 'type': 'float', 'doc': 'Emission wavelength for channel, in nm.'})  # required
     def __init__(self, **kwargs):
         description, emission_lambda = popargs("description", "emission_lambda", kwargs)
-        call_docval_func(super(OpticalChannel, self).__init__, kwargs)
+        super().__init__(**kwargs)
         self.description = description
         self.emission_lambda = emission_lambda
 
@@ -87,38 +87,37 @@ class ImagingPlane(NWBContainer):
              'doc': "Measurement units for grid_spacing. The default value is 'meters'.",
              'default': 'meters'})
     def __init__(self, **kwargs):
-        optical_channel, description, device, excitation_lambda, imaging_rate, \
-            indicator, location, manifold, conversion, unit, reference_frame, origin_coords, origin_coords_unit, \
-            grid_spacing, grid_spacing_unit = popargs(
-                'optical_channel', 'description', 'device', 'excitation_lambda',
-                'imaging_rate', 'indicator', 'location', 'manifold', 'conversion',
-                'unit', 'reference_frame', 'origin_coords', 'origin_coords_unit', 'grid_spacing', 'grid_spacing_unit',
-                kwargs)
-        call_docval_func(super(ImagingPlane, self).__init__, kwargs)
-        self.optical_channel = optical_channel if isinstance(optical_channel, list) else [optical_channel]
-        self.description = description
-        self.device = device
-        self.excitation_lambda = excitation_lambda
-        self.imaging_rate = imaging_rate
-        self.indicator = indicator
-        self.location = location
-        if manifold is not None:
+        keys_to_set = ('optical_channel',
+                       'description',
+                       'device',
+                       'excitation_lambda',
+                       'imaging_rate',
+                       'indicator',
+                       'location',
+                       'manifold',
+                       'conversion',
+                       'unit',
+                       'reference_frame',
+                       'origin_coords',
+                       'origin_coords_unit',
+                       'grid_spacing',
+                       'grid_spacing_unit')
+        args_to_set = popargs_to_dict(keys_to_set, kwargs)
+        super().__init__(**kwargs)
+
+        if not isinstance(args_to_set['optical_channel'], list):
+            args_to_set['optical_channel'] = [args_to_set['optical_channel']]
+        if args_to_set['manifold'] is not None:
             warnings.warn("The 'manifold' argument is deprecated in favor of 'origin_coords' and 'grid_spacing'.",
                           DeprecationWarning)
-        if conversion != 1.0:
+        if args_to_set['conversion'] != 1.0:
             warnings.warn("The 'conversion' argument is deprecated in favor of 'origin_coords' and 'grid_spacing'.",
                           DeprecationWarning)
-        if unit != 'meters':
+        if args_to_set['unit'] != 'meters':
             warnings.warn("The 'unit' argument is deprecated in favor of 'origin_coords_unit' and 'grid_spacing_unit'.",
                           DeprecationWarning)
-        self.manifold = manifold
-        self.conversion = conversion
-        self.unit = unit
-        self.reference_frame = reference_frame
-        self.origin_coords = origin_coords
-        self.origin_coords_unit = origin_coords_unit
-        self.grid_spacing = grid_spacing
-        self.grid_spacing_unit = grid_spacing_unit
+        for key, val in args_to_set.items():
+            setattr(self, key, val)
 
 
 @register_class('TwoPhotonSeries', CORE_NAMESPACE)
@@ -142,15 +141,17 @@ class TwoPhotonSeries(ImageSeries):
              'default': None},
             *get_docval(ImageSeries.__init__, 'external_file', 'starting_frame', 'bits_per_pixel',
                         'dimension', 'resolution', 'conversion', 'timestamps', 'starting_time', 'rate',
-                        'comments', 'description', 'control', 'control_description', 'device'))
+                        'comments', 'description', 'control', 'control_description', 'device', 'offset'))
     def __init__(self, **kwargs):
-        field_of_view, imaging_plane, pmt_gain, scan_line_rate = popargs(
-            'field_of_view', 'imaging_plane', 'pmt_gain', 'scan_line_rate', kwargs)
-        call_docval_func(super(TwoPhotonSeries, self).__init__, kwargs)
-        self.field_of_view = field_of_view
-        self.imaging_plane = imaging_plane
-        self.pmt_gain = pmt_gain
-        self.scan_line_rate = scan_line_rate
+        keys_to_set = ("field_of_view",
+                       "imaging_plane",
+                       "pmt_gain",
+                       "scan_line_rate")
+        args_to_set = popargs_to_dict(keys_to_set, kwargs)
+        super().__init__(**kwargs)
+
+        for key, val in args_to_set.items():
+            setattr(self, key, val)
 
 
 @register_class('CorrectedImageStack', CORE_NAMESPACE)
@@ -176,7 +177,7 @@ class CorrectedImageStack(NWBDataInterface):
                     'for example, to align each frame to a reference image. This must have the name "xy_translation".'})
     def __init__(self, **kwargs):
         corrected, original, xy_translation = popargs('corrected', 'original', 'xy_translation', kwargs)
-        call_docval_func(super(CorrectedImageStack, self).__init__, kwargs)
+        super().__init__(**kwargs)
         self.corrected = corrected
         self.original = original
         self.xy_translation = xy_translation
@@ -228,10 +229,9 @@ class PlaneSegmentation(DynamicTable):
             *get_docval(DynamicTable.__init__, 'id', 'columns', 'colnames'))
     def __init__(self, **kwargs):
         imaging_plane, reference_images = popargs('imaging_plane', 'reference_images', kwargs)
-        if kwargs.get('name') is None:
+        if kwargs['name'] is None:
             kwargs['name'] = imaging_plane.name
-        columns, colnames = getargs('columns', 'colnames', kwargs)
-        call_docval_func(super(PlaneSegmentation, self).__init__, kwargs)
+        super().__init__(**kwargs)
         self.imaging_plane = imaging_plane
         if isinstance(reference_images, ImageSeries):
             reference_images = (reference_images,)
@@ -260,7 +260,7 @@ class PlaneSegmentation(DynamicTable):
             rkwargs['pixel_mask'] = pixel_mask
         if voxel_mask is not None:
             rkwargs['voxel_mask'] = voxel_mask
-        return super(PlaneSegmentation, self).add_row(**rkwargs)
+        return super().add_row(**rkwargs)
 
     @staticmethod
     def pixel_to_image(pixel_mask):
@@ -291,7 +291,7 @@ class PlaneSegmentation(DynamicTable):
             {'name': 'region', 'type': (slice, list, tuple), 'doc': 'the indices of the table', 'default': slice(None)},
             {'name': 'name', 'type': str, 'doc': 'the name of the ROITableRegion', 'default': 'rois'})
     def create_roi_table_region(self, **kwargs):
-        return call_docval_func(self.create_region, kwargs)
+        return self.create_region(**kwargs)
 
 
 @register_class('ImageSegmentation', CORE_NAMESPACE)
@@ -339,7 +339,7 @@ class RoiResponseSeries(TimeSeries):
             {'name': 'rois', 'type': DynamicTableRegion,  # required
              'doc': 'a table region corresponding to the ROIs that were used to generate this data'},
             *get_docval(TimeSeries.__init__, 'resolution', 'conversion', 'timestamps', 'starting_time', 'rate',
-                        'comments', 'description', 'control', 'control_description'))
+                        'comments', 'description', 'control', 'control_description', 'offset'))
     def __init__(self, **kwargs):
         rois = popargs('rois', kwargs)
 
@@ -354,15 +354,16 @@ class RoiResponseSeries(TimeSeries):
             # check that key dimensions are known
             and data_shape[1] is not None and rois_shape[0] is not None
 
-            and data_shape[1] != rois_shape
+            and data_shape[1] != rois_shape[0]
         ):
             if data_shape[0] == rois_shape[0]:
-                warnings.warn("The second dimension of data does not match the length of rois, but instead the "
-                              "first does. Data is oriented incorrectly and should be transposed.")
+                warnings.warn("%s '%s': The second dimension of data does not match the length of rois, "
+                              "but instead the first does. Data is oriented incorrectly and should be transposed."
+                              % (self.__class__.__name__, kwargs["name"]))
             else:
-                warnings.warn("The second dimension of data does not match the length of rois. Your data may be "
-                              "transposed.")
-        call_docval_func(super(RoiResponseSeries, self).__init__, kwargs)
+                warnings.warn("%s '%s': The second dimension of data does not match the length of rois. "
+                              "Your data may be transposed." % (self.__class__.__name__, kwargs["name"]))
+        super().__init__(**kwargs)
         self.rois = rois
 
 

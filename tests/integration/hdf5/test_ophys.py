@@ -140,7 +140,7 @@ class TestTwoPhotonSeriesIO(AcquisitionH5IOMixin, TestCase):
     def setUpContainer(self):
         """ Return the test TwoPhotonSeries to read/write """
         self.device, self.optical_channel, self.imaging_plane = make_imaging_plane()
-        data = [[[1., 1.] * 2] * 2]
+        data = np.ones((10, 2, 2))
         timestamps = list(map(lambda x: x/10, range(10)))
         fov = [2.0, 2.0, 5.0]
         ret = TwoPhotonSeries(

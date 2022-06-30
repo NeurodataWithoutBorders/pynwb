@@ -1,3 +1,4 @@
+"""Command line tool to Validate an NWB file against a namespace"""
 import os
 import sys
 from argparse import ArgumentParser

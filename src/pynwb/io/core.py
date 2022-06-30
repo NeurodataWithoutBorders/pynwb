@@ -34,9 +34,9 @@ class NWBDataMap(NWBBaseTypeMapper):
     def carg_name(self, builder, manager):
         return builder.name
 
-    @ObjectMapper.constructor_arg('data')
-    def carg_data(self, builder, manager):
-        return builder.data
+    # @ObjectMapper.constructor_arg('data')
+    # def carg_data(self, builder, manager):
+    #     return builder.data
 
 
 @register_map(ScratchData)

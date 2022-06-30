@@ -1,7 +1,7 @@
 import warnings
 
 from hdmf.common import DynamicTable, AlignedDynamicTable
-from hdmf.utils import docval, popargs, call_docval_func, get_docval, getargs
+from hdmf.utils import docval, popargs, popargs_to_dict, get_docval, getargs
 
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries, TimeSeriesReferenceVectorData
@@ -30,7 +30,8 @@ class IntracellularElectrode(NWBContainer):
     '''
     '''
 
-    __nwbfields__ = ('slice',
+    __nwbfields__ = ('cell_id',
+                     'slice',
                      'seal',
                      'description',
                      'location',
@@ -51,20 +52,25 @@ class IntracellularElectrode(NWBContainer):
             {'name': 'resistance', 'type': str, 'doc': 'Electrode resistance COMMENT: unit: Ohm.', 'default': None},
             {'name': 'filtering', 'type': str, 'doc': 'Electrode specific filtering.', 'default': None},
             {'name': 'initial_access_resistance', 'type': str, 'doc': 'Initial access resistance.', 'default': None},
+            {'name': 'cell_id', 'type': str, 'doc': 'Unique ID of cell.', 'default': None}
             )
     def __init__(self, **kwargs):
-        slice, seal, description, location, resistance, filtering, initial_access_resistance, device = popargs(
-            'slice', 'seal', 'description', 'location', 'resistance',
-            'filtering', 'initial_access_resistance', 'device', kwargs)
-        call_docval_func(super().__init__, kwargs)
-        self.slice = slice
-        self.seal = seal
-        self.description = description
-        self.location = location
-        self.resistance = resistance
-        self.filtering = filtering
-        self.initial_access_resistance = initial_access_resistance
-        self.device = device
+        keys_to_set = (
+            'slice',
+            'seal',
+            'description',
+            'location',
+            'resistance',
+            'filtering',
+            'initial_access_resistance',
+            'device',
+            'cell_id'
+        )
+        args_to_set = popargs_to_dict(keys_to_set, kwargs)
+        super().__init__(**kwargs)
+
+        for key, val in args_to_set.items():
+            setattr(self, key, val)
 
 
 @register_class('PatchClampSeries', CORE_NAMESPACE)
@@ -89,7 +95,7 @@ class PatchClampSeries(TimeSeries):
             {'name': 'gain', 'type': 'float', 'doc': 'Units: Volt/Amp (v-clamp) or Volt/Volt (c-clamp)'},  # required
             {'name': 'stimulus_description', 'type': str, 'doc': 'the stimulus name/protocol', 'default': "N/A"},
             *get_docval(TimeSeries.__init__, 'resolution', 'conversion', 'timestamps', 'starting_time', 'rate',
-                        'comments', 'description', 'control', 'control_description'),
+                        'comments', 'description', 'control', 'control_description', 'offset'),
             {'name': 'sweep_number', 'type': (int, 'uint32', 'uint64'),
              'doc': 'Sweep number, allows for grouping different PatchClampSeries together '
                     'via the sweep_table', 'default': None})
@@ -127,7 +133,7 @@ class CurrentClampSeries(PatchClampSeries):
             {'name': 'bridge_balance', 'type': 'float', 'doc': 'Unit: Ohm', 'default': None},
             {'name': 'capacitance_compensation', 'type': 'float', 'doc': 'Unit: Farad', 'default': None},
             *get_docval(PatchClampSeries.__init__, 'resolution', 'conversion', 'timestamps', 'starting_time', 'rate',
-                        'comments', 'description', 'control', 'control_description', 'sweep_number'),
+                        'comments', 'description', 'control', 'control_description', 'sweep_number', 'offset'),
             {'name': 'unit', 'type': str, 'doc': "The base unit of measurement (must be 'volts')",
              'default': 'volts'})
     def __init__(self, **kwargs):
@@ -160,7 +166,7 @@ class IZeroClampSeries(CurrentClampSeries):
              'default': 'N/A'},
             *get_docval(CurrentClampSeries.__init__, 'resolution', 'conversion', 'timestamps',
                         'starting_time', 'rate', 'comments', 'description', 'control', 'control_description',
-                        'sweep_number'),
+                        'sweep_number', 'offset'),
             {'name': 'unit', 'type': str, 'doc': "The base unit of measurement (must be 'volts')",
              'default': 'volts'})
     def __init__(self, **kwargs):
@@ -198,7 +204,7 @@ class CurrentClampStimulusSeries(PatchClampSeries):
     @docval(*get_docval(PatchClampSeries.__init__, 'name', 'data', 'electrode', 'gain'),  # required
             *get_docval(PatchClampSeries.__init__, 'stimulus_description', 'resolution', 'conversion', 'timestamps',
                         'starting_time', 'rate', 'comments', 'description', 'control', 'control_description',
-                        'sweep_number'),
+                        'sweep_number', 'offset'),
             {'name': 'unit', 'type': str, 'doc': "The base unit of measurement (must be 'amperes')",
              'default': 'amperes'})
     def __init__(self, **kwargs):
@@ -234,7 +240,7 @@ class VoltageClampSeries(PatchClampSeries):
             {'name': 'whole_cell_capacitance_comp', 'type': 'float', 'doc': 'Unit: Farad', 'default': None},
             {'name': 'whole_cell_series_resistance_comp', 'type': 'float', 'doc': 'Unit: Ohm', 'default': None},
             *get_docval(PatchClampSeries.__init__, 'resolution', 'conversion', 'timestamps', 'starting_time', 'rate',
-                        'comments', 'description', 'control', 'control_description', 'sweep_number'),
+                        'comments', 'description', 'control', 'control_description', 'sweep_number', 'offset'),
             {'name': 'unit', 'type': str, 'doc': "The base unit of measurement (must be 'amperes')",
              'default': 'amperes'})
     def __init__(self, **kwargs):
@@ -267,7 +273,7 @@ class VoltageClampStimulusSeries(PatchClampSeries):
     @docval(*get_docval(PatchClampSeries.__init__, 'name', 'data', 'electrode', 'gain'),  # required
             *get_docval(PatchClampSeries.__init__, 'stimulus_description', 'resolution', 'conversion', 'timestamps',
                         'starting_time', 'rate', 'comments', 'description', 'control', 'control_description',
-                        'sweep_number'),
+                        'sweep_number', 'offset'),
             {'name': 'unit', 'type': str, 'doc': "The base unit of measurement (must be 'volts')",
              'default': 'volts'})
     def __init__(self, **kwargs):
@@ -297,7 +303,7 @@ class SweepTable(DynamicTable):
         warnings.warn("Use of SweepTable is deprecated. Use the IntracellularRecordingsTable "
                       "instead. See also the  NWBFile.add_intracellular_recordings function.",
                       DeprecationWarning)
-        call_docval_func(super().__init__, kwargs)
+        super().__init__(**kwargs)
 
     @docval({'name': 'pcs', 'type': PatchClampSeries,
              'doc': 'PatchClampSeries to add to the table must have a valid sweep_number'})
@@ -357,7 +363,7 @@ class IntracellularElectrodesTable(DynamicTable):
         kwargs['name'] = 'electrodes'
         kwargs['description'] = ('Table for storing intracellular electrode related metadata')
         # Initialize the DynamicTable
-        call_docval_func(super().__init__, kwargs)
+        super().__init__(**kwargs)
 
 
 @register_class('IntracellularStimuliTable', CORE_NAMESPACE)
@@ -380,7 +386,7 @@ class IntracellularStimuliTable(DynamicTable):
         kwargs['name'] = 'stimuli'
         kwargs['description'] = ('Table for storing intracellular stimulus related metadata')
         # Initialize the DynamicTable
-        call_docval_func(super().__init__, kwargs)
+        super().__init__(**kwargs)
 
 
 @register_class('IntracellularResponsesTable', CORE_NAMESPACE)
@@ -403,7 +409,7 @@ class IntracellularResponsesTable(DynamicTable):
         kwargs['name'] = 'responses'
         kwargs['description'] = ('Table for storing intracellular response related metadata')
         # Initialize the DynamicTable
-        call_docval_func(super().__init__, kwargs)
+        super().__init__(**kwargs)
 
 
 @register_class('IntracellularRecordingsTable', CORE_NAMESPACE)
@@ -461,7 +467,7 @@ class IntracellularRecordingsTable(AlignedDynamicTable):
             kwargs['category_tables'] = dynamic_table_arg
             kwargs['categories'] = categories_arg
 
-        call_docval_func(super().__init__, kwargs)
+        super().__init__(**kwargs)
 
     @docval({'name': 'electrode', 'type': IntracellularElectrode, 'doc': 'The intracellular electrode used'},
             {'name': 'stimulus_start_index', 'type': 'int', 'doc': 'Start index of the stimulus', 'default': None},
@@ -666,7 +672,7 @@ class SimultaneousRecordingsTable(DynamicTable):
                                  'IntracellularRecordingsTable table together that were recorded simultaneously '
                                  'from different electrodes.')
         # Initialize the DynamicTable
-        call_docval_func(super().__init__, kwargs)
+        super().__init__(**kwargs)
         if self['recordings'].target.table is None:
             if intracellular_recordings_table is not None:
                 self['recordings'].target.table = intracellular_recordings_table
@@ -726,7 +732,7 @@ class SequentialRecordingsTable(DynamicTable):
                                  'group together simultaneous_recordings where the a sequence of stimuli of the '
                                  'same type with varying parameters have been presented in a sequence.')
         # Initialize the DynamicTable
-        call_docval_func(super().__init__, kwargs)
+        super().__init__(**kwargs)
         if self['simultaneous_recordings'].target.table is None:
             if simultaneous_recordings_table is not None:
                 self['simultaneous_recordings'].target.table = simultaneous_recordings_table
@@ -783,7 +789,7 @@ class RepetitionsTable(DynamicTable):
                                  'of stimulus, the RepetitionsTable table is typically used to group sets '
                                  'of stimuli applied in sequence.')
         # Initialize the DynamicTable
-        call_docval_func(super().__init__, kwargs)
+        super().__init__(**kwargs)
         if self['sequential_recordings'].target.table is None:
             if sequential_recordings_table is not None:
                 self['sequential_recordings'].target.table = sequential_recordings_table
@@ -833,7 +839,7 @@ class ExperimentalConditionsTable(DynamicTable):
         kwargs['description'] = ('A table for grouping different intracellular recording repetitions together that '
                                  'belong to the same experimental conditions.')
         # Initialize the DynamicTable
-        call_docval_func(super().__init__, kwargs)
+        super().__init__(**kwargs)
         if self['repetitions'].target.table is None:
             if repetitions_table is not None:
                 self['repetitions'].target.table = repetitions_table

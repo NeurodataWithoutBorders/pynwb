@@ -40,8 +40,7 @@ class TestElectricalSeriesIO(AcquisitionH5IOMixin, TestCase):
                                     location='tetrode location',
                                     device=self.dev1)
         for i in range(4):
-            self.table.add_row(x=float(i), y=2.0, z=3.0, imp=-1.0, location='CA1', filtering='none', group=self.group,
-                               group_name='tetrode1')
+            self.table.add_row(location='CA1', group=self.group, group_name='tetrode1')
 
     def setUpContainer(self):
         """ Return the test ElectricalSeries to read/write """
@@ -166,8 +165,8 @@ class EventWaveformConstructor(AcquisitionH5IOMixin, TestCase):
                                     description='the first and third electrodes',
                                     table=self.table)
         sES = SpikeEventSeries(name='test_sES',
-                               data=((1, 1, 1), (2, 2, 2)),
-                               timestamps=[0., 1.],
+                               data=((1, 1), (2, 2), (3, 3)),
+                               timestamps=[0., 1., 2.],
                                electrodes=region)
         ew = EventWaveform(sES)
         return ew

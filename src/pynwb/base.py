@@ -4,7 +4,7 @@ from typing import NamedTuple
 
 import numpy as np
 
-from hdmf.utils import docval, getargs, popargs, call_docval_func, get_docval
+from hdmf.utils import docval, popargs_to_dict, get_docval, popargs
 from hdmf.common import DynamicTable, VectorData
 from hdmf.utils import get_data_shape
 
@@ -33,18 +33,16 @@ class ProcessingModule(MultiContainerInterface):
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this processing module'},
             {'name': 'description', 'type': str, 'doc': 'Description of this processing module'},
             {'name': 'data_interfaces', 'type': (list, tuple, dict),
-             'doc': 'NWBDataInterfacess that belong to this ProcessingModule', 'default': None})
+             'doc': 'NWBDataInterfaces that belong to this ProcessingModule', 'default': None})
     def __init__(self, **kwargs):
-        call_docval_func(super(ProcessingModule, self).__init__, kwargs)
-        self.description = popargs('description', kwargs)
-        self.data_interfaces = popargs('data_interfaces', kwargs)
+        description, data_interfaces = popargs("description", "data_interfaces", kwargs)
+        super().__init__(**kwargs)
+        self.description = description
+        self.data_interfaces = data_interfaces
 
     @property
     def containers(self):
         return self.data_interfaces
-
-    def __getitem__(self, arg):
-        return self.get(arg)
 
     @docval({'name': 'container', 'type': (NWBDataInterface, DynamicTable),
              'doc': 'the NWBDataInterface to add to this Module'})
@@ -52,31 +50,27 @@ class ProcessingModule(MultiContainerInterface):
         '''
         Add an NWBContainer to this ProcessingModule
         '''
-        container = getargs('container', kwargs)
         warn(PendingDeprecationWarning('add_container will be replaced by add'))
-        self.add(container)
+        self.add(kwargs['container'])
 
     @docval({'name': 'container_name', 'type': str, 'doc': 'the name of the NWBContainer to retrieve'})
     def get_container(self, **kwargs):
         '''
         Retrieve an NWBContainer from this ProcessingModule
         '''
-        container_name = getargs('container_name', kwargs)
         warn(PendingDeprecationWarning('get_container will be replaced by get'))
-        return self.get(container_name)
+        return self.get(kwargs['container_name'])
 
     @docval({'name': 'NWBDataInterface', 'type': (NWBDataInterface, DynamicTable),
              'doc': 'the NWBDataInterface to add to this Module'})
     def add_data_interface(self, **kwargs):
-        NWBDataInterface = getargs('NWBDataInterface', kwargs)
         warn(PendingDeprecationWarning('add_data_interface will be replaced by add'))
-        self.add(NWBDataInterface)
+        self.add(kwargs['NWBDataInterface'])
 
     @docval({'name': 'data_interface_name', 'type': str, 'doc': 'the name of the NWBContainer to retrieve'})
     def get_data_interface(self, **kwargs):
-        data_interface_name = getargs('data_interface_name', kwargs)
         warn(PendingDeprecationWarning('get_data_interface will be replaced by get'))
-        return self.get(data_interface_name)
+        return self.get(kwargs['data_interface_name'])
 
 
 @register_class('TimeSeries', CORE_NAMESPACE)
@@ -87,6 +81,7 @@ class TimeSeries(NWBDataInterface):
                      "data",
                      "resolution",
                      "conversion",
+                     "offset",
                      "unit",
                      "timestamps",
                      "timestamps_unit",
@@ -104,16 +99,30 @@ class TimeSeries(NWBDataInterface):
     DEFAULT_DATA = np.ndarray(shape=(0, ), dtype=np.uint8)
     DEFAULT_UNIT = 'unknown'
 
+    DEFAULT_RESOLUTION = -1.0
+    DEFAULT_CONVERSION = 1.0
+    DEFAULT_OFFSET = 0.0
+
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset'},  # required
             {'name': 'data', 'type': ('array_data', 'data', 'TimeSeries'),
              'doc': ('The data values. The first dimension must be time. '
                      'Can also store binary data, e.g., image frames')},
             {'name': 'unit', 'type': str, 'doc': 'The base unit of measurement (should be SI unit)'},
-            {'name': 'resolution', 'type': (str, 'float'),
-             'doc': 'The smallest meaningful difference (in specified unit) between values in data', 'default': -1.0},
-            {'name': 'conversion', 'type': (str, 'float'),
-             'doc': 'Scalar to multiply each element in data to convert it to the specified unit', 'default': 1.0},
-
+            {'name': 'resolution', 'type': 'float',
+             'doc': 'The smallest meaningful difference (in specified unit) between values in data',
+             'default': DEFAULT_RESOLUTION},
+            {'name': 'conversion', 'type': 'float',
+             'doc': 'Scalar to multiply each element in data to convert it to the specified unit',
+             'default': DEFAULT_CONVERSION},
+            {
+                'name': 'offset',
+                'type': 'float',
+                'doc': (
+                    "Scalar to add to each element in the data scaled by 'conversion' to finish converting it to the "
+                    "specified unit."
+                    ),
+                'default': DEFAULT_OFFSET
+            },
             {'name': 'timestamps', 'type': ('array_data', 'data', 'TimeSeries'), 'shape': (None,),
              'doc': 'Timestamps for samples stored in data', 'default': None},
             {'name': 'starting_time', 'type': 'float', 'doc': 'The timestamp of the first sample', 'default': None},
@@ -138,64 +147,70 @@ class TimeSeries(NWBDataInterface):
     def __init__(self, **kwargs):
         """Create a TimeSeries object
         """
+        keys_to_set = ("starting_time",
+                       "rate",
+                       "resolution",
+                       "comments",
+                       "description",
+                       "conversion",
+                       "offset",
+                       "unit",
+                       "control",
+                       "control_description",
+                       "continuity")
+        args_to_set = popargs_to_dict(keys_to_set, kwargs)
+        keys_to_process = ("data", "timestamps")  # these are properties and cannot be set with setattr
+        args_to_process = popargs_to_dict(keys_to_process, kwargs)
+        super().__init__(**kwargs)
 
-        call_docval_func(super(TimeSeries, self).__init__, kwargs)
-        keys = ("resolution",
-                "comments",
-                "description",
-                "conversion",
-                "unit",
-                "control",
-                "control_description",
-                "continuity")
+        for key, val in args_to_set.items():
+            setattr(self, key, val)
 
-        data_shape = get_data_shape(data=kwargs["data"], strict_no_data_load=True)
-        timestamps_shape = get_data_shape(data=kwargs["timestamps"], strict_no_data_load=True)
-        if (
-            # check that the shape is known
-            data_shape is not None and timestamps_shape is not None
-
-            # check for scalars. Should never happen
-            and (len(data_shape) > 0 and len(timestamps_shape) > 0)
-
-            # check that the length of the first dimension is known
-            and (data_shape[0] is not None and timestamps_shape[0] is not None)
-
-            # check that the data and timestamps match
-            and (data_shape[0] != timestamps_shape[0])
-        ):
-            warn("Length of data does not match length of timestamps. Your data may be transposed. Time should be on "
-                 "the 0th dimension")
-        for key in keys:
-            val = kwargs.get(key)
-            if val is not None:
-                setattr(self, key, val)
-
-        data = getargs('data', kwargs)
+        data = args_to_process['data']
         self.fields['data'] = data
+        if isinstance(data, TimeSeries):
+            data.__add_link('data_link', self)
 
-        timestamps = kwargs.get('timestamps')
-        starting_time = kwargs.get('starting_time')
-        rate = kwargs.get('rate')
+        timestamps = args_to_process['timestamps']
         if timestamps is not None:
-            if rate is not None:
+            if self.rate is not None:
                 raise ValueError('Specifying rate and timestamps is not supported.')
-            if starting_time is not None:
+            if self.starting_time is not None:
                 raise ValueError('Specifying starting_time and timestamps is not supported.')
             self.fields['timestamps'] = timestamps
             self.timestamps_unit = self.__time_unit
             self.interval = 1
             if isinstance(timestamps, TimeSeries):
                 timestamps.__add_link('timestamp_link', self)
-        elif rate is not None:
-            self.rate = rate
-            if starting_time is not None:
-                self.starting_time = starting_time
-            else:
+        elif self.rate is not None:
+            if self.starting_time is None:  # override default if rate is provided but not starting time
                 self.starting_time = 0.0
             self.starting_time_unit = self.__time_unit
         else:
             raise TypeError("either 'timestamps' or 'rate' must be specified")
+
+        if not self._check_time_series_dimension():
+            warn("%s '%s': Length of data does not match length of timestamps. Your data may be transposed. "
+                 "Time should be on the 0th dimension" % (self.__class__.__name__, self.name))
+
+    def _check_time_series_dimension(self):
+        """Check that the 0th dimension of data equals the length of timestamps, when applicable.
+        """
+        if self.timestamps is None:
+            return True
+
+        data_shape = get_data_shape(data=self.fields["data"], strict_no_data_load=True)
+        timestamps_shape = get_data_shape(data=self.fields["timestamps"], strict_no_data_load=True)
+
+        # skip check if shape of data or timestamps cannot be computed
+        if data_shape is None or timestamps_shape is None:
+            return True
+
+        # skip check if length of the first dimension is not known
+        if data_shape[0] is None or timestamps_shape[0] is None:
+            return True
+
+        return data_shape[0] == timestamps_shape[0]
 
     @property
     def num_samples(self):
@@ -219,14 +234,16 @@ class TimeSeries(NWBDataInterface):
         else:
             warn(no_len_warning('data'), UserWarning)
 
-        if hasattr(self, 'timestamps'):
-            if hasattr(self.timestamps, '__len__'):
-                try:
-                    return len(self.timestamps)
-                except TypeError:
-                    warn(unreadable_warning('timestamps'), UserWarning)
-            elif not (hasattr(self, 'rate') and hasattr(self, 'starting_time')):
-                warn(no_len_warning('timestamps'), UserWarning)
+        # only get here if self.data has no __len__ or __len__ is unreadable
+        if hasattr(self.timestamps, '__len__'):
+            try:
+                return len(self.timestamps)
+            except TypeError:
+                warn(unreadable_warning('timestamps'), UserWarning)
+        elif self.rate is None and self.starting_time is None:
+            warn(no_len_warning('timestamps'), UserWarning)
+
+        return None
 
     @property
     def data(self):
@@ -254,8 +271,7 @@ class TimeSeries(NWBDataInterface):
 
     def __get_links(self, links):
         ret = self.fields.get(links, list())
-        if ret is not None:
-            ret = set(ret)
+        ret = set(ret)
         return ret
 
     def __add_link(self, links_key, link):
@@ -280,15 +296,40 @@ class Image(NWBData):
             {'name': 'resolution', 'type': 'float', 'doc': 'pixels / cm', 'default': None},
             {'name': 'description', 'type': str, 'doc': 'description of image', 'default': None})
     def __init__(self, **kwargs):
-        call_docval_func(super(Image, self).__init__, kwargs)
-        self.resolution = kwargs['resolution']
-        self.description = kwargs['description']
+        args_to_set = popargs_to_dict(("resolution", "description"), kwargs)
+        super().__init__(**kwargs)
+
+        for key, val in args_to_set.items():
+            setattr(self, key, val)
+
+
+@register_class('ImageReferences', CORE_NAMESPACE)
+class ImageReferences(NWBData):
+    """
+    Ordered dataset of references to Image objects.
+    """
+    __nwbfields__ = ('data', )
+
+    @docval({'name': 'name', 'type': str, 'doc': 'The name of this ImageReferences object.'},
+            {'name': 'data', 'type': 'array_data', 'doc': 'The images in order.'},)
+    def __init__(self, **kwargs):
+        # NOTE we do not use the docval shape validator here because it will recognize a list of P MxN images as
+        # having shape (P, M, N)
+        # check type and dimensionality
+        for image in kwargs['data']:
+            assert isinstance(image, Image), "Images used in ImageReferences must have type Image, not %s" % type(image)
+        super().__init__(**kwargs)
 
 
 @register_class('Images', CORE_NAMESPACE)
 class Images(MultiContainerInterface):
+    """An collection of images with an optional way to specify the order of the images
+    using the "order_of_images" dataset. An order must be specified if the images are
+    referenced by index, e.g., from an IndexSeries.
+    """
 
-    __nwbfields__ = ('description',)
+    __nwbfields__ = ('description',
+                     {'name': 'order_of_images', 'child': True, 'required_name': 'order_of_images'})
 
     __clsconf__ = {
         'attr': 'images',
@@ -300,12 +341,15 @@ class Images(MultiContainerInterface):
 
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this set of images'},
             {'name': 'images', 'type': 'array_data', 'doc': 'image objects', 'default': None},
-            {'name': 'description', 'type': str, 'doc': 'description of images', 'default': 'no description'})
+            {'name': 'description', 'type': str, 'doc': 'description of images', 'default': 'no description'},
+            {'name': 'order_of_images', 'type': 'ImageReferences',
+             'doc': 'Ordered dataset of references to Image objects stored in the parent group.', 'default': None},)
     def __init__(self, **kwargs):
-        name, description, images = popargs('name', 'description', 'images', kwargs)
-        super(Images, self).__init__(name, **kwargs)
-        self.description = description
-        self.images = images
+
+        args_to_set = popargs_to_dict(("description", "images", "order_of_images"), kwargs)
+        super().__init__(**kwargs)
+        for key, val in args_to_set.items():
+            setattr(self, key, val)
 
 
 class TimeSeriesReference(NamedTuple):
@@ -474,19 +518,39 @@ class TimeSeriesReferenceVectorData(VectorData):
                         "to be selected as well as an object reference to the TimeSeries."},
             *get_docval(VectorData.__init__, 'data'))
     def __init__(self, **kwargs):
-        call_docval_func(super().__init__, kwargs)
+        super().__init__(**kwargs)
+        # CAUTION: Define any logic specific for init in the self._init_internal function, not here!
+        self._init_internal()
 
-    @docval({'name': 'val', 'type': TIME_SERIES_REFERENCE_TUPLE, 'doc': 'the value to add to this column'})
+    def _init_internal(self):
+        """
+        Called from __init__ to perform initialization specific to this class. This is done
+        here due to the :py:class:`~pynwb.io.epoch.TimeIntervalsMap` having to migrate legacy VectorData
+        to TimeSeriesReferenceVectorData. In this way, if dedicated logic init logic needs
+        to be added to this class then we have a place for it without having to also
+        update :py:class:`~pynwb.io.epoch.TimeIntervalsMap` (which would likely get forgotten)
+        """
+        pass
+
+    @docval({'name': 'val', 'type': (TIME_SERIES_REFERENCE_TUPLE, tuple),
+             'doc': 'the value to add to this column. If this is a regular tuple then it '
+                    'must be convertible to a TimeSeriesReference'})
     def add_row(self, **kwargs):
         """Append a data value to this column."""
-        val = getargs('val', kwargs)
+        val = kwargs['val']
+        if not isinstance(val, self.TIME_SERIES_REFERENCE_TUPLE):
+            val = self.TIME_SERIES_REFERENCE_TUPLE(*val)
         val.check_types()
         super().append(val)
 
-    @docval({'name': 'arg', 'type': TIME_SERIES_REFERENCE_TUPLE, 'doc': 'the value to append to this column'})
+    @docval({'name': 'arg', 'type': (TIME_SERIES_REFERENCE_TUPLE, tuple),
+             'doc': 'the value to append to this column. If this is a regular tuple then it '
+                    'must be convertible to a TimeSeriesReference'})
     def append(self, **kwargs):
         """Append a data value to this column."""
-        arg = getargs('arg', kwargs)
+        arg = kwargs['arg']
+        if not isinstance(arg, self.TIME_SERIES_REFERENCE_TUPLE):
+            arg = self.TIME_SERIES_REFERENCE_TUPLE(*arg)
         arg.check_types()
         super().append(arg)
 
@@ -525,7 +589,7 @@ class TimeSeriesReferenceVectorData(VectorData):
                 return self.TIME_SERIES_REFERENCE_TUPLE(*vals)
         else:  # key selected multiple rows
             # When loading from HDF5 we get an np.ndarray otherwise we get list-of-list. This
-            # makes the values consistent and tranforms the data to use our namedtuple type
+            # makes the values consistent and transforms the data to use our namedtuple type
             re = [self.TIME_SERIES_REFERENCE_NONE_TYPE
                   if (v[0] < 0 or v[1] < 0) else self.TIME_SERIES_REFERENCE_TUPLE(*v)
                   for v in vals]
