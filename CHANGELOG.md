@@ -1,9 +1,8 @@
 # PyNWB Changelog
 
-## PyNWB 2.1.0 (Upcoming)
+## PyNWB 2.1.0 (June 30, 2022)
 
 ### Breaking changes:
-- A warning is now raised if `SpatialSeries.data` has more than 3 columns. @bendichter, @rly (#1455, #1480)
 - Updated ``TimeIntervals`` to use the new  ``TimeSeriesReferenceVectorData`` type. This does not alter the overall
   structure of ``TimeIntervals`` in a major way aside from changing the value of the ``neurodata_type`` attribute of the
   ``TimeIntervals.timeseries`` column from ``VectorData`` to ``TimeSeriesReferenceVectorData``. This change facilitates
@@ -16,7 +15,9 @@
   behavior of the API is largely consistent with existing behavior. @oruebel, @rly (#1390)
 
 # Enhancements and minor changes
+- A warning is now raised if `SpatialSeries.data` has more than 3 columns. @bendichter, @rly (#1455, #1480)
 - The arguments x, y, z, imp, location, filtering are no longer required in the electrodes table.
+  @h-mayorquin, @rly (#1448)
 - Added `cell_id` attribute to `IntracellularElectrode`. @bendichter (#1459)
 - Added `offset` field to `TimeSeries` and its subtypes. @codycbakerphd (#1424)
 - Added support for NWB 2.5.0.
@@ -33,11 +34,11 @@
 
 ### Documentation and tutorial enhancements:
 - Added tutorial on annotating data via ``TimeIntervals``. @oruebel (#1390)
-- Added copy button to code blocks @weiglszonja (#1460)
-- Created behavioral tutorial @weiglszonja (#1464)
+- Added copy button to code blocks. @weiglszonja (#1460)
+- Created behavioral tutorial. @weiglszonja (#1464)
 - Enhanced display of icephys pandas tutorial by using ``dataframe_image`` to render and display large tables
   as images. @oruebel (#1469)
-- Created tutorial about reading and exploring an existing `NWBFile` @weiglszonja (#1453)
+- Created tutorial about reading and exploring an existing `NWBFile`. @weiglszonja (#1453)
 - Added new logo for PyNWB. @oruebel (#1461)
 - Minor text fixes. @oruebel @bendichter (#1443, #1462, #1463, #1466, #1472, #1473)
 
