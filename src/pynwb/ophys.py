@@ -354,14 +354,15 @@ class RoiResponseSeries(TimeSeries):
             # check that key dimensions are known
             and data_shape[1] is not None and rois_shape[0] is not None
 
-            and data_shape[1] != rois_shape
+            and data_shape[1] != rois_shape[0]
         ):
             if data_shape[0] == rois_shape[0]:
-                warnings.warn("The second dimension of data does not match the length of rois, but instead the "
-                              "first does. Data is oriented incorrectly and should be transposed.")
+                warnings.warn("%s '%s': The second dimension of data does not match the length of rois, "
+                              "but instead the first does. Data is oriented incorrectly and should be transposed."
+                              % (self.__class__.__name__, kwargs["name"]))
             else:
-                warnings.warn("The second dimension of data does not match the length of rois. Your data may be "
-                              "transposed.")
+                warnings.warn("%s '%s': The second dimension of data does not match the length of rois. "
+                              "Your data may be transposed." % (self.__class__.__name__, kwargs["name"]))
         super().__init__(**kwargs)
         self.rois = rois
 

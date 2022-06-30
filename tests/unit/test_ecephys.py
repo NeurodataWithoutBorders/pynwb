@@ -85,7 +85,8 @@ class ElectricalSeriesConstructor(TestCase):
             )
             self.assertEqual(len(w), 1)
             assert (
-                "The second dimension of data does not match the length of electrodes. Your data may be transposed."
+                "ElectricalSeries 'test_ts1': The second dimension of data does not match the length of electrodes. "
+                "Your data may be transposed."
                 ) in str(w[-1].message)
 
         with warnings.catch_warnings(record=True) as w:
@@ -99,8 +100,8 @@ class ElectricalSeriesConstructor(TestCase):
             )
             self.assertEqual(len(w), 1)
             assert (
-               "The second dimension of data does not match the length of electrodes, but instead the first does. Data "
-               "is oriented incorrectly and should be transposed."
+               "ElectricalSeries 'test_ts1': The second dimension of data does not match the length of electrodes, "
+               "but instead the first does. Data is oriented incorrectly and should be transposed."
                    ) in str(w[-1].message)
 
 

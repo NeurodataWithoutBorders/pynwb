@@ -190,8 +190,8 @@ class TimeSeries(NWBDataInterface):
             raise TypeError("either 'timestamps' or 'rate' must be specified")
 
         if not self._check_time_series_dimension():
-            warn("Length of data does not match length of timestamps. Your data may be transposed. Time should be on "
-                 "the 0th dimension")
+            warn("%s '%s': Length of data does not match length of timestamps. Your data may be transposed. "
+                 "Time should be on the 0th dimension" % (self.__class__.__name__, self.name))
 
     def _check_time_series_dimension(self):
         """Check that the 0th dimension of data equals the length of timestamps, when applicable.

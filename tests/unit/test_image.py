@@ -79,7 +79,7 @@ class ImageSeriesConstructor(TestCase):
         """Test that a warning is raised when the dimensions of the data are not the
         same as the dimensions of the timestamps."""
         msg = (
-            "Length of data does not match length of timestamps. Your data may be "
+            "ImageSeries 'test_iS': Length of data does not match length of timestamps. Your data may be "
             "transposed. Time should be on the 0th dimension"
         )
         with self.assertWarnsWith(UserWarning, msg):
