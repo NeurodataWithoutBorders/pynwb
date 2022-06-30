@@ -85,11 +85,12 @@ class ElectricalSeries(TimeSeries):
             and data_shape[1] != len(args_to_set['electrodes'].data)
         ):
             if data_shape[0] == len(args_to_set['electrodes'].data):
-                warnings.warn("The second dimension of data does not match the length of electrodes, but instead the "
-                              "first does. Data is oriented incorrectly and should be transposed.")
+                warnings.warn("%s '%s': The second dimension of data does not match the length of electrodes, "
+                              "but instead the first does. Data is oriented incorrectly and should be transposed."
+                              % (self.__class__.__name__, kwargs["name"]))
             else:
-                warnings.warn("The second dimension of data does not match the length of electrodes. Your data may be "
-                              "transposed.")
+                warnings.warn("%s '%s': The second dimension of data does not match the length of electrodes. "
+                              "Your data may be transposed." % (self.__class__.__name__, kwargs["name"]))
 
         kwargs['unit'] = 'volts'  # fixed value
         super().__init__(**kwargs)

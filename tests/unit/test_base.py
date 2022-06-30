@@ -375,7 +375,7 @@ class TestTimeSeries(TestCase):
 
     def test_dimension_warning(self):
         msg = (
-            "Length of data does not match length of timestamps. Your data may be "
+            "TimeSeries 'test_ts2': Length of data does not match length of timestamps. Your data may be "
             "transposed. Time should be on the 0th dimension"
         )
         with self.assertWarnsWith(UserWarning, msg):

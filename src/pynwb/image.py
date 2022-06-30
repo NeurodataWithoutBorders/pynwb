@@ -81,8 +81,8 @@ class ImageSeries(TimeSeries):
 
         if not self._check_image_series_dimension():
             warnings.warn(
-                "Length of data does not match length of timestamps. "
-                "Your data may be transposed. Time should be on the 0th dimension"
+                "%s '%s': Length of data does not match length of timestamps. Your data may be transposed. "
+                "Time should be on the 0th dimension" % (self.__class__.__name__, self.name)
             )
 
     def _check_time_series_dimension(self):
