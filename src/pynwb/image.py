@@ -1,12 +1,13 @@
 import warnings
-import numpy as np
 from collections.abc import Iterable
 
+import numpy as np
 from hdmf.utils import docval, getargs, popargs, popargs_to_dict, get_docval
 
-from . import register_class, CORE_NAMESPACE
+from .globals import CORE_NAMESPACE
 from .base import TimeSeries, Image, Images
 from .device import Device
+from .utils import register_class
 
 
 @register_class('ImageSeries', CORE_NAMESPACE)

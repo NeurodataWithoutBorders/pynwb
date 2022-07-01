@@ -1,9 +1,10 @@
 from hdmf.utils import docval, popargs, get_docval, popargs_to_dict
 
-from . import register_class, CORE_NAMESPACE
+from .globals import CORE_NAMESPACE
 from .base import TimeSeries
 from .core import NWBContainer
 from .device import Device
+from .utils import register_class
 
 
 @register_class('OptogeneticStimulusSite', CORE_NAMESPACE)

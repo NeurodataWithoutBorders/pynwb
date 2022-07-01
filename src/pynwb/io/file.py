@@ -1,8 +1,9 @@
 from dateutil.parser import parse as dateutil_parse
 from hdmf.build import ObjectMapper
-from .. import register_map
+
 from ..file import NWBFile, Subject
 from ..core import ScratchData
+from ..utils import register_map
 
 
 @register_map(NWBFile)

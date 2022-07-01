@@ -6,9 +6,13 @@ from argparse import ArgumentParser
 from hdmf.spec import NamespaceCatalog
 from hdmf.build import BuildManager
 from hdmf.build import TypeMap as TypeMap
+from hdmf.utils import docval, getargs
+from hdmf.backends.io import HDMFIO
+from hdmf.validate import ValidatorMap
 
-from pynwb import validate, CORE_NAMESPACE, NWBHDF5IO
-from pynwb.spec import NWBDatasetSpec, NWBGroupSpec, NWBNamespace
+from .globals import CORE_NAMESPACE
+from .spec import NWBDatasetSpec, NWBGroupSpec, NWBNamespace
+from .utils import NWBHDF5IO
 
 
 def _print_errors(validation_errors):
@@ -27,49 +31,16 @@ def _validate_helper(**kwargs):
     return (errors is not None and len(errors) > 0)
 
 
-def get_cached_namespaces_to_validate(path):
-    """
-    Determine the most specific namespace(s) (i.e., extensions) that are cached in the given
-    NWB file that should be used for validation.
-
-    Example
-    -------
-
-    The following example illustrates how we can use this function to validate against namespaces
-    cached in a file. This is useful, e.g., when a file was created using an extension
-
-    >>> from pynwb import validate
-    >>> from pynwb.validate import get_cached_namespaces_to_validate
-    >>> path = "my_nwb_file.nwb"
-    >>> validate_namespaces, manager, cached_namespaces = get_cached_namespaces_to_validate(path)
-    >>> with NWBHDF5IO(path, "r", manager=manager) as reader:
-    >>>     errors = []
-    >>>     for ns in validate_namespaces:
-    >>>         errors += validate(io=reader, namespace=ns)
-
-    :param path: Path for the NWB file
-    :return: Tuple with:
-      - List of strings with the most specific namespace(s) to use for validation.
-      - BuildManager object for opening the file for validation
-      - Dict with the full result from NWBHDF5IO.load_namespaces
-    """
-    catalog = NamespaceCatalog(NWBGroupSpec, NWBDatasetSpec, NWBNamespace)
-    ns_deps = NWBHDF5IO.load_namespaces(catalog, path)
-    # determine which namespaces are the most specific (i.e. extensions) and validate against those
-    s = set(ns_deps.keys())
-    for k in ns_deps:
-        s -= ns_deps[k].keys()
-    # TODO remove this workaround for issue https://github.com/NeurodataWithoutBorders/pynwb/issues/1357
-    s.discard('hdmf-experimental')  # remove validation of hdmf-experimental for now
-    namespaces = sorted(s)
-
-    if len(namespaces) > 0:
-        tm = TypeMap(catalog)
-        manager = BuildManager(tm)
-    else:
-        manager = None
-
-    return namespaces, manager, ns_deps
+@docval({'name': 'io', 'type': HDMFIO, 'doc': 'the HDMFIO object to read from'},
+        {'name': 'namespace', 'type': str, 'doc': 'the namespace to validate against', 'default': CORE_NAMESPACE},
+        returns="errors in the file", rtype=list,
+        is_method=False)
+def validate(**kwargs):
+    """Validate an NWB file against a namespace"""
+    io, namespace = getargs('io', 'namespace', kwargs)
+    builder = io.read_builder()
+    validator = ValidatorMap(io.manager.namespace_catalog.get_namespace(name=namespace))
+    return validator.validate(builder)
 
 
 def main():  # noqa: C901
@@ -114,10 +85,21 @@ def main():  # noqa: C901
             continue
 
         if args.cached_namespace:
-            namespaces, manager,  ns_deps = get_cached_namespaces_to_validate(path)
+            catalog = NamespaceCatalog(NWBGroupSpec, NWBDatasetSpec, NWBNamespace)
+            ns_deps = NWBHDF5IO.load_namespaces(catalog, path)
+            s = set(ns_deps.keys())       # determine which namespaces are the most
+            for k in ns_deps:             # specific (i.e. extensions) and validate
+                s -= ns_deps[k].keys()    # against those
+            # TODO remove this workaround for issue https://github.com/NeurodataWithoutBorders/pynwb/issues/1357
+            if 'hdmf-experimental' in s:
+                s.remove('hdmf-experimental')  # remove validation of hdmf-experimental for now
+            namespaces = list(sorted(s))
             if len(namespaces) > 0:
+                tm = TypeMap(catalog)
+                manager = BuildManager(tm)
                 specloc = "cached namespace information"
             else:
+                manager = None
                 namespaces = [CORE_NAMESPACE]
                 specloc = "pynwb namespace information"
                 print("The file {} has no cached namespace information. "

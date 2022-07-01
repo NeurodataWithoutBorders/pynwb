@@ -2,10 +2,11 @@ import warnings
 
 from hdmf.utils import docval, popargs, get_docval, get_data_shape
 
-from . import register_class, CORE_NAMESPACE
+from .globals import CORE_NAMESPACE
 from .core import MultiContainerInterface
 from .misc import IntervalSeries
 from .base import TimeSeries
+from .utils import register_class
 
 
 @register_class('SpatialSeries', CORE_NAMESPACE)

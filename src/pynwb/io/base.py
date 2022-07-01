@@ -1,8 +1,8 @@
-from .core import NWBContainerMapper
-from .. import register_map
-
-from ..base import TimeSeries, ProcessingModule
 from hdmf.build import LinkBuilder
+
+from .core import NWBContainerMapper
+from ..utils import register_map
+from ..base import TimeSeries, ProcessingModule
 
 
 @register_map(ProcessingModule)

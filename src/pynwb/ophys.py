@@ -1,15 +1,16 @@
 from collections.abc import Iterable
-import numpy as np
 import warnings
 
+import numpy as np
 from hdmf.utils import docval, popargs, get_docval, get_data_shape, popargs_to_dict
+from hdmf.common import DynamicTable, DynamicTableRegion
 
-from . import register_class, CORE_NAMESPACE
+from .globals import CORE_NAMESPACE
 from .base import TimeSeries
 from .image import ImageSeries
 from .core import NWBContainer, MultiContainerInterface, NWBDataInterface
-from hdmf.common import DynamicTable, DynamicTableRegion
 from .device import Device
+from .utils import register_class
 
 
 @register_class('OpticalChannel', CORE_NAMESPACE)

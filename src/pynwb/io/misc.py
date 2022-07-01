@@ -1,8 +1,7 @@
-from .. import register_map
 from hdmf.common.io.table import DynamicTableMap
-
 from pynwb.misc import Units
 
+from ..utils import register_map
 
 @register_map(Units)
 class UnitsMap(DynamicTableMap):

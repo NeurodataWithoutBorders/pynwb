@@ -8,7 +8,8 @@ from hdmf.common import VectorData, VectorIndex, ElementIdentifiers  # noqa: F40
 from hdmf.utils import docval, popargs
 from hdmf.utils import LabelledDict  # noqa: F401
 
-from . import CORE_NAMESPACE, register_class
+from .globals import CORE_NAMESPACE
+from .utils import register_class
 
 
 def _not_parent(arg):

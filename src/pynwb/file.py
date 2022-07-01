@@ -8,8 +8,10 @@ import numpy as np
 import pandas as pd
 
 from hdmf.utils import docval, getargs, get_docval, popargs, popargs_to_dict, AllowPositional
+from hdmf.common import DynamicTableRegion, DynamicTable
 
-from . import register_class, CORE_NAMESPACE
+from .globals import CORE_NAMESPACE
+from .core import NWBDataInterface, MultiContainerInterface, NWBData
 from .base import TimeSeries, ProcessingModule
 from .device import Device
 from .epoch import TimeIntervals
@@ -21,7 +23,7 @@ from .ophys import ImagingPlane
 from .ogen import OptogeneticStimulusSite
 from .misc import Units
 from .core import NWBContainer, NWBDataInterface, MultiContainerInterface, ScratchData, LabelledDict
-from hdmf.common import DynamicTableRegion, DynamicTable
+from .utils import register_class
 
 
 def _not_parent(arg):

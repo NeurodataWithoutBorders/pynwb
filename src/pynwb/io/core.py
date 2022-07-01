@@ -4,12 +4,10 @@ from hdmf.utils import getargs, docval
 from hdmf.spec import AttributeSpec
 from hdmf.build import BuildManager
 
-from .. import register_map
-
-from pynwb.file import NWBFile
-from pynwb.core import NWBData, NWBContainer, ScratchData
-from pynwb.misc import Units
-
+from ..file import NWBFile
+from ..core import NWBData, NWBContainer, ScratchData
+from ..misc import Units
+from ..utils import register_map
 
 class NWBBaseTypeMapper(ObjectMapper):
 

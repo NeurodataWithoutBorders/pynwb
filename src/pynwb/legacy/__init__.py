@@ -1,6 +1,7 @@
 from hdmf.utils import docval, getargs
-from .. import get_type_map, NWBContainer
+
 from .map import ObjectMapperLegacy as ObjectMapper
+from ..utils import get_type_map, NWBContainer
 
 
 __TYPE_MAP = get_type_map()

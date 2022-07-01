@@ -3,13 +3,13 @@ from collections.abc import Iterable
 from typing import NamedTuple
 
 import numpy as np
-
 from hdmf.utils import docval, popargs_to_dict, get_docval, popargs
 from hdmf.common import DynamicTable, VectorData
 from hdmf.utils import get_data_shape
 
-from . import register_class, CORE_NAMESPACE
+from .globals import CORE_NAMESPACE
 from .core import NWBDataInterface, MultiContainerInterface, NWBData
+from .utils import register_class
 
 
 @register_class('ProcessingModule', CORE_NAMESPACE)

@@ -1,14 +1,15 @@
 import warnings
+from copy import copy
 
+import numpy as np
 from hdmf.common import DynamicTable, AlignedDynamicTable
 from hdmf.utils import docval, popargs, popargs_to_dict, get_docval, getargs
 
-from . import register_class, CORE_NAMESPACE
+from .globals import CORE_NAMESPACE
 from .base import TimeSeries, TimeSeriesReferenceVectorData
 from .core import NWBContainer
 from .device import Device
-from copy import copy
-import numpy as np
+from .utils import register_class
 
 
 def ensure_unit(self, name, current_unit, unit, nwb_version):

@@ -1,9 +1,9 @@
-from .. import register_map
-
 from pynwb.epoch import TimeIntervals
 from hdmf.common.io.table import DynamicTableMap
 from hdmf.common.table import VectorData
 from pynwb.base import TimeSeriesReferenceVectorData
+
+from ..utils import register_map
 
 
 @register_map(TimeIntervals)

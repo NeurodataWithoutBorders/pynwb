@@ -1,10 +1,11 @@
-from collections.abc import Iterable
 import warnings
+from collections.abc import Iterable
 
 from hdmf.utils import docval, popargs, get_docval
 
-from . import register_class, CORE_NAMESPACE
+from .globals import CORE_NAMESPACE
 from .core import NWBDataInterface, NWBData
+from .utils import register_class
 
 
 class RetinotopyImage(NWBData):
