@@ -5,11 +5,11 @@ from hdmf.data_utils import DataChunkIterator  # noqa: F401,E402
 from hdmf.backends.hdf5 import H5DataIO  # noqa: F401,E402
 
 from . import io as __io  # noqa: F401,E402
-from .globals import NamespaceCatalog, __NS_CATALOG, __TYPE_MAP # noqa E402
+# from .globals import NamespaceCatalog, __NS_CATALOG, __TYPE_MAP # noqa E402
 from .core import NWBContainer, NWBData  # noqa: F401,E402
 from .base import TimeSeries, ProcessingModule  # noqa: F401,E402
 from .file import NWBFile  # noqa: F401,E402
-from .spec import NWBDatasetSpec, NWBGroupSpec, NWBNamespace  # noqa E402
+from .spec import NWBDatasetSpec, NWBGroupSpec, NWBNamespace, NamespaceCatalog, __NS_CATALOG, __TYPE_MAP  # noqa E402
 from .validation import validate  # noqa: F401,E402
 
 from . import behavior  # noqa: F401,E402

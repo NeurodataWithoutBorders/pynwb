@@ -1,11 +1,13 @@
 from copy import copy, deepcopy
 
+import hdmf
 from hdmf.spec import (LinkSpec, GroupSpec, DatasetSpec, SpecNamespace, NamespaceBuilder, AttributeSpec, DtypeSpec,
-                       RefSpec)
+                       RefSpec, NamespaceCatalog)
 from hdmf.spec.write import export_spec  # noqa: F401
 from hdmf.utils import docval, get_docval
+from hdmf.build import TypeMap
 
-from . import CORE_NAMESPACE
+from .globals import CORE_NAMESPACE
 
 
 def __swap_inc_def(cls):
@@ -217,3 +219,9 @@ class NWBNamespaceBuilder(NamespaceBuilder):
         kwargs['namespace_cls'] = NWBNamespace
         super().__init__(**kwargs)
         self.include_namespace(CORE_NAMESPACE)
+
+__NS_CATALOG = NamespaceCatalog(NWBGroupSpec, NWBDatasetSpec, NWBNamespace)
+
+hdmf_typemap = hdmf.common.get_type_map()
+__TYPE_MAP = TypeMap(__NS_CATALOG)
+__TYPE_MAP.merge(hdmf_typemap, ns_catalog=True)
