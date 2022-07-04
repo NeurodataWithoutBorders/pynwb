@@ -10,7 +10,7 @@ from .globals import CORE_NAMESPACE
 from .base import TimeSeries
 from .core import NWBContainer, NWBDataInterface, MultiContainerInterface
 from .device import Device
-from .utils import register_class
+from .tools import register_class
 
 
 @register_class('ElectrodeGroup', CORE_NAMESPACE)

@@ -7,7 +7,7 @@ from hdmf.utils import docval, getargs, popargs, popargs_to_dict, get_docval
 from .globals import CORE_NAMESPACE
 from .base import TimeSeries, Image, Images
 from .device import Device
-from .utils import register_class
+from .tools import register_class
 
 
 @register_class('ImageSeries', CORE_NAMESPACE)

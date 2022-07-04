@@ -4,7 +4,7 @@ from .globals import CORE_NAMESPACE
 from .base import TimeSeries
 from .core import NWBContainer
 from .device import Device
-from .utils import register_class
+from .tools import register_class
 
 
 @register_class('OptogeneticStimulusSite', CORE_NAMESPACE)

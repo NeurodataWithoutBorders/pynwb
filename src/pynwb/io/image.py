@@ -1,6 +1,6 @@
 from .base import TimeSeriesMap
 from ..image import ImageSeries
-from ..utils import register_map
+from ..tools import register_map
 
 
 @register_map(ImageSeries)

@@ -3,7 +3,7 @@ from hdmf.common.io.table import DynamicTableMap
 from hdmf.common.io.alignedtable import AlignedDynamicTableMap
 
 from .base import TimeSeriesMap
-from ..utils import register_map
+from ..tools import register_map
 
 
 @register_map(VoltageClampSeries)

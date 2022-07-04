@@ -2,7 +2,7 @@ from hdmf.common.io.table import DynamicTableMap
 
 from .core import NWBContainerMapper
 from ..ophys import PlaneSegmentation, ImagingPlane
-from ..utils import register_map
+from ..tools import register_map
 
 
 @register_map(PlaneSegmentation)

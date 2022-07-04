@@ -2,7 +2,7 @@ from hdmf.utils import docval, popargs
 
 from .globals import CORE_NAMESPACE
 from .core import NWBContainer
-from .utils import register_class
+from .tools import register_class
 
 
 @register_class('Device', CORE_NAMESPACE)

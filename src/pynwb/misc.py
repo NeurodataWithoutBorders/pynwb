@@ -8,7 +8,7 @@ from hdmf.common import DynamicTable, DynamicTableRegion
 
 from .globals import CORE_NAMESPACE
 from .base import TimeSeries
-from .utils import register_class
+from .tools import register_class
 
 
 @register_class('AnnotationSeries', CORE_NAMESPACE)

@@ -5,7 +5,7 @@ from hdmf.utils import docval, popargs, get_docval
 
 from .globals import CORE_NAMESPACE
 from .core import NWBDataInterface, NWBData
-from .utils import register_class
+from .tools import register_class
 
 
 class RetinotopyImage(NWBData):

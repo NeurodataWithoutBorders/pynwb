@@ -3,14 +3,15 @@ import os.path
 from pathlib import Path
 from copy import deepcopy
 from warnings import warn
-import h5py
 
+import h5py
 from hdmf.utils import docval, getargs, popargs, get_docval
 from hdmf.backends.io import HDMFIO
 from hdmf.backends.hdf5 import HDF5IO as _HDF5IO
 from hdmf.build import BuildManager, TypeMap
 
-from .globals import __core_ns_file_name, __TYPE_MAP, __NS_CATALOG
+from .globals import __core_ns_file_name
+from .spec import __TYPE_MAP, __NS_CATALOG
 
 
 def __get_resources():
@@ -257,45 +258,3 @@ class NWBHDF5IO(_HDF5IO):
         nwbfile = popargs('nwbfile', kwargs)
         kwargs['container'] = nwbfile
         super().export(**kwargs)
-
-
-from . import io as __io  # noqa: F401,E402
-from .core import NWBContainer, NWBData  # noqa: F401,E402
-from .base import TimeSeries, ProcessingModule  # noqa: F401,E402
-from .file import NWBFile  # noqa: F401,E402
-
-from . import behavior  # noqa: F401,E402
-from . import device  # noqa: F401,E402
-from . import ecephys  # noqa: F401,E402
-from . import epoch  # noqa: F401,E402
-from . import icephys  # noqa: F401,E402
-from . import image  # noqa: F401,E402
-from . import misc  # noqa: F401,E402
-from . import ogen  # noqa: F401,E402
-from . import ophys  # noqa: F401,E402
-from . import retinotopy  # noqa: F401,E402
-from . import legacy  # noqa: F401,E402
-from hdmf.data_utils import DataChunkIterator  # noqa: F401,E402
-from hdmf.backends.hdf5 import H5DataIO  # noqa: F401,E402
-
-from ._version import get_versions  # noqa: E402
-__version__ = get_versions()['version']
-del get_versions
-
-from ._due import due, BibTeX  # noqa: E402
-due.cite(BibTeX("""
-@article {R{\"u}bel2021.03.13.435173,
-    author = {R{\"u}bel, Oliver and Tritt, Andrew and Ly, Ryan and Dichter, Benjamin K. and Ghosh, Satrajit and Niu, Lawrence and Soltesz, Ivan and Svoboda, Karel and Frank, Loren and Bouchard, Kristofer E.},
-    title = {The Neurodata Without Borders ecosystem for neurophysiological data science},
-    elocation-id = {2021.03.13.435173},
-    year = {2021},
-    doi = {10.1101/2021.03.13.435173},
-    publisher = {Cold Spring Harbor Laboratory},
-    abstract = {The neurophysiology of cells and tissues are monitored electrophysiologically and optically in diverse experiments and species, ranging from flies to humans. Understanding the brain requires integration of data across this diversity, and thus these data must be findable, accessible, interoperable, and reusable (FAIR). This requires a standard language for data and metadata that can coevolve with neuroscience. We describe design and implementation principles for a language for neurophysiology data. Our software (Neurodata Without Borders, NWB) defines and modularizes the interdependent, yet separable, components of a data language. We demonstrate NWB{\textquoteright}s impact through unified description of neurophysiology data across diverse modalities and species. NWB exists in an ecosystem which includes data management, analysis, visualization, and archive tools. Thus, the NWB data language enables reproduction, interchange, and reuse of diverse neurophysiology data. More broadly, the design principles of NWB are generally applicable to enhance discovery across biology through data FAIRness.Competing Interest StatementThe authors have declared no competing interest.},
-    URL = {https://www.biorxiv.org/content/early/2021/03/15/2021.03.13.435173},
-    eprint = {https://www.biorxiv.org/content/early/2021/03/15/2021.03.13.435173.full.pdf},
-    journal = {bioRxiv}
-}
-"""), description="The Neurodata Without Borders ecosystem for neurophysiological data science",  # noqa: E501
-         path="pynwb/", version=__version__, cite_module=True)
-del due, BibTeX

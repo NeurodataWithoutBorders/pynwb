@@ -10,7 +10,7 @@ from .base import TimeSeries
 from .image import ImageSeries
 from .core import NWBContainer, MultiContainerInterface, NWBDataInterface
 from .device import Device
-from .utils import register_class
+from .tools import register_class
 
 
 @register_class('OpticalChannel', CORE_NAMESPACE)

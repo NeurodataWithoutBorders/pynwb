@@ -13,7 +13,7 @@ from hdmf.validate import ValidatorMap
 
 from .globals import CORE_NAMESPACE
 from .spec import NWBDatasetSpec, NWBGroupSpec, NWBNamespace
-from .utils import NWBHDF5IO
+from .tools import NWBHDF5IO
 
 
 def _print_errors(validation_errors):

@@ -9,7 +9,7 @@ from .globals import CORE_NAMESPACE
 from .base import TimeSeries, TimeSeriesReferenceVectorData
 from .core import NWBContainer
 from .device import Device
-from .utils import register_class
+from .tools import register_class
 
 
 def ensure_unit(self, name, current_unit, unit, nwb_version):

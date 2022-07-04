@@ -7,7 +7,7 @@ from hdmf.build import BuildManager
 from ..file import NWBFile
 from ..core import NWBData, NWBContainer, ScratchData
 from ..misc import Units
-from ..utils import register_map
+from ..tools import register_map
 
 class NWBBaseTypeMapper(ObjectMapper):
 

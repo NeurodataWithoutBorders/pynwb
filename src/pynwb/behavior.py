@@ -6,7 +6,7 @@ from .globals import CORE_NAMESPACE
 from .core import MultiContainerInterface
 from .misc import IntervalSeries
 from .base import TimeSeries
-from .utils import register_class
+from .tools import register_class
 
 
 @register_class('SpatialSeries', CORE_NAMESPACE)

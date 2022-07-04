@@ -1,16 +1,30 @@
 '''This package will contain functions, classes, and objects
 for reading and writing data in NWB format
 '''
+import os  # noqa: E402
+from warnings import warn  # noqa: E402
+
+import h5py  # noqa: E402
+import hdmf  # noqa: E402
 from hdmf.data_utils import DataChunkIterator  # noqa: F401,E402
 from hdmf.backends.hdf5 import H5DataIO  # noqa: F401,E402
+from hdmf.utils import call_docval_func  # noqa E402
 
 from . import io as __io  # noqa: F401,E402
-from .globals import NamespaceCatalog, __NS_CATALOG, __TYPE_MAP # noqa E402
+# from .globals import NamespaceCatalog, __NS_CATALOG, __TYPE_MAP # noqa E402
 from .core import NWBContainer, NWBData  # noqa: F401,E402
 from .base import TimeSeries, ProcessingModule  # noqa: F401,E402
 from .file import NWBFile  # noqa: F401,E402
-from .spec import NWBDatasetSpec, NWBGroupSpec, NWBNamespace  # noqa E402
-from .validation import validate  # noqa: F401,E402
+from .spec import (  # noqa E402
+    NWBDatasetSpec,
+    NWBGroupSpec,
+    NWBNamespace,
+    NamespaceCatalog,
+    __NS_CATALOG,
+    __TYPE_MAP,
+    hdmf_typemap,
+)
+from .validation import validate, ValidatorMap  # noqa: F401,E402
 
 from . import behavior  # noqa: F401,E402
 from . import device  # noqa: F401,E402
@@ -24,14 +38,38 @@ from . import ophys  # noqa: F401,E402
 from . import retinotopy  # noqa: F401,E402
 from . import legacy  # noqa: F401,E402
 
+from .tools import (  # noqa: E402
+    BuildManager,
+    HDMFIO,
+    NWBHDF5IO,
+    Path,
+    TypeMap,
+    _HDF5IO,
+    __get_resources,
+    __resources,
+    _get_resources,
+    available_namespaces,
+    deepcopy,
+    docval,
+    get_class,
+    get_docval,
+    get_manager,
+    get_type_map,
+    getargs,
+    # hdmf_typemap,
+    load_namespaces,
+    popargs,
+    register_class,
+    register_map,
+)
+from .globals import CORE_NAMESPACE, __core_ns_file_name  # noqa: E402
+
+
 from ._version import get_versions  # noqa: E402
 __version__ = get_versions()['version']
 del get_versions
 
 from ._due import due, BibTeX  # noqa: E402
-
-CORE_NAMESPACE = 'core'
-__core_ns_file_name = 'nwb.namespace.yaml'
 
 due.cite(BibTeX("""
 @article {R{\"u}bel2021.03.13.435173,
