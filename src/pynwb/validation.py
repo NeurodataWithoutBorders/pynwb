@@ -1,4 +1,4 @@
-"""Command line tool to Validate an NWB file against a namespace"""
+"""Command line tool to Validate an NWB file against a namespace."""
 import os
 import sys
 from argparse import ArgumentParser
@@ -46,8 +46,8 @@ def validate(**kwargs):
 
 def get_cached_namespaces_to_validate(path: str) -> Tuple[List[str], BuildManager, Dict[str, str]]:
     """
-    Determine the most specific namespace(s) (i.e., extensions) that are cached in the given
-    NWB file that should be used for validation.
+    Determine the most specific namespace(s) that are cached in the given NWBFile that can be used for validation.
+
     Example
     -------
     The following example illustrates how we can use this function to validate against namespaces
@@ -103,7 +103,7 @@ def get_cached_namespaces_to_validate(path: str) -> Tuple[List[str], BuildManage
 def validate_file(**kwargs):
     """Validate an NWB file against a namespace or its cached namespaces."""
     path, use_cached_namespaces, namespace = getargs("path", "use_cached_namespaces", "namespace", kwargs)
-    
+
     if use_cached_namespaces:
         catalog = NamespaceCatalog(NWBGroupSpec, NWBDatasetSpec, NWBNamespace)
         ns_deps = NWBHDF5IO.load_namespaces(catalog, path)
