@@ -3,8 +3,8 @@ import os.path
 from pathlib import Path
 from copy import deepcopy
 from warnings import warn
-import h5py
 
+import h5py
 from hdmf.utils import docval, getargs, popargs, get_docval
 from hdmf.backends.io import HDMFIO
 from hdmf.backends.hdf5 import HDF5IO as _HDF5IO
