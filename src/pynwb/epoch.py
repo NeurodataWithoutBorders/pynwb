@@ -6,7 +6,7 @@ from hdmf.data_utils import DataIO
 
 from .globals import CORE_NAMESPACE
 from .base import TimeSeries, TimeSeriesReferenceVectorData, TimeSeriesReference
-from .utils import register_class
+from .tools import register_class
 
 
 

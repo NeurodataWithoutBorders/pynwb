@@ -23,7 +23,7 @@ from .ophys import ImagingPlane
 from .ogen import OptogeneticStimulusSite
 from .misc import Units
 from .core import NWBContainer, NWBDataInterface, MultiContainerInterface, ScratchData, LabelledDict
-from .utils import register_class
+from .tools import register_class
 
 
 def _not_parent(arg):

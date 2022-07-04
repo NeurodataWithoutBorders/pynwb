@@ -9,7 +9,7 @@ from hdmf.utils import docval, popargs
 from hdmf.utils import LabelledDict  # noqa: F401
 
 from .globals import CORE_NAMESPACE
-from .utils import register_class
+from .tools import register_class
 
 
 def _not_parent(arg):

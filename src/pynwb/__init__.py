@@ -38,7 +38,7 @@ from . import ophys  # noqa: F401,E402
 from . import retinotopy  # noqa: F401,E402
 from . import legacy  # noqa: F401,E402
 
-from .utils import (  # noqa: E402
+from .tools import (  # noqa: E402
     BuildManager,
     HDMFIO,
     NWBHDF5IO,

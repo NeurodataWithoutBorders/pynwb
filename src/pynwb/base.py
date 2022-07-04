@@ -9,7 +9,7 @@ from hdmf.utils import get_data_shape
 
 from .globals import CORE_NAMESPACE
 from .core import NWBDataInterface, MultiContainerInterface, NWBData
-from .utils import register_class
+from .tools import register_class
 
 
 @register_class('ProcessingModule', CORE_NAMESPACE)

@@ -1,7 +1,7 @@
 import sys
 from unittest import TestCase
 
-import pynwb
+import pynwb  # noqa: F401
 
 
 class TestImportStructure(TestCase):
@@ -84,7 +84,7 @@ class TestImportStructure(TestCase):
 
     def test_outer_level_import_backcompatability(self):
         full_new_import_structure = [x for x in sys.modules["pynwb"].__dict__]
-        exclude_names = ["globals", "utils", "validation"]  # new ones being introduced
+        exclude_names = ["globals", "tools", "validation"]  # new ones being introduced
 
         overlap_structure = [x for x in full_new_import_structure if x not in exclude_names]
 
