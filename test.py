@@ -281,7 +281,7 @@ def main():
     # Run example tests with ros3 streaming examples
     # NOTE this requires h5py to be built with ROS3 support and the dandi package to be installed
     # this is most easily done by creating a conda environment using environment-ros3.yml
-    if flags['example-ros3'] in args.suites or flags['validation'] in args.suites:
+    if flags['example-ros3'] in args.suites:
         run_example_ros3_tests()
 
     # Run validation tests on the example NWB files generated above
