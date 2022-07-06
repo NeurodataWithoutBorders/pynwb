@@ -73,6 +73,7 @@ ros3_examples = [
 
 
 def run_example_tests():
+    """Run the Sphinx gallery example files, excluding ROS3-dependent ones, to check for errors."""
     logging.info('running example tests')
     examples_scripts = list()
     for root, dirs, files in os.walk(os.path.join(os.path.dirname(__file__), "docs", "gallery")):
@@ -88,6 +89,7 @@ def run_example_tests():
 
 
 def run_example_ros3_tests():
+    """Run the Sphinx gallery example files that depend on ROS3 to check for errors."""
     logging.info('running example ros3 tests')
     examples_scripts = list()
     for root, dirs, files in os.walk(os.path.join(os.path.dirname(__file__), "docs", "gallery")):
@@ -273,17 +275,17 @@ def main():
         run_test_suite("tests/unit", "pynwb unit tests", verbose=args.verbosity)
 
     # Run example tests
-    if flags['example'] in args.suites:
+    if flags['example'] in args.suites or flags['validation'] in args.suites:
         run_example_tests()
 
     # Run example tests with ros3 streaming examples
-    if flags['example-ros3'] in args.suites:
+    # NOTE this requires h5py to be built with ROS3 support and the dandi package to be installed
+    # this is most easily done by creating a conda environment using environment-ros3.yml
+    if flags['example-ros3'] in args.suites or flags['validation'] in args.suites:
         run_example_ros3_tests()
 
-    # Run validation tests
+    # Run validation tests on the example NWB files generated above
     if flags['validation'] in args.suites:
-        run_example_tests()
-        run_example_ros3_tests()
         validate_nwbs()
 
     # Run integration tests
