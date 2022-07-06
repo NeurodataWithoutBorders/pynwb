@@ -149,7 +149,7 @@ def validate_nwbs():
                 def get_namespaces(nwbfile):
                     comp = run(["python", "-m", "pynwb.validate",
                                "--list-namespaces", "--cached-namespace", nwb],
-                               stdout=PIPE, stderr=STDOUT, universal_newlines=True, timeout=20)
+                               stdout=PIPE, stderr=STDOUT, universal_newlines=True, timeout=30)
 
                     if comp.returncode != 0:
                         return []
@@ -172,7 +172,7 @@ def validate_nwbs():
 
                 for cmd in cmds:
                     logging.info("Validating with \"%s\"." % (" ".join(cmd[:-1])))
-                    comp = run(cmd, stdout=PIPE, stderr=STDOUT, universal_newlines=True, timeout=20)
+                    comp = run(cmd, stdout=PIPE, stderr=STDOUT, universal_newlines=True, timeout=30)
                     TOTAL += 1
 
                     if comp.returncode != 0:
