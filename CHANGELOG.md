@@ -1,6 +1,6 @@
 # PyNWB Changelog
 
-## PyNWB 2.1.0 (June 30, 2022)
+## PyNWB 2.1.0 (July 6, 2022)
 
 ### Breaking changes:
 - Updated ``TimeIntervals`` to use the new  ``TimeSeriesReferenceVectorData`` type. This does not alter the overall
