@@ -383,41 +383,21 @@ workflows:
     jobs:
       - flake8:
           <<: *no_filters
-      - python37:
-          <<: *no_filters
       - python37-min-req:
-          <<: *no_filters
-      - python38:
-          <<: *no_filters
-      - python39:
           <<: *no_filters
       - python39-upgrade-dev:
           <<: *no_filters
-      - python39-upgrade-dev-pre:
-          <<: *no_filters
       - miniconda37:
-          <<: *no_filters
-      - miniconda38:
           <<: *no_filters
       - miniconda39:
           <<: *no_filters
-      - gallery37:
-          <<: *no_filters
       - gallery37-min-req:
           <<: *no_filters
-      - gallery38:
-          <<: *no_filters
-      - gallery39:
-          <<: *no_filters
-      - gallery39-upgrade-dev:
-          <<: *no_filters
-      - gallery39-upgrade-dev-pre:
+      - gallery38: # TODO replace with gallery39 after allensdk support py39
           <<: *no_filters
       - gallery39-ros3:
           <<: *no_filters
       - miniconda39-ros3:
-          <<: *no_filters
-      - test-validation:
           <<: *no_filters
       - deploy-dev:
           requires:
