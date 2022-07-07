@@ -86,7 +86,8 @@ device = nwbfile.create_device(
 # :py:class:`~pynwb.ecephys.ElectrodeGroup`. Then you can add electrodes one-at-a-time with
 # :py:meth:`~pynwb.file.NWBFile.add_electrode`. :py:meth:`~pynwb.file.NWBFile.add_electrode` has one required argument,
 # ``group``, which takes a :py:class:`~pynwb.ecephys.ElectrodeGroup`. It also has a number of optional metadata
-# fields for electrode features. Since this table is a :py:class:`~hdmf.common.table.DynamicTable`, we can add
+# fields for electrode features (e.g, ``x``, ``y``, ``z``, ``impedance``, ``location``, and ``filtering``). 
+# Since this table is a :py:class:`~hdmf.common.table.DynamicTable`, we can add
 # additional user-specified metadata fields as well. We will be adding a ``"label"`` column to the table. Use the
 # following code to add electrodes for an array with 4 shanks and 3 channels per shank.
 
