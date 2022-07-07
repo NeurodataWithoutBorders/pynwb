@@ -107,7 +107,7 @@ for ishank in range(nshanks):
     # add electrodes to the electrode table
     for ielec in range(nchannels_per_shank):
         nwbfile.add_electrode(
-            group=electrode_group, 
+            group=electrode_group,
             label="shank{}elec{}".format(ishank, ielec),
             location="brain area",
         )
