@@ -220,6 +220,7 @@ class NWBNamespaceBuilder(NamespaceBuilder):
         super().__init__(**kwargs)
         self.include_namespace(CORE_NAMESPACE)
 
+
 __NS_CATALOG = NamespaceCatalog(NWBGroupSpec, NWBDatasetSpec, NWBNamespace)
 
 hdmf_typemap = hdmf.common.get_type_map()

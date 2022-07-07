@@ -69,6 +69,8 @@ nwbfile.add_acquisition(rate_ts)
 # tables for :py:meth:`~pynwb.file.NWBFile.epochs`, :py:meth:`~pynwb.file.NWBFile.trials`, and
 # :py:meth:`~pynwb.file.NWBFile.invalid_times`.
 #
+# .. _basic_trials:
+#
 # Trials
 # ^^^^^^
 #

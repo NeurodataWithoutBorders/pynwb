@@ -3,6 +3,7 @@ from pynwb.misc import Units
 
 from ..tools import register_map
 
+
 @register_map(Units)
 class UnitsMap(DynamicTableMap):
 
