@@ -55,10 +55,6 @@ nwbfile = NWBFile(
 # In order to store extracellular electrophysiology data, you first must create an electrodes table
 # describing the electrodes that generated this data. Extracellular electrodes are stored in an
 # ``"electrodes"`` table, which is a :py:class:`~hdmf.common.table.DynamicTable`.
-# The ``"electrodes"`` table has several required fields: ``x``, ``y``, ``z``, ``impedance``,
-# ``location``, ``filtering``, and ``electrode group``.
-# Electrode groups (i.e. experimentally relevant groupings of channels) are represented by
-# :py:class:`~pynwb.ecephys.ElectrodeGroup` objects.
 #
 # .. only:: html
 #
