@@ -1,21 +1,19 @@
-'''This package will contain functions, classes, and objects
-for reading and writing data in NWB format
-'''
-import os  # noqa: E402
-from warnings import warn  # noqa: E402
+"""Contains functions, classes, and objects for reading and writing data in NWB format."""
+import os  # noqa: F401,E402
+from warnings import warn  # noqa: F401,E402
 
-import h5py  # noqa: E402
-import hdmf  # noqa: E402
+import h5py  # noqa: F401,E402
+import hdmf  # noqa: F401,E402
 from hdmf.data_utils import DataChunkIterator  # noqa: F401,E402
 from hdmf.backends.hdf5 import H5DataIO  # noqa: F401,E402
-from hdmf.utils import call_docval_func  # noqa E402
+from hdmf.utils import call_docval_func  # noqa: F401,E402
 
 from . import io as __io  # noqa: F401,E402
-# from .globals import NamespaceCatalog, __NS_CATALOG, __TYPE_MAP # noqa E402
+# from .globals import NamespaceCatalog, __NS_CATALOG, __TYPE_MAP # noqa: F401,E402
 from .core import NWBContainer, NWBData  # noqa: F401,E402
 from .base import TimeSeries, ProcessingModule  # noqa: F401,E402
 from .file import NWBFile  # noqa: F401,E402
-from .spec import (  # noqa E402
+from .spec import (  # noqa: F401,E402
     NWBDatasetSpec,
     NWBGroupSpec,
     NWBNamespace,
@@ -38,7 +36,7 @@ from . import ophys  # noqa: F401,E402
 from . import retinotopy  # noqa: F401,E402
 from . import legacy  # noqa: F401,E402
 
-from .tools import (  # noqa: E402
+from .tools import (  # noqa: F401, E402
     BuildManager,
     HDMFIO,
     NWBHDF5IO,
@@ -62,7 +60,7 @@ from .tools import (  # noqa: E402
     register_class,
     register_map,
 )
-from .globals import CORE_NAMESPACE, __core_ns_file_name  # noqa: E402
+from .globals import CORE_NAMESPACE, __core_ns_file_name  # noqa: F401, E402
 
 
 from ._version import get_versions  # noqa: E402

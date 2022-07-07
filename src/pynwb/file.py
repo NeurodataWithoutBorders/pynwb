@@ -11,8 +11,8 @@ from hdmf.utils import docval, getargs, get_docval, popargs, popargs_to_dict, Al
 from hdmf.common import DynamicTableRegion, DynamicTable
 
 from .globals import CORE_NAMESPACE
-from .core import NWBDataInterface, MultiContainerInterface, NWBData
 from .base import TimeSeries, ProcessingModule
+from .core import NWBContainer, NWBDataInterface, MultiContainerInterface, ScratchData, LabelledDict
 from .device import Device
 from .epoch import TimeIntervals
 from .ecephys import ElectrodeGroup
@@ -22,7 +22,6 @@ from .icephys import (IntracellularElectrode, SweepTable, PatchClampSeries, Intr
 from .ophys import ImagingPlane
 from .ogen import OptogeneticStimulusSite
 from .misc import Units
-from .core import NWBContainer, NWBDataInterface, MultiContainerInterface, ScratchData, LabelledDict
 from .tools import register_class
 
 

@@ -26,7 +26,6 @@ def _get_resources():
     return __get_resources()
 
 
-
 @docval({'name': 'extensions', 'type': (str, TypeMap, list),
          'doc': 'a path to a namespace, a TypeMap, or a list consisting of paths to namespaces and TypeMaps',
          'default': None},

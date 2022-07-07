@@ -9,7 +9,6 @@ from .base import TimeSeries, TimeSeriesReferenceVectorData, TimeSeriesReference
 from .tools import register_class
 
 
-
 @register_class('TimeIntervals', CORE_NAMESPACE)
 class TimeIntervals(DynamicTable):
     """
