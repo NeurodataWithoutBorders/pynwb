@@ -9,6 +9,7 @@ from ..core import NWBData, NWBContainer, ScratchData
 from ..misc import Units
 from ..tools import register_map
 
+
 class NWBBaseTypeMapper(ObjectMapper):
 
     @staticmethod
