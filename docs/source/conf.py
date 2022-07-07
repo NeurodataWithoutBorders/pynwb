@@ -14,7 +14,6 @@
 import sys
 import os
 
-import sphinx_gallery.sorting
 import sphinx_rtd_theme
 
 
