@@ -5,7 +5,7 @@ from hdmf import Container, Data
 from hdmf.container import AbstractContainer, MultiContainerInterface as hdmf_MultiContainerInterface, Table
 from hdmf.common import DynamicTable, DynamicTableRegion  # noqa: F401
 from hdmf.common import VectorData, VectorIndex, ElementIdentifiers  # noqa: F401
-from hdmf.utils import docval, getargs, call_docval_func
+from hdmf.utils import docval, popargs
 from hdmf.utils import LabelledDict  # noqa: F401
 
 from . import CORE_NAMESPACE, register_class
@@ -28,7 +28,7 @@ class NWBMixin(AbstractContainer):
         """
         Traverse parent hierarchy and return first instance of the specified data_type
         """
-        neurodata_type = getargs('neurodata_type', kwargs)
+        neurodata_type = kwargs['neurodata_type']
         return super().get_ancestor(data_type=neurodata_type)
 
 
@@ -52,8 +52,8 @@ class NWBData(NWBMixin, Data):
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this container'},
             {'name': 'data', 'type': ('scalar_data', 'array_data', 'data', Data), 'doc': 'the source of the data'})
     def __init__(self, **kwargs):
-        call_docval_func(super(NWBData, self).__init__, kwargs)
-        self.__data = getargs('data', kwargs)
+        super().__init__(**kwargs)
+        self.__data = kwargs['data']
 
     @property
     def data(self):
@@ -97,8 +97,8 @@ class ScratchData(NWBData):
              'doc': 'notes about the data. This argument will be deprecated. Use description instead', 'default': ''},
             {'name': 'description', 'type': str, 'doc': 'notes about the data', 'default': None})
     def __init__(self, **kwargs):
-        call_docval_func(super().__init__, kwargs)
-        notes, description = getargs('notes', 'description', kwargs)
+        notes, description = popargs('notes', 'description', kwargs)
+        super().__init__(**kwargs)
         if notes != '':
             warn('The `notes` argument of ScratchData.__init__ will be deprecated. Use description instead.',
                  PendingDeprecationWarning)

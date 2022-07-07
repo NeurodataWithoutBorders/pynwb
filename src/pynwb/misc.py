@@ -3,7 +3,7 @@ from collections.abc import Iterable
 import warnings
 from bisect import bisect_left, bisect_right
 
-from hdmf.utils import docval, getargs, popargs, call_docval_func, get_docval
+from hdmf.utils import docval, getargs, popargs, popargs_to_dict, get_docval
 
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries
@@ -26,7 +26,7 @@ class AnnotationSeries(TimeSeries):
             *get_docval(TimeSeries.__init__, 'timestamps', 'comments', 'description'))
     def __init__(self, **kwargs):
         name, data, timestamps = popargs('name', 'data', 'timestamps', kwargs)
-        super(AnnotationSeries, self).__init__(name, data, 'n/a', resolution=-1.0, timestamps=timestamps, **kwargs)
+        super().__init__(name=name, data=data, unit='n/a', resolution=-1.0, timestamps=timestamps, **kwargs)
 
     @docval({'name': 'time', 'type': 'float', 'doc': 'The time for the annotation'},
             {'name': 'annotation', 'type': str, 'doc': 'the annotation'})
@@ -61,11 +61,11 @@ class AbstractFeatureSeries(TimeSeries):
                      'dimension represents features'),
              'default': list()},
             *get_docval(TimeSeries.__init__, 'resolution', 'conversion', 'timestamps', 'starting_time', 'rate',
-                        'comments', 'description', 'control', 'control_description'))
+                        'comments', 'description', 'control', 'control_description', 'offset'))
     def __init__(self, **kwargs):
         name, data, features, feature_units = popargs('name', 'data',
                                                               'features', 'feature_units', kwargs)
-        super(AbstractFeatureSeries, self).__init__(name, data, "see 'feature_units'", **kwargs)
+        super().__init__(name=name, data=data, unit="see 'feature_units'", **kwargs)
         self.features = features
         self.feature_units = feature_units
 
@@ -103,7 +103,7 @@ class IntervalSeries(TimeSeries):
         name, data, timestamps = popargs('name', 'data', 'timestamps', kwargs)
         self.__interval_timestamps = timestamps
         self.__interval_data = data
-        super(IntervalSeries, self).__init__(name, data, 'n/a', resolution=-1.0, timestamps=timestamps, **kwargs)
+        super().__init__(name=name, data=data, unit='n/a', resolution=-1.0, timestamps=timestamps, **kwargs)
 
     @docval({'name': 'start', 'type': 'float', 'doc': 'The start time of the interval'},
             {'name': 'stop', 'type': 'float', 'doc': 'The stop time of the interval'})
@@ -165,15 +165,18 @@ class Units(DynamicTable):
              'doc': 'The smallest possible difference between two spike times', 'default': None}
             )
     def __init__(self, **kwargs):
-        if kwargs.get('description', None) is None:
+        args_to_set = popargs_to_dict(("waveform_rate", "waveform_unit", "resolution"), kwargs)
+        electrode_table = popargs("electrode_table", kwargs)
+        if kwargs['description'] is None:
             kwargs['description'] = "data on spiking units"
-        call_docval_func(super(Units, self).__init__, kwargs)
+        super().__init__(**kwargs)
+
+        for key, val in args_to_set.items():
+            setattr(self, key, val)
+
         if 'spike_times' not in self.colnames:
             self.__has_spike_times = False
-        self.__electrode_table = getargs('electrode_table', kwargs)
-        self.waveform_rate = getargs('waveform_rate', kwargs)
-        self.waveform_unit = getargs('waveform_unit', kwargs)
-        self.resolution = getargs('resolution', kwargs)
+        self.__electrode_table = electrode_table
 
     @docval({'name': 'spike_times', 'type': 'array_data', 'doc': 'the spike times for each unit',
              'default': None, 'shape': (None,)},
@@ -198,7 +201,7 @@ class Units(DynamicTable):
         """
         Add a unit to this table
         """
-        super(Units, self).add_row(**kwargs)
+        super().add_row(**kwargs)
         if 'electrodes' in self:
             elec_col = self['electrodes'].target
             if elec_col.table is None:
@@ -272,11 +275,11 @@ class DecompositionSeries(TimeSeries):
                      'similar to ElectricalSeries.electrodes.'),
              'default': None},
             *get_docval(TimeSeries.__init__, 'resolution', 'conversion', 'timestamps', 'starting_time', 'rate',
-                        'comments', 'control', 'control_description'))
+                        'comments', 'control', 'control_description', 'offset'))
     def __init__(self, **kwargs):
         metric, source_timeseries, bands, source_channels = popargs('metric', 'source_timeseries', 'bands',
                                                                     'source_channels', kwargs)
-        super(DecompositionSeries, self).__init__(**kwargs)
+        super().__init__(**kwargs)
         self.source_timeseries = source_timeseries
         self.source_channels = source_channels
         if self.source_timeseries is None and self.source_channels is None:
@@ -285,7 +288,10 @@ class DecompositionSeries(TimeSeries):
                           "corresponding source_channels. (Optional)")
         self.metric = metric
         if bands is None:
-            bands = DynamicTable("bands", "data about the frequency bands that the signal was decomposed into")
+            bands = DynamicTable(
+                name="bands",
+                description="data about the frequency bands that the signal was decomposed into"
+            )
         self.bands = bands
 
     def __check_column(self, name, desc):

@@ -1,7 +1,7 @@
 from collections.abc import Iterable
 import warnings
 
-from hdmf.utils import docval, popargs, call_docval_func, get_docval
+from hdmf.utils import docval, popargs, get_docval
 
 from . import register_class, CORE_NAMESPACE
 from .core import NWBDataInterface, NWBData
@@ -27,7 +27,7 @@ class RetinotopyImage(NWBData):
     def __init__(self, **kwargs):
         bits_per_pixel, dimension, format, field_of_view = popargs(
             'bits_per_pixel', 'dimension', 'format', 'field_of_view', kwargs)
-        call_docval_func(super().__init__, kwargs)
+        super().__init__(**kwargs)
         self.bits_per_pixel = bits_per_pixel
         self.dimension = dimension
         self.format = format
@@ -45,7 +45,7 @@ class FocalDepthImage(RetinotopyImage):
             {'name': 'focal_depth', 'type': 'float', 'doc': 'Focal depth offset, in meters.'})
     def __init__(self, **kwargs):
         focal_depth = popargs('focal_depth', kwargs)
-        call_docval_func(super().__init__, kwargs)
+        super().__init__(**kwargs)
         self.focal_depth = focal_depth
 
 
@@ -63,7 +63,7 @@ class RetinotopyMap(NWBData):
              'doc': 'Number of rows and columns in the image'})
     def __init__(self, **kwargs):
         field_of_view, dimension = popargs('field_of_view', 'dimension', kwargs)
-        call_docval_func(super().__init__, kwargs)
+        super().__init__(**kwargs)
         self.field_of_view = field_of_view
         self.dimension = dimension
 
@@ -79,7 +79,7 @@ class AxisMap(RetinotopyMap):
             *get_docval(RetinotopyMap.__init__, 'dimension'))
     def __init__(self, **kwargs):
         unit = popargs('unit', kwargs)
-        call_docval_func(super().__init__, kwargs)
+        super().__init__(**kwargs)
         self.unit = unit
 
 
@@ -132,7 +132,7 @@ class ImagingRetinotopy(NWBDataInterface):
             focal_depth_image, sign_map, vasculature_image = popargs(
                 'axis_1_phase_map', 'axis_1_power_map', 'axis_2_phase_map', 'axis_2_power_map',
                 'axis_descriptions', 'focal_depth_image', 'sign_map', 'vasculature_image', kwargs)
-        call_docval_func(super().__init__, kwargs)
+        super().__init__(**kwargs)
         warnings.warn("The ImagingRetinotopy class currently cannot be written to or read from a file. "
                       "This is a known bug and will be fixed in a future release of PyNWB.")
         self.axis_1_phase_map = axis_1_phase_map

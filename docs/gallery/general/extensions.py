@@ -4,13 +4,19 @@
 Extending NWB
 =============
 
-The NWB format was designed to be easily extendable. Here we will demonstrate how to extend NWB using the
-PyNWB API.
+The NWB format was designed to be easily extendable. Here we discuss some of the basic functionality
+in PyNWB for creating  Neurodata Extensions (NDX).
 
-.. note::
+.. seealso::
 
-    A more in-depth discussion of the components and steps for creating and using extensions is
-    available as part of the docs at :ref:`extending-nwb`.
+    For a more in-depth, step-by-step guide on how to create, document, and publish NWB extensions, we highly
+    recommend visiting the :nwb_overview:`extension tutorial <extensions_tutorial/6_documenting_extension.html>`
+    on the :nwb_overview:`nwb overview <>` website.
+
+.. seealso::
+
+   For more information on available tools for creating extensions, see
+   :nwb_overview:`here <core_tools/core_tools_home.html#svg-version-1-1-width-1-5em-height-1-5em-class-sd-octicon-sd-octicon-diff-added-viewbox-0-0-16-16-aria-hidden-true-path-fill-rule-evenodd-d-m13-25-2-5h2-75a-25-25-0-00-25-25v10-5c0-138-112-25-25-25h10-5a-25-25-0-00-25-25v2-75a-25-25-0-00-25-25zm2-75-1h10-5c-966-0-1-75-784-1-75-1-75v10-5a1-75-1-75-0-0113-25-15h2-75a1-75-1-75-0-011-13-25v2-75c1-1-784-1-784-1-2-75-1zm8-4a-75-75-0-01-75-75v2-5h2-5a-75-75-0-010-1-5h-2-5v2-5a-75-75-0-01-1-5-0v-2-5h-2-5a-75-75-0-010-1-5h2-5v-2-5a-75-75-0-018-4z-path-svg-extending-nwb>`.
 
 '''
 
@@ -23,8 +29,6 @@ PyNWB API.
 # Extensions should be defined separately from the code that uses the extensions. This design decision is
 # based on the assumption that the extension will be written once, and read or used multiple times. Here, we
 # provide an example of how to create an extension for subsequent use.
-# (For more information on the available tools for creating extensions, see :ref:`extending-nwb`).
-#
 #
 # The following block of code demonstrates how to create a new namespace, and then add a new `neurodata_type`
 # to this namespace. Finally,
@@ -100,7 +104,7 @@ ns_builder.export(ns_path)
 
 from pynwb import register_class, load_namespaces
 from pynwb.ecephys import ElectricalSeries
-from hdmf.utils import docval, call_docval_func, getargs, get_docval
+from hdmf.utils import docval, get_docval, popargs
 
 ns_path = "mylab.namespace.yaml"
 load_namespaces(ns_path)
@@ -114,16 +118,16 @@ class TetrodeSeries(ElectricalSeries):
     @docval(*get_docval(ElectricalSeries.__init__) + (
         {'name': 'trode_id', 'type': int, 'doc': 'the tetrode id'},))
     def __init__(self, **kwargs):
-        call_docval_func(super(TetrodeSeries, self).__init__, kwargs)
-        self.trode_id = getargs('trode_id', kwargs)
+        trode_id = popargs('trode_id', kwargs)
+        super().__init__(**kwargs)
+        self.trode_id = trode_id
 
 
 ####################
 # .. note::
 #
-#     See the API docs for more information about :py:func:`~hdmf.utils.docval`
-#     :py:func:`~hdmf.utils.call_docval_func`, :py:func:`~hdmf.utils.getargs`
-#     and :py:func:`~hdmf.utils.get_docval`
+#     See the API docs for more information about :py:func:`~hdmf.utils.docval`,
+#     :py:func:`~hdmf.utils.popargs`, and :py:func:`~hdmf.utils.get_docval`
 #
 # When extending :py:class:`~pynwb.core.NWBContainer` or :py:class:`~pynwb.core.NWBContainer`
 # subclasses, you should define the class field ``__nwbfields__``. This will
@@ -297,7 +301,7 @@ class Potato(NWBContainer):
             {'name': 'weight', 'type': float, 'doc': 'weight of potato in grams'},
             {'name': 'age', 'type': float, 'doc': 'age of potato in days'})
     def __init__(self, **kwargs):
-        super(Potato, self).__init__(name=kwargs['name'])
+        super().__init__(name=kwargs['name'])
         self.weight = kwargs['weight']
         self.age = kwargs['age']
 
