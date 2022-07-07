@@ -78,6 +78,7 @@ class TestImportStructure(TestCase):
         "register_map",
         "retinotopy",
         "spec",
+        "testing",
         "validate",
         "warn",
     ]
