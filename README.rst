@@ -1,8 +1,8 @@
-=====
-PyNWB
-=====
+.. image:: docs/source/figures/logo_pynwb.png
+    :width: 200px
 
-Documentation of PyNWB can be found at https://pynwb.readthedocs.io
+PyNWB is a Python package for working with NWB files. The PyNWB 
+documentation can be found at https://pynwb.readthedocs.io
 
 Latest Release
 ==============

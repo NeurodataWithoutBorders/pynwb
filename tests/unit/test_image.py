@@ -1,6 +1,9 @@
+import warnings
+
 import numpy as np
 
 from pynwb import TimeSeries
+from pynwb.base import Image, Images, ImageReferences
 from pynwb.device import Device
 from pynwb.image import ImageSeries, IndexSeries, ImageMaskSeries, OpticalSeries, GrayscaleImage, RGBImage, RGBAImage
 from pynwb.testing import TestCase
@@ -17,7 +20,7 @@ class ImageSeriesConstructor(TestCase):
             external_file=['external_file'],
             starting_frame=[1, 2, 3],
             format='tiff',
-            timestamps=list(),
+            timestamps=[1., 2., 3.],
             device=dev,
         )
         self.assertEqual(iS.name, 'test_iS')
@@ -34,7 +37,7 @@ class ImageSeriesConstructor(TestCase):
             ImageSeries(
                 name='test_iS',
                 unit='unit',
-                timestamps=list()
+                rate=2.,
             )
 
     def test_external_file_no_frame(self):
@@ -42,7 +45,7 @@ class ImageSeriesConstructor(TestCase):
             name='test_iS',
             unit='unit',
             external_file=['external_file'],
-            timestamps=list()
+            timestamps=[1., 2., 3.]
         )
         self.assertListEqual(iS.starting_frame, [0])
 
@@ -51,7 +54,7 @@ class ImageSeriesConstructor(TestCase):
             name='test_iS',
             unit='unit',
             data=np.ones((3, 3, 3)),
-            timestamps=list()
+            timestamps=[1., 2., 3.]
         )
         self.assertIsNone(iS.starting_frame)
 
@@ -72,25 +75,104 @@ class ImageSeriesConstructor(TestCase):
         )
         self.assertEqual(iS.unit, ImageSeries.DEFAULT_UNIT)
 
+    def test_dimension_warning(self):
+        """Test that a warning is raised when the dimensions of the data are not the
+        same as the dimensions of the timestamps."""
+        msg = (
+            "ImageSeries 'test_iS': Length of data does not match length of timestamps. Your data may be "
+            "transposed. Time should be on the 0th dimension"
+        )
+        with self.assertWarnsWith(UserWarning, msg):
+            ImageSeries(
+                name='test_iS',
+                data=np.ones((3, 3, 3)),
+                unit='Frames',
+                starting_frame=[0],
+                timestamps=[1, 2, 3, 4]
+            )
+
+    def test_dimension_warning_external_file_with_timestamps(self):
+        """Test that a warning is not raised when external file is used with timestamps."""
+        with warnings.catch_warnings(record=True) as w:
+            ImageSeries(
+                name='test_iS',
+                external_file=['external_file'],
+                format='external',
+                unit='Frames',
+                starting_frame=[0],
+                timestamps=[1, 2, 3, 4]
+            )
+            self.assertEqual(w, [])
+
+    def test_dimension_warning_external_file_with_rate(self):
+        """Test that a warning is not raised when external file is used with rate."""
+        with warnings.catch_warnings(record=True) as w:
+            ImageSeries(
+                name='test_iS',
+                external_file=['external_file'],
+                format='external',
+                unit='Frames',
+                starting_frame=[0],
+                rate=0.2,
+            )
+            self.assertEqual(w, [])
+
 
 class IndexSeriesConstructor(TestCase):
 
     def test_init(self):
+        image1 = Image(name='test_image', data=np.ones((10, 10)))
+        image2 = Image(name='test_image2', data=np.ones((10, 10)))
+        image_references = ImageReferences(name='order_of_images', data=[image2, image1])
+        images = Images(name='images_name', images=[image1, image2], order_of_images=image_references)
+
+        iS = IndexSeries(
+            name='test_iS',
+            data=[1, 2, 3],
+            unit='N/A',
+            indexed_images=images,
+            timestamps=[0.1, 0.2, 0.3]
+        )
+        self.assertEqual(iS.name, 'test_iS')
+        self.assertEqual(iS.unit, 'N/A')
+        self.assertIs(iS.indexed_images, images)
+
+    def test_init_bad_unit(self):
         ts = TimeSeries(
             name='test_ts',
             data=[1, 2, 3],
             unit='unit',
             timestamps=[0.1, 0.2, 0.3]
         )
-        iS = IndexSeries(
-            name='test_iS',
+        msg = ("The 'unit' field of IndexSeries is fixed to the value 'N/A' starting in NWB 2.5. Passing "
+               "a different value for 'unit' will raise an error in PyNWB 3.0.")
+        with self.assertWarnsWith(PendingDeprecationWarning, msg):
+            iS = IndexSeries(
+                name='test_iS',
+                data=[1, 2, 3],
+                unit='na',
+                indexed_timeseries=ts,
+                timestamps=[0.1, 0.2, 0.3]
+            )
+        self.assertEqual(iS.unit, 'N/A')
+
+    def test_init_indexed_ts(self):
+        ts = TimeSeries(
+            name='test_ts',
             data=[1, 2, 3],
-            unit='N/A',
-            indexed_timeseries=ts,
+            unit='unit',
             timestamps=[0.1, 0.2, 0.3]
         )
-        self.assertEqual(iS.name, 'test_iS')
-        self.assertEqual(iS.unit, 'N/A')
+        msg = ("The indexed_timeseries field of IndexSeries is discouraged and will be deprecated in "
+               "a future version of NWB. Use the indexed_images field instead.")
+        with self.assertWarnsWith(PendingDeprecationWarning, msg):
+            iS = IndexSeries(
+                name='test_iS',
+                data=[1, 2, 3],
+                unit='N/A',
+                indexed_timeseries=ts,
+                timestamps=[0.1, 0.2, 0.3]
+            )
         self.assertIs(iS.indexed_timeseries, ts)
 
 

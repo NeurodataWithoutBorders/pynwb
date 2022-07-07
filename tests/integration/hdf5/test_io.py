@@ -247,7 +247,7 @@ class TestAppend(TestCase):
             location='',
             device=device
         )
-        self.nwbfile.add_electrode(x=0.0, y=0.0, z=0.0, imp=np.nan, location='', filtering='', group=e_group)
+        self.nwbfile.add_electrode(x=0.0, y=0.0, z=0.0, imp=np.nan, location='loc', filtering='filt', group=e_group)
         electrodes = self.nwbfile.create_electrode_table_region(region=[0], description='')
         e_series = ElectricalSeries(
             name='test_es',
@@ -283,9 +283,11 @@ class TestAppend(TestCase):
                                                       description='',
                                                       location='',
                                                       device=device)
-        self.nwbfile.add_electrode(id=0, x=0.0, y=0.0, z=0.0, imp=np.nan, location='', filtering='', group=e_group)
+        self.nwbfile.add_electrode(id=0, x=0.0, y=0.0, z=0.0, imp=np.nan,
+                                   location='loc', filtering='filt', group=e_group)
         with self.assertRaises(ValueError):
-            self.nwbfile.add_electrode(id=0, x=0.0, y=0.0, z=0.0, imp=np.nan, location='', filtering='', group=e_group)
+            self.nwbfile.add_electrode(id=0, x=0.0, y=0.0, z=0.0, imp=np.nan, location='loc',
+                                       filtering='filt', group=e_group)
 
 
 class TestH5DataIO(TestCase):

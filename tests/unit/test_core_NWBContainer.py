@@ -1,7 +1,7 @@
 import unittest
 
 from pynwb.core import NWBContainer
-from hdmf.utils import docval, call_docval_func
+from hdmf.utils import docval
 
 
 class MyTestClass(NWBContainer):
@@ -10,7 +10,7 @@ class MyTestClass(NWBContainer):
 
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this container'})
     def __init__(self, **kwargs):
-        call_docval_func(super(MyTestClass, self).__init__, kwargs)
+        super().__init__(**kwargs)
         self.prop1 = 'test1'
 
 

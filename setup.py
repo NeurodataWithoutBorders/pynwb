@@ -19,9 +19,9 @@ print('found these packages:', pkgs)
 schema_dir = 'nwb-schema/core'
 
 reqs = [
-    'h5py>=2.9,<4',
-    'hdmf>=3.1.1,<4',
-    'numpy>=1.16,<1.22',
+    'h5py>=2.10,<4',
+    'hdmf>=3.3.2,<4',
+    'numpy>=1.16,<1.23',
     'pandas>=1.0.5,<2',
     'python-dateutil>=2.7,<3',
     'setuptools'
