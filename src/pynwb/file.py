@@ -2,7 +2,6 @@ from datetime import datetime
 from dateutil.tz import tzlocal
 from collections.abc import Iterable
 from warnings import warn
-import copy as _copy
 
 import numpy as np
 import pandas as pd
@@ -1090,18 +1089,23 @@ class ElectrodeTable(DynamicTable):
     # ElectrodeTable parameters are fixed
 
     __columns__ = (
-        {'name': 'location', 'description': 'the location of channel within the subject e.g. brain region', 'required': True},
-        {'name': 'group', 'description': 'a reference to the ElectrodeGroup this electrode is a part of', 'required': True},
-        {'name': 'group_name', 'description': 'the name of the ElectrodeGroup this electrode is a part of', 'required': True},
+        {'name': 'location', 'description': 'the location of channel within the subject e.g. brain region',
+         'required': True},
+        {'name': 'group', 'description': 'a reference to the ElectrodeGroup this electrode is a part of',
+         'required': True},
+        {'name': 'group_name', 'description': 'the name of the ElectrodeGroup this electrode is a part of',
+         'required': True},
         {'name': 'x', 'description': 'the x coordinate of the position (+x is posterior)'},
         {'name': 'y', 'description': 'the y coordinate of the position (+y is inferior)'},
         {'name': 'z', 'description': 'the z coordinate of the position (+z is right)'},
         {'name': 'imp', 'description': 'the impedance of the electrode, in ohms'},
-        {'name': 'filtering', 'description': 'description of hardware filtering, including the filter name and frequency cutoffs'},
+        {'name': 'filtering', 'description': 'description of hardware filtering, including the filter name '
+         'and frequency cutoffs'},
         {'name': 'rel_x', 'description': 'the x coordinate within the electrode group'},
         {'name': 'rel_y', 'description': 'the y coordinate within the electrode group'},
         {'name': 'rel_z', 'description': 'the z coordinate within the electrode group'},
-        {'name': 'reference', 'description': 'Description of the reference electrode and/or reference scheme used for this electrode, e.g.,"stainless steel skull screw" or "online common average referencing".'},
+        {'name': 'reference', 'description': 'Description of the reference electrode and/or reference scheme '
+         'used for this electrode, e.g.,"stainless steel skull screw" or "online common average referencing".'},
     )
 
     @docval(*get_docval(DynamicTable.__init__, "id", "columns", "colnames"),
