@@ -1,5 +1,20 @@
 # PyNWB Changelog
 
+## PyNWB 2.1.1 (Upcoming)
+
+### Bug fixes
+- Fix adding data to optional columns of the `ElectrodeTable` when not using `NWBFile.add_electrode`. @rly (#1499)
+
+### Minor improvements:
+- `ElectrodeTable` is now a dedicated Python class that is a subclass of `DynamicTable`, instead of a special
+  instance of `DynamicTable`. Note that `ElectrodeTable` is not yet a neurodata type. @rly (#1499)
+
+### Documentation and tutorial enhancements:
+- Minor improvements to ecephys tutorial and order of Sphinx gallery examples. @bendichter (#1495, #1496)
+
+### Repo infrastructure changes:
+- Add Python 3.10 to the GitHub bug report form. @CodyCBakerPHD (#1498)
+
 ## PyNWB 2.1.0 (July 6, 2022)
 
 ### Breaking changes:
@@ -14,7 +29,7 @@
   change, the impact user codes should be minimal as this change primarily adds functionality while the overall
   behavior of the API is largely consistent with existing behavior. @oruebel, @rly (#1390)
 
-# Enhancements and minor changes
+### Enhancements and minor changes:
 - A warning is now raised if `SpatialSeries.data` has more than 3 columns. @bendichter, @rly (#1455, #1480)
 - The arguments x, y, z, imp, location, filtering are no longer required in the electrodes table.
   @h-mayorquin, @rly (#1448)
