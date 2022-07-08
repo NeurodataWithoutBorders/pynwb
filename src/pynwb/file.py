@@ -126,6 +126,86 @@ _add_electrode_docval = (
 )
 
 
+
+class ElectrodeTable(DynamicTable):
+
+    # NOTE: ElectrodeTable is not yet a standalone type in the NWB schema (with its own neurodata_type_def)
+    # ElectrodeTable parameters are fixed
+
+    __columns__ = (
+        {'name': 'location', 'description': 'the location of channel within the subject e.g. brain region',
+         'required': True},
+        {'name': 'group', 'description': 'a reference to the ElectrodeGroup this electrode is a part of',
+         'required': True},
+        {'name': 'group_name', 'description': 'the name of the ElectrodeGroup this electrode is a part of',
+         'required': True},
+        {'name': 'x', 'description': 'the x coordinate of the position (+x is posterior)'},
+        {'name': 'y', 'description': 'the y coordinate of the position (+y is inferior)'},
+        {'name': 'z', 'description': 'the z coordinate of the position (+z is right)'},
+        {'name': 'imp', 'description': 'the impedance of the electrode, in ohms'},
+        {'name': 'filtering', 'description': 'description of hardware filtering, including the filter name '
+         'and frequency cutoffs'},
+        {'name': 'rel_x', 'description': 'the x coordinate within the electrode group'},
+        {'name': 'rel_y', 'description': 'the y coordinate within the electrode group'},
+        {'name': 'rel_z', 'description': 'the z coordinate within the electrode group'},
+        {'name': 'reference', 'description': 'Description of the reference electrode and/or reference scheme '
+         'used for this electrode, e.g.,"stainless steel skull screw" or "online common average referencing".'},
+    )
+
+    @docval(*get_docval(DynamicTable.__init__, "id", "columns", "colnames"),
+            allow_positional=AllowPositional.WARNING)
+    def __init__(self, **kwargs):
+        super().__init__(
+            name='electrodes',
+            description='metadata about extracellular electrodes',
+            **kwargs
+        )
+
+    # NOTE _add_electrode_docval is defined outside the class so it can be used by NWBFile.add_electrode
+    @docval(*_add_electrode_docval,
+            allow_extra=True,
+            allow_positional=AllowPositional.WARNING)
+    def add_electrode(self, **kwargs):
+        self.add_row(**kwargs)
+
+    # NOTE _add_electrode_docval is defined outside the class so it can be used by NWBFile.add_electrode
+    @docval(*_add_electrode_docval,
+            allow_extra=True,
+            allow_positional=AllowPositional.WARNING)
+    def add_row(self, **kwargs):
+        """
+        Add an electrode. Optional columns are
+        See :py:meth:`~hdmf.common.DynamicTable.add_row` for more details.
+
+        Required fields are *location* and
+        *group* and any columns that have been added
+        (through calls to `add_electrode_column`).
+        """
+
+        # NOTE location and group are required arguments. in PyNWB 2.1.0, 'x', 'y', and 'z' became optional arguments,
+        # and in order to avoid breaking API changes, the order of the arguments needed to be maintained even though
+        # these optional arguments came before the required arguments, so in docval these required arguments are
+        # displayed as optional when really they are required. this should be changed when positional arguments
+        # are no longer allowed
+        if not kwargs['location']:
+            raise ValueError("The 'location' argument is required when creating an electrode.")
+        if not kwargs['group']:
+            raise ValueError("The 'group' argument is required when creating an electrode.")
+
+        if kwargs.get('group_name', None) is None:
+            kwargs['group_name'] = kwargs['group'].name
+
+        super().add_row(**kwargs)
+
+    def copy(self):
+        """
+        Return a copy of this ElectrodeTable.
+        This is useful for linking.
+        """
+        kwargs = dict(id=self.id, columns=self.columns, colnames=self.colnames)
+        return self.__class__(**kwargs)
+
+
 @register_class('NWBFile', CORE_NAMESPACE)
 class NWBFile(MultiContainerInterface):
     """
@@ -739,7 +819,7 @@ class NWBFile(MultiContainerInterface):
         self.__check_invalid_times()
         self.invalid_times.add_interval(**kwargs)
 
-    @docval({'name': 'electrode_table', 'type': DynamicTable, 'doc': 'the ElectrodeTable for this file'})
+    @docval({'name': 'electrode_table', 'type': ElectrodeTable, 'doc': 'the ElectrodeTable for this file'})
     def set_electrode_table(self, **kwargs):
         """
         Set the electrode table of this NWBFile to an existing ElectrodeTable
@@ -749,6 +829,11 @@ class NWBFile(MultiContainerInterface):
             raise ValueError(msg)
         electrode_table = getargs('electrode_table', kwargs)
         self.electrodes = electrode_table
+
+    @electrodes.setter  # can I overwrite the generated one? probably not.
+    def electrodes(self, v):
+        # TODO cast the DynamicTable as an ElectrodeTable
+        self.electrodes = v
 
     def _check_sweep_table(self):
         """
@@ -1081,85 +1166,6 @@ def _tablefunc(table_name, description, columns):
         else:
             raise ValueError("Elements of 'columns' must be str or tuple")
     return t
-
-
-class ElectrodeTable(DynamicTable):
-
-    # NOTE: ElectrodeTable is not yet a standalone type in the NWB schema (with its own neurodata_type_def)
-    # ElectrodeTable parameters are fixed
-
-    __columns__ = (
-        {'name': 'location', 'description': 'the location of channel within the subject e.g. brain region',
-         'required': True},
-        {'name': 'group', 'description': 'a reference to the ElectrodeGroup this electrode is a part of',
-         'required': True},
-        {'name': 'group_name', 'description': 'the name of the ElectrodeGroup this electrode is a part of',
-         'required': True},
-        {'name': 'x', 'description': 'the x coordinate of the position (+x is posterior)'},
-        {'name': 'y', 'description': 'the y coordinate of the position (+y is inferior)'},
-        {'name': 'z', 'description': 'the z coordinate of the position (+z is right)'},
-        {'name': 'imp', 'description': 'the impedance of the electrode, in ohms'},
-        {'name': 'filtering', 'description': 'description of hardware filtering, including the filter name '
-         'and frequency cutoffs'},
-        {'name': 'rel_x', 'description': 'the x coordinate within the electrode group'},
-        {'name': 'rel_y', 'description': 'the y coordinate within the electrode group'},
-        {'name': 'rel_z', 'description': 'the z coordinate within the electrode group'},
-        {'name': 'reference', 'description': 'Description of the reference electrode and/or reference scheme '
-         'used for this electrode, e.g.,"stainless steel skull screw" or "online common average referencing".'},
-    )
-
-    @docval(*get_docval(DynamicTable.__init__, "id", "columns", "colnames"),
-            allow_positional=AllowPositional.WARNING)
-    def __init__(self, **kwargs):
-        super().__init__(
-            name='electrodes',
-            description='metadata about extracellular electrodes',
-            **kwargs
-        )
-
-    # NOTE _add_electrode_docval is defined outside the class so it can be used by NWBFile.add_electrode
-    @docval(*_add_electrode_docval,
-            allow_extra=True,
-            allow_positional=AllowPositional.WARNING)
-    def add_electrode(self, **kwargs):
-        self.add_row(**kwargs)
-
-    # NOTE _add_electrode_docval is defined outside the class so it can be used by NWBFile.add_electrode
-    @docval(*_add_electrode_docval,
-            allow_extra=True,
-            allow_positional=AllowPositional.WARNING)
-    def add_row(self, **kwargs):
-        """
-        Add an electrode. Optional columns are
-        See :py:meth:`~hdmf.common.DynamicTable.add_row` for more details.
-
-        Required fields are *location* and
-        *group* and any columns that have been added
-        (through calls to `add_electrode_column`).
-        """
-
-        # NOTE location and group are required arguments. in PyNWB 2.1.0, 'x', 'y', and 'z' became optional arguments,
-        # and in order to avoid breaking API changes, the order of the arguments needed to be maintained even though
-        # these optional arguments came before the required arguments, so in docval these required arguments are
-        # displayed as optional when really they are required. this should be changed when positional arguments
-        # are no longer allowed
-        if not kwargs['location']:
-            raise ValueError("The 'location' argument is required when creating an electrode.")
-        if not kwargs['group']:
-            raise ValueError("The 'group' argument is required when creating an electrode.")
-
-        if kwargs.get('group_name', None) is None:
-            kwargs['group_name'] = kwargs['group'].name
-
-        super().add_row(**kwargs)
-
-    def copy(self):
-        """
-        Return a copy of this ElectrodeTable.
-        This is useful for linking.
-        """
-        kwargs = dict(id=self.id, columns=self.columns, colnames=self.colnames)
-        return self.__class__(**kwargs)
 
 
 def TrialTable(name='trials', description='metadata about experimental trials'):
