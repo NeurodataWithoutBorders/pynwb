@@ -210,7 +210,7 @@ class NWBHDF5IO(_HDF5IO):
             {'name': 'extensions', 'type': (str, TypeMap, list),
              'doc': 'a path to a namespace, a TypeMap, or a list consisting paths to namespaces and TypeMaps',
              'default': None},
-            {'name': 'file', 'type': h5py.File, 'doc': 'a pre-existing h5py.File object', 'default': None},
+            {'name': 'file', 'type': [h5py.File, 'S3File'], 'doc': 'a pre-existing h5py.File object', 'default': None},
             {'name': 'comm', 'type': "Intracomm", 'doc': 'the MPI communicator to use for parallel I/O',
              'default': None},
             {'name': 'driver', 'type': str, 'doc': 'driver for h5py to use when opening HDF5 file', 'default': None})
