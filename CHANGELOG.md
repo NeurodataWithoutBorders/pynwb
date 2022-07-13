@@ -1,5 +1,13 @@
 # PyNWB Changelog
 
+## PyNWB 2.1.1 (Upcoming)
+
+### Enhancements and minor changes:
+- Enable passing an S3File created through s3fs, which provides a method for reading an NWB file directly from s3 that is an alternative to ros3. This required relaxing of `NWBHDF5IO` input validation. The `path` arg is not needed if `file` is provided. `mode` now has a default value of "r". @bendichter ([1499](https://github.com/NeurodataWithoutBorders/pynwb/pull/1499))
+
+### Documentation and tutorial enhancements:
+- Add example code for s3fs in the streaming tutorial.
+
 ## PyNWB 2.1.0 (July 6, 2022)
 
 ### Breaking changes:
@@ -14,7 +22,7 @@
   change, the impact user codes should be minimal as this change primarily adds functionality while the overall
   behavior of the API is largely consistent with existing behavior. @oruebel, @rly (#1390)
 
-# Enhancements and minor changes
+### Enhancements and minor changes
 - A warning is now raised if `SpatialSeries.data` has more than 3 columns. @bendichter, @rly (#1455, #1480)
 - The arguments x, y, z, imp, location, filtering are no longer required in the electrodes table.
   @h-mayorquin, @rly (#1448)
