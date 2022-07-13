@@ -1,10 +1,11 @@
 from datetime import datetime
 from dateutil.tz import tzlocal
 
+import numpy as np
 from hdmf.utils import docval
 
 from pynwb import NWBFile, TimeSeries, available_namespaces
-from pynwb.core import NWBContainer
+from pynwb.core import NWBContainer, NWBData
 from pynwb.testing import TestCase
 
 
@@ -34,6 +35,46 @@ class TestNWBContainer(TestCase):
         obj.prop2 = 'test2'
         self.assertEqual(obj.prop1, 'test1')
         self.assertEqual(obj.prop2, 'test2')
+
+
+class MyNWBData(NWBData):
+
+    __nwbfields__ = ('data',)
+
+    @docval(
+        {
+            'name': 'name',
+            'type': str,
+            'doc': 'The name of this container',
+        },{
+            'name': 'data',
+            'type': ('array_data', 'data'),
+            'doc': 'any data',
+        },
+    )
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+
+class TestNWBData(TestCase):
+
+    def test_constructor(self):
+        """Test constructor
+        """
+        obj = MyNWBData('obj1', data=[[1, 2, 3], [1, 2, 3]])
+        self.assertEqual(obj.name, 'obj1')
+
+    def test_append(self):
+
+        obj = MyNWBData('obj1', data=[[1, 2, 3], [1, 2, 3]])
+        obj.append([4, 5, 6])
+        np.testing.assert_array_equal(obj.data, [[1, 2, 3], [1, 2, 3], [4, 5, 6]])
+
+    def test_extend(self):
+
+        obj = MyNWBData('obj1', data=[[1, 2, 3], [1, 2, 3]])
+        obj.extend([[4, 5, 6]])
+        np.testing.assert_array_equal(obj.data, [[1, 2, 3], [1, 2, 3], [4, 5, 6]])
 
 
 class TestPrint(TestCase):
