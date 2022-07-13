@@ -74,7 +74,7 @@ nwbfile
 # the :py:meth:`~pynwb.file.NWBFile.add_stimulus` method.
 #
 
-image_data = np.random.uniform(low=0, high=255, size=(200, 50, 50, 3)).astype(int)
+image_data = np.random.uniform(low=0, high=255, size=(200, 50, 50, 3)).astype(np.uint8)
 optical_series = OpticalSeries(
     name="StimulusPresentation",  # required
     distance=0.7,  # required
@@ -102,7 +102,7 @@ nwbfile.add_stimulus(timeseries=optical_series)
 # the :py:meth:`~pynwb.file.NWBFile.add_acquisition` method.
 #
 
-image_data = np.random.uniform(low=0, high=255, size=(200, 50, 50, 3)).astype(int)
+image_data = np.random.uniform(low=0, high=255, size=(200, 50, 50, 3)).astype(np.uint8)
 
 behavior_images = ImageSeries(
     name="ImageSeries",
