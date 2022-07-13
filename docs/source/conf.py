@@ -13,6 +13,7 @@
 
 import sys
 import os
+
 import sphinx_rtd_theme
 
 
@@ -61,6 +62,23 @@ extensions = [
 from sphinx_gallery.sorting import ExplicitOrder
 from sphinx_gallery.sorting import ExampleTitleSortKey
 
+
+class CustomSphinxGallerySectionSortKey(ExampleTitleSortKey):
+    """
+    Define the key to be used to sort sphinx galleries sections
+    """
+    def __call__(self, filename):
+        """
+        Return the key to be used for sorting the given sphinx gallery file.
+
+        :param filename: Name of the sphinx gallery file
+        """
+        title = super().__call__(filename)
+        if title == "NWB File Basics":
+            return ''  # make this first
+        return title
+
+
 sphinx_gallery_conf = {
     # path to your examples scripts
     'examples_dirs': ['../gallery'],
@@ -70,7 +88,7 @@ sphinx_gallery_conf = {
     'backreferences_dir': 'gen_modules/backreferences',
     'min_reported_time': 5,
     'remove_config_comments': True,
-    'within_subsection_order': ExampleTitleSortKey
+    'within_subsection_order': CustomSphinxGallerySectionSortKey,
 }
 
 intersphinx_mapping = {
