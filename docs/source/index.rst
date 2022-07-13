@@ -45,6 +45,7 @@ breaking down the barriers to data sharing in neuroscience.
    software_process
    make_a_release
    make_roundtrip_test
+   make_a_tutorial
 
 .. toctree::
    :maxdepth: 2
