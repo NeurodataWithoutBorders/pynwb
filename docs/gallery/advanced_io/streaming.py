@@ -62,7 +62,7 @@ advanced configuration enabled. You can install HDF5 with the ROS3 driver from `
 # Method 2: s3fs
 # ~~~~~~~~~~~~~~
 # s3fs is a library that creates a virtual filesystem for an S3 store. With this approach, a virtual file is created
-# for the file. This virtual filesystem layer will take care of requesting data from the s3 bucket whenever data is
+# for the file and virtual filesystem layer will take care of requesting data from the s3 bucket whenever data is
 # read from the virtual file.
 #
 # First install s3fs:
@@ -87,8 +87,8 @@ advanced configuration enabled. You can install HDF5 with the ROS3 driver from `
 #
 #   io.read()
 #
-# The above snippet opens an arbitrary file on DANDI. You can use the ``DandiAPIClient`` to find the s3 path just as above,
-# but you will need to adjust this url to give it a prefix of "s3://dandiarchive/" as shown above.
+# The above snippet opens an arbitrary file on DANDI. You can use the ``DandiAPIClient`` to find the s3 path just as
+# above, but you will need to adjust this url to give it a prefix of "s3://dandiarchive/" as shown above.
 
 
 # sphinx_gallery_thumbnail_path = 'figures/gallery_thumbnails_streaming.png'
