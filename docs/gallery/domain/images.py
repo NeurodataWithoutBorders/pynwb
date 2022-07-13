@@ -144,7 +144,7 @@ img = Image.open("docs/source/figures/logo_pynwb.png")  # an example image
 rgba_logo = RGBAImage(
     name="pynwb_RGBA_logo",
     data=np.array(img),
-    resolution=70,  # in pixels / cm
+    resolution=70.0,  # in pixels / cm
     description="RGBA version of the PyNWB logo.",
 )
 
@@ -160,7 +160,7 @@ rgba_logo = RGBAImage(
 rgb_logo = RGBImage(
     name="pynwb_RGB_logo",
     data=np.array(img.convert("RGB")),
-    resolution=70,
+    resolution=70.0,
     description="RGB version of the PyNWB logo.",
 )
 
