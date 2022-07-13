@@ -97,6 +97,7 @@ nwbfile.add_stimulus(timeseries=optical_series)
 #
 # :py:class:`~pynwb.image.ImageSeries` is a general container for series of images acquired during
 # the experiment. Image data can be stored either in the HDF5 file or as an external image file.
+# When color images are stored in the HDF5 file the color channel order is expected to be RGB.
 #
 # We can add raw data to the :py:class:`~pynwb.file.NWBFile` object as *acquisition* using
 # the :py:meth:`~pynwb.file.NWBFile.add_acquisition` method.
