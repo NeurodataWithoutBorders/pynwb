@@ -1,4 +1,4 @@
-from hdmf.utils import docval, popargs, get_docval, call_docval_func
+from hdmf.utils import docval, popargs, get_docval, popargs_to_dict
 
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries
@@ -22,13 +22,11 @@ class OptogeneticStimulusSite(NWBContainer):
             {'name': 'excitation_lambda', 'type': 'float', 'doc': 'Excitation wavelength in nm.'},
             {'name': 'location', 'type': str, 'doc': 'Location of stimulation site.'})
     def __init__(self, **kwargs):
-        device, description, excitation_lambda, location = popargs(
-            'device', 'description', 'excitation_lambda', 'location', kwargs)
-        call_docval_func(super(OptogeneticStimulusSite, self).__init__, kwargs)
-        self.device = device
-        self.description = description
-        self.excitation_lambda = excitation_lambda
-        self.location = location
+        args_to_set = popargs_to_dict(('device', 'description', 'excitation_lambda', 'location'), kwargs)
+        super().__init__(**kwargs)
+
+        for key, val in args_to_set.items():
+            setattr(self, key, val)
 
 
 @register_class('OptogeneticSeries', CORE_NAMESPACE)
@@ -47,6 +45,7 @@ class OptogeneticSeries(TimeSeries):
             *get_docval(TimeSeries.__init__, 'resolution', 'conversion', 'timestamps', 'starting_time', 'rate',
                         'comments', 'description', 'control', 'control_description', 'offset'))
     def __init__(self, **kwargs):
-        name, data, site = popargs('name', 'data', 'site', kwargs)
-        super(OptogeneticSeries, self).__init__(name, data, 'watts', **kwargs)
+        site = popargs('site', kwargs)
+        kwargs['unit'] = 'watts'
+        super().__init__(**kwargs)
         self.site = site

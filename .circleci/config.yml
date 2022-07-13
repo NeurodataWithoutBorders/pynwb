@@ -314,7 +314,7 @@ jobs:
             python test.py --example-ros3
 
   test-validation:
-    <<: *py39
+    <<: *py38
     steps:
       - checkout
       - run: git submodule sync
@@ -326,7 +326,7 @@ jobs:
           command: |
             . ../venv/bin/activate
             pip install tox
-            tox -e validation-py39
+            tox -e validation-py38
           # Install is expected to be quick. Increase timeout in case there are some network issues.
           # While pip installing tox does not output by default. Circle thinks task is dead after 10 min.
           no_output_timeout: 30m

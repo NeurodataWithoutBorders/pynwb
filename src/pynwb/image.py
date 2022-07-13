@@ -2,10 +2,10 @@ import warnings
 import numpy as np
 from collections.abc import Iterable
 
-from hdmf.utils import docval, getargs, popargs, call_docval_func, get_docval
+from hdmf.utils import docval, getargs, popargs, popargs_to_dict, get_docval
 
 from . import register_class, CORE_NAMESPACE
-from .base import TimeSeries, Image
+from .base import TimeSeries, Image, Images
 from .device import Device
 
 
@@ -56,13 +56,13 @@ class ImageSeries(TimeSeries):
             {'name': 'device', 'type': Device,
              'doc': 'Device used to capture the images/video.', 'default': None},)
     def __init__(self, **kwargs):
-        bits_per_pixel, dimension, external_file, starting_frame, format, device = popargs(
-            'bits_per_pixel', 'dimension', 'external_file', 'starting_frame', 'format', 'device', kwargs)
+        keys_to_set = ('bits_per_pixel', 'dimension', 'external_file', 'starting_frame', 'format', 'device')
+        args_to_set = popargs_to_dict(keys_to_set, kwargs)
         name, data, unit = getargs('name', 'data', 'unit', kwargs)
         if data is not None and unit is None:
             raise ValueError("Must supply 'unit' argument when supplying 'data' to %s '%s'."
                              % (self.__class__.__name__, name))
-        if external_file is None and data is None:
+        if args_to_set['external_file'] is None and data is None:
             raise ValueError("Must supply either external_file or data to %s '%s'."
                              % (self.__class__.__name__, name))
 
@@ -72,17 +72,35 @@ class ImageSeries(TimeSeries):
         if unit is None:
             kwargs['unit'] = ImageSeries.DEFAULT_UNIT
 
-        call_docval_func(super(ImageSeries, self).__init__, kwargs)
+        super().__init__(**kwargs)
 
-        self.bits_per_pixel = bits_per_pixel
-        self.dimension = dimension
-        self.external_file = external_file
-        if external_file is not None:
-            self.starting_frame = starting_frame
-        else:
-            self.starting_frame = None
-        self.format = format
-        self.device = device
+        if args_to_set["external_file"] is None:
+            args_to_set["starting_frame"] = None  # overwrite starting_frame
+        for key, val in args_to_set.items():
+            setattr(self, key, val)
+
+        if not self._check_image_series_dimension():
+            warnings.warn(
+                "%s '%s': Length of data does not match length of timestamps. Your data may be transposed. "
+                "Time should be on the 0th dimension" % (self.__class__.__name__, self.name)
+            )
+
+    def _check_time_series_dimension(self):
+        """Override _check_time_series_dimension to do nothing.
+        The _check_image_series_dimension method will be called instead.
+        """
+        return True
+
+    def _check_image_series_dimension(self):
+        """Check that the 0th dimension of data equals the length of timestamps, when applicable.
+
+        ImageSeries objects can have an external file instead of data stored. The external file cannot be
+        queried for the number of frames it contains, so this check will return True when an external file
+        is provided. Otherwise, this function calls the parent class' _check_time_series_dimension method.
+        """
+        if self.external_file is not None:
+            return True
+        return super()._check_time_series_dimension()
 
     @property
     def bits_per_pixel(self):
@@ -115,13 +133,36 @@ class IndexSeries(TimeSeries):
             'doc': ('The data values. Must be 1D, where the first dimension must be time (frame)')},
             *get_docval(TimeSeries.__init__, 'unit'),  # required
             {'name': 'indexed_timeseries', 'type': TimeSeries,  # required
-             'doc': 'HDF5 link to TimeSeries containing images that are indexed.'},
+             'doc': 'Link to TimeSeries containing images that are indexed.', 'default': None},
+            {'name': 'indexed_images', 'type': Images,  # required
+             'doc': ("Link to Images object containing an ordered set of images that are indexed. The Images object "
+                     "must contain a 'ordered_images' dataset specifying the order of the images in the Images type."),
+             'default': None},
             *get_docval(TimeSeries.__init__, 'resolution', 'conversion', 'timestamps', 'starting_time', 'rate',
                         'comments', 'description', 'control', 'control_description', 'offset'))
     def __init__(self, **kwargs):
-        indexed_timeseries = popargs('indexed_timeseries', kwargs)
-        super(IndexSeries, self).__init__(**kwargs)
+        indexed_timeseries, indexed_images = popargs('indexed_timeseries', 'indexed_images', kwargs)
+        if kwargs['unit'] and kwargs['unit'] != 'N/A':
+            msg = ("The 'unit' field of IndexSeries is fixed to the value 'N/A' starting in NWB 2.5. Passing "
+                   "a different value for 'unit' will raise an error in PyNWB 3.0.")
+            warnings.warn(msg, PendingDeprecationWarning)
+        if not indexed_timeseries and not indexed_images:
+            msg = "Either indexed_timeseries or indexed_images must be provided when creating an IndexSeries."
+            raise ValueError(msg)
+        if indexed_timeseries:
+            msg = ("The indexed_timeseries field of IndexSeries is discouraged and will be deprecated in "
+                   "a future version of NWB. Use the indexed_images field instead.")
+            warnings.warn(msg, PendingDeprecationWarning)
+        kwargs['unit'] = 'N/A'  # fixed value starting in NWB 2.5
+        super().__init__(**kwargs)
         self.indexed_timeseries = indexed_timeseries
+        self.indexed_images = indexed_images
+        if kwargs['conversion'] and kwargs['conversion'] != self.DEFAULT_CONVERSION:
+            warnings.warn("The conversion attribute is not used by IndexSeries.")
+        if kwargs['resolution'] and kwargs['resolution'] != self.DEFAULT_RESOLUTION:
+            warnings.warn("The resolution attribute is not used by IndexSeries.")
+        if kwargs['offset'] and kwargs['offset'] != self.DEFAULT_OFFSET:
+            warnings.warn("The offset attribute is not used by IndexSeries.")
 
 
 @register_class('ImageMaskSeries', CORE_NAMESPACE)
@@ -147,7 +188,7 @@ class ImageMaskSeries(ImageSeries):
              'default': None},)
     def __init__(self, **kwargs):
         masked_imageseries = popargs('masked_imageseries', kwargs)
-        super(ImageMaskSeries, self).__init__(**kwargs)
+        super().__init__(**kwargs)
         self.masked_imageseries = masked_imageseries
 
 
@@ -183,7 +224,7 @@ class OpticalSeries(ImageSeries):
                         'description', 'control', 'control_description', 'device', 'offset'))
     def __init__(self, **kwargs):
         distance, field_of_view, orientation = popargs('distance', 'field_of_view', 'orientation', kwargs)
-        super(OpticalSeries, self).__init__(**kwargs)
+        super().__init__(**kwargs)
         self.distance = distance
         self.field_of_view = field_of_view
         self.orientation = orientation
@@ -198,7 +239,7 @@ class GrayscaleImage(Image):
              'shape': (None, None)},
             *get_docval(Image.__init__, 'resolution', 'description'))
     def __init__(self, **kwargs):
-        call_docval_func(super(GrayscaleImage, self).__init__, kwargs)
+        super().__init__(**kwargs)
 
 
 @register_class('RGBImage', CORE_NAMESPACE)
@@ -211,7 +252,7 @@ class RGBImage(Image):
              'shape': (None, None, 3)},
             *get_docval(Image.__init__, 'resolution', 'description'))
     def __init__(self, **kwargs):
-        call_docval_func(super(RGBImage, self).__init__, kwargs)
+        super().__init__(**kwargs)
 
 
 @register_class('RGBAImage', CORE_NAMESPACE)
@@ -224,4 +265,4 @@ class RGBAImage(Image):
              'shape': (None, None, 4)},
             *get_docval(Image.__init__, 'resolution', 'description'))
     def __init__(self, **kwargs):
-        call_docval_func(super(RGBAImage, self).__init__, kwargs)
+        super().__init__(**kwargs)

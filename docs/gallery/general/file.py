@@ -486,6 +486,10 @@ reuse_ts = TimeSeries(
 #
 # .. _basic_trials:
 #
+# The following provides a brief introduction to managing annotations in time via
+# :py:class:`~pynwb.epoch.TimeIntervals`. See the :ref:`time_intervals` tutorial
+# for a more detailed introduction to :py:class:`~pynwb.epoch.TimeIntervals`.
+#
 # Trials
 # ^^^^^^
 #

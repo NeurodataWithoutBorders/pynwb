@@ -13,6 +13,7 @@
 
 import sys
 import os
+
 import sphinx_rtd_theme
 
 
@@ -61,6 +62,23 @@ extensions = [
 from sphinx_gallery.sorting import ExplicitOrder
 from sphinx_gallery.sorting import ExampleTitleSortKey
 
+
+class CustomSphinxGallerySectionSortKey(ExampleTitleSortKey):
+    """
+    Define the key to be used to sort sphinx galleries sections
+    """
+    def __call__(self, filename):
+        """
+        Return the key to be used for sorting the given sphinx gallery file.
+
+        :param filename: Name of the sphinx gallery file
+        """
+        title = super().__call__(filename)
+        if title == "NWB File Basics":
+            return ''  # make this first
+        return title
+
+
 sphinx_gallery_conf = {
     # path to your examples scripts
     'examples_dirs': ['../gallery'],
@@ -70,13 +88,13 @@ sphinx_gallery_conf = {
     'backreferences_dir': 'gen_modules/backreferences',
     'min_reported_time': 5,
     'remove_config_comments': True,
-    'within_subsection_order': ExampleTitleSortKey
+    'within_subsection_order': CustomSphinxGallerySectionSortKey,
 }
 
 intersphinx_mapping = {
-    'python': ('https://docs.python.org/3.8', None),
+    'python': ('https://docs.python.org/3.9', None),
     'numpy': ('https://numpy.org/doc/stable/', None),
-    'matplotlib': ('https://matplotlib.org', None),
+    'matplotlib': ('https://matplotlib.org/stable/', None),
     'h5py': ('https://docs.h5py.org/en/latest/', None),
     'hdmf': ('https://hdmf.readthedocs.io/en/latest/', None),
     'pandas': ('https://pandas.pydata.org/pandas-docs/stable/', None),

@@ -16,7 +16,7 @@ class TestTimeSeriesModular(TestCase):
     def setUp(self):
         self.start_time = datetime(1971, 1, 1, 12, tzinfo=tzutc())
 
-        self.data = np.arange(2000).reshape((2, 1000))
+        self.data = np.arange(2000).reshape((1000, 2))
         self.timestamps = np.linspace(0, 1, 1000)
 
         self.container = TimeSeries(

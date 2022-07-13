@@ -440,7 +440,7 @@ class TestElectrodes(NWBH5IOMixin, TestCase):
         """
         Return placeholder table for electrodes. Tested electrodes are added directly to the NWBFile in addContainer
         """
-        return DynamicTable('electrodes', 'a placeholder table')
+        return DynamicTable(name='electrodes', description='a placeholder table')
 
     def addContainer(self, nwbfile):
         """ Add electrodes and related objects to the given NWBFile """
@@ -491,7 +491,7 @@ class TestElectrodesOptColumns(NWBH5IOMixin, TestCase):
         """
         Return placeholder table for electrodes. Tested electrodes are added directly to the NWBFile in addContainer
         """
-        return DynamicTable('electrodes', 'a placeholder table')
+        return DynamicTable(name='electrodes', description='a placeholder table')
 
     def addContainer(self, nwbfile):
         """ Add electrodes and related objects to the given NWBFile """
@@ -546,7 +546,7 @@ class TestElectrodesRegion(NWBH5IOMixin, TestCase):
         """
         Return placeholder table for electrodes. Tested electrodes are added directly to the NWBFile in addContainer
         """
-        return DynamicTable('electrodes', 'a placeholder table')
+        return DynamicTable(name='electrodes', description='a placeholder table')
 
     def addContainer(self, nwbfile):
         """ Add electrode table region and related objects to the given NWBFile """

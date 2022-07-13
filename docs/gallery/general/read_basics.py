@@ -183,7 +183,8 @@ stimulus_presentation.data.shape
 #
 #     (200, 400, 300, 3)
 #
-# This :py:class:`~pynwb.image.OpticalSeries` data contains 200 images of size 400x300 pixels with three channels (red, green, and blue).
+# This :py:class:`~pynwb.image.OpticalSeries` data contains 200 images of size 400x300 pixels with three channels
+# (red, green, and blue).
 #
 # Slicing datasets
 # ----------------

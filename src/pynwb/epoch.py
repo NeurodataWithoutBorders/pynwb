@@ -1,10 +1,10 @@
 from bisect import bisect_left
 
-from hdmf.utils import docval, getargs, popargs, call_docval_func, get_docval
+from hdmf.utils import docval, getargs, popargs, get_docval
 from hdmf.data_utils import DataIO
 
 from . import register_class, CORE_NAMESPACE
-from .base import TimeSeries
+from .base import TimeSeries, TimeSeriesReferenceVectorData, TimeSeriesReference
 from hdmf.common import DynamicTable
 
 
@@ -20,7 +20,8 @@ class TimeIntervals(DynamicTable):
         {'name': 'start_time', 'description': 'Start time of epoch, in seconds', 'required': True},
         {'name': 'stop_time', 'description': 'Stop time of epoch, in seconds', 'required': True},
         {'name': 'tags', 'description': 'user-defined tags', 'index': True},
-        {'name': 'timeseries', 'description': 'index into a TimeSeries object', 'index': True}
+        {'name': 'timeseries', 'description': 'index into a TimeSeries object',
+         'index': True, 'class': TimeSeriesReferenceVectorData}
     )
 
     @docval({'name': 'name', 'type': str, 'doc': 'name of this TimeIntervals'},  # required
@@ -28,7 +29,7 @@ class TimeIntervals(DynamicTable):
              'default': "experimental intervals"},
             *get_docval(DynamicTable.__init__, 'id', 'columns', 'colnames'))
     def __init__(self, **kwargs):
-        call_docval_func(super(TimeIntervals, self).__init__, kwargs)
+        super().__init__(**kwargs)
 
     @docval({'name': 'start_time', 'type': 'float', 'doc': 'Start time of epoch, in seconds'},
             {'name': 'stop_time', 'type': 'float', 'doc': 'Stop time of epoch, in seconds'},
@@ -51,10 +52,10 @@ class TimeIntervals(DynamicTable):
             tmp = list()
             for ts in timeseries:
                 idx_start, count = self.__calculate_idx_count(start_time, stop_time, ts)
-                tmp.append((idx_start, count, ts))
+                tmp.append(TimeSeriesReference(idx_start, count, ts))
             timeseries = tmp
             rkwargs['timeseries'] = timeseries
-        return super(TimeIntervals, self).add_row(**rkwargs)
+        return super().add_row(**rkwargs)
 
     def __calculate_idx_count(self, start_time, stop_time, ts_data):
         if isinstance(ts_data.timestamps, DataIO):

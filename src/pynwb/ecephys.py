@@ -1,7 +1,7 @@
 from collections.abc import Iterable
 import warnings
 
-from hdmf.utils import docval, getargs, popargs, call_docval_func, get_docval
+from hdmf.utils import docval, popargs, get_docval, popargs_to_dict
 from hdmf.data_utils import DataChunkIterator, assertEqualShape
 from hdmf.utils import get_data_shape
 
@@ -30,15 +30,13 @@ class ElectrodeGroup(NWBContainer):
             {'name': 'position', 'type': 'array_data',
              'doc': 'stereotaxic position of this electrode group (x, y, z)', 'default': None})
     def __init__(self, **kwargs):
-        call_docval_func(super(ElectrodeGroup, self).__init__, kwargs)
-        description, location, device, position = popargs('description', 'location', 'device', 'position', kwargs)
-        self.description = description
-        self.location = location
-        self.device = device
-        if position and len(position) != 3:
+        args_to_set = popargs_to_dict(('description', 'location', 'device', 'position'), kwargs)
+        super().__init__(**kwargs)
+        if args_to_set['position'] and len(args_to_set['position']) != 3:
             raise Exception('ElectrodeGroup position argument must have three elements: x, y, z, but received: %s'
-                            % position)
-        self.position = position
+                            % args_to_set['position'])
+        for key, val in args_to_set.items():
+            setattr(self, key, val)
 
 
 @register_class('ElectricalSeries', CORE_NAMESPACE)
@@ -78,25 +76,26 @@ class ElectricalSeries(TimeSeries):
             *get_docval(TimeSeries.__init__, 'resolution', 'conversion', 'timestamps', 'starting_time', 'rate',
                         'comments', 'description', 'control', 'control_description', 'offset'))
     def __init__(self, **kwargs):
-        name, electrodes, data, channel_conversion, filtering = popargs('name', 'electrodes', 'data',
-                                                                        'channel_conversion', 'filtering', kwargs)
-        data_shape = get_data_shape(data, strict_no_data_load=True)
+        args_to_set = popargs_to_dict(('electrodes', 'channel_conversion', 'filtering'), kwargs)
+
+        data_shape = get_data_shape(kwargs['data'], strict_no_data_load=True)
         if (
             data_shape is not None
             and len(data_shape) == 2
-            and data_shape[1] != len(electrodes.data)
+            and data_shape[1] != len(args_to_set['electrodes'].data)
         ):
-            if data_shape[0] == len(electrodes.data):
-                warnings.warn("The second dimension of data does not match the length of electrodes, but instead the "
-                              "first does. Data is oriented incorrectly and should be transposed.")
+            if data_shape[0] == len(args_to_set['electrodes'].data):
+                warnings.warn("%s '%s': The second dimension of data does not match the length of electrodes, "
+                              "but instead the first does. Data is oriented incorrectly and should be transposed."
+                              % (self.__class__.__name__, kwargs["name"]))
             else:
-                warnings.warn("The second dimension of data does not match the length of electrodes. Your data may be "
-                              "transposed.")
+                warnings.warn("%s '%s': The second dimension of data does not match the length of electrodes. "
+                              "Your data may be transposed." % (self.__class__.__name__, kwargs["name"]))
 
-        super(ElectricalSeries, self).__init__(name, data, 'volts', **kwargs)
-        self.electrodes = electrodes
-        self.channel_conversion = channel_conversion
-        self.filtering = filtering
+        kwargs['unit'] = 'volts'  # fixed value
+        super().__init__(**kwargs)
+        for key, val in args_to_set.items():
+            setattr(self, key, val)
 
 
 @register_class('SpikeEventSeries', CORE_NAMESPACE)
@@ -120,8 +119,8 @@ class SpikeEventSeries(ElectricalSeries):
             *get_docval(ElectricalSeries.__init__, 'resolution', 'conversion', 'comments', 'description', 'control',
                         'control_description', 'offset'))
     def __init__(self, **kwargs):
-        name, data, electrodes = popargs('name', 'data', 'electrodes', kwargs)
-        timestamps = getargs('timestamps', kwargs)
+        data = kwargs['data']
+        timestamps = kwargs['timestamps']
         if not (isinstance(data, TimeSeries) or isinstance(timestamps, TimeSeries)):
             if not (isinstance(data, DataChunkIterator) or isinstance(timestamps, DataChunkIterator)):
                 if len(data) != len(timestamps):
@@ -129,7 +128,7 @@ class SpikeEventSeries(ElectricalSeries):
             else:
                 # TODO: add check when we have DataChunkIterators
                 pass
-        super(SpikeEventSeries, self).__init__(name, data, electrodes, **kwargs)
+        super().__init__(**kwargs)
 
 
 @register_class('EventDetection', CORE_NAMESPACE)
@@ -155,14 +154,11 @@ class EventDetection(NWBDataInterface):
             {'name': 'times', 'type': ('array_data', 'data'), 'doc': 'Timestamps of events, in Seconds'},
             {'name': 'name', 'type': str, 'doc': 'the name of this container', 'default': 'EventDetection'})
     def __init__(self, **kwargs):
-        detection_method, source_electricalseries, source_idx, times = popargs(
-            'detection_method', 'source_electricalseries', 'source_idx', 'times', kwargs)
-        super(EventDetection, self).__init__(**kwargs)
-        self.detection_method = detection_method
-        self.source_electricalseries = source_electricalseries
-        self.source_idx = source_idx
-        self.times = times
-        self.unit = 'seconds'
+        args_to_set = popargs_to_dict(('detection_method', 'source_electricalseries', 'source_idx', 'times'), kwargs)
+        super().__init__(**kwargs)
+        for key, val in args_to_set.items():
+            setattr(self, key, val)
+        self.unit = 'seconds'  # fixed value
 
 
 @register_class('EventWaveform', CORE_NAMESPACE)
@@ -207,15 +203,12 @@ class Clustering(NWBDataInterface):
              'shape': (None,)},
             {'name': 'name', 'type': str, 'doc': 'the name of this container', 'default': 'Clustering'})
     def __init__(self, **kwargs):
-        import warnings
         warnings.warn("use pynwb.misc.Units or NWBFile.units instead", DeprecationWarning)
-        description, num, peak_over_rms, times = popargs(
-            'description', 'num', 'peak_over_rms', 'times', kwargs)
-        super(Clustering, self).__init__(**kwargs)
-        self.description = description
-        self.num = num
-        self.peak_over_rms = list(peak_over_rms)
-        self.times = times
+        args_to_set = popargs_to_dict(('description', 'num', 'peak_over_rms', 'times'), kwargs)
+        super().__init__(**kwargs)
+        args_to_set['peak_over_rms'] = list(args_to_set['peak_over_rms'])
+        for key, val in args_to_set.items():
+            setattr(self, key, val)
 
 
 @register_class('ClusterWaveforms', CORE_NAMESPACE)
@@ -244,15 +237,12 @@ class ClusterWaveforms(NWBDataInterface):
              'doc': 'the standard deviations of waveforms for each cluster'},
             {'name': 'name', 'type': str, 'doc': 'the name of this container', 'default': 'ClusterWaveforms'})
     def __init__(self, **kwargs):
-        import warnings
         warnings.warn("use pynwb.misc.Units or NWBFile.units instead", DeprecationWarning)
-        clustering_interface, waveform_filtering, waveform_mean, waveform_sd = popargs(
-            'clustering_interface', 'waveform_filtering', 'waveform_mean', 'waveform_sd', kwargs)
-        super(ClusterWaveforms, self).__init__(**kwargs)
-        self.clustering_interface = clustering_interface
-        self.waveform_filtering = waveform_filtering
-        self.waveform_mean = waveform_mean
-        self.waveform_sd = waveform_sd
+        args_to_set = popargs_to_dict(('clustering_interface', 'waveform_filtering',
+                                       'waveform_mean', 'waveform_sd'), kwargs)
+        super().__init__(**kwargs)
+        for key, val in args_to_set.items():
+            setattr(self, key, val)
 
 
 @register_class('LFP', CORE_NAMESPACE)
@@ -356,7 +346,7 @@ class FeatureExtraction(NWBDataInterface):
             raise ValueError(error_msg)
 
         # Initialize the object
-        super(FeatureExtraction, self).__init__(**kwargs)
+        super().__init__(**kwargs)
         self.electrodes = electrodes
         self.description = description
         self.times = list(times)
