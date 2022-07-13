@@ -41,8 +41,8 @@ class MyNWBData(NWBData):
     __nwbfields__ = ("data",)
 
     @docval(
-        {"name": "name", "type": str, "doc": "The name of this container",},
-        {"name": "data", "type": ("array_data", "data"), "doc": "any data",},
+        {"name": "name", "type": str, "doc": "The name of this container"},
+        {"name": "data", "type": ("array_data", "data"), "doc": "any data"},
     )
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
