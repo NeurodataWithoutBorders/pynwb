@@ -60,17 +60,16 @@ nwbfile
 # --------------------------------------------------
 #
 # :py:class:`~pynwb.image.OpticalSeries` is for series of images that were presented
-# to the experimental subject as stimuli.
+# to the subject as stimuli.
 # We will create an :py:class:`~pynwb.image.OpticalSeries` object with the name
 # ``"StimulusPresentation"`` representing what images were shown to the subject and at what times.
 #
 # Image data can be stored either in the HDF5 file or as an external image file.
-# For this tutorial, we will use a fake image data with shape of (200, 50, 50, 3).
-# Images may be 3D or 4D (grayscale or RBG), where the first dimension must be time (frame).
+# For this tutorial, we will use fake image data with shape of (200, 50, 50, 3).
 # The second and third dimensions represent x and y.
 # The fourth dimension represents the RGB value (length of 3) for color images.
 #
-# NWB differentiates between raw, acquired data and data that was presented as stimulus.
+# NWB differentiates between acquired data and data that was presented as stimulus.
 # We can add it to the :py:class:`~pynwb.file.NWBFile` object as stimulus data using
 # the :py:meth:`~pynwb.file.NWBFile.add_stimulus` method.
 #
