@@ -38,7 +38,7 @@ class TestNWBContainer(TestCase):
 
 class MyNWBData(NWBData):
 
-    __nwbfields__ = ("data",)
+    __nwbfields__ = ("data", )
 
     @docval(
         {"name": "name", "type": str, "doc": "The name of this container"},
@@ -55,15 +55,26 @@ class TestNWBData(TestCase):
         obj = MyNWBData("obj1", data=[[1, 2, 3], [1, 2, 3]])
         self.assertEqual(obj.name, "obj1")
 
-    def test_append(self):
+    def test_append_list(self):
 
         obj = MyNWBData("obj1", data=[[1, 2, 3], [1, 2, 3]])
         obj.append([4, 5, 6])
         np.testing.assert_array_equal(obj.data, [[1, 2, 3], [1, 2, 3], [4, 5, 6]])
 
-    def test_extend(self):
+    def test_append_ndarray(self):
+        obj = MyNWBData("obj1", data=np.array([[1, 2, 3], [1, 2, 3]]))
+        obj.append([4, 5, 6])
+        np.testing.assert_array_equal(obj.data, [[1, 2, 3], [1, 2, 3], [4, 5, 6]])
+
+    def test_extend_list(self):
 
         obj = MyNWBData("obj1", data=[[1, 2, 3], [1, 2, 3]])
+        obj.extend([[4, 5, 6]])
+        np.testing.assert_array_equal(obj.data, [[1, 2, 3], [1, 2, 3], [4, 5, 6]])
+
+    def test_extend_ndarray(self):
+
+        obj = MyNWBData("obj1", data=np.array([[1, 2, 3], [1, 2, 3]]))
         obj.extend([[4, 5, 6]])
         np.testing.assert_array_equal(obj.data, [[1, 2, 3], [1, 2, 3], [4, 5, 6]])
 
