@@ -87,8 +87,12 @@ advanced configuration enabled. You can install HDF5 with the ROS3 driver from `
 #
 #   io.read()
 #
-# The above snippet opens an arbitrary file on DANDI. You can use the ``DandiAPIClient`` to find the s3 path just as
-# above, but you will need to adjust this url to give it a prefix of "s3://dandiarchive/" as shown above.
+# The above snippet opens an arbitrary file on DANDI. You can use the ``DandiAPIClient`` to find the s3 path,
+# but you will need to adjust this url to give it a prefix of "s3://dandiarchive/" as shown above.
+#
+# The s3fs approach has the advantage of being more robust that ROS3. Sometimes s3 requests are interrupted,
+# and s3fs has internal mechanisms to retry these requests automatically, whereas ROS3 does not. However, it may not
+# be available on all platforms.
 
 
 # sphinx_gallery_thumbnail_path = 'figures/gallery_thumbnails_streaming.png'
