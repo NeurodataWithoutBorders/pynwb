@@ -23,7 +23,7 @@ from datetime import datetime
 from dateutil import tz
 
 import numpy as np
-from PIL.Image import Image
+from PIL import Image
 
 from pynwb import NWBFile
 from pynwb.base import Images
