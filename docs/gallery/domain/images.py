@@ -197,7 +197,7 @@ nwbfile.add_acquisition(images)
 
 ####################
 # Writing the imaging data to an NWB File
-# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+# ---------------------------------------
 # As demonstrated in the :ref:`basic_writing` tutorial, we will use :py:class:`~pynwb.NWBHDF5IO`
 # to write the file.
 
