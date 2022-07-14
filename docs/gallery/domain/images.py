@@ -7,9 +7,9 @@ Images
 This tutorial will demonstrate the usage of the :py:mod:`pynwb.image` module for adding
 images to an :py:class:`~pynwb.file.NWBFile`.
 
-Image data can be of individual images or of movie segments (as a movie is simply a series of images),
-about the subject, the environment, the presented stimuli, or other kind
-that relates to the experiment.
+Image data can be a collection of individual images or movie segments (as a movie is simply a series of images),
+about the subject, the environment, the presented stimuli, or other parts
+related to the experiment. This tutorial focuses in particular on the usage of:
 
 * :py:class:`~pynwb.image.OpticalSeries` for series of images that were presented as stimulus
 * :py:class:`~pynwb.image.ImageSeries`, for series of images (movie segments);
