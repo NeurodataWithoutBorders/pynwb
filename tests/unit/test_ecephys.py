@@ -133,6 +133,12 @@ class SpikeEventSeriesConstructor(TestCase):
         with self.assertRaises(TypeError):
             SpikeEventSeries(name='test_sES', data=data, electrodes=region, rate=1.)
 
+    def test_incorrect_timestamps(self):
+        table, region = self._create_table_and_region()
+        data = ((1, 1, 1), (2, 2, 2))
+        with self.assertRaisesWith(Exception, "Must provide the same number of timestamps and spike events"):
+            SpikeEventSeries(name='test_sES', data=data, electrodes=region, timestamps=[1.0, 2.0, 3.0])
+
 
 class ElectrodeGroupConstructor(TestCase):
 
