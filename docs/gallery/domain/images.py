@@ -125,8 +125,8 @@ nwbfile.add_acquisition(behavior_images)
 behavior_external_file = ImageSeries(
     name="ExternalFiles",
     description="Behavior video of animal moving in environment.",
-    unit="Frames",
-    external_file=["/path/to/image/file"],
+    unit="n.a.",
+    external_file=["/path/to/image/file.avi"],
     format="external",
     starting_frame=[0.0],
     rate=1.0,
