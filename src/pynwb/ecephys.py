@@ -33,8 +33,8 @@ class ElectrodeGroup(NWBContainer):
         args_to_set = popargs_to_dict(('description', 'location', 'device', 'position'), kwargs)
         super().__init__(**kwargs)
         if args_to_set['position'] and len(args_to_set['position']) != 3:
-            raise Exception('ElectrodeGroup position argument must have three elements: x, y, z, but received: %s'
-                            % args_to_set['position'])
+            raise ValueError('ElectrodeGroup position argument must have three elements: x, y, z, but received: %s'
+                             % args_to_set['position'])
         for key, val in args_to_set.items():
             setattr(self, key, val)
 
