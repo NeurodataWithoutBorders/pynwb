@@ -61,19 +61,27 @@ class TestNWBData(TestCase):
         obj.append([4, 5, 6])
         np.testing.assert_array_equal(obj.data, [[1, 2, 3], [1, 2, 3], [4, 5, 6]])
 
-    def test_append_ndarray(self):
+    def test_append_ndarray_2d(self):
         obj = MyNWBData("obj1", data=np.array([[1, 2, 3], [1, 2, 3]]))
         obj.append([4, 5, 6])
         np.testing.assert_array_equal(obj.data, [[1, 2, 3], [1, 2, 3], [4, 5, 6]])
 
-    def test_extend_list(self):
+        def test_append_ndarray_1d(self):
+            obj = MyNWBData("obj1", data=np.array([1, 2, 3]))
+            obj.append([4])
+            np.testing.assert_array_equal(obj.data, [1, 2, 3, 4])
 
+    def test_extend_list(self):
         obj = MyNWBData("obj1", data=[[1, 2, 3], [1, 2, 3]])
         obj.extend([[4, 5, 6]])
         np.testing.assert_array_equal(obj.data, [[1, 2, 3], [1, 2, 3], [4, 5, 6]])
 
-    def test_extend_ndarray(self):
+    def test_extend_ndarray_1d(self):
+        obj = MyNWBData("obj1", data=np.array([1, 2, 3]))
+        obj.extend([4, 5, 6])
+        np.testing.assert_array_equal(obj.data, [1, 2, 3, 4, 5, 6])
 
+    def test_extend_ndarray_2d(self):
         obj = MyNWBData("obj1", data=np.array([[1, 2, 3], [1, 2, 3]]))
         obj.extend([[4, 5, 6]])
         np.testing.assert_array_equal(obj.data, [[1, 2, 3], [1, 2, 3], [4, 5, 6]])

@@ -71,7 +71,7 @@ class NWBData(NWBMixin, Data):
         if isinstance(self.data, list):
             self.data.append(arg)
         elif isinstance(self.data, np.ndarray):
-            self.__data = np.vstack((self.__data, [arg]))
+            self.__data = np.concatenate((self.__data, [arg]))
         else:
             msg = "NWBData cannot append to object of type '%s'" % type(self.__data)
             raise ValueError(msg)
@@ -80,7 +80,7 @@ class NWBData(NWBMixin, Data):
         if isinstance(self.data, list):
             self.data.extend(arg)
         elif isinstance(self.data, np.ndarray):
-            self.__data = np.vstack((self.__data, arg))
+            self.__data = np.concatenate((self.__data, arg))
         else:
             msg = "NWBData cannot extend object of type '%s'" % type(self.__data)
             raise ValueError(msg)
