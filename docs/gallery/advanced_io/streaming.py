@@ -92,7 +92,7 @@ advanced configuration enabled. You can install HDF5 with the ROS3 driver from `
 #
 # The s3fs approach has the advantage of being more robust that ROS3. Sometimes s3 requests are interrupted,
 # and s3fs has internal mechanisms to retry these requests automatically, whereas ROS3 does not. However, it may not
-# be available on all platforms.
+# be available on all platforms. s3fs does not currently work for Windows.
 
 
 # sphinx_gallery_thumbnail_path = 'figures/gallery_thumbnails_streaming.png'
