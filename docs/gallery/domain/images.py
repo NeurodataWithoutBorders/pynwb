@@ -25,7 +25,7 @@ from dateutil import tz
 import numpy as np
 from PIL import Image
 
-from pynwb import NWBFile
+from pynwb import NWBFile, NWBHDF5IO
 from pynwb.base import Images
 from pynwb.image import RGBAImage, RGBImage, GrayscaleImage, OpticalSeries, ImageSeries
 
@@ -136,7 +136,7 @@ nwbfile.add_acquisition(behavior_images)
 #
 # :py:class:`~pynwb.image.RGBAImage` is for storing data of color image with transparency.
 # :py:attr:`~pynwb.image.RGBAImage.data` must be 3D where the first and second dimensions
-# represent x and y. The third dimension has length 4 and represents the RGBA value.,
+# represent x and y. The third dimension has length 4 and represents the RGBA value.
 #
 
 img = Image.open("docs/source/figures/logo_pynwb.png")  # an example image
@@ -154,7 +154,7 @@ rgba_logo = RGBAImage(
 #
 # :py:class:`~pynwb.image.RGBImage` is for storing data of RGB color image.
 # :py:attr:`~pynwb.image.RGBImage.data` must be 3D where the first and second dimensions
-# represent x and y. The third dimension has length 3 and represents the RGB value.,
+# represent x and y. The third dimension has length 3 and represents the RGB value.
 #
 
 rgb_logo = RGBImage(
@@ -193,22 +193,37 @@ images = Images(
     description="A collection of logo images presented to the subject.",
 )
 
-####################
-# Create a Processing Module
-# ----------------------------------
-#
-# Create a processing module called ``"images"`` for storing image data in the :py:class:`~pynwb.file.NWBFile`
-# using the :py:meth:`~pynwb.file.NWBFile.create_processing_module` method, then and add the
-# :py:class:`~pynwb.base.Images` container to the processing module.
-
-
-images_module = nwbfile.create_processing_module(
-    name="images", description="Static images presented to the subject."
-)
-
-images_module.add(images)
+nwbfile.add_acquisition(images)
 
 ####################
-# .. seealso::
-#    You can read more about the basic concepts of processing modules in the :ref:`modules_overview` tutorial.
+# Writing the imaging data to an NWB File
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+# As demonstrated in the :ref:`basic_writing` tutorial, we will use :py:class:`~pynwb.NWBHDF5IO`
+# to write the file.
+
+with NWBHDF5IO("images_tutorial.nwb", "w") as io:
+    io.write(nwbfile)
+
+####################
+# Reading and accessing the imaging data
+# --------------------------------------
 #
+# To read the NWB file, use another :py:class:`~pynwb.NWBHDF5IO` object,
+# and use the :py:meth:`~pynwb.NWBHDF5IO.read` method to retrieve an
+# :py:class:`~pynwb.file.NWBFile` object.
+#
+# We can access the imaging data added as acquisition to the NWB File by indexing ``nwbfile.acquisition``
+# with the name of the :py:class:`~pynwb.image.ImageSeries` object "ImageSeries".
+#
+# We can also access :py:class:`~pynwb.image.OpticalSeries` data that was added to the NWB File
+# as stimuli by indexing ``nwbfile.stimulus`` with the name of the :py:class:`~pynwb.image.OpticalSeries`
+# object "StimulusPresentation".
+# Data arrays are read passively from the file.
+# Accessing the ``data`` attribute of the :py:class:`~pynwb.image.OpticalSeries` object
+# does not read the data values into memory, but returns an HDF5 object that can be indexed to read data.
+# Use the ``[:]`` operator to read the entire data array into memory.
+
+with NWBHDF5IO("images_tutorial.nwb", "r") as io:
+    read_nwbfile = io.read()
+    print(read_nwbfile.acquisition["ImageSeries"])
+    print(read_nwbfile.stimulus["StimulusPresentation"].data[:])
