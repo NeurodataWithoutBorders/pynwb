@@ -146,7 +146,7 @@ position = Position(spatial_series=position_spatial_series)
 # -----------------------------------
 #
 # Create a processing module called ``"behavior"`` for storing behavioral data in the :py:class:`~pynwb.file.NWBFile`
-# using the :py:meth:`~pynwb.file.NWBFile.create_processing_module` method, then add the
+# using the :py:meth:`~pynwb.file.NWBFile.create_processing_module` method, and then add the
 # :py:class:`~pynwb.behavior.Position` object to the processing module.
 
 
