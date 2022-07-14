@@ -73,7 +73,7 @@ nwbfile
 # the :py:meth:`~pynwb.file.NWBFile.add_stimulus` method.
 #
 
-image_data = np.random.uniform(low=0, high=255, size=(200, 50, 50, 3)).astype(np.uint8)
+image_data = np.random.randint(low=0, high=255, size=(200, 50, 50, 3), dtype=np.uint8)
 optical_series = OpticalSeries(
     name="StimulusPresentation",  # required
     distance=0.7,  # required
@@ -102,15 +102,13 @@ nwbfile.add_stimulus(timeseries=optical_series)
 # the :py:meth:`~pynwb.file.NWBFile.add_acquisition` method.
 #
 
-image_data = np.random.uniform(low=0, high=255, size=(200, 50, 50, 3)).astype(np.uint8)
-
+image_data = np.random.randint(low=0, high=255, size=(200, 50, 50, 3), dtype=np.uint8)
 behavior_images = ImageSeries(
     name="ImageSeries",
     data=image_data,
     description="Image data of an animal moving in environment.",
-    unit="pixels",
+    unit="n.a.",
     format="raw",
-    starting_frame=[0.0],
     rate=1.0,
 )
 
