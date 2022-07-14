@@ -11,10 +11,9 @@ Image data can be of individual images or of movie segments (as a movie is simpl
 about the subject, the environment, the presented stimuli, or other kind
 that relates to the experiment.
 
-* :py:class:`~pynwb.image.GrayscaleImage`, :py:class:`~pynwb.image.RGBImage`, :py:class:`~pynwb.image.RGBAImage`, for static images;
-* :py:class:`~pynwb.image.ImageSeries`, :py:class:`~pynwb.image.ImageMaskSeries` for series of images (movie segments);
 * :py:class:`~pynwb.image.OpticalSeries` for series of images that were presented as stimulus
-* :py:class:`~pynwb.image.IndexSeries` for storing indices to image frames stored in an :py:class:`~pynwb.image.ImageSeries`
+* :py:class:`~pynwb.image.ImageSeries`, for series of images (movie segments);
+* :py:class:`~pynwb.image.GrayscaleImage`, :py:class:`~pynwb.image.RGBImage`, :py:class:`~pynwb.image.RGBAImage`, for static images;
 
 The following examples will reference variables that may not be defined within the block they are used in. For
 clarity, we define them here:
@@ -118,6 +117,24 @@ behavior_images = ImageSeries(
 nwbfile.add_acquisition(behavior_images)
 
 ####################
+# External files (e.g. video files of the behaving animal) can be added to the :py:class:`~pynwb.file.NWBFile` by creating
+# an :py:class:`~pynwb.image.ImageSeries` object using the ``external_file`` attribute that specifies the
+# path to the external file(s) on disk. The file(s) path must be relative to the path of the NWB file.
+# Either ``external_file`` or ``data`` must be specified, but not both.
+
+behavior_external_file = ImageSeries(
+    name="ExternalFiles",
+    description="Behavior video of animal moving in environment.",
+    unit="pixels",
+    external_file=["/path/to/image/file"],
+    format="external",
+    starting_frame=[0.0],
+    rate=1.0,
+)
+
+nwbfile.add_acquisition(behavior_external_file)
+
+####################
 # Static images
 # -------------
 #
@@ -196,7 +213,7 @@ images = Images(
 nwbfile.add_acquisition(images)
 
 ####################
-# Writing the imaging data to an NWB File
+# Writing the images to an NWB File
 # ---------------------------------------
 # As demonstrated in the :ref:`basic_writing` tutorial, we will use :py:class:`~pynwb.NWBHDF5IO`
 # to write the file.
@@ -205,14 +222,14 @@ with NWBHDF5IO("images_tutorial.nwb", "w") as io:
     io.write(nwbfile)
 
 ####################
-# Reading and accessing the imaging data
-# --------------------------------------
+# Reading and accessing data
+# --------------------------
 #
 # To read the NWB file, use another :py:class:`~pynwb.NWBHDF5IO` object,
 # and use the :py:meth:`~pynwb.NWBHDF5IO.read` method to retrieve an
 # :py:class:`~pynwb.file.NWBFile` object.
 #
-# We can access the imaging data added as acquisition to the NWB File by indexing ``nwbfile.acquisition``
+# We can access the data added as acquisition to the NWB File by indexing ``nwbfile.acquisition``
 # with the name of the :py:class:`~pynwb.image.ImageSeries` object "ImageSeries".
 #
 # We can also access :py:class:`~pynwb.image.OpticalSeries` data that was added to the NWB File
