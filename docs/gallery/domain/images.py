@@ -140,6 +140,11 @@ behavior_external_file = ImageSeries(
 nwbfile.add_acquisition(behavior_external_file)
 
 ####################
+# .. note::
+#          See the `External Links in NWB and DANDI <https://www.dandiarchive.org/2022/03/03/external-links-organize.html>`_ 
+#          guidelines of the DANDI data archive for best practices on how to organize 
+#          external files, e.g., movies and images. 
+#
 # Static images
 # -------------
 #
