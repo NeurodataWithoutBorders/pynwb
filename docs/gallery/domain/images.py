@@ -30,7 +30,6 @@ from pynwb.image import RGBAImage, RGBImage, GrayscaleImage, OpticalSeries, Imag
 
 # Define file paths used in the tutorial
 import os
-
 nwbfile_path = os.path.abspath("images_tutorial.nwb")
 moviefiles_path = [
     os.path.abspath("image/file_1.tiff"),
@@ -153,12 +152,6 @@ behavior_external_file = ImageSeries(
 )
 
 nwbfile.add_acquisition(behavior_external_file)
-
-####################
-# .. seealso::
-#     You can learn more about best practices for storing external files alongside NWB files
-#     and how to updaled to :dandi:`DANDI <>` :dandi:`here </2022/03/03/external-links-organize.html>`.
-#
 
 ####################
 # Static images
