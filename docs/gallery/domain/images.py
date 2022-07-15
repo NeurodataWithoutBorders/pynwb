@@ -28,6 +28,11 @@ from pynwb import NWBFile, NWBHDF5IO
 from pynwb.base import Images
 from pynwb.image import RGBAImage, RGBImage, GrayscaleImage, OpticalSeries, ImageSeries
 
+# Define file paths used in the tutorial
+import os
+nwbfile_path = os.path.abspath("images_tutorial.nwb")
+moviefile_path = os.path.abspath("image/file.avi")
+
 ####################
 # Create an NWB File
 # ------------------
@@ -58,13 +63,14 @@ nwbfile
 # OpticalSeries: Storing series of images as stimuli
 # --------------------------------------------------
 #
-# :py:class:`~pynwb.image.OpticalSeries` is for series of images that were presented
+# :py:class:`~pynwb.image.OpticalSeries` is for time series of images that were presented
 # to the subject as stimuli.
 # We will create an :py:class:`~pynwb.image.OpticalSeries` object with the name
 # ``"StimulusPresentation"`` representing what images were shown to the subject and at what times.
 #
 # Image data can be stored either in the HDF5 file or as an external image file.
-# For this tutorial, we will use fake image data with shape of (200, 50, 50, 3).
+# For this tutorial, we will use fake image data with shape of ``('time', 'x', 'y', 'RGB') = (200, 50, 50, 3)``.
+# As in all :py:class:`~pynwb.base.TimeSeries`, the first dimension is time.
 # The second and third dimensions represent x and y.
 # The fourth dimension represents the RGB value (length of 3) for color images.
 #
@@ -94,7 +100,7 @@ nwbfile.add_stimulus(timeseries=optical_series)
 # ImageSeries: Storing series of images as acquisition
 # ----------------------------------------------------
 #
-# :py:class:`~pynwb.image.ImageSeries` is a general container for series of images acquired during
+# :py:class:`~pynwb.image.ImageSeries` is a general container for time series of images acquired during
 # the experiment. Image data can be stored either in the HDF5 file or as an external image file.
 # When color images are stored in the HDF5 file the color channel order is expected to be RGB.
 #
@@ -124,10 +130,11 @@ behavior_external_file = ImageSeries(
     name="ExternalFiles",
     description="Behavior video of animal moving in environment.",
     unit="n.a.",
-    external_file=["/path/to/image/file.avi"],
+    external_file=[os.path.relpath(nwbfile_path, moviefile_path)],
     format="external",
-    starting_frame=[0.0],
+    starting_frame=[0],
     rate=1.0,
+    starting_time=0.0,
 )
 
 nwbfile.add_acquisition(behavior_external_file)
@@ -216,7 +223,7 @@ nwbfile.add_acquisition(images)
 # As demonstrated in the :ref:`basic_writing` tutorial, we will use :py:class:`~pynwb.NWBHDF5IO`
 # to write the file.
 
-with NWBHDF5IO("images_tutorial.nwb", "w") as io:
+with NWBHDF5IO(nwbfile_path, "w") as io:
     io.write(nwbfile)
 
 ####################
@@ -238,7 +245,7 @@ with NWBHDF5IO("images_tutorial.nwb", "w") as io:
 # does not read the data values into memory, but returns an HDF5 object that can be indexed to read data.
 # Use the ``[:]`` operator to read the entire data array into memory.
 
-with NWBHDF5IO("images_tutorial.nwb", "r") as io:
+with NWBHDF5IO(nwbfile_path, "r") as io:
     read_nwbfile = io.read()
     print(read_nwbfile.acquisition["ImageSeries"])
     print(read_nwbfile.stimulus["StimulusPresentation"].data[:])
