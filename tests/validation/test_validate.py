@@ -14,6 +14,8 @@ class TestValidateScript(TestCase):
     def test_validate_file_no_cache(self):
         """Test that validating a file with no cached spec against the core namespace succeeds."""
         print(subprocess.run("pwd"))
+        print(subprocess.run("ls"))
+        print(subprocess.run("ls tests"))
         print(subprocess.run("ls tests/back_compat"))
 
         result = subprocess.run("python -m pynwb.validate tests/back_compat/1.0.2_nwbfile.nwb",
