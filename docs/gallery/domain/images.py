@@ -30,8 +30,13 @@ from pynwb.image import RGBAImage, RGBImage, GrayscaleImage, OpticalSeries, Imag
 
 # Define file paths used in the tutorial
 import os
+
 nwbfile_path = os.path.abspath("images_tutorial.nwb")
-moviefile_path = os.path.abspath("image/file.avi")
+moviefiles_path = [
+    os.path.abspath("image/file_1.tiff"),
+    os.path.abspath("image/file_2.tiff"),
+    os.path.abspath("image/file_3.tiff"),
+]
 
 ####################
 # Create an NWB File
@@ -116,28 +121,44 @@ behavior_images = ImageSeries(
     unit="n.a.",
     format="raw",
     rate=1.0,
+    starting_time=0.0,
 )
 
 nwbfile.add_acquisition(behavior_images)
 
 ####################
+# External Files
+# ^^^^^^^^^^^^^^
+#
 # External files (e.g. video files of the behaving animal) can be added to the :py:class:`~pynwb.file.NWBFile` by creating
 # an :py:class:`~pynwb.image.ImageSeries` object using the ``external_file`` attribute that specifies the
 # path to the external file(s) on disk. The file(s) path must be relative to the path of the NWB file.
 # Either ``external_file`` or ``data`` must be specified, but not both.
+#
+# If the sampling rate is constant, use ``rate`` and ``strating_time`` to specify time.
+# For irregularly sampled recordings, use ``timestamps`` to specify time for each sample.
 
+external_file = [
+    os.path.relpath(movie_path, nwbfile_path) for movie_path in moviefiles_path
+]
+timestamps = [0.0, 0.04, 0.07, 0.1, 0.14, 0.16, 0.21]
 behavior_external_file = ImageSeries(
     name="ExternalFiles",
     description="Behavior video of animal moving in environment.",
     unit="n.a.",
-    external_file=[os.path.relpath(nwbfile_path, moviefile_path)],
+    external_file=external_file,
     format="external",
     starting_frame=[0],
-    rate=1.0,
-    starting_time=0.0,
+    timestamps=timestamps,
 )
 
 nwbfile.add_acquisition(behavior_external_file)
+
+####################
+# .. seealso::
+#     You can learn more about best practices for storing external files alongside NWB files
+#     and how to updaled to :dandi:`DANDI <>` :dandi:`here </2022/03/03/external-links-organize.html>`.
+#
 
 ####################
 # Static images
