@@ -70,6 +70,8 @@ jobs:
       - name: Run integration tests and generate coverage report
         run: |
           python -m coverage run test.py --integration
+          # validation CLI tests generate separate .coverage files that need to be merged
+          python -m coverage combine
           python -m coverage xml  # codecov uploader requires xml format
           python -m coverage report -m
 
