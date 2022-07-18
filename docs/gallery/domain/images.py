@@ -135,11 +135,12 @@ nwbfile.add_acquisition(behavior_images)
 # Either ``external_file`` or ``data`` must be specified, but not both.
 #
 # If the sampling rate is constant, use ``rate`` and ``strating_time`` to specify time.
-# For irregularly sampled recordings, use ``timestamps`` to specify time for each sample.
+# For irregularly sampled recordings, use ``timestamps`` to specify time for each sample image.
 
 external_file = [
     os.path.relpath(movie_path, nwbfile_path) for movie_path in moviefiles_path
 ]
+# We have 3 movie files each containing multiple frames. We here need to specify the timestamp for each frame. 
 timestamps = [0.0, 0.04, 0.07, 0.1, 0.14, 0.16, 0.21]
 behavior_external_file = ImageSeries(
     name="ExternalFiles",
