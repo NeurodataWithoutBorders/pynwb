@@ -5,6 +5,7 @@
 ## Documentation and tutorial enhancements:
 - Support explicit ordering of sphinx gallery tutorials in the docs. @oruebel (#1504), @bdichter (#1495)
 - Add developer guide on how to create a new tutorial. @oruebel (#1504) 
+- Add images tutorial. @weiglszonja (#1470)
 
 ## PyNWB 2.1.0 (July 6, 2022)
 
