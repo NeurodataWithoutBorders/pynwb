@@ -34,7 +34,7 @@ Build Status
      :target: https://circleci.com/gh/conda-forge/pynwb-feedstocks
 
 
-Overall Health
+Code Coverage
 ==============
 
 .. image:: https://github.com/NeurodataWithoutBorders/pynwb/workflows/Run%20coverage/badge.svg
@@ -54,6 +54,9 @@ Integration test coverage
 
 .. image:: https://codecov.io/gh/NeurodataWithoutBorders/pynwb/branch/dev/graph/badge.svg?flag=integration
     :target: https://codecov.io/gh/NeurodataWithoutBorders/pynwb
+
+Overall Health
+==============
 
 .. image:: https://requires.io/github/NeurodataWithoutBorders/pynwb/requirements.svg?branch=dev
      :target: https://requires.io/github/NeurodataWithoutBorders/pynwb/requirements/?branch=dev
