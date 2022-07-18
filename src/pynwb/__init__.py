@@ -186,16 +186,7 @@ def get_class(**kwargs):
     return __TYPE_MAP.get_dt_container_cls(neurodata_type, namespace)
 
 
-@docval({'name': 'io', 'type': HDMFIO, 'doc': 'the HDMFIO object to read from'},
-        {'name': 'namespace', 'type': str, 'doc': 'the namespace to validate against', 'default': CORE_NAMESPACE},
-        returns="errors in the file", rtype=list,
-        is_method=False)
-def validate(**kwargs):
-    """Validate an NWB file against a namespace"""
-    io, namespace = getargs('io', 'namespace', kwargs)
-    builder = io.read_builder()
-    validator = ValidatorMap(io.manager.namespace_catalog.get_namespace(name=namespace))
-    return validator.validate(builder)
+from .validation import validate  # keeping here as placeholder for import order
 
 
 class NWBHDF5IO(_HDF5IO):
