@@ -7,6 +7,9 @@
 - Add developer guide on how to create a new tutorial. @oruebel (#1504) 
 - Add images tutorial. @weiglszonja (#1470)
 
+## Minor improvements
+- Update coverage workflow, report separate unit vs integration coverage. @rly (#1509)
+
 ## PyNWB 2.1.0 (July 6, 2022)
 
 ### Breaking changes:
