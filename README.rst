@@ -41,14 +41,17 @@ Overall Health
     :target: https://github.com/NeurodataWithoutBorders/pynwb/actions?query=workflow%3A%22Run+coverage%22
 
 Overall test coverage
+
 .. image:: https://codecov.io/gh/NeurodataWithoutBorders/pynwb/branch/dev/graph/badge.svg
     :target: https://codecov.io/gh/NeurodataWithoutBorders/pynwb
 
 Unit test coverage
+
 .. image:: https://codecov.io/gh/NeurodataWithoutBorders/pynwb/branch/dev/graph/badge.svg?flag=unit
     :target: https://codecov.io/gh/NeurodataWithoutBorders/pynwb
 
 Integration test coverage
+
 .. image:: https://codecov.io/gh/NeurodataWithoutBorders/pynwb/branch/dev/graph/badge.svg?flag=integration
     :target: https://codecov.io/gh/NeurodataWithoutBorders/pynwb
 
