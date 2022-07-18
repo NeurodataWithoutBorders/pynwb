@@ -130,12 +130,18 @@ nwbfile.add_acquisition(behavior_images)
 # ^^^^^^^^^^^^^^
 #
 # External files (e.g. video files of the behaving animal) can be added to the :py:class:`~pynwb.file.NWBFile` by creating
-# an :py:class:`~pynwb.image.ImageSeries` object using the ``external_file`` attribute that specifies the
+# an :py:class:`~pynwb.image.ImageSeries` object using the :py:attr:`~pynwb.image.ImageSeries.external_file` attribute that specifies the
 # path to the external file(s) on disk. The file(s) path must be relative to the path of the NWB file.
 # Either ``external_file`` or ``data`` must be specified, but not both.
 #
-# If the sampling rate is constant, use ``rate`` and ``strating_time`` to specify time.
-# For irregularly sampled recordings, use ``timestamps`` to specify time for each sample image.
+# If the sampling rate is constant, use :py:attr:`~pynwb.base.TimeSeries.rate` and :py:attr:`~pynwb.base.TimeSeries.starting_time` to specify time.
+# For irregularly sampled recordings, use :py:attr:`~pynwb.base.TimeSeries.timestamps` to specify time for each sample image.
+#
+# Each external image may contain one or more consecutive frames of the full :py:class:`~pynwb.image.ImageSeries`.
+# The :py:attr:`~pynwb.image.ImageSeries.starting_frame` attribute serves as an index to indicate which frame
+# each file contains.
+# For example, if the ``external_file`` dataset has three paths to files and the first and the second file have 2 frames,
+# and the third file has 3 frames, then this attribute will have values `[0, 2, 4]`.
 
 external_file = [
     os.path.relpath(movie_path, nwbfile_path) for movie_path in moviefiles_path
@@ -148,7 +154,7 @@ behavior_external_file = ImageSeries(
     unit="n.a.",
     external_file=external_file,
     format="external",
-    starting_frame=[0],
+    starting_frame=[0, 2, 4],
     timestamps=timestamps,
 )
 
