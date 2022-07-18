@@ -18,6 +18,7 @@ related to the experiment. This tutorial focuses in particular on the usage of:
 The following examples will reference variables that may not be defined within the block they are used in. For
 clarity, we define them here:
 """
+# sphinx_gallery_thumbnail_path = 'figures/gallery_thumbnails_image_data.png'
 from datetime import datetime
 from dateutil import tz
 
