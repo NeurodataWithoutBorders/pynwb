@@ -1,8 +1,8 @@
 """
 .. _images:
 
-Images
-==================================
+Storing Image Data in NWB
+==========================
 
 This tutorial will demonstrate the usage of the :py:mod:`pynwb.image` module for adding
 images to an :py:class:`~pynwb.file.NWBFile`.
