@@ -74,7 +74,8 @@ class ImageSeries(TimeSeries):
         if args_to_set['external_file'] is not None:
             args_to_set['starting_frame'] = [0] if len(args_to_set['external_file']) == 1 else args_to_set['starting_frame']
         if get_data_shape(args_to_set['external_file']) != get_data_shape(args_to_set['starting_frame']):
-            raise ValueError("%s '%s': The number of frame indices in 'starting_frame' must have the same length as 'external_file'."
+            warnings.warn(
+                "%s '%s': The number of frame indices in 'starting_frame' should have the same length as 'external_file'."
                              % (self.__class__.__name__, name))
         # data and unit are required in TimeSeries, but allowed to be None here, so handle this specially
         if data is None:
