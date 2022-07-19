@@ -2,7 +2,14 @@ import warnings
 import numpy as np
 from collections.abc import Iterable
 
-from hdmf.utils import docval, getargs, popargs, popargs_to_dict, get_docval
+from hdmf.utils import (
+    docval,
+    getargs,
+    popargs,
+    popargs_to_dict,
+    get_docval,
+    get_data_shape,
+)
 
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries, Image, Images
@@ -64,7 +71,11 @@ class ImageSeries(TimeSeries):
         if args_to_set['external_file'] is None and data is None:
             raise ValueError("Must supply either external_file or data to %s '%s'."
                              % (self.__class__.__name__, name))
-
+        if args_to_set['external_file'] is not None:
+            args_to_set['starting_frame'] = [0] if len(args_to_set['external_file']) == 1 else args_to_set['starting_frame']
+        if get_data_shape(args_to_set['external_file']) != get_data_shape(args_to_set['starting_frame']):
+            raise ValueError("%s '%s': The number of frame indices in 'starting_frame' must have the same length as 'external_file'."
+                             % (self.__class__.__name__, name))
         # data and unit are required in TimeSeries, but allowed to be None here, so handle this specially
         if data is None:
             kwargs['data'] = ImageSeries.DEFAULT_DATA
