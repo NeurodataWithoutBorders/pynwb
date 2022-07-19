@@ -76,11 +76,16 @@ class CustomSphinxGallerySectionSortKey(ExampleTitleSortKey):
     GALLERY_ORDER = {
         'general': ['file.py'],
         # Sort domain-specific tutorials based on domain to group tutorials belonging to the same domain
-        'domain': ['ecephys.py',
-                   'ophys.py',
-                   'plot_icephys.py', 'plot_icephys_pandas.py', 'icephys.py',
-                   'plot_behavior.py', 'images.py',
-                   'brain_observatory.py'],
+        'domain': [
+            "ecephys.py",
+            "ophys.py",
+            "plot_icephys.py",
+            "plot_icephys_pandas.py",
+            "icephys.py",
+            "plot_behavior.py",
+            "images.py",
+            "brain_observatory.py"
+        ],
         'advanced_io': []
     }
 
