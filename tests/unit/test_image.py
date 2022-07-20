@@ -117,21 +117,24 @@ class ImageSeriesConstructor(TestCase):
             )
             self.assertEqual(w, [])
 
-    def test_external_files_no_starting_frame(self):
+    def test_external_files_starting_frame_warning(self):
         """Test that a warning is raised when the length of starting_frame
          is not the same as the length of external_file."""
-        msg = "ImageSeries 'test_iS': The number of frame indices in 'starting_frame' must have the same length as 'external_file'."
-        with self.assertWarnsWith(ValueError, msg):
-            ImageSeries(
-                name='test_iS',
-                external_file=['external_file', 'external_file2'],
-                format='external',
-                unit='n.a.',
-                starting_frame=None,
-                rate=0.2,
-            )
+        for starting_frame in [None, [0], [1, 2, 3]]:
+            with self.subTest():
+                msg = "ImageSeries 'test_iS': The number of frame indices in " \
+                      "'starting_frame' should have the same length as 'external_file'."
+                with self.assertWarnsWith(UserWarning, msg):
+                    ImageSeries(
+                        name='test_iS',
+                        external_file=['external_file', 'external_file2'],
+                        format='external',
+                        unit='n.a.',
+                        starting_frame=starting_frame,
+                        rate=0.2,
+                    )
 
-    def test_external_files_no_starting_frame(self):
+    def test_external_file_default_starting_frame(self):
         """Test that starting_frame is set to [0] if not provided, when external_file is has length 1."""
         iS = ImageSeries(
             name='test_iS',
@@ -142,7 +145,8 @@ class ImageSeriesConstructor(TestCase):
             rate=0.2,
         )
 
-        assert iS.starting_frame == [0]
+        self.assertEqual(iS.starting_frame, [0])
+
 
 class IndexSeriesConstructor(TestCase):
 
