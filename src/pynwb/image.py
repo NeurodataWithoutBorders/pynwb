@@ -84,8 +84,8 @@ class ImageSeries(TimeSeries):
                 args_to_set['starting_frame'] = [0]
         if external_file_shape != starting_frame_shape:
             warnings.warn(
-                "%s '%s': The number of frame indices in 'starting_frame' should have the same length as 'external_file'."
-                % (self.__class__.__name__, name)
+                "%s '%s': The number of frame indices in 'starting_frame' should have the same length "
+                "as 'external_file'." % (self.__class__.__name__, name)
             )
 
         super().__init__(**kwargs)
