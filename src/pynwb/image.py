@@ -82,7 +82,7 @@ class ImageSeries(TimeSeries):
         if external_file_shape is not None and starting_frame_shape is None:
             if len(external_file_shape) == 1:
                 args_to_set['starting_frame'] = [0]
-        if external_file_shape != starting_frame_shape:
+        if external_file_shape != get_data_shape(args_to_set['starting_frame']):
             warnings.warn(
                 "%s '%s': The number of frame indices in 'starting_frame' should have the same length "
                 "as 'external_file'." % (self.__class__.__name__, name)

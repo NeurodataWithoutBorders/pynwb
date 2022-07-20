@@ -5,7 +5,15 @@ import numpy as np
 from pynwb import TimeSeries
 from pynwb.base import Image, Images, ImageReferences
 from pynwb.device import Device
-from pynwb.image import ImageSeries, IndexSeries, ImageMaskSeries, OpticalSeries, GrayscaleImage, RGBImage, RGBAImage
+from pynwb.image import (
+    ImageSeries,
+    IndexSeries,
+    ImageMaskSeries,
+    OpticalSeries,
+    GrayscaleImage,
+    RGBImage,
+    RGBAImage,
+)
 from pynwb.testing import TestCase
 
 
@@ -119,32 +127,35 @@ class ImageSeriesConstructor(TestCase):
 
     def test_external_files_starting_frame_warning(self):
         """Test that a warning is raised when the length of starting_frame
-         is not the same as the length of external_file."""
+        is not the same as the length of external_file."""
         for starting_frame in [None, [0], [1, 2, 3]]:
             with self.subTest():
-                msg = "ImageSeries 'test_iS': The number of frame indices in " \
-                      "'starting_frame' should have the same length as 'external_file'."
+                msg = (
+                    "ImageSeries 'test_iS': The number of frame indices in "
+                    "'starting_frame' should have the same length as 'external_file'."
+                )
                 with self.assertWarnsWith(UserWarning, msg):
                     ImageSeries(
-                        name='test_iS',
-                        external_file=['external_file', 'external_file2'],
-                        format='external',
-                        unit='n.a.',
+                        name="test_iS",
+                        external_file=["external_file", "external_file2"],
+                        format="external",
+                        unit="n.a.",
                         starting_frame=starting_frame,
                         rate=0.2,
                     )
 
     def test_external_file_default_starting_frame(self):
         """Test that starting_frame is set to [0] if not provided, when external_file is has length 1."""
-        iS = ImageSeries(
-            name='test_iS',
-            external_file=['external_file'],
-            format='external',
-            unit='n.a.',
-            starting_frame=None,
-            rate=0.2,
-        )
-
+        with warnings.catch_warnings(record=True) as w:
+            iS = ImageSeries(
+                name="test_iS",
+                external_file=["external_file"],
+                format="external",
+                unit="n.a.",
+                starting_frame=None,
+                rate=0.2,
+            )
+            self.assertEqual(w, [])
         self.assertEqual(iS.starting_frame, [0])
 
 
