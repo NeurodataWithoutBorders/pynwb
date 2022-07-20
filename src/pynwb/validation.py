@@ -6,9 +6,13 @@ from argparse import ArgumentParser
 from hdmf.spec import NamespaceCatalog
 from hdmf.build import BuildManager
 from hdmf.build import TypeMap as TypeMap
+from hdmf.utils import docval, getargs
+from hdmf.backends.io import HDMFIO
+from hdmf.validate import ValidatorMap
 
-from pynwb import validate, CORE_NAMESPACE, NWBHDF5IO
-from pynwb.spec import NWBDatasetSpec, NWBGroupSpec, NWBNamespace
+from .globals import CORE_NAMESPACE
+from .spec import NWBDatasetSpec, NWBGroupSpec, NWBNamespace
+from .tools import NWBHDF5IO
 
 
 def _print_errors(validation_errors):
@@ -25,6 +29,18 @@ def _validate_helper(**kwargs):
     _print_errors(errors)
 
     return (errors is not None and len(errors) > 0)
+
+
+@docval({'name': 'io', 'type': HDMFIO, 'doc': 'the HDMFIO object to read from'},
+        {'name': 'namespace', 'type': str, 'doc': 'the namespace to validate against', 'default': CORE_NAMESPACE},
+        returns="errors in the file", rtype=list,
+        is_method=False)
+def validate(**kwargs):
+    """Validate an NWB file against a namespace"""
+    io, namespace = getargs('io', 'namespace', kwargs)
+    builder = io.read_builder()
+    validator = ValidatorMap(io.manager.namespace_catalog.get_namespace(name=namespace))
+    return validator.validate(builder)
 
 
 def main():  # noqa: C901
