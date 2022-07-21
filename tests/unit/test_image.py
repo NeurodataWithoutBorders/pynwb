@@ -171,6 +171,35 @@ class ImageSeriesConstructor(TestCase):
             self.assertEqual(w, [])
         self.assertEqual(iS.starting_frame, [0])
 
+    def test_external_file_with_incorrect_format(self):
+        """Test that ValueError is raised when external_file is provided but
+        the format is not 'external'."""
+        msg = (
+            "ImageSeries 'test_iS': Format must be 'external' when external_file is specified."
+        )
+        with self.assertRaisesWith(ValueError, msg):
+            ImageSeries(
+                name="test_iS",
+                external_file=["external_file"],
+                format="raw",
+                unit="n.a.",
+                starting_frame=[0],
+                rate=0.2,
+            )
+
+    def test_external_file_default_format(self):
+        """Test that format is set to 'external' if not provided, when external_file is provided."""
+        with warnings.catch_warnings(record=True) as w:
+            iS = ImageSeries(
+                name="test_iS",
+                external_file=["external_file", "external_file2"],
+                unit="n.a.",
+                starting_frame=[0, 10],
+                rate=0.2,
+            )
+            self.assertEqual(w, [])
+        self.assertEqual(iS.format, "external")
+
 
 class IndexSeriesConstructor(TestCase):
 
@@ -234,7 +263,7 @@ class ImageMaskSeriesConstructor(TestCase):
 
     def test_init(self):
         iS = ImageSeries(name='test_iS', data=np.ones((2, 2, 2)), unit='unit',
-                         external_file=['external_file'], starting_frame=[0], format='tiff',
+                         external_file=['external_file'], starting_frame=[0], format='external',
                          timestamps=[1., .2])
 
         ims = ImageMaskSeries(name='test_ims', data=np.ones((2, 2, 2)), unit='unit',

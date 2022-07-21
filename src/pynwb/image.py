@@ -79,6 +79,8 @@ class ImageSeries(TimeSeries):
 
         if args_to_set['external_file'] is not None and args_to_set['starting_frame'] is None:
             args_to_set['starting_frame'] = [0] if len(args_to_set['external_file']) == 1 else None
+        if args_to_set['external_file'] is not None and args_to_set['format'] is None:
+            args_to_set['format'] = 'external'
 
         super().__init__(**kwargs)
 
@@ -89,6 +91,11 @@ class ImageSeries(TimeSeries):
             raise ValueError(
                 "%s '%s': The number of frame indices in 'starting_frame' should have the same length "
                 "as 'external_file'." % (self.__class__.__name__, name)
+            )
+
+        if not self._check_external_file_format():
+            raise ValueError(
+                "%s '%s': Format must be 'external' when external_file is specified." % (self.__class__.__name__, name)
             )
 
         if not self._check_image_series_dimension():
@@ -104,6 +111,15 @@ class ImageSeries(TimeSeries):
         external_file_shape = get_data_shape(self.external_file)
         starting_frame_shape = get_data_shape(self.starting_frame)
         return external_file_shape == starting_frame_shape
+
+    def _check_external_file_format(self):
+        """
+        Check that format is 'external' when external_file is specified.
+        """
+        if self.external_file is None:
+            return True
+
+        return self.format == "external"
 
     def _check_time_series_dimension(self):
         """Override _check_time_series_dimension to do nothing.
