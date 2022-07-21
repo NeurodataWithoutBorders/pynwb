@@ -175,6 +175,7 @@ io4 = NWBHDF5IO(filename4, 'w')
 io4.write(nwbfile4,
           link_data=True)     # <-------- Specify default behavior to link rather than copy data
 io4.close()
+io1.close()
 
 #####################
 # .. note::
@@ -240,6 +241,8 @@ nwbfile3.add_acquisition(timeseries_2)             # <--------
 io3 = NWBHDF5IO(filename3, 'w', manager=manager)
 io3.write(nwbfile3)
 io3.close()
+io1.close()
+io2.close()
 
 
 ####################

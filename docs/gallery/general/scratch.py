@@ -171,3 +171,8 @@ fft_in = nwb_scratch_in.get_scratch('dft_filtered')
 #    .. note::
 #       We recommend writing scratch data into copies of files only. This will make it easier to
 #       isolate and discard scratch data and avoids updating files that store precious data.
+
+# close the IO objects
+raw_io.close()
+proc_io.close()
+scratch_io.close()
