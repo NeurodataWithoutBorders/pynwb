@@ -77,27 +77,33 @@ class ImageSeries(TimeSeries):
         if unit is None:
             kwargs['unit'] = ImageSeries.DEFAULT_UNIT
 
-        external_file_shape = get_data_shape(args_to_set['external_file'])
-        starting_frame_shape = get_data_shape(args_to_set['starting_frame'])
-        if external_file_shape is not None and starting_frame_shape is None:
-            if len(external_file_shape) == 1:
-                args_to_set['starting_frame'] = [0]
-        if external_file_shape != get_data_shape(args_to_set['starting_frame']):
-            raise ValueError(
-                "%s '%s': The number of frame indices in 'starting_frame' should have the same length "
-                "as 'external_file'." % (self.__class__.__name__, name)
-            )
+        if args_to_set['external_file'] is not None and args_to_set['starting_frame'] is None:
+            args_to_set['starting_frame'] = [0] if len(args_to_set['external_file']) == 1 else None
 
         super().__init__(**kwargs)
 
         for key, val in args_to_set.items():
             setattr(self, key, val)
 
+        if not self._check_external_file_starting_frame_length():
+            raise ValueError(
+                "%s '%s': The number of frame indices in 'starting_frame' should have the same length "
+                "as 'external_file'." % (self.__class__.__name__, name)
+            )
+
         if not self._check_image_series_dimension():
             warnings.warn(
                 "%s '%s': Length of data does not match length of timestamps. Your data may be transposed. "
                 "Time should be on the 0th dimension" % (self.__class__.__name__, self.name)
             )
+
+    def _check_external_file_starting_frame_length(self):
+        """
+        Check that the number of frame indices in 'starting_frame' matches the number of files in 'external_file'.
+        """
+        external_file_shape = get_data_shape(self.external_file)
+        starting_frame_shape = get_data_shape(self.starting_frame)
+        return external_file_shape == starting_frame_shape
 
     def _check_time_series_dimension(self):
         """Override _check_time_series_dimension to do nothing.
