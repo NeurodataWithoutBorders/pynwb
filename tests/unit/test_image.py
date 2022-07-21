@@ -134,7 +134,7 @@ class ImageSeriesConstructor(TestCase):
                     "ImageSeries 'test_iS': The number of frame indices in "
                     "'starting_frame' should have the same length as 'external_file'."
                 )
-                with self.assertWarnsWith(UserWarning, msg):
+                with self.assertRaisesWith(ValueError, msg):
                     ImageSeries(
                         name="test_iS",
                         external_file=["external_file", "external_file2"],
