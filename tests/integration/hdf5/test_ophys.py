@@ -179,8 +179,8 @@ class TestPlaneSegmentationIO(NWBH5IOMixin, TestCase):
             name='test_iS',
             dimension=[2],
             external_file=['images.tiff'],
-            starting_frame=[1, 2, 3],
-            format='tiff',
+            starting_frame=[0],
+            format='external',
             timestamps=ts
         )
 
@@ -248,8 +248,8 @@ class MaskIO(TestPlaneSegmentationIO, metaclass=ABCMeta):
             name='test_iS',
             dimension=[2],
             external_file=['images.tiff'],
-            starting_frame=[1, 2, 3],
-            format='tiff',
+            starting_frame=[0],
+            format='external',
             timestamps=ts
         )
         self.device = Device(name='dev1')
@@ -346,8 +346,8 @@ class TestCorrectedImageStackIO(AcquisitionH5IOMixin, TestCase):
             data=data,
             unit='unit',
             external_file=['external_file'],
-            starting_frame=[1, 2, 3],
-            format='tiff',
+            starting_frame=[0],
+            format='external',
             timestamps=timestamps
         )
         self.original_is = ImageSeries(
@@ -355,8 +355,8 @@ class TestCorrectedImageStackIO(AcquisitionH5IOMixin, TestCase):
             data=data,
             unit='unit',
             external_file=['external_file'],
-            starting_frame=[1, 2, 3],
-            format='tiff',
+            starting_frame=[0],
+            format='external',
             timestamps=timestamps
         )
         tstamps = [1., 2., 3.]

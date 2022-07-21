@@ -26,16 +26,16 @@ class ImageSeriesConstructor(TestCase):
             data=np.ones((3, 3, 3)),
             unit='unit',
             external_file=['external_file'],
-            starting_frame=[1, 2, 3],
-            format='tiff',
+            starting_frame=[0],
+            format='external',
             timestamps=[1., 2., 3.],
             device=dev,
         )
         self.assertEqual(iS.name, 'test_iS')
         self.assertEqual(iS.unit, 'unit')
         self.assertEqual(iS.external_file, ['external_file'])
-        self.assertEqual(iS.starting_frame, [1, 2, 3])
-        self.assertEqual(iS.format, 'tiff')
+        self.assertEqual(iS.starting_frame, [0])
+        self.assertEqual(iS.format, 'external')
         self.assertIs(iS.device, dev)
         # self.assertEqual(iS.bits_per_pixel, np.nan)
 
@@ -95,7 +95,6 @@ class ImageSeriesConstructor(TestCase):
                 name='test_iS',
                 data=np.ones((3, 3, 3)),
                 unit='Frames',
-                starting_frame=[0],
                 timestamps=[1, 2, 3, 4]
             )
 
@@ -125,8 +124,8 @@ class ImageSeriesConstructor(TestCase):
             )
             self.assertEqual(w, [])
 
-    def test_external_files_starting_frame_warning(self):
-        """Test that a warning is raised when the length of starting_frame
+    def test_external_file_with_incorrect_starting_frame(self):
+        """Test that ValueError is raised when the length of starting_frame
         is not the same as the length of external_file."""
         for starting_frame in [None, [0], [1, 2, 3]]:
             with self.subTest():
@@ -144,7 +143,21 @@ class ImageSeriesConstructor(TestCase):
                         rate=0.2,
                     )
 
-    def test_external_file_default_starting_frame(self):
+    def test_external_file_with_correct_starting_frame(self):
+        """Test that ValueError is not raised when the length of starting_frame
+        is the same as the length of external_file."""
+        with warnings.catch_warnings(record=True) as w:
+            ImageSeries(
+                name="test_iS",
+                external_file=["external_file", "external_file2", "external_file3"],
+                format="external",
+                unit="n.a.",
+                starting_frame=[0, 15, 30],
+                rate=0.2,
+            )
+            self.assertEqual(w, [])
+
+    def test_external_file_with_default_starting_frame(self):
         """Test that starting_frame is set to [0] if not provided, when external_file is has length 1."""
         with warnings.catch_warnings(record=True) as w:
             iS = ImageSeries(
@@ -221,18 +234,18 @@ class ImageMaskSeriesConstructor(TestCase):
 
     def test_init(self):
         iS = ImageSeries(name='test_iS', data=np.ones((2, 2, 2)), unit='unit',
-                         external_file=['external_file'], starting_frame=[1, 2, 3], format='tiff',
+                         external_file=['external_file'], starting_frame=[0], format='tiff',
                          timestamps=[1., .2])
 
         ims = ImageMaskSeries(name='test_ims', data=np.ones((2, 2, 2)), unit='unit',
-                              masked_imageseries=iS, external_file=['external_file'], starting_frame=[1, 2, 3],
-                              format='tiff', timestamps=[1., 2.])
+                              masked_imageseries=iS, external_file=['external_file'], starting_frame=[0],
+                              format='external', timestamps=[1., 2.])
         self.assertEqual(ims.name, 'test_ims')
         self.assertEqual(ims.unit, 'unit')
         self.assertIs(ims.masked_imageseries, iS)
         self.assertEqual(ims.external_file, ['external_file'])
-        self.assertEqual(ims.starting_frame, [1, 2, 3])
-        self.assertEqual(ims.format, 'tiff')
+        self.assertEqual(ims.starting_frame, [0])
+        self.assertEqual(ims.format, 'external')
 
 
 class OpticalSeriesConstructor(TestCase):
@@ -240,15 +253,15 @@ class OpticalSeriesConstructor(TestCase):
     def test_init(self):
         ts = OpticalSeries(name='test_ts', data=np.ones((2, 2, 2)), unit='unit', distance=1.0,
                            field_of_view=[4, 5], orientation='orientation', external_file=['external_file'],
-                           starting_frame=[1, 2, 3], format='tiff', timestamps=[1., 2.])
+                           starting_frame=[0], format='external', timestamps=[1., 2.])
         self.assertEqual(ts.name, 'test_ts')
         self.assertEqual(ts.unit, 'unit')
         self.assertEqual(ts.distance, 1.0)
         self.assertEqual(ts.field_of_view, [4, 5])
         self.assertEqual(ts.orientation, 'orientation')
         self.assertEqual(ts.external_file, ['external_file'])
-        self.assertEqual(ts.starting_frame, [1, 2, 3])
-        self.assertEqual(ts.format, 'tiff')
+        self.assertEqual(ts.starting_frame, [0])
+        self.assertEqual(ts.format, 'external')
 
 
 class TestImageSubtypes(TestCase):

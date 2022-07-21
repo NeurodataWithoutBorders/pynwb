@@ -48,8 +48,8 @@ def create_plane_segmentation():
         data=np.ones((2, 2, 2)),
         unit='unit',
         external_file=['external_file'],
-        starting_frame=[1, 2, 3],
-        format='tiff',
+        starting_frame=[0],
+        format='external',
         timestamps=[1., 2.]
     )
 
@@ -184,8 +184,8 @@ class TwoPhotonSeriesConstructor(TestCase):
             pmt_gain=1.0,
             scan_line_rate=2.0,
             external_file=['external_file'],
-            starting_frame=[1, 2, 3],
-            format='tiff',
+            starting_frame=[0],
+            format='external',
             timestamps=list()
         )
         self.assertEqual(tPS.name, 'test_tPS')
@@ -195,8 +195,8 @@ class TwoPhotonSeriesConstructor(TestCase):
         self.assertEqual(tPS.pmt_gain, 1.0)
         self.assertEqual(tPS.scan_line_rate, 2.0)
         self.assertEqual(tPS.external_file, ['external_file'])
-        self.assertEqual(tPS.starting_frame, [1, 2, 3])
-        self.assertEqual(tPS.format, 'tiff')
+        self.assertEqual(tPS.starting_frame, [0])
+        self.assertEqual(tPS.format, 'external')
         self.assertIsNone(tPS.dimension)
 
 
@@ -246,8 +246,8 @@ class CorrectedImageStackConstructor(TestCase):
             data=np.ones((2, 2, 2)),
             unit='unit',
             external_file=['external_file'],
-            starting_frame=[1, 2, 3],
-            format='tiff',
+            starting_frame=[0],
+            format='external',
             timestamps=[1., 2.]
         )
         is2 = ImageSeries(
@@ -255,8 +255,8 @@ class CorrectedImageStackConstructor(TestCase):
             data=np.ones((2, 2, 2)),
             unit='unit',
             external_file=['external_file'],
-            starting_frame=[1, 2, 3],
-            format='tiff',
+            starting_frame=[0],
+            format='external',
             timestamps=[1., 2.]
         )
         tstamps = np.arange(1.0, 100.0, 0.1, dtype=np.float64)
@@ -394,8 +394,8 @@ class PlaneSegmentationConstructor(TestCase):
             data=np.ones((2, 2, 2)),
             unit='unit',
             external_file=['external_file'],
-            starting_frame=[1, 2, 3],
-            format='tiff',
+            starting_frame=[0],
+            format='external',
             timestamps=[1., 2.]
         )
 
