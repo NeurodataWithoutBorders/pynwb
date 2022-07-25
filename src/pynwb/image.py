@@ -51,8 +51,8 @@ class ImageSeries(TimeSeries):
              'doc': 'Path or URL to one or more external file(s). Field only present if format=external. '
                     'Either external_file or data must be specified (not None), but not both.', 'default': None},
             {'name': 'starting_frame', 'type': Iterable,
-             'doc': 'Each entry is a frame number that corresponds to the first frame of each file in external_file. '
-                    'This serves as an index to what frames each file contains.', 'default': None},
+             'doc': 'Each entry is a frame number that corresponds to the first frame of each file '
+                    'listed in external_file within the full ImageSeries.', 'default': None},
             {'name': 'bits_per_pixel', 'type': int, 'doc': 'DEPRECATED: Number of bits per image pixel',
              'default': None},
             {'name': 'dimension', 'type': Iterable,
