@@ -23,7 +23,6 @@ class ImageSeriesConstructor(TestCase):
         dev = Device('test_device')
         iS = ImageSeries(
             name='test_iS',
-            data=np.ones((3, 3, 3)),
             unit='unit',
             external_file=['external_file'],
             starting_frame=[0],
@@ -159,16 +158,14 @@ class ImageSeriesConstructor(TestCase):
 
     def test_external_file_with_default_starting_frame(self):
         """Test that starting_frame is set to [0] if not provided, when external_file is has length 1."""
-        with warnings.catch_warnings(record=True) as w:
-            iS = ImageSeries(
+        iS = ImageSeries(
                 name="test_iS",
                 external_file=["external_file"],
                 format="external",
                 unit="n.a.",
                 starting_frame=None,
                 rate=0.2,
-            )
-            self.assertEqual(w, [])
+        )
         self.assertEqual(iS.starting_frame, [0])
 
     def test_external_file_with_incorrect_format(self):
@@ -189,7 +186,12 @@ class ImageSeriesConstructor(TestCase):
 
     def test_external_file_default_format(self):
         """Test that format is set to 'external' if not provided, when external_file is provided."""
-        with warnings.catch_warnings(record=True) as w:
+        msg = (
+            "ImageSeries 'test_iS': The value for 'format' has been changed to 'external'. "
+            "Setting a default value for 'format' is deprecated and will be changed to "
+            "raising a ValueError in the next release."
+        )
+        with self.assertWarnsWith(DeprecationWarning, msg):
             iS = ImageSeries(
                 name="test_iS",
                 external_file=["external_file", "external_file2"],
@@ -197,8 +199,38 @@ class ImageSeriesConstructor(TestCase):
                 starting_frame=[0, 10],
                 rate=0.2,
             )
-            self.assertEqual(w, [])
         self.assertEqual(iS.format, "external")
+
+    def test_external_file_with_correct_format(self):
+        """Test that warning is not raised when external_file is provided and format
+        is external."""
+        with warnings.catch_warnings(record=True) as w:
+            ImageSeries(
+                name="test_iS",
+                external_file=["external_file"],
+                format="external",
+                unit="n.a.",
+                starting_frame=[0],
+                rate=0.2,
+            )
+            self.assertEqual(w, [])
+
+    def test_external_file_with_data(self):
+        """Test that ValueError is raised when external_file is provided and
+        data is not None."""
+        msg = (
+            "ImageSeries 'test_iS': Either external_file or data must be specified (not None), but not both."
+        )
+        with self.assertRaisesWith(ValueError, msg):
+            ImageSeries(
+                name="test_iS",
+                external_file=["external_file"],
+                data=np.ones((3, 3, 3)),
+                format="external",
+                unit="n.a.",
+                starting_frame=[0],
+                rate=0.2,
+            )
 
 
 class IndexSeriesConstructor(TestCase):
@@ -262,11 +294,11 @@ class IndexSeriesConstructor(TestCase):
 class ImageMaskSeriesConstructor(TestCase):
 
     def test_init(self):
-        iS = ImageSeries(name='test_iS', data=np.ones((2, 2, 2)), unit='unit',
+        iS = ImageSeries(name='test_iS', unit='unit',
                          external_file=['external_file'], starting_frame=[0], format='external',
                          timestamps=[1., .2])
 
-        ims = ImageMaskSeries(name='test_ims', data=np.ones((2, 2, 2)), unit='unit',
+        ims = ImageMaskSeries(name='test_ims', unit='unit',
                               masked_imageseries=iS, external_file=['external_file'], starting_frame=[0],
                               format='external', timestamps=[1., 2.])
         self.assertEqual(ims.name, 'test_ims')
@@ -280,7 +312,7 @@ class ImageMaskSeriesConstructor(TestCase):
 class OpticalSeriesConstructor(TestCase):
 
     def test_init(self):
-        ts = OpticalSeries(name='test_ts', data=np.ones((2, 2, 2)), unit='unit', distance=1.0,
+        ts = OpticalSeries(name='test_ts', unit='unit', distance=1.0,
                            field_of_view=[4, 5], orientation='orientation', external_file=['external_file'],
                            starting_frame=[0], format='external', timestamps=[1., 2.])
         self.assertEqual(ts.name, 'test_ts')

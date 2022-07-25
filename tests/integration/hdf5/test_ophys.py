@@ -338,12 +338,10 @@ class TestCorrectedImageStackIO(AcquisitionH5IOMixin, TestCase):
 
     def setUpContainer(self):
         """Return the test CorrectedImageStack to read/write."""
-        data = np.ones((2, 2, 2)),
         timestamps = [1., 2.]
 
         corrected_is = ImageSeries(
             name='corrected',
-            data=data,
             unit='unit',
             external_file=['external_file'],
             starting_frame=[0],
@@ -352,7 +350,6 @@ class TestCorrectedImageStackIO(AcquisitionH5IOMixin, TestCase):
         )
         self.original_is = ImageSeries(
             name='original_is',
-            data=data,
             unit='unit',
             external_file=['external_file'],
             starting_frame=[0],
