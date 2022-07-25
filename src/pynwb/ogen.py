@@ -8,7 +8,9 @@ from .device import Device
 
 @register_class('OptogeneticStimulusSite', CORE_NAMESPACE)
 class OptogeneticStimulusSite(NWBContainer):
-    """Optogenetic stimulus site."""
+    """
+    Optogenetic stimulus site.
+    """
 
     __nwbfields__ = ('device',
                      'description',

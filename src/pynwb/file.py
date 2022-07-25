@@ -30,7 +30,9 @@ def _not_parent(arg):
 
 @register_class('LabMetaData', CORE_NAMESPACE)
 class LabMetaData(NWBContainer):
-    """Metadata about the lab that collected the data."""
+    """
+    Metadata about the lab that collected the data.
+    """
 
     @docval({'name': 'name', 'type': str, 'doc': 'name of lab metadata'})
     def __init__(self, **kwargs):
@@ -39,7 +41,9 @@ class LabMetaData(NWBContainer):
 
 @register_class('Subject', CORE_NAMESPACE)
 class Subject(NWBContainer):
-    """Subject information and metadata."""
+    """
+    Subject information and metadata.
+    """
 
     __nwbfields__ = (
         'age',
