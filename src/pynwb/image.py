@@ -91,7 +91,7 @@ class ImageSeries(TimeSeries):
                 "as 'external_file'." % (self.__class__.__name__, name)
             )
 
-        if data is None and self._change_external_file_format():
+        if self._change_external_file_format():
             warnings.warn(
                 "%s '%s': The value for 'format' has been changed to 'external'. "
                 "Setting a default value for 'format' is deprecated and will be changed "
@@ -131,7 +131,11 @@ class ImageSeries(TimeSeries):
         """
         Change the format to 'external' when external_file is specified.
         """
-        if self.external_file is not None and self.format is None:
+        if (
+                self.data.shape[0] == 0 and
+                self.external_file is not None and
+                self.format is None
+        ):
             self.format = 'external'
             return True
 
