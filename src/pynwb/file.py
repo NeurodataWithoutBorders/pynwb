@@ -7,6 +7,7 @@ import copy as _copy
 import numpy as np
 import pandas as pd
 
+from hdmf.common import DynamicTableRegion, DynamicTable
 from hdmf.utils import docval, getargs, get_docval, popargs, popargs_to_dict, AllowPositional
 
 from . import register_class, CORE_NAMESPACE
@@ -21,7 +22,6 @@ from .ophys import ImagingPlane
 from .ogen import OptogeneticStimulusSite
 from .misc import Units
 from .core import NWBContainer, NWBDataInterface, MultiContainerInterface, ScratchData, LabelledDict
-from hdmf.common import DynamicTableRegion, DynamicTable
 
 
 def _not_parent(arg):
