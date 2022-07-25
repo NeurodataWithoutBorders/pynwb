@@ -15,8 +15,8 @@ class OptogeneticStimulusSite(NWBContainer):
                      'excitation_lambda',
                      'location')
 
-    @docval({'name': 'name', 'type': str, 'doc': 'The name of this stimulus site'},
-            {'name': 'device', 'type': Device, 'doc': 'the device that was used'},
+    @docval({'name': 'name', 'type': str, 'doc': 'The name of this stimulus site.'},
+            {'name': 'device', 'type': Device, 'doc': 'The device that was used.'},
             {'name': 'description', 'type': str, 'doc': 'Description of site.'},
             {'name': 'excitation_lambda', 'type': 'float', 'doc': 'Excitation wavelength in nm.'},
             {'name': 'location', 'type': str, 'doc': 'Location of stimulation site.'})

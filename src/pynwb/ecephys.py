@@ -22,7 +22,7 @@ class ElectrodeGroup(NWBContainer):
                      'device',
                      'position')
 
-    @docval({'name': 'name', 'type': str, 'doc': 'the name of this electrode'},
+    @docval({'name': 'name', 'type': str, 'doc': 'the name of this electrode group'},
             {'name': 'description', 'type': str, 'doc': 'description of this electrode group'},
             {'name': 'location', 'type': str, 'doc': 'description of location of this electrode group'},
             {'name': 'device', 'type': Device, 'doc': 'the device that was used to record from this electrode group'},

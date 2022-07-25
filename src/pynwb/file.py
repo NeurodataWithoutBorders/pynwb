@@ -32,7 +32,7 @@ def _not_parent(arg):
 class LabMetaData(NWBContainer):
     """Metadata about the lab that collected the data."""
 
-    @docval({'name': 'name', 'type': str, 'doc': 'name of metadata'})
+    @docval({'name': 'name', 'type': str, 'doc': 'name of lab metadata'})
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
