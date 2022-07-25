@@ -107,7 +107,8 @@ class ImageSeries(TimeSeries):
 
         if not self._check_external_file_data():
             raise ValueError(
-                "%s '%s': Either external_file or data must be specified (not None), but not both." % (self.__class__.__name__, name)
+                "%s '%s': Either external_file or data must be specified (not None), but not both."
+                % (self.__class__.__name__, name)
             )
 
         if not self._check_image_series_dimension():
