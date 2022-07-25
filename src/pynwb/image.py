@@ -77,8 +77,13 @@ class ImageSeries(TimeSeries):
         if unit is None:
             kwargs['unit'] = ImageSeries.DEFAULT_UNIT
 
-        if args_to_set['external_file'] is not None and args_to_set['starting_frame'] is None:
-            args_to_set['starting_frame'] = [0] if len(args_to_set['external_file']) == 1 else None
+        if (
+            args_to_set["external_file"] is not None
+            and args_to_set["starting_frame"] is None
+        ):
+            args_to_set["starting_frame"] = (
+                [0] if len(args_to_set["external_file"]) == 1 else None
+            )
 
         super().__init__(**kwargs)
 
@@ -97,12 +102,13 @@ class ImageSeries(TimeSeries):
                 "Setting a default value for 'format' is deprecated and will be changed "
                 "to raising a ValueError in the next release."
                 % (self.__class__.__name__, self.name),
-                DeprecationWarning
+                DeprecationWarning,
             )
 
         if not self._check_external_file_format():
             raise ValueError(
-                "%s '%s': Format must be 'external' when external_file is specified." % (self.__class__.__name__, name)
+                "%s '%s': Format must be 'external' when external_file is specified."
+                % (self.__class__.__name__, name)
             )
 
         if not self._check_external_file_data():
@@ -114,7 +120,8 @@ class ImageSeries(TimeSeries):
         if not self._check_image_series_dimension():
             warnings.warn(
                 "%s '%s': Length of data does not match length of timestamps. Your data may be transposed. "
-                "Time should be on the 0th dimension" % (self.__class__.__name__, self.name)
+                "Time should be on the 0th dimension"
+                % (self.__class__.__name__, self.name)
             )
 
     def _check_external_file_starting_frame_length(self):
@@ -132,11 +139,11 @@ class ImageSeries(TimeSeries):
         Change the format to 'external' when external_file is specified.
         """
         if (
-                self.data.shape[0] == 0 and
-                self.external_file is not None and
-                self.format is None
+            self.data.shape[0] == 0
+            and self.external_file is not None
+            and self.format is None
         ):
-            self.format = 'external'
+            self.format = "external"
             return True
 
         return False
