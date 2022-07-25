@@ -115,6 +115,8 @@ class ImageSeries(TimeSeries):
         """
         Check that the number of frame indices in 'starting_frame' matches the number of files in 'external_file'.
         """
+        if self.external_file is None:
+            return True
         external_file_shape = get_data_shape(self.external_file)
         starting_frame_shape = get_data_shape(self.starting_frame)
         return external_file_shape == starting_frame_shape
