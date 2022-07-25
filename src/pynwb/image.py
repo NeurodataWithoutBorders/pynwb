@@ -105,6 +105,11 @@ class ImageSeries(TimeSeries):
                 "%s '%s': Format must be 'external' when external_file is specified." % (self.__class__.__name__, name)
             )
 
+        if not self._check_external_file_data():
+            raise ValueError(
+                "%s '%s': Either external_file or data must be specified (not None), but not both." % (self.__class__.__name__, name)
+            )
+
         if not self._check_image_series_dimension():
             warnings.warn(
                 "%s '%s': Length of data does not match length of timestamps. Your data may be transposed. "
@@ -139,6 +144,15 @@ class ImageSeries(TimeSeries):
             return True
 
         return self.format == "external"
+
+    def _check_external_file_data(self):
+        """
+        Check that data is an empty array when external_file is specified.
+        """
+        if self.external_file is None:
+            return True
+
+        return self.data.shape[0] == 0
 
     def _check_time_series_dimension(self):
         """Override _check_time_series_dimension to do nothing.
