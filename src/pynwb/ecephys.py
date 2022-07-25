@@ -14,8 +14,7 @@ from .device import Device
 
 @register_class('ElectrodeGroup', CORE_NAMESPACE)
 class ElectrodeGroup(NWBContainer):
-    """
-    """
+    """Defines a related group of electrodes."""
 
     __nwbfields__ = ('name',
                      'description',

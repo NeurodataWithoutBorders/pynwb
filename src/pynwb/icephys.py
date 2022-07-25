@@ -27,8 +27,7 @@ def ensure_unit(self, name, current_unit, unit, nwb_version):
 
 @register_class('IntracellularElectrode', CORE_NAMESPACE)
 class IntracellularElectrode(NWBContainer):
-    '''
-    '''
+    """Describes an intracellular electrode and associated metadata."""
 
     __nwbfields__ = ('cell_id',
                      'slice',
