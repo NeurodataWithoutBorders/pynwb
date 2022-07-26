@@ -589,7 +589,11 @@ class NWBFile(MultiContainerInterface):
         """
         self.__check_epochs()
         if kwargs['tags'] is not None:
-            self.epoch_tags.update(kwargs['tags'])
+            # If a str is passed into epoch_tags directly, it gets split into characters
+            tmp = kwargs['tags']
+            if isinstance(kwargs['tags'], str):
+                tmp = [s.strip() for s in kwargs['tags'].split(",") if not s.isspace()]
+            self.epoch_tags.update(tmp)
         self.epochs.add_interval(**kwargs)
 
     def __check_electrodes(self):
