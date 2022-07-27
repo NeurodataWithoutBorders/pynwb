@@ -1,14 +1,13 @@
-from collections.abc import Iterable
 import warnings
+from collections.abc import Iterable
 
-from hdmf.utils import docval, popargs, get_docval, popargs_to_dict
+from hdmf.common import DynamicTableRegion
 from hdmf.data_utils import DataChunkIterator, assertEqualShape
-from hdmf.utils import get_data_shape
+from hdmf.utils import docval, popargs, get_docval, popargs_to_dict, get_data_shape
 
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries
 from .core import NWBContainer, NWBDataInterface, MultiContainerInterface
-from hdmf.common import DynamicTableRegion
 from .device import Device
 
 

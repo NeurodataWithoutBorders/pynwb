@@ -1,5 +1,5 @@
-from collections.abc import Iterable
 import warnings
+from collections.abc import Iterable
 
 from hdmf.utils import docval, popargs, get_docval
 

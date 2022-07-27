@@ -2,13 +2,13 @@ from collections.abc import Iterable
 import numpy as np
 import warnings
 
+from hdmf.common import DynamicTable, DynamicTableRegion
 from hdmf.utils import docval, popargs, get_docval, get_data_shape, popargs_to_dict
 
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries
 from .image import ImageSeries
 from .core import NWBContainer, MultiContainerInterface, NWBDataInterface
-from hdmf.common import DynamicTable, DynamicTableRegion
 from .device import Device
 
 
