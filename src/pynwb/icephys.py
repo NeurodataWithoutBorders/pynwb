@@ -11,6 +11,7 @@ from .base import TimeSeries, TimeSeriesReferenceVectorData
 from .core import NWBContainer
 from .device import Device
 
+
 def ensure_unit(self, name, current_unit, unit, nwb_version):
     """A helper to ensure correct unit used.
 
