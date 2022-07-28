@@ -30,7 +30,7 @@ def _not_parent(arg):
 
 @register_class('LabMetaData', CORE_NAMESPACE)
 class LabMetaData(NWBContainer):
-    """Metadata about the lab that collected the data."""
+    """Container for storing lab-specific meta-data"""
 
     @docval({'name': 'name', 'type': str, 'doc': 'name of lab metadata'})
     def __init__(self, **kwargs):
