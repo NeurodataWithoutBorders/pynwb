@@ -1,6 +1,7 @@
 import warnings
-import numpy as np
 from collections.abc import Iterable
+
+import numpy as np
 
 from hdmf.utils import docval, getargs, popargs, popargs_to_dict, get_docval
 
