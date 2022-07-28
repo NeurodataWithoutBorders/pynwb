@@ -1,6 +1,7 @@
 import warnings
-import numpy as np
 from collections.abc import Iterable
+
+import numpy as np
 
 from hdmf.utils import (
     docval,
@@ -71,6 +72,7 @@ class ImageSeries(TimeSeries):
         if args_to_set['external_file'] is None and data is None:
             raise ValueError("Must supply either external_file or data to %s '%s'."
                              % (self.__class__.__name__, name))
+
         # data and unit are required in TimeSeries, but allowed to be None here, so handle this specially
         if data is None:
             kwargs['data'] = ImageSeries.DEFAULT_DATA
