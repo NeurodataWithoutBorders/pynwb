@@ -141,7 +141,7 @@ class ImageSeries(TimeSeries):
         Change the format to 'external' when external_file is specified.
         """
         if (
-            self.data.shape[0] == 0
+            get_data_shape(self.data)[0] == 0
             and self.external_file is not None
             and self.format is None
         ):
