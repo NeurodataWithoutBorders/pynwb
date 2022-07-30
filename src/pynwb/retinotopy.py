@@ -42,7 +42,7 @@ class FocalDepthImage(RetinotopyImage):
     __nwbfields__ = ('focal_depth', )
 
     @docval(*get_docval(RetinotopyImage.__init__),
-            {'name': 'focal_depth', 'type': 'float', 'doc': 'Focal depth offset, in meters.'})
+            {'name': 'focal_depth', 'type': float, 'doc': 'Focal depth offset, in meters.'})
     def __init__(self, **kwargs):
         focal_depth = popargs('focal_depth', kwargs)
         super().__init__(**kwargs)

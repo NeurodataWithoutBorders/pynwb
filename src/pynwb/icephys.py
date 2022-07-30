@@ -91,7 +91,7 @@ class PatchClampSeries(TimeSeries):
             {'name': 'electrode', 'type': IntracellularElectrode,  # required
              'doc': 'IntracellularElectrode group that describes the electrode that was used to apply '
                      'or record this data.'},
-            {'name': 'gain', 'type': 'float', 'doc': 'Units: Volt/Amp (v-clamp) or Volt/Volt (c-clamp)'},  # required
+            {'name': 'gain', 'type': float, 'doc': 'Units: Volt/Amp (v-clamp) or Volt/Volt (c-clamp)'},  # required
             {'name': 'stimulus_description', 'type': str, 'doc': 'the stimulus name/protocol', 'default': "N/A"},
             *get_docval(TimeSeries.__init__, 'resolution', 'conversion', 'timestamps', 'starting_time', 'rate',
                         'comments', 'description', 'control', 'control_description', 'offset'),
@@ -126,11 +126,11 @@ class CurrentClampSeries(PatchClampSeries):
                      'capacitance_compensation')
 
     @docval(*get_docval(PatchClampSeries.__init__, 'name', 'data', 'electrode'),  # required
-            {'name': 'gain', 'type': 'float', 'doc': 'Units: Volt/Volt'},
+            {'name': 'gain', 'type': float, 'doc': 'Units: Volt/Volt'},
             *get_docval(PatchClampSeries.__init__, 'stimulus_description'),
-            {'name': 'bias_current', 'type': 'float', 'doc': 'Unit: Amp', 'default': None},
-            {'name': 'bridge_balance', 'type': 'float', 'doc': 'Unit: Ohm', 'default': None},
-            {'name': 'capacitance_compensation', 'type': 'float', 'doc': 'Unit: Farad', 'default': None},
+            {'name': 'bias_current', 'type': float, 'doc': 'Unit: Amp', 'default': None},
+            {'name': 'bridge_balance', 'type': float, 'doc': 'Unit: Ohm', 'default': None},
+            {'name': 'capacitance_compensation', 'type': float, 'doc': 'Unit: Farad', 'default': None},
             *get_docval(PatchClampSeries.__init__, 'resolution', 'conversion', 'timestamps', 'starting_time', 'rate',
                         'comments', 'description', 'control', 'control_description', 'sweep_number', 'offset'),
             {'name': 'unit', 'type': str, 'doc': "The base unit of measurement (must be 'volts')",
@@ -158,7 +158,7 @@ class IZeroClampSeries(CurrentClampSeries):
     __nwbfields__ = ()
 
     @docval(*get_docval(CurrentClampSeries.__init__, 'name', 'data', 'electrode'),  # required
-            {'name': 'gain', 'type': 'float', 'doc': 'Units: Volt/Volt'},  # required
+            {'name': 'gain', 'type': float, 'doc': 'Units: Volt/Volt'},  # required
             {'name': 'stimulus_description', 'type': str,
              'doc': ('The stimulus name/protocol. Setting this to a value other than "N/A" is deprecated as of '
                      'NWB 2.3.0.'),
@@ -229,15 +229,15 @@ class VoltageClampSeries(PatchClampSeries):
                      'whole_cell_series_resistance_comp')
 
     @docval(*get_docval(PatchClampSeries.__init__, 'name', 'data', 'electrode'),  # required
-            {'name': 'gain', 'type': 'float', 'doc': 'Units: Volt/Amp'},  # required
+            {'name': 'gain', 'type': float, 'doc': 'Units: Volt/Amp'},  # required
             *get_docval(PatchClampSeries.__init__, 'stimulus_description'),
-            {'name': 'capacitance_fast', 'type': 'float', 'doc': 'Unit: Farad', 'default': None},
-            {'name': 'capacitance_slow', 'type': 'float', 'doc': 'Unit: Farad', 'default': None},
-            {'name': 'resistance_comp_bandwidth', 'type': 'float', 'doc': 'Unit: Hz', 'default': None},
-            {'name': 'resistance_comp_correction', 'type': 'float', 'doc': 'Unit: percent', 'default': None},
-            {'name': 'resistance_comp_prediction', 'type': 'float', 'doc': 'Unit: percent', 'default': None},
-            {'name': 'whole_cell_capacitance_comp', 'type': 'float', 'doc': 'Unit: Farad', 'default': None},
-            {'name': 'whole_cell_series_resistance_comp', 'type': 'float', 'doc': 'Unit: Ohm', 'default': None},
+            {'name': 'capacitance_fast', 'type': float, 'doc': 'Unit: Farad', 'default': None},
+            {'name': 'capacitance_slow', 'type': float, 'doc': 'Unit: Farad', 'default': None},
+            {'name': 'resistance_comp_bandwidth', 'type': float, 'doc': 'Unit: Hz', 'default': None},
+            {'name': 'resistance_comp_correction', 'type': float, 'doc': 'Unit: percent', 'default': None},
+            {'name': 'resistance_comp_prediction', 'type': float, 'doc': 'Unit: percent', 'default': None},
+            {'name': 'whole_cell_capacitance_comp', 'type': float, 'doc': 'Unit: Farad', 'default': None},
+            {'name': 'whole_cell_series_resistance_comp', 'type': float, 'doc': 'Unit: Ohm', 'default': None},
             *get_docval(PatchClampSeries.__init__, 'resolution', 'conversion', 'timestamps', 'starting_time', 'rate',
                         'comments', 'description', 'control', 'control_description', 'sweep_number', 'offset'),
             {'name': 'unit', 'type': str, 'doc': "The base unit of measurement (must be 'amperes')",

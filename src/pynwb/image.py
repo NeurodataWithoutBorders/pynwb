@@ -208,7 +208,7 @@ class OpticalSeries(ImageSeries):
                      'orientation')
 
     @docval(*get_docval(ImageSeries.__init__, 'name'),  # required
-            {'name': 'distance', 'type': 'float', 'doc': 'Distance from camera/monitor to target/eye.'},  # required
+            {'name': 'distance', 'type': float, 'doc': 'Distance from camera/monitor to target/eye.'},  # required
             {'name': 'field_of_view', 'type': ('array_data', 'data', 'TimeSeries'), 'shape': ((2, ), (3, )),  # required
              'doc': 'Width, height and depth of image, or imaged area (meters).'},
             {'name': 'orientation', 'type': str,  # required

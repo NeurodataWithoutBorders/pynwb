@@ -108,15 +108,15 @@ class TimeSeries(NWBDataInterface):
              'doc': ('The data values. The first dimension must be time. '
                      'Can also store binary data, e.g., image frames')},
             {'name': 'unit', 'type': str, 'doc': 'The base unit of measurement (should be SI unit)'},
-            {'name': 'resolution', 'type': 'float',
+            {'name': 'resolution', 'type': float,
              'doc': 'The smallest meaningful difference (in specified unit) between values in data',
              'default': DEFAULT_RESOLUTION},
-            {'name': 'conversion', 'type': 'float',
+            {'name': 'conversion', 'type': float,
              'doc': 'Scalar to multiply each element in data to convert it to the specified unit',
              'default': DEFAULT_CONVERSION},
             {
                 'name': 'offset',
-                'type': 'float',
+                'type': float,
                 'doc': (
                     "Scalar to add to each element in the data scaled by 'conversion' to finish converting it to the "
                     "specified unit."
@@ -125,8 +125,8 @@ class TimeSeries(NWBDataInterface):
             },
             {'name': 'timestamps', 'type': ('array_data', 'data', 'TimeSeries'), 'shape': (None,),
              'doc': 'Timestamps for samples stored in data', 'default': None},
-            {'name': 'starting_time', 'type': 'float', 'doc': 'The timestamp of the first sample', 'default': None},
-            {'name': 'rate', 'type': 'float', 'doc': 'Sampling rate in Hz', 'default': None},
+            {'name': 'starting_time', 'type': float, 'doc': 'The timestamp of the first sample', 'default': None},
+            {'name': 'rate', 'type': float, 'doc': 'Sampling rate in Hz', 'default': None},
 
             {'name': 'comments', 'type': str, 'doc': 'Human-readable comments about this TimeSeries dataset',
              'default': 'no comments'},
@@ -293,7 +293,7 @@ class Image(NWBData):
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this image'},
             {'name': 'data', 'type': ('array_data', 'data'), 'doc': 'data of image. Dimensions: x, y [, r,g,b[,a]]',
              'shape': ((None, None), (None, None, 3), (None, None, 4))},
-            {'name': 'resolution', 'type': 'float', 'doc': 'pixels / cm', 'default': None},
+            {'name': 'resolution', 'type': float, 'doc': 'pixels / cm', 'default': None},
             {'name': 'description', 'type': str, 'doc': 'description of image', 'default': None})
     def __init__(self, **kwargs):
         args_to_set = popargs_to_dict(("resolution", "description"), kwargs)
