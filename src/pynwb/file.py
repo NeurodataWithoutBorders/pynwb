@@ -590,6 +590,7 @@ class NWBFile(MultiContainerInterface):
         self.__check_epochs()
         if kwargs['tags'] is not None:
             # If a str is passed into epoch_tags directly, it gets split into characters
+            #   This processing needs to match tags parsing in `epoch.TimeIntervals.add_interval`
             tmp = kwargs['tags']
             if isinstance(kwargs['tags'], str):
                 tmp = [s.strip() for s in kwargs['tags'].split(",") if not s.isspace()]
