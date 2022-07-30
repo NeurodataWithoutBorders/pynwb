@@ -1,5 +1,6 @@
-import numpy as np
 from warnings import warn
+
+import numpy as np
 
 from hdmf import Container, Data
 from hdmf.container import AbstractContainer, MultiContainerInterface as hdmf_MultiContainerInterface, Table

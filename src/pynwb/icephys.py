@@ -1,4 +1,7 @@
 import warnings
+from copy import copy
+
+import numpy as np
 
 from hdmf.common import DynamicTable, AlignedDynamicTable
 from hdmf.utils import docval, popargs, popargs_to_dict, get_docval, getargs
@@ -7,8 +10,6 @@ from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries, TimeSeriesReferenceVectorData
 from .core import NWBContainer
 from .device import Device
-from copy import copy
-import numpy as np
 
 
 def ensure_unit(self, name, current_unit, unit, nwb_version):
@@ -27,8 +28,7 @@ def ensure_unit(self, name, current_unit, unit, nwb_version):
 
 @register_class('IntracellularElectrode', CORE_NAMESPACE)
 class IntracellularElectrode(NWBContainer):
-    '''
-    '''
+    """Describes an intracellular electrode and associated metadata."""
 
     __nwbfields__ = ('cell_id',
                      'slice',
@@ -43,13 +43,12 @@ class IntracellularElectrode(NWBContainer):
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this electrode'},
             {'name': 'device', 'type': Device, 'doc': 'the device that was used to record from this electrode'},
             {'name': 'description', 'type': str,
-             'doc': 'Recording description, description of electrode (e.g.,  whole-cell, sharp, etc) '
-                    'COMMENT: Free-form text (can be from Methods)'},
+             'doc': 'Recording description, description of electrode (e.g.,  whole-cell, sharp, etc).'},
             {'name': 'slice', 'type': str, 'doc': 'Information about slice used for recording.', 'default': None},
             {'name': 'seal', 'type': str, 'doc': 'Information about seal used for recording.', 'default': None},
             {'name': 'location', 'type': str,
              'doc': 'Area, layer, comments on estimation, stereotaxis coordinates (if in vivo, etc).', 'default': None},
-            {'name': 'resistance', 'type': str, 'doc': 'Electrode resistance COMMENT: unit: Ohm.', 'default': None},
+            {'name': 'resistance', 'type': str, 'doc': 'Electrode resistance, unit: Ohm.', 'default': None},
             {'name': 'filtering', 'type': str, 'doc': 'Electrode specific filtering.', 'default': None},
             {'name': 'initial_access_resistance', 'type': str, 'doc': 'Initial access resistance.', 'default': None},
             {'name': 'cell_id', 'type': str, 'doc': 'Unique ID of cell.', 'default': None}
