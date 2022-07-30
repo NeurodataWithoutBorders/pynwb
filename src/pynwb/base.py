@@ -342,7 +342,7 @@ class Images(MultiContainerInterface):
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this set of images'},
             {'name': 'images', 'type': 'array_data', 'doc': 'image objects', 'default': None},
             {'name': 'description', 'type': str, 'doc': 'description of images', 'default': 'no description'},
-            {'name': 'order_of_images', 'type': 'ImageReferences',
+            {'name': 'order_of_images', 'type': ImageReferences,
              'doc': 'Ordered dataset of references to Image objects stored in the parent group.', 'default': None},)
     def __init__(self, **kwargs):
 

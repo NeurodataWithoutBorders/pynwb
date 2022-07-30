@@ -247,7 +247,7 @@ class NWBHDF5IO(_HDF5IO):
 
     @docval({'name': 'src_io', 'type': HDMFIO,
              'doc': 'the HDMFIO object (such as NWBHDF5IO) that was used to read the data to export'},
-            {'name': 'nwbfile', 'type': 'NWBFile',
+            {'name': 'nwbfile', 'type': NWBFile,
              'doc': 'the NWBFile object to export. If None, then the entire contents of src_io will be exported',
              'default': None},
             {'name': 'write_args', 'type': dict, 'doc': 'arguments to pass to :py:meth:`write_builder`',

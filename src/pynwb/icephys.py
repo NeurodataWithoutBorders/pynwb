@@ -469,13 +469,13 @@ class IntracellularRecordingsTable(AlignedDynamicTable):
         super().__init__(**kwargs)
 
     @docval({'name': 'electrode', 'type': IntracellularElectrode, 'doc': 'The intracellular electrode used'},
-            {'name': 'stimulus_start_index', 'type': 'int', 'doc': 'Start index of the stimulus', 'default': None},
-            {'name': 'stimulus_index_count', 'type': 'int', 'doc': 'Stop index of the stimulus', 'default': None},
+            {'name': 'stimulus_start_index', 'type': int, 'doc': 'Start index of the stimulus', 'default': None},
+            {'name': 'stimulus_index_count', 'type': int, 'doc': 'Stop index of the stimulus', 'default': None},
             {'name': 'stimulus', 'type': TimeSeries,
              'doc': 'The TimeSeries (usually a PatchClampSeries) with the stimulus',
              'default': None},
-            {'name': 'response_start_index', 'type': 'int', 'doc': 'Start index of the response', 'default': None},
-            {'name': 'response_index_count', 'type': 'int', 'doc': 'Stop index of the response', 'default': None},
+            {'name': 'response_start_index', 'type': int, 'doc': 'Start index of the response', 'default': None},
+            {'name': 'response_index_count', 'type': int, 'doc': 'Stop index of the response', 'default': None},
             {'name': 'response', 'type': TimeSeries,
              'doc': 'The TimeSeries (usually a PatchClampSeries) with the response',
              'default': None},
