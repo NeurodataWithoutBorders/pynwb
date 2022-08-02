@@ -1,3 +1,5 @@
+import glob
+import os
 import subprocess
 import re
 
@@ -101,6 +103,13 @@ class TestValidateScript(TestCase):
             r"Validating tests/back_compat/1\.1\.2_nwbfile\.nwb against pynwb namespace information using namespace "
             r"'core'\.\s* - no errors found\.\s*")
         self.assertRegex(result.stdout.decode('utf-8'), stdout_regex)
+
+    @classmethod
+    def tearDownClass(cls):
+        # merge the coverage files and delete the individual files
+        subprocess.run(["coverage", "combine"])
+        for f in glob.glob(".coverage.*"):
+            os.remove(f)
 
 
 class TestValidateFunction(TestCase):
