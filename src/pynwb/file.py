@@ -607,11 +607,11 @@ class NWBFile(MultiContainerInterface):
         self.__check_electrodes()
         self.electrodes.add_column(**kwargs)
 
-    @docval({'name': 'x', 'type': 'float', 'doc': 'the x coordinate of the position (+x is posterior)',
+    @docval({'name': 'x', 'type': float, 'doc': 'the x coordinate of the position (+x is posterior)',
              'default': None},
-            {'name': 'y', 'type': 'float', 'doc': 'the y coordinate of the position (+y is inferior)', 'default': None},
-            {'name': 'z', 'type': 'float', 'doc': 'the z coordinate of the position (+z is right)', 'default': None},
-            {'name': 'imp', 'type': 'float', 'doc': 'the impedance of the electrode, in ohms', 'default': None},
+            {'name': 'y', 'type': float, 'doc': 'the y coordinate of the position (+y is inferior)', 'default': None},
+            {'name': 'z', 'type': float, 'doc': 'the z coordinate of the position (+z is right)', 'default': None},
+            {'name': 'imp', 'type': float, 'doc': 'the impedance of the electrode, in ohms', 'default': None},
             {'name': 'location', 'type': str,
              'doc': 'the location of electrode within the subject e.g. brain region. Required.',
              'default': None},
@@ -622,9 +622,9 @@ class NWBFile(MultiContainerInterface):
              'doc': 'the ElectrodeGroup object to add to this NWBFile. Required.',
              'default': None},
             {'name': 'id', 'type': int, 'doc': 'a unique identifier for the electrode', 'default': None},
-            {'name': 'rel_x', 'type': 'float', 'doc': 'the x coordinate within the electrode group', 'default': None},
-            {'name': 'rel_y', 'type': 'float', 'doc': 'the y coordinate within the electrode group', 'default': None},
-            {'name': 'rel_z', 'type': 'float', 'doc': 'the z coordinate within the electrode group', 'default': None},
+            {'name': 'rel_x', 'type': float, 'doc': 'the x coordinate within the electrode group', 'default': None},
+            {'name': 'rel_y', 'type': float, 'doc': 'the y coordinate within the electrode group', 'default': None},
+            {'name': 'rel_z', 'type': float, 'doc': 'the z coordinate within the electrode group', 'default': None},
             {'name': 'reference', 'type': str, 'doc': 'Description of the reference electrode and/or reference scheme\
                 used for this  electrode, e.g.,"stainless steel skull screw" or "online common average referencing". ',
                 'default': None},
