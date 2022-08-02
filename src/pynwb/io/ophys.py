@@ -1,8 +1,8 @@
-from .. import register_map
+from hdmf.common.io.table import DynamicTableMap
 
+from .. import register_map
 from ..ophys import PlaneSegmentation, ImagingPlane
 from .core import NWBContainerMapper
-from hdmf.common.io.table import DynamicTableMap
 
 
 @register_map(PlaneSegmentation)

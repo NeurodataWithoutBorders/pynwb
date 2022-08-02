@@ -1,11 +1,11 @@
 from bisect import bisect_left
 
-from hdmf.utils import docval, getargs, popargs, get_docval
 from hdmf.data_utils import DataIO
+from hdmf.common import DynamicTable
+from hdmf.utils import docval, getargs, popargs, get_docval
 
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries, TimeSeriesReferenceVectorData, TimeSeriesReference
-from hdmf.common import DynamicTable
 
 
 @register_class('TimeIntervals', CORE_NAMESPACE)

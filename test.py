@@ -224,6 +224,9 @@ def run_integration_tests(verbose=True):
     else:
         logging.info('all classes have integration tests')
 
+    # also test the validation script
+    run_test_suite("tests/validation", "validation CLI tests", verbose=verbose)
+
 
 def main():
     # setup and parse arguments

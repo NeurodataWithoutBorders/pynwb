@@ -1,7 +1,7 @@
 .. image:: docs/source/figures/logo_pynwb.png
     :width: 200px
 
-PyNWB is a Python package for working with NWB files. The PyNWB 
+PyNWB is a Python package for working with NWB files. The PyNWB
 documentation can be found at https://pynwb.readthedocs.io
 
 Latest Release
@@ -34,14 +34,29 @@ Build Status
      :target: https://circleci.com/gh/conda-forge/pynwb-feedstocks
 
 
-Overall Health
+Code Coverage
 ==============
 
 .. image:: https://github.com/NeurodataWithoutBorders/pynwb/workflows/Run%20coverage/badge.svg
     :target: https://github.com/NeurodataWithoutBorders/pynwb/actions?query=workflow%3A%22Run+coverage%22
 
+Overall test coverage
+
 .. image:: https://codecov.io/gh/NeurodataWithoutBorders/pynwb/branch/dev/graph/badge.svg
     :target: https://codecov.io/gh/NeurodataWithoutBorders/pynwb
+
+Unit test coverage
+
+.. image:: https://codecov.io/gh/NeurodataWithoutBorders/pynwb/branch/dev/graph/badge.svg?flag=unit
+    :target: https://codecov.io/gh/NeurodataWithoutBorders/pynwb
+
+Integration test coverage
+
+.. image:: https://codecov.io/gh/NeurodataWithoutBorders/pynwb/branch/dev/graph/badge.svg?flag=integration
+    :target: https://codecov.io/gh/NeurodataWithoutBorders/pynwb
+
+Overall Health
+==============
 
 .. image:: https://requires.io/github/NeurodataWithoutBorders/pynwb/requirements.svg?branch=dev
      :target: https://requires.io/github/NeurodataWithoutBorders/pynwb/requirements/?branch=dev
