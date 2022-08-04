@@ -67,7 +67,8 @@ Streaming Method 2: fsspec
 fsspec is another data streaming approach that is quite flexible and has several performance advantages. This library
 creates a virtual filesystem for remote stores. With this approach, a virtual file is created for the file and
 the virtual filesystem layer takes care of requesting data from the S3 bucket whenever data is
-read from the virtual file.
+read from the virtual file.  Note that this implementation is completely unaware of internals of the HDF5 format
+and thus can work for **any** file, not only for the purpose of use with H5PY and PyNWB.
 
 First install ``fsspec`` and the dependencies of the :py:class:`~fsspec.implementations.http.HTTPFileSystem`:
 
