@@ -64,7 +64,7 @@ download the sliced data (and only the sliced data) to memory.
 
 Streaming Method 2: fsspec
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
-fsspec is another data streaming approach that quite flexible and has several performance advantages. This library
+fsspec is another data streaming approach that is quite flexible and has several performance advantages. This library
 creates a virtual filesystem for remote stores. With this approach, a virtual file is created for the file and
 virtual filesystem layer will take care of requesting data from the s3 bucket whenever data is
 read from the virtual file.
