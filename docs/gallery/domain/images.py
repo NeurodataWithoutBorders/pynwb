@@ -83,6 +83,9 @@ nwbfile
 # We can add it to the :py:class:`~pynwb.file.NWBFile` object as stimulus data using
 # the :py:meth:`~pynwb.file.NWBFile.add_stimulus` method.
 #
+# If the sampling rate is constant, use :py:attr:`~pynwb.base.TimeSeries.rate` and :py:attr:`~pynwb.base.TimeSeries.starting_time` to specify time.
+# For irregularly sampled recordings, use :py:attr:`~pynwb.base.TimeSeries.timestamps` to specify time for each sample image.
+#
 
 image_data = np.random.randint(low=0, high=255, size=(200, 50, 50, 3), dtype=np.uint8)
 optical_series = OpticalSeries(
@@ -92,10 +95,7 @@ optical_series = OpticalSeries(
     orientation="lower left",  # required
     data=image_data,
     unit="n.a.",
-    format="raw",
-    starting_frame=[0.0],
     rate=1.0,
-    comments="no comments",
     description="The images presented to the subject as stimuli",
 )
 
@@ -119,7 +119,6 @@ behavior_images = ImageSeries(
     data=image_data,
     description="Image data of an animal moving in environment.",
     unit="n.a.",
-    format="raw",
     rate=1.0,
     starting_time=0.0,
 )
@@ -135,14 +134,8 @@ nwbfile.add_acquisition(behavior_images)
 # path to the external file(s) on disk. The file(s) path must be relative to the path of the NWB file.
 # Either ``external_file`` or ``data`` must be specified, but not both.
 #
-# If the sampling rate is constant, use :py:attr:`~pynwb.base.TimeSeries.rate` and :py:attr:`~pynwb.base.TimeSeries.starting_time` to specify time.
-# For irregularly sampled recordings, use :py:attr:`~pynwb.base.TimeSeries.timestamps` to specify time for each sample image.
-#
-# Each external image may contain one or more consecutive frames of the full :py:class:`~pynwb.image.ImageSeries`.
-# The :py:attr:`~pynwb.image.ImageSeries.starting_frame` attribute serves as an index to indicate which frame
-# each file contains.
-# For example, if the ``external_file`` dataset has three paths to files and the first and the second file have 2 frames,
-# and the third file has 3 frames, then this attribute will have values `[0, 2, 4]`.
+# The :py:attr:`~pynwb.image.ImageSeries.starting_frame` attribute serves as an index to indicate the starting frame of
+# each external file, allowing you to skip the beginning of videos.
 
 external_file = [
     os.path.relpath(movie_path, nwbfile_path) for movie_path in moviefiles_path

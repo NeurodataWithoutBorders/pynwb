@@ -1,98 +1,119 @@
 '''
 .. _streaming:
 
-Streaming from an S3 Bucket
-===========================
+Streaming NWB files
+===================
 
-It is possible to read data directly from an S3 bucket, such as data from the `DANDI Archive
-<https://dandiarchive.org/>`_. This is especially useful for reading small pieces of data
-from a large NWB file stored remotely. In fact, there are two different ways to do this supported by PyNWB.
+YOu can read specific sections within individual data files directly from remote storessuch as the
+`DANDI Archive <https://dandiarchive.org/>`_. This does not require you to download the entire large file just to
+access a small amount of datais especially useful for reading small pieces of data from a large NWB file stored
+remotely. First, you will need to get the location of the file. The code below illustrates how to do this on DANDI
+using the dandi API library.
 
-Method 1: ROS3
-~~~~~~~~~~~~~~
-ROS3 stands for "read only S3" and is a driver created by the HDF5 group that allows HDF5 to read HDF5 files
-stored on s3. Using this method requires that your HDF5 library is installed with the ROS3 driver enabled. This
-is not the default configuration, so you will need to make sure you install the right version of h5py that has this
-advanced configuration enabled. You can install HDF5 with the ROS3 driver from `conda-forge
-<https://conda-forge.org/>`_ using ``conda``. You may first need to uninstall a currently installed version of h5py.
+Getting file location on DANDI
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+The :py:class:`~dandi.dandiapi.DandiAPIClient` can be used to get the S3 URL of any NWB file stored in the DANDI
+Archive. If you have not already, install the latest release of the ``dandi`` package.
+
+
+.. code-block:: bash
+
+   pip install dandi
+
+Now you can get the url of a particular NWB file using the dandiset ID and the path of that file within the dandiset.
+
+.. code-block:: python
+
+   from dandi.dandiapi import DandiAPIClient
+
+   dandiset_id = '000006'  # ephys dataset from the Svoboda Lab
+   filepath = 'sub-anm372795/sub-anm372795_ses-20170718.nwb'  # 450 kB file
+   with DandiAPIClient() as client:
+       asset = client.get_dandiset(dandiset_id, 'draft').get_asset_by_path(filepath)
+       s3_url = asset.get_content_url(follow_redirects=1, strip_query=True)
+
+
+Streaming Method 1: ROS3
+~~~~~~~~~~~~~~~~~~~~~~~~
+ROS3 is one of the supported methods for reading data from a remote store. ROS3 stands for "read only S3" and is a
+driver created by the HDF5 Group that allows HDF5 to read HDF5 files stored remotely in s3 buckets. Using this method
+requires that your HDF5 library is installed with the ROS3 driver enabled. This is not the default configuration,
+so you will need to make sure you install the right version of ``h5py`` that has this advanced configuration enabled.
+You can install HDF5 with the ROS3 driver from `conda-forge <https://conda-forge.org/>`_ using ``conda``. You may
+first need to uninstall a currently installed version of ``h5py``.
+
+.. code-block:: bash
+
+   pip uninstall h5py
+   conda install -c conda-forge "h5py>=3.2"
+
+Now instantiate a :py:class:`~pynwb.NWBHDF5IO` object with the S3 URL and specify the driver as "ros3". This
+will download metadata about the file from the S3 bucket to memory. The values of datasets are accessed lazily,
+just like when reading an NWB file stored locally. So, slicing into a dataset will require additional time to
+download the sliced data (and only the sliced data) to memory.
+
+.. code-block:: python
+
+   from pynwb import NWBHDF5IO
+
+   with NWBHDF5IO(s3_url, mode='r', load_namespaces=True, driver='ros3') as io:
+       nwbfile = io.read()
+       print(nwbfile)
+       print(nwbfile.acquisition['lick_times'].time_series['lick_left_times'].data[:])
+
+Streaming Method 2: fsspec
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+fsspec is another data streaming approach that quite flexible and has several performance advantages. This library
+creates a virtual filesystem for remote stores. With this approach, a virtual file is created for the file and
+virtual filesystem layer will take care of requesting data from the s3 bucket whenever data is
+read from the virtual file.
+
+First install ``fsspec`` and the dependencies of the :py:class:`~fsspec.implementations.http.HTTPFileSystem`:
+
+.. code-block:: bash
+
+   pip install fsspec requests aiohttp
+
+Then in Python:
+
+.. code-block:: python
+
+    import fsspec
+    import pynwb
+    import h5py
+    from fsspec.implementations.cached import CachingFileSystem
+
+    # first, create a virtual filesystem based on the http protocol and use
+    # caching to save accessed data to RAM.
+    fs = CachingFileSystem(
+        fs=fsspec.filesystem("http"),
+        # target_protocol='blockcache',
+        cache_storage="nwb-cache",
+        # cache_check=600,
+        # block_size=1024,
+        # check_files=True,
+        # expiry_times=True,
+        # same_names=True,
+    )
+
+    # next, open the file
+    with fs.open(s3_url, "rb") as f:
+        with h5py.File(f) as file:
+            with pynwb.NWBHDF5IO(file=file, load_namespaces=True) as io:
+                nwbfile = io.read()
+                print(nwbfile.acquisition['lick_times'].time_series['lick_left_times'].data[:])
+
+
+fsspec is a protocol that can be used to access a variety of different store formats, including (at the time of
+writing):
+
+.. code-block:: python
+
+    from fsspec.registry import known_implementations
+    known_implementations.keys()
+
+file, memory, dropbox, http, https, zip, tar, gcs, gs, gdrive, sftp, ssh, ftp, hdfs, arrow_hdfs, webhdfs, s3, s3a, wandb, oci, adl, abfs, az, cached, blockcache, filecache, simplecache, dask, dbfs, github, git, smb, jupyter, jlab, libarchive, reference
 '''
-
-####################
-# .. code-block:: bash
-#
-#   pip uninstall h5py
-#   conda install -c conda-forge "h5py>=3.2"
-#
-
-####################
-# The ``DandiAPIClient`` can be used to get the S3 URL to an NWB file of interest stored in the DANDI Archive.
-# If you have not already, install the latest release of the ``dandi`` package.
-#
-# .. code-block:: bash
-#
-#   pip install dandi
-#
-# .. code-block:: python
-#
-#   from dandi.dandiapi import DandiAPIClient
-#
-#   dandiset_id = '000006'  # ephys dataset from the Svoboda Lab
-#   filepath = 'sub-anm372795/sub-anm372795_ses-20170718.nwb'  # 450 kB file
-#   with DandiAPIClient() as client:
-#       asset = client.get_dandiset(dandiset_id, 'draft').get_asset_by_path(filepath)
-#       s3_path = asset.get_content_url(follow_redirects=1, strip_query=True)
-
-####################
-# Finally, instantiate a :py:class:`~pynwb.NWBHDF5IO` object with the S3 URL and specify the driver as "ros3". This
-# will download metadata about the file from the S3 bucket to memory. The values of datasets are accessed lazily,
-# just like when reading an NWB file stored locally. So, slicing into a dataset will require additional time to
-# download the sliced data (and only the sliced data) to memory.
-#
-# .. code-block:: python
-#
-#   from pynwb import NWBHDF5IO
-#
-#   with NWBHDF5IO(s3_path, mode='r', load_namespaces=True, driver='ros3') as io:
-#       nwbfile = io.read()
-#       print(nwbfile)
-#       print(nwbfile.acquisition['lick_times'].time_series['lick_left_times'].data[:])
-
-####################
-# Method 2: s3fs
-# ~~~~~~~~~~~~~~
-# s3fs is a library that creates a virtual filesystem for an S3 store. With this approach, a virtual file is created
-# for the file and virtual filesystem layer will take care of requesting data from the s3 bucket whenever data is
-# read from the virtual file.
-#
-# First install s3fs:
-#
-# .. code-block:: bash
-#
-#   pip install s3fs
-#
-# Then in Python:
-#
-# .. code-block:: python
-#
-#   import s3fs
-#   import pynwb
-#   import h5py
-#
-#   fs = s3fs.S3FileSystem(anon=True)
-#
-#   f = fs.open("s3://dandiarchive/blobs/43b/f3a/43bf3a81-4a0b-433f-b471-1f10303f9d35", 'rb')
-#   file = h5py.File(f)
-#   io = pynwb.NWBHDF5IO(file=file, load_namespaces=True)
-#
-#   io.read()
-#
-# The above snippet opens an arbitrary file on DANDI. You can use the ``DandiAPIClient`` to find the s3 path,
-# but you will need to adjust this url to give it a prefix of "s3://dandiarchive/" as shown above.
-#
-# The s3fs approach has the advantage of being more robust that ROS3. Sometimes s3 requests are interrupted,
-# and s3fs has internal mechanisms to retry these requests automatically, whereas ROS3 does not. However, it may not
-# be available on all platforms. s3fs does not currently work for Windows.
-
 
 # sphinx_gallery_thumbnail_path = 'figures/gallery_thumbnails_streaming.png'

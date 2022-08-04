@@ -190,7 +190,8 @@ print(nwbfile)
 # The fields in the :py:class:`~pynwb.file.Subject` object are all free-form text (any format will be valid),
 # however it is recommended to follow particular conventions to help software tools interpret the data:
 #
-# * **age**: `ISO 8601 Duration format <https://en.wikipedia.org/wiki/ISO_8601#Durations>`_, e.g., ``"P90D"`` for 90 days old
+# * **age**: `ISO 8601 Duration format <https://en.wikipedia.org/wiki/ISO_8601#Durations>`_, e.g., ``"P90D"`` for 90
+# days old
 # * **species**: The formal latin binomial nomenclature, e.g., ``"Mus musculus"``, ``"Homo sapiens"``
 # * **sex**: Single letter abbreviation, e.g., ``"F"`` (female), ``"M"`` (male), ``"U"`` (unknown), and ``"O"`` (other)
 #
@@ -247,7 +248,8 @@ time_series_with_timestamps = TimeSeries(
 ####################
 # :py:class:`~pynwb.base.TimeSeries` objects can be added directly to :py:class:`~pynwb.file.NWBFile` using:
 #
-# * :py:meth:`~pynwb.file.NWBFile.add_acquisition` to  add *acquisition* data (raw, acquired data that should never change),
+# * :py:meth:`~pynwb.file.NWBFile.add_acquisition` to  add *acquisition* data (raw, acquired data that should never
+# change),
 # * :py:meth:`~pynwb.file.NWBFile.add_stimulus` to add *stimulus* data, or
 # * :py:meth:`~pynwb.file.NWBFile.add_stimulus_template` to store *stimulus templates*.
 #
@@ -306,8 +308,9 @@ print(spatial_series_obj)
 
 ####################
 # To help data analysis and visualization tools know that this :py:class:`~pynwb.behavior.SpatialSeries` object
-# represents the position of the subject, store the :py:class:`~pynwb.behavior.SpatialSeries` object inside
-# of a :py:class:`~pynwb.behavior.Position` object, which can hold one or more :py:class:`~pynwb.behavior.SpatialSeries` objects.
+# represents the position of the subject, store the :py:class:`~pynwb.behavior.SpatialSeries` object inside a
+# :py:class:`~pynwb.behavior.Position` object, which can hold one or more :py:class:`~pynwb.behavior.SpatialSeries`
+# objects.
 #
 # .. only:: html
 #

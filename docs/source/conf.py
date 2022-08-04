@@ -143,6 +143,7 @@ intersphinx_mapping = {
     'hdmf': ('https://hdmf.readthedocs.io/en/latest/', None),
     'pandas': ('https://pandas.pydata.org/pandas-docs/stable/', None),
     'dandi': ('https://dandi.readthedocs.io/en/stable/', None),
+    'fsspec': ("https://filesystem-spec.readthedocs.io/en/latest/", None),
 }
 
 extlinks = {'incf_lesson': ('https://training.incf.org/lesson/%s', ''),
