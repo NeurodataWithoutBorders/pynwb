@@ -99,7 +99,7 @@ Then in Python:
                 print(nwbfile.acquisition['lick_times'].time_series['lick_left_times'].data[:])
 
 
-fsspec is a protocol that can be used to access a variety of different store formats, including (at the time of
+fsspec is a library that can be used to access a variety of different store formats, including (at the time of
 writing):
 
 .. code-block:: python
