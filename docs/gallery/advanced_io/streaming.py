@@ -88,13 +88,7 @@ Then in Python:
     # caching to save accessed data to RAM.
     fs = CachingFileSystem(
         fs=fsspec.filesystem("http"),
-        # target_protocol='blockcache',
-        cache_storage="nwb-cache",
-        # cache_check=600,
-        # block_size=1024,
-        # check_files=True,
-        # expiry_times=True,
-        # same_names=True,
+        cache_storage="nwb-cache",  # Local folder for the cache
     )
 
     # next, open the file
