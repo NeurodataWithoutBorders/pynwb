@@ -564,7 +564,7 @@ class NWBFile(MultiContainerInterface):
     @docval(*get_docval(TimeIntervals.add_column))
     def add_epoch_column(self, **kwargs):
         """
-        Add a column to the electrode table.
+        Add a column to the epoch table.
         See :py:meth:`~pynwb.core.TimeIntervals.add_column` for more details
         """
         self.__check_epochs()
@@ -754,7 +754,7 @@ class NWBFile(MultiContainerInterface):
     @docval(*get_docval(DynamicTable.add_column))
     def add_invalid_times_column(self, **kwargs):
         """
-        Add a column to the trial table.
+        Add a column to the invalid times table.
         See :py:meth:`~hdmf.common.DynamicTable.add_column` for more details
         """
         self.__check_invalid_times()
@@ -763,7 +763,7 @@ class NWBFile(MultiContainerInterface):
     @docval(*get_docval(TimeIntervals.add_interval), allow_extra=True)
     def add_invalid_time_interval(self, **kwargs):
         """
-        Add a trial to the trial table.
+        Add a time interval to the invalid times table.
         See :py:meth:`~hdmf.common.DynamicTable.add_row` for more details.
 
         Required fields are *start_time*, *stop_time*, and any columns that have
