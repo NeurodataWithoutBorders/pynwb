@@ -229,9 +229,20 @@ for k, v in nwbfile.acquisition.items():
 # This command automatically installs the filters. Here is an example of how you would use the Z Standard library:
 import hdf5plugin
 
+from hdmf.backends.hdf5.h5_utils import H5DataIO
+from pynwb.file import TimeSeries
+
+import hdf5plugin
+
+wrapped_data = H5DataIO(
+    data=data,
+    compression=hdf5plugin.Zstd().filter_id,
+    allow_plugin_filters=True,
+)
+
 test_ts = TimeSeries(
     name='test_gzipped_timeseries',
-    data=H5DataIO(data=data, compression=hdf5plugin.Zstd()),       # <----
+    data=wrapped_data,
     unit='SIunit',
     starting_time=0.0,
     rate=10.0,
