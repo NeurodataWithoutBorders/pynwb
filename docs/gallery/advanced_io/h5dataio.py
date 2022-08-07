@@ -151,9 +151,6 @@ nwbfile.add_acquisition(test_ts)
 #   In addition to ``compression``, :py:class:`~hdmf.backends.hdf5.h5_utils.H5DataIO` also allows us to
 #   enable the ``shuffle`` and ``fletcher32`` HDF5 I/O filters.
 
-
-
-
 ####################
 # Writing the data
 # ----------------
@@ -214,8 +211,6 @@ for k, v in nwbfile.acquisition.items():
 #
 #   When wrapping an ``h5py.Dataset`` object using H5DataIO, then  all settings except ``link_data``
 #   will be ignored as the h5py.Dataset will either be linked to or copied as on write.
-
-
 
 ####################
 # Dynamically Loaded Filters
