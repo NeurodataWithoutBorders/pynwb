@@ -226,7 +226,8 @@ for k, v in nwbfile.acquisition.items():
 # ``pip install hdf5plugin``
 
 ####################
-# This command automatically installs the filters. Here is an example of how you would use the Z Standard library:
+# This command automatically installs the filters. Here is an example of how you would use the Z Standard algorithm:
+
 import hdf5plugin
 
 from hdmf.backends.hdf5.h5_utils import H5DataIO
