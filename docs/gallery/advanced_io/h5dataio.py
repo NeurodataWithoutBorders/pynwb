@@ -232,8 +232,6 @@ import hdf5plugin
 from hdmf.backends.hdf5.h5_utils import H5DataIO
 from pynwb.file import TimeSeries
 
-import hdf5plugin
-
 wrapped_data = H5DataIO(
     data=data,
     compression=hdf5plugin.Zstd().filter_id,
