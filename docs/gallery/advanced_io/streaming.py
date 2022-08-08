@@ -109,6 +109,10 @@ writing):
     known_implementations.keys()
 
 file, memory, dropbox, http, https, zip, tar, gcs, gs, gdrive, sftp, ssh, ftp, hdfs, arrow_hdfs, webhdfs, s3, s3a, wandb, oci, adl, abfs, az, cached, blockcache, filecache, simplecache, dask, dbfs, github, git, smb, jupyter, jlab, libarchive, reference
+
+The S3 backend, in particular, may provide additional functionality for accessing data on DANDI. See the
+`fsspec documentation on known implementations <https://filesystem-spec.readthedocs.io/en/latest/api.html?highlight=S3#other-known-implementations>`_
+for a full updated list of supported store formats.
 '''
 
 # sphinx_gallery_thumbnail_path = 'figures/gallery_thumbnails_streaming.png'
