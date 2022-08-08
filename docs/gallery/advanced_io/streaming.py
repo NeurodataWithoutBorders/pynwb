@@ -10,8 +10,8 @@ access a small amount of datais especially useful for reading small pieces of da
 remotely. First, you will need to get the location of the file. The code below illustrates how to do this on DANDI
 using the dandi API library.
 
-Getting file location on DANDI
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Getting the location of the file on DANDI
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The :py:class:`~dandi.dandiapi.DandiAPIClient` can be used to get the S3 URL of any NWB file stored in the DANDI
 Archive. If you have not already, install the latest release of the ``dandi`` package.
