@@ -5,7 +5,7 @@ Streaming NWB files
 ===================
 
 You can read specific sections within individual data files directly from remote stores such as the
-`DANDI Archive <https://dandiarchive.org/>`_. This is especially useful for reading small pieces of data 
+`DANDI Archive <https://dandiarchive.org/>`_. This is especially useful for reading small pieces of data
 from a large NWB file stored
 remotely. First, you will need to get the location of the file. The code below illustrates how to do this on DANDI
 using the dandi API library.
