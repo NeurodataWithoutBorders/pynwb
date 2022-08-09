@@ -93,10 +93,14 @@ class ImageSeries(TimeSeries):
             setattr(self, key, val)
 
         if not self._check_external_file_starting_frame_length():
-            raise ValueError(
-                "%s '%s': The number of frame indices in 'starting_frame' should have the same length "
-                "as 'external_file'." % (self.__class__.__name__, name)
-            )
+            msg = ("%s '%s': The number of frame indices in 'starting_frame' should have "
+                   "the same length as 'external_file'." % (self.__class__.__name__, name))
+
+            # Raise an error when user creates the instance
+            if not self._in_construct_mode:
+                raise ValueError(msg)
+            # For back compatibility, raise a warning when loading from file
+            warnings.warn(msg)
 
         if self._change_external_file_format():
             warnings.warn(
