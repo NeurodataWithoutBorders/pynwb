@@ -75,16 +75,14 @@ class TestReadOldVersions(TestCase):
     def test_read_imageseries_no_data_warns_when_checks_are_violated(self):
         """Test that warnings are raised when an ImageSeries is read that was created
         incorrectly."""
-        f = Path(__file__).parent / '1.5.1_imageseries_no_data.nwb'
+        f = Path(__file__).parent / "1.5.1_imageseries_no_data.nwb"
         with warnings.catch_warnings(record=True) as warnings_on_read:
-            with NWBHDF5IO(str(f), 'r') as io:
+            with NWBHDF5IO(str(f), "r") as io:
                 io.read()
                 warning_msgs = [warning.message.args[0] for warning in warnings_on_read]
                 self.assertEqual(len(warning_msgs), 2)
                 self.assertTrue(
-                    all(
-                        msg in warning_msgs for msg in self.image_series_warnings[1:]
-                    )
+                    all(msg in warning_msgs for msg in self.image_series_warnings[1:])
                 )
                 assert self.image_series_warnings[0] not in warning_msgs
 
@@ -98,15 +96,12 @@ class TestReadOldVersions(TestCase):
     def test_read_imageseries_no_unit_warns_when_checks_are_violated(self):
         """Test that warnings are raised when an ImageSeries is read that was created
         incorrectly."""
-        f = Path(__file__).parent / '1.5.1_imageseries_no_unit.nwb'
+        f = Path(__file__).parent / "1.5.1_imageseries_no_unit.nwb"
         with warnings.catch_warnings(record=True) as warnings_on_read:
-            with NWBHDF5IO(str(f), 'r') as io:
+            with NWBHDF5IO(str(f), "r") as io:
                 io.read()
                 warning_msgs = [warning.message.args[0] for warning in warnings_on_read]
                 self.assertEqual(len(warning_msgs), 3)
                 self.assertTrue(
-                    all(
-                        msg in warning_msgs for msg in self.image_series_warnings
-                    )
+                    all(msg in warning_msgs for msg in self.image_series_warnings)
                 )
-
