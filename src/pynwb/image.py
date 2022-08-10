@@ -79,6 +79,7 @@ class ImageSeries(TimeSeries):
         if unit is None:
             kwargs['unit'] = ImageSeries.DEFAULT_UNIT
 
+        # If a single external_file is given then set starting_frame  to [0] for backward compatibility 
         if (
             args_to_set["external_file"] is not None
             and args_to_set["starting_frame"] is None
@@ -128,9 +129,14 @@ class ImageSeries(TimeSeries):
             )
 
     def _raise_error_when_check_is_violated(self, error_msg):
-        """Raise an error when a check is violated on instance creation.
+        """
+        Raise an error when a check is violated on instance creation.
         To ensure backwards compatibility, this method throws a warning
-        instead of raising an error when reading from a file."""
+        instead of raising an error when reading from a file, ensuring that
+        files with invalid data can be read.
+        """
+        if error_msg is None:
+            return
         if not self._in_construct_mode:
             raise ValueError(error_msg)
         warnings.warn(error_msg)
