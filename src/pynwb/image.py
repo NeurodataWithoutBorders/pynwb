@@ -117,20 +117,6 @@ class ImageSeries(TimeSeries):
         )
         self._error_on_new_warn_on_construct(error_msg=self._check_external_file_data())
 
-    def _check_external_file_starting_frame_length(self):
-        """
-        Check that the number of frame indices in 'starting_frame' matches the number of files in 'external_file'.
-        """
-        if self.external_file is None:
-            return
-        if get_data_shape(self.external_file) == get_data_shape(self.starting_frame):
-            return
-
-        return (
-            "%s '%s': The number of frame indices in 'starting_frame' should have "
-            "the same length as 'external_file'." % (self.__class__.__name__, self.name)
-        )
-
     def _change_external_file_format(self):
         """
         Change the format to 'external' when external_file is specified.
@@ -144,6 +130,38 @@ class ImageSeries(TimeSeries):
             return True
 
         return False
+
+    def _check_time_series_dimension(self):
+        """Override _check_time_series_dimension to do nothing.
+        The _check_image_series_dimension method will be called instead.
+        """
+        return True
+
+    def _check_image_series_dimension(self):
+        """Check that the 0th dimension of data equals the length of timestamps, when applicable.
+
+        ImageSeries objects can have an external file instead of data stored. The external file cannot be
+        queried for the number of frames it contains, so this check will return True when an external file
+        is provided. Otherwise, this function calls the parent class' _check_time_series_dimension method.
+        """
+        if self.external_file is not None:
+            return True
+        return super()._check_time_series_dimension()
+
+    def _check_external_file_starting_frame_length(self):
+        """
+        Check that the number of frame indices in 'starting_frame' matches
+        the number of files in 'external_file'.
+        """
+        if self.external_file is None:
+            return
+        if get_data_shape(self.external_file) == get_data_shape(self.starting_frame):
+            return
+
+        return (
+            "%s '%s': The number of frame indices in 'starting_frame' should have "
+            "the same length as 'external_file'." % (self.__class__.__name__, self.name)
+        )
 
     def _check_external_file_format(self):
         """
@@ -172,23 +190,6 @@ class ImageSeries(TimeSeries):
             "%s '%s': Either external_file or data must be specified (not None), but not both."
             % (self.__class__.__name__, self.name)
         )
-
-    def _check_time_series_dimension(self):
-        """Override _check_time_series_dimension to do nothing.
-        The _check_image_series_dimension method will be called instead.
-        """
-        return True
-
-    def _check_image_series_dimension(self):
-        """Check that the 0th dimension of data equals the length of timestamps, when applicable.
-
-        ImageSeries objects can have an external file instead of data stored. The external file cannot be
-        queried for the number of frames it contains, so this check will return True when an external file
-        is provided. Otherwise, this function calls the parent class' _check_time_series_dimension method.
-        """
-        if self.external_file is not None:
-            return True
-        return super()._check_time_series_dimension()
 
     @property
     def bits_per_pixel(self):
