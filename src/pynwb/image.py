@@ -79,7 +79,7 @@ class ImageSeries(TimeSeries):
         if unit is None:
             kwargs['unit'] = ImageSeries.DEFAULT_UNIT
 
-        # If a single external_file is given then set starting_frame  to [0] for backward compatibility 
+        # If a single external_file is given then set starting_frame  to [0] for backward compatibility
         if (
             args_to_set["external_file"] is not None
             and args_to_set["starting_frame"] is None
@@ -93,11 +93,6 @@ class ImageSeries(TimeSeries):
         for key, val in args_to_set.items():
             setattr(self, key, val)
 
-        if not self._check_external_file_starting_frame_length():
-            msg = ("%s '%s': The number of frame indices in 'starting_frame' should have "
-                   "the same length as 'external_file'." % (self.__class__.__name__, name))
-            self._error_on_new_warn_on_construct(error_msg=msg)
-
         if self._change_external_file_format():
             warnings.warn(
                 "%s '%s': The value for 'format' has been changed to 'external'. "
@@ -107,19 +102,9 @@ class ImageSeries(TimeSeries):
                 DeprecationWarning,
             )
 
-        if not self._check_external_file_format():
-            msg = (
-                "%s '%s': Format must be 'external' when external_file is specified."
-                % (self.__class__.__name__, name)
-            )
-            self._error_on_new_warn_on_construct(error_msg=msg)
-
-        if not self._check_external_file_data():
-            msg = (
-                "%s '%s': Either external_file or data must be specified (not None), but not both."
-                % (self.__class__.__name__, name)
-            )
-            self._error_on_new_warn_on_construct(error_msg=msg)
+        self._error_on_new_warn_on_construct(error_msg=self._check_external_file_starting_frame_length())
+        self._error_on_new_warn_on_construct(error_msg=self._check_external_file_format())
+        self._error_on_new_warn_on_construct(error_msg=self._check_external_file_data())
 
         if not self._check_image_series_dimension():
             warnings.warn(
@@ -133,10 +118,12 @@ class ImageSeries(TimeSeries):
         Check that the number of frame indices in 'starting_frame' matches the number of files in 'external_file'.
         """
         if self.external_file is None:
-            return True
-        external_file_shape = get_data_shape(self.external_file)
-        starting_frame_shape = get_data_shape(self.starting_frame)
-        return external_file_shape == starting_frame_shape
+            return
+        if get_data_shape(self.external_file) == get_data_shape(self.starting_frame):
+            return
+
+        return ("%s '%s': The number of frame indices in 'starting_frame' should have "
+                "the same length as 'external_file'." % (self.__class__.__name__, self.name))
 
     def _change_external_file_format(self):
         """
@@ -157,18 +144,24 @@ class ImageSeries(TimeSeries):
         Check that format is 'external' when external_file is specified.
         """
         if self.external_file is None:
-            return True
+            return
+        if self.format == "external":
+            return
 
-        return self.format == "external"
+        return ("%s '%s': Format must be 'external' when external_file is specified."
+                % (self.__class__.__name__, self.name))
 
     def _check_external_file_data(self):
         """
         Check that data is an empty array when external_file is specified.
         """
         if self.external_file is None:
-            return True
+            return
+        if get_data_shape(self.data)[0] == 0:
+            return
 
-        return self.data.shape[0] == 0
+        return ("%s '%s': Either external_file or data must be specified (not None), but not both."
+                % (self.__class__.__name__, self.name))
 
     def _check_time_series_dimension(self):
         """Override _check_time_series_dimension to do nothing.
