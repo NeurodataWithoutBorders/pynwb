@@ -102,16 +102,16 @@ class ImageSeries(TimeSeries):
                 DeprecationWarning,
             )
 
-        self._error_on_new_warn_on_construct(error_msg=self._check_external_file_starting_frame_length())
-        self._error_on_new_warn_on_construct(error_msg=self._check_external_file_format())
-        self._error_on_new_warn_on_construct(error_msg=self._check_external_file_data())
-
         if not self._check_image_series_dimension():
             warnings.warn(
                 "%s '%s': Length of data does not match length of timestamps. Your data may be transposed. "
                 "Time should be on the 0th dimension"
                 % (self.__class__.__name__, self.name)
             )
+
+        self._error_on_new_warn_on_construct(error_msg=self._check_external_file_starting_frame_length())
+        self._error_on_new_warn_on_construct(error_msg=self._check_external_file_format())
+        self._error_on_new_warn_on_construct(error_msg=self._check_external_file_data())
 
     def _check_external_file_starting_frame_length(self):
         """
