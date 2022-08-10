@@ -32,6 +32,20 @@ class NWBMixin(AbstractContainer):
         neurodata_type = kwargs['neurodata_type']
         return super().get_ancestor(data_type=neurodata_type)
 
+    def _error_on_new_warn_on_construct(self, error_msg: str):
+        """
+        Raise an error when a check is violated on instance creation.
+        To ensure backwards compatibility, this method throws a warning
+        instead of raising an error when reading from a file, ensuring that
+        files with invalid data can be read. If error_msg is set to None
+        the function will simply return without further action.
+        """
+        if error_msg is None:
+            return
+        if not self._in_construct_mode:
+            raise ValueError(error_msg)
+        warn(error_msg)
+
 
 @register_class('NWBContainer', CORE_NAMESPACE)
 class NWBContainer(NWBMixin, Container):
