@@ -37,7 +37,8 @@ class NWBMixin(AbstractContainer):
         Raise an error when a check is violated on instance creation.
         To ensure backwards compatibility, this method throws a warning
         instead of raising an error when reading from a file, ensuring that
-        files with invalid data can be read.
+        files with invalid data can be read. If error_msg is set to None
+        the function will simply return without further action.
         """
         if error_msg is None:
             return
