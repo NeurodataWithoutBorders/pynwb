@@ -142,6 +142,38 @@ class ImageSeriesConstructor(TestCase):
                         rate=0.2,
                     )
 
+    def test_external_file_with_incorrect_starting_frame_construct_mode(self):
+        """Test that warning is raised when the length of starting_frame
+        is not the same as the length of external_file in case that the
+        ImageSeries in construct mode (i.e., during read)."""
+        for starting_frame in [None, [0], [1, 2, 3]]:
+            with self.subTest():
+                msg = (
+                    "ImageSeries 'test_iS': The number of frame indices in "
+                    "'starting_frame' should have the same length as 'external_file'."
+                )
+                # Create the image series in construct mode, modelling the behavior
+                # of the ObjectMapper on read while avoiding having to create, write,
+                # and read and entire NWB file
+                obj = ImageSeries.__new__(ImageSeries,
+                                          container_source=None,
+                                          parent=None,
+                                          object_id="test",
+                                          in_construct_mode=True)
+                with self.assertWarnsWith(warn_type=UserWarning, exc_msg=msg):
+                    obj.__init__(
+                        name="test_iS",
+                        external_file=["external_file", "external_file2"],
+                        format="external",
+                        unit="n.a.",
+                        starting_frame=starting_frame,
+                        rate=0.2,
+                    )
+            # Disable construct mode. Since we are not using this object any more
+            # this is not strictly necessary but is good style in case we expand
+            # the test later on
+            obj._in_construct_mode = False
+
     def test_external_file_with_correct_starting_frame(self):
         """Test that ValueError is not raised when the length of starting_frame
         is the same as the length of external_file."""
@@ -176,6 +208,27 @@ class ImageSeriesConstructor(TestCase):
         )
         with self.assertRaisesWith(ValueError, msg):
             ImageSeries(
+                name="test_iS",
+                external_file=["external_file"],
+                format="raw",
+                unit="n.a.",
+                starting_frame=[0],
+                rate=0.2,
+            )
+
+    def test_external_file_with_incorrect_format_construct_mode(self):
+        """Test that UserWarning is raised when external_file is provided but
+        the format is not 'external' while being in construct mode (i.e,. on data read)."""
+        obj = ImageSeries.__new__(ImageSeries,
+                                  container_source=None,
+                                  parent=None,
+                                  object_id="test",
+                                  in_construct_mode=True)
+        msg = (
+            "ImageSeries 'test_iS': Format must be 'external' when external_file is specified."
+        )
+        with self.assertWarnsWith(warn_type=UserWarning, exc_msg=msg):
+            obj.__init__(
                 name="test_iS",
                 external_file=["external_file"],
                 format="raw",
@@ -223,6 +276,28 @@ class ImageSeriesConstructor(TestCase):
         )
         with self.assertRaisesWith(ValueError, msg):
             ImageSeries(
+                name="test_iS",
+                external_file=["external_file"],
+                data=np.ones((3, 3, 3)),
+                format="external",
+                unit="n.a.",
+                starting_frame=[0],
+                rate=0.2,
+            )
+
+    def test_external_file_with_data_construct_mode(self):
+        """Test that UserWarning is raised when external_file is provided and
+        data is not None while being in construct mode (i.e,. on read)."""
+        obj = ImageSeries.__new__(ImageSeries,
+                                  container_source=None,
+                                  parent=None,
+                                  object_id="test",
+                                  in_construct_mode=True)
+        msg = (
+            "ImageSeries 'test_iS': Either external_file or data must be specified (not None), but not both."
+        )
+        with self.assertWarnsWith(warn_type=UserWarning, exc_msg=msg):
+            obj.__init__(
                 name="test_iS",
                 external_file=["external_file"],
                 data=np.ones((3, 3, 3)),
