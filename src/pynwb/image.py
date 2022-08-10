@@ -109,8 +109,12 @@ class ImageSeries(TimeSeries):
                 % (self.__class__.__name__, self.name)
             )
 
-        self._error_on_new_warn_on_construct(error_msg=self._check_external_file_starting_frame_length())
-        self._error_on_new_warn_on_construct(error_msg=self._check_external_file_format())
+        self._error_on_new_warn_on_construct(
+            error_msg=self._check_external_file_starting_frame_length()
+        )
+        self._error_on_new_warn_on_construct(
+            error_msg=self._check_external_file_format()
+        )
         self._error_on_new_warn_on_construct(error_msg=self._check_external_file_data())
 
     def _check_external_file_starting_frame_length(self):
@@ -122,8 +126,10 @@ class ImageSeries(TimeSeries):
         if get_data_shape(self.external_file) == get_data_shape(self.starting_frame):
             return
 
-        return ("%s '%s': The number of frame indices in 'starting_frame' should have "
-                "the same length as 'external_file'." % (self.__class__.__name__, self.name))
+        return (
+            "%s '%s': The number of frame indices in 'starting_frame' should have "
+            "the same length as 'external_file'." % (self.__class__.__name__, self.name)
+        )
 
     def _change_external_file_format(self):
         """
@@ -148,8 +154,10 @@ class ImageSeries(TimeSeries):
         if self.format == "external":
             return
 
-        return ("%s '%s': Format must be 'external' when external_file is specified."
-                % (self.__class__.__name__, self.name))
+        return "%s '%s': Format must be 'external' when external_file is specified." % (
+            self.__class__.__name__,
+            self.name,
+        )
 
     def _check_external_file_data(self):
         """
@@ -160,8 +168,10 @@ class ImageSeries(TimeSeries):
         if get_data_shape(self.data)[0] == 0:
             return
 
-        return ("%s '%s': Either external_file or data must be specified (not None), but not both."
-                % (self.__class__.__name__, self.name))
+        return (
+            "%s '%s': Either external_file or data must be specified (not None), but not both."
+            % (self.__class__.__name__, self.name)
+        )
 
     def _check_time_series_dimension(self):
         """Override _check_time_series_dimension to do nothing.
