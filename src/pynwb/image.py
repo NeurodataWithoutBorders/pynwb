@@ -96,7 +96,7 @@ class ImageSeries(TimeSeries):
         if not self._check_external_file_starting_frame_length():
             msg = ("%s '%s': The number of frame indices in 'starting_frame' should have "
                    "the same length as 'external_file'." % (self.__class__.__name__, name))
-            self._raise_error_when_check_is_violated(error_msg=msg)
+            self._error_on_new_warn_on_construct(error_msg=msg)
 
         if self._change_external_file_format():
             warnings.warn(
@@ -112,14 +112,14 @@ class ImageSeries(TimeSeries):
                 "%s '%s': Format must be 'external' when external_file is specified."
                 % (self.__class__.__name__, name)
             )
-            self._raise_error_when_check_is_violated(error_msg=msg)
+            self._error_on_new_warn_on_construct(error_msg=msg)
 
         if not self._check_external_file_data():
             msg = (
                 "%s '%s': Either external_file or data must be specified (not None), but not both."
                 % (self.__class__.__name__, name)
             )
-            self._raise_error_when_check_is_violated(error_msg=msg)
+            self._error_on_new_warn_on_construct(error_msg=msg)
 
         if not self._check_image_series_dimension():
             warnings.warn(
@@ -127,19 +127,6 @@ class ImageSeries(TimeSeries):
                 "Time should be on the 0th dimension"
                 % (self.__class__.__name__, self.name)
             )
-
-    def _raise_error_when_check_is_violated(self, error_msg):
-        """
-        Raise an error when a check is violated on instance creation.
-        To ensure backwards compatibility, this method throws a warning
-        instead of raising an error when reading from a file, ensuring that
-        files with invalid data can be read.
-        """
-        if error_msg is None:
-            return
-        if not self._in_construct_mode:
-            raise ValueError(error_msg)
-        warnings.warn(error_msg)
 
     def _check_external_file_starting_frame_length(self):
         """
