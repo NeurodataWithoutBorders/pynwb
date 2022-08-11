@@ -4,14 +4,14 @@
 Streaming NWB files
 ===================
 
-YOu can read specific sections within individual data files directly from remote storessuch as the
-`DANDI Archive <https://dandiarchive.org/>`_. This does not require you to download the entire large file just to
-access a small amount of datais especially useful for reading small pieces of data from a large NWB file stored
+You can read specific sections within individual data files directly from remote stores such as the
+`DANDI Archive <https://dandiarchive.org/>`_. This is especially useful for reading small pieces of data
+from a large NWB file stored
 remotely. First, you will need to get the location of the file. The code below illustrates how to do this on DANDI
 using the dandi API library.
 
-Getting file location on DANDI
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Getting the location of the file on DANDI
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The :py:class:`~dandi.dandiapi.DandiAPIClient` can be used to get the S3 URL of any NWB file stored in the DANDI
 Archive. If you have not already, install the latest release of the ``dandi`` package.
@@ -64,10 +64,11 @@ download the sliced data (and only the sliced data) to memory.
 
 Streaming Method 2: fsspec
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
-fsspec is another data streaming approach that quite flexible and has several performance advantages. This library
+fsspec is another data streaming approach that is quite flexible and has several performance advantages. This library
 creates a virtual filesystem for remote stores. With this approach, a virtual file is created for the file and
-virtual filesystem layer will take care of requesting data from the s3 bucket whenever data is
-read from the virtual file.
+the virtual filesystem layer takes care of requesting data from the S3 bucket whenever data is
+read from the virtual file.  Note that this implementation is completely unaware of internals of the HDF5 format
+and thus can work for **any** file, not only for the purpose of use with H5PY and PyNWB.
 
 First install ``fsspec`` and the dependencies of the :py:class:`~fsspec.implementations.http.HTTPFileSystem`:
 
@@ -88,13 +89,7 @@ Then in Python:
     # caching to save accessed data to RAM.
     fs = CachingFileSystem(
         fs=fsspec.filesystem("http"),
-        # target_protocol='blockcache',
-        cache_storage="nwb-cache",
-        # cache_check=600,
-        # block_size=1024,
-        # check_files=True,
-        # expiry_times=True,
-        # same_names=True,
+        cache_storage="nwb-cache",  # Local folder for the cache
     )
 
     # next, open the file
@@ -105,7 +100,7 @@ Then in Python:
                 print(nwbfile.acquisition['lick_times'].time_series['lick_left_times'].data[:])
 
 
-fsspec is a protocol that can be used to access a variety of different store formats, including (at the time of
+fsspec is a library that can be used to access a variety of different store formats, including (at the time of
 writing):
 
 .. code-block:: python
@@ -114,6 +109,10 @@ writing):
     known_implementations.keys()
 
 file, memory, dropbox, http, https, zip, tar, gcs, gs, gdrive, sftp, ssh, ftp, hdfs, arrow_hdfs, webhdfs, s3, s3a, wandb, oci, adl, abfs, az, cached, blockcache, filecache, simplecache, dask, dbfs, github, git, smb, jupyter, jlab, libarchive, reference
+
+The S3 backend, in particular, may provide additional functionality for accessing data on DANDI. See the
+`fsspec documentation on known implementations <https://filesystem-spec.readthedocs.io/en/latest/api.html?highlight=S3#other-known-implementations>`_
+for a full updated list of supported store formats.
 
 .. tip::
 
