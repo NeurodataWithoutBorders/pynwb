@@ -373,18 +373,52 @@ class TestTimeSeries(TestCase):
                 timestamps=[0.3, 0.4, 0.5],
             )
 
-    def test_dimension_warning(self):
+    def test_timestamps_data_length_error_raised(self):
+        """Test that TimeSeries cannot be created with timestamps and data of different lengths."""
         msg = (
             "TimeSeries 'test_ts2': Length of data does not match length of timestamps. Your data may be "
             "transposed. Time should be on the 0th dimension"
         )
-        with self.assertWarnsWith(UserWarning, msg):
+        with self.assertRaisesWith(ValueError, msg):
             TimeSeries(
                 name="test_ts2",
                 data=[10, 11, 12],
                 unit="grams",
                 timestamps=[0.3, 0.4, 0.5, 0.6, 0.7, 0.8],
             )
+
+    def test_timestamps_data_length_warning_construct_mode(self):
+        """
+        Test that warning is raised when the length of data does not match the length of
+        timestamps in case that the TimeSeries in construct mode (i.e., during read).
+        """
+        msg = (
+            "TimeSeries 'test_ts2': Length of data does not match length of timestamps. Your data may be "
+            "transposed. Time should be on the 0th dimension"
+        )
+        for timestamps in [[0], [1, 2, 3, 4]]:
+            with self.subTest():
+                # Create the time series in construct mode, modelling the behavior
+                # of the ObjectMapper on read while avoiding having to create, write,
+                # and read and entire NWB file
+                obj = TimeSeries.__new__(
+                    TimeSeries,
+                    container_source=None,
+                    parent=None,
+                    object_id="test",
+                    in_construct_mode=True,
+                )
+                with self.assertWarnsWith(UserWarning, msg):
+                    obj.__init__(
+                        name="test_ts2",
+                        data=[10, 11, 12],
+                        unit="grams",
+                        timestamps=timestamps,
+                    )
+                # Disable construct mode. Since we are not using this object anymore
+                # this is not strictly necessary but is good style in case we expand
+                # the test later on.
+                obj._in_construct_mode = False
 
 
 class TestImage(TestCase):
