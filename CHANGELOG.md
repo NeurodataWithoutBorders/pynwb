@@ -14,6 +14,10 @@
   from s3 that is an alternative to ros3. This required relaxing of `NWBHDF5IO` input validation. The `path`
   arg is not needed if `file` is provided. `mode` now has a default value of "r". 
   @bendichter (#1499)
+- Added a method to `NWBMixin` that only raises an error when a check is violated on instance creation,
+  otherwise throws a warning when reading from a file. The new checks in `ImageSeries` when `external_file` 
+  is provided is used with this method to ensure that that files with invalid data can be read, but prohibits
+  the user from creating new instances when these checks are violated. @weiglszonja (#1516)
 
 ## PyNWB 2.1.0 (July 6, 2022)
 

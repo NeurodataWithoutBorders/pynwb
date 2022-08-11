@@ -12,11 +12,10 @@ class TestImageSeriesIO(AcquisitionH5IOMixin, TestCase):
         self.dev1 = Device('dev1')
         iS = ImageSeries(
             name='test_iS',
-            data=np.ones((3, 3, 3)),
             unit='unit',
             external_file=['external_file'],
-            starting_frame=[1, 2, 3],
-            format='tiff',
+            starting_frame=[0],
+            format='external',
             timestamps=[1., 2., 3.],
             device=self.dev1,
         )
