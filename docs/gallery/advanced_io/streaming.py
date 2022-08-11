@@ -114,6 +114,13 @@ writing):
     known_implementations.keys()
 
 file, memory, dropbox, http, https, zip, tar, gcs, gs, gdrive, sftp, ssh, ftp, hdfs, arrow_hdfs, webhdfs, s3, s3a, wandb, oci, adl, abfs, az, cached, blockcache, filecache, simplecache, dask, dbfs, github, git, smb, jupyter, jlab, libarchive, reference
+
+.. tip::
+
+    There are several other methods for interacting with data in the cloud not covered here. See the HDF Group Blog post
+    `Cloud Storage Options for HDF5 <https://www.hdfgroup.org/2022/08/cloud-storage-options-for-hdf5/>`_ for a
+    comparative summary of these and other options.
+
 '''
 
 # sphinx_gallery_thumbnail_path = 'figures/gallery_thumbnails_streaming.png'
