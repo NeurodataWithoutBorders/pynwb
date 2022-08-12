@@ -164,7 +164,7 @@ nwbfile.add_acquisition(image_series2)
 #
 # You can also store the result of motion correction.
 # These should be stored in a :py:class:`~pynwb.ophys.MotionCorrection` object,
-# which is a :py:class:`~pynwb.core.MultiContainerInterface` (similar to pynwb.behavior.Position)
+# which is a :py:class:`~pynwb.core.MultiContainerInterface` (similar to :py:class:`~pynwb.behavior.Position`)
 # which holds 1 or more :py:class:`~pynwb.ophys.CorrectedImageStack` objects.
 
 

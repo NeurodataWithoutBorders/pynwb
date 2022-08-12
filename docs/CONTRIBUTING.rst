@@ -18,30 +18,30 @@ Did you find a bug? or Do you intend to add a new feature or change an existing 
 
 * **Identify the appropriate repository** for the change you are suggesting:
 
-   * Use `nwb-schema <https://github.com/NeurodataWithoutBorders/nwb-schema/>`_ for any changes to the NWB:N format schema, schema language, storage, and other NWB:N related documents
+   * Use `nwb-schema <https://github.com/NeurodataWithoutBorders/nwb-schema/>`_ for any changes to the NWB format schema, schema language, storage, and other NWB related documents
    * Use `PyNWB <https://github.com/NeurodataWithoutBorders/pynwb>`_  for any changes regarding the PyNWB API and the corresponding documentation
-   * Use `MatNWB <https://github.com/NeurodataWithoutBorders/matnwb>`_  for any changes regarding the PyNWB API and the corresponding documentation
+   * Use `MatNWB <https://github.com/NeurodataWithoutBorders/matnwb>`_  for any changes regarding the MatNWB API and the corresponding documentation
 
 * **Ensure the feature or change was not already reported** by searching on GitHub under `PyNWB Issues <https://github.com/NeurodataWithoutBorders/pynwb/issues>`_ and `nwb-schema issues <https://github.com/NeurodataWithoutBorders/nwb-schema/issues>`_, respectively .
 
 * If you are unable to find an open issue addressing the problem then open a new issue on the respective repository. Be sure to include:
 
     * **brief and descriptive title**
-    * **clear description of the problem you are trying to solve***. Describing the use case is often more important than proposing a specific solution. By describing the use case and problem you are trying to solve gives the development team and ultimately the NWB:N community a better understanding for the reasons of changes and enables others to suggest solutions.
+    * **clear description of the problem you are trying to solve***. Describing the use case is often more important than proposing a specific solution. By describing the use case and problem you are trying to solve gives the development team and ultimately the NWB community a better understanding for the reasons of changes and enables others to suggest solutions.
     * **context** providing as much relevant information as possible and if available a **code sample** or an **executable test case** demonstrating the expected behavior and/or problem.
 
 * Be sure to select the appropriate labels (see :ref:`sec-issue-labels`) for your tickets so that they can be processed accordingly.
 
-* NWB:N is currently being developed primarily by staff at scientific research institutions and industry, most of which work on many different research projects. Please be patient, if our development team is not able to respond immediately to your issues. In particular issues that belong to later project milestones may not be reviewed or processed until work on that milestone begins.
+* NWB is currently being developed primarily by staff at scientific research institutions and industry, most of which work on many different research projects. Please be patient, if our development team is not able to respond immediately to your issues. In particular issues that belong to later project milestones may not be reviewed or processed until work on that milestone begins.
 
 Did you write a patch that fixes a bug or implements a new feature?
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 See the ``Contributing Patches and Changes`` section below for details.
 
-Do you have questions about NWB:N?
+Do you have questions about NWB?
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Ask questions on our `Slack workspace <https://nwb-users.slack.com>`_ or sign up for our `NWB:N mailing list <http://visitor.r20.constantcontact.com/manage/optin?v=001nQUq2GTjwCjZxK_V2-6RLElLJO1HMVtoNLJ-wGyDCukZQZxu2AFJmNh6NS0_lGMsWc2w9hZpeNn74HuWdv5RtLX9qX0o0Hy1P0hOgMrkm2NoGAX3VoY25wx8HAtIZwredcCuM0nCUGodpvoaue3SzQ%3D%3D>`_ for updates.
+Ask questions on our `Slack workspace <https://nwb-users.slack.com>`_ or sign up for our `NWB mailing list <http://visitor.r20.constantcontact.com/manage/optin?v=001nQUq2GTjwCjZxK_V2-6RLElLJO1HMVtoNLJ-wGyDCukZQZxu2AFJmNh6NS0_lGMsWc2w9hZpeNn74HuWdv5RtLX9qX0o0Hy1P0hOgMrkm2NoGAX3VoY25wx8HAtIZwredcCuM0nCUGodpvoaue3SzQ%3D%3D>`_ for updates.
 
 Informal discussions between developers and users?
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

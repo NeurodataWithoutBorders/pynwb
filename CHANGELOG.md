@@ -2,14 +2,23 @@
 
 ## PyNWB 2.1.1 (Upcoming)
 
-## Documentation and tutorial enhancements:
+### Documentation and tutorial enhancements:
 - Support explicit ordering of sphinx gallery tutorials in the docs. @oruebel (#1504), @bdichter (#1495)
 - Add developer guide on how to create a new tutorial. @oruebel (#1504)
 - Add images tutorial. @weiglszonja (#1470)
+- Add example code for s3fs in the streaming tutorial. @bdichter (#1499)
 
-## Minor improvements
+### Enhancements and minor changes
 - Update coverage workflow, report separate unit vs integration coverage. @rly (#1509)
 - Delete test files generated from running sphinx gallery examples. @rly (#1517)
+- Enable passing an S3File created through s3fs, which provides a method for reading an NWB file directly
+  from s3 that is an alternative to ros3. This required relaxing of `NWBHDF5IO` input validation. The `path`
+  arg is not needed if `file` is provided. `mode` now has a default value of "r".
+  @bendichter (#1499)
+- Added a method to `NWBMixin` that only raises an error when a check is violated on instance creation,
+  otherwise throws a warning when reading from a file. The new checks in `ImageSeries` when `external_file`
+  is provided is used with this method to ensure that that files with invalid data can be read, but prohibits
+  the user from creating new instances when these checks are violated. @weiglszonja (#1516)
 
 ## PyNWB 2.1.0 (July 6, 2022)
 
@@ -25,7 +34,7 @@
   change, the impact user codes should be minimal as this change primarily adds functionality while the overall
   behavior of the API is largely consistent with existing behavior. @oruebel, @rly (#1390)
 
-# Enhancements and minor changes
+### Enhancements and minor changes
 - A warning is now raised if `SpatialSeries.data` has more than 3 columns. @bendichter, @rly (#1455, #1480)
 - The arguments x, y, z, imp, location, filtering are no longer required in the electrodes table.
   @h-mayorquin, @rly (#1448)
