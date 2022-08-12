@@ -18,6 +18,10 @@ Create a new tutorial
    include the prefix ``plot_`` as part of the name of tutorial file. Tutorials
    without the prefix will render just the code cells and text.
 
+2. Add the names of any test files created by running the python file to the
+   ``files_to_remove`` variable in ``clean_up_tests()`` in ``test.py``. This function
+   will remove the created test files after the sphinx-gallery tests are completed.
+
 2. **Optional:** To specify an explicit position for your tutorial in the subsection of the
    gallery, update the ``GALLERY_ORDER`` variable of the ``CustomSphinxGallerySectionSortKey``
    class defined in ``docs/source/conf.py``. If you skip this step, the tutorial will
