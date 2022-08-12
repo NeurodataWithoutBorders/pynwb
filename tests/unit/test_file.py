@@ -264,67 +264,6 @@ class NWBFileTest(TestCase):
         self.assertEqual(elec.iloc[0]['filtering'], 'none')
         self.assertEqual(elec.iloc[0]['group'], group)
 
-    def test_add_electrode_some_opt(self):
-        dev1 = self.nwbfile.create_device(name='dev1')
-        group = self.nwbfile.create_electrode_group(
-            name='tetrode1',
-            description='tetrode description',
-            location='tetrode location',
-            device=dev1
-        )
-        self.nwbfile.add_electrode(
-            x=1.0, y=2.0, z=3.0,
-            imp=-1.0,
-            location='CA1',
-            filtering='none',
-            group=group,
-            id=1,
-            rel_x=4.0, rel_y=5.0, rel_z=6.0,
-            reference='ref1'
-        )
-        self.nwbfile.add_electrode(
-            x=1.0, y=2.0, z=3.0,
-            imp=-1.0,
-            location='CA1',
-            filtering='none',
-            group=group,
-            id=2,
-            rel_x=7.0, rel_y=8.0, rel_z=9.0,
-            reference='ref2'
-        )
-        elec = self.nwbfile.electrodes[0]
-        self.assertEqual(elec.iloc[0]['rel_x'], 4.0)
-        self.assertEqual(elec.iloc[0]['rel_y'], 5.0)
-        self.assertEqual(elec.iloc[0]['rel_z'], 6.0)
-        self.assertEqual(elec.iloc[0]['reference'], 'ref1')
-        elec = self.nwbfile.electrodes[1]
-        self.assertEqual(elec.iloc[0]['rel_x'], 7.0)
-        self.assertEqual(elec.iloc[0]['rel_y'], 8.0)
-        self.assertEqual(elec.iloc[0]['rel_z'], 9.0)
-        self.assertEqual(elec.iloc[0]['reference'], 'ref2')
-
-    def test_add_electrode_missing_location(self):
-        """
-        Test the case where the user creates an electrode table region with
-        indexes that are out of range of the amount of electrodes added.
-        """
-        nwbfile = NWBFile('a', 'b', datetime.now(tzlocal()))
-        device = nwbfile.create_device('a')
-        elecgrp = nwbfile.create_electrode_group('a', 'b', device=device, location='a')
-        msg = "The 'location' argument is required when creating an electrode."
-        with self.assertRaisesWith(ValueError, msg):
-            nwbfile.add_electrode(group=elecgrp, id=0)
-
-    def test_add_electrode_missing_group(self):
-        """
-        Test the case where the user creates an electrode table region with
-        indexes that are out of range of the amount of electrodes added.
-        """
-        nwbfile = NWBFile('a', 'b', datetime.now(tzlocal()))
-        msg = "The 'group' argument is required when creating an electrode."
-        with self.assertRaisesWith(ValueError, msg):
-            nwbfile.add_electrode(location='a', id=0)
-
     def test_all_children(self):
         ts1 = TimeSeries('test_ts1', [0, 1, 2, 3, 4, 5], 'grams', timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5])
         ts2 = TimeSeries('test_ts2', [0, 1, 2, 3, 4, 5], 'grams', timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5])
@@ -433,6 +372,156 @@ Fields:
                                self.start,
                                related_publications=('pub1', 'pub2'))
         self.assertTupleEqual(self.nwbfile.related_publications, ('pub1', 'pub2'))
+
+
+class TestElectrodeTable(TestCase):
+
+    def setUp(self):
+        self.nwbfile = NWBFile(
+            session_description='a test session description for a test NWBFile',
+            identifier='FILE123',
+            session_start_time=datetime(2017, 5, 1, 12, 0, 0, tzinfo=tzlocal())
+        )
+
+    def test_set_electrodes(self):
+        electrodes = ElectrodeTable()
+        self.nwbfile.electrodes = electrodes
+
+    def test_electrodes_add_row(self):
+        dev1 = self.nwbfile.create_device(name='dev1')
+        group = self.nwbfile.create_electrode_group(
+            name='tetrode1',
+            description='tetrode description',
+            location='tetrode location',
+            device=dev1
+        )
+
+        table = ElectrodeTable()
+        table.add_row(
+            x=1.0, y=2.0, z=3.0,
+            imp=-1.0,
+            location='CA1',
+            filtering='none',
+            group=group,
+            id=1
+        )
+
+        elec = table[0]
+        self.assertEqual(elec.index[0], 1)
+        self.assertEqual(elec.iloc[0]['x'], 1.0)
+        self.assertEqual(elec.iloc[0]['y'], 2.0)
+        self.assertEqual(elec.iloc[0]['z'], 3.0)
+        self.assertEqual(elec.iloc[0]['location'], 'CA1')
+        self.assertEqual(elec.iloc[0]['filtering'], 'none')
+        self.assertEqual(elec.iloc[0]['group'], group)
+
+    def test_electrodes_add_electrode(self):
+        dev1 = self.nwbfile.create_device(name='dev1')
+        group = self.nwbfile.create_electrode_group(
+            name='tetrode1',
+            description='tetrode description',
+            location='tetrode location',
+            device=dev1
+        )
+
+        table = ElectrodeTable()
+        table.add_electrode(
+            x=1.0, y=2.0, z=3.0,
+            imp=-1.0,
+            location='CA1',
+            filtering='none',
+            group=group,
+            id=1
+        )
+
+        elec = table[0]
+        self.assertEqual(elec.index[0], 1)
+        self.assertEqual(elec.iloc[0]['x'], 1.0)
+        self.assertEqual(elec.iloc[0]['y'], 2.0)
+        self.assertEqual(elec.iloc[0]['z'], 3.0)
+        self.assertEqual(elec.iloc[0]['location'], 'CA1')
+        self.assertEqual(elec.iloc[0]['filtering'], 'none')
+        self.assertEqual(elec.iloc[0]['group'], group)
+
+    def test_add_electrode_opt_x(self):
+        dev1 = self.nwbfile.create_device(name='dev1')
+        group = self.nwbfile.create_electrode_group(
+            name='tetrode1',
+            description='tetrode description',
+            location='tetrode location',
+            device=dev1
+        )
+        table = ElectrodeTable()
+        table.add_electrode(
+            x=1.0,
+            location='CA1',
+            group=group,
+        )
+        # confirm that x is added and y is not
+        elec = table[0]
+        self.assertEqual(elec.index[0], 0)
+        self.assertEqual(elec.iloc[0]['x'], 1.0)
+        self.assertTrue('y' not in elec.iloc[0])
+
+    def test_add_electrode_opt(self):
+        dev1 = self.nwbfile.create_device(name='dev1')
+        group = self.nwbfile.create_electrode_group(
+            name='tetrode1',
+            description='tetrode description',
+            location='tetrode location',
+            device=dev1
+        )
+        table = ElectrodeTable()
+        table.add_electrode(
+            x=1.0, y=2.0, z=3.0,
+            imp=-1.0,
+            location='CA1',
+            filtering='none',
+            group=group,
+            id=1,
+            rel_x=4.0, rel_y=5.0, rel_z=6.0,
+            reference='ref1'
+        )
+        table.add_electrode(
+            x=1.0, y=2.0, z=3.0,
+            imp=-1.0,
+            location='CA1',
+            filtering='none',
+            group=group,
+            id=2,
+            rel_x=7.0, rel_y=8.0, rel_z=9.0,
+            reference='ref2'
+        )
+        elec = table[0]
+        self.assertEqual(elec.iloc[0]['rel_x'], 4.0)
+        self.assertEqual(elec.iloc[0]['rel_y'], 5.0)
+        self.assertEqual(elec.iloc[0]['rel_z'], 6.0)
+        self.assertEqual(elec.iloc[0]['reference'], 'ref1')
+        elec = table[1]
+        self.assertEqual(elec.iloc[0]['rel_x'], 7.0)
+        self.assertEqual(elec.iloc[0]['rel_y'], 8.0)
+        self.assertEqual(elec.iloc[0]['rel_z'], 9.0)
+        self.assertEqual(elec.iloc[0]['reference'], 'ref2')
+
+    def test_add_electrode_missing_location(self):
+        """
+        Test the case where the user tries to add an electrode without a location.
+        """
+        device = self.nwbfile.create_device(name='a')
+        elecgrp = self.nwbfile.create_electrode_group(name='a', description='b', device=device, location='a')
+        table = ElectrodeTable()
+        msg = "The 'location' argument is required when creating an electrode."
+        with self.assertRaisesWith(ValueError, msg):
+            table.add_electrode(group=elecgrp)
+
+    def test_add_electrode_missing_group(self):
+        """
+        Test the case where the user tries to add an electrode without a group.
+        """
+        table = ElectrodeTable()
+        msg = "The 'group' argument is required when creating an electrode."
+        with self.assertRaisesWith(ValueError, msg):
+            table.add_electrode(location='a')
 
 
 class SubjectTest(TestCase):
