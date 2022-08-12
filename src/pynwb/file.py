@@ -6,6 +6,7 @@ from warnings import warn
 import numpy as np
 import pandas as pd
 
+from hdmf.common import DynamicTableRegion, DynamicTable
 from hdmf.utils import docval, getargs, get_docval, popargs, popargs_to_dict, AllowPositional
 
 from . import register_class, CORE_NAMESPACE
@@ -20,7 +21,6 @@ from .ophys import ImagingPlane
 from .ogen import OptogeneticStimulusSite
 from .misc import Units
 from .core import NWBContainer, NWBDataInterface, MultiContainerInterface, ScratchData, LabelledDict
-from hdmf.common import DynamicTableRegion, DynamicTable
 
 
 def _not_parent(arg):
@@ -29,14 +29,16 @@ def _not_parent(arg):
 
 @register_class('LabMetaData', CORE_NAMESPACE)
 class LabMetaData(NWBContainer):
+    """Container for storing lab-specific meta-data"""
 
-    @docval({'name': 'name', 'type': str, 'doc': 'name of metadata'})
+    @docval({'name': 'name', 'type': str, 'doc': 'name of lab metadata'})
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
 
 @register_class('Subject', CORE_NAMESPACE)
 class Subject(NWBContainer):
+    """Subject information and metadata."""
 
     __nwbfields__ = (
         'age',
@@ -124,7 +126,6 @@ _add_electrode_docval = (
     {'name': 'enforce_unique_id', 'type': bool, 'doc': 'enforce that the id in the table must be unique',
      'default': True}
 )
-
 
 
 class ElectrodeTable(DynamicTable):
@@ -668,7 +669,7 @@ class NWBFile(MultiContainerInterface):
     @docval(*get_docval(TimeIntervals.add_column))
     def add_epoch_column(self, **kwargs):
         """
-        Add a column to the electrode table.
+        Add a column to the epoch table.
         See :py:meth:`~pynwb.core.TimeIntervals.add_column` for more details
         """
         self.__check_epochs()
@@ -801,7 +802,7 @@ class NWBFile(MultiContainerInterface):
     @docval(*get_docval(DynamicTable.add_column))
     def add_invalid_times_column(self, **kwargs):
         """
-        Add a column to the trial table.
+        Add a column to the invalid times table.
         See :py:meth:`~hdmf.common.DynamicTable.add_column` for more details
         """
         self.__check_invalid_times()
@@ -810,7 +811,7 @@ class NWBFile(MultiContainerInterface):
     @docval(*get_docval(TimeIntervals.add_interval), allow_extra=True)
     def add_invalid_time_interval(self, **kwargs):
         """
-        Add a trial to the trial table.
+        Add a time interval to the invalid times table.
         See :py:meth:`~hdmf.common.DynamicTable.add_row` for more details.
 
         Required fields are *start_time*, *stop_time*, and any columns that have

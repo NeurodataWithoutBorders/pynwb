@@ -11,10 +11,18 @@ class TestValidateScript(TestCase):
     # 1.0.3_nwbfile.nwb has cached "core" specification
     # 1.1.2_nwbfile.nwb has cached "core" and "hdmf-common" specifications
 
+    # NOTE we use "coverage run -m pynwb.validate" instead of "python -m pynwb.validate"
+    # so that we can both test pynwb.validate and compute code coverage from that test.
+    # NOTE we also use "coverage run -p" which will generate a .coverage file with the
+    # machine name, process id, and a random number appended to the filename to
+    # simplify collecting and merging coverage data from multiple subprocesses. if "-p"
+    # is not used, then each "coverage run" will overwrite the .coverage file from a
+    # previous "coverage run".
+
     def test_validate_file_no_cache(self):
         """Test that validating a file with no cached spec against the core namespace succeeds."""
-        result = subprocess.run("python -m pynwb.validate tests/back_compat/1.0.2_nwbfile.nwb",
-                                capture_output=True)
+        result = subprocess.run(["coverage", "run", "-p", "-m", "pynwb.validate",
+                                 "tests/back_compat/1.0.2_nwbfile.nwb"], capture_output=True)
 
         stderr_regex = re.compile(
             r".*UserWarning: No cached namespaces found in tests/back_compat/1\.0\.2_nwbfile\.nwb\s*"
@@ -31,8 +39,8 @@ class TestValidateScript(TestCase):
 
     def test_validate_file_no_cache_bad_ns(self):
         """Test that validating a file with no cached spec against a specified, unknown namespace fails."""
-        result = subprocess.run("python -m pynwb.validate tests/back_compat/1.0.2_nwbfile.nwb --ns notfound",
-                                capture_output=True)
+        result = subprocess.run(["coverage", "run", "-p", "-m", "pynwb.validate", "tests/back_compat/1.0.2_nwbfile.nwb",
+                                 "--ns", "notfound"], capture_output=True)
 
         stderr_regex = re.compile(
             r".*UserWarning: No cached namespaces found in tests/back_compat/1\.0\.2_nwbfile\.nwb\s*"
@@ -48,8 +56,8 @@ class TestValidateScript(TestCase):
 
     def test_validate_file_cached(self):
         """Test that validating a file with cached spec against its cached namespace succeeds."""
-        result = subprocess.run("python -m pynwb.validate tests/back_compat/1.1.2_nwbfile.nwb",
-                                capture_output=True)
+        result = subprocess.run(["coverage", "run", "-p", "-m", "pynwb.validate",
+                                 "tests/back_compat/1.1.2_nwbfile.nwb"], capture_output=True)
 
         self.assertEqual(result.stderr.decode('utf-8'), '')
 
@@ -60,8 +68,8 @@ class TestValidateScript(TestCase):
 
     def test_validate_file_cached_bad_ns(self):
         """Test that validating a file with cached spec against a specified, unknown namespace fails."""
-        result = subprocess.run("python -m pynwb.validate tests/back_compat/1.1.2_nwbfile.nwb --ns notfound",
-                                capture_output=True)
+        result = subprocess.run(["coverage", "run", "-p", "-m", "pynwb.validate",
+                                 "tests/back_compat/1.1.2_nwbfile.nwb", "--ns", "notfound"], capture_output=True)
 
         stderr_regex = re.compile(
             r"The namespace 'notfound' could not be found in cached namespace information as only "
@@ -73,8 +81,8 @@ class TestValidateScript(TestCase):
 
     def test_validate_file_cached_hdmf_common(self):
         """Test that validating a file with cached spec against the hdmf-common namespace fails."""
-        result = subprocess.run("python -m pynwb.validate tests/back_compat/1.1.2_nwbfile.nwb --ns hdmf-common",
-                                capture_output=True)
+        result = subprocess.run(["coverage", "run", "-p", "-m", "pynwb.validate", "tests/back_compat/1.1.2_nwbfile.nwb",
+                                 "--ns", "hdmf-common"], capture_output=True)
 
         stderr_regex = re.compile(
             r"The namespace 'hdmf-common' is included by the namespace 'core'\. Please validate against that "
@@ -84,8 +92,8 @@ class TestValidateScript(TestCase):
 
     def test_validate_file_cached_ignore(self):
         """Test that validating a file with cached spec against the core namespace succeeds."""
-        result = subprocess.run("python -m pynwb.validate tests/back_compat/1.1.2_nwbfile.nwb --no-cached-namespace",
-                                capture_output=True)
+        result = subprocess.run(["coverage", "run", "-p", "-m", "pynwb.validate", "tests/back_compat/1.1.2_nwbfile.nwb",
+                                 "--no-cached-namespace"], capture_output=True)
 
         self.assertEqual(result.stderr.decode('utf-8'), '')
 

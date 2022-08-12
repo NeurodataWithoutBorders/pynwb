@@ -200,9 +200,10 @@ def validate(**kwargs):
 
 class NWBHDF5IO(_HDF5IO):
 
-    @docval({'name': 'path', 'type': (str, Path), 'doc': 'the path to the HDF5 file'},
+    @docval({'name': 'path', 'type': (str, Path), 'doc': 'the path to the HDF5 file', 'default': None},
             {'name': 'mode', 'type': str,
-             'doc': 'the mode to open the HDF5 file with, one of ("w", "r", "r+", "a", "w-", "x")'},
+             'doc': 'the mode to open the HDF5 file with, one of ("w", "r", "r+", "a", "w-", "x")',
+             'default': 'r'},
             {'name': 'load_namespaces', 'type': bool,
              'doc': 'whether or not to load cached namespaces from given path - not applicable in write mode',
              'default': False},
@@ -210,7 +211,7 @@ class NWBHDF5IO(_HDF5IO):
             {'name': 'extensions', 'type': (str, TypeMap, list),
              'doc': 'a path to a namespace, a TypeMap, or a list consisting paths to namespaces and TypeMaps',
              'default': None},
-            {'name': 'file', 'type': h5py.File, 'doc': 'a pre-existing h5py.File object', 'default': None},
+            {'name': 'file', 'type': [h5py.File, 'S3File'], 'doc': 'a pre-existing h5py.File object', 'default': None},
             {'name': 'comm', 'type': "Intracomm", 'doc': 'the MPI communicator to use for parallel I/O',
              'default': None},
             {'name': 'driver', 'type': str, 'doc': 'driver for h5py to use when opening HDF5 file', 'default': None})

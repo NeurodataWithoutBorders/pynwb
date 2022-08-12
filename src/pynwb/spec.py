@@ -1,7 +1,7 @@
 from copy import copy, deepcopy
 
-from hdmf.spec import (LinkSpec, GroupSpec, DatasetSpec, SpecNamespace, NamespaceBuilder, AttributeSpec, DtypeSpec,
-                       RefSpec)
+from hdmf.spec import (LinkSpec, GroupSpec, DatasetSpec, SpecNamespace, NamespaceBuilder,
+                       AttributeSpec, DtypeSpec, RefSpec)
 from hdmf.spec.write import export_spec  # noqa: F401
 from hdmf.utils import docval, get_docval
 

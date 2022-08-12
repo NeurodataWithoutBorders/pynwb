@@ -10,7 +10,7 @@ in PyNWB for creating  Neurodata Extensions (NDX).
 .. seealso::
 
     For a more in-depth, step-by-step guide on how to create, document, and publish NWB extensions, we highly
-    recommend visiting the :nwb_overview:`extension tutorial <extensions_tutorial/6_documenting_extension.html>`
+    recommend visiting the :nwb_overview:`extension tutorial <extensions_tutorial/extensions_tutorial_home.html>`
     on the :nwb_overview:`nwb overview <>` website.
 
 .. seealso::

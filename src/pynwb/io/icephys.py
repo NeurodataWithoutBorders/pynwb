@@ -1,9 +1,9 @@
-from .. import register_map
-
-from pynwb.icephys import VoltageClampSeries, IntracellularRecordingsTable
 from hdmf.common.io.table import DynamicTableMap
 from hdmf.common.io.alignedtable import AlignedDynamicTableMap
+
+from .. import register_map
 from .base import TimeSeriesMap
+from pynwb.icephys import VoltageClampSeries, IntracellularRecordingsTable
 
 
 @register_map(VoltageClampSeries)

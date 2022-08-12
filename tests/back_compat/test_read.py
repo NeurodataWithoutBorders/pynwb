@@ -20,6 +20,17 @@ class TestReadOldVersions(TestCase):
                                "- expected an array of shape '[None]', got non-array data 'one publication'")],
     }
 
+    @classmethod
+    def setUpClass(cls):
+        cls.image_series_warnings = [
+            "ImageSeries 'test_imageseries': Either external_file or data must be "
+            "specified (not None), but not both.",
+            "ImageSeries 'test_imageseries': The number of frame indices in "
+            "'starting_frame' should have the same length as 'external_file'.",
+            "ImageSeries 'test_imageseries': Format must be 'external' when "
+            "external_file is specified.",
+        ]
+
     def test_read(self):
         """Test reading and validating all NWB files in the same folder as this file.
 
@@ -61,9 +72,36 @@ class TestReadOldVersions(TestCase):
             read_nwbfile = io.read()
             np.testing.assert_array_equal(read_nwbfile.acquisition['test_imageseries'].data, ImageSeries.DEFAULT_DATA)
 
+    def test_read_imageseries_no_data_warns_when_checks_are_violated(self):
+        """Test that warnings are raised when an ImageSeries is read that was created
+        incorrectly."""
+        f = Path(__file__).parent / "1.5.1_imageseries_no_data.nwb"
+        with warnings.catch_warnings(record=True) as warnings_on_read:
+            with NWBHDF5IO(str(f), "r") as io:
+                io.read()
+                warning_msgs = [warning.message.args[0] for warning in warnings_on_read]
+                self.assertEqual(len(warning_msgs), 2)
+                self.assertTrue(
+                    all(msg in warning_msgs for msg in self.image_series_warnings[1:])
+                )
+                assert self.image_series_warnings[0] not in warning_msgs
+
     def test_read_imageseries_no_unit(self):
         """Test that an ImageSeries written without unit is read with unit set to the default value."""
         f = Path(__file__).parent / '1.5.1_imageseries_no_unit.nwb'
         with NWBHDF5IO(str(f), 'r') as io:
             read_nwbfile = io.read()
             self.assertEqual(read_nwbfile.acquisition['test_imageseries'].unit, ImageSeries.DEFAULT_UNIT)
+
+    def test_read_imageseries_no_unit_warns_when_checks_are_violated(self):
+        """Test that warnings are raised when an ImageSeries is read that was created
+        incorrectly."""
+        f = Path(__file__).parent / "1.5.1_imageseries_no_unit.nwb"
+        with warnings.catch_warnings(record=True) as warnings_on_read:
+            with NWBHDF5IO(str(f), "r") as io:
+                io.read()
+                warning_msgs = [warning.message.args[0] for warning in warnings_on_read]
+                self.assertEqual(len(warning_msgs), 3)
+                self.assertTrue(
+                    all(msg in warning_msgs for msg in self.image_series_warnings)
+                )
