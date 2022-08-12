@@ -104,13 +104,6 @@ class TestValidateScript(TestCase):
             r"'core'\.\s* - no errors found\.\s*")
         self.assertRegex(result.stdout.decode('utf-8'), stdout_regex)
 
-    @classmethod
-    def tearDownClass(cls):
-        # merge the coverage files and delete the individual files
-        subprocess.run(["coverage", "combine"])
-        for f in glob.glob(".coverage.*"):
-            os.remove(f)
-
 
 class TestValidateFunction(TestCase):
 
