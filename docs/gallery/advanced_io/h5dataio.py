@@ -160,9 +160,8 @@ nwbfile.add_acquisition(test_ts)
 
 from pynwb import NWBHDF5IO
 
-io = NWBHDF5IO('advanced_io_example.nwb', 'w')
-io.write(nwbfile)
-io.close()
+with NWBHDF5IO('advanced_io_example.nwb', 'w') as io:
+    io.write(nwbfile)
 
 ####################
 # Reading the data
@@ -182,7 +181,7 @@ for k, v in nwbfile.acquisition.items():
                                                                v.data.chunks,
                                                                v.data.compression,
                                                                v.data.maxshape))
-
+io.close()
 ####################
 #
 # .. code-block:: python

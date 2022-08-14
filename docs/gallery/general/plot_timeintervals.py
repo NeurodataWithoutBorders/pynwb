@@ -238,7 +238,8 @@ from pynwb import NWBHDF5IO
 with NWBHDF5IO('example_timeintervals_file.nwb', 'w') as io:
     io.write(nwbfile)
 # read the file
-io = NWBHDF5IO('example_timeintervals_file.nwb', 'r')
-nwbfile_in = io.read()
-# plot the sleep stages TimeIntervals table
-nwbfile.get_time_intervals('sleep_stages').to_dataframe()
+with NWBHDF5IO('example_timeintervals_file.nwb', 'r') as io:
+    nwbfile_in = io.read()
+
+    # plot the sleep stages TimeIntervals table
+    nwbfile_in.get_time_intervals('sleep_stages').to_dataframe()
