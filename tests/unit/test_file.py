@@ -489,6 +489,10 @@ class SubjectTest(TestCase):
         with self.assertRaisesWith(ValueError, "age__reference must be 'birth' or 'gestational'."):
             Subject(subject_id='RAT123', age='P90D', age__reference='brth')
 
+    def test_age_reference_without_age(self):
+        with self.assertRaisesWith(ValueError, "If age__reference is provided, age must also be provided."):
+            Subject(subject_id='RAT123', age__reference='birth')
+
 
 class TestCacheSpec(TestCase):
 

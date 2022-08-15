@@ -100,6 +100,8 @@ class Subject(NWBContainer):
         if args_to_set["age__reference"] is not None:
             if args_to_set["age__reference"] not in ("birth", "gestational"):
                 raise ValueError("age__reference must be 'birth' or 'gestational'.")
+            if args_to_set["age"] is None:
+                raise ValueError("If age__reference is provided, age must also be provided.")
 
         weight = args_to_set['weight']
         if isinstance(weight, float):
