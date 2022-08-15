@@ -61,7 +61,7 @@ class Subject(NWBContainer):
                 "type": str,
                 "doc": "Age is with reference to this event. Can be 'birth' or 'gestational'. If reference is "
                        "omitted, 'birth' is implied.",
-                "default": None,
+                "default": "birth",
             },
             {'name': 'description', 'type': str,
              'doc': 'A description of the subject, e.g., "mouse A10".', 'default': None},
