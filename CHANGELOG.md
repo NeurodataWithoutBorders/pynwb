@@ -6,7 +6,8 @@
 - Support explicit ordering of sphinx gallery tutorials in the docs. @oruebel (#1504), @bdichter (#1495)
 - Add developer guide on how to create a new tutorial. @oruebel (#1504)
 - Add images tutorial. @weiglszonja (#1470)
-- Add example code for s3fs in the streaming tutorial. @bdichter (#1499)
+- Add example code for fsspec in the streaming tutorial. @bdichter (#1499)
+- Add age__reference field @bendichter ([#1540](https://github.com/NeurodataWithoutBorders/pynwb/pull/1540))
 
 ### Enhancements and minor changes
 - Update coverage workflow, report separate unit vs integration coverage. @rly (#1509)
