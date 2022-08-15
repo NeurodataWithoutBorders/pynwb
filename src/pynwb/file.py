@@ -56,6 +56,13 @@ class Subject(NWBContainer):
     @docval({'name': 'age', 'type': str,
              'doc': ('The age of the subject. The ISO 8601 Duration format is recommended, e.g., "P90D" for '
                      '90 days old.'), 'default': None},
+            {
+                "name": "age__reference",
+                "type": str,
+                "doc": "Age is with reference to this event. Can be 'birth' or 'gestational'. If reference is "
+                       "omitted, 'birth' is implied.",
+                "default": None,
+            },
             {'name': 'description', 'type': str,
              'doc': 'A description of the subject, e.g., "mouse A10".', 'default': None},
             {'name': 'genotype', 'type': str,
@@ -78,6 +85,7 @@ class Subject(NWBContainer):
             {'name': 'strain', 'type': str, 'doc': 'The strain of the subject, e.g., "C57BL/6J"', 'default': None})
     def __init__(self, **kwargs):
         keys_to_set = ("age",
+                       "age__reference",
                        "description",
                        "genotype",
                        "sex",
@@ -87,8 +95,11 @@ class Subject(NWBContainer):
                        "date_of_birth",
                        "strain")
         args_to_set = popargs_to_dict(keys_to_set, kwargs)
-        kwargs['name'] = 'subject'
-        super().__init__(**kwargs)
+        super().__init__(name="subject", **kwargs)
+
+        if args_to_set["age__reference"] is not None:
+            if args_to_set["age__reference"] not in ("birth", "gestational"):
+                raise ValueError("age__reference must be 'birth' or 'gestational'.")
 
         weight = args_to_set['weight']
         if isinstance(weight, float):
