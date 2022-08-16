@@ -489,7 +489,6 @@ class SubjectTest(TestCase):
         with self.assertRaisesWith(ValueError, "age__reference must be 'birth' or 'gestational'."):
             Subject(subject_id='RAT123', age='P90D', age__reference='brth')
 
-
     def test_age_regression_1(self):
         subject = Subject(
             age='P90D',
