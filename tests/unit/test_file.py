@@ -489,11 +489,8 @@ class SubjectTest(TestCase):
         with self.assertRaisesWith(ValueError, "age__reference must be 'birth' or 'gestational'."):
             Subject(subject_id='RAT123', age='P90D', age__reference='brth')
 
-    def test_age_reference_without_age(self):
-        with self.assertRaisesWith(ValueError, "If age__reference is provided, age must also be provided."):
-            Subject(subject_id='RAT123', age__reference='birth')
 
-    def test_age_regression(self):
+    def test_age_regression_1(self):
         subject = Subject(
             age='P90D',
             description='An unfortunate rat',
@@ -502,6 +499,15 @@ class SubjectTest(TestCase):
 
         self.assertEqual(subject.age, 'P90D')
         self.assertEqual(subject.age__reference, "birth")
+        self.assertEqual(subject.description, 'An unfortunate rat')
+        self.assertEqual(subject.subject_id, 'RAT123')
+
+    def test_age_regression_2(self):
+        subject = Subject(
+            description='An unfortunate rat',
+            subject_id='RAT123',
+        )
+
         self.assertEqual(subject.description, 'An unfortunate rat')
         self.assertEqual(subject.subject_id, 'RAT123')
 
