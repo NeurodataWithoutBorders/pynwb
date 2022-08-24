@@ -75,7 +75,7 @@ class DecompositionSeriesConstructor(TestCase):
         self.assertEqual(spec_anal.metric, 'amplitude')
 
     @staticmethod
-    def mock_electrode_table(self):
+    def make_electrode_table(self):
         """ Make an electrode table, electrode group, and device """
         self.table = get_electrode_table()
         self.dev1 = Device(name='dev1')
