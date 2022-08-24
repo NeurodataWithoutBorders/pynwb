@@ -10,6 +10,13 @@ intracellular electrophysiology experiments using the metadata tables
 from the :py:meth:`~pynwb.icephys` module. See the :ref:`icephys_tutorial_new`
 tutorial for an introduction to the intracellular electrophysiology metadata
 tables and how to create an NWBFile for intracellular electrophysiology data.
+
+.. note::
+
+    To enhance display of large pandas DataFrames, we save and render large tables
+    as images in this tutorial. Simply click on the rendered table to view the
+    full-size image.
+
 '''
 
 #####################################################################
@@ -20,10 +27,30 @@ tables and how to create an NWBFile for intracellular electrophysiology data.
 # Standard Python imports
 import numpy as np
 import pandas
-# Set pandas rendering option to avoid very wide tables in the html docs
+
+#####################################################################
+# Settings for improving rendering of tables in the online tutorial
+import dataframe_image
+import os
+# Get the path to the this tutorial
+try:
+    tutorial_path = os.path.abspath(__file__)    # when running as a .py
+except NameError:
+    tutorial_path = os.path.abspath("__file__")  # when running as a script or notebook
+# directory to save rendered dataframe images for display
+df_basedir = os.path.abspath(os.path.join(
+    os.path.dirname(tutorial_path),
+    "../../source/tutorials/domain/images/"))
+# Create the image directory. This is necessary only for gallery tests on GitHub
+# but not for normal doc builds the output path already exists
+os.makedirs(df_basedir, exist_ok=True)
+# Set rendering options for tables
 pandas.set_option("display.max_colwidth", 30)
 pandas.set_option("display.max_rows", 10)
 pandas.set_option("display.max_columns", 6)
+pandas.set_option("display.colheader_justify", "right")
+dfi_fontsize = 7  # Fontsize to use when rendering with dataframe_image
+
 
 #####################################################################
 # Example setup
@@ -154,17 +181,29 @@ exp_cond_df.iloc[0]['repetitions']
 # ``electrodes``, ``stimuli``, and ``responses``. For convenience, the
 # :py:meth:`~pynwb.icephys.IntracellularRecordingsTable.to_dataframe` of the
 # :py:class:`~pynwb.icephys.IntracellularRecordingsTable` provides a few
-# additonal optional parameters to optionally ignore the ids of the category tables
+# additional optional parameters to ignore the ids of the category tables
 # (via ``ignore_category_ids=True``) or to convert the electrode, stimulus, and
 # response references to ObjectIds. For example:
 #
-
-nwbfile.intracellular_recordings.to_dataframe(
+ir_df = nwbfile.intracellular_recordings.to_dataframe(
     ignore_category_ids=True,
     electrode_refs_as_objectids=True,
     stimulus_refs_as_objectids=True,
     response_refs_as_objectids=True
 )
+
+# save the table as image to display in the docs
+dataframe_image.export(
+    obj=ir_df,
+    filename=os.path.join(df_basedir, 'intracellular_recordings_dataframe.png'),
+    table_conversion='matplotlib',
+    fontsize=dfi_fontsize)
+
+#####################################################################
+# .. image:: images/intracellular_recordings_dataframe.png
+#     :width: 100%
+#     :alt: intracellular_recordings_dataframe.png
+#     :align: center
 
 #####################################################################
 # Using indexed DataFrames
@@ -224,12 +263,18 @@ target_table[[0, 1]]
 from hdmf.common.hierarchicaltable import to_hierarchical_dataframe
 icephys_meta_df = to_hierarchical_dataframe(root_table)
 
-#####################################################################
-#
+# save table as image to display in the docs
+dataframe_image.export(
+    obj=icephys_meta_df,
+    filename=os.path.join(df_basedir, 'icephys_meta_dataframe.png'),
+    table_conversion='matplotlib',
+    fontsize=dfi_fontsize)
 
-# To avoid a too wide display in the online docs we here only show 4 select rows of the
-# table and transpose the table to show the large MultiIndex as columns instead of rows
-icephys_meta_df.iloc[[0, 1, 18, 19]].transpose()
+#####################################################################
+# .. image:: images/icephys_meta_dataframe.png
+#     :width: 100%
+#     :alt: icephys_meta_dataframe.png
+#     :align: center
 
 #####################################################################
 # Depending on the analysis, it can be useful to further process our `DataFrame`_. Using the standard
@@ -252,7 +297,20 @@ icephys_meta_df.reset_index(inplace=True)
 flatten_column_index(dataframe=icephys_meta_df, max_levels=2, inplace=True)
 # Remove the id columns. By setting inplace=False allows us to visualize the result of this
 # action while keeping the id columns in our main icephys_meta_df table
-drop_id_columns(dataframe=icephys_meta_df, inplace=False)
+drid_icephys_meta_df = drop_id_columns(dataframe=icephys_meta_df, inplace=False)
+
+# save the table as image to display in the docs
+dataframe_image.export(
+    obj=drid_icephys_meta_df,
+    filename=os.path.join(df_basedir, 'icephys_meta_dataframe_drop_id.png'),
+    table_conversion='matplotlib',
+    fontsize=dfi_fontsize)
+
+#####################################################################
+# .. image:: images/icephys_meta_dataframe_drop_id.png
+#     :width: 100%
+#     :alt: icephys_meta_dataframe_drop_id.png
+#     :align: center
 
 #####################################################################
 # Useful additional data preparations
@@ -278,8 +336,19 @@ stimulus_df = pandas.DataFrame(
 # icephys_meta_df.drop(labels=[('stimuli', 'stimulus'), ], axis=1, inplace=True)
 # Add our expanded columns to the icephys_meta_df dataframe
 icephys_meta_df = pandas.concat([icephys_meta_df, stimulus_df], axis=1)
-# display the table for the HTML docs
-icephys_meta_df
+
+# save the table as image to display in the docs
+dataframe_image.export(
+    obj=icephys_meta_df,
+    filename=os.path.join(df_basedir, 'icephys_meta_dataframe_expand_tsr.png'),
+    table_conversion='matplotlib',
+    fontsize=dfi_fontsize)
+
+#####################################################################
+# .. image:: images/icephys_meta_dataframe_expand_tsr.png
+#     :width: 100%
+#     :alt: icephys_meta_dataframe_expand_tsr.png
+#     :align: center
 
 #####################################################################
 # We can then easily expand also the ``(responses, response)`` column in the same way
@@ -303,17 +372,31 @@ icephys_meta_df = pandas.concat([icephys_meta_df, response_df], axis=1)
 # Here we show a few examples.
 
 # Add a column with the name of the stimulus TimeSeries object.
-# Note: We use getattr here to easily deal with missing values, i.e., cases where no stimulus is present
+# Note: We use getattr here to easily deal with missing values,
+#       i.e., here the cases where no stimulus is present
 col = ('stimuli', 'name')
 icephys_meta_df[col] = [getattr(s, 'name', None)
                         for s in icephys_meta_df[('stimuli', 'timeseries')]]
 
-# Often we can easily do this in bulk-fashion by specifing the collection of fields of interest
+# Often we can easily do this in a bulk-fashion by specifying
+# the collection of fields of interest
 for field in ['neurodata_type', 'gain', 'rate', 'starting_time', 'object_id']:
     col = ('stimuli', field)
     icephys_meta_df[col] = [getattr(s, field, None)
                             for s in icephys_meta_df[('stimuli', 'timeseries')]]
-icephys_meta_df
+# save the table as image to display in the docs
+dataframe_image.export(
+    obj=icephys_meta_df,
+    filename=os.path.join(df_basedir, 'icephys_meta_dataframe_add_stimres.png'),
+    table_conversion='matplotlib',
+    max_cols=10,
+    fontsize=dfi_fontsize)
+
+#####################################################################
+# .. image:: images/icephys_meta_dataframe_add_stimres.png
+#     :width: 100%
+#     :alt: icephys_meta_dataframe_add_stimres.png
+#     :align: center
 
 #####################################################################
 # Naturally we can again do the same also for our response columns
@@ -404,7 +487,8 @@ for field in ['name', 'device', 'object_id']:
 
 # Get a response 'vcs_9' from the file
 response = nwbfile.get_acquisition('vcs_9')
-# Return all data related to that response, including the stimulus as part of ('stimuli', 'stimulus') column
+# Return all data related to that response, including the stimulus
+# as part of ('stimuli', 'stimulus') column
 icephys_meta_df[icephys_meta_df[('responses', 'object_id')] == response.object_id]
 
 
@@ -438,4 +522,20 @@ print(unique_stimulus_types)
 # Given a stimulus type, get all corresponding intracellular recordings
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-icephys_meta_df[icephys_meta_df[('sequential_recordings', 'stimulus_type')] == 'StimType_1']
+query_res_df = icephys_meta_df[
+    icephys_meta_df[('sequential_recordings', 'stimulus_type')] == 'StimType_1'
+]
+
+# save the table as image to display in the docs
+dataframe_image.export(
+    obj=query_res_df,
+    filename=os.path.join(df_basedir, 'icephys_meta_query_result_dataframe.png'),
+    table_conversion='matplotlib',
+    max_cols=10,
+    fontsize=dfi_fontsize)
+
+#####################################################################
+# .. image:: images/icephys_meta_query_result_dataframe.png
+#     :width: 100%
+#     :alt: icephys_meta_query_result_dataframe.png
+#     :align: center

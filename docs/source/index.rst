@@ -7,7 +7,9 @@ NWB for Python
 ==============
 
 PyNWB is a Python package for working with NWB files. It provides a high-level API for
-efficiently working with Neurodata stored in the `NWB format <https://nwb-schema.readthedocs.io>`_.
+efficiently working with neurodata stored in the NWB format. If you are new to NWB
+and would like to learn more, then please also visit the :nwb_overview:`NWB Overview <>`
+website, which provides an entry point for researchers and developers interested in using NWB.
 
 `Neurodata Without Borders (NWB) <http://www.nwb.org/>`_ is a project to develop a
 unified data format for cellular-based neurophysiology data, focused on the
@@ -31,7 +33,6 @@ breaking down the barriers to data sharing in neuroscience.
    :maxdepth: 2
    :caption: Resources
 
-   extensions_tutorial/extensions_tutorial_home
    validation
    export
    api_docs
@@ -46,6 +47,7 @@ breaking down the barriers to data sharing in neuroscience.
    software_process
    make_a_release
    make_roundtrip_test
+   make_a_tutorial
 
 .. toctree::
    :maxdepth: 2

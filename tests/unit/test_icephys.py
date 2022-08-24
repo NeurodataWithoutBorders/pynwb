@@ -20,7 +20,9 @@ def GetElectrode():
         location='location',
         resistance='resistance',
         filtering='filtering',
-        initial_access_resistance='initial_access_resistance')
+        initial_access_resistance='initial_access_resistance',
+        cell_id='this_cell',
+    )
     return elec
 
 
@@ -118,7 +120,8 @@ class IntracellularElectrodeConstructor(TestCase):
                                       'location',
                                       'resistance',
                                       'filtering',
-                                      'initial_access_resistance')
+                                      'initial_access_resistance',
+                                      'this_cell')
         self.assertEqual(elec.name, 'test_iS')
         self.assertEqual(elec.device, device)
         self.assertEqual(elec.description, 'description')
@@ -128,6 +131,7 @@ class IntracellularElectrodeConstructor(TestCase):
         self.assertEqual(elec.resistance, 'resistance')
         self.assertEqual(elec.filtering, 'filtering')
         self.assertEqual(elec.initial_access_resistance, 'initial_access_resistance')
+        self.assertEqual(elec.cell_id, 'this_cell')
 
 
 class PatchClampSeriesConstructor(TestCase):

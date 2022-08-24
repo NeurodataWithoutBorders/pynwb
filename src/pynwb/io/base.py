@@ -1,15 +1,15 @@
+from hdmf.build import LinkBuilder
+
 from .core import NWBContainerMapper
 from .. import register_map
-
 from ..base import TimeSeries, ProcessingModule
-from hdmf.build import LinkBuilder
 
 
 @register_map(ProcessingModule)
 class ModuleMap(NWBContainerMapper):
 
     def __init__(self, spec):
-        super(ModuleMap, self).__init__(spec)
+        super().__init__(spec)
         containers_spec = self.spec.get_neurodata_type('NWBDataInterface')
         table_spec = self.spec.get_neurodata_type('DynamicTable')
         self.map_spec('data_interfaces', containers_spec)
@@ -24,11 +24,12 @@ class ModuleMap(NWBContainerMapper):
 class TimeSeriesMap(NWBContainerMapper):
 
     def __init__(self, spec):
-        super(TimeSeriesMap, self).__init__(spec)
+        super().__init__(spec)
         data_spec = self.spec.get_dataset('data')
         self.map_spec('unit', data_spec.get_attribute('unit'))
         self.map_spec('resolution', data_spec.get_attribute('resolution'))
         self.map_spec('conversion', data_spec.get_attribute('conversion'))
+        self.map_spec('offset', data_spec.get_attribute('offset'))
         self.map_spec('continuity', data_spec.get_attribute('continuity'))
 
         timestamps_spec = self.spec.get_dataset('timestamps')

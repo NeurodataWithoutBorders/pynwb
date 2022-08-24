@@ -3,28 +3,66 @@ import warnings
 import numpy as np
 
 from pynwb.base import TimeSeries
+from pynwb.device import Device
 from pynwb.image import ImageSeries
-from pynwb.ophys import (
-    TwoPhotonSeries,
-    RoiResponseSeries,
-    DfOverF,
-    Fluorescence,
-    PlaneSegmentation,
-    ImageSegmentation,
-    OpticalChannel,
-    ImagingPlane,
-    MotionCorrection,
-    CorrectedImageStack
-)
+from pynwb.ophys import (TwoPhotonSeries, RoiResponseSeries, DfOverF, Fluorescence, PlaneSegmentation,
+                         ImageSegmentation, OpticalChannel, ImagingPlane, MotionCorrection, CorrectedImageStack)
 from pynwb.testing import TestCase
-from pynwb.testing.mock.ophys import (
-    mock_ImagingPlane,
-    mock_TwoPhotonSeries,
-    mock_RoiResponseSeries,
-    mock_PlaneSegmentation,
-    mock_OpticalChannel,
-)
-from pynwb.testing.mock.device import mock_Device
+
+
+def create_imaging_plane():
+    oc = OpticalChannel(
+        name='test_optical_channel',
+        description='description',
+        emission_lambda=500.
+    )
+
+    device = Device(name='device_name')
+
+    ip = ImagingPlane(
+        name='test_imaging_plane',
+        optical_channel=oc,
+        description='description',
+        device=device,
+        excitation_lambda=600.,
+        imaging_rate=300.,
+        indicator='indicator',
+        location='location',
+        reference_frame='reference_frame',
+        origin_coords=[10, 20],
+        origin_coords_unit='oc_unit',
+        grid_spacing=[1, 2, 3],
+        grid_spacing_unit='gs_unit'
+    )
+    return ip
+
+
+def create_plane_segmentation():
+    w, h = 5, 5
+    img_mask = [[[1.0 for x in range(w)] for y in range(h)], [[2.0 for x in range(w)] for y in range(h)]]
+    pix_mask = [[1, 2, 1.0], [3, 4, 1.0], [5, 6, 1.0],
+                [7, 8, 2.0], [9, 10, 2.0]]
+
+    iSS = ImageSeries(
+        name='test_iS',
+        unit='unit',
+        external_file=['external_file'],
+        starting_frame=[0],
+        format='external',
+        timestamps=[1., 2.]
+    )
+
+    ip = create_imaging_plane()
+
+    pS = PlaneSegmentation(
+        description='description',
+        imaging_plane=ip,
+        name='test_name',
+        reference_images=iSS
+    )
+    pS.add_roi(pixel_mask=pix_mask[0:3], image_mask=img_mask[0])
+    pS.add_roi(pixel_mask=pix_mask[3:5], image_mask=img_mask[1])
+    return pS
 
 
 class OpticalChannelConstructor(TestCase):
@@ -41,9 +79,17 @@ class OpticalChannelConstructor(TestCase):
 
 class ImagingPlaneConstructor(TestCase):
 
-    def test_init(self):
+    def set_up_dependencies(self):
+        oc = OpticalChannel(
+            name='test_optical_channel',
+            description='description',
+            emission_lambda=500.
+        )
+        device = Device(name='device_name')
+        return oc, device
 
-        oc, device = mock_OpticalChannel(), mock_Device()
+    def test_init(self):
+        oc, device = self.set_up_dependencies()
 
         ip = ImagingPlane(
             name='test_imaging_plane',
@@ -73,28 +119,62 @@ class ImagingPlaneConstructor(TestCase):
         self.assertEqual(ip.grid_spacing_unit, 'gs_unit')
 
     def test_manifold_deprecated(self):
+        oc, device = self.set_up_dependencies()
 
         msg = "The 'manifold' argument is deprecated in favor of 'origin_coords' and 'grid_spacing'."
         with self.assertWarnsWith(DeprecationWarning, msg):
-            mock_ImagingPlane(manifold=(1, 1, (2, 2, 2)))
+            ImagingPlane(
+                name='test_imaging_plane',
+                optical_channel=oc,
+                description='description',
+                device=device,
+                excitation_lambda=600.,
+                imaging_rate=300.,
+                indicator='indicator',
+                location='location',
+                manifold=(1, 1, (2, 2, 2))
+            )
 
     def test_conversion_deprecated(self):
+        oc, device = self.set_up_dependencies()
 
         msg = "The 'conversion' argument is deprecated in favor of 'origin_coords' and 'grid_spacing'."
         with self.assertWarnsWith(DeprecationWarning, msg):
-            mock_ImagingPlane(conversion=2.0)
+            ImagingPlane(
+                name='test_imaging_plane',
+                optical_channel=oc,
+                description='description',
+                device=device,
+                excitation_lambda=600.,
+                imaging_rate=300.,
+                indicator='indicator',
+                location='location',
+                conversion=2.0
+            )
 
     def test_unit_deprecated(self):
+        oc, device = self.set_up_dependencies()
 
         msg = "The 'unit' argument is deprecated in favor of 'origin_coords_unit' and 'grid_spacing_unit'."
         with self.assertWarnsWith(DeprecationWarning, msg):
-            mock_ImagingPlane(unit='my_unit')
+            ImagingPlane(
+                name='test_imaging_plane',
+                optical_channel=oc,
+                description='description',
+                device=device,
+                excitation_lambda=600.,
+                imaging_rate=300.,
+                indicator='indicator',
+                location='location',
+                reference_frame='reference_frame',
+                unit='my_unit'
+            )
 
 
 class TwoPhotonSeriesConstructor(TestCase):
 
     def test_init(self):
-        ip = mock_ImagingPlane()
+        ip = create_imaging_plane()
         tPS = TwoPhotonSeries(
             name='test_tPS',
             unit='unit',
@@ -103,18 +183,19 @@ class TwoPhotonSeriesConstructor(TestCase):
             pmt_gain=1.0,
             scan_line_rate=2.0,
             external_file=['external_file'],
-            starting_frame=[1, 2, 3],
-            format='tiff',
-            rate=50.,
+            starting_frame=[0],
+            format='external',
+            timestamps=list()
         )
         self.assertEqual(tPS.name, 'test_tPS')
         self.assertEqual(tPS.unit, 'unit')
         self.assertEqual(tPS.field_of_view, [2., 3.])
+        self.assertEqual(tPS.imaging_plane, ip)
         self.assertEqual(tPS.pmt_gain, 1.0)
         self.assertEqual(tPS.scan_line_rate, 2.0)
         self.assertEqual(tPS.external_file, ['external_file'])
-        self.assertEqual(tPS.starting_frame, [1, 2, 3])
-        self.assertEqual(tPS.format, 'tiff')
+        self.assertEqual(tPS.starting_frame, [0])
+        self.assertEqual(tPS.format, 'external')
         self.assertIsNone(tPS.dimension)
 
 
@@ -137,7 +218,15 @@ class MotionCorrectionConstructor(TestCase):
             rate=1.0,
         )
 
-        image_series = mock_TwoPhotonSeries()
+        ip = create_imaging_plane()
+
+        image_series = TwoPhotonSeries(
+            name='TwoPhotonSeries1',
+            data=np.ones((1000, 100, 100)),
+            imaging_plane=ip,
+            rate=1.0,
+            unit='normalized amplitude'
+        )
 
         corrected_image_stack = CorrectedImageStack(
             corrected=corrected,
@@ -153,19 +242,18 @@ class CorrectedImageStackConstructor(TestCase):
     def test_init(self):
         is1 = ImageSeries(
             name='corrected',
-            data=np.ones((2, 2, 2)),
             unit='unit',
             external_file=['external_file'],
-            starting_frame=[1, 2, 3],
-            format='tiff',
+            starting_frame=[0],
+            format='external',
             timestamps=[1., 2.]
         )
         is2 = ImageSeries(
             name='is2',
             unit='unit',
             external_file=['external_file'],
-            starting_frame=[1, 2, 3],
-            format='tiff',
+            starting_frame=[0],
+            format='external',
             timestamps=[1., 2.]
         )
         tstamps = np.arange(1.0, 100.0, 0.1, dtype=np.float64)
@@ -187,7 +275,7 @@ class CorrectedImageStackConstructor(TestCase):
 
 class RoiResponseSeriesConstructor(TestCase):
     def test_init(self):
-        ps = mock_PlaneSegmentation()
+        ps = create_plane_segmentation()
         rt_region = ps.create_roi_table_region(description='the second ROI', region=[0])
 
         ts = RoiResponseSeries(
@@ -202,42 +290,66 @@ class RoiResponseSeriesConstructor(TestCase):
         self.assertEqual(ts.rois, rt_region)
 
     def test_warnings(self):
+        ps = create_plane_segmentation()
+        rt_region = ps.create_roi_table_region(description='the first two ROIs', region=[0, 1])
 
         with warnings.catch_warnings(record=True) as w:
             # Cause all warnings to always be triggered.
             warnings.simplefilter("always")
-            mock_RoiResponseSeries(
+            RoiResponseSeries(
+                name="test_ts1",
+                data=np.ones((6, 2)),
+                rois=rt_region,
+                rate=30000.,
+                unit="n.a.",
+            )
+            self.assertEqual(w, [])
+
+        with warnings.catch_warnings(record=True) as w:
+            # Cause all warnings to always be triggered.
+            warnings.simplefilter("always")
+            RoiResponseSeries(
+                name="test_ts1",
                 data=np.ones((6, 3)),
-                n_rois=2,
-                timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5],
-                rate=None,
+                rois=rt_region,
+                unit="n.a.",
+                timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5]
             )
             self.assertEqual(len(w), 1)
             assert (
-                    "The second dimension of data does not match the length of rois. Your data may be transposed."
+                    "RoiResponseSeries 'test_ts1': The second dimension of data does not match the length of rois. "
+                    "Your data may be transposed."
                 ) in str(w[-1].message)
 
         with warnings.catch_warnings(record=True) as w:
             # Cause all warnings to always be triggered.
             warnings.simplefilter("always")
-            mock_RoiResponseSeries(
+            RoiResponseSeries(
                 name="test_ts1",
                 data=np.ones((2, 6)),
-                n_rois=2,
+                rois=rt_region,
                 rate=30000.,
                 unit="n.a.",
             )
             self.assertEqual(len(w), 1)
             assert (
-               "The second dimension of data does not match the length of rois, but instead the first does. "
-               "Data is oriented incorrectly and should be transposed."
+               "RoiResponseSeries 'test_ts1': The second dimension of data does not match the length of rois, "
+               "but instead the first does. Data is oriented incorrectly and should be transposed."
                    ) in str(w[-1].message)
 
 
 class DfOverFConstructor(TestCase):
     def test_init(self):
+        ps = create_plane_segmentation()
+        rt_region = ps.create_roi_table_region(description='the second ROI', region=[1])
 
-        rrs = mock_RoiResponseSeries(name='test_ts')
+        rrs = RoiResponseSeries(
+            name='test_ts',
+            data=[1, 2, 3],
+            rois=rt_region,
+            unit='unit',
+            timestamps=[0.1, 0.2, 0.3]
+        )
 
         dof = DfOverF(rrs)
         self.assertEqual(dof.roi_response_series['test_ts'], rrs)
@@ -245,8 +357,16 @@ class DfOverFConstructor(TestCase):
 
 class FluorescenceConstructor(TestCase):
     def test_init(self):
+        ps = create_plane_segmentation()
+        rt_region = ps.create_roi_table_region(description='the second ROI', region=[1])
 
-        ts = mock_RoiResponseSeries(name='test_ts')
+        ts = RoiResponseSeries(
+            name='test_ts',
+            data=[1, 2, 3],
+            rois=rt_region,
+            unit='unit',
+            timestamps=[0.1, 0.2, 0.3]
+        )
 
         ff = Fluorescence(ts)
         self.assertEqual(ff.roi_response_series['test_ts'], ts)
@@ -255,7 +375,7 @@ class FluorescenceConstructor(TestCase):
 class ImageSegmentationConstructor(TestCase):
 
     def test_init(self):
-        ps = mock_PlaneSegmentation()
+        ps = create_plane_segmentation()
 
         iS = ImageSegmentation(ps, name='test_iS')
         self.assertEqual(iS.name, 'test_iS')
@@ -265,10 +385,22 @@ class ImageSegmentationConstructor(TestCase):
 
 class PlaneSegmentationConstructor(TestCase):
 
+    def set_up_dependencies(self):
+        iSS = ImageSeries(
+            name='test_iS',
+            unit='unit',
+            external_file=['external_file'],
+            starting_frame=[0],
+            format='external',
+            timestamps=[1., 2.]
+        )
+
+        ip = create_imaging_plane()
+        return iSS, ip
+
     def create_basic_plane_segmentation(self):
         """Creates a basic plane segmentation used for testing"""
-        iSS, ip = mock_TwoPhotonSeries(), mock_ImagingPlane()
-
+        iSS, ip = self.set_up_dependencies()
         pS = PlaneSegmentation(
             description='description',
             imaging_plane=ip,

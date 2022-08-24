@@ -13,6 +13,7 @@
 
 import sys
 import os
+
 import sphinx_rtd_theme
 
 
@@ -54,11 +55,73 @@ extensions = [
     'sphinx.ext.intersphinx',
     'sphinx.ext.viewcode',
     'sphinx.ext.extlinks',
-    'sphinx_gallery.gen_gallery'
+    'sphinx_gallery.gen_gallery',
+    'sphinx_copybutton',
 ]
 
 from sphinx_gallery.sorting import ExplicitOrder
 from sphinx_gallery.sorting import ExampleTitleSortKey
+
+
+class CustomSphinxGallerySectionSortKey(ExampleTitleSortKey):
+    """
+    Define the key to be used to sort sphinx galleries sections
+
+    :param src_dir : The source directory.
+    :type srd_dir: str
+    """
+    # Define a partial ordered list of galleries for all subsections. Galleries not
+    # listed here will be added in alphabetical order based on title after the
+    # explicitly listed galleries
+    GALLERY_ORDER = {
+        'general': ['file.py'],
+        # Sort domain-specific tutorials based on domain to group tutorials belonging to the same domain
+        'domain': [
+            "ecephys.py",
+            "ophys.py",
+            "plot_icephys.py",
+            "plot_icephys_pandas.py",
+            "icephys.py",
+            "plot_behavior.py",
+            "images.py",
+            "brain_observatory.py"
+        ],
+        'advanced_io': []
+    }
+
+    def __call__(self, filename):
+        """
+        Compute index to use for sorting galleries.
+
+        Return the explicit index of the gallery if defined as part of self.GALLERY_ORDER
+        and otherwise compute a score based on the title of the gallery to ensure galleries
+        are sorted alphabetically by default
+        """
+        import string
+        import math
+
+        # Get the ordered list of gallery files for the current source dir
+        explicit_order = self.GALLERY_ORDER.get(os.path.basename(self.src_dir), [])
+        # If the file is in the explicit order then return its index
+        if filename in explicit_order:
+            sort_index = explicit_order.index(filename)
+        # Else sort alphabetically based on the title by computing a corresponding
+        # floating point index based on the characters of the titles
+        else:
+            title = super().__call__(filename)
+            # map the characters of the title to a floating point number
+            # based on the numerical index of the individual lowercase characters
+            sort_index = len(explicit_order)  # all explicitly ordered galleries come first
+            for i, v in enumerate(title.lower()):
+                # get the index of the current character
+                curr_index = (string.ascii_lowercase.index(v)
+                              if v in string.ascii_lowercase
+                              else len(string.ascii_lowercase))
+                # shift the value based on its position in the title string and
+                # add it to the sort_index value
+                sort_index += curr_index / math.pow(10, ((i+1) * 2))
+        return sort_index
+
 
 sphinx_gallery_conf = {
     # path to your examples scripts
@@ -69,22 +132,26 @@ sphinx_gallery_conf = {
     'backreferences_dir': 'gen_modules/backreferences',
     'min_reported_time': 5,
     'remove_config_comments': True,
-    'within_subsection_order': ExampleTitleSortKey
+    'within_subsection_order': CustomSphinxGallerySectionSortKey,
 }
 
 intersphinx_mapping = {
-    'python': ('https://docs.python.org/3.8', None),
+    'python': ('https://docs.python.org/3.9', None),
     'numpy': ('https://numpy.org/doc/stable/', None),
-    'matplotlib': ('https://matplotlib.org', None),
+    'matplotlib': ('https://matplotlib.org/stable/', None),
     'h5py': ('https://docs.h5py.org/en/latest/', None),
     'hdmf': ('https://hdmf.readthedocs.io/en/latest/', None),
-    'pandas': ('https://pandas.pydata.org/pandas-docs/stable/', None)
+    'pandas': ('https://pandas.pydata.org/pandas-docs/stable/', None),
+    'dandi': ('https://dandi.readthedocs.io/en/stable/', None),
+    'fsspec': ("https://filesystem-spec.readthedocs.io/en/latest/", None),
 }
 
 extlinks = {'incf_lesson': ('https://training.incf.org/lesson/%s', ''),
             'incf_collection': ('https://training.incf.org/collection/%s', ''),
             'nwb_extension': ('https://github.com/nwb-extensions/%s', ''),
-            'pynwb': ('https://github.com/NeurodataWithoutBorders/pynwb/%s', '')}
+            'pynwb': ('https://github.com/NeurodataWithoutBorders/pynwb/%s', ''),
+            'nwb_overview': ('https://nwb-overview.readthedocs.io/en/latest/%s', ''),
+            'dandi': ('https://www.dandiarchive.org/%s', '')}
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -160,7 +227,8 @@ html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 # further.  For a list of options available for each theme, see the
 # documentation.
 html_theme_options = {
-    "style_nav_header_background": "#AFD2E8"
+    # "style_nav_header_background": "#AFD2E8"
+    "style_nav_header_background": "#000000"
 }
 
 # These paths are either relative to html_static_path
@@ -182,12 +250,12 @@ html_css_files = [
 # The name of an image file (relative to this directory) to place at the top
 # of the sidebar.
 # html_logo = None
-html_logo = 'logo.png'
+html_logo = 'figures/logo_pynwb_with_margin.png'
 
 # The name of an image file (within the static path) to use as favicon of the
 # docs.  This file should be a Windows icon file (.ico) being 16x16 or 32x32
 # pixels large.
-html_favicon = 'favicon_96.png'
+html_favicon = 'figures/favicon_96.png'
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
@@ -261,7 +329,7 @@ latex_elements = {
 
 # The name of an image file (relative to this directory) to place at the top of
 # the title page.
-latex_logo = 'logo.pdf'
+latex_logo = 'figures/logo_pynwb_with_margin.png'
 
 # For "manual" documents, if this is true, then toplevel headings are parts,
 # not chapters.

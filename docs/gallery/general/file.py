@@ -2,7 +2,7 @@
 .. _basics:
 
 NWB File Basics
-==================
+===============
 
 This example will focus on the basics of working with an :py:class:`~pynwb.file.NWBFile` object,
 including writing and reading of an NWB file, and giving you an introduction to the basic data types.
@@ -128,9 +128,6 @@ from pynwb import NWBFile, TimeSeries, NWBHDF5IO
 from pynwb.epoch import TimeIntervals
 from pynwb.file import Subject
 from pynwb.behavior import SpatialSeries, Position
-from pynwb.image import RGBAImage, RGBImage, GrayscaleImage
-from pynwb.base import Images
-from PIL import Image
 from datetime import datetime
 from dateutil import tz
 
@@ -171,7 +168,7 @@ print(nwbfile)
 # .. _basic_subject:
 #
 # Subject Information
-# ----------------
+# -------------------
 #
 # In the :py:class:`~pynwb.file.Subject` object we can store information about the experimental subject,
 # such as ``age``, ``species``, ``genotype``, ``sex``, and a ``description``.
@@ -272,7 +269,7 @@ nwbfile.get_acquisition("test_timeseries")
 # .. _basic_spatialseries:
 #
 # Spatial Series and Position
-# ----------------
+# ---------------------------
 #
 # :py:class:`~pynwb.behavior.SpatialSeries` is a subclass of :py:class:`~pynwb.base.TimeSeries`
 # that represents the spatial position of an animal over time.
@@ -333,7 +330,7 @@ position_obj = Position(spatial_series=spatial_series_obj)
 
 ####################
 # Behavior Processing Module
-# ----------------
+# --------------------------
 #
 # :py:class:`~pynwb.base.ProcessingModule` is a container for data interfaces that are related to a particular
 # processing workflow. NWB differentiates between raw, acquired data (*acquisition*), which should never change,
@@ -459,7 +456,6 @@ with NWBHDF5IO("basics_tutorial.nwb", "r") as io:
     print(read_nwbfile.processing["behavior"]["Position"]["SpatialSeries"])
 
 ####################
-
 # .. _reuse_timestamps:
 #
 # Reusing timestamps
@@ -485,6 +481,10 @@ reuse_ts = TimeSeries(
 # --------------
 #
 # .. _basic_trials:
+#
+# The following provides a brief introduction to managing annotations in time via
+# :py:class:`~pynwb.epoch.TimeIntervals`. See the :ref:`time_intervals` tutorial
+# for a more detailed introduction to :py:class:`~pynwb.epoch.TimeIntervals`.
 #
 # Trials
 # ^^^^^^
@@ -589,41 +589,6 @@ sleep_stages.add_row(start_time=0.7, stop_time=0.9, stage=2, confidence=0.99)
 sleep_stages.add_row(start_time=1.3, stop_time=3.0, stage=3, confidence=0.7)
 
 nwbfile.add_time_intervals(sleep_stages)
-
-####################
-# Images
-# ------
-#
-# You can store static images within the NWB file as well. These can be images of the subject, the environment, stimuli,
-# or really anything.
-#
-# .. note::
-#          All basic image types :py:class:`~pynwb.image.RGBAImage`, :py:class:`~pynwb.image.RGBImage`, and
-#          :py:class:`~pynwb.image.GrayscaleImage` provide the optional: 1) ``description`` parameter to include a
-#          text description about the image and 2) ``resolution`` parameter to specify the *pixels / cm* resolution
-#          of the image.
-
-img = Image.open("docs/source/logo.png")  # an example image
-
-# you can store an RGBA image
-rgba_logo = RGBAImage(name="RGBA_logo", data=np.array(img))
-
-# or RGB
-rgb_logo = RGBImage(name="RGB_logo", data=np.array(img.convert("RGB")))
-
-# or Grayscale. Here with the optional description and resolution specified.
-gs_logo = GrayscaleImage(
-    name="Grayscale_logo",
-    data=np.array(img.convert("L")),
-    description="Grayscale version of the NWB logo",
-    resolution=35.433071,
-)
-
-# Images is a container that accepts any of these image types
-images = Images(name="logo_images", images=[rgb_logo, rgba_logo, gs_logo])
-
-# Finally, do not forget to add the images object to the nwb file.
-nwbfile.processing["behavior"].add(images)
 
 ####################
 # Now we overwrite the file with all of the data

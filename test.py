@@ -12,7 +12,7 @@ import sys
 import traceback
 import unittest
 
-flags = {'pynwb': 2, 'integration': 3, 'example': 4, 'backwards': 5, 'validation': 6, 'ros3': 7}
+flags = {'pynwb': 2, 'integration': 3, 'example': 4, 'backwards': 5, 'validation': 6, 'ros3': 7, 'example-ros3': 8}
 
 TOTAL = 0
 FAILURES = 0
@@ -66,15 +66,46 @@ def _import_from_file(script):
 warning_re = re.compile("Parent module '[a-zA-Z0-9]+' not found while handling absolute import")
 
 
+ros3_examples = [
+    os.path.join('general', 'read_basics.py'),
+    os.path.join('advanced_io', 'streaming.py'),
+]
+
+
 def run_example_tests():
-    global TOTAL, FAILURES, ERRORS
+    """Run the Sphinx gallery example files, excluding ROS3-dependent ones, to check for errors."""
     logging.info('running example tests')
     examples_scripts = list()
     for root, dirs, files in os.walk(os.path.join(os.path.dirname(__file__), "docs", "gallery")):
         for f in files:
             if f.endswith(".py"):
+                name_with_parent_dir = os.path.join(os.path.basename(root), f)
+                if name_with_parent_dir in ros3_examples:
+                    logging.info("Skipping %s" % name_with_parent_dir)
+                    continue
                 examples_scripts.append(os.path.join(root, f))
 
+    __run_example_tests_helper(examples_scripts)
+
+
+def run_example_ros3_tests():
+    """Run the Sphinx gallery example files that depend on ROS3 to check for errors."""
+    logging.info('running example ros3 tests')
+    examples_scripts = list()
+    for root, dirs, files in os.walk(os.path.join(os.path.dirname(__file__), "docs", "gallery")):
+        for f in files:
+            if f.endswith(".py"):
+                name_with_parent_dir = os.path.join(os.path.basename(root), f)
+                if name_with_parent_dir not in ros3_examples:
+                    logging.info("Skipping %s" % name_with_parent_dir)
+                    continue
+                examples_scripts.append(os.path.join(root, f))
+
+    __run_example_tests_helper(examples_scripts)
+
+
+def __run_example_tests_helper(examples_scripts):
+    global TOTAL, FAILURES, ERRORS
     TOTAL += len(examples_scripts)
     for script in examples_scripts:
         try:
@@ -120,7 +151,7 @@ def validate_nwbs():
                 def get_namespaces(nwbfile):
                     comp = run(["python", "-m", "pynwb.validate",
                                "--list-namespaces", "--cached-namespace", nwb],
-                               stdout=PIPE, stderr=STDOUT, universal_newlines=True, timeout=20)
+                               stdout=PIPE, stderr=STDOUT, universal_newlines=True, timeout=30)
 
                     if comp.returncode != 0:
                         return []
@@ -139,11 +170,14 @@ def validate_nwbs():
                 cmds += [["python", "-m", "pynwb.validate", "--no-cached-namespace", nwb]]
 
                 for ns in namespaces:
+                    # for some reason, this logging command is necessary to correctly printing the namespace in the
+                    # next logging command
+                    logging.info("Namespace found: %s" % ns)
                     cmds += [["python", "-m", "pynwb.validate", "--cached-namespace", "--ns", ns, nwb]]
 
                 for cmd in cmds:
                     logging.info("Validating with \"%s\"." % (" ".join(cmd[:-1])))
-                    comp = run(cmd, stdout=PIPE, stderr=STDOUT, universal_newlines=True, timeout=20)
+                    comp = run(cmd, stdout=PIPE, stderr=STDOUT, universal_newlines=True, timeout=30)
                     TOTAL += 1
 
                     if comp.returncode != 0:
@@ -193,6 +227,54 @@ def run_integration_tests(verbose=True):
     else:
         logging.info('all classes have integration tests')
 
+    # also test the validation script
+    run_test_suite("tests/validation", "validation CLI tests", verbose=verbose)
+
+
+def clean_up_tests():
+    # remove files generated from running example files
+    files_to_remove = [
+        "advanced_io_example.nwb",
+        "basic_alternative_custom_write.nwb",
+        "basic_iterwrite_example.nwb",
+        "basic_sparse_iterwrite_*.nwb",
+        "basic_sparse_iterwrite_*.npy",
+        "basics_tutorial.nwb",
+        "behavioral_tutorial.nwb",
+        "brain_observatory.nwb",
+        "cache_spec_example.nwb",
+        "ecephys_tutorial.nwb",
+        "ecog.extensions.yaml",
+        "ecog.namespace.yaml",
+        "ex_test_icephys_file.nwb",
+        "example_timeintervals_file.nwb",
+        "exported_nwbfile.nwb",
+        "external_linkcontainer_example.nwb",
+        "external_linkdataset_example.nwb",
+        "external1_example.nwb",
+        "external2_example.nwb",
+        "icephys_example.nwb",
+        "icephys_pandas_testfile.nwb",
+        "images_tutorial.nwb",
+        "manifest.json",
+        "mylab.extensions.yaml",
+        "mylab.namespace.yaml",
+        "nwbfile.nwb",
+        "ophys_tutorial.nwb",
+        "processed_data.nwb",
+        "raw_data.nwb",
+        "scratch_analysis.nwb",
+        "test_cortical_surface.nwb",
+        "test_icephys_file.nwb",
+        "test_multicontainerinterface.extensions.yaml",
+        "test_multicontainerinterface.namespace.yaml",
+        "test_multicontainerinterface.nwb",
+    ]
+    for f in files_to_remove:
+        for name in glob.glob(f):
+            if os.path.exists(name):
+                os.remove(name)
+
 
 def main():
     # setup and parse arguments
@@ -206,6 +288,8 @@ def main():
                         help='run integration tests')
     parser.add_argument('-e', '--example', action='append_const', const=flags['example'], dest='suites',
                         help='run example tests')
+    parser.add_argument('-f', '--example-ros3', action='append_const', const=flags['example-ros3'], dest='suites',
+                        help='run example tests with ros3 streaming')
     parser.add_argument('-b', '--backwards', action='append_const', const=flags['backwards'], dest='suites',
                         help='run backwards compatibility tests')
     parser.add_argument('-w', '--validation', action='append_const', const=flags['validation'], dest='suites',
@@ -215,9 +299,11 @@ def main():
     args = parser.parse_args()
     if not args.suites:
         args.suites = list(flags.values())
-        args.suites.pop(args.suites.index(flags['example']))  # remove example as a suite run by default
-        args.suites.pop(args.suites.index(flags['validation']))  # remove validation as a suite run by default
-        args.suites.pop(args.suites.index(flags['ros3']))  # remove ros3 as a suite run by default (different reqs)
+        # remove from test suites run by default
+        args.suites.pop(args.suites.index(flags['example']))
+        args.suites.pop(args.suites.index(flags['example-ros3']))
+        args.suites.pop(args.suites.index(flags['validation']))
+        args.suites.pop(args.suites.index(flags['ros3']))
 
     # set up logger
     root = logging.getLogger()
@@ -240,12 +326,17 @@ def main():
         run_test_suite("tests/unit", "pynwb unit tests", verbose=args.verbosity)
 
     # Run example tests
-    if flags['example'] in args.suites:
+    if flags['example'] in args.suites or flags['validation'] in args.suites:
         run_example_tests()
 
-    # Run validation tests
+    # Run example tests with ros3 streaming examples
+    # NOTE this requires h5py to be built with ROS3 support and the dandi package to be installed
+    # this is most easily done by creating a conda environment using environment-ros3.yml
+    if flags['example-ros3'] in args.suites:
+        run_example_ros3_tests()
+
+    # Run validation tests on the example NWB files generated above
     if flags['validation'] in args.suites:
-        run_example_tests()
         validate_nwbs()
 
     # Run integration tests
@@ -259,6 +350,10 @@ def main():
     # Run ros3 streaming tests
     if flags['ros3'] in args.suites:
         run_test_suite("tests/integration/ros3", "pynwb ros3 streaming tests", verbose=args.verbosity)
+
+    # Delete files generated from running example tests above
+    if flags['example'] in args.suites or flags['validation'] in args.suites:
+        clean_up_tests()
 
     final_message = 'Ran %s tests' % TOTAL
     exitcode = 0

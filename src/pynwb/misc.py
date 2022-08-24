@@ -1,12 +1,14 @@
-import numpy as np
-from collections.abc import Iterable
 import warnings
+from collections.abc import Iterable
 from bisect import bisect_left, bisect_right
 
-from hdmf.utils import docval, getargs, popargs, call_docval_func, get_docval
+import numpy as np
+
+from hdmf.utils import docval, getargs, popargs, popargs_to_dict, get_docval
 
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries
+from .ecephys import ElectrodeGroup
 from hdmf.common import DynamicTable, DynamicTableRegion
 
 
@@ -26,9 +28,9 @@ class AnnotationSeries(TimeSeries):
             *get_docval(TimeSeries.__init__, 'timestamps', 'comments', 'description'))
     def __init__(self, **kwargs):
         name, data, timestamps = popargs('name', 'data', 'timestamps', kwargs)
-        super(AnnotationSeries, self).__init__(name, data, 'n/a', resolution=-1.0, timestamps=timestamps, **kwargs)
+        super().__init__(name=name, data=data, unit='n/a', resolution=-1.0, timestamps=timestamps, **kwargs)
 
-    @docval({'name': 'time', 'type': 'float', 'doc': 'The time for the annotation'},
+    @docval({'name': 'time', 'type': float, 'doc': 'The time for the annotation'},
             {'name': 'annotation', 'type': str, 'doc': 'the annotation'})
     def add_annotation(self, **kwargs):
         """Add an annotation."""
@@ -61,15 +63,15 @@ class AbstractFeatureSeries(TimeSeries):
                      'dimension represents features'),
              'default': list()},
             *get_docval(TimeSeries.__init__, 'resolution', 'conversion', 'timestamps', 'starting_time', 'rate',
-                        'comments', 'description', 'control', 'control_description'))
+                        'comments', 'description', 'control', 'control_description', 'offset'))
     def __init__(self, **kwargs):
         name, data, features, feature_units = popargs('name', 'data',
                                                               'features', 'feature_units', kwargs)
-        super(AbstractFeatureSeries, self).__init__(name, data, "see 'feature_units'", **kwargs)
+        super().__init__(name=name, data=data, unit="see 'feature_units'", **kwargs)
         self.features = features
         self.feature_units = feature_units
 
-    @docval({'name': 'time', 'type': 'float', 'doc': 'the time point of this feature'},
+    @docval({'name': 'time', 'type': float, 'doc': 'the time point of this feature'},
             {'name': 'features', 'type': (list, np.ndarray), 'doc': 'the feature values for this time point'})
     def add_features(self, **kwargs):
         time, features = getargs('time', 'features', kwargs)
@@ -103,10 +105,10 @@ class IntervalSeries(TimeSeries):
         name, data, timestamps = popargs('name', 'data', 'timestamps', kwargs)
         self.__interval_timestamps = timestamps
         self.__interval_data = data
-        super(IntervalSeries, self).__init__(name, data, 'n/a', resolution=-1.0, timestamps=timestamps, **kwargs)
+        super().__init__(name=name, data=data, unit='n/a', resolution=-1.0, timestamps=timestamps, **kwargs)
 
-    @docval({'name': 'start', 'type': 'float', 'doc': 'The start time of the interval'},
-            {'name': 'stop', 'type': 'float', 'doc': 'The stop time of the interval'})
+    @docval({'name': 'start', 'type': float, 'doc': 'The start time of the interval'},
+            {'name': 'stop', 'type': float, 'doc': 'The stop time of the interval'})
     def add_interval(self, **kwargs):
         start, stop = getargs('start', 'stop', kwargs)
         self.__interval_timestamps.append(start)
@@ -157,23 +159,26 @@ class Units(DynamicTable):
             {'name': 'description', 'type': str, 'doc': 'a description of what is in this table', 'default': None},
             {'name': 'electrode_table', 'type': DynamicTable,
              'doc': 'the table that the *electrodes* column indexes', 'default': None},
-            {'name': 'waveform_rate', 'type': 'float',
+            {'name': 'waveform_rate', 'type': float,
              'doc': 'Sampling rate of the waveform means', 'default': None},
             {'name': 'waveform_unit', 'type': str,
              'doc': 'Unit of measurement of the waveform means', 'default': 'volts'},
-            {'name': 'resolution', 'type': 'float',
+            {'name': 'resolution', 'type': float,
              'doc': 'The smallest possible difference between two spike times', 'default': None}
             )
     def __init__(self, **kwargs):
-        if kwargs.get('description', None) is None:
+        args_to_set = popargs_to_dict(("waveform_rate", "waveform_unit", "resolution"), kwargs)
+        electrode_table = popargs("electrode_table", kwargs)
+        if kwargs['description'] is None:
             kwargs['description'] = "data on spiking units"
-        call_docval_func(super(Units, self).__init__, kwargs)
+        super().__init__(**kwargs)
+
+        for key, val in args_to_set.items():
+            setattr(self, key, val)
+
         if 'spike_times' not in self.colnames:
             self.__has_spike_times = False
-        self.__electrode_table = getargs('electrode_table', kwargs)
-        self.waveform_rate = getargs('waveform_rate', kwargs)
-        self.waveform_unit = getargs('waveform_unit', kwargs)
-        self.resolution = getargs('resolution', kwargs)
+        self.__electrode_table = electrode_table
 
     @docval({'name': 'spike_times', 'type': 'array_data', 'doc': 'the spike times for each unit',
              'default': None, 'shape': (None,)},
@@ -183,7 +188,7 @@ class Units(DynamicTable):
              'default': None, 'shape': (None, 2)},
             {'name': 'electrodes', 'type': 'array_data', 'doc': 'the electrodes that each unit came from',
              'default': None},
-            {'name': 'electrode_group', 'type': 'ElectrodeGroup', 'default': None,
+            {'name': 'electrode_group', 'type': ElectrodeGroup, 'default': None,
              'doc': 'the electrode group that each unit came from'},
             {'name': 'waveform_mean', 'type': 'array_data',
              'doc': 'the spike waveform mean for each unit. Shape is (time,) or (time, electrodes)',
@@ -198,7 +203,7 @@ class Units(DynamicTable):
         """
         Add a unit to this table
         """
-        super(Units, self).add_row(**kwargs)
+        super().add_row(**kwargs)
         if 'electrodes' in self:
             elec_col = self['electrodes'].target
             if elec_col.table is None:
@@ -272,11 +277,11 @@ class DecompositionSeries(TimeSeries):
                      'similar to ElectricalSeries.electrodes.'),
              'default': None},
             *get_docval(TimeSeries.__init__, 'resolution', 'conversion', 'timestamps', 'starting_time', 'rate',
-                        'comments', 'control', 'control_description'))
+                        'comments', 'control', 'control_description', 'offset'))
     def __init__(self, **kwargs):
         metric, source_timeseries, bands, source_channels = popargs('metric', 'source_timeseries', 'bands',
                                                                     'source_channels', kwargs)
-        super(DecompositionSeries, self).__init__(**kwargs)
+        super().__init__(**kwargs)
         self.source_timeseries = source_timeseries
         self.source_channels = source_channels
         if self.source_timeseries is None and self.source_channels is None:
@@ -285,7 +290,10 @@ class DecompositionSeries(TimeSeries):
                           "corresponding source_channels. (Optional)")
         self.metric = metric
         if bands is None:
-            bands = DynamicTable("bands", "data about the frequency bands that the signal was decomposed into")
+            bands = DynamicTable(
+                name="bands",
+                description="data about the frequency bands that the signal was decomposed into"
+            )
         self.bands = bands
 
     def __check_column(self, name, desc):
@@ -296,9 +304,9 @@ class DecompositionSeries(TimeSeries):
              'default': None},
             {'name': 'band_limits', 'type': ('array_data', 'data'), 'default': None,
              'doc': 'low and high frequencies of bandpass filter in Hz'},
-            {'name': 'band_mean', 'type': 'float', 'doc': 'the mean of Gaussian filters in Hz',
+            {'name': 'band_mean', 'type': float, 'doc': 'the mean of Gaussian filters in Hz',
              'default': None},
-            {'name': 'band_stdev', 'type': 'float', 'doc': 'the standard deviation of Gaussian filters in Hz',
+            {'name': 'band_stdev', 'type': float, 'doc': 'the standard deviation of Gaussian filters in Hz',
              'default': None},
             allow_extra=True)
     def add_band(self, **kwargs):

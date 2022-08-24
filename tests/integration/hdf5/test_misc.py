@@ -56,19 +56,19 @@ class TestUnitsIO(AcquisitionH5IOMixin, TestCase):
         """ Test whether the Units spike times read from file are what was written """
         ut = self.roundtripContainer()
         received = ut.get_unit_spike_times(0)
-        self.assertTrue(np.array_equal(received, [0., 1., 2.]))
+        np.testing.assert_array_equal(received, [0., 1., 2.])
         received = ut.get_unit_spike_times(1)
-        self.assertTrue(np.array_equal(received, [3., 4., 5.]))
-        self.assertTrue(np.array_equal(ut['spike_times'][:], [[0., 1., 2.], [3., 4., 5.]]))
+        np.testing.assert_array_equal(received, [3., 4., 5.])
+        np.testing.assert_array_equal(ut['spike_times'][:], [[0., 1., 2.], [3., 4., 5.]])
 
     def test_get_obs_intervals(self):
         """ Test whether the Units observation intervals read from file are what was written """
         ut = self.roundtripContainer()
         received = ut.get_unit_obs_intervals(0)
-        self.assertTrue(np.array_equal(received, [[0., 1.], [2., 3.]]))
+        np.testing.assert_array_equal(received, [[0., 1.], [2., 3.]])
         received = ut.get_unit_obs_intervals(1)
-        self.assertTrue(np.array_equal(received, [[2., 5.], [6., 7.]]))
-        self.assertTrue(np.array_equal(ut['obs_intervals'][:], [[[0., 1.], [2., 3.]], [[2., 5.], [6., 7.]]]))
+        np.testing.assert_array_equal(received, [[2., 5.], [6., 7.]])
+        np.testing.assert_array_equal(ut['obs_intervals'][:], [[[0., 1.], [2., 3.]], [[2., 5.], [6., 7.]]])
 
 
 class TestUnitsFileIO(NWBH5IOMixin, TestCase):
@@ -89,9 +89,7 @@ class TestUnitsFileIO(NWBH5IOMixin, TestCase):
                                                          device=device)
         for idx in [1, 2, 3, 4]:
             nwbfile.add_electrode(id=idx,
-                                  x=1.0, y=2.0, z=3.0,
-                                  imp=float(-idx),
-                                  location='CA1', filtering='none',
+                                  location='CA1',
                                   group=electrode_group)
 
         nwbfile.add_unit(id=1, electrodes=[1], electrode_group=electrode_group)
@@ -151,8 +149,7 @@ class TestDecompositionSeriesWithSourceChannelsIO(AcquisitionH5IOMixin, TestCase
                                     location='tetrode location',
                                     device=self.dev1)
         for i in range(4):
-            self.table.add_row(x=float(i), y=2.0, z=3.0, imp=-1.0, location='CA1', filtering='none', group=self.group,
-                               group_name='tetrode1')
+            self.table.add_row(location='CA1', group=self.group, group_name='tetrode1')
 
     def setUpContainer(self):
         """ Return the test ElectricalSeries to read/write """

@@ -14,15 +14,18 @@ class TestIntracellularElectrode(NWBH5IOMixin, TestCase):
     def setUpContainer(self):
         """ Return the test IntracellularElectrode to read/write """
         self.device = Device(name='device_name')
-        elec = IntracellularElectrode(name="elec0",
-                                      slice='tissue slice',
-                                      resistance='something measured in ohms',
-                                      seal='sealing method',
-                                      description='a fake electrode object',
-                                      location='Springfield Elementary School',
-                                      filtering='a meaningless free-form text field',
-                                      initial_access_resistance='I guess this changes',
-                                      device=self.device)
+        elec = IntracellularElectrode(
+            name="elec0",
+            slice='tissue slice',
+            resistance='something measured in ohms',
+            seal='sealing method',
+            description='a fake electrode object',
+            location='Springfield Elementary School',
+            filtering='a meaningless free-form text field',
+            initial_access_resistance='I guess this changes',
+            device=self.device,
+            cell_id="this_cell",
+        )
         return elec
 
     def addContainer(self, nwbfile):
