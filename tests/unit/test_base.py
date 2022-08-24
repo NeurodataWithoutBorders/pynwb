@@ -6,7 +6,6 @@ from pynwb.base import ProcessingModule, TimeSeries, Images, Image, TimeSeriesRe
 from pynwb.testing import TestCase
 from hdmf.data_utils import DataChunkIterator
 from hdmf.backends.hdf5 import H5DataIO
-from pynwb.testing.mock.base import mock_TimeSeries
 
 
 class TestProcessingModule(TestCase):
@@ -459,7 +458,3 @@ class TestTimeSeriesReference(TestCase):
                                                     data=np.arange(10), unit='unit', starting_time=5.0, rate=0.1))
         with self.assertRaisesWith(IndexError, "'idx_start + count' out of range for timeseries 'test0'"):
             tsr.data
-
-
-def test_mock():
-    mock_TimeSeries()
