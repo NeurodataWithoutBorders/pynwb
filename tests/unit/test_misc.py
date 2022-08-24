@@ -87,7 +87,7 @@ class DecompositionSeriesConstructor(TestCase):
             self.table.add_row(location='CA1', group=self.group, group_name='tetrode1')
 
     def test_init_with_source_channels(self):
-        self.mock_electrode_table(self)
+        self.make_electrode_table(self)
         region = DynamicTableRegion(name='source_channels',
                                     data=[0, 2],
                                     description='the first and third electrodes',
