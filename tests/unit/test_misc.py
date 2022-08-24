@@ -75,7 +75,7 @@ class DecompositionSeriesConstructor(TestCase):
         self.assertEqual(spec_anal.metric, 'amplitude')
 
     @staticmethod
-    def mock_electrode_table(self):
+    def make_electrode_table(self):
         """ Make an electrode table, electrode group, and device """
         self.table = get_electrode_table()
         self.dev1 = Device(name='dev1')
@@ -87,7 +87,7 @@ class DecompositionSeriesConstructor(TestCase):
             self.table.add_row(location='CA1', group=self.group, group_name='tetrode1')
 
     def test_init_with_source_channels(self):
-        self.mock_electrode_table(self)
+        self.make_electrode_table(self)
         region = DynamicTableRegion(name='source_channels',
                                     data=[0, 2],
                                     description='the first and third electrodes',
