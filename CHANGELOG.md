@@ -7,6 +7,7 @@
 - Add developer guide on how to create a new tutorial. @oruebel (#1504)
 - Add images tutorial. @weiglszonja (#1470)
 - Add example code for s3fs in the streaming tutorial. @bdichter (#1499)
+- Add voxel_mask tutorial. @codycbakerphd (#1544)
 
 ### Enhancements and minor changes
 - Update coverage workflow, report separate unit vs integration coverage. @rly (#1509)
