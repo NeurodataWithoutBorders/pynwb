@@ -363,8 +363,8 @@ for _ in range(30):
 
     # add voxel mask to plane segmentation
     ps3.add_roi(voxel_mask=voxel_mask)
-    
-    
+
+
 ####################
 # We can view the :py:class:`~pynwb.ophys.PlaneSegmentation` table with pixel
 # masks in tabular form by converting it to a :py:class:`~pandas.DataFrame`.
