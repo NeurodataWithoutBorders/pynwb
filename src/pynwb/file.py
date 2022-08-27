@@ -30,7 +30,20 @@ def _not_parent(arg):
 
 @register_class('LabMetaData', CORE_NAMESPACE)
 class LabMetaData(NWBContainer):
-    """Container for storing lab-specific meta-data"""
+    """
+    Container for storing lab-specific meta-data
+
+    The LabMetaData class serves as a base type for defining lab specific meta-data.
+    To define your own lab-specific metadata, create a Neurodata Extension (NDX) for
+    NWB that defines the data to add. Using the LabMetaData container as a base type
+    makes it easy to add your data to an NWBFile without having to modify the NWBFile
+    type itself, since adding of LabMetaData is already implemented. This allows
+    extensions based on LabMetaData to be typically fairly simple and helps avoid the
+    need for custom Container classes in many cases. For more details
+    on how to create an extension see the
+    :nwb_overview:`Extending NWB <extensions_tutorial/extensions_tutorial_home.html>`
+    tutorial.
+    """
 
     @docval({'name': 'name', 'type': str, 'doc': 'name of lab metadata'})
     def __init__(self, **kwargs):
