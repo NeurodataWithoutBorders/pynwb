@@ -19,6 +19,7 @@
   otherwise throws a warning when reading from a file. The new checks in `ImageSeries` when `external_file`
   is provided is used with this method to ensure that that files with invalid data can be read, but prohibits
   the user from creating new instances when these checks are violated. @weiglszonja (#1516)
+- Enhance docs for ``LabMetaData`` to clarify its usage @oruebel (#1546)
 
 ## PyNWB 2.1.0 (July 6, 2022)
 
