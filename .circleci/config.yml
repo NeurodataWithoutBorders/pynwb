@@ -100,7 +100,7 @@ references:
             conda update -n base -c defaults conda
             conda config --set always_yes yes --set changeps1 no
             conda config --add channels conda-forge
-            conda install python=$CONDA_PYTHON_VER
+            conda create --name testenv python=$CONDA_PYTHON_VER --yes
             # work around incompatibilities between virtualenv & importlib-metadata
             if [[ "${TEST_TOX_ENV}" == *"py37"* ]]; then
               conda install "importlib-metadata=1.7"
