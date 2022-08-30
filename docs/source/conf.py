@@ -140,7 +140,7 @@ intersphinx_mapping = {
     'numpy': ('https://numpy.org/doc/stable/', None),
     'matplotlib': ('https://matplotlib.org/stable/', None),
     'h5py': ('https://docs.h5py.org/en/latest/', None),
-    'hdmf': ('https://hdmf.readthedocs.io/en/latest/', None),
+    'hdmf': ('https://hdmf.readthedocs.io/en/stable/', None),
     'pandas': ('https://pandas.pydata.org/pandas-docs/stable/', None),
     'dandi': ('https://dandi.readthedocs.io/en/stable/', None),
     'fsspec': ("https://filesystem-spec.readthedocs.io/en/latest/", None),
