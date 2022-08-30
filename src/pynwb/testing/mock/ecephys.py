@@ -27,16 +27,7 @@ def mock_ElectrodeGroup(
 def mock_ElectrodeTable(n_rows=5, group=mock_ElectrodeGroup()):
     table = ElectrodeTable()
     for i in range(n_rows):
-        table.add_row(
-            x=1.0,
-            y=2.0,
-            z=3.0,
-            imp=-(i + 1),
-            location="CA1",
-            filtering="none",
-            group=group,
-            group_name=group.name,
-        )
+        table.add_row(location="CA1", group=group)
     return table
 
 
