@@ -56,5 +56,6 @@ def mock_PupilTracking(
 
 def mock_CompassDirection(name=None, spatial_series=None):
     return CompassDirection(
-        name=name or name_generator("CompassDirection"), spatial_series=spatial_series or [mock_SpatialSeries(unit="radians")]
+        name=name or name_generator("CompassDirection"),
+        spatial_series=spatial_series or [mock_SpatialSeries(unit="radians")],
     )
