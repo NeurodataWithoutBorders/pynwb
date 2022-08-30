@@ -96,33 +96,29 @@ references:
       - run:
           name: Configure conda
           command: |
+            pip install --upgrade pip
             conda update -n base -c defaults conda
             conda config --set always_yes yes --set changeps1 no
             conda config --add channels conda-forge
-            conda create --name testenv python=$CONDA_PYTHON_VER --yes
-            source activate testenv
+            conda install python=$CONDA_PYTHON_VER
             # work around incompatibilities between virtualenv & importlib-metadata
             if [[ "${TEST_TOX_ENV}" == *"py37"* ]]; then
               conda install "importlib-metadata=1.7"
             else
               conda install importlib-metadata
             fi
-            conda upgrade pip
             conda install tox
       - run:
           name: Run the tests
           command: |
-            source activate testenv
             tox -e $TEST_TOX_ENV
       - run:
           name: Build wheel and source distribution
           command: |
-            source activate testenv
             tox -e $BUILD_TOX_ENV
       - run:
           name: Test installation from a wheel
           command: |
-            source activate testenv
             tox -e $TEST_WHEELINSTALL_ENV --recreate --installpkg dist/*-none-any.whl
 
   gallery-steps: &gallery-steps
