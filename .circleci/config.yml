@@ -112,14 +112,17 @@ references:
       - run:
           name: Run the tests
           command: |
+            source activate testenv
             tox -e $TEST_TOX_ENV
       - run:
           name: Build wheel and source distribution
           command: |
+            source activate testenv
             tox -e $BUILD_TOX_ENV
       - run:
           name: Test installation from a wheel
           command: |
+            source activate testenv
             tox -e $TEST_WHEELINSTALL_ENV --recreate --installpkg dist/*-none-any.whl
 
   gallery-steps: &gallery-steps
