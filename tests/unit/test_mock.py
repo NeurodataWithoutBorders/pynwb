@@ -1,3 +1,5 @@
+from pynwb.testing.mock.file import mock_Subject, mock_NWBFile
+
 from pynwb.testing.mock.ophys import (
     mock_ImagingPlane,
     mock_TwoPhotonSeries,
@@ -48,6 +50,8 @@ import pytest
         mock_ElectrodeTable,
         mock_ElectricalSeries,
         mock_SpikeEventSeries,
+        mock_Subject,
+        mock_NWBFile,
     ],
 )
 def test_mock(mock_function):
