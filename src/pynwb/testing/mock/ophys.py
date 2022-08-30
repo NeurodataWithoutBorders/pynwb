@@ -27,9 +27,9 @@ def mock_OpticalChannel(
 
 def mock_ImagingPlane(
     name=None,
-    optical_channel=mock_OpticalChannel(),
+    optical_channel=None,
     description="description",
-    device=mock_Device(),
+    device=None,
     excitation_lambda=500.0,
     indicator="indicator",
     location="unknown",
@@ -45,9 +45,9 @@ def mock_ImagingPlane(
 ):
     return ImagingPlane(
         name=name or name_generator("ImagingPlane"),
-        optical_channel=optical_channel,
+        optical_channel=optical_channel or mock_OpticalChannel(),
         description=description,
-        device=device,
+        device=device or mock_Device(),
         excitation_lambda=excitation_lambda,
         indicator=indicator,
         location=location,

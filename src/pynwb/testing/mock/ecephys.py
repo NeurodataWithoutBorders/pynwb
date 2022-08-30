@@ -12,11 +12,15 @@ def mock_ElectrodeGroup(
     name=None,
     description="description",
     location="location",
-    device=mock_Device(),
+    device=None,
     position=None,
 ):
     return ElectrodeGroup(
-        name=name or name_generator("ElectrodeGroup"), description=description, location=location, device=device, position=position,
+        name=name or name_generator("ElectrodeGroup"),
+        description=description,
+        location=location,
+        device=device or mock_Device(),
+        position=position,
     )
 
 
