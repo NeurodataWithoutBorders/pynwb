@@ -52,7 +52,7 @@ def mock_ElectricalSeries(
     data=np.ones((10, 5)),
     rate=30000.0,
     timestamps=None,
-    electrodes=mock_electrodes(),
+    electrodes=None,
     filtering="filtering",
 ):
     return ElectricalSeries(
@@ -61,7 +61,7 @@ def mock_ElectricalSeries(
         data=data,
         rate=rate,
         timestamps=timestamps,
-        electrodes=electrodes,
+        electrodes=electrodes or mock_electrodes(),
         filtering=filtering,
     )
 
