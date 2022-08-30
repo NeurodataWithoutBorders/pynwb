@@ -4,12 +4,12 @@ from .utils import name_generator
 
 
 def mock_Device(
-    name=name_generator("Device"),
+    name=None,
     description="description",
     manufacturer=None,
 ):
     return Device(
-        name=name,
+        name=name or name_generator("Device"),
         description=description,
         manufacturer=manufacturer,
     )

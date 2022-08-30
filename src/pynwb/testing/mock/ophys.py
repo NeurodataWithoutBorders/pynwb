@@ -16,17 +16,17 @@ from .utils import name_generator
 
 
 def mock_OpticalChannel(
-    name=name_generator("OpticalChannel"),
+    name=None,
     description="description",
     emission_lambda=500.0,
 ):
     return OpticalChannel(
-        name=name, description=description, emission_lambda=emission_lambda,
+        name=name or name_generator("OpticalChannel"), description=description, emission_lambda=emission_lambda,
     )
 
 
 def mock_ImagingPlane(
-    name=name_generator("ImagingPlane"),
+    name=None,
     optical_channel=mock_OpticalChannel(),
     description="description",
     device=mock_Device(),
@@ -44,7 +44,7 @@ def mock_ImagingPlane(
     grid_spacing_unit="meters",
 ):
     return ImagingPlane(
-        name=name,
+        name=name or name_generator("ImagingPlane"),
         optical_channel=optical_channel,
         description=description,
         device=device,

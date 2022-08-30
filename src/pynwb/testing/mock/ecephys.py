@@ -9,14 +9,14 @@ from .utils import name_generator
 
 
 def mock_ElectrodeGroup(
-    name=name_generator("ElectrodeGroup"),
+    name=None,
     description="description",
     location="location",
     device=mock_Device(),
     position=None,
 ):
     return ElectrodeGroup(
-        name=name, description=description, location=location, device=device, position=position,
+        name=name or name_generator("ElectrodeGroup"), description=description, location=location, device=device, position=position,
     )
 
 
@@ -43,7 +43,7 @@ def mock_electrodes(n_electrodes=5, table=mock_ElectrodeTable(n_rows=5)):
 
 
 def mock_ElectricalSeries(
-    name=name_generator("ElectricalSeries"),
+    name=None,
     description="description",
     data=np.ones((10, 5)),
     rate=30000.0,
@@ -52,7 +52,7 @@ def mock_ElectricalSeries(
     filtering="filtering",
 ):
     return ElectricalSeries(
-        name=name,
+        name=name or name_generator("ElectricalSeries"),
         description=description,
         data=data,
         rate=rate,
@@ -63,14 +63,14 @@ def mock_ElectricalSeries(
 
 
 def mock_SpikeEventSeries(
-    name=name_generator("SpikeEventSeries"),
+    name=None,
     description="description",
     data=np.ones((10, 5)),
     timestamps=np.arange(10).astype(float),
     electrodes=mock_electrodes(),
 ):
     return SpikeEventSeries(
-        name=name,
+        name=name or name_generator("SpikeEventSeries"),
         description=description,
         data=data,
         timestamps=timestamps,

@@ -11,7 +11,7 @@ from .base import mock_TimeSeries
 
 
 def mock_SpatialSeries(
-    name=name_generator("SpatialSeries"),
+    name=None,
     data=np.array([1, 2, 3, 4]),
     reference_frame="lower left is (0, 0)",
     unit="meters",
@@ -26,7 +26,7 @@ def mock_SpatialSeries(
     control_description=None,
 ):
     return SpatialSeries(
-        name=name,
+        name=name or name_generator("SpatialSeries"),
         data=data,
         reference_frame=reference_frame,
         unit=unit,
@@ -43,18 +43,18 @@ def mock_SpatialSeries(
 
 
 def mock_Position(
-    name=name_generator("Position"), spatial_series=None,
+    name=None, spatial_series=None,
 ):
-    return Position(name=name, spatial_series=spatial_series or [mock_SpatialSeries()])
+    return Position(name=name or name_generator("Position"), spatial_series=spatial_series or [mock_SpatialSeries()])
 
 
 def mock_PupilTracking(
-    name=name_generator("PupilTracking"), time_series=None,
+    name=None, time_series=None,
 ):
-    return PupilTracking(name=name, time_series=time_series or [mock_TimeSeries()])
+    return PupilTracking(name=name or name_generator("PupilTracking"), time_series=time_series or [mock_TimeSeries()])
 
 
-def mock_CompassDirection(name=name_generator("CompassDirection"), spatial_series=None):
+def mock_CompassDirection(name=None, spatial_series=None):
     return CompassDirection(
-        name=name, spatial_series=spatial_series or [mock_SpatialSeries(unit="radians")]
+        name=name or name_generator("CompassDirection"), spatial_series=spatial_series or [mock_SpatialSeries(unit="radians")]
     )
