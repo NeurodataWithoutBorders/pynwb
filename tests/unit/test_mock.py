@@ -52,4 +52,3 @@ import pytest
 )
 def test_mock(mock_function):
     mock_function()
-
