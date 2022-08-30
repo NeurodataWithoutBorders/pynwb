@@ -88,7 +88,7 @@ breaking down the barriers to data sharing in neuroscience.
 Installation
 ============
 
-See the PyNWB documentation for details http://pynwb.readthedocs.io/en/latest/getting_started.html#installation
+See the PyNWB documentation for details https://pynwb.readthedocs.io/en/stable/install_users.html
 
 Code of Conduct
 ===============
