@@ -44,7 +44,7 @@ def mock_electrodes(n_electrodes=5, table=mock_ElectrodeTable(n_rows=5)):
 def mock_ElectricalSeries(
     name=None,
     description="description",
-    data=np.ones((10, 5)),
+    data=None,
     rate=30000.0,
     timestamps=None,
     electrodes=None,
