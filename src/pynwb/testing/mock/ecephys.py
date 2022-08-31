@@ -53,7 +53,7 @@ def mock_ElectricalSeries(
     return ElectricalSeries(
         name=name or name_generator("ElectricalSeries"),
         description=description,
-        data=data,
+        data=data if data is not None else np.ones((10, 5)),
         rate=rate,
         timestamps=timestamps,
         electrodes=electrodes or mock_electrodes(),
