@@ -168,5 +168,3 @@ if __name__ == '__main__':
         _make_imageseries_no_data()
         _make_imageseries_non_external_format()
         _make_imageseries_nonmatch_starting_frame()
-
-
