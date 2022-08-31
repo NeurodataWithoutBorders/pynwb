@@ -188,8 +188,8 @@ def mock_DfOverF(roi_response_series=None, name=None):
     )
 
 
-def mock_Fluorescence(roi_response_series=None, name="Fluorescence"):
+def mock_Fluorescence(roi_response_series=None, name=None):
     return Fluorescence(
         roi_response_series=roi_response_series or [mock_RoiResponseSeries()],
-        name=name,
+        name=name if name is not None else name_generator("Fluorescence"),
     )
