@@ -12,7 +12,7 @@ from .base import mock_TimeSeries
 
 def mock_SpatialSeries(
     name=None,
-    data=np.array([1, 2, 3, 4]),
+    data=None,
     reference_frame="lower left is (0, 0)",
     unit="meters",
     conversion=1.0,
