@@ -116,7 +116,7 @@ def mock_TwoPhotonSeries(
 def mock_PlaneSegmentation(
     description="no description",
     imaging_plane=mock_ImagingPlane(),
-    name=name_generator("PlaneSegmentation"),
+    name=None,
     reference_images=None,
     n_rois=5,
 ):
