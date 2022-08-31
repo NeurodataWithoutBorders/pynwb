@@ -184,7 +184,7 @@ def mock_RoiResponseSeries(
 def mock_DfOverF(roi_response_series=None, name=None):
     return DfOverF(
         roi_response_series=roi_response_series or [mock_RoiResponseSeries()],
-        name=name,
+        name=name if name is not None else name_generator("DfOverF"),
     )
 
 
