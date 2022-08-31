@@ -21,7 +21,7 @@ def mock_TimeSeries(
 ):
     return TimeSeries(
         name=name or name_generator("TimeSeries"),
-        data=data,
+        data=data if data is not None else np.array([1, 2, 3, 4]),
         unit=unit,
         resolution=resolution,
         conversion=conversion,
