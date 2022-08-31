@@ -72,6 +72,6 @@ def mock_SpikeEventSeries(
         name=name or name_generator("SpikeEventSeries"),
         description=description,
         data=data if data is not None else np.ones((10, 5)),
-        timestamps=timestamps,
+        timestamps=timestamps if timestamps is not None else np.arange(10).astype(float),
         electrodes=electrodes,
     )
