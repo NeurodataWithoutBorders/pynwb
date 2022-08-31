@@ -64,7 +64,7 @@ def mock_ImagingPlane(
 
 
 def mock_TwoPhotonSeries(
-    name=name_generator("TwoPhotonSeries"),
+    name=None,
     imaging_plane=mock_ImagingPlane(),
     data=np.ones((20, 5, 5)),
     rate=50.0,
