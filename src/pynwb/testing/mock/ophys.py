@@ -159,8 +159,8 @@ def mock_RoiResponseSeries(
     n_rois=5,
 ):
     return RoiResponseSeries(
-        name=name,
-        data=data,
+        name=name if name is not None else name_generator("RoiResponseSeries"),
+        data=data if data is not None else np.ones((30, 5)),
         unit=unit,
         rois=rois
         or DynamicTableRegion(
