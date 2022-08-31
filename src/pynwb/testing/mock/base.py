@@ -5,7 +5,7 @@ from .utils import name_generator
 
 
 def mock_TimeSeries(
-    name=name_generator("TimeSeries"),
+    name=None,
     data=np.array([1, 2, 3, 4]),
     unit="volts",
     resolution=-1.0,
@@ -20,7 +20,7 @@ def mock_TimeSeries(
     continuity=None,
 ):
     return TimeSeries(
-        name=name,
+        name=name or name_generator("TimeSeries"),
         data=data,
         unit=unit,
         resolution=resolution,
