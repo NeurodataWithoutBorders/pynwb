@@ -88,7 +88,7 @@ def mock_TwoPhotonSeries(
     device=None,
 ):
     return TwoPhotonSeries(
-        name=name,
+        name=name if name is not None else name_generator("TwoPhotonSeries"),
         imaging_plane=imaging_plane,
         data=data,
         unit=unit,
