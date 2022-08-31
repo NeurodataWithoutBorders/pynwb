@@ -64,7 +64,7 @@ def mock_ElectricalSeries(
 def mock_SpikeEventSeries(
     name=None,
     description="description",
-    data=np.ones((10, 5)),
+    data=None,
     timestamps=np.arange(10).astype(float),
     electrodes=mock_electrodes(),
 ):
