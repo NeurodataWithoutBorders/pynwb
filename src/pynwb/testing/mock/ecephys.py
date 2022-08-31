@@ -24,12 +24,12 @@ def mock_ElectrodeGroup(
     )
 
 
-def mock_ElectrodeTable(n_rows=5, group=mock_ElectrodeGroup()):
+def mock_ElectrodeTable(n_rows=5, group=None):
     table = ElectrodeTable()
     for i in range(n_rows):
         table.add_row(
             location="CA1",
-            group=group,
+            group=group if group is not None else mock_ElectrodeGroup(),
             group_name=group.name,
         )
     return table
