@@ -143,8 +143,8 @@ def mock_ImageSegmentation(
 
 
 def mock_RoiResponseSeries(
-    name=name_generator("RoiResponseSeries"),
-    data=np.ones((30, 5)),
+    name=None,
+    data=None,
     unit="n.a.",
     rois=None,
     resolution=-1.0,
