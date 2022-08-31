@@ -66,7 +66,7 @@ def mock_SpikeEventSeries(
     description="description",
     data=None,
     timestamps=np.arange(10).astype(float),
-    electrodes=mock_electrodes(),
+    electrodes=None,
 ):
     return SpikeEventSeries(
         name=name or name_generator("SpikeEventSeries"),
