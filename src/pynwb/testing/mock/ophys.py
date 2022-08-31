@@ -123,7 +123,7 @@ def mock_PlaneSegmentation(
     plane_segmentation = PlaneSegmentation(
         description=description,
         imaging_plane=imaging_plane,
-        name=name,
+        name=name if name is not None else name_generator("PlaneSegmentation"),
         reference_images=reference_images,
     )
 
