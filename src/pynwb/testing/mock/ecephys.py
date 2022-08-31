@@ -24,12 +24,12 @@ def mock_ElectrodeGroup(
     )
 
 
-def mock_ElectrodeTable(n_rows=5, group=mock_ElectrodeGroup()):
+def mock_ElectrodeTable(n_rows=5, group=None):
     table = ElectrodeTable()
     for i in range(n_rows):
         table.add_row(
             location="CA1",
-            group=group,
+            group=group if group is not None else mock_ElectrodeGroup(),
             group_name=group.name,
         )
     return table
@@ -44,7 +44,7 @@ def mock_electrodes(n_electrodes=5, table=mock_ElectrodeTable(n_rows=5)):
 def mock_ElectricalSeries(
     name=None,
     description="description",
-    data=np.ones((10, 5)),
+    data=None,
     rate=30000.0,
     timestamps=None,
     electrodes=None,
@@ -53,7 +53,7 @@ def mock_ElectricalSeries(
     return ElectricalSeries(
         name=name or name_generator("ElectricalSeries"),
         description=description,
-        data=data,
+        data=data if data is not None else np.ones((10, 5)),
         rate=rate,
         timestamps=timestamps,
         electrodes=electrodes or mock_electrodes(),
@@ -64,14 +64,14 @@ def mock_ElectricalSeries(
 def mock_SpikeEventSeries(
     name=None,
     description="description",
-    data=np.ones((10, 5)),
+    data=None,
     timestamps=np.arange(10).astype(float),
-    electrodes=mock_electrodes(),
+    electrodes=None,
 ):
     return SpikeEventSeries(
         name=name or name_generator("SpikeEventSeries"),
         description=description,
-        data=data,
-        timestamps=timestamps,
-        electrodes=electrodes,
+        data=data if data is not None else np.ones((10, 5)),
+        timestamps=timestamps if timestamps is not None else np.arange(10).astype(float),
+        electrodes=electrodes if electrodes is not None else mock_electrodes(),
     )

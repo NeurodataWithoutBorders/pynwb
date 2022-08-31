@@ -24,7 +24,7 @@ def mock_OptogeneticStimulusSite(
 
 def mock_OptogeneticSeries(
     name=None,
-    data=np.array([1, 2, 3, 4]),
+    data=None,
     site=None,
     resolution=-1.0,
     conversion=1.0,
@@ -38,7 +38,7 @@ def mock_OptogeneticSeries(
 ):
     return OptogeneticSeries(
         name=name or name_generator("OptogeneticSeries"),
-        data=data,
+        data=data if data is not None else np.array([1, 2, 3, 4]),
         site=site or mock_OptogeneticStimulusSite(),
         resolution=resolution,
         conversion=conversion,

@@ -64,7 +64,7 @@ def mock_ImagingPlane(
 
 
 def mock_TwoPhotonSeries(
-    name=name_generator("TwoPhotonSeries"),
+    name=None,
     imaging_plane=mock_ImagingPlane(),
     data=np.ones((20, 5, 5)),
     rate=50.0,
@@ -88,7 +88,7 @@ def mock_TwoPhotonSeries(
     device=None,
 ):
     return TwoPhotonSeries(
-        name=name,
+        name=name if name is not None else name_generator("TwoPhotonSeries"),
         imaging_plane=imaging_plane,
         data=data,
         unit=unit,
@@ -116,14 +116,14 @@ def mock_TwoPhotonSeries(
 def mock_PlaneSegmentation(
     description="no description",
     imaging_plane=mock_ImagingPlane(),
-    name=name_generator("PlaneSegmentation"),
+    name=None,
     reference_images=None,
     n_rois=5,
 ):
     plane_segmentation = PlaneSegmentation(
         description=description,
         imaging_plane=imaging_plane,
-        name=name,
+        name=name if name is not None else name_generator("PlaneSegmentation"),
         reference_images=reference_images,
     )
 
@@ -143,8 +143,8 @@ def mock_ImageSegmentation(
 
 
 def mock_RoiResponseSeries(
-    name=name_generator("RoiResponseSeries"),
-    data=np.ones((30, 5)),
+    name=None,
+    data=None,
     unit="n.a.",
     rois=None,
     resolution=-1.0,
@@ -159,8 +159,8 @@ def mock_RoiResponseSeries(
     n_rois=5,
 ):
     return RoiResponseSeries(
-        name=name,
-        data=data,
+        name=name if name is not None else name_generator("RoiResponseSeries"),
+        data=data if data is not None else np.ones((30, 5)),
         unit=unit,
         rois=rois
         or DynamicTableRegion(
@@ -181,15 +181,15 @@ def mock_RoiResponseSeries(
     )
 
 
-def mock_DfOverF(roi_response_series=None, name=name_generator("DfOverF")):
+def mock_DfOverF(roi_response_series=None, name=None):
     return DfOverF(
         roi_response_series=roi_response_series or [mock_RoiResponseSeries()],
-        name=name,
+        name=name if name is not None else name_generator("DfOverF"),
     )
 
 
-def mock_Fluorescence(roi_response_series=None, name="Fluorescence"):
+def mock_Fluorescence(roi_response_series=None, name=None):
     return Fluorescence(
         roi_response_series=roi_response_series or [mock_RoiResponseSeries()],
-        name=name,
+        name=name if name is not None else name_generator("Fluorescence"),
     )
