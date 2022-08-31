@@ -27,7 +27,7 @@ def mock_SpatialSeries(
 ):
     return SpatialSeries(
         name=name or name_generator("SpatialSeries"),
-        data=data,
+        data=data if data is not None else np.array([1, 2, 3, 4]),
         reference_frame=reference_frame,
         unit=unit,
         conversion=conversion,
