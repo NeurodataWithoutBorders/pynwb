@@ -71,7 +71,7 @@ def mock_SpikeEventSeries(
     return SpikeEventSeries(
         name=name or name_generator("SpikeEventSeries"),
         description=description,
-        data=data,
+        data=data if data is not None else np.ones((10, 5)),
         timestamps=timestamps,
         electrodes=electrodes,
     )
