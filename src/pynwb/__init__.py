@@ -14,12 +14,11 @@ from hdmf.backends.hdf5 import HDF5IO as _HDF5IO
 from hdmf.build import BuildManager, TypeMap
 import hdmf.common
 
-from .validation import validate  # noqa: F401
-
 CORE_NAMESPACE = 'core'
 __core_ns_file_name = 'nwb.namespace.yaml'
 
 from .spec import NWBDatasetSpec, NWBGroupSpec, NWBNamespace  # noqa E402
+from .validation import validate  # noqa: F401
 
 
 def __get_resources():
