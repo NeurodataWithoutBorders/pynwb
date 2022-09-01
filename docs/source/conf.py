@@ -76,11 +76,16 @@ class CustomSphinxGallerySectionSortKey(ExampleTitleSortKey):
     GALLERY_ORDER = {
         'general': ['file.py'],
         # Sort domain-specific tutorials based on domain to group tutorials belonging to the same domain
-        'domain': ['ecephys.py',
-                   'ophys.py',
-                   'plot_icephys.py', 'plot_icephys_pandas.py', 'icephys.py',
-                   'plot_behavior.py',
-                   'brain_observatory.py'],
+        'domain': [
+            "ecephys.py",
+            "ophys.py",
+            "plot_icephys.py",
+            "plot_icephys_pandas.py",
+            "icephys.py",
+            "plot_behavior.py",
+            "images.py",
+            "brain_observatory.py"
+        ],
         'advanced_io': []
     }
 
@@ -135,16 +140,18 @@ intersphinx_mapping = {
     'numpy': ('https://numpy.org/doc/stable/', None),
     'matplotlib': ('https://matplotlib.org/stable/', None),
     'h5py': ('https://docs.h5py.org/en/latest/', None),
-    'hdmf': ('https://hdmf.readthedocs.io/en/latest/', None),
+    'hdmf': ('https://hdmf.readthedocs.io/en/stable/', None),
     'pandas': ('https://pandas.pydata.org/pandas-docs/stable/', None),
     'dandi': ('https://dandi.readthedocs.io/en/stable/', None),
+    'fsspec': ("https://filesystem-spec.readthedocs.io/en/latest/", None),
 }
 
 extlinks = {'incf_lesson': ('https://training.incf.org/lesson/%s', ''),
             'incf_collection': ('https://training.incf.org/collection/%s', ''),
             'nwb_extension': ('https://github.com/nwb-extensions/%s', ''),
             'pynwb': ('https://github.com/NeurodataWithoutBorders/pynwb/%s', ''),
-            'nwb_overview': ('https://nwb-overview.readthedocs.io/en/latest/%s', '')}
+            'nwb_overview': ('https://nwb-overview.readthedocs.io/en/latest/%s', ''),
+            'dandi': ('https://www.dandiarchive.org/%s', '')}
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']

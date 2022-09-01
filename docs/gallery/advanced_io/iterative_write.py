@@ -160,7 +160,7 @@ def iter_sin(chunk_length=10, max_chunks=100):
     """
     x = 0
     num_chunks = 0
-    while(x < 0.5 and num_chunks < max_chunks):
+    while (x < 0.5 and num_chunks < max_chunks):
         val = np.asarray([sin(random() * 2 * pi) for i in range(chunk_length)])
         x = random()
         num_chunks += 1
@@ -542,16 +542,16 @@ write_test_file(filename='basic_sparse_iterwrite_largearray.nwb',
 # Read the NWB file
 from pynwb import NWBHDF5IO  # noqa: F811
 
-io = NWBHDF5IO('basic_sparse_iterwrite_largearray.nwb', 'r')
-nwbfile = io.read()
-data = nwbfile.get_acquisition('synthetic_timeseries').data
-# Compare all the data values of our two arrays
-data_match = np.all(arrdata == data[:])   # Don't do this for very large arrays!
-# Print result message
-if data_match:
-    print("Success: All data values match")
-else:
-    print("ERROR: Mismatch between data")
+with NWBHDF5IO('basic_sparse_iterwrite_largearray.nwb', 'r') as io:
+    nwbfile = io.read()
+    data = nwbfile.get_acquisition('synthetic_timeseries').data
+    # Compare all the data values of our two arrays
+    data_match = np.all(arrdata == data[:])   # Don't do this for very large arrays!
+    # Print result message
+    if data_match:
+        print("Success: All data values match")
+    else:
+        print("ERROR: Mismatch between data")
 
 
 ####################

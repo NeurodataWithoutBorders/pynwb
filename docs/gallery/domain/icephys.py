@@ -194,3 +194,6 @@ device = nwbfile.get_device('Heka ITC-1600')
 # consisting of acquisition and stimulus, from sweep 1.
 
 series = nwbfile.sweep_table.get_series(1)
+
+# close the file
+io.close()

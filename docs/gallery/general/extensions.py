@@ -237,8 +237,8 @@ io.close()
 # explicitly specify this. This behavior is enabled by the *load_namespaces*
 # argument to the :py:class:`~pynwb.NWBHDF5IO` constructor.
 
-io = NWBHDF5IO('cache_spec_example.nwb', mode='r', load_namespaces=True)
-nwbfile = io.read()
+with NWBHDF5IO('cache_spec_example.nwb', mode='r', load_namespaces=True) as io:
+    nwbfile = io.read()
 
 ####################
 # .. _MultiContainerInterface:
@@ -345,15 +345,13 @@ with NWBHDF5IO('test_multicontainerinterface.nwb', 'w') as io:
 
 load_namespaces(ns_path)
 # from xxx import PotatoSack, Potato
-io = NWBHDF5IO('test_multicontainerinterface.nwb', 'r')
-nwb = io.read()
-print(nwb.get_processing_module()['potato_sack'].get_potato('big_potato').weight)
+with NWBHDF5IO('test_multicontainerinterface.nwb', 'r') as io:
+    nwb = io.read()
+    print(nwb.get_processing_module()['potato_sack'].get_potato('big_potato').weight)
 # note: you can call get_processing_module() with or without the module name as
 # an argument. however, if there is more than one module, the name is required.
 # here, there is more than one potato, so the name of the potato is required as
 # an argument to get get_potato
-
-io.close()
 
 ####################
 # Example: Cortical Surface Mesh

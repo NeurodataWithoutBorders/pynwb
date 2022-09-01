@@ -1,8 +1,16 @@
 import warnings
-import numpy as np
 from collections.abc import Iterable
 
-from hdmf.utils import docval, getargs, popargs, popargs_to_dict, get_docval
+import numpy as np
+
+from hdmf.utils import (
+    docval,
+    getargs,
+    popargs,
+    popargs_to_dict,
+    get_docval,
+    get_data_shape,
+)
 
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries, Image, Images
@@ -44,9 +52,8 @@ class ImageSeries(TimeSeries):
              'doc': 'Path or URL to one or more external file(s). Field only present if format=external. '
                     'Either external_file or data must be specified (not None), but not both.', 'default': None},
             {'name': 'starting_frame', 'type': Iterable,
-             'doc': 'Each entry is the frame number in the corresponding external_file variable. '
-                    'This serves as an index to what frames each file contains. If external_file is not '
-                    'provided, then this value will be None', 'default': [0]},
+             'doc': 'Each entry is a frame number that corresponds to the first frame of each file '
+                    'listed in external_file within the full ImageSeries.', 'default': None},
             {'name': 'bits_per_pixel', 'type': int, 'doc': 'DEPRECATED: Number of bits per image pixel',
              'default': None},
             {'name': 'dimension', 'type': Iterable,
@@ -72,18 +79,57 @@ class ImageSeries(TimeSeries):
         if unit is None:
             kwargs['unit'] = ImageSeries.DEFAULT_UNIT
 
+        # If a single external_file is given then set starting_frame  to [0] for backward compatibility
+        if (
+            args_to_set["external_file"] is not None
+            and args_to_set["starting_frame"] is None
+        ):
+            args_to_set["starting_frame"] = (
+                [0] if len(args_to_set["external_file"]) == 1 else None
+            )
+
         super().__init__(**kwargs)
 
-        if args_to_set["external_file"] is None:
-            args_to_set["starting_frame"] = None  # overwrite starting_frame
         for key, val in args_to_set.items():
             setattr(self, key, val)
+
+        if self._change_external_file_format():
+            warnings.warn(
+                "%s '%s': The value for 'format' has been changed to 'external'. "
+                "Setting a default value for 'format' is deprecated and will be changed "
+                "to raising a ValueError in the next release."
+                % (self.__class__.__name__, self.name),
+                DeprecationWarning,
+            )
 
         if not self._check_image_series_dimension():
             warnings.warn(
                 "%s '%s': Length of data does not match length of timestamps. Your data may be transposed. "
-                "Time should be on the 0th dimension" % (self.__class__.__name__, self.name)
+                "Time should be on the 0th dimension"
+                % (self.__class__.__name__, self.name)
             )
+
+        self._error_on_new_warn_on_construct(
+            error_msg=self._check_external_file_starting_frame_length()
+        )
+        self._error_on_new_warn_on_construct(
+            error_msg=self._check_external_file_format()
+        )
+        self._error_on_new_warn_on_construct(error_msg=self._check_external_file_data())
+
+    def _change_external_file_format(self):
+        """
+        Change the format to 'external' when external_file is specified.
+        """
+        if (
+            get_data_shape(self.data)[0] == 0
+            and self.external_file is not None
+            and self.format is None
+        ):
+            self.format = "external"
+            return True
+
+        return False
 
     def _check_time_series_dimension(self):
         """Override _check_time_series_dimension to do nothing.
@@ -101,6 +147,49 @@ class ImageSeries(TimeSeries):
         if self.external_file is not None:
             return True
         return super()._check_time_series_dimension()
+
+    def _check_external_file_starting_frame_length(self):
+        """
+        Check that the number of frame indices in 'starting_frame' matches
+        the number of files in 'external_file'.
+        """
+        if self.external_file is None:
+            return
+        if get_data_shape(self.external_file) == get_data_shape(self.starting_frame):
+            return
+
+        return (
+            "%s '%s': The number of frame indices in 'starting_frame' should have "
+            "the same length as 'external_file'." % (self.__class__.__name__, self.name)
+        )
+
+    def _check_external_file_format(self):
+        """
+        Check that format is 'external' when external_file is specified.
+        """
+        if self.external_file is None:
+            return
+        if self.format == "external":
+            return
+
+        return "%s '%s': Format must be 'external' when external_file is specified." % (
+            self.__class__.__name__,
+            self.name,
+        )
+
+    def _check_external_file_data(self):
+        """
+        Check that data is an empty array when external_file is specified.
+        """
+        if self.external_file is None:
+            return
+        if get_data_shape(self.data)[0] == 0:
+            return
+
+        return (
+            "%s '%s': Either external_file or data must be specified (not None), but not both."
+            % (self.__class__.__name__, self.name)
+        )
 
     @property
     def bits_per_pixel(self):
@@ -207,7 +296,7 @@ class OpticalSeries(ImageSeries):
                      'orientation')
 
     @docval(*get_docval(ImageSeries.__init__, 'name'),  # required
-            {'name': 'distance', 'type': 'float', 'doc': 'Distance from camera/monitor to target/eye.'},  # required
+            {'name': 'distance', 'type': float, 'doc': 'Distance from camera/monitor to target/eye.'},  # required
             {'name': 'field_of_view', 'type': ('array_data', 'data', 'TimeSeries'), 'shape': ((2, ), (3, )),  # required
              'doc': 'Width, height and depth of image, or imaged area (meters).'},
             {'name': 'orientation', 'type': str,  # required

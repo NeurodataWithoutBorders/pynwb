@@ -5,6 +5,7 @@ omit =
     src/pynwb/_version.py
     src/pynwb/_due.py
     src/pynwb/testing/*
+    src/pynwb/legacy/*
 
 [report]
 exclude_lines =
