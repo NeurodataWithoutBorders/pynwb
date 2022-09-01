@@ -44,10 +44,9 @@ class TestReadOldVersions(TestCase):
                     with NWBHDF5IO(str(f), 'r') as io:
                         errors = validate(io)
                         io.read()
-                        if warnings_on_read:
-                            for w in warnings_on_read:
-                                if f.name in self.expected_warnings and w.message not in self.expected_warnings[f.name]:
-                                    warnings.warn('%s: %s' % (f.name, w))
+                        for w in warnings_on_read:
+                            if f.name in self.expected_warnings and str(w.message) not in self.expected_warnings[f.name]:
+                                warnings.warn('%s: %s' % (f.name, str(w.message)))
                         if errors:
                             for e in errors:
                                 if f.name in self.expected_errors and str(e) not in self.expected_errors[f.name]:
