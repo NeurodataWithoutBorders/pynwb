@@ -83,19 +83,19 @@ def _get_cached_namespaces_to_validate(path: str) -> Tuple[List[str], BuildManag
 @docval(
     {
         "name": "io",
-        "type": HDMFIO,  # want to do Optional[HDMFIO] but docval complains?
+        "type": (HDMFIO, type(None)),  # want to do Optional[HDMFIO] but docval complains?
         "doc": "An open IO to an NWB file.",
-        "default": False,
+        "default": None,
     },  # For back-compatability
     {
         "name": "namespace",
-        "type": str,  # want to do Optional[str] but docval complains?
+        "type": (str, type(None)),  # want to do Optional[str] but docval complains?
         "doc": "A specific namespace to validate against.",
         "default": CORE_NAMESPACE,
     },  # Argument order is for back-compatability
     {
         "name": "paths",
-        "type": list,  # want to do Optional[List[str]] but docval complains?
+        "type": (list, type(None)),  # want to do Optional[List[str]] but docval complains?
         "doc": "List of NWB file paths.",
         "default": None,
     },
@@ -122,6 +122,7 @@ def validate(**kwargs):
     io, paths, use_cached_namespaces, chosen_namespace, verbose = getargs(
         "io", "paths", "use_cached_namespaces", "namespace", "verbose", kwargs
     )
+    assert io != paths, "Both 'io' and 'paths' were specified! Please choose only one."
 
     if io is not None:
         validation_errors = _validate_helper(io=io, namespace=chosen_namespace)
@@ -210,7 +211,7 @@ def validate_cli():
             print("\n".join(cached_namespaces))
     else:
         validation_errors, validation_status = validate(
-            paths=args.paths, use_cached_namespace=args.cached_namespace, namespace=args.ns, verbose=True
+            paths=args.paths, use_cached_namespaces=args.cached_namespace, namespace=args.ns, verbose=True
         )
         _print_errors(validation_errors=validation_errors)
         status = status or validation_status or (validation_errors is not None and len(validation_errors) > 0)

@@ -18,7 +18,7 @@ CORE_NAMESPACE = 'core'
 __core_ns_file_name = 'nwb.namespace.yaml'
 
 from .spec import NWBDatasetSpec, NWBGroupSpec, NWBNamespace  # noqa E402
-from .validation import validate  # noqa: F401
+from .validate import validate  # noqa: F401
 
 
 def __get_resources():
