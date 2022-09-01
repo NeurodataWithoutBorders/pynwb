@@ -6,7 +6,7 @@
 - Added support for explicit ordering of sphinx gallery tutorials in the docs. @oruebel (#1504), @bdichter (#1495)
 - Added developer guide on how to create a new tutorial. @oruebel (#1504)
 - Added images tutorial. @weiglszonja (#1470)
-- Added example code for s3fs in the streaming tutorial. @bdichter (#1499)
+- Added example code for fsspec in the streaming tutorial. @bdichter (#1499)
 
 ### Enhancements and minor changes
 - Updated coverage workflow, report separate unit vs integration coverage. @rly (#1509)
