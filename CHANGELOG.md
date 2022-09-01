@@ -21,6 +21,7 @@
   the user from creating new instances when these checks are violated. @weiglszonja (#1516)
 - Created a GitHub Actions workflow to generate test files for testing backward compatibility. @rly
   [#1548](https://github.com/NeurodataWithoutBorders/pynwb/pull/1548)
+- Enhanced docs for ``LabMetaData`` to clarify its usage @oruebel [#1546](https://github.com/NeurodataWithoutBorders/pynwb/pull/1546)
 
 ## PyNWB 2.1.0 (July 6, 2022)
 
