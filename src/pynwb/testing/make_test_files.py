@@ -83,7 +83,7 @@ def _make_imageseries_no_data():
     image_series = ImageSeries(
         name='test_imageseries',
         external_file=['external_file'],
-        starting_frame=[1, 2, 3],
+        starting_frame=[1],
         format='external',
         timestamps=[1., 2., 3.]
     )
