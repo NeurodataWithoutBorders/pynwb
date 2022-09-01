@@ -1,6 +1,6 @@
 # PyNWB Changelog
 
-## PyNWB 2.1.1 (Upcoming)
+## PyNWB 2.1.1 (September 1, 2022)
 
 ### Documentation and tutorial enhancements:
 - Added support for explicit ordering of sphinx gallery tutorials in the docs. @oruebel (#1504), @bdichter (#1495)
