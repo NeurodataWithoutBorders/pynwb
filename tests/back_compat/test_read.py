@@ -46,7 +46,7 @@ class TestReadOldVersions(TestCase):
                         io.read()
                         if warnings_on_read:
                             for w in warnings_on_read:
-                                if f.name in self.expected_warnings and str(w) not in self.expected_warnings[f.name]:
+                                if f.name in self.expected_warnings and w.message not in self.expected_warnings[f.name]:
                                     warnings.warn('%s: %s' % (f.name, w))
                         if errors:
                             for e in errors:
@@ -84,7 +84,7 @@ class TestReadOldVersions(TestCase):
             self.assertEqual(read_nwbfile.acquisition['test_imageseries'].unit, ImageSeries.DEFAULT_UNIT)
 
     def test_read_imageseries_non_external_format(self):
-        """Test that reading an imageseries with an inconsistent format does not change the value."""
+        """Test that reading an ImageSeries with an inconsistent format does not change the value."""
         fbase = "2.1.0_imageseries_non_external_format.nwb"
         f = Path(__file__).parent / fbase
         expected_warning = self.expected_warnings[fbase][0]
@@ -94,7 +94,7 @@ class TestReadOldVersions(TestCase):
                 self.assertEqual(read_nwbfile.acquisition['test_imageseries'].format, "tiff")
 
     def test_read_imageseries_nonmatch_starting_frame(self):
-        """Test that reading an imageseries with an inconsistent starting_frame does not change the value."""
+        """Test that reading an ImageSeries with an inconsistent starting_frame does not change the value."""
         fbase = "2.1.0_imageseries_nonmatch_starting_frame.nwb"
         f = Path(__file__).parent / fbase
         expected_warning = self.expected_warnings[fbase][0]
