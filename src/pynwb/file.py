@@ -37,9 +37,7 @@ class LabMetaData(NWBContainer):
     To define your own lab-specific metadata, create a Neurodata Extension (NDX) for
     NWB that defines the data to add. Using the LabMetaData container as a base type
     makes it easy to add your data to an NWBFile without having to modify the NWBFile
-    type itself, since adding of LabMetaData is already implemented. This allows
-    extensions based on LabMetaData to be typically fairly simple and helps avoid the
-    need for custom Container classes in many cases. For more details
+    type itself, since adding of LabMetaData is already implemented. For more details
     on how to create an extension see the
     :nwb_overview:`Extending NWB <extensions_tutorial/extensions_tutorial_home.html>`
     tutorial.
