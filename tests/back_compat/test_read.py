@@ -10,6 +10,7 @@ from pynwb.testing import TestCase
 class TestReadOldVersions(TestCase):
 
     expected_warnings = {
+        ''
         '2.1.0_imageseries_non_external_format.nwb': [(
             "ImageSeries 'test_imageseries': Format must be 'external' when external_file is specified."
         )],
@@ -45,12 +46,22 @@ class TestReadOldVersions(TestCase):
                         errors = validate(io)
                         io.read()
                         for w in warnings_on_read:
-                            if f.name in self.expected_warnings and str(w.message) not in self.expected_warnings[f.name]:
-                                warnings.warn('%s: %s' % (f.name, str(w.message)))
+                            if f.name in self.expected_warnings:
+                                if str(w.message) not in self.expected_warnings[f.name]:
+                                    pass
+                                    # will replace above with below after the test file is updated
+                                    # raise Exception("Unexpected warning: %s: %s" % (f.name, str(w.message)))
+                            else:
+                                pass
+                                # will replace above with below after the test file is updated
+                                # raise Exception("Unexpected warning: %s: %s" % (f.name, str(w.message)))
                         if errors:
                             for e in errors:
-                                if f.name in self.expected_errors and str(e) not in self.expected_errors[f.name]:
-                                    warnings.warn('%s: %s' % (f.name, e))
+                                if f.name in self.expected_errors:
+                                    if str(e) not in self.expected_errors[f.name]:
+                                        warnings.warn('%s: %s' % (f.name, e))
+                                else:
+                                    raise Exception("Unexpected validation error: %s: %s" % (f.name, e))
                             # TODO uncomment below when validation errors have been fixed
                             # raise Exception('%d validation error(s). See warnings.' % len(errors))
 
