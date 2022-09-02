@@ -200,9 +200,12 @@ def validate_cli():
     parser.add_argument("-n", "--ns", type=str, help="the namespace to validate against")
     feature_parser = parser.add_mutually_exclusive_group(required=False)
     feature_parser.add_argument(
-        "--cached-namespace", dest="cached_namespace", action="store_true", help="Use the cached namespace (default)."
+        "--no-cached-namespace",
+        dest="no_cached_namespace",
+        action="store_true",
+        help="Use the cached namespace (default)."
     )
-    parser.set_defaults(cached_namespace=True)
+    parser.set_defaults(no_cached_namespace=False)
     args = parser.parse_args()
     status = 0
 
@@ -212,7 +215,7 @@ def validate_cli():
             print("\n".join(cached_namespaces))
     else:
         validation_errors, validation_status = validate(
-            paths=args.paths, use_cached_namespaces=args.cached_namespace, namespace=args.ns, verbose=True
+            paths=args.paths, use_cached_namespaces=not args.no_cached_namespace, namespace=args.ns, verbose=True
         )
         _print_errors(validation_errors=validation_errors)
         status = status or validation_status or (validation_errors is not None and len(validation_errors) > 0)
