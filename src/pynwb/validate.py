@@ -58,9 +58,9 @@ def _get_cached_namespaces_to_validate(path: str) -> Tuple[List[str], BuildManag
     from . import NWBHDF5IO  # TODO: modularize to avoid circular import
 
     catalog = NamespaceCatalog(
-        group_spec=NWBGroupSpec, dataset_spec_cls=NWBDatasetSpec, spec_namespace_cls=NWBNamespace
+        group_spec_cls=NWBGroupSpec, dataset_spec_cls=NWBDatasetSpec, spec_namespace_cls=NWBNamespace
     )
-    namespace_dependencies = NWBHDF5IO.load_namespaces(namepsace_catalog=catalog, path=path)
+    namespace_dependencies = NWBHDF5IO.load_namespaces(namespace_catalog=catalog, path=path)
 
     # Determine which namespaces are the most specific (i.e. extensions) and validate against those
     candidate_namespaces = set(namespace_dependencies.keys())
@@ -83,19 +83,20 @@ def _get_cached_namespaces_to_validate(path: str) -> Tuple[List[str], BuildManag
 @docval(
     {
         "name": "io",
-        "type": (HDMFIO, type(None)),  # want to do Optional[HDMFIO] but docval complains?
+        "type": HDMFIO,  # want to do Optional[HDMFIO] but docval complains?
         "doc": "An open IO to an NWB file.",
         "default": None,
     },  # For back-compatability
     {
         "name": "namespace",
-        "type": (str, type(None)),  # want to do Optional[str] but docval complains?
+        "type": str,  # want to do Optional[str] but docval complains?
         "doc": "A specific namespace to validate against.",
         "default": CORE_NAMESPACE,
+        "allow_none": True,
     },  # Argument order is for back-compatability
     {
         "name": "paths",
-        "type": (list, type(None)),  # want to do Optional[List[str]] but docval complains?
+        "type": list,  # want to do Optional[List[str]] but docval complains?
         "doc": "List of NWB file paths.",
         "default": None,
     },
