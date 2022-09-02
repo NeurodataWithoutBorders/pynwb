@@ -52,6 +52,7 @@ class ImageSeriesConstructor(TestCase):
             name='test_iS',
             unit='unit',
             external_file=['external_file'],
+            format="external",
             timestamps=[1., 2., 3.]
         )
         self.assertListEqual(iS.starting_frame, [0])
@@ -78,6 +79,7 @@ class ImageSeriesConstructor(TestCase):
         iS = ImageSeries(
             name='test_iS',
             external_file=['external_file'],
+            format="external",
             timestamps=list()
         )
         self.assertEqual(iS.unit, ImageSeries.DEFAULT_UNIT)
@@ -242,7 +244,7 @@ class ImageSeriesConstructor(TestCase):
         msg = (
             "ImageSeries 'test_iS': The value for 'format' has been changed to 'external'. "
             "Setting a default value for 'format' is deprecated and will be changed to "
-            "raising a ValueError in the next release."
+            "raising a ValueError in the next major release."
         )
         with self.assertWarnsWith(DeprecationWarning, msg):
             iS = ImageSeries(

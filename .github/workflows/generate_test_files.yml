@@ -39,4 +39,4 @@ jobs:
         with:
           name: test-files-${{ matrix.name }}
           path: |
-            tests/back_compat/*.nwb
+            src/pynwb/testing/*.nwb

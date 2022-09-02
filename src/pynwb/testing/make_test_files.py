@@ -1,4 +1,5 @@
 import numpy as np
+from pathlib import Path
 
 from datetime import datetime
 from pynwb import NWBFile, NWBHDF5IO, __version__, TimeSeries
@@ -11,8 +12,7 @@ from pynwb.image import ImageSeries
 
 
 def _write(test_name, nwbfile):
-    filename = 'tests/back_compat/%s_%s.nwb' % (__version__, test_name)
-
+    filename = str("%s/%s_%s.nwb") % (Path(__file__).parent, __version__, test_name)
     with NWBHDF5IO(filename, 'w') as io:
         io.write(nwbfile)
 
@@ -83,7 +83,7 @@ def _make_imageseries_no_data():
     image_series = ImageSeries(
         name='test_imageseries',
         external_file=['external_file'],
-        starting_frame=[1, 2, 3],
+        starting_frame=[1],
         format='external',
         timestamps=[1., 2., 3.]
     )
@@ -152,6 +152,8 @@ def _make_imageseries_nonmatch_starting_frame():
 if __name__ == '__main__':
     # install these versions of PyNWB and run this script to generate new files
     # python src/pynwb/testing/make_test_files.py
+    # files will be made in src/pynwb/testing/
+    # files should be moved to tests/back_compat/
 
     if __version__ == '1.1.2':
         _make_empty()
