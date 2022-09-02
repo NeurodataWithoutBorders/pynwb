@@ -83,20 +83,20 @@ def _get_cached_namespaces_to_validate(path: str) -> Tuple[List[str], BuildManag
 @docval(
     {
         "name": "io",
-        "type": HDMFIO,  # want to do Optional[HDMFIO] but docval complains?
+        "type": HDMFIO,
         "doc": "An open IO to an NWB file.",
         "default": None,
     },  # For back-compatability
     {
         "name": "namespace",
-        "type": str,  # want to do Optional[str] but docval complains?
+        "type": str,
         "doc": "A specific namespace to validate against.",
         "default": CORE_NAMESPACE,
         "allow_none": True,
     },  # Argument order is for back-compatability
     {
         "name": "paths",
-        "type": list,  # want to do Optional[List[str]] but docval complains?
+        "type": list,
         "doc": "List of NWB file paths.",
         "default": None,
     },
