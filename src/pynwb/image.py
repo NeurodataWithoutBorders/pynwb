@@ -97,7 +97,7 @@ class ImageSeries(TimeSeries):
             warnings.warn(
                 "%s '%s': The value for 'format' has been changed to 'external'. "
                 "Setting a default value for 'format' is deprecated and will be changed "
-                "to raising a ValueError in the next release."
+                "to raising a ValueError in the next major release."
                 % (self.__class__.__name__, self.name),
                 DeprecationWarning,
             )
