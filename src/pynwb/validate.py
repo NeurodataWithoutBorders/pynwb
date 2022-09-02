@@ -92,7 +92,6 @@ def _get_cached_namespaces_to_validate(path: str) -> Tuple[List[str], BuildManag
         "type": str,
         "doc": "A specific namespace to validate against.",
         "default": CORE_NAMESPACE,
-        "allow_none": True,
     },  # Argument order is for back-compatability
     {
         "name": "paths",
@@ -120,62 +119,65 @@ def validate(**kwargs):
     """Validate NWB file(s) against a namespace or its cached namespaces."""
     from . import NWBHDF5IO  # TODO: modularize to avoid circular import
 
-    io, paths, use_cached_namespaces, chosen_namespace, verbose = getargs(
+    io, paths, use_cached_namespaces, namespace, verbose = getargs(
         "io", "paths", "use_cached_namespaces", "namespace", "verbose", kwargs
     )
     assert io != paths, "Both 'io' and 'paths' were specified! Please choose only one."
 
     if io is not None:
-        validation_errors = _validate_helper(io=io, namespace=chosen_namespace)
+        validation_errors = _validate_helper(io=io, namespace=namespace)
         return validation_errors
 
     status = 0
     validation_errors = list()
+    namespaces = [CORE_NAMESPACE]
+    namespace_message = "PyNWB namespace information"
     for path in paths:
+        io_kwargs = dict(path=path, mode="r")
+
         if use_cached_namespaces:
             cached_namespaces, manager, namespace_dependencies = _get_cached_namespaces_to_validate(path=path)
+            io_kwargs.update(manager=manager)
 
             if any(cached_namespaces):
                 namespaces = cached_namespaces
                 namespace_message = "cached namespace information"
             else:
-                namespace_message = "PyNWB namespace information"
                 if verbose:
                     print(
-                        f"The file {path} has no cached namespace information. " "Falling back to {namespace_source}.",
+                        f"The file {path} has no cached namespace information. Falling back to {namespace_message}.",
                         file=sys.stderr,
                     )
-                namespaces = [CORE_NAMESPACE]
 
-        if chosen_namespace:
-            if chosen_namespace in namespaces:
-                namespaces = [chosen_namespace]
+        if namespace:
+            if namespace in namespaces:
+                namespaces = [namespace]
             elif (
-                use_cached_namespaces and chosen_namespace in namespace_dependencies
+                use_cached_namespaces and namespace in namespace_dependencies
             ):  # validating against a dependency
                 for namespace_dependency in namespace_dependencies:
-                    if chosen_namespace in namespace_dependencies[namespace_dependency]:
+                    if namespace in namespace_dependencies[namespace_dependency]:
                         status = 1
                         if verbose:
                             print(
-                                f"The namespace '{chosen_namespace}' is included by the namespace "
-                                "'{namespace_dependency}'. Please validate against that namespace instead.",
+                                f"The namespace '{namespace}' is included by the namespace "
+                                f"'{namespace_dependency}'. Please validate against that namespace instead.",
                                 file=sys.stderr,
                             )
             else:
                 status = 1
                 if verbose:
                     print(
-                        f"The namespace '{chosen_namespace}' could not be found in {namespace_message} as only "
+                        f"The namespace '{namespace}' could not be found in {namespace_message} as only "
                         f"{namespaces} is present.",
                         file=sys.stderr,
                     )
 
-        with NWBHDF5IO(path, mode="r", manager=manager) as io:
-            for namespace in namespaces:
+        with NWBHDF5IO(**io_kwargs) as io:
+            for validation_namespace in namespaces:
                 if verbose:
-                    print(f"Validating {path} against {namespace_message} using namespace '{namespace}'.")
-                validation_errors += _validate_helper(io=io, namespace=namespace)
+                    print(f"Validating {path} against {namespace_message} using namespace '{validation_namespace}'.")
+                validation_errors += _validate_helper(io=io, namespace=validation_namespace)
     return validation_errors, status
 
 
@@ -206,6 +208,7 @@ def validate_cli():
         help="Use the cached namespace (default)."
     )
     parser.set_defaults(no_cached_namespace=False)
+    parser.set_defaults(ns=CORE_NAMESPACE)
     args = parser.parse_args()
     status = 0
 
