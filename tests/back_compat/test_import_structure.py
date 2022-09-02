@@ -24,7 +24,6 @@ class TestImportStructure(TestCase):
             "ProcessingModule",
             "TimeSeries",
             "TypeMap",
-            "ValidatorMap",
             "_HDF5IO",
             "__NS_CATALOG",
             "__TYPE_MAP",
@@ -77,7 +76,7 @@ class TestImportStructure(TestCase):
             "register_map",
             "retinotopy",
             "spec",
-            "validation",
+            "testing",
             "validate",
             "warn",
         ]
