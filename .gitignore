@@ -69,5 +69,8 @@ tests/coverage/htmlcov
 # vscode
 .vscode/
 
-#mypy
+# mypy
 .mypy_cache/
+
+# macos
+.DS_Store
