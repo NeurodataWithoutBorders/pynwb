@@ -130,9 +130,9 @@ def validate(**kwargs):
 
     status = 0
     validation_errors = list()
-    namespaces = [CORE_NAMESPACE]
-    namespace_message = "PyNWB namespace information"
     for path in paths:
+        namespaces = [CORE_NAMESPACE]
+        namespace_message = "PyNWB namespace information"
         io_kwargs = dict(path=path, mode="r")
 
         if use_cached_namespaces:

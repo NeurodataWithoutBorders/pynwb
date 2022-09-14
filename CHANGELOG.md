@@ -1,9 +1,17 @@
 # PyNWB Changelog
 
+## PyNWB 2.2.0 (Upcoming)
+
+### Enhancements and minor changes
+
+- Enhanced `pynwb.validate` API function to accept a list of file paths as well as the ability to operate on cached
+  namespaces. Also adjusted the validate CLI to directly use the API function. @CodyCBakerPhD
+  [#1511](https://github.com/NeurodataWithoutBorders/pynwb/pull/1511)
+
 ## PyNWB 2.1.1 (September 1, 2022)
 
 ### Documentation and tutorial enhancements:
-- Added support for explicit ordering of sphinx gallery tutorials in the docs. @oruebel 
+- Added support for explicit ordering of sphinx gallery tutorials in the docs. @oruebel
   [#1504](https://github.com/NeurodataWithoutBorders/pynwb/pull/1504), @bdichter
   [#1495](https://github.com/NeurodataWithoutBorders/pynwb/pull/1495)
 - Added developer guide on how to create a new tutorial. @oruebel
@@ -33,9 +41,6 @@
 - Enhanced docs for ``LabMetaData`` to clarify its usage @oruebel [#1546](https://github.com/NeurodataWithoutBorders/pynwb/pull/1546)
 - Updated requirements, including allowing numpy 1.23. @rly
   [#1550](https://github.com/NeurodataWithoutBorders/pynwb/pull/1550)
-- Enhanced docs for ``LabMetaData`` to clarify its usage. @oruebel 
-  [#1546](https://github.com/NeurodataWithoutBorders/pynwb/pull/1546)
-- Enhanced `pynwb.validate` API function to accept a list of file paths as well as the ability to operate on cached namespaces. Also adjusted the validate CLI to directly use the API function. @CodyCBakerPhD [#1511](https://github.com/NeurodataWithoutBorders/pynwb/pull/1511)
 
 ## PyNWB 2.1.0 (July 6, 2022)
 

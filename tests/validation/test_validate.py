@@ -28,14 +28,15 @@ class TestValidateScript(TestCase):
             r".*UserWarning: No cached namespaces found in tests/back_compat/1\.0\.2_nwbfile\.nwb\s*"
             r"warnings.warn\(msg\)\s*"
             r"The file tests/back_compat/1\.0\.2_nwbfile\.nwb has no cached namespace information\. "
-            r"Falling back to pynwb namespace information\.\s*"
+            r"Falling back to PyNWB namespace information\.\s*"
         )
         self.assertRegex(result.stderr.decode('utf-8'), stderr_regex)
 
         stdout_regex = re.compile(
-            r"Validating tests/back_compat/1\.0\.2_nwbfile\.nwb against pynwb namespace information using namespace "
+            r"Validating tests/back_compat/1\.0\.2_nwbfile\.nwb against PyNWB namespace information using namespace "
             r"'core'\.\s* - no errors found\.\s*")
         self.assertRegex(result.stdout.decode('utf-8'), stdout_regex)
+        # self.assertEqual(result.stdout.decode('utf-8'), "")
 
     def test_validate_file_no_cache_bad_ns(self):
         """Test that validating a file with no cached spec against a specified, unknown namespace fails."""
@@ -46,13 +47,18 @@ class TestValidateScript(TestCase):
             r".*UserWarning: No cached namespaces found in tests/back_compat/1\.0\.2_nwbfile\.nwb\s*"
             r"warnings.warn\(msg\)\s*"
             r"The file tests/back_compat/1\.0\.2_nwbfile\.nwb has no cached namespace information\. "
-            r"Falling back to pynwb namespace information\.\s*"
-            r"The namespace 'notfound' could not be found in pynwb namespace information as only "
+            r"Falling back to PyNWB namespace information\.\s*"
+            r"The namespace 'notfound' could not be found in PyNWB namespace information as only "
             r"\['core'\] is present\.\s*"
         )
         self.assertRegex(result.stderr.decode('utf-8'), stderr_regex)
 
-        self.assertEqual(result.stdout.decode('utf-8'), '')
+        stdout_regex = re.compile(
+            r"Validating tests/back_compat/1\.0\.2_nwbfile\.nwb against PyNWB namespace information using namespace "
+            r"'core'\.\s*- no errors found\.\s*"
+        )
+
+        self.assertRegex(result.stdout.decode('utf-8'), stdout_regex)
 
     def test_validate_file_cached(self):
         """Test that validating a file with cached spec against its cached namespace succeeds."""
@@ -77,7 +83,12 @@ class TestValidateScript(TestCase):
         )
         self.assertRegex(result.stderr.decode('utf-8'), stderr_regex)
 
-        self.assertEqual(result.stdout.decode('utf-8'), '')
+        stdout_regex = re.compile(
+            r"Validating tests/back_compat/1\.1\.2_nwbfile\.nwb against cached namespace information using namespace "
+            r"'core'\.\s*- no errors found\.\s*"
+        )
+
+        self.assertRegex(result.stdout.decode('utf-8'), stdout_regex)
 
     def test_validate_file_cached_hdmf_common(self):
         """Test that validating a file with cached spec against the hdmf-common namespace fails."""
@@ -98,7 +109,7 @@ class TestValidateScript(TestCase):
         self.assertEqual(result.stderr.decode('utf-8'), '')
 
         stdout_regex = re.compile(
-            r"Validating tests/back_compat/1\.1\.2_nwbfile\.nwb against pynwb namespace information using namespace "
+            r"Validating tests/back_compat/1\.1\.2_nwbfile\.nwb against PyNWB namespace information using namespace "
             r"'core'\.\s* - no errors found\.\s*")
         self.assertRegex(result.stdout.decode('utf-8'), stdout_regex)
 
