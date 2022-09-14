@@ -38,9 +38,10 @@
   [#1516](https://github.com/NeurodataWithoutBorders/pynwb/pull/1516)
 - Created a GitHub Actions workflow to generate test files for testing backward compatibility. @rly
   [#1548](https://github.com/NeurodataWithoutBorders/pynwb/pull/1548)
-- Enhanced docs for ``LabMetaData`` to clarify its usage @oruebel [#1546](https://github.com/NeurodataWithoutBorders/pynwb/pull/1546)
 - Updated requirements, including allowing numpy 1.23. @rly
   [#1550](https://github.com/NeurodataWithoutBorders/pynwb/pull/1550)
+- Enhanced docs for ``LabMetaData`` to clarify its usage @oruebel
+  [#1546](https://github.com/NeurodataWithoutBorders/pynwb/pull/1546)
 
 ## PyNWB 2.1.0 (July 6, 2022)
 
