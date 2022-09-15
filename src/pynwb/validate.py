@@ -131,7 +131,7 @@ def validate(**kwargs):
     status = 0
     validation_errors = list()
     for path in paths:
-        namespaces = [CORE_NAMESPACE]
+        namespaces_to_validate = [CORE_NAMESPACE]
         namespace_message = "PyNWB namespace information"
         io_kwargs = dict(path=path, mode="r")
 
@@ -140,7 +140,7 @@ def validate(**kwargs):
             io_kwargs.update(manager=manager)
 
             if any(cached_namespaces):
-                namespaces = cached_namespaces
+                namespaces_to_validate = cached_namespaces
                 namespace_message = "cached namespace information"
             else:
                 if verbose:
@@ -150,8 +150,8 @@ def validate(**kwargs):
                     )
 
         if namespace:
-            if namespace in namespaces:
-                namespaces = [namespace]
+            if namespace in namespaces_to_validate:
+                namespaces_to_validate = [namespace]
             elif (
                 use_cached_namespaces and namespace in namespace_dependencies
             ):  # validating against a dependency
@@ -169,12 +169,15 @@ def validate(**kwargs):
                 if verbose:
                     print(
                         f"The namespace '{namespace}' could not be found in {namespace_message} as only "
-                        f"{namespaces} is present.",
+                        f"{namespaces_to_validate} is present.",
                         file=sys.stderr,
                     )
 
+        if status == 1:
+            continue
+
         with NWBHDF5IO(**io_kwargs) as io:
-            for validation_namespace in namespaces:
+            for validation_namespace in namespaces_to_validate:
                 if verbose:
                     print(f"Validating {path} against {namespace_message} using namespace '{validation_namespace}'.")
                 validation_errors += _validate_helper(io=io, namespace=validation_namespace)
@@ -220,7 +223,8 @@ def validate_cli():
         validation_errors, validation_status = validate(
             paths=args.paths, use_cached_namespaces=not args.no_cached_namespace, namespace=args.ns, verbose=True
         )
-        _print_errors(validation_errors=validation_errors)
+        if not validation_status:
+            _print_errors(validation_errors=validation_errors)
         status = status or validation_status or (validation_errors is not None and len(validation_errors) > 0)
 
     sys.exit(status)
