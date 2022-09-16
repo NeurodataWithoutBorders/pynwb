@@ -1,5 +1,5 @@
 """
-This module provides mock instance of common neurodata types which can be used to write
+The mock module provides mock instances of common neurodata types which can be used to write
 tests for downstream libraries. For instance, to write an RoiResponseSeries, you need a
 PlaneSegmentation, which requires an ImagingPlane, which in turn requires an
 OpticalChannel and a Device, all of which need to be populated with reasonable mock
