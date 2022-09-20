@@ -333,6 +333,7 @@ for _ in range(30):
 # Voxel masks
 # ^^^^^^^^^^^
 #
+# When storing the segmentation of volumetric imaging, you can use imaging masks.
 # Alternatively, you could define ROIs using a voxel mask, which is an array of
 # triplets (x, y, z, weight) that have a non-zero weight. All undefined voxels
 # are assumed to be 0.
