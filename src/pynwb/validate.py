@@ -152,11 +152,9 @@ def validate(**kwargs):
         if namespace:
             if namespace in namespaces_to_validate:
                 namespaces_to_validate = [namespace]
-            elif (
-                use_cached_namespaces and namespace in namespace_dependencies
-            ):  # validating against a dependency
+            elif use_cached_namespaces and namespace in namespace_dependencies:  # validating against a dependency
                 for namespace_dependency in namespace_dependencies:
-                    if namespace in namespace_dependencies[namespace_dependency]:
+                    if namespace != "core" and namespace in namespace_dependencies[namespace_dependency]:
                         status = 1
                         if verbose:
                             print(
@@ -208,7 +206,7 @@ def validate_cli():
         "--no-cached-namespace",
         dest="no_cached_namespace",
         action="store_true",
-        help="Use the cached namespace (default)."
+        help="Use the cached namespace (default).",
     )
     parser.set_defaults(no_cached_namespace=False)
     parser.set_defaults(ns=CORE_NAMESPACE)
