@@ -1,25 +1,42 @@
 # PyNWB Changelog
 
-## PyNWB 2.1.1 (Upcoming)
+## PyNWB 2.1.1 (September 1, 2022)
 
 ### Documentation and tutorial enhancements:
-- Support explicit ordering of sphinx gallery tutorials in the docs. @oruebel (#1504), @bdichter (#1495)
-- Add developer guide on how to create a new tutorial. @oruebel (#1504)
-- Add images tutorial. @weiglszonja (#1470)
-- Add example code for s3fs in the streaming tutorial. @bdichter (#1499)
+- Added support for explicit ordering of sphinx gallery tutorials in the docs. @oruebel 
+  [#1504](https://github.com/NeurodataWithoutBorders/pynwb/pull/1504), @bdichter
+  [#1495](https://github.com/NeurodataWithoutBorders/pynwb/pull/1495)
+- Added developer guide on how to create a new tutorial. @oruebel
+  [#1504](https://github.com/NeurodataWithoutBorders/pynwb/pull/1504)
+- Added images tutorial. @weiglszonja
+  [#1470](https://github.com/NeurodataWithoutBorders/pynwb/pull/1470)
+- Added example code for fsspec in the streaming tutorial. @bdichter
+  [#1499](https://github.com/NeurodataWithoutBorders/pynwb/pull/1499)
 - Add voxel_mask tutorial. @codycbakerphd (#1544)
 
 ### Enhancements and minor changes
-- Update coverage workflow, report separate unit vs integration coverage. @rly (#1509)
-- Delete test files generated from running sphinx gallery examples. @rly (#1517)
-- Enable passing an S3File created through s3fs, which provides a method for reading an NWB file directly
+- Updated coverage workflow, report separate unit vs integration coverage. @rly
+  [#1509](https://github.com/NeurodataWithoutBorders/pynwb/pull/1509)
+- Deleted test files generated from running sphinx gallery examples. @rly
+  [#1517](https://github.com/NeurodataWithoutBorders/pynwb/pull/1517)
+- Enabled passing an S3File created through s3fs, which provides a method for reading an NWB file directly
   from s3 that is an alternative to ros3. This required relaxing of `NWBHDF5IO` input validation. The `path`
   arg is not needed if `file` is provided. `mode` now has a default value of "r".
-  @bendichter (#1499)
+  @bendichter
+  [#1499](https://github.com/NeurodataWithoutBorders/pynwb/pull/1499)
 - Added a method to `NWBMixin` that only raises an error when a check is violated on instance creation,
   otherwise throws a warning when reading from a file. The new checks in `ImageSeries` when `external_file`
   is provided is used with this method to ensure that that files with invalid data can be read, but prohibits
-  the user from creating new instances when these checks are violated. @weiglszonja (#1516)
+  the user from creating new instances when these checks are violated. @weiglszonja
+  [#1516](https://github.com/NeurodataWithoutBorders/pynwb/pull/1516)
+- Created a GitHub Actions workflow to generate test files for testing backward compatibility. @rly
+  [#1548](https://github.com/NeurodataWithoutBorders/pynwb/pull/1548)
+- Updated requirements, including allowing numpy 1.23. @rly
+  [#1550](https://github.com/NeurodataWithoutBorders/pynwb/pull/1550)
+- Enhanced docs for ``LabMetaData`` to clarify its usage. @oruebel 
+  [#1546](https://github.com/NeurodataWithoutBorders/pynwb/pull/1546)
+- Add testing/mock, which provides mock neurodata objects for testing. @bendichter
+  [#1454](https://github.com/NeurodataWithoutBorders/pynwb/pull/1454)
 
 ## PyNWB 2.1.0 (July 6, 2022)
 

@@ -9,6 +9,17 @@ from pynwb.testing import TestCase
 
 class TestReadOldVersions(TestCase):
 
+    expected_warnings = {
+        ''
+        '2.1.0_imageseries_non_external_format.nwb': [(
+            "ImageSeries 'test_imageseries': Format must be 'external' when external_file is specified."
+        )],
+        '2.1.0_imageseries_nonmatch_starting_frame.nwb': [(
+            "ImageSeries 'test_imageseries': The number of frame indices in 'starting_frame' should have the same "
+            "length as 'external_file'."
+        )],
+    }
+
     expected_errors = {
         '1.0.2_str_experimenter.nwb': [("root/general/experimenter (general/experimenter): incorrect shape - expected "
                                         "an array of shape '[None]', got non-array data 'one experimenter'")],
@@ -20,17 +31,6 @@ class TestReadOldVersions(TestCase):
                                "- expected an array of shape '[None]', got non-array data 'one publication'")],
     }
 
-    @classmethod
-    def setUpClass(cls):
-        cls.image_series_warnings = [
-            "ImageSeries 'test_imageseries': Either external_file or data must be "
-            "specified (not None), but not both.",
-            "ImageSeries 'test_imageseries': The number of frame indices in "
-            "'starting_frame' should have the same length as 'external_file'.",
-            "ImageSeries 'test_imageseries': Format must be 'external' when "
-            "external_file is specified.",
-        ]
-
     def test_read(self):
         """Test reading and validating all NWB files in the same folder as this file.
 
@@ -41,15 +41,29 @@ class TestReadOldVersions(TestCase):
         nwb_files = dir_path.glob('*.nwb')
         for f in nwb_files:
             with self.subTest(file=f.name):
-                with NWBHDF5IO(str(f), 'r') as io:
-                    errors = validate(io)
-                    io.read()
-                    if errors:
-                        for e in errors:
-                            if f.name in self.expected_errors and str(e) not in self.expected_errors[f.name]:
-                                warnings.warn('%s: %s' % (f.name, e))
-                        # TODO uncomment below when validation errors have been fixed
-                        # raise Exception('%d validation error(s). See warnings.' % len(errors))
+                with warnings.catch_warnings(record=True) as warnings_on_read:
+                    with NWBHDF5IO(str(f), 'r') as io:
+                        errors = validate(io)
+                        io.read()
+                        for w in warnings_on_read:
+                            if f.name in self.expected_warnings:
+                                if str(w.message) not in self.expected_warnings[f.name]:
+                                    pass
+                                    # will replace above with below after the test file is updated
+                                    # raise Exception("Unexpected warning: %s: %s" % (f.name, str(w.message)))
+                            else:
+                                pass
+                                # will replace above with below after the test file is updated
+                                # raise Exception("Unexpected warning: %s: %s" % (f.name, str(w.message)))
+                        if errors:
+                            for e in errors:
+                                if f.name in self.expected_errors:
+                                    if str(e) not in self.expected_errors[f.name]:
+                                        warnings.warn('%s: %s' % (f.name, e))
+                                else:
+                                    raise Exception("Unexpected validation error: %s: %s" % (f.name, e))
+                            # TODO uncomment below when validation errors have been fixed
+                            # raise Exception('%d validation error(s). See warnings.' % len(errors))
 
     def test_read_timeseries_no_data(self):
         """Test that a TimeSeries written without data is read with data set to the default value."""
@@ -72,20 +86,6 @@ class TestReadOldVersions(TestCase):
             read_nwbfile = io.read()
             np.testing.assert_array_equal(read_nwbfile.acquisition['test_imageseries'].data, ImageSeries.DEFAULT_DATA)
 
-    def test_read_imageseries_no_data_warns_when_checks_are_violated(self):
-        """Test that warnings are raised when an ImageSeries is read that was created
-        incorrectly."""
-        f = Path(__file__).parent / "1.5.1_imageseries_no_data.nwb"
-        with warnings.catch_warnings(record=True) as warnings_on_read:
-            with NWBHDF5IO(str(f), "r") as io:
-                io.read()
-                warning_msgs = [warning.message.args[0] for warning in warnings_on_read]
-                self.assertEqual(len(warning_msgs), 2)
-                self.assertTrue(
-                    all(msg in warning_msgs for msg in self.image_series_warnings[1:])
-                )
-                assert self.image_series_warnings[0] not in warning_msgs
-
     def test_read_imageseries_no_unit(self):
         """Test that an ImageSeries written without unit is read with unit set to the default value."""
         f = Path(__file__).parent / '1.5.1_imageseries_no_unit.nwb'
@@ -93,15 +93,22 @@ class TestReadOldVersions(TestCase):
             read_nwbfile = io.read()
             self.assertEqual(read_nwbfile.acquisition['test_imageseries'].unit, ImageSeries.DEFAULT_UNIT)
 
-    def test_read_imageseries_no_unit_warns_when_checks_are_violated(self):
-        """Test that warnings are raised when an ImageSeries is read that was created
-        incorrectly."""
-        f = Path(__file__).parent / "1.5.1_imageseries_no_unit.nwb"
-        with warnings.catch_warnings(record=True) as warnings_on_read:
-            with NWBHDF5IO(str(f), "r") as io:
-                io.read()
-                warning_msgs = [warning.message.args[0] for warning in warnings_on_read]
-                self.assertEqual(len(warning_msgs), 3)
-                self.assertTrue(
-                    all(msg in warning_msgs for msg in self.image_series_warnings)
-                )
+    def test_read_imageseries_non_external_format(self):
+        """Test that reading an ImageSeries with an inconsistent format does not change the value."""
+        fbase = "2.1.0_imageseries_non_external_format.nwb"
+        f = Path(__file__).parent / fbase
+        expected_warning = self.expected_warnings[fbase][0]
+        with self.assertWarnsWith(UserWarning, expected_warning):
+            with NWBHDF5IO(str(f), 'r') as io:
+                read_nwbfile = io.read()
+                self.assertEqual(read_nwbfile.acquisition['test_imageseries'].format, "tiff")
+
+    def test_read_imageseries_nonmatch_starting_frame(self):
+        """Test that reading an ImageSeries with an inconsistent starting_frame does not change the value."""
+        fbase = "2.1.0_imageseries_nonmatch_starting_frame.nwb"
+        f = Path(__file__).parent / fbase
+        expected_warning = self.expected_warnings[fbase][0]
+        with self.assertWarnsWith(UserWarning, expected_warning):
+            with NWBHDF5IO(str(f), 'r') as io:
+                read_nwbfile = io.read()
+                np.testing.assert_array_equal(read_nwbfile.acquisition['test_imageseries'].starting_frame, [1, 2, 3])
