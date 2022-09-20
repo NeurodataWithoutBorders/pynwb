@@ -2,7 +2,7 @@ import numpy as np
 from pathlib import Path
 import warnings
 
-from pynwb import NWBHDF5IO, load_namespaces, validate, TimeSeries
+from pynwb import NWBHDF5IO, validate, TimeSeries
 from pynwb.image import ImageSeries
 from pynwb.testing import TestCase
 
