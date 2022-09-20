@@ -2,7 +2,7 @@ import numpy as np
 from pathlib import Path
 import warnings
 
-from pynwb import NWBHDF5IO, validate, TimeSeries
+from pynwb import NWBHDF5IO, load_namespaces, validate, TimeSeries
 from pynwb.image import ImageSeries
 from pynwb.testing import TestCase
 
@@ -42,7 +42,7 @@ class TestReadOldVersions(TestCase):
         for f in nwb_files:
             with self.subTest(file=f.name):
                 with warnings.catch_warnings(record=True) as warnings_on_read:
-                    with NWBHDF5IO(str(f), 'r') as io:
+                    with NWBHDF5IO(str(f), 'r', load_namespaces=True) as io:
                         errors = validate(io)
                         io.read()
                         for w in warnings_on_read:
