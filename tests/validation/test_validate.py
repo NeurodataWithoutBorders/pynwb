@@ -18,6 +18,10 @@ class TestValidateScript(TestCase):
     # simplify collecting and merging coverage data from multiple subprocesses. if "-p"
     # is not used, then each "coverage run" will overwrite the .coverage file from a
     # previous "coverage run".
+    # NOTE the run_coverage.yml GitHub Action runs "python -m coverage combine" to
+    # combine the individual coverage reprots into one .coverage file.
+
+    # TODO test validation on files with cached extensions
 
     def test_validate_file_no_cache(self):
         """Test that validating a file with no cached spec against the core namespace succeeds."""
@@ -79,6 +83,44 @@ class TestValidateScript(TestCase):
 
         self.assertEqual(result.stdout.decode('utf-8'), '')
 
+    def test_validate_file_cached_extension(self):
+        """Test that validating a file with cached spec against the cached namespaces succeeds."""
+        result = subprocess.run(["coverage", "run", "-p", "-m", "pynwb.validate",
+                                 "tests/back_compat/2.1.0_nwbfile_with_extension.nwb"], capture_output=True)
+
+        self.assertEqual(result.stderr.decode('utf-8'), '')
+
+        stdout_regex = re.compile(
+            r"Validating tests/back_compat/2\.1\.0_nwbfile_with_extension\.nwb against cached namespace information "
+            r"using namespace 'ndx-testextension'\.\s* - no errors found\.\s*")
+        self.assertRegex(result.stdout.decode('utf-8'), stdout_regex)
+
+    def test_validate_file_cached_extension_pass_ns(self):
+        """Test that validating a file with cached spec against the extension namespace succeeds."""
+        result = subprocess.run(["coverage", "run", "-p", "-m", "pynwb.validate",
+                                 "tests/back_compat/2.1.0_nwbfile_with_extension.nwb",
+                                 "--ns", "ndx-testextension"], capture_output=True)
+
+        self.assertEqual(result.stderr.decode('utf-8'), '')
+
+        stdout_regex = re.compile(
+            r"Validating tests/back_compat/2\.1\.0_nwbfile_with_extension\.nwb against cached namespace information "
+            r"using namespace 'ndx-testextension'\.\s* - no errors found\.\s*")
+        self.assertRegex(result.stdout.decode('utf-8'), stdout_regex)
+
+    def test_validate_file_cached_core(self):  # TODO determine correct behavior
+        """Test that validating a file with cached spec against the core namespace succeeds."""
+        result = subprocess.run(["coverage", "run", "-p", "-m", "pynwb.validate",
+                                 "tests/back_compat/2.1.0_nwbfile_with_extension.nwb",
+                                 "--ns", "core"], capture_output=True)
+
+        self.assertEqual(result.stderr.decode('utf-8'), '')
+
+        stdout_regex = re.compile(
+            r"Validating tests/back_compat/2\.1\.0_nwbfile_with_extension\.nwb against cached namespace information "
+            r"using namespace 'core'\.\s* - no errors found\.\s*")
+        self.assertRegex(result.stdout.decode('utf-8'), stdout_regex)
+
     def test_validate_file_cached_hdmf_common(self):
         """Test that validating a file with cached spec against the hdmf-common namespace fails."""
         result = subprocess.run(["coverage", "run", "-p", "-m", "pynwb.validate", "tests/back_compat/1.1.2_nwbfile.nwb",
@@ -107,7 +149,7 @@ class TestValidateFunction(TestCase):
 
     # 1.0.2_nwbfile.nwb has no cached specifications
     # 1.0.3_nwbfile.nwb has cached "core" specification
-    # 1.1.2_nwbfile.nwb has cached "core" and "hdmf-common" specifications
+    # 1.1.2_nwbfile.nwb has cached "core" and "hdmf-common" specificaitions
 
     def test_validate_file_no_cache(self):
         """Test that validating a file with no cached spec against the core namespace succeeds."""
@@ -125,6 +167,24 @@ class TestValidateFunction(TestCase):
         """Test that validating a file with cached spec against its cached namespace succeeds."""
         with NWBHDF5IO('tests/back_compat/1.1.2_nwbfile.nwb', 'r') as io:
             errors = validate(io)
+            self.assertEqual(errors, [])
+
+    def test_validate_file_cached_extension(self):
+        """Test that validating a file with cached spec against its cached namespaces succeeds."""
+        with NWBHDF5IO('tests/back_compat/2.1.0_nwbfile_with_extension.nwb', 'r', load_namespaces=True) as io:
+            errors = validate(io)
+            self.assertEqual(errors, [])
+
+    def test_validate_file_cached_extension_pass_ns(self):
+        """Test that validating a file with cached extension spec against the extension namespace succeeds."""
+        with NWBHDF5IO('tests/back_compat/2.1.0_nwbfile_with_extension.nwb', 'r', load_namespaces=True) as io:
+            errors = validate(io, 'ndx-testextension')
+            self.assertEqual(errors, [])
+
+    def test_validate_file_cached_core(self):  # TODO determine correct behavior
+        """Test that validating a file with cached extension spec against the core namespace succeeds."""
+        with NWBHDF5IO('tests/back_compat/2.1.0_nwbfile_with_extension.nwb', 'r', load_namespaces=True) as io:
+            errors = validate(io, 'core')
             self.assertEqual(errors, [])
 
     def test_validate_file_cached_bad_ns(self):

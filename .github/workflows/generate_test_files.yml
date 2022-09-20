@@ -1,6 +1,7 @@
 name: Generate test files
 on:
   workflow_dispatch:
+  pull_request:  # TEMP REMOVE ME
 
 jobs:
   gen-test-files:
