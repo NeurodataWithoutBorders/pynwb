@@ -334,7 +334,7 @@ for _ in range(30):
 # ^^^^^^^^^^^
 #
 # Alternatively, you could define ROIs using a voxel mask, which is an array of
-# triplets (x, y, z, weight) that have a non-zero weight. All undefined pixels
+# triplets (x, y, z, weight) that have a non-zero weight. All undefined voxels
 # are assumed to be 0.
 #
 # .. note::
