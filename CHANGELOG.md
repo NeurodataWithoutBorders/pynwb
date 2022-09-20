@@ -42,6 +42,8 @@
   [#1550](https://github.com/NeurodataWithoutBorders/pynwb/pull/1550)
 - Enhanced docs for ``LabMetaData`` to clarify its usage @oruebel
   [#1546](https://github.com/NeurodataWithoutBorders/pynwb/pull/1546)
+- Add testing/mock, which provides mock neurodata objects for testing. @bendichter
+  [#1454](https://github.com/NeurodataWithoutBorders/pynwb/pull/1454)
 
 ## PyNWB 2.1.0 (July 6, 2022)
 
