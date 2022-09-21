@@ -131,7 +131,7 @@ def validate(**kwargs):
     status = 0
     validation_errors = list()
     for path in paths:
-        namespaces_to_validate = [CORE_NAMESPACE]
+        namespaces_to_validate = []
         namespace_message = "PyNWB namespace information"
         io_kwargs = dict(path=path, mode="r")
 
@@ -143,6 +143,7 @@ def validate(**kwargs):
                 namespaces_to_validate = cached_namespaces
                 namespace_message = "cached namespace information"
             else:
+                namespaces_to_validate = [CORE_NAMESPACE]
                 if verbose:
                     print(
                         f"The file {path} has no cached namespace information. Falling back to {namespace_message}.",
@@ -154,7 +155,7 @@ def validate(**kwargs):
                 namespaces_to_validate = [namespace]
             elif use_cached_namespaces and namespace in namespace_dependencies:  # validating against a dependency
                 for namespace_dependency in namespace_dependencies:
-                    if namespace != "core" and namespace in namespace_dependencies[namespace_dependency]:
+                    if namespace in namespace_dependencies[namespace_dependency]:
                         status = 1
                         if verbose:
                             print(
