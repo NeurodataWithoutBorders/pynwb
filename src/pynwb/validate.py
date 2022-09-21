@@ -91,7 +91,7 @@ def _get_cached_namespaces_to_validate(path: str) -> Tuple[List[str], BuildManag
         "name": "namespace",
         "type": str,
         "doc": "A specific namespace to validate against.",
-        "default": CORE_NAMESPACE,
+        "default": None,
     },  # Argument order is for back-compatability
     {
         "name": "paths",
@@ -125,7 +125,7 @@ def validate(**kwargs):
     assert io != paths, "Both 'io' and 'paths' were specified! Please choose only one."
 
     if io is not None:
-        validation_errors = _validate_helper(io=io, namespace=namespace)
+        validation_errors = _validate_helper(io=io, namespace=namespace or CORE_NAMESPACE)
         return validation_errors
 
     status = 0
@@ -149,8 +149,10 @@ def validate(**kwargs):
                         f"The file {path} has no cached namespace information. Falling back to {namespace_message}.",
                         file=sys.stderr,
                     )
+        else:
+            namespaces_to_validate = [CORE_NAMESPACE]
 
-        if namespace:
+        if namespace is not None:
             if namespace in namespaces_to_validate:
                 namespaces_to_validate = [namespace]
             elif use_cached_namespaces and namespace in namespace_dependencies:  # validating against a dependency
@@ -210,7 +212,6 @@ def validate_cli():
         help="Use the cached namespace (default).",
     )
     parser.set_defaults(no_cached_namespace=False)
-    parser.set_defaults(ns=CORE_NAMESPACE)
     args = parser.parse_args()
     status = 0
 
