@@ -112,7 +112,7 @@ def _get_cached_namespaces_to_validate(path: str) -> Tuple[List[str], BuildManag
         "default": False,
     },
     returns="Validation errors in the file.",
-    rtype=(list, bool),
+    rtype=(list, (list, bool)),
     is_method=False,
 )
 def validate(**kwargs):

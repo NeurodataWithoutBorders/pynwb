@@ -1,5 +1,7 @@
 import subprocess
 import re
+from unittest.mock import patch
+from io import StringIO
 
 from pynwb.testing import TestCase
 from pynwb import validate, NWBHDF5IO
@@ -108,18 +110,17 @@ class TestValidateScript(TestCase):
             r"using namespace 'ndx-testextension'\.\s* - no errors found\.\s*")
         self.assertRegex(result.stdout.decode('utf-8'), stdout_regex)
 
-    def test_validate_file_cached_core(self):  # TODO determine correct behavior
+    def test_validate_file_cached_core(self):
         """Test that validating a file with cached spec against the core namespace succeeds."""
         result = subprocess.run(["coverage", "run", "-p", "-m", "pynwb.validate",
                                  "tests/back_compat/2.1.0_nwbfile_with_extension.nwb",
                                  "--ns", "core"], capture_output=True)
 
-        self.assertEqual(result.stderr.decode('utf-8'), '')
-
         stdout_regex = re.compile(
-            r"Validating tests/back_compat/2\.1\.0_nwbfile_with_extension\.nwb against cached namespace information "
-            r"using namespace 'core'\.\s* - no errors found\.\s*")
-        self.assertRegex(result.stdout.decode('utf-8'), stdout_regex)
+            r"The namespace 'core' is included by the namespace 'ndx-testextension'. "
+            r"Please validate against that namespace instead\.\s*"
+        )
+        self.assertRegex(result.stderr.decode('utf-8'), stdout_regex)
 
     def test_validate_file_cached_hdmf_common(self):
         """Test that validating a file with cached spec against the hdmf-common namespace fails."""
@@ -181,11 +182,34 @@ class TestValidateFunction(TestCase):
             errors = validate(io, 'ndx-testextension')
             self.assertEqual(errors, [])
 
-    def test_validate_file_cached_core(self):  # TODO determine correct behavior
-        """Test that validating a file with cached extension spec against the core namespace succeeds."""
-        with NWBHDF5IO('tests/back_compat/2.1.0_nwbfile_with_extension.nwb', 'r', load_namespaces=True) as io:
-            errors = validate(io, 'core')
-            self.assertEqual(errors, [])
+    def test_validate_file_cached_core_with_io(self):
+        """
+        For back-compatability, test that validating a file with cached extension spec against the core
+        namespace succeeds when using the `io` + `namespace` keywords.
+        """
+        with NWBHDF5IO(
+            path='tests/back_compat/2.1.0_nwbfile_with_extension.nwb', mode='r', load_namespaces=True
+        ) as io:
+            results = validate(io=io, namespace="core")
+            self.assertEqual(results, [])
+
+    def test_validate_file_cached_core_with_paths(self):
+        """
+        Test that validating a file with cached extension spec against the core
+        namespace raises an error with the new CLI-mimicing paths keyword.
+        """
+        nwbfile_path = "tests/back_compat/2.1.0_nwbfile_with_extension.nwb"
+        with patch("sys.stderr", new=StringIO()) as fake_out:
+            results, status = validate(paths=[nwbfile_path], namespace="core", verbose=True)
+            self.assertEqual(results, [])
+            self.assertEqual(status, 1)
+            self.assertEqual(
+                first=fake_out.getvalue(),
+                second=(
+                    "The namespace 'core' is included by the namespace 'ndx-testextension'. "
+                    "Please validate against that namespace instead.\n"
+                )
+            )
 
     def test_validate_file_cached_bad_ns(self):
         """Test that validating a file with cached spec against a specified, unknown namespace fails."""
