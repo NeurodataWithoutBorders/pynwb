@@ -14,7 +14,7 @@ def mock_NWBFile(
 ):
     return NWBFile(
         session_description=session_description,
-        identifier=identifier or uuid4(),
+        identifier=identifier or str(uuid4()),
         session_start_time=session_start_time,
         subject=subject or mock_Subject(),
         **kwargs
