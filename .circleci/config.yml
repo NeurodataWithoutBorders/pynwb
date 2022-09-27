@@ -100,6 +100,8 @@ references:
             conda config --set always_yes yes --set changeps1 no
             conda config --add channels conda-forge
             conda create --name test python=$CONDA_PYTHON_VER --yes
+            conda init bash
+            source ~/.bashrc
             conda activate test
             pip install --upgrade pip
             # work around incompatibilities between virtualenv & importlib-metadata
