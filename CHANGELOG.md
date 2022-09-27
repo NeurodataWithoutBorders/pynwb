@@ -8,6 +8,10 @@
   namespaces. Also adjusted the validate CLI to directly use the API function. @CodyCBakerPhD
   [#1511](https://github.com/NeurodataWithoutBorders/pynwb/pull/1511)
 
+### Bug fixes
+- Fixed bug in ``pynwb.testing.mock.file.mock_NWBFile`` to identifier UUID to string. @oruebel
+  [#1557](https://github.com/NeurodataWithoutBorders/pynwb/pull/1557)
+
 ## PyNWB 2.1.1 (September 1, 2022)
 
 ### Documentation and tutorial enhancements:
