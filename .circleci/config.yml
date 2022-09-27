@@ -96,11 +96,12 @@ references:
       - run:
           name: Configure conda
           command: |
-            pip install --upgrade pip
-            conda update -n base -c defaults conda
+            conda install -n base -c defaults conda=4.13.0
             conda config --set always_yes yes --set changeps1 no
             conda config --add channels conda-forge
-            conda install python=$CONDA_PYTHON_VER
+            conda create --name test python=$CONDA_PYTHON_VER --yes
+            conda activate test
+            pip install --upgrade pip
             # work around incompatibilities between virtualenv & importlib-metadata
             if [[ "${TEST_TOX_ENV}" == *"py37"* ]]; then
               conda install "importlib-metadata=1.7"
@@ -108,17 +109,22 @@ references:
               conda install importlib-metadata
             fi
             conda install tox
+            conda list
+            pip list
       - run:
           name: Run the tests
           command: |
+            conda activate test
             tox -e $TEST_TOX_ENV
       - run:
           name: Build wheel and source distribution
           command: |
+            conda activate test
             tox -e $BUILD_TOX_ENV
       - run:
           name: Test installation from a wheel
           command: |
+            conda activate test
             tox -e $TEST_WHEELINSTALL_ENV --recreate --installpkg dist/*-none-any.whl
 
   gallery-steps: &gallery-steps
@@ -381,63 +387,63 @@ workflows:
   version: 2
   test-package-publish:
     jobs:
-      - flake8:
-          <<: *no_filters
-      - python37-min-req:
-          <<: *no_filters
-      - python39-upgrade-dev:
-          <<: *no_filters
+      # - flake8:
+      #     <<: *no_filters
+      # - python37-min-req:
+      #     <<: *no_filters
+      # - python39-upgrade-dev:
+      #     <<: *no_filters
       - miniconda37:
           <<: *no_filters
       - miniconda39:
           <<: *no_filters
-      - gallery37-min-req:
-          <<: *no_filters
-      - gallery38: # TODO replace with gallery39 after allensdk support py39
-          <<: *no_filters
-      - gallery39-ros3:
-          <<: *no_filters
-      - miniconda39-ros3:
-          <<: *no_filters
-      - deploy-dev:
-          requires:
-            - flake8
-            - python37-min-req
-            - python39-upgrade-dev  # distributions from this job uploaded to PyPI
-            - miniconda37
-            - miniconda39
-            - gallery37-min-req
-            - gallery38  # TODO gallery39
-            - gallery39-ros3
-            - miniconda39-ros3
-          filters:
-            tags:
-              ignore:
-                # exclude tags created by "ci_addons publish_github_release"
-                - /^latest$/
-                - /^latest-tmp$/
-            branches:
-              only: dev
-          context:
-            - docker-hub-creds
-      - deploy-release:
-          requires:
-            - flake8
-            - python37-min-req
-            - python39-upgrade-dev  # distributions from this job uploaded to PyPI
-            - miniconda37
-            - miniconda39
-            - gallery37-min-req
-            - gallery38  # TODO gallery39
-            - gallery39-ros3
-            - miniconda39-ros3
-          filters:
-            tags:
-              only: /^[0-9]+(\.[0-9]+)*(\.post[0-9]+)?$/
-            branches:
-              ignore: /.*/
-          context:
-            - docker-hub-creds
+      # - gallery37-min-req:
+      #     <<: *no_filters
+      # - gallery38: # TODO replace with gallery39 after allensdk support py39
+      #     <<: *no_filters
+      # - gallery39-ros3:
+      #     <<: *no_filters
+      # - miniconda39-ros3:
+      #     <<: *no_filters
+      # - deploy-dev:
+      #     requires:
+      #       - flake8
+      #       - python37-min-req
+      #       - python39-upgrade-dev  # distributions from this job uploaded to PyPI
+      #       - miniconda37
+      #       - miniconda39
+      #       - gallery37-min-req
+      #       - gallery38  # TODO gallery39
+      #       - gallery39-ros3
+      #       - miniconda39-ros3
+      #     filters:
+      #       tags:
+      #         ignore:
+      #           # exclude tags created by "ci_addons publish_github_release"
+      #           - /^latest$/
+      #           - /^latest-tmp$/
+      #       branches:
+      #         only: dev
+      #     context:
+      #       - docker-hub-creds
+      # - deploy-release:
+      #     requires:
+      #       - flake8
+      #       - python37-min-req
+      #       - python39-upgrade-dev  # distributions from this job uploaded to PyPI
+      #       - miniconda37
+      #       - miniconda39
+      #       - gallery37-min-req
+      #       - gallery38  # TODO gallery39
+      #       - gallery39-ros3
+      #       - miniconda39-ros3
+      #     filters:
+      #       tags:
+      #         only: /^[0-9]+(\.[0-9]+)*(\.post[0-9]+)?$/
+      #       branches:
+      #         ignore: /.*/
+      #     context:
+      #       - docker-hub-creds
 
   nightly:
     triggers:
