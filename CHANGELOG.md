@@ -5,11 +5,12 @@
 ### Bug fixes
 - Fixed bug in ``pynwb.testing.mock.file.mock_NWBFile`` to identifier UUID to string. @oruebel
   [#1557](https://github.com/NeurodataWithoutBorders/pynwb/pull/1557)
+- Fixed CircleCI configuration. @rly [#1559](https://github.com/NeurodataWithoutBorders/pynwb/pull/1559)
 
 ## PyNWB 2.1.1 (September 1, 2022)
 
 ### Documentation and tutorial enhancements:
-- Added support for explicit ordering of sphinx gallery tutorials in the docs. @oruebel 
+- Added support for explicit ordering of sphinx gallery tutorials in the docs. @oruebel
   [#1504](https://github.com/NeurodataWithoutBorders/pynwb/pull/1504), @bdichter
   [#1495](https://github.com/NeurodataWithoutBorders/pynwb/pull/1495)
 - Added developer guide on how to create a new tutorial. @oruebel
@@ -39,7 +40,7 @@
   [#1548](https://github.com/NeurodataWithoutBorders/pynwb/pull/1548)
 - Updated requirements, including allowing numpy 1.23. @rly
   [#1550](https://github.com/NeurodataWithoutBorders/pynwb/pull/1550)
-- Enhanced docs for ``LabMetaData`` to clarify its usage. @oruebel 
+- Enhanced docs for ``LabMetaData`` to clarify its usage. @oruebel
   [#1546](https://github.com/NeurodataWithoutBorders/pynwb/pull/1546)
 - Add testing/mock, which provides mock neurodata objects for testing. @bendichter
   [#1454](https://github.com/NeurodataWithoutBorders/pynwb/pull/1454)
