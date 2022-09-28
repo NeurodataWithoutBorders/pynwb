@@ -23,7 +23,7 @@ reqs = [
     'hdmf>=3.4.2,<4',
     'numpy>=1.16,<1.24',
     'pandas>=1.1.5,<2',
-    'python-dateutil>=2.7,<3',
+    'python-dateutil>=2.7.3,<3',
     'setuptools'
 ]
 
