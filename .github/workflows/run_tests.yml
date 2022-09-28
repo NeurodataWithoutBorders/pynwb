@@ -174,7 +174,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { name: linux-python3.10-ros3  , python-ver: "3.10", os: ubuntu-latest }
+          - { name: linux-python3.9-ros3  , python-ver: "3.9", os: ubuntu-latest }
     steps:
       - name: Cancel any previous incomplete runs
         uses: styfle/cancel-workflow-action@0.9.1
@@ -216,7 +216,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { name: linux-gallery-python3.10-ros3  , python-ver: "3.10", os: ubuntu-latest }
+          - { name: linux-gallery-python3.9-ros3  , python-ver: "3.9", os: ubuntu-latest }
     steps:
       - name: Cancel any previous incomplete runs
         uses: styfle/cancel-workflow-action@0.9.1
@@ -238,7 +238,7 @@ jobs:
 
       - name: Install run dependencies
         run: |
-          pip install -r requirements-doc.txt
+          pip install matplotlib
           pip install -e .
           conda info
           conda list
