@@ -32,7 +32,7 @@ jobs:
           python -m pip list
           git clone https://github.com/NeurodataWithoutBorders/nwbinspector.git
           cd nwbinspector
-          python -m pip install -r requirements.txt
+          python -m pip install -r requirements.txt pytest
           # must install in editable mode for coverage to find sources
           python -m pip install -e .  # this might install a pinned version of pynwb instead of the current one
           cd ..
