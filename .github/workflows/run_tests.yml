@@ -231,16 +231,13 @@ jobs:
         uses: conda-incubator/setup-miniconda@v2
         with:
           auto-update-conda: true
-          auto-activate-base: true
-          activate-environment: true  # TODO select environment file
+          activate-environment: ros3
+          environment-file: environment-ros3.yml
           python-version: ${{ matrix.python-ver }}
+          channels: conda-forge
 
       - name: Install run dependencies
         run: |
-          conda config --set always_yes yes --set changeps1 no
-          conda config --add channels conda-forge
-          conda env create -f environment-ros3.yml
-          source activate ros3
           pip install -e .
           conda info
           conda list
