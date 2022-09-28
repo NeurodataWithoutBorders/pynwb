@@ -65,6 +65,7 @@ jobs:
         uses: codecov/codecov-action@v3
         with:
           flags: unit
+          files: coverage.xml
           fail_ci_if_error: true
 
       - name: Run integration tests and generate coverage report
@@ -79,4 +80,5 @@ jobs:
         uses: codecov/codecov-action@v3
         with:
           flags: integration
+          files: coverage.xml
           fail_ci_if_error: true

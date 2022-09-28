@@ -118,7 +118,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
      run:
-       shell: bash -l {0}
+       shell: bash -l {0}  # necessary for conda
     strategy:
       fail-fast: false
       matrix:
@@ -169,7 +169,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     defaults:
       run:
-        shell: bash
+        shell: bash -l {0}  # necessary for conda
     strategy:
       fail-fast: false
       matrix:
@@ -197,7 +197,6 @@ jobs:
 
       - name: Install run dependencies
         run: |
-          conda activate ros3  # not sure why this is still needed
           pip install -r requirements-dev.txt
           pip install -e .
           conda info
@@ -206,7 +205,6 @@ jobs:
 
       - name: Run gallery ros3 tests
         run: |
-          conda activate ros3  # not sure why this is still needed
           python test.py --ros3
 
   run-gallery-ros3-tests:
@@ -214,7 +212,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     defaults:
       run:
-        shell: bash
+        shell: bash -l {0}  # necessary for conda
     strategy:
       fail-fast: false
       matrix:
@@ -242,7 +240,6 @@ jobs:
 
       - name: Install run dependencies
         run: |
-          conda activate ros3  # not sure why this is still needed
           pip install matplotlib
           pip install -e .
           conda info
@@ -251,7 +248,6 @@ jobs:
 
       - name: Run gallery ros3 tests
         run: |
-          conda activate ros3  # not sure why this is still needed
           python test.py --example-ros3
 
   deploy-dev:
