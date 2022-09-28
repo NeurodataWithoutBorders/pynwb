@@ -255,7 +255,7 @@ jobs:
 
   deploy-dev:
     name: Deploy pre-release from dev
-    needs: [run-tests, run-gallery-tests, run-tests-on-conda, run-ros3-test, run-gallery-ros3-tests]
+    needs: [run-tests, run-gallery-tests, run-tests-on-conda, run-ros3-tests, run-gallery-ros3-tests]
     if: ${{ github.event_name == 'push' }}
     runs-on: ubuntu-latest
     steps:
