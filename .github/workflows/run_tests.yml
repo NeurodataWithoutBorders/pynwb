@@ -238,6 +238,7 @@ jobs:
 
       - name: Install run dependencies
         run: |
+          pip install -r requirements-doc.txt
           pip install -e .
           conda info
           conda list
