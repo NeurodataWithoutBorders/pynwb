@@ -10,9 +10,7 @@ Continuous Integration
 
 PyNWB is tested against Ubuntu, macOS, and Windows operating systems.
 The project has both unit and integration tests.
-
-* CircleCI_ runs all PyNWB tests on Ubuntu
-* `Azure Pipelines`_ runs all PyNWB tests on Windows and macOS
+Tests run on `GitHub Actions`_.
 
 Each time a PR is published or updated, the project is built, packaged, and tested on all supported operating systems
 and python distributions. That way, as a contributor, you know if you introduced regressions or coding style
@@ -20,8 +18,7 @@ inconsistencies.
 
 There are badges in the README_ file which shows the current condition of the dev branch.
 
-.. _CircleCI: https://circleci.com/gh/NeurodataWithoutBorders/workflows/pynwb
-.. _Azure Pipelines: https://dev.azure.com/NeurodataWithoutBorders/pynwb/_build
+.. _GitHub Actions: https://github.com/NeurodataWithoutBorders/pynwb/actions
 .. _README: https://github.com/NeurodataWithoutBorders/pynwb#readme
 
 
@@ -29,11 +26,13 @@ There are badges in the README_ file which shows the current condition of the de
 Coverage
 --------
 
-Coverage is computed and reported using the coverage_ tool. There is a badge in the README_ file which
-shows percentage coverage. A detailed report can be found on codecov_ which shows line by line which
-lines are covered by the tests.
+Code coverage is computed and reported using the coverage_ tool. There are two coverage-related badges in the README_
+file. One shows the status of the `GitHub Action workflow`_ which runs the coverage_ tool and uploads the report to
+codecov_, and the other badge shows the percentage coverage reported from codecov_. A detailed report can be found on
+codecov_, which shows line by line which lines are covered by the tests.
 
 .. _coverage: https://coverage.readthedocs.io
+.. _GitHub Action workflow: https://github.com/NeurodataWithoutBorders/pynwb/actions?query=workflow%3A%22Run+coverage%22
 .. _codecov: https://codecov.io/gh/NeurodataWithoutBorders/pynwb/tree/dev/src/pynwb
 
 ..  _software_process_requirement_specifications:
