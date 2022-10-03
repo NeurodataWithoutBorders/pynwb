@@ -182,4 +182,93 @@ jobs:
         run: |
           tox -e wheelinstall --recreate --installpkg dist/*-none-any.whl
 
-# TODO copy ros3 tests here, run on linux, macos, windows
+
+  run-ros3-tests:  # tox and conda do not play nicely so do not use tox here
+    name: ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash -l {0}  # necessary for conda
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { name: linux-python3.9-ros3  , python-ver: "3.9", os: ubuntu-latest }
+          - { name: windows-python3.9-ros3, python-ver: "3.9", os: windows-latest }
+          - { name: macos-python3.9-ros3  , python-ver: "3.9", os: macos-latest }
+    steps:
+      - name: Cancel any previous incomplete runs
+        uses: styfle/cancel-workflow-action@0.9.1
+        with:
+          access_token: ${{ github.token }}
+
+      - uses: actions/checkout@v3
+        with:
+          submodules: 'recursive'
+
+      - name: Set up Conda
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+          auto-update-conda: true
+          activate-environment: ros3
+          environment-file: environment-ros3.yml
+          python-version: ${{ matrix.python-ver }}
+          channels: conda-forge
+          auto-activate-base: false
+
+      - name: Install run dependencies
+        run: |
+          pip install -r requirements-dev.txt
+          pip install -e .
+          conda info
+          conda list
+          pip list
+
+      - name: Run gallery ros3 tests
+        run: |
+          python test.py --ros3
+
+  run-gallery-ros3-tests:
+    name: ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash -l {0}  # necessary for conda
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { name: linux-gallery-python3.9-ros3  , python-ver: "3.9", os: ubuntu-latest }
+          - { name: windows-gallery-python3.9-ros3, python-ver: "3.9", os: windows-latest }
+          - { name: macos-gallery-python3.9-ros3  , python-ver: "3.9", os: macos-latest }
+    steps:
+      - name: Cancel any previous incomplete runs
+        uses: styfle/cancel-workflow-action@0.9.1
+        with:
+          access_token: ${{ github.token }}
+
+      - uses: actions/checkout@v3
+        with:
+          submodules: 'recursive'
+
+      - name: Set up Conda
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+          auto-update-conda: true
+          activate-environment: ros3
+          environment-file: environment-ros3.yml
+          python-version: ${{ matrix.python-ver }}
+          channels: conda-forge
+          auto-activate-base: false
+
+      - name: Install run dependencies
+        run: |
+          pip install matplotlib
+          pip install -e .
+          conda info
+          conda list
+          pip list
+
+      - name: Run gallery ros3 tests
+        run: |
+          python test.py --example-ros3
