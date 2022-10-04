@@ -1,0 +1,274 @@
+name: Run all tests
+on:
+  schedule:
+    - cron: '0 5 * * *'  # once per day at midnight ET
+  push:
+    tags:  # run only on new tags that follow semver
+      - '/^[0-9]+(\.[0-9]+)?(\.[0-9]+)?$/'
+  workflow_dispatch:
+
+jobs:
+  run-all-tests:
+    # the only differences between this job and "run_tests.yml" is the "strategy.matrix.include" and the upload
+    # distributions step.
+    # GitHub Actions does not yet support YAML anchors, easily reusable components, or easy dynamic matrix
+    # configurations based on the github event, so this job is duplicated for the most part
+    name: ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { name: linux-python3.7-minimum      , test-tox-env: py37-minimum    , build-tox-env: build-py37-minimum    , python-ver: "3.7" , os: ubuntu-latest }
+          - { name: linux-python3.7              , test-tox-env: py37            , build-tox-env: build-py37            , python-ver: "3.7" , os: ubuntu-latest }
+          - { name: linux-python3.8              , test-tox-env: py38            , build-tox-env: build-py38            , python-ver: "3.8" , os: ubuntu-latest }
+          - { name: linux-python3.9              , test-tox-env: py39            , build-tox-env: build-py39            , python-ver: "3.9" , os: ubuntu-latest }
+          - { name: linux-python3.10             , test-tox-env: py310           , build-tox-env: build-py310           , python-ver: "3.10", os: ubuntu-latest }
+          - { name: linux-python3.10-optional    , test-tox-env: py310-optional  , build-tox-env: build-py310-optional  , python-ver: "3.10", os: ubuntu-latest }
+          - { name: linux-python3.10-upgraded    , test-tox-env: py310-upgraded  , build-tox-env: build-py310-upgraded  , python-ver: "3.10", os: ubuntu-latest }
+          - { name: linux-python3.10-prerelease  , test-tox-env: py310-prerelease, build-tox-env: build-py310-prerelease, python-ver: "3.10", os: ubuntu-latest }
+          - { name: windows-python3.7-minimum    , test-tox-env: py37-minimum    , build-tox-env: build-py37-minimum    , python-ver: "3.7" , os: windows-latest }
+          - { name: windows-python3.7            , test-tox-env: py37            , build-tox-env: build-py37            , python-ver: "3.7" , os: windows-latest }
+          - { name: windows-python3.8            , test-tox-env: py38            , build-tox-env: build-py38            , python-ver: "3.8" , os: windows-latest }
+          - { name: windows-python3.9            , test-tox-env: py39            , build-tox-env: build-py39            , python-ver: "3.9" , os: windows-latest }
+          - { name: windows-python3.10           , test-tox-env: py310           , build-tox-env: build-py310           , python-ver: "3.10", os: windows-latest }
+          - { name: windows-python3.10-optional  , test-tox-env: py310-optional  , build-tox-env: build-py310-optional  , python-ver: "3.10", os: windows-latest }
+          - { name: windows-python3.10-upgraded  , test-tox-env: py310-upgraded  , build-tox-env: build-py310-upgraded  , python-ver: "3.10", os: windows-latest }
+          - { name: windows-python3.10-prerelease, test-tox-env: py310-prerelease, build-tox-env: build-py310-prerelease, python-ver: "3.10", os: windows-latest }
+          - { name: macos-python3.7-minimum      , test-tox-env: py37-minimum    , build-tox-env: build-py37-minimum    , python-ver: "3.7" , os: macos-latest }
+          - { name: macos-python3.7              , test-tox-env: py37            , build-tox-env: build-py37            , python-ver: "3.7" , os: macos-latest }
+          - { name: macos-python3.8              , test-tox-env: py38            , build-tox-env: build-py38            , python-ver: "3.8" , os: macos-latest }
+          - { name: macos-python3.9              , test-tox-env: py39            , build-tox-env: build-py39            , python-ver: "3.9" , os: macos-latest }
+          - { name: macos-python3.10             , test-tox-env: py310           , build-tox-env: build-py310           , python-ver: "3.10", os: macos-latest }
+          - { name: macos-python3.10-optional    , test-tox-env: py310-optional  , build-tox-env: build-py310-optional  , python-ver: "3.10", os: macos-latest }
+          - { name: macos-python3.10-upgraded    , test-tox-env: py310-upgraded  , build-tox-env: build-py310-upgraded  , python-ver: "3.10", os: macos-latest }
+          - { name: macos-python3.10-prerelease  , test-tox-env: py310-prerelease, build-tox-env: build-py310-prerelease, python-ver: "3.10", os: macos-latest }
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: 'recursive'
+
+      - name: Set up Python
+        uses: actions/setup-python@v3
+        with:
+          python-version: ${{ matrix.python-ver }}
+
+      - name: Install build dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install tox
+          python -m pip list
+
+      - name: Run tox tests
+        run: |
+          tox -e ${{ matrix.test-tox-env }}
+
+      - name: Build wheel and source distribution
+        run: |
+          tox -e ${{ matrix.build-tox-env }}
+          ls -1 dist
+
+      - name: Test installation from a wheel
+        run: |
+          tox -e wheelinstall --recreate --installpkg dist/*-none-any.whl
+
+  run-all-gallery-tests:
+    name: ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { name: linux-gallery-python3.7-minimum      , test-tox-env: gallery-py37-minimum    , python-ver: "3.7" , os: ubuntu-latest }
+          - { name: linux-gallery-python3.8-upgraded     , test-tox-env: gallery-py38-upgraded   , python-ver: "3.8" , os: ubuntu-latest }
+          - { name: linux-gallery-python3.8-prerelease   , test-tox-env: gallery-py38-prerelease , python-ver: "3.8" , os: ubuntu-latest }
+          # allensdk is not compatible with python 3.9+, so run gallery tests only on python <=3.8
+          # - { name: linux-gallery-python3.10-upgraded    , test-tox-env: gallery-py310-upgraded  , python-ver: "3.10", os: ubuntu-latest }
+          # - { name: linux-gallery-python3.10-prerelease  , test-tox-env: gallery-py310-prerelease, python-ver: "3.10", os: ubuntu-latest }
+          - { name: windows-gallery-python3.7-minimum    , test-tox-env: gallery-py37-minimum    , python-ver: "3.7" , os: windows-latest }
+          - { name: windows-gallery-python3.8-upgraded   , test-tox-env: gallery-py38-upgraded   , python-ver: "3.8" , os: windows-latest }
+          - { name: windows-gallery-python3.8-prerelease , test-tox-env: gallery-py38-prerelease , python-ver: "3.8" , os: windows-latest }
+          # - { name: windows-gallery-python3.10-upgraded  , test-tox-env: gallery-py310-upgraded  , python-ver: "3.10", os: windows-latest }
+          # - { name: windows-gallery-python3.10-prerelease, test-tox-env: gallery-py310-prerelease, python-ver: "3.10", os: windows-latest }
+          - { name: macos-gallery-python3.7-minimum      , test-tox-env: gallery-py37-minimum    , python-ver: "3.7" , os: macos-latest }
+          - { name: macos-gallery-python3.8-upgraded     , test-tox-env: gallery-py38-upgraded   , python-ver: "3.8" , os: macos-latest }
+          - { name: macos-gallery-python3.8-prerelease   , test-tox-env: gallery-py38-prerelease , python-ver: "3.8" , os: macos-latest }
+          # - { name: macos-gallery-python3.10-upgraded    , test-tox-env: gallery-py310-upgraded  , python-ver: "3.10", os: macos-latest }
+          # - { name: macos-gallery-python3.10-prerelease  , test-tox-env: gallery-py310-prerelease, python-ver: "3.10", os: macos-latest }
+    steps:
+      - name: Cancel any previous incomplete runs
+        uses: styfle/cancel-workflow-action@0.9.1
+        with:
+          access_token: ${{ github.token }}
+
+      - uses: actions/checkout@v3
+        with:
+          submodules: 'recursive'
+
+      - name: Set up Python
+        uses: actions/setup-python@v3
+        with:
+          python-version: ${{ matrix.python-ver }}
+
+      - name: Install build dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install tox
+          python -m pip list
+
+      - name: Run tox tests
+        run: |
+          tox -e ${{ matrix.test-tox-env }}
+
+  run-all-tests-on-conda:
+    name: ${{ matrix.name }}
+    runs-on: ubuntu-latest
+    defaults:
+     run:
+       shell: bash -l {0}  # needed for conda environment to work
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { name: conda-linux-python3.7-minimum    , test-tox-env: py37-minimum    , build-tox-env: build-py37-minimum    , python-ver: "3.7" , os: ubuntu-latest }
+          - { name: conda-linux-python3.7            , test-tox-env: py37            , build-tox-env: build-py37            , python-ver: "3.7" , os: ubuntu-latest }
+          - { name: conda-linux-python3.8            , test-tox-env: py38            , build-tox-env: build-py38            , python-ver: "3.8" , os: ubuntu-latest }
+          - { name: conda-linux-python3.9            , test-tox-env: py39            , build-tox-env: build-py39            , python-ver: "3.9" , os: ubuntu-latest }
+          - { name: conda-linux-python3.10           , test-tox-env: py310           , build-tox-env: build-py310           , python-ver: "3.10", os: ubuntu-latest }
+          - { name: conda-linux-python3.10-optional  , test-tox-env: py310-optional  , build-tox-env: build-py310-optional  , python-ver: "3.10", os: ubuntu-latest }
+          - { name: conda-linux-python3.10-upgraded  , test-tox-env: py310-upgraded  , build-tox-env: build-py310-upgraded  , python-ver: "3.10", os: ubuntu-latest }
+          - { name: conda-linux-python3.10-prerelease, test-tox-env: py310-prerelease, build-tox-env: build-py310-prerelease, python-ver: "3.10", os: ubuntu-latest }
+    steps:
+      - name: Cancel any previous incomplete runs
+        uses: styfle/cancel-workflow-action@0.9.1
+        with:
+          access_token: ${{ github.token }}
+
+      - uses: actions/checkout@v3
+        with:
+          submodules: 'recursive'
+
+      - name: Set up Conda
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+          auto-update-conda: true
+          auto-activate-base: true
+          activate-environment: true
+          python-version: ${{ matrix.python-ver }}
+
+      - name: Install build dependencies
+        run: |
+          conda config --set always_yes yes --set changeps1 no
+          conda info
+          conda install -c conda-forge tox
+          conda list
+
+      - name: Run tox tests
+        run: |
+          tox -e ${{ matrix.test-tox-env }}
+
+      - name: Build wheel and source distribution
+        run: |
+          tox -e ${{ matrix.build-tox-env }}
+          ls -1 dist
+
+      - name: Test installation from a wheel
+        run: |
+          tox -e wheelinstall --recreate --installpkg dist/*-none-any.whl
+
+
+  run-ros3-tests:  # tox and conda do not play nicely so do not use tox here
+    name: ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash -l {0}  # necessary for conda
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { name: linux-python3.9-ros3  , python-ver: "3.9", os: ubuntu-latest }
+          - { name: windows-python3.9-ros3, python-ver: "3.9", os: windows-latest }
+          - { name: macos-python3.9-ros3  , python-ver: "3.9", os: macos-latest }
+    steps:
+      - name: Cancel any previous incomplete runs
+        uses: styfle/cancel-workflow-action@0.9.1
+        with:
+          access_token: ${{ github.token }}
+
+      - uses: actions/checkout@v3
+        with:
+          submodules: 'recursive'
+
+      - name: Set up Conda
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+          auto-update-conda: true
+          activate-environment: ros3
+          environment-file: environment-ros3.yml
+          python-version: ${{ matrix.python-ver }}
+          channels: conda-forge
+          auto-activate-base: false
+
+      - name: Install run dependencies
+        run: |
+          pip install -r requirements-dev.txt
+          pip install -e .
+          conda info
+          conda list
+          pip list
+
+      - name: Run gallery ros3 tests
+        run: |
+          python test.py --ros3
+
+  run-gallery-ros3-tests:
+    name: ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash -l {0}  # necessary for conda
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { name: linux-gallery-python3.9-ros3  , python-ver: "3.9", os: ubuntu-latest }
+          - { name: windows-gallery-python3.9-ros3, python-ver: "3.9", os: windows-latest }
+          - { name: macos-gallery-python3.9-ros3  , python-ver: "3.9", os: macos-latest }
+    steps:
+      - name: Cancel any previous incomplete runs
+        uses: styfle/cancel-workflow-action@0.9.1
+        with:
+          access_token: ${{ github.token }}
+
+      - uses: actions/checkout@v3
+        with:
+          submodules: 'recursive'
+
+      - name: Set up Conda
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+          auto-update-conda: true
+          activate-environment: ros3
+          environment-file: environment-ros3.yml
+          python-version: ${{ matrix.python-ver }}
+          channels: conda-forge
+          auto-activate-base: false
+
+      - name: Install run dependencies
+        run: |
+          pip install matplotlib
+          pip install -e .
+          conda info
+          conda list
+          pip list
+
+      - name: Run gallery ros3 tests
+        run: |
+          python test.py --example-ros3

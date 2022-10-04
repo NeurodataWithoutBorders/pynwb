@@ -13,27 +13,6 @@ Latest Release
 .. image:: https://anaconda.org/conda-forge/pynwb/badges/version.svg
      :target: https://anaconda.org/conda-forge/pynwb
 
-
-Build Status
-============
-
-.. table::
-
-  +-----------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------+
-  | Linux                                                                                   | Windows and MacOS                                                                                                               |
-  +=========================================================================================+=================================================================================================================================+
-  | .. image:: https://circleci.com/gh/NeurodataWithoutBorders/pynwb.svg?style=shield       | .. image:: https://dev.azure.com/NeurodataWithoutBorders/pynwb/_apis/build/status/NeurodataWithoutBorders.pynwb?branchName=dev  |
-  |     :target: https://circleci.com/gh/NeurodataWithoutBorders/pynwb                      |     :target: https://dev.azure.com/NeurodataWithoutBorders/pynwb/_build/latest?definitionId=3&branchName=dev                    |
-  +-----------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------+
-
-
-**Conda**
-
-
-.. image:: https://circleci.com/gh/conda-forge/pynwb-feedstock.svg?style=shield
-     :target: https://circleci.com/gh/conda-forge/pynwb-feedstocks
-
-
 Code Coverage
 ==============
 
@@ -58,6 +37,24 @@ Integration test coverage
 Overall Health
 ==============
 
+.. image:: https://github.com/NeurodataWithoutBorders/pynwb/workflows/run_tests.yml/badge.svg
+    :target: https://github.com/NeurodataWithoutBorders/pynwb/actions/workflows/run_tests.yml
+
+.. image:: https://github.com/NeurodataWithoutBorders/pynwb/workflows/run_flake8.yml/badge.svg
+    :target: https://github.com/NeurodataWithoutBorders/pynwb/actions/workflows/run_flake8.yml
+
+.. image:: https://github.com/NeurodataWithoutBorders/pynwb/workflows/check_external_links.yml/badge.svg
+    :target: https://github.com/NeurodataWithoutBorders/pynwb/actions/workflows/check_external_links.yml
+
+.. image:: https://github.com/NeurodataWithoutBorders/pynwb/actions/workflows/run_inspector_tests.yml/badge.svg
+    :target: https://github.com/NeurodataWithoutBorders/pynwb/actions/workflows/run_inspector_tests.yml
+
+.. image:: https://github.com/NeurodataWithoutBorders/pynwb/workflows/run_all_tests.yml/badge.svg
+    :target: https://github.com/NeurodataWithoutBorders/pynwb/actions/workflows/run_all_tests.yml
+
+.. image:: https://github.com/NeurodataWithoutBorders/pynwb/workflows/deploy_release.yml/badge.svg
+    :target: https://github.com/NeurodataWithoutBorders/pynwb/actions/workflows/deploy_release.yml
+
 .. image:: https://requires.io/github/NeurodataWithoutBorders/pynwb/requirements.svg?branch=dev
      :target: https://requires.io/github/NeurodataWithoutBorders/pynwb/requirements/?branch=dev
      :alt: Requirements Status
@@ -68,7 +65,12 @@ Overall Health
 
 .. image:: https://img.shields.io/pypi/l/pynwb.svg
      :target: https://github.com/neurodatawithoutborders/pynwb/blob/dev/license.txt
-     :alt:    PyPI - License
+     :alt: PyPI - License
+
+**Conda**
+.. image:: https://circleci.com/gh/conda-forge/pynwb-feedstock.svg?style=shield
+     :target: https://circleci.com/gh/conda-forge/pynwb-feedstocks
+     :alt: Conda Feedstock Status
 
 NWB Format API
 ==============
