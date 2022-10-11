@@ -20,6 +20,10 @@ jobs:
         with:
           submodules: 'recursive'
 
+      - name: Get git tags  # necessary for versioneer to determine the version
+        run: |
+          git fetch --tags origin
+
       - name: Set up Python
         uses: actions/setup-python@v3
         with:
