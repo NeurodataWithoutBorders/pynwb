@@ -331,3 +331,6 @@ due.cite(BibTeX("""
 """), description="The Neurodata Without Borders ecosystem for neurophysiological data science",  # noqa: E501
          path="pynwb/", version=__version__, cite_module=True)
 del due, BibTeX
+
+from . import _version
+__version__ = _version.get_versions()['version']
