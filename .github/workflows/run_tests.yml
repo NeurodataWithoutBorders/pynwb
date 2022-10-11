@@ -20,7 +20,6 @@ jobs:
       matrix:
         include:
           - { name: linux-python3.7-minimum      , test-tox-env: py37-minimum    , build-tox-env: build-py37-minimum    , python-ver: "3.7" , os: ubuntu-latest }
-          - { name: linux-python3.7              , test-tox-env: py37            , build-tox-env: build-py37            , python-ver: "3.7" , os: ubuntu-latest }
           - { name: linux-python3.10             , test-tox-env: py310           , build-tox-env: build-py310           , python-ver: "3.10", os: ubuntu-latest }
           # NOTE config below with "upload-wheels: true" specifies that wheels should be uploaded as an artifact
           - { name: linux-python3.10-upgraded    , test-tox-env: py310-upgraded  , build-tox-env: build-py310-upgraded  , python-ver: "3.10", os: ubuntu-latest , upload-wheels: true }
