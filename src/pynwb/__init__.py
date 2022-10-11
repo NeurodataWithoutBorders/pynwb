@@ -297,9 +297,8 @@ from . import legacy  # noqa: F401,E402
 from hdmf.data_utils import DataChunkIterator  # noqa: F401,E402
 from hdmf.backends.hdf5 import H5DataIO  # noqa: F401,E402
 
-from ._version import get_versions  # noqa: E402
-__version__ = get_versions()['version']
-del get_versions
+from . import _version    # noqa: F401,E402
+__version__ = _version.get_versions()['version']
 
 from ._due import due, BibTeX  # noqa: E402
 due.cite(BibTeX("""

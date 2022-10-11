@@ -7,8 +7,9 @@
   namespaces. Also adjusted the validate CLI to directly use the API function. @CodyCBakerPhD
   [#1511](https://github.com/NeurodataWithoutBorders/pynwb/pull/1511)
 
-## Internal enhancement
-- Moved CI to GitHub Actions. @rly [#1560](https://github.com/NeurodataWithoutBorders/pynwb/pull/1560)
+### Internal enhancements
+- Moved CI to GitHub Actions. @rly [#1560](https://github.com/NeurodataWithoutBorders/pynwb/pull/1560),
+  [#1566](https://github.com/NeurodataWithoutBorders/pynwb/pull/1566)
 
 ### Bug fixes
 - Fixed bug in ``pynwb.testing.mock.file.mock_NWBFile`` to identifier UUID to string. @oruebel
