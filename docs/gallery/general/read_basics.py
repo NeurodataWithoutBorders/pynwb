@@ -10,7 +10,7 @@ an NWB File using different tools.
 An :py:class:`~pynwb.file.NWBFile` represents a single session of an experiment.
 It contains all the data of that session and the metadata required to understand the data.
 
-We will demonstrate how to use the `DANDI <https://gui.dandiarchive.org/#/>`_ neurophysiology data archive to access
+We will demonstrate how to use the `DANDI <https://gui.dandiarchive.org/>`_ neurophysiology data archive to access
 the data in two different ways: (1) by downloading it to your computer and (2) streaming it.
 
 We will briefly show tools for exploring NWB Files interactively and refer the reader to the
@@ -32,7 +32,7 @@ import matplotlib.pyplot as plt
 ####################
 # Read the data
 # -------------
-# We will use the `DANDI <https://gui.dandiarchive.org/#/>`_ neurophysiology data archive
+# We will use the `DANDI <https://gui.dandiarchive.org/>`_ neurophysiology data archive
 # to access an NWB File. We will use data from one session of an experiment by
 # `Chandravadia et al. (2020) <https://www.nature.com/articles/s41597-020-0415-9>`_, where
 # the authors recorded single neuron activity from the medial temporal lobes of human subjects
@@ -40,10 +40,10 @@ import matplotlib.pyplot as plt
 #
 # Download the data
 # ^^^^^^^^^^^^^^^^^
-# First, we will demonstrate how to download an NWB data file from `DANDI <https://gui.dandiarchive.org/#/>`_
+# First, we will demonstrate how to download an NWB data file from `DANDI <https://gui.dandiarchive.org/>`_
 # to your machine.
 #
-# 1. Go to the DANDI archive and open `this <https://gui.dandiarchive.org/#/dandiset/000004/draft>`_ dataset
+# 1. Go to the DANDI archive and open `this <https://gui.dandiarchive.org/dandiset/000004/draft>`_ dataset
 # 2. List the files in this dataset by clicking the "Files" button in Dandiset Actions (top right column of the page).
 #
 # .. image:: ../../_static/demo_dandi_view_files_in_dataset.png

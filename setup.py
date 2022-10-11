@@ -22,8 +22,8 @@ reqs = [
     'h5py>=2.10,<4',
     'hdmf>=3.4.2,<4',
     'numpy>=1.16,<1.24',
-    'pandas>=1.0.5,<2',
-    'python-dateutil>=2.7,<3',
+    'pandas>=1.1.5,<2',
+    'python-dateutil>=2.7.3,<3',
     'setuptools'
 ]
 
@@ -49,6 +49,7 @@ setup_args = {
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
         "License :: OSI Approved :: BSD License",
         "Development Status :: 5 - Production/Stable",
         "Intended Audience :: Developers",
