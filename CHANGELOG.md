@@ -1,9 +1,10 @@
 # PyNWB Changelog
 
-## PyNWB 2.2.0 (October 3, 2022)
+## PyNWB 2.2.0 (October 11, 2022)
 
 ### Internal enhancements:
-- Moved CI to GitHub Actions. @rly [#1560](https://github.com/NeurodataWithoutBorders/pynwb/pull/1560)
+- Moved CI to GitHub Actions. @rly [#1560](https://github.com/NeurodataWithoutBorders/pynwb/pull/1560),
+  [#1566](https://github.com/NeurodataWithoutBorders/pynwb/pull/1566)
 
 ### Bug fixes
 - Fixed bug in ``pynwb.testing.mock.file.mock_NWBFile`` to identifier UUID to string. @oruebel
