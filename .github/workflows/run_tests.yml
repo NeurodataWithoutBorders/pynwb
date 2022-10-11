@@ -6,7 +6,7 @@ on:
     tags-ignore:  # exclude tags created by "ci_addons publish_github_release"
       - 'latest'
       - 'latest-tmp'
-  pull_request:
+  # pull_request:  # TEMP
 
 jobs:
   run-tests:
