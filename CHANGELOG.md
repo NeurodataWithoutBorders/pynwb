@@ -1,6 +1,6 @@
 # PyNWB Changelog
 
-## PyNWB 2.2.0 (October 11, 2022)
+## PyNWB 2.2.0 (October 14, 2022)
 
 ### Enhancements and minor changes
 - Enhanced `pynwb.validate` API function to accept a list of file paths as well as the ability to operate on cached
