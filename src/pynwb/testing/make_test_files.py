@@ -63,7 +63,7 @@ def _make_timeseries_invalid():
     filename = _write(test_name, nwbfile)
 
     with h5py.File(filename, "a") as f:
-        del f["timeseries"]["starting_time"]
+        del f["acquisition/timeseries"]["starting_time"]
 
 
 def _make_timeseries_no_data():
