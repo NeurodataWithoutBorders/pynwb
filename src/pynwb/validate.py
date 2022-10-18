@@ -14,10 +14,6 @@ from pynwb import CORE_NAMESPACE
 from pynwb.spec import NWBDatasetSpec, NWBGroupSpec, NWBNamespace
 
 
-def _check_errors(validation_errors: list) -> bool:
-    return validation_errors is not None and len(validation_errors) > 0
-
-
 def _print_errors(validation_errors: list):
     if validation_errors:
         print(" - found the following errors:", file=sys.stderr)

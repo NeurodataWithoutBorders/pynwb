@@ -7,7 +7,7 @@ from pynwb.testing import TestCase
 from pynwb import validate, NWBHDF5IO
 
 
-class TestValidateScript(TestCase):
+class TestValidateCLI(TestCase):
 
     # 1.0.2_nwbfile.nwb has no cached specifications
     # 1.0.3_nwbfile.nwb has cached "core" specification

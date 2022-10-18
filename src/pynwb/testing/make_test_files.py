@@ -1,4 +1,5 @@
 from datetime import datetime
+import h5py
 import numpy as np
 from pathlib import Path
 from pynwb import NWBFile, NWBHDF5IO, __version__, TimeSeries, get_class, load_namespaces
@@ -44,6 +45,24 @@ def _make_str_pub():
                       related_publications='one publication')
     test_name = 'str_pub'
     _write(test_name, nwbfile)
+
+
+def _make_timeseries_invalid():
+    nwbfile = NWBFile(session_description='ADDME',
+                      identifier='ADDME',
+                      session_start_time=datetime.now().astimezone())
+    ts = TimeSeries(
+        name='test_timeseries',
+        rate=1.,
+        unit='unit',
+    )
+    nwbfile.add_acquisition(ts)
+
+    test_name = 'timeseries_no_data'
+    filename = _write(test_name, nwbfile)
+
+    with h5py.File(filename, "a") as f:
+        del f["timeseries_no_data/starting_time"]
 
 
 def _make_timeseries_no_data():
@@ -211,6 +230,7 @@ if __name__ == '__main__':
         _make_str_pub()
 
     if __version__ == '1.5.1':
+        _make_timeseries_invalid()  # NOTE: this is not specific to 1.5.1
         _make_timeseries_no_data()
         _make_timeseries_no_unit()
         _make_imageseries_no_data()
