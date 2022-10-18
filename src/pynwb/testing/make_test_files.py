@@ -53,16 +53,17 @@ def _make_timeseries_invalid():
                       session_start_time=datetime.now().astimezone())
     ts = TimeSeries(
         name='test_timeseries',
+        data=[0],
         rate=1.,
         unit='unit',
     )
     nwbfile.add_acquisition(ts)
 
-    test_name = 'timeseries_no_data'
+    test_name = 'timeseries'
     filename = _write(test_name, nwbfile)
 
     with h5py.File(filename, "a") as f:
-        del f["timeseries_no_data/starting_time"]
+        del f["timeseries"]["starting_time"]
 
 
 def _make_timeseries_no_data():
