@@ -288,13 +288,11 @@ class TestValidateFunction(TestCase):
                 results, status = validate(paths=[nwbfile_path], namespace="notfound")
                 self.assertEqual(results, [])
                 self.assertEqual(status, 1)
-                self.assertEqual(
-                    fake_err.getvalue(),
-                    (
-                        "The namespace 'notfound' could not be found in PyNWB namespace information as only "
-                        "['core'] is present.\n"
-                    )
+                stderr_regex = (
+                    r"The namespace 'notfound' could not be found in PyNWB namespace information as only "
+                    r"\['core'\] is present.\n"
                 )
+                self.assertRegex(fake_err.getvalue(), stderr_regex)
                 self.assertEqual(fake_out.getvalue(), "")
 
     def test_validate_io_cached_bad_ns(self):
