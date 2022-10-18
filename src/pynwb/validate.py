@@ -155,20 +155,18 @@ def validate(**kwargs):
                 for namespace_dependency in namespace_dependencies:
                     if namespace in namespace_dependencies[namespace_dependency]:
                         status = 1
-                        if verbose:
-                            print(
-                                f"The namespace '{namespace}' is included by the namespace "
-                                f"'{namespace_dependency}'. Please validate against that namespace instead.",
-                                file=sys.stderr,
-                            )
+                        print(
+                            f"The namespace '{namespace}' is included by the namespace "
+                            f"'{namespace_dependency}'. Please validate against that namespace instead.",
+                            file=sys.stderr,
+                        )
             else:
                 status = 1
-                if verbose:
-                    print(
-                        f"The namespace '{namespace}' could not be found in {namespace_message} as only "
-                        f"{namespaces_to_validate} is present.",
-                        file=sys.stderr,
-                    )
+                print(
+                    f"The namespace '{namespace}' could not be found in {namespace_message} as only "
+                    f"{namespaces_to_validate} is present.",
+                    file=sys.stderr,
+                )
 
         if status == 1:
             continue
