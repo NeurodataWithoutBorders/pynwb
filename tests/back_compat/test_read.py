@@ -42,6 +42,7 @@ class TestReadOldVersions(TestCase):
         for f in nwb_files:
             with self.subTest(file=f.name):
                 with warnings.catch_warnings(record=True) as warnings_on_read:
+                    warnings.simplefilter("always")
                     with NWBHDF5IO(str(f), 'r') as io:
                         errors = validate(io)
                         io.read()

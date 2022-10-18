@@ -1,5 +1,6 @@
 from uuid import uuid4
 from datetime import datetime
+from dateutil.tz import tzlocal
 
 from ...file import NWBFile, Subject
 from .utils import name_generator
@@ -8,7 +9,7 @@ from .utils import name_generator
 def mock_NWBFile(
     session_description='session_description',
     identifier=None,
-    session_start_time=datetime(1970, 1, 1),
+    session_start_time=datetime(1970, 1, 1, tzinfo=tzlocal()),
     subject=None,
     **kwargs
 ):

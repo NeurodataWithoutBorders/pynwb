@@ -38,7 +38,10 @@ def mock_ElectrodeTable(n_rows=5, group=None):
 
 def mock_electrodes(n_electrodes=5, table=mock_ElectrodeTable(n_rows=5)):
     return DynamicTableRegion(
-        "electrodes", list(range(n_electrodes)), "the first and third electrodes", table
+        name="electrodes",
+        data=list(range(n_electrodes)),
+        description="the first and third electrodes",
+        table=table,
     )
 
 
