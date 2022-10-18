@@ -47,25 +47,6 @@ def _make_str_pub():
     _write(test_name, nwbfile)
 
 
-def _make_timeseries_invalid():
-    nwbfile = NWBFile(session_description='ADDME',
-                      identifier='ADDME',
-                      session_start_time=datetime.now().astimezone())
-    ts = TimeSeries(
-        name='test_timeseries',
-        data=[0],
-        rate=1.,
-        unit='unit',
-    )
-    nwbfile.add_acquisition(ts)
-
-    test_name = 'timeseries_invalid'
-    filename = _write(test_name, nwbfile)
-
-    with h5py.File(filename, "a") as f:
-        del f["acquisition/test_timeseries/starting_time"]
-
-
 def _make_timeseries_no_data():
     nwbfile = NWBFile(session_description='ADDME',
                       identifier='ADDME',
@@ -231,7 +212,6 @@ if __name__ == '__main__':
         _make_str_pub()
 
     if __version__ == '1.5.1':
-        _make_timeseries_invalid()  # NOTE: this is not specific to 1.5.1
         _make_timeseries_no_data()
         _make_timeseries_no_unit()
         _make_imageseries_no_data()

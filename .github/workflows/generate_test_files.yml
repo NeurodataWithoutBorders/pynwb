@@ -1,7 +1,7 @@
 name: Generate test files
 on:
   workflow_dispatch:
-  pull_request:  # TODO comment
+  # pull_request:
 
 jobs:
   gen-test-files:

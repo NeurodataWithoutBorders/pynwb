@@ -145,6 +145,26 @@ class TestValidateCLI(TestCase):
             r"'core'\.\s* - no errors found\.\s*")
         self.assertRegex(result.stdout.decode('utf-8'), stdout_regex)
 
+    def test_validate_file_invalid(self):
+        """Test that validating a file with cached spec against the core namespace succeeds."""
+        result = subprocess.run(
+            ["coverage", "run", "-p", "-m", "pynwb.validate", "tests/back_compat/1.0.2_str_experimenter.nwb",
+             "--no-cached-namespace"],
+             capture_output=True
+        )
+
+        stderr_regex = re.compile(
+            r" - found the following errors:\s*"
+            r"root/general/experimenter \(general/experimenter\): incorrect shape - expected an array of shape "
+            r"'\[None\]', got non-array data 'one experimenter'\s*"
+        )
+        self.assertRegex(result.stderr.decode('utf-8'), stderr_regex)
+
+        stdout_regex = re.compile(
+            r"Validating tests/back_compat/1\.0\.2_str_experimenter\.nwb against PyNWB namespace information using "
+            r"namespace 'core'\.\s*")
+        self.assertRegex(result.stdout.decode('utf-8'), stdout_regex)
+
 
 class TestValidateFunction(TestCase):
 

@@ -205,7 +205,7 @@ def validate_cli():
         "--no-cached-namespace",
         dest="no_cached_namespace",
         action="store_true",
-        help="Use the cached namespace (default).",
+        help="Use the PyNWB loaded namespace (true) or use the cached namespace (false; default).",
     )
     parser.set_defaults(no_cached_namespace=False)
     args = parser.parse_args()
