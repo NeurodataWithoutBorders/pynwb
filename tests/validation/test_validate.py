@@ -146,11 +146,13 @@ class TestValidateCLI(TestCase):
         self.assertRegex(result.stdout.decode('utf-8'), stdout_regex)
 
     def test_validate_file_invalid(self):
-        """Test that validating a file with cached spec against the core namespace succeeds."""
+        """Test that validating an invalid file outputs errors."""
         result = subprocess.run(
-            ["coverage", "run", "-p", "-m", "pynwb.validate", "tests/back_compat/1.0.2_str_experimenter.nwb",
-             "--no-cached-namespace"],
-             capture_output=True
+            [
+                "coverage", "run", "-p", "-m", "pynwb.validate", "tests/back_compat/1.0.2_str_experimenter.nwb",
+                "--no-cached-namespace"
+            ],
+            capture_output=True
         )
 
         stderr_regex = re.compile(
@@ -163,6 +165,21 @@ class TestValidateCLI(TestCase):
         stdout_regex = re.compile(
             r"Validating tests/back_compat/1\.0\.2_str_experimenter\.nwb against PyNWB namespace information using "
             r"namespace 'core'\.\s*")
+        self.assertRegex(result.stdout.decode('utf-8'), stdout_regex)
+
+    def test_validate_file_list_namespaces(self):
+        """Test listing namespaces from a file"""
+        result = subprocess.run(
+            [
+                "coverage", "run", "-p", "-m", "pynwb.validate", "tests/back_compat/2.1.0_nwbfile_with_extension.nwb",
+                "--list-namespaces"
+            ],
+            capture_output=True
+        )
+
+        self.assertEqual(result.stderr.decode('utf-8'), '')
+
+        stdout_regex = re.compile(r"ndx-testextension\s*")
         self.assertRegex(result.stdout.decode('utf-8'), stdout_regex)
 
 

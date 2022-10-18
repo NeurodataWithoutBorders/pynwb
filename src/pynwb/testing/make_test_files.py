@@ -1,5 +1,4 @@
 from datetime import datetime
-import h5py
 import numpy as np
 from pathlib import Path
 from pynwb import NWBFile, NWBHDF5IO, __version__, TimeSeries, get_class, load_namespaces

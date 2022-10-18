@@ -213,7 +213,7 @@ def validate_cli():
 
     if args.list_namespaces:
         for path in args.paths:
-            cached_namespaces, _, _, specloc = _get_cached_namespaces_to_validate(path=path)
+            cached_namespaces, _, _ = _get_cached_namespaces_to_validate(path=path)
             print("\n".join(cached_namespaces))
     else:
         validation_errors, validation_status = validate(
