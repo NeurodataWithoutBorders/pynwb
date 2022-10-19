@@ -23,8 +23,6 @@ class TestValidateCLI(TestCase):
     # NOTE the run_coverage.yml GitHub Action runs "python -m coverage combine" to
     # combine the individual coverage reprots into one .coverage file.
 
-    # TODO test validation on files with cached extensions
-
     def test_validate_file_no_cache(self):
         """Test that validating a file with no cached spec against the core namespace succeeds."""
         result = subprocess.run(["coverage", "run", "-p", "-m", "pynwb.validate",
@@ -183,7 +181,7 @@ class TestValidateCLI(TestCase):
         self.assertRegex(result.stdout.decode('utf-8'), stdout_regex)
 
     def test_validate_file_list_namespaces_extension(self):
-        """Test listing namespaces from a file"""
+        """Test listing namespaces from a file with an extension"""
         result = subprocess.run(
             [
                 "coverage", "run", "-p", "-m", "pynwb.validate", "tests/back_compat/2.1.0_nwbfile_with_extension.nwb",

@@ -4,6 +4,11 @@ import pynwb
 
 
 class TestImportStructure(TestCase):
+    """Test whether the classes/modules imported from pynwb in version 2.1.1 are still accessible.
+
+    NOTE: this test was needed to ensure backward compatibility of "import pynwb" after changes to the package file
+    hierarchy in PyNWB 2.2.0 around validate.py (see https://github.com/NeurodataWithoutBorders/pynwb/pull/1511).
+    """
     def test_outer_import_structure(self):
         current_structure = dir(pynwb)
         expected_structure = [
