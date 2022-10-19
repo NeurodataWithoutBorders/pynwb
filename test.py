@@ -228,7 +228,7 @@ def run_integration_tests(verbose=True):
         logging.info('all classes have integration tests')
 
     # also test the validation script
-    run_test_suite("tests/validation", "validation CLI tests", verbose=verbose)
+    run_test_suite("tests/validation", "validation tests", verbose=verbose)
 
 
 def clean_up_tests():
@@ -293,7 +293,7 @@ def main():
     parser.add_argument('-b', '--backwards', action='append_const', const=flags['backwards'], dest='suites',
                         help='run backwards compatibility tests')
     parser.add_argument('-w', '--validation', action='append_const', const=flags['validation'], dest='suites',
-                        help='run validation tests')
+                        help='run example tests and validation tests on example NWB files')
     parser.add_argument('-r', '--ros3', action='append_const', const=flags['ros3'], dest='suites',
                         help='run ros3 streaming tests')
     args = parser.parse_args()
