@@ -14,6 +14,8 @@
 ### Bug fixes
 - Fixed bug in ``pynwb.testing.mock.file.mock_NWBFile`` to identifier UUID to string. @oruebel
   [#1557](https://github.com/NeurodataWithoutBorders/pynwb/pull/1557)
+- Minor fixes to test suite to prevent warnings. @rly
+  [#1571](https://github.com/NeurodataWithoutBorders/pynwb/pull/1571)
 
 ## PyNWB 2.1.1 (September 1, 2022)
 
