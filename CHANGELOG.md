@@ -1,8 +1,13 @@
 # PyNWB Changelog
 
-## PyNWB 2.2.0 (October 11, 2022)
+## PyNWB 2.2.0 (October 19, 2022)
 
-### Internal enhancements:
+### Enhancements and minor changes
+- Enhanced `pynwb.validate` API function to accept a list of file paths as well as the ability to operate on cached
+  namespaces. Also adjusted the validate CLI to directly use the API function. @CodyCBakerPhD
+  [#1511](https://github.com/NeurodataWithoutBorders/pynwb/pull/1511)
+
+### Internal enhancements
 - Moved CI to GitHub Actions. @rly [#1560](https://github.com/NeurodataWithoutBorders/pynwb/pull/1560),
   [#1566](https://github.com/NeurodataWithoutBorders/pynwb/pull/1566)
 
