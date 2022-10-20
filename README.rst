@@ -37,22 +37,22 @@ Integration test coverage
 Overall Health
 ==============
 
-.. image:: https://github.com/NeurodataWithoutBorders/pynwb/workflows/run_tests.yml/badge.svg
+.. image:: https://github.com/NeurodataWithoutBorders/pynwb/actions/workflows/run_tests.yml/badge.svg
     :target: https://github.com/NeurodataWithoutBorders/pynwb/actions/workflows/run_tests.yml
 
-.. image:: https://github.com/NeurodataWithoutBorders/pynwb/workflows/run_flake8.yml/badge.svg
+.. image:: https://github.com/NeurodataWithoutBorders/pynwb/actions/workflows/run_flake8.yml/badge.svg
     :target: https://github.com/NeurodataWithoutBorders/pynwb/actions/workflows/run_flake8.yml
 
-.. image:: https://github.com/NeurodataWithoutBorders/pynwb/workflows/check_external_links.yml/badge.svg
+.. image:: https://github.com/NeurodataWithoutBorders/pynwb/actions/workflows/check_external_links.yml/badge.svg
     :target: https://github.com/NeurodataWithoutBorders/pynwb/actions/workflows/check_external_links.yml
 
 .. image:: https://github.com/NeurodataWithoutBorders/pynwb/actions/workflows/run_inspector_tests.yml/badge.svg
     :target: https://github.com/NeurodataWithoutBorders/pynwb/actions/workflows/run_inspector_tests.yml
 
-.. image:: https://github.com/NeurodataWithoutBorders/pynwb/workflows/run_all_tests.yml/badge.svg
+.. image:: https://github.com/NeurodataWithoutBorders/pynwb/actions/workflows/run_all_tests.yml/badge.svg
     :target: https://github.com/NeurodataWithoutBorders/pynwb/actions/workflows/run_all_tests.yml
 
-.. image:: https://github.com/NeurodataWithoutBorders/pynwb/workflows/deploy_release.yml/badge.svg
+.. image:: https://github.com/NeurodataWithoutBorders/pynwb/actions/workflows/deploy_release.yml/badge.svg
     :target: https://github.com/NeurodataWithoutBorders/pynwb/actions/workflows/deploy_release.yml
 
 .. image:: https://requires.io/github/NeurodataWithoutBorders/pynwb/requirements.svg?branch=dev
@@ -68,8 +68,9 @@ Overall Health
      :alt: PyPI - License
 
 **Conda**
+
 .. image:: https://circleci.com/gh/conda-forge/pynwb-feedstock.svg?style=shield
-     :target: https://circleci.com/gh/conda-forge/pynwb-feedstocks
+     :target: https://circleci.com/gh/conda-forge/pynwb-feedstock
      :alt: Conda Feedstock Status
 
 NWB Format API
