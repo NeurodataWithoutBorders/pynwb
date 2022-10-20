@@ -18,6 +18,8 @@
   [#1571](https://github.com/NeurodataWithoutBorders/pynwb/pull/1571)
 - Made build wheel python 3 only. @mavaylon1
   [#1572](https://github.com/NeurodataWithoutBorders/pynwb/pull/1572)
+- Updated README.rst. @mavaylon1
+  [#1573](https://github.com/NeurodataWithoutBorders/pynwb/pull/1573)
 
 ## PyNWB 2.1.1 (September 1, 2022)
 

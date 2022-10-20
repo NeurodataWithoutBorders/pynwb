@@ -37,22 +37,22 @@ Integration test coverage
 Overall Health
 ==============
 
-.. image:: https://github.com/NeurodataWithoutBorders/pynwb/workflows/run_tests.yml/badge.svg
+.. image:: https://github.com/NeurodataWithoutBorders/pynwb/actions/workflows/run_tests.yml/badge.svg
     :target: https://github.com/NeurodataWithoutBorders/pynwb/actions/workflows/run_tests.yml
 
-.. image:: https://github.com/NeurodataWithoutBorders/pynwb/workflows/run_flake8.yml/badge.svg
+.. image:: https://github.com/NeurodataWithoutBorders/pynwb/actions/workflows/run_flake8.yml/badge.svg
     :target: https://github.com/NeurodataWithoutBorders/pynwb/actions/workflows/run_flake8.yml
 
-.. image:: https://github.com/NeurodataWithoutBorders/pynwb/workflows/check_external_links.yml/badge.svg
+.. image:: https://github.com/NeurodataWithoutBorders/pynwb/actions/workflows/check_external_links.yml/badge.svg
     :target: https://github.com/NeurodataWithoutBorders/pynwb/actions/workflows/check_external_links.yml
 
 .. image:: https://github.com/NeurodataWithoutBorders/pynwb/actions/workflows/run_inspector_tests.yml/badge.svg
     :target: https://github.com/NeurodataWithoutBorders/pynwb/actions/workflows/run_inspector_tests.yml
 
-.. image:: https://github.com/NeurodataWithoutBorders/pynwb/workflows/run_all_tests.yml/badge.svg
+.. image:: https://github.com/NeurodataWithoutBorders/pynwb/actions/workflows/run_all_tests.yml/badge.svg
     :target: https://github.com/NeurodataWithoutBorders/pynwb/actions/workflows/run_all_tests.yml
 
-.. image:: https://github.com/NeurodataWithoutBorders/pynwb/workflows/deploy_release.yml/badge.svg
+.. image:: https://github.com/NeurodataWithoutBorders/pynwb/actions/workflows/deploy_release.yml/badge.svg
     :target: https://github.com/NeurodataWithoutBorders/pynwb/actions/workflows/deploy_release.yml
 
 .. image:: https://requires.io/github/NeurodataWithoutBorders/pynwb/requirements.svg?branch=dev
@@ -68,8 +68,9 @@ Overall Health
      :alt: PyPI - License
 
 **Conda**
+
 .. image:: https://circleci.com/gh/conda-forge/pynwb-feedstock.svg?style=shield
-     :target: https://circleci.com/gh/conda-forge/pynwb-feedstocks
+     :target: https://circleci.com/gh/conda-forge/pynwb-feedstock
      :alt: Conda Feedstock Status
 
 NWB Format API
@@ -105,7 +106,7 @@ For details on how to contribute to PyNWB see our `contribution guidelines <docs
 Citing NWB
 ==========
 
-* **Manuscript:** Oliver Rübel, Andrew Tritt, Ryan Ly, Benjamin K. Dichter, Satrajit Ghosh, Lawrence Niu, Ivan Soltesz, Karel Svoboda, Loren Frank, Kristofer E. Bouchard, "The Neurodata Without Borders ecosystem for neurophysiological data science", bioRxiv 2021.03.13.435173, March 15, 2021, doi: https://doi.org/10.1101/2021.03.13.435173
+* **Manuscript:** Oliver Rübel, Andrew Tritt, Ryan Ly, Benjamin K Dichter, Satrajit Ghosh, Lawrence Niu, Pamela Baker, Ivan Soltesz, Lydia Ng, Karel Svoboda, Loren Frank, Kristofer E Bouchard. (2022). The Neurodata Without Borders ecosystem for neurophysiological data science. eLife, 11:e78362. doi: https://doi.org/10.7554/eLife.78362
 * **RRID:** (PyNWB, RRID:SCR_017452)
 
 LICENSE
