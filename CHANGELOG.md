@@ -1,5 +1,10 @@
 # PyNWB Changelog
 
+## Upcoming
+
+### Documentation and tutorial enhancements:
+- Adjusted [ecephys tutorial](https://pynwb.readthedocs.io/en/stable/tutorials/domain/ecephys.html) to create fake data with proper dimensions @bendichter [#1581](https://github.com/NeurodataWithoutBorders/pynwb/pull/1581)
+
 ## PyNWB 2.2.0 (October 19, 2022)
 
 ### Enhancements and minor changes
