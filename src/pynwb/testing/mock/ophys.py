@@ -90,7 +90,7 @@ def mock_TwoPhotonSeries(
     return TwoPhotonSeries(
         name=name if name is not None else name_generator("TwoPhotonSeries"),
         imaging_plane=imaging_plane or mock_ImagingPlane(),
-        data=data if data is None else np.ones((20, 5, 5)),
+        data=data if data is not None else np.ones((20, 5, 5)),
         unit=unit,
         format=format,
         field_of_view=field_of_view,
