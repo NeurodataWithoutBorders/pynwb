@@ -11,8 +11,8 @@ tests are split into four main categories, all of which are in the ``tests/`` fo
 * ``tests/validation``: tests command line usage of NWB validator.
 
 In addition to the ``tests/`` folder, there is also a :py:mod:`pynwb.testing` package. This module does not
-contain any tests but instead contains classes and/or functions that can be used by PyNWB tests and can be imported
-and used in the testing suite of any downstream library.
+contain any tests but instead contains classes and/or functions that help with the implementation of tests for PyNWB and are used in the testing suite and also be imported
+and used by downstream libraries, e.g., to implement test suites for extensions to the NWB (NDX).
 
 .. toctree::
 
