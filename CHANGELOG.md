@@ -1,5 +1,10 @@
 # PyNWB Changelog
 
+## Upcoming
+
+### Bug fixes:
+- Fixed tests for `testing.mock` module @bendichter [#1582](https://github.com/NeurodataWithoutBorders/pynwb/pull/1582)
+
 ## PyNWB 2.2.0 (October 19, 2022)
 
 ### Enhancements and minor changes
