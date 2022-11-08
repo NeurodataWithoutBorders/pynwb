@@ -130,7 +130,7 @@ nwbfile.electrodes.to_dataframe()
 # .. _ec_recordings:
 #
 # Extracellular recordings
-# ------------------------------
+# ------------------------
 #
 # Raw voltage traces and local-field potential (LFP) data are stored in :py:class:`~pynwb.ecephys.ElectricalSeries`
 # objects. :py:class:`~pynwb.ecephys.ElectricalSeries` is a subclass of :py:class:`~pynwb.base.TimeSeries`
@@ -148,7 +148,7 @@ all_table_region = nwbfile.create_electrode_table_region(
 
 ####################
 # Raw voltage data
-# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+# ^^^^^^^^^^^^^^^^^
 #
 # Now create an :py:class:`~pynwb.ecephys.ElectricalSeries` object to store raw data collected
 # during the experiment, passing in this ``"all_table_region"`` :py:class:`~pynwb.core.DynamicTableRegion`
@@ -170,7 +170,7 @@ all_table_region = nwbfile.create_electrode_table_region(
 #
 
 
-raw_data = np.random.randn(50, 4)
+raw_data = np.random.randn(50, 12)
 raw_electrical_series = ElectricalSeries(
     name="ElectricalSeries",
     data=raw_data,
@@ -203,7 +203,7 @@ nwbfile.add_acquisition(raw_electrical_series)
 # again passing in the :py:class:`~pynwb.core.DynamicTableRegion` reference to all rows of the ``"electrodes"`` table.
 
 
-lfp_data = np.random.randn(50, 4)
+lfp_data = np.random.randn(50, 12)
 lfp_electrical_series = ElectricalSeries(
     name="ElectricalSeries",
     data=lfp_data,
