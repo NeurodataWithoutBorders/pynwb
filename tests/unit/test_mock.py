@@ -1,11 +1,16 @@
 from pynwb.testing.mock.file import mock_Subject, mock_NWBFile
 
+from pynwb.testing.mock.base import mock_TimeSeries
+
 from pynwb.testing.mock.ophys import (
     mock_ImagingPlane,
     mock_TwoPhotonSeries,
     mock_RoiResponseSeries,
     mock_PlaneSegmentation,
     mock_OpticalChannel,
+    mock_Fluorescence,
+    mock_DfOverF,
+    mock_ImageSegmentation,
 )
 
 from pynwb.testing.mock.ogen import (
@@ -29,33 +34,47 @@ from pynwb.testing.mock.ecephys import (
     mock_SpikeEventSeries,
 )
 
-from pynwb.testing import TestCase
+from pynwb.testing.mock.utils import name_generator
+
 import pytest
 
 
-class TestMock(TestCase):
+@pytest.mark.parametrize(
+    "mock_function", [
+        mock_ImagingPlane,
+        mock_TwoPhotonSeries,
+        mock_RoiResponseSeries,
+        mock_PlaneSegmentation,
+        mock_OpticalChannel,
+        mock_OptogeneticStimulusSite,
+        mock_OptogeneticSeries,
+        mock_Fluorescence,
+        mock_DfOverF,
+        mock_ImageSegmentation,
+        mock_Device,
+        mock_Position,
+        mock_PupilTracking,
+        mock_CompassDirection,
+        mock_SpatialSeries,
+        mock_ElectrodeGroup,
+        mock_ElectrodeTable,
+        mock_ElectricalSeries,
+        mock_SpikeEventSeries,
+        mock_Subject,
+        mock_NWBFile,
+        mock_TimeSeries,
+    ],
+)
+def test_mock(mock_function):
+    mock_function()
 
-    @pytest.mark.parametrize(
-        "mock_function", [
-            mock_ImagingPlane,
-            mock_TwoPhotonSeries,
-            mock_RoiResponseSeries,
-            mock_PlaneSegmentation,
-            mock_OpticalChannel,
-            mock_OptogeneticStimulusSite,
-            mock_OptogeneticSeries,
-            mock_Device,
-            mock_Position,
-            mock_PupilTracking,
-            mock_CompassDirection,
-            mock_SpatialSeries,
-            mock_ElectrodeGroup,
-            mock_ElectrodeTable,
-            mock_ElectricalSeries,
-            mock_SpikeEventSeries,
-            mock_Subject,
-            mock_NWBFile,
-        ],
-    )
-    def test_mock(mock_function):
-        mock_function()
+
+def test_name_generator():
+
+    from pynwb.testing.mock.utils import name_generator_registry
+
+    name_generator_registry.clear()  # reset registry
+
+    assert name_generator("TimeSeries") == "TimeSeries"
+    assert name_generator("TimeSeries") == "TimeSeries2"
+

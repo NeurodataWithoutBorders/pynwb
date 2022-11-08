@@ -65,7 +65,7 @@ def mock_ImagingPlane(
 
 def mock_TwoPhotonSeries(
     name=None,
-    imaging_plane=mock_ImagingPlane(),
+    imaging_plane=None,
     data=np.ones((20, 5, 5)),
     rate=50.0,
     unit="n.a.",
@@ -89,7 +89,7 @@ def mock_TwoPhotonSeries(
 ):
     return TwoPhotonSeries(
         name=name if name is not None else name_generator("TwoPhotonSeries"),
-        imaging_plane=imaging_plane,
+        imaging_plane=imaging_plane or mock_ImagingPlane(),
         data=data,
         unit=unit,
         format=format,
@@ -115,14 +115,14 @@ def mock_TwoPhotonSeries(
 
 def mock_PlaneSegmentation(
     description="no description",
-    imaging_plane=mock_ImagingPlane(),
+    imaging_plane=None,
     name=None,
     reference_images=None,
     n_rois=5,
 ):
     plane_segmentation = PlaneSegmentation(
         description=description,
-        imaging_plane=imaging_plane,
+        imaging_plane=imaging_plane or mock_ImagingPlane(),
         name=name if name is not None else name_generator("PlaneSegmentation"),
         reference_images=reference_images,
     )
