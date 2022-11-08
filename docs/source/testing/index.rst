@@ -2,7 +2,7 @@ Testing
 -------
 
 PyNWB has a goal of 100% test coverage, so it is important that any changes to the code base be covered by tests. Our
-tests are split into two four categories, all of which are in the ``tests/`` folder:
+tests are split into three main categories, all of which are in the ``tests/`` folder:
 
 * ``tests/back_compat`` tests to check compatibility of the API with older version of NWB. This is a collection of small NWB files with many different versions and a small testing script that ensures we can still read them.
 * ``tests/unit``: tests that cover each use-case of each method or function
