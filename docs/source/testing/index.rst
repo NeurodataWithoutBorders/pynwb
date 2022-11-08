@@ -8,7 +8,7 @@ tests are split into four main categories, all of which are in the ``tests/`` fo
 * ``tests/unit``: tests that cover each use-case of each method or function
 * ``tests/integration``: tests that neurodata types and NWB file can be written and read in various modes and
   backends including HDF5 and using the ros3 driver.
-* ``tests/validation``: tests command line usage of NWB validator.
+* ``tests/validation``: tests command line usage of the ``pynwb.validate`` NWB validator.
 
 In addition to the ``tests/`` folder, there is also a :py:mod:`pynwb.testing` package. This module does not
 contain any tests but instead contains classes and/or functions that help with the implementation of tests for PyNWB and are used in the testing suite and also be imported
