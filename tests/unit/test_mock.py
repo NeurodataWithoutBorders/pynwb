@@ -78,3 +78,4 @@ def test_name_generator():
     assert name_generator("TimeSeries") == "TimeSeries"
     assert name_generator("TimeSeries") == "TimeSeries2"
 
+
