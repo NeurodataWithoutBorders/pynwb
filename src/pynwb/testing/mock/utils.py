@@ -13,7 +13,7 @@ def name_generator(name):
 
     Returns
     -------
-    str: name of neurodata_object
+    name of neurodata_object: str
 
     """
     if name not in name_generator_registry:

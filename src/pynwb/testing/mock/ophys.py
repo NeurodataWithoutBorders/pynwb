@@ -158,24 +158,20 @@ def mock_RoiResponseSeries(
     control_description=None,
     n_rois=None,
 ):
-    if data is not None:
-        if n_rois is not None and n_rois != data.shape[1]:
-            raise ValueError("Argument conflict: n_rois does not match second dimension of data.")
-        n_rois = data.shape[1]
-    else:
-        n_rois = 5
+    rois = rois or DynamicTableRegion(
+        name="rois",
+        description="rois",
+        table=mock_PlaneSegmentation(n_rois=n_rois or 5),
+        data=list(range(n_rois or 5)),
+    )
+
+    n_rois = len(rois.data)
 
     return RoiResponseSeries(
         name=name if name is not None else name_generator("RoiResponseSeries"),
         data=data if data is not None else np.ones((30, n_rois)),
         unit=unit,
-        rois=rois
-        or DynamicTableRegion(
-            name="rois",
-            description="rois",
-            table=mock_PlaneSegmentation(n_rois=n_rois),
-            data=list(range(n_rois)),
-        ),
+        rois=rois,
         resolution=resolution,
         conversion=conversion,
         timestamps=timestamps,
