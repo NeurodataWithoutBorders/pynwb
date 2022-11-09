@@ -29,7 +29,9 @@ def _validate_helper(io: HDMFIO, namespace: str = CORE_NAMESPACE) -> list:
     return validator.validate(builder)
 
 
-def _get_cached_namespaces_to_validate(path: str, driver: Optional[str] = None) -> Tuple[List[str], BuildManager, Dict[str, str]]:
+def _get_cached_namespaces_to_validate(
+    path: str, driver: Optional[str] = None
+) -> Tuple[List[str], BuildManager, Dict[str, str]]:
     """
     Determine the most specific namespace(s) that are cached in the given NWBFile that can be used for validation.
 
@@ -138,7 +140,9 @@ def validate(**kwargs):
         io_kwargs = dict(path=path, mode="r", driver=driver)
 
         if use_cached_namespaces:
-            cached_namespaces, manager, namespace_dependencies = _get_cached_namespaces_to_validate(path=path, driver=driver)
+            cached_namespaces, manager, namespace_dependencies = _get_cached_namespaces_to_validate(
+                path=path, driver=driver
+            )
             io_kwargs.update(manager=manager)
 
             if any(cached_namespaces):
