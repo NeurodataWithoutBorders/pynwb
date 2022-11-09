@@ -1,7 +1,7 @@
 """Command line tool to Validate an NWB file against a namespace."""
 import sys
 from argparse import ArgumentParser
-from typing import Tuple, List, Dict
+from typing import Tuple, List, Dict, Optional
 
 from hdmf.spec import NamespaceCatalog
 from hdmf.build import BuildManager
@@ -29,7 +29,7 @@ def _validate_helper(io: HDMFIO, namespace: str = CORE_NAMESPACE) -> list:
     return validator.validate(builder)
 
 
-def _get_cached_namespaces_to_validate(path: str) -> Tuple[List[str], BuildManager, Dict[str, str]]:
+def _get_cached_namespaces_to_validate(path: str, driver: Optional[str] = None) -> Tuple[List[str], BuildManager, Dict[str, str]]:
     """
     Determine the most specific namespace(s) that are cached in the given NWBFile that can be used for validation.
 
@@ -56,7 +56,7 @@ def _get_cached_namespaces_to_validate(path: str) -> Tuple[List[str], BuildManag
     catalog = NamespaceCatalog(
         group_spec_cls=NWBGroupSpec, dataset_spec_cls=NWBDatasetSpec, spec_namespace_cls=NWBNamespace
     )
-    namespace_dependencies = NWBHDF5IO.load_namespaces(namespace_catalog=catalog, path=path)
+    namespace_dependencies = NWBHDF5IO.load_namespaces(namespace_catalog=catalog, path=path, driver=driver)
 
     # Determine which namespaces are the most specific (i.e. extensions) and validate against those
     candidate_namespaces = set(namespace_dependencies.keys())
@@ -107,6 +107,12 @@ def _get_cached_namespaces_to_validate(path: str) -> Tuple[List[str], BuildManag
         "doc": "Whether or not to print messages to stdout.",
         "default": False,
     },
+    {
+        "name": "driver",
+        "type": list,
+        "doc": "Driver for h5py to use when opening the HDF5 file.",
+        "default": None,
+    }
     returns="Validation errors in the file.",
     rtype=(list, (list, bool)),
     is_method=False,
@@ -115,8 +121,8 @@ def validate(**kwargs):
     """Validate NWB file(s) against a namespace or its cached namespaces."""
     from . import NWBHDF5IO  # TODO: modularize to avoid circular import
 
-    io, paths, use_cached_namespaces, namespace, verbose = getargs(
-        "io", "paths", "use_cached_namespaces", "namespace", "verbose", kwargs
+    io, paths, use_cached_namespaces, namespace, verbose, driver = getargs(
+        "io", "paths", "use_cached_namespaces", "namespace", "verbose", "driver", kwargs
     )
     assert io != paths, "Both 'io' and 'paths' were specified! Please choose only one."
 
@@ -129,10 +135,10 @@ def validate(**kwargs):
     for path in paths:
         namespaces_to_validate = []
         namespace_message = "PyNWB namespace information"
-        io_kwargs = dict(path=path, mode="r")
+        io_kwargs = dict(path=path, mode="r", driver=driver)
 
         if use_cached_namespaces:
-            cached_namespaces, manager, namespace_dependencies = _get_cached_namespaces_to_validate(path=path)
+            cached_namespaces, manager, namespace_dependencies = _get_cached_namespaces_to_validate(path=path, driver=driver)
             io_kwargs.update(manager=manager)
 
             if any(cached_namespaces):
