@@ -112,7 +112,7 @@ def _get_cached_namespaces_to_validate(path: str, driver: Optional[str] = None) 
         "type": list,
         "doc": "Driver for h5py to use when opening the HDF5 file.",
         "default": None,
-    }
+    },
     returns="Validation errors in the file.",
     rtype=(list, (list, bool)),
     is_method=False,
