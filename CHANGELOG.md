@@ -7,6 +7,9 @@
 - Refactored testing documentation, including addition of section on ``pynwb.testing.mock`` submodule. @bendichter 
   [#1583](https://github.com/NeurodataWithoutBorders/pynwb/pull/1583)
 
+### 
+- Added the `driver` keyword argument to the `pynwb.validate` function as well as the corresponding namespace caching. @CodyCBakerPhD [#1588](https://github.com/NeurodataWithoutBorders/pynwb/pull/1588)
+
 ## PyNWB 2.2.0 (October 19, 2022)
 
 ### Enhancements and minor changes
