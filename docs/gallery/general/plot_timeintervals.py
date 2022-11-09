@@ -130,7 +130,7 @@ nwbfile.add_epoch(6.0, 8.0, ['second', 'example'], [test_ts, ])
 # Custom Time Intervals
 # ^^^^^^^^^^^^^^^^^^^^^
 #
-# To define custom, experiment-specific :py:class:`~pynwb.epoch.TimeIntervals` we can wither add them
+# To define custom, experiment-specific :py:class:`~pynwb.epoch.TimeIntervals` we can add them
 # either: 1) when creating the :py:class:`~pynwb.file.NWBFile` by defining the
 # :py:meth:`~pynwb.file.NWBFile.__init__.intervals` constructor argument or 2) via the
 # :py:meth:`~pynwb.file.NWBFile.add_time_intervals` or :py:meth:`~pynwb.file.NWBFile.create_time_intervals`
