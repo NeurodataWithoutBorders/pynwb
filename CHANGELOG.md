@@ -5,6 +5,9 @@
 ### Bug fixes:
 - Fixed tests for `testing.mock` module @bendichter [#1582](https://github.com/NeurodataWithoutBorders/pynwb/pull/1582)
 
+### Documentation and tutorial enhancements:
+- Adjusted [ecephys tutorial](https://pynwb.readthedocs.io/en/stable/tutorials/domain/ecephys.html) to create fake data with proper dimensions @bendichter [#1581](https://github.com/NeurodataWithoutBorders/pynwb/pull/1581)
+
 ## PyNWB 2.2.0 (October 19, 2022)
 
 ### Enhancements and minor changes
