@@ -66,7 +66,7 @@ def mock_ImagingPlane(
 def mock_TwoPhotonSeries(
     name=None,
     imaging_plane=None,
-    data=np.ones((20, 5, 5)),
+    data=None,
     rate=50.0,
     unit="n.a.",
     format=None,
@@ -90,7 +90,7 @@ def mock_TwoPhotonSeries(
     return TwoPhotonSeries(
         name=name if name is not None else name_generator("TwoPhotonSeries"),
         imaging_plane=imaging_plane or mock_ImagingPlane(),
-        data=data,
+        data=data if data is not None else np.ones((20, 5, 5)),
         unit=unit,
         format=format,
         field_of_view=field_of_view,
@@ -134,11 +134,11 @@ def mock_PlaneSegmentation(
 
 
 def mock_ImageSegmentation(
-    plane_segmentations=None, name="ImageSegmentation",
+    plane_segmentations=None, name=None,
 ):
     return ImageSegmentation(
         plane_segmentations=plane_segmentations or [mock_PlaneSegmentation()],
-        name=name,
+        name=name or name_generator("ImageSegmentation"),
     )
 
 
@@ -156,11 +156,18 @@ def mock_RoiResponseSeries(
     description="no description",
     control=None,
     control_description=None,
-    n_rois=5,
+    n_rois=None,
 ):
+    if data is not None:
+        if n_rois is not None and n_rois != data.shape[1]:
+            raise ValueError("Argument conflict: n_rois does not match second dimension of data.")
+        n_rois = data.shape[1]
+    else:
+        n_rois = 5
+
     return RoiResponseSeries(
         name=name if name is not None else name_generator("RoiResponseSeries"),
-        data=data if data is not None else np.ones((30, 5)),
+        data=data if data is not None else np.ones((30, n_rois)),
         unit=unit,
         rois=rois
         or DynamicTableRegion(
