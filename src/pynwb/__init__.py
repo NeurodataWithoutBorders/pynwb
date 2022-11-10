@@ -128,8 +128,8 @@ def register_class(**kwargs):
     def _dec(cls):
         if "core" not in __TYPE_MAP.namespace_catalog.namespaces:
             raise KeyError(
-                "'core' not a registered namespace. If you installed PyNWB locally using a git clone, you need to use "
-                "the --recurse_submodules flag when closing. See developer installation instructions here: "
+                "'core' is not a registered namespace. If you installed PyNWB locally using a git clone, you need to "
+                "use the --recurse_submodules flag when cloning. See developer installation instructions here: "
                 "https://pynwb.readthedocs.io/en/stable/install_developers.html#install-from-git-repository"
             )
         __TYPE_MAP.register_container_type(namespace, neurodata_type, cls)
