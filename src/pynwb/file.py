@@ -1,6 +1,7 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from dateutil.tz import tzlocal
 from collections.abc import Iterable
+from decimal import Decimal
 from warnings import warn
 import copy as _copy
 
@@ -64,7 +65,7 @@ class Subject(NWBContainer):
         'strain'
     )
 
-    @docval({'name': 'age', 'type': str,
+    @docval({'name': 'age', 'type': (str, timedelta),
              'doc': ('The age of the subject. The ISO 8601 Duration format is recommended, e.g., "P90D" for '
                      '90 days old.'), 'default': None},
             {'name': 'description', 'type': str,
@@ -105,12 +106,40 @@ class Subject(NWBContainer):
         if isinstance(weight, float):
             args_to_set['weight'] = str(weight) + ' kg'
 
+        if isinstance(args_to_set["age"], timedelta):
+            args_to_set["age"] = self.timedelta_to_iso_str(args_to_set["age"])
+
         date_of_birth = args_to_set['date_of_birth']
         if date_of_birth and date_of_birth.tzinfo is None:
             args_to_set['date_of_birth'] = _add_missing_timezone(date_of_birth)
 
         for key, val in args_to_set.items():
             setattr(self, key, val)
+
+    @staticmethod
+    def timedelta_to_iso_str(td: timedelta):
+        """
+        Converts a duration in seconds to an ISO 8601 datestring in the
+        format 'PYMDTHMS'
+
+        taken from https://github.com/gweis/isodate/issues/42#issuecomment-341664535
+        """
+
+        s = Decimal(td.total_seconds())
+        years, less_then_y = divmod(s, 3600*24*365)
+        days, less_then_d = divmod(less_then_y, 3600*24)
+        hours, less_then_h = divmod(less_then_d, 3600)
+        minutes, seconds = divmod(less_then_h, 60)
+
+        y = str(years) + "Y" if years else ""
+        d = str(days) + "D" if days else ""
+        h = str(hours) + "H" if hours else ""
+        m = str(minutes) + "M" if minutes else ""
+        s = str(seconds) + "S" if seconds else ""
+        t = "T" if (h or m or s) else ""
+
+        iso_string = "P{y}{d}{t}{h}{m}{s}".format(y=y, d=d, t=t, h=h, m=m, s=s)
+        return iso_string
 
 
 @register_class('NWBFile', CORE_NAMESPACE)
