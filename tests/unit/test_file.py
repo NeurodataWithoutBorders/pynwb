@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 
-from datetime import datetime
+from datetime import datetime, timedelta
 from dateutil.tz import tzlocal, tzutc
 
 from pynwb import NWBFile, TimeSeries, NWBHDF5IO
@@ -478,6 +478,14 @@ class SubjectTest(TestCase):
             weight=2.3,
         )
         self.assertEqual(subject.weight, '2.3 kg')
+
+    def test_subject_age_duration(self):
+        subject = Subject(
+            subject_id='RAT123',
+            age=timedelta(seconds=99999)
+        )
+
+        self.assertEqual(subject.age, "P1DT3H46M39S")
 
 
 class TestCacheSpec(TestCase):
