@@ -72,7 +72,9 @@ class TestRos3Streaming(TestCase):
                 )
             }
         }
-        found_namespaces, _, found_namespace_dependencies = _get_cached_namespaces_to_validate(path=self.s3_test_path, driver="ros3")
+        found_namespaces, _, found_namespace_dependencies = _get_cached_namespaces_to_validate(
+            path=self.s3_test_path, driver="ros3"
+        )
 
         self.assertCountEqual(first=found_namespaces, second=expected_namespaces)
         self.assertDictEqual(d1=expected_namespace_dependencies, d2=expected_namespace_dependencies)
