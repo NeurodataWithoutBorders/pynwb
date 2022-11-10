@@ -111,7 +111,7 @@ def _get_cached_namespaces_to_validate(
     },
     {
         "name": "driver",
-        "type": list,
+        "type": str,
         "doc": "Driver for h5py to use when opening the HDF5 file.",
         "default": None,
     },
