@@ -101,10 +101,16 @@ def load_namespaces(**kwargs):
     return __TYPE_MAP.load_namespaces(namespace_path)
 
 
-# load the core namespace i.e. base NWB specification
+# load the core namespace, i.e. base NWB specification
 __resources = __get_resources()
 if os.path.exists(__resources['namespace_path']):
     load_namespaces(__resources['namespace_path'])
+else:
+    raise RuntimeError(
+        "'core' is not a registered namespace. If you installed PyNWB locally using a git clone, you need to "
+        "use the --recurse_submodules flag when cloning. See developer installation instructions here: "
+        "https://pynwb.readthedocs.io/en/stable/install_developers.html#install-from-git-repository"
+    )
 
 
 def available_namespaces():
@@ -126,12 +132,6 @@ def register_class(**kwargs):
     neurodata_type, namespace, container_cls = getargs('neurodata_type', 'namespace', 'container_cls', kwargs)
 
     def _dec(cls):
-        if "core" not in __TYPE_MAP.namespace_catalog.namespaces:
-            raise KeyError(
-                "'core' is not a registered namespace. If you installed PyNWB locally using a git clone, you need to "
-                "use the --recurse_submodules flag when cloning. See developer installation instructions here: "
-                "https://pynwb.readthedocs.io/en/stable/install_developers.html#install-from-git-repository"
-            )
         __TYPE_MAP.register_container_type(namespace, neurodata_type, cls)
         return cls
     if container_cls is None:
