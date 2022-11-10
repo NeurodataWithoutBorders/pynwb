@@ -8,6 +8,8 @@
   [#1583](https://github.com/NeurodataWithoutBorders/pynwb/pull/1583)
 - Update round trip tutorial to the newer ``NWBH5IOMixin`` and ``AcquisitionH5IOMixin`` classes. @bendichter 
   [#1586](https://github.com/NeurodataWithoutBorders/pynwb/pull/1586)
+- More informative error message for common installation error. @bendichter, @rly
+  [#1591](https://github.com/NeurodataWithoutBorders/pynwb/pull/1591)
 
 ## PyNWB 2.2.0 (October 19, 2022)
 
