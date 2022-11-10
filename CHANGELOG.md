@@ -2,6 +2,9 @@
 
 ## Upcoming
 
+### Enhancements and minor changes
+- `Subject.age` can be input as a `timedelta`
+
 ### Documentation and tutorial enhancements:
 - Adjusted [ecephys tutorial](https://pynwb.readthedocs.io/en/stable/tutorials/domain/ecephys.html) to create fake data with proper dimensions @bendichter [#1581](https://github.com/NeurodataWithoutBorders/pynwb/pull/1581)
 - Refactored testing documentation, including addition of section on ``pynwb.testing.mock`` submodule. @bendichter 
