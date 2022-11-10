@@ -648,7 +648,7 @@ class NWBFile(MultiContainerInterface):
     def add_electrode_column(self, **kwargs):
         """
         Add a column to the electrode table.
-        See :py:meth:`~hdmf.common.DynamicTable.add_column` for more details
+        See :py:meth:`~hdmf.common.table.DynamicTable.add_column` for more details
         """
         self.__check_electrodes()
         self.electrodes.add_column(**kwargs)
@@ -681,7 +681,7 @@ class NWBFile(MultiContainerInterface):
     def add_electrode(self, **kwargs):
         """
         Add an electrode to the electrodes table.
-        See :py:meth:`~hdmf.common.DynamicTable.add_row` for more details.
+        See :py:meth:`~hdmf.common.table.DynamicTable.add_row` for more details.
 
         Required fields are *location* and
         *group* and any columns that have been added
@@ -750,7 +750,7 @@ class NWBFile(MultiContainerInterface):
     def add_unit_column(self, **kwargs):
         """
         Add a column to the unit table.
-        See :py:meth:`~hdmf.common.DynamicTable.add_column` for more details
+        See :py:meth:`~hdmf.common.table.DynamicTable.add_column` for more details
         """
         self.__check_units()
         self.units.add_column(**kwargs)
@@ -759,7 +759,7 @@ class NWBFile(MultiContainerInterface):
     def add_unit(self, **kwargs):
         """
         Add a unit to the unit table.
-        See :py:meth:`~hdmf.common.DynamicTable.add_row` for more details.
+        See :py:meth:`~hdmf.common.table.DynamicTable.add_row` for more details.
 
         """
         self.__check_units()
@@ -773,7 +773,7 @@ class NWBFile(MultiContainerInterface):
     def add_trial_column(self, **kwargs):
         """
         Add a column to the trial table.
-        See :py:meth:`~hdmf.common.DynamicTable.add_column` for more details
+        See :py:meth:`~hdmf.common.table.DynamicTable.add_column` for more details
         """
         self.__check_trials()
         self.trials.add_column(**kwargs)
@@ -782,7 +782,7 @@ class NWBFile(MultiContainerInterface):
     def add_trial(self, **kwargs):
         """
         Add a trial to the trial table.
-        See :py:meth:`~hdmf.common.DynamicTable.add_interval` for more details.
+        See :py:meth:`~hdmf.common.table.DynamicTable.add_interval` for more details.
 
         Required fields are *start_time*, *stop_time*, and any columns that have
         been added (through calls to `add_trial_columns`).
@@ -801,7 +801,7 @@ class NWBFile(MultiContainerInterface):
     def add_invalid_times_column(self, **kwargs):
         """
         Add a column to the invalid times table.
-        See :py:meth:`~hdmf.common.DynamicTable.add_column` for more details
+        See :py:meth:`~hdmf.common.table.DynamicTable.add_column` for more details
         """
         self.__check_invalid_times()
         self.invalid_times.add_column(**kwargs)
@@ -810,7 +810,7 @@ class NWBFile(MultiContainerInterface):
     def add_invalid_time_interval(self, **kwargs):
         """
         Add a time interval to the invalid times table.
-        See :py:meth:`~hdmf.common.DynamicTable.add_row` for more details.
+        See :py:meth:`~hdmf.common.table.DynamicTable.add_row` for more details.
 
         Required fields are *start_time*, *stop_time*, and any columns that have
         been added (through calls to `add_invalid_times_columns`).
