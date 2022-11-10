@@ -119,9 +119,9 @@ class ImagingPlane(NWBContainer):
         for key, val in args_to_set.items():
             setattr(self, key, val)
 
-            
+
 @register_class("OnePhotonSeries", CORE_NAMESPACE)
-class TwoPhotonSeries(ImageSeries):
+class OnePhotonSeries(ImageSeries):
     """Image stack recorded over time from 1-photon microscope."""
 
     __nwbfields__ = (

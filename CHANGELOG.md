@@ -2,6 +2,9 @@
 
 ## Upcoming
 
+### Enhancements and minor changes
+- Added a class and tests for the `OnePhotonSeries`. @CodyCBakerPhD [#1593](https://github.com/NeurodataWithoutBorders/pynwb/pull/1593)
+
 ### Documentation and tutorial enhancements:
 - Adjusted [ecephys tutorial](https://pynwb.readthedocs.io/en/stable/tutorials/domain/ecephys.html) to create fake data with proper dimensions @bendichter [#1581](https://github.com/NeurodataWithoutBorders/pynwb/pull/1581)
 - Refactored testing documentation, including addition of section on ``pynwb.testing.mock`` submodule. @bendichter 
