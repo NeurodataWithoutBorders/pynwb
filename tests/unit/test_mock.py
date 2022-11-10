@@ -36,7 +36,7 @@ from pynwb.testing.mock.ecephys import (
 
 import pytest
 
-from pynwb.testing.mock.utils import name_generator
+from pynwb.testing.mock.utils import name_generator, name_generator_registry
 
 
 @pytest.mark.parametrize(
@@ -70,8 +70,6 @@ def test_mock(mock_function):
 
 
 def test_name_generator():
-
-    from pynwb.testing.mock.utils import name_generator_registry
 
     name_generator_registry.clear()  # reset registry
 
