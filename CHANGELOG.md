@@ -13,6 +13,10 @@
   [#1586](https://github.com/NeurodataWithoutBorders/pynwb/pull/1586)
 - More informative error message for common installation error. @bendichter, @rly
   [#1591](https://github.com/NeurodataWithoutBorders/pynwb/pull/1591)
+  
+### Bug fixes
+- Add shape constraint to `PatchClampSeries.data`. @bendichter 
+  [#1596](https://github.com/NeurodataWithoutBorders/pynwb/pull/1596)
 
 ## PyNWB 2.2.0 (October 19, 2022)
 
