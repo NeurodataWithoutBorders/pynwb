@@ -4,7 +4,7 @@
 
 ### Enhancements and minor changes
 - `Subject.age` can be input as a `timedelta`. @bendichter [#1590](https://github.com/NeurodataWithoutBorders/pynwb/pull/1590)
-- `IntracellularRecordingsTable.add_recording`: the `electrode` arg is now optional, and is automatically populated from the stimulus or responce.
+- `IntracellularRecordingsTable.add_recording`: the `electrode` arg is now optional, and is automatically populated from the stimulus or response.
   [#1597](https://github.com/NeurodataWithoutBorders/pynwb/pull/1597)
 
 ### Documentation and tutorial enhancements:
