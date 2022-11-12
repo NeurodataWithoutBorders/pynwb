@@ -214,7 +214,6 @@ class PatchClampSeriesConstructor(TestCase):
             )
 
 
-
 class CurrentClampSeriesConstructor(TestCase):
 
     def test_init(self):
