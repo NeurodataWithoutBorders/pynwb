@@ -200,6 +200,20 @@ class PatchClampSeriesConstructor(TestCase):
             PatchClampSeries('test_pCS', list(), 'unit',
                              electrode_name, 1.0, timestamps=list(), sweep_number=1.5)
 
+    def test_data_shape(self):
+        electrode_name = GetElectrode()
+
+        with self.assertRaises(ValueError):
+            PatchClampSeries(
+                name="test_pCS",
+                data=np.ones((30, 2)),
+                unit="unit",
+                electrode=electrode_name,
+                gain=1.0,
+                rate=100_000.,
+            )
+
+
 
 class CurrentClampSeriesConstructor(TestCase):
 
