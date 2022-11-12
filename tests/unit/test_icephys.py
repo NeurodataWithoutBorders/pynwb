@@ -1,7 +1,16 @@
 import numpy as np
 
-from pynwb.icephys import (PatchClampSeries, CurrentClampSeries, IZeroClampSeries, CurrentClampStimulusSeries,
-                           VoltageClampSeries, VoltageClampStimulusSeries, IntracellularElectrode, SweepTable)
+from pynwb.icephys import (
+    PatchClampSeries,
+    CurrentClampSeries,
+    IZeroClampSeries,
+    CurrentClampStimulusSeries,
+    VoltageClampSeries,
+    VoltageClampStimulusSeries,
+    IntracellularElectrode,
+    SweepTable,
+    IntracellularRecordingsTable,
+)
 from pynwb.device import Device
 from pynwb.testing import TestCase
 from pynwb.file import NWBFile  # Needed to test icephys functionality defined on NWBFile
@@ -331,3 +340,28 @@ class VoltageClampStimulusSeriesConstructor(TestCase):
         with self.assertWarnsWith(UserWarning, msg):
             vCSS = VoltageClampStimulusSeries('test_vCSS', list(), electrode_name, 1.0, timestamps=list(), unit='unit')
         self.assertEqual(vCSS.unit, 'volts')
+
+
+class IntracellularRecordingsTableConstructor(TestCase):
+
+    def test_init(self):
+        electrode_name = GetElectrode()
+
+        cCSS = CurrentClampStimulusSeries(
+            name="test_cCSS",
+            data=np.ones((30,)),
+            electrode=electrode_name,
+            gain=1.0,
+            rate=100_000.,
+        )
+
+        cCS = CurrentClampSeries(
+            name="test_cCS",
+            data=np.ones((30,)),
+            electrode=electrode_name,
+            gain=1.0,
+            rate=100_000.,
+        )
+
+        itr = IntracellularRecordingsTable()
+        itr.add_recording(stimulus=cCSS, response=cCS)
