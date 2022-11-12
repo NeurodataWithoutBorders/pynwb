@@ -4,6 +4,8 @@
 
 ### Enhancements and minor changes
 - `Subject.age` can be input as a `timedelta`. @bendichter [#1590](https://github.com/NeurodataWithoutBorders/pynwb/pull/1590)
+- `IntracellularRecordingsTable.add_recording`: the `electrode` arg is now optional, and is automatically populated from the stimulus or responce.
+  [#1597](https://github.com/NeurodataWithoutBorders/pynwb/pull/1597)
 
 ### Documentation and tutorial enhancements:
 - Adjusted [ecephys tutorial](https://pynwb.readthedocs.io/en/stable/tutorials/domain/ecephys.html) to create fake data with proper dimensions @bendichter [#1581](https://github.com/NeurodataWithoutBorders/pynwb/pull/1581)
