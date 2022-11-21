@@ -15,10 +15,6 @@ class ModuleMap(NWBContainerMapper):
         self.map_spec('data_interfaces', containers_spec)
         self.map_spec('data_interfaces', table_spec)
 
-    @NWBContainerMapper.constructor_arg('name')
-    def name(self, builder, manager):
-        return builder.name
-
 
 @register_map(TimeSeries)
 class TimeSeriesMap(NWBContainerMapper):
@@ -43,10 +39,6 @@ class TimeSeriesMap(NWBContainerMapper):
         # TODO map the sync group to something
         sync_spec = self.spec.get_group('sync')
         self.unmap(sync_spec)
-
-    @NWBContainerMapper.constructor_arg('name')
-    def name(self, builder, manager):
-        return builder.name
 
     @NWBContainerMapper.object_attr("timestamps")
     def timestamps_attr(self, container, manager):
