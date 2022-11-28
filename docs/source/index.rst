@@ -46,7 +46,7 @@ breaking down the barriers to data sharing in neuroscience.
    update_requirements
    software_process
    make_a_release
-   make_roundtrip_test
+   testing/index
    make_a_tutorial
 
 .. toctree::

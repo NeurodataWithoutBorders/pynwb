@@ -138,7 +138,7 @@ position = Position(spatial_series=position_spatial_series)
 # .. seealso::
 #    You can learn more about best practices that can be applied to
 #    :py:class:`~pynwb.behavior.SpatialSeries` at `NWB Best Practices
-#    <https://www.nwb.org/best-practices/#timeseries>`_.
+#    <https://nwbinspector.readthedocs.io/en/dev/best_practices/time_series.html>`_.
 #
 
 ####################

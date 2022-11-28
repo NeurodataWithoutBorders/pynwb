@@ -1,11 +1,10 @@
 # pinned dependencies to reproduce an entire development environment to use PyNWB, run PyNWB tests, check code style,
 # compute coverage, and create test environments
 codecov==2.1.12
-coverage==6.3.2
-flake8==4.0.1
+coverage==6.4.2
+flake8==5.0.4;
 flake8-debugger==4.1.2
 flake8-print==5.0.0
-importlib-metadata==4.2.0
 pytest==7.1.2
 pytest-cov==3.0.0
-tox==3.25.0
+tox==3.25.1

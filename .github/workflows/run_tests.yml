@@ -1,0 +1,286 @@
+name: Run tests
+on:
+  push:
+    branches:
+      - dev
+    tags-ignore:  # exclude tags created by "ci_addons publish_github_release"
+      - 'latest'
+      - 'latest-tmp'
+  pull_request:
+
+jobs:
+  run-tests:
+    name: ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { name: linux-python3.7-minimum      , test-tox-env: py37-minimum    , build-tox-env: build-py37-minimum    , python-ver: "3.7" , os: ubuntu-latest }
+          # NOTE config below with "upload-wheels: true" specifies that wheels should be uploaded as an artifact
+          - { name: linux-python3.10-upgraded    , test-tox-env: py310-upgraded  , build-tox-env: build-py310-upgraded  , python-ver: "3.10", os: ubuntu-latest , upload-wheels: true }
+          - { name: windows-python3.7-minimum    , test-tox-env: py37-minimum    , build-tox-env: build-py37-minimum    , python-ver: "3.7" , os: windows-latest }
+          - { name: macos-python3.7-minimum      , test-tox-env: py37-minimum    , build-tox-env: build-py37-minimum    , python-ver: "3.7" , os: macos-latest }
+    steps:
+      - name: Cancel any previous incomplete runs
+        uses: styfle/cancel-workflow-action@0.9.1
+        with:
+          all_but_latest: true
+          access_token: ${{ github.token }}
+
+      - uses: actions/checkout@v3
+        with:
+          submodules: 'recursive'
+          fetch-depth: 0  # tags are required for versioneer to determine the version
+
+      - name: Set up Python
+        uses: actions/setup-python@v3
+        with:
+          python-version: ${{ matrix.python-ver }}
+
+      - name: Install build dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install tox
+          python -m pip list
+
+      - name: Run tox tests
+        run: |
+          tox -e ${{ matrix.test-tox-env }}
+
+      - name: Build wheel and source distribution
+        run: |
+          tox -e ${{ matrix.build-tox-env }}
+          ls -1 dist
+
+      - name: Test installation from a wheel
+        run: |
+          tox -e wheelinstall --recreate --installpkg dist/*-none-any.whl
+
+      - name: Upload distribution as a workspace artifact
+        if: ${{ matrix.upload-wheels }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: distributions
+          path: dist
+
+  run-gallery-tests:
+    name: ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { name: linux-gallery-python3.7-minimum    , test-tox-env: gallery-py37-minimum  , python-ver: "3.7" , os: ubuntu-latest }
+          - { name: linux-gallery-python3.8-upgraded   , test-tox-env: gallery-py38-upgraded , python-ver: "3.8" , os: ubuntu-latest }
+          # allensdk is not compatible with python 3.9+, so run gallery tests only on python <=3.8
+          # - { name: linux-gallery-python3.10-upgraded  , test-tox-env: gallery-py310-upgraded, python-ver: "3.10", os: ubuntu-latest }
+          - { name: windows-gallery-python3.7-minimum  , test-tox-env: gallery-py37-minimum  , python-ver: "3.7" , os: windows-latest }
+          - { name: windows-gallery-python3.8-upgraded , test-tox-env: gallery-py38-upgraded , python-ver: "3.8" , os: windows-latest }
+          # - { name: windows-gallery-python3.10-upgraded, test-tox-env: gallery-py310-upgraded, python-ver: "3.10", os: windows-latest }
+    steps:
+      - name: Cancel any previous incomplete runs
+        uses: styfle/cancel-workflow-action@0.9.1
+        with:
+          access_token: ${{ github.token }}
+
+      - uses: actions/checkout@v3
+        with:
+          submodules: 'recursive'
+
+      - name: Set up Python
+        uses: actions/setup-python@v3
+        with:
+          python-version: ${{ matrix.python-ver }}
+
+      - name: Install build dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install tox
+          python -m pip list
+
+      - name: Run tox tests
+        run: |
+          tox -e ${{ matrix.test-tox-env }}
+
+  run-tests-on-conda:
+    name: ${{ matrix.name }}
+    runs-on: ubuntu-latest
+    defaults:
+     run:
+       shell: bash -l {0}  # necessary for conda
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { name: conda-linux-python3.7-minimum    , test-tox-env: py37-minimum    , build-tox-env: build-py37-minimum    , python-ver: "3.7" , os: ubuntu-latest }
+          - { name: conda-linux-python3.10-upgraded  , test-tox-env: py310-upgraded  , build-tox-env: build-py310-upgraded  , python-ver: "3.10", os: ubuntu-latest }
+    steps:
+      - name: Cancel any previous incomplete runs
+        uses: styfle/cancel-workflow-action@0.9.1
+        with:
+          access_token: ${{ github.token }}
+
+      - uses: actions/checkout@v3
+        with:
+          submodules: 'recursive'
+          fetch-depth: 0  # tags are required for versioneer to determine the version
+
+      - name: Set up Conda
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+          auto-update-conda: true
+          auto-activate-base: true
+          activate-environment: true
+          python-version: ${{ matrix.python-ver }}
+
+      - name: Install build dependencies
+        run: |
+          conda config --set always_yes yes --set changeps1 no
+          conda info
+          conda install -c conda-forge tox
+          conda list
+
+      - name: Run tox tests
+        run: |
+          tox -e ${{ matrix.test-tox-env }}
+
+      - name: Build wheel and source distribution
+        run: |
+          tox -e ${{ matrix.build-tox-env }}
+          ls -1 dist
+
+      - name: Test installation from a wheel
+        run: |
+          tox -e wheelinstall --recreate --installpkg dist/*-none-any.whl
+
+  run-ros3-tests:  # tox and conda do not play nicely so do not use tox here
+    name: ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash -l {0}  # necessary for conda
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { name: linux-python3.9-ros3  , python-ver: "3.9", os: ubuntu-latest }
+    steps:
+      - name: Cancel any previous incomplete runs
+        uses: styfle/cancel-workflow-action@0.9.1
+        with:
+          access_token: ${{ github.token }}
+
+      - uses: actions/checkout@v3
+        with:
+          submodules: 'recursive'
+
+      - name: Set up Conda
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+          auto-update-conda: true
+          activate-environment: ros3
+          environment-file: environment-ros3.yml
+          python-version: ${{ matrix.python-ver }}
+          channels: conda-forge
+          auto-activate-base: false
+
+      - name: Install run dependencies
+        run: |
+          pip install -r requirements-dev.txt
+          pip install -e .
+          conda info
+          conda list
+          pip list
+
+      - name: Run gallery ros3 tests
+        run: |
+          python test.py --ros3
+
+  run-gallery-ros3-tests:
+    name: ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash -l {0}  # necessary for conda
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { name: linux-gallery-python3.9-ros3  , python-ver: "3.9", os: ubuntu-latest }
+    steps:
+      - name: Cancel any previous incomplete runs
+        uses: styfle/cancel-workflow-action@0.9.1
+        with:
+          access_token: ${{ github.token }}
+
+      - uses: actions/checkout@v3
+        with:
+          submodules: 'recursive'
+
+      - name: Set up Conda
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+          auto-update-conda: true
+          activate-environment: ros3
+          environment-file: environment-ros3.yml
+          python-version: ${{ matrix.python-ver }}
+          channels: conda-forge
+          auto-activate-base: false
+
+      - name: Install run dependencies
+        run: |
+          pip install matplotlib
+          pip install -e .
+          conda info
+          conda list
+          pip list
+
+      - name: Run gallery ros3 tests
+        run: |
+          python test.py --example-ros3
+
+  deploy-dev:
+    name: Deploy pre-release from dev
+    needs: [run-tests, run-gallery-tests, run-tests-on-conda, run-ros3-tests, run-gallery-ros3-tests]
+    if: ${{ github.event_name == 'push' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Cancel any previous incomplete runs
+        uses: styfle/cancel-workflow-action@0.9.1
+        with:
+          access_token: ${{ github.token }}
+
+      - name: Checkout repo with submodules
+        uses: actions/checkout@v3
+        with:
+          submodules: 'recursive'
+
+      - name: Set up Python
+        uses: actions/setup-python@v3
+        with:
+          python-version: '3.10'
+
+      - name: Download wheel and source distributions from artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: distributions
+          path: dist
+
+      - name: Publish wheel and source distributions as a GitHub release
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install scikit-ci-addons
+          ci_addons publish_github_release NeurodataWithoutBorders/pynwb  \
+              --prerelease-packages "dist/*" \
+              --prerelease-sha $GITHUB_SHA \
+              --prerelease-packages-clear-pattern "*" \
+              --prerelease-packages-keep-pattern "*dev<COMMIT_DISTANCE>*" \
+              --token ${{ secrets.BOT_GITHUB_TOKEN }} \
+              --re-upload

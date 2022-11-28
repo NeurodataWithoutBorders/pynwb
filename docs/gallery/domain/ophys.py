@@ -306,7 +306,7 @@ plt.imshow(image_mask)
 #
 # .. note::
 #    You need to be consistent within a :py:class:`~pynwb.ophys.PlaneSegmentation` table.
-#    You can add ROIs either using image mask or pixel mask.
+#    You can add ROIs either using image masks, pixel masks, or voxel masks.
 
 ps2 = img_seg.create_plane_segmentation(
     name='PlaneSegmentation2',
@@ -316,17 +316,55 @@ ps2 = img_seg.create_plane_segmentation(
 )
 
 for _ in range(30):
-    # randomly generate example image masks
+    # randomly generate example starting points for region
     x = np.random.randint(0, 95)
     y = np.random.randint(0, 95)
 
+    # define an example 4 x 3 region of pixels of weight '1'
     pixel_mask = []
-    for ix in range(x, x + 5):
-        for iy in range(y, y + 5):
+    for ix in range(x, x + 4):
+        for iy in range(y, y + 3):
             pixel_mask.append((ix, iy, 1))
 
     # add pixel mask to plane segmentation
     ps2.add_roi(pixel_mask=pixel_mask)
+
+####################
+# Voxel masks
+# ^^^^^^^^^^^
+#
+# When storing the segmentation of volumetric imaging, you can use imaging masks.
+# Alternatively, you could define ROIs using a voxel mask, which is an array of
+# triplets (x, y, z, weight) that have a non-zero weight. All undefined voxels
+# are assumed to be 0.
+#
+# .. note::
+#    You need to be consistent within a :py:class:`~pynwb.ophys.PlaneSegmentation` table.
+#    You can add ROIs either using image masks, pixel masks, or voxel masks.
+
+ps3 = img_seg.create_plane_segmentation(
+    name='PlaneSegmentation3',
+    description='output from segmenting my favorite imaging plane',
+    imaging_plane=imaging_plane,
+    reference_images=image_series1  # optional
+)
+
+for _ in range(30):
+    # randomly generate example starting points for region
+    x = np.random.randint(0, 95)
+    y = np.random.randint(0, 95)
+    z = np.random.randint(0, 15)
+
+    # define an example 4 x 3 x 2 voxel region of weight '0.5'
+    voxel_mask = []
+    for ix in range(x, x + 4):
+        for iy in range(y, y + 3):
+            for iz in range(z, z + 2):
+                voxel_mask.append((ix, iy, iz, 0.5))
+
+    # add voxel mask to plane segmentation
+    ps3.add_roi(voxel_mask=voxel_mask)
+
 
 ####################
 # We can view the :py:class:`~pynwb.ophys.PlaneSegmentation` table with pixel

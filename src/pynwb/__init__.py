@@ -11,15 +11,14 @@ from hdmf.spec import NamespaceCatalog
 from hdmf.utils import docval, getargs, popargs, get_docval
 from hdmf.backends.io import HDMFIO
 from hdmf.backends.hdf5 import HDF5IO as _HDF5IO
-from hdmf.validate import ValidatorMap
 from hdmf.build import BuildManager, TypeMap
 import hdmf.common
-
 
 CORE_NAMESPACE = 'core'
 __core_ns_file_name = 'nwb.namespace.yaml'
 
 from .spec import NWBDatasetSpec, NWBGroupSpec, NWBNamespace  # noqa E402
+from .validate import validate  # noqa: F401, E402
 
 
 def __get_resources():
@@ -102,10 +101,16 @@ def load_namespaces(**kwargs):
     return __TYPE_MAP.load_namespaces(namespace_path)
 
 
-# load the core namespace i.e. base NWB specification
+# load the core namespace, i.e. base NWB specification
 __resources = __get_resources()
 if os.path.exists(__resources['namespace_path']):
     load_namespaces(__resources['namespace_path'])
+else:
+    raise RuntimeError(
+        "'core' is not a registered namespace. If you installed PyNWB locally using a git clone, you need to "
+        "use the --recurse_submodules flag when cloning. See developer installation instructions here: "
+        "https://pynwb.readthedocs.io/en/stable/install_developers.html#install-from-git-repository"
+    )
 
 
 def available_namespaces():
@@ -184,18 +189,6 @@ def get_class(**kwargs):
     """
     neurodata_type, namespace = getargs('neurodata_type', 'namespace', kwargs)
     return __TYPE_MAP.get_dt_container_cls(neurodata_type, namespace)
-
-
-@docval({'name': 'io', 'type': HDMFIO, 'doc': 'the HDMFIO object to read from'},
-        {'name': 'namespace', 'type': str, 'doc': 'the namespace to validate against', 'default': CORE_NAMESPACE},
-        returns="errors in the file", rtype=list,
-        is_method=False)
-def validate(**kwargs):
-    """Validate an NWB file against a namespace"""
-    io, namespace = getargs('io', 'namespace', kwargs)
-    builder = io.read_builder()
-    validator = ValidatorMap(io.manager.namespace_catalog.get_namespace(name=namespace))
-    return validator.validate(builder)
 
 
 class NWBHDF5IO(_HDF5IO):
@@ -310,9 +303,8 @@ from . import legacy  # noqa: F401,E402
 from hdmf.data_utils import DataChunkIterator  # noqa: F401,E402
 from hdmf.backends.hdf5 import H5DataIO  # noqa: F401,E402
 
-from ._version import get_versions  # noqa: E402
-__version__ = get_versions()['version']
-del get_versions
+from . import _version    # noqa: F401,E402
+__version__ = _version.get_versions()['version']
 
 from ._due import due, BibTeX  # noqa: E402
 due.cite(BibTeX("""
