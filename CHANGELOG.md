@@ -38,7 +38,6 @@
 ## PyNWB 2.1.1 (September 1, 2022)
 
 ### Documentation and tutorial enhancements:
-
 - Added support for explicit ordering of sphinx gallery tutorials in the docs. @oruebel
   [#1504](https://github.com/NeurodataWithoutBorders/pynwb/pull/1504), @bdichter
   [#1495](https://github.com/NeurodataWithoutBorders/pynwb/pull/1495)
