@@ -340,4 +340,3 @@ class VoltageClampStimulusSeriesConstructor(TestCase):
         with self.assertWarnsWith(UserWarning, msg):
             vCSS = VoltageClampStimulusSeries('test_vCSS', list(), electrode_name, 1.0, timestamps=list(), unit='unit')
         self.assertEqual(vCSS.unit, 'volts')
-

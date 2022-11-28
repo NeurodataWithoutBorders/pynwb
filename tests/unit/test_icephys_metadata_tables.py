@@ -21,7 +21,6 @@ from pynwb.icephys import (
     VoltageClampSeries,
     CurrentClampStimulusSeries,
     IZeroClampSeries,
-    IntracellularRecordingsTable,
     SimultaneousRecordingsTable,
     SequentialRecordingsTable,
     RepetitionsTable,
