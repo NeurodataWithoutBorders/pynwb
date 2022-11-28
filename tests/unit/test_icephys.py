@@ -9,7 +9,6 @@ from pynwb.icephys import (
     VoltageClampStimulusSeries,
     IntracellularElectrode,
     SweepTable,
-    IntracellularRecordingsTable,
 )
 from pynwb.device import Device
 from pynwb.testing import TestCase

@@ -27,6 +27,7 @@ from pynwb.icephys import (
     ExperimentalConditionsTable,
     IntracellularElectrode,
     CurrentClampSeries,
+    IntracellularRecordingsTable
 )
 from pynwb.device import Device
 from pynwb.base import TimeSeriesReferenceVectorData
