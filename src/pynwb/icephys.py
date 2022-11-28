@@ -470,9 +470,9 @@ class IntracellularRecordingsTable(AlignedDynamicTable):
 
     @docval(
         {
-            'name': 'electrode',
-            'type': IntracellularElectrode,
-            'doc': 'The intracellular electrode used',
+            "name": "electrode",
+            "type": IntracellularElectrode,
+            "doc": "The intracellular electrode used",
             "default": None,
         },
         {'name': 'stimulus_start_index', 'type': int, 'doc': 'Start index of the stimulus', 'default': None},
@@ -515,6 +515,7 @@ class IntracellularRecordingsTable(AlignedDynamicTable):
                                                                        'response',
                                                                        kwargs)
         electrode = popargs('electrode', kwargs)
+
         # if electrode is not provided, take from stimulus or response object
         if electrode is None:
             if stimulus:
@@ -556,8 +557,10 @@ class IntracellularRecordingsTable(AlignedDynamicTable):
             #     warnings.warn("sweep_number are usually expected to be the same for PatchClampSeries type "
             #                   "stimulus and response pairs in an intracellular recording.")
             if response.electrode != stimulus.electrode:
-                raise ValueError("electrodes are usually expected to be the same for PatchClampSeries type "
-                                 "stimulus and response pairs in an intracellular recording.")
+                raise ValueError(
+                    "electrodes are usually expected to be the same for PatchClampSeries type stimulus and response "
+                    "pairs in an intracellular recording."
+                )
 
         # Compile the electrodes table data
         electrodes = copy(popargs('electrode_metadata', kwargs))

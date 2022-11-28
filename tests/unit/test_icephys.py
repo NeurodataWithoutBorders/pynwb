@@ -341,27 +341,3 @@ class VoltageClampStimulusSeriesConstructor(TestCase):
             vCSS = VoltageClampStimulusSeries('test_vCSS', list(), electrode_name, 1.0, timestamps=list(), unit='unit')
         self.assertEqual(vCSS.unit, 'volts')
 
-
-class IntracellularRecordingsTableConstructor(TestCase):
-
-    def test_init(self):
-        electrode_name = GetElectrode()
-
-        cCSS = CurrentClampStimulusSeries(
-            name="test_cCSS",
-            data=np.ones((30,)),
-            electrode=electrode_name,
-            gain=1.0,
-            rate=100_000.,
-        )
-
-        cCS = CurrentClampSeries(
-            name="test_cCS",
-            data=np.ones((30,)),
-            electrode=electrode_name,
-            gain=1.0,
-            rate=100_000.,
-        )
-
-        itr = IntracellularRecordingsTable()
-        itr.add_recording(stimulus=cCSS, response=cCS)
