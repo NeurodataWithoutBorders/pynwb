@@ -3,7 +3,8 @@
 ## Upcoming
 
 ### Enhancements and minor changes
-- `Subject.age` can be input as a `timedelta`. @bendichter [#1590](https://github.com/NeurodataWithoutBorders/pynwb/pull/1590)
+- `Subject.age` can be input as a `timedelta` type. @bendichter [#1590](https://github.com/NeurodataWithoutBorders/pynwb/pull/1590)
+- Add `Subject.age__reference` field. @bendichter ([#1540](https://github.com/NeurodataWithoutBorders/pynwb/pull/1540))
 
 ### Documentation and tutorial enhancements:
 - Adjusted [ecephys tutorial](https://pynwb.readthedocs.io/en/stable/tutorials/domain/ecephys.html) to create fake data with proper dimensions @bendichter [#1581](https://github.com/NeurodataWithoutBorders/pynwb/pull/1581)
