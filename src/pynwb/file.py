@@ -54,6 +54,7 @@ class Subject(NWBContainer):
 
     __nwbfields__ = (
         'age',
+        "age__reference",
         'description',
         'genotype',
         'sex',
@@ -75,12 +76,17 @@ class Subject(NWBContainer):
         {
             "name": "age__reference",
             "type": str,
-            "doc": "Age is with reference to this event. Can be 'birth' or 'gestational'. If reference is omitted, 
-            'birth' is implied.",
+            "doc": "Age is with reference to this event. Can be 'birth' or 'gestational'. If reference is omitted, "
+                   "'birth' is implied.",
             "default": "birth",
+            "allow_none": True,
         },
-        {'name': 'description', 'type': str,
-         'doc': 'A description of the subject, e.g., "mouse A10".', 'default': None},
+        {
+            "name": "description",
+            "type": str,
+            "doc": 'A description of the subject, e.g., "mouse A10".',
+            "default": None,
+        },
         {'name': 'genotype', 'type': str,
          'doc': 'The genotype of the subject, e.g., "Sst-IRES-Cre/wt;Ai32(RCL-ChR2(H134R)_EYFP)/wt".',
          'default': None},
@@ -101,21 +107,23 @@ class Subject(NWBContainer):
         {'name': 'strain', 'type': str, 'doc': 'The strain of the subject, e.g., "C57BL/6J"', 'default': None},
     )
     def __init__(self, **kwargs):
-        keys_to_set = ("age",
-                       "age__reference",
-                       "description",
-                       "genotype",
-                       "sex",
-                       "species",
-                       "subject_id",
-                       "weight",
-                       "date_of_birth",
-                       "strain")
+        keys_to_set = (
+            "age",
+            "age__reference",
+            "description",
+            "genotype",
+            "sex",
+            "species",
+            "subject_id",
+            "weight",
+            "date_of_birth",
+            "strain",
+        )
         args_to_set = popargs_to_dict(keys_to_set, kwargs)
         super().__init__(name="subject", **kwargs)
 
         if args_to_set["age__reference"] not in (None, "birth", "gestational"):
-            raise ValueError("age__reference must be 'birth' or 'gestational'.")
+            raise ValueError("age__reference, if supplied, must be 'birth' or 'gestational'.")
 
         weight = args_to_set['weight']
         if isinstance(weight, float):
