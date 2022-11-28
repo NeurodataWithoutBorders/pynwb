@@ -64,7 +64,6 @@ class Subject(NWBContainer):
         'strain'
     )
 
-
     @docval(
         {
             "name": "age",
