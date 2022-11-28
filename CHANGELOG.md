@@ -48,7 +48,6 @@
 - Added example code for fsspec in the streaming tutorial. @bdichter
   [#1499](https://github.com/NeurodataWithoutBorders/pynwb/pull/1499)
 - Add voxel_mask tutorial. @codycbakerphd (#1544)
-- Add `age__reference` field to Subject. @bendichter ([#1540](https://github.com/NeurodataWithoutBorders/pynwb/pull/1540))
 
 ### Enhancements and minor changes
 - Updated coverage workflow, report separate unit vs integration coverage. @rly
