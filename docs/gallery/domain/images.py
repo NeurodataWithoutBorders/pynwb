@@ -254,7 +254,7 @@ nwbfile.add_acquisition(images)
 # the same data multiple times. A better solution would be to store the unique images
 # once and reference those images. This is how :py:class:`~pynwb.image.IndexSeries`
 # works. First, create an :py:class:`~pynwb.base.Images` container with the order of
-# images defined using a :py:class:`~pynwb.base.ImageReferences`. Then create an
+# images defined using an :py:class:`~pynwb.base.ImageReferences`. Then create an
 # :py:class:`~pynwb.image.IndexSeries` that indexes into the
 # :py:class:`~pynwb.base.Images`.
 
