@@ -14,6 +14,8 @@
   [#1586](https://github.com/NeurodataWithoutBorders/pynwb/pull/1586)
 - More informative error message for common installation error. @bendichter, @rly
   [#1591](https://github.com/NeurodataWithoutBorders/pynwb/pull/1591)
+- Update the [images tutorial](https://pynwb.readthedocs.io/en/stable/tutorials/domain/images.html) to provide example usage of an ``IndexSeries``
+  with a reference to ``Images``. @bendichter [#1602](https://github.com/NeurodataWithoutBorders/pynwb/pull/1602)
 
 ## PyNWB 2.2.0 (October 19, 2022)
 
