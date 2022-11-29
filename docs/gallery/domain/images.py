@@ -245,6 +245,54 @@ images = Images(
 nwbfile.add_acquisition(images)
 
 ####################
+# IndexSeries for repeated images
+# -------------------------------
+#
+# You may want to set up visual stimuli of images that are repeated. You could create an
+# :py:class:`~pynwb.image.ImageSeries` that repeats the data each time the image is
+# shown, but a better solution would be to store the unique images once and reference
+# those images. This is how :py:class:`~pynwb.image.IndexSeries` works. First, create an
+# :py:class:`~pynwb.base.Images` container with the order of images defined using a
+# :py:class:`~pynwb.base.ImageReferences`. Then create an
+# :py:class:`~pynwb.image.IndexSeries` that indexes into the
+# :py:class:`~pynwb.base.Images`.
+
+from scipy import misc
+
+from pynwb.image import Images, IndexSeries, GrayscaleImage, RGBImage
+from pynwb.base import ImageReferences
+
+
+gs_face = GrayscaleImage(
+    name="gs_face",
+    data=misc.face(gray=True),
+    description="Grayscale version of a raccoon.",
+    resolution=35.433071,
+)
+
+rgb_face = RGBImage(
+    name="rgb_face",
+    data=misc.face(),
+    resolution=70.0,
+    description="RGB version of a raccoon.",
+)
+
+images = Images(
+    name="raccoons",
+    images=[rgb_face, gs_face],
+    description="A collection of raccoons.",
+    order_of_images=ImageReferences("order_of_images", [rgb_face, gs_face]),
+)
+
+idx_series = IndexSeries(
+    name="stimuli",
+    data=[0, 1, 0, 1],
+    indexed_images=images,
+    unit="N/A",
+    timestamps=[.1, .2, .3, .4],
+)
+
+####################
 # Writing the images to an NWB File
 # ---------------------------------------
 # As demonstrated in the :ref:`basic_writing` tutorial, we will use :py:class:`~pynwb.NWBHDF5IO`

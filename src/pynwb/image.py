@@ -212,23 +212,49 @@ class IndexSeries(TimeSeries):
     array indicates when that image was displayed.
     '''
 
-    __nwbfields__ = ('indexed_timeseries',)
+    __nwbfields__ = (
+        "indexed_timeseries",
+        "indexed_images"
+    )
 
     # # value used when an ImageSeries is read and missing data
     # DEFAULT_UNIT = 'N/A'
 
-    @docval(*get_docval(TimeSeries.__init__, 'name'),  # required
-            {'name': 'data', 'type': ('array_data', 'data', TimeSeries), 'shape': (None, ),  # required
-            'doc': ('The data values. Must be 1D, where the first dimension must be time (frame)')},
-            *get_docval(TimeSeries.__init__, 'unit'),  # required
-            {'name': 'indexed_timeseries', 'type': TimeSeries,  # required
-             'doc': 'Link to TimeSeries containing images that are indexed.', 'default': None},
-            {'name': 'indexed_images', 'type': Images,  # required
-             'doc': ("Link to Images object containing an ordered set of images that are indexed. The Images object "
-                     "must contain a 'ordered_images' dataset specifying the order of the images in the Images type."),
-             'default': None},
-            *get_docval(TimeSeries.__init__, 'resolution', 'conversion', 'timestamps', 'starting_time', 'rate',
-                        'comments', 'description', 'control', 'control_description', 'offset'))
+    @docval(
+        *get_docval(TimeSeries.__init__, 'name'),  # required
+        {
+            'name': 'data',
+            'type': ('array_data', 'data', TimeSeries),
+            'shape': (None,),  # required
+            'doc': 'The data values. Must be 1D, where the first dimension must be time (frame)',
+        },
+        *get_docval(TimeSeries.__init__, 'unit'),  # required
+        {
+            'name': 'indexed_timeseries', 'type': TimeSeries,  # required
+            'doc': 'Link to TimeSeries containing images that are indexed.',
+            'default': None,
+        },
+        {
+            'name': 'indexed_images',
+            'type': Images,  # required
+            'doc': "Link to Images object containing an ordered set of images that are indexed. The Images object must "
+                   "contain a 'ordered_images' dataset specifying the order of the images in the Images type.",
+            'default': None
+        },
+        *get_docval(
+            TimeSeries.__init__,
+            'resolution',
+            'conversion',
+            'timestamps',
+            'starting_time',
+            'rate',
+            'comments',
+            'description',
+            'control',
+            'control_description',
+            'offset',
+        ),
+    )
     def __init__(self, **kwargs):
         indexed_timeseries, indexed_images = popargs('indexed_timeseries', 'indexed_images', kwargs)
         if kwargs['unit'] and kwargs['unit'] != 'N/A':
