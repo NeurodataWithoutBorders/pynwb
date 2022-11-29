@@ -212,10 +212,7 @@ class IndexSeries(TimeSeries):
     array indicates when that image was displayed.
     '''
 
-    __nwbfields__ = (
-        "indexed_timeseries",
-        "indexed_images"
-    )
+    __nwbfields__ = ("indexed_timeseries",)
 
     # # value used when an ImageSeries is read and missing data
     # DEFAULT_UNIT = 'N/A'
