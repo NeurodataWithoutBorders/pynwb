@@ -248,7 +248,7 @@ nwbfile.add_acquisition(images)
 # IndexSeries for repeated images
 # -------------------------------
 #
-# You may want to set up a time series of images where some images are repreated many
+# You may want to set up a time series of images where some images are repeated many
 # times. You could create an :py:class:`~pynwb.image.ImageSeries` that repeats the data
 # each time the image is shown, but that would be inefficient, becuase it would store
 # the same data multiple times. A better solution would be to store the unique images
