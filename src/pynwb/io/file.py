@@ -220,3 +220,10 @@ class SubjectMap(ObjectMapper):
             datestr = dob_builder.data
             date = dateutil_parse(datestr)
             return date
+
+    @ObjectMapper.constructor_arg("age__reference")
+    def age_reference_none(self, builder, manager):
+        age__reference = builder.get("age__reference")
+        if age__reference is None:
+            return "unspecified"  # this is handled specially in Subject.__init__
+        return age__reference

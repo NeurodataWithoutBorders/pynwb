@@ -121,8 +121,9 @@ class Subject(NWBContainer):
         )
         args_to_set = popargs_to_dict(keys_to_set, kwargs)
         super().__init__(name="subject", **kwargs)
-
-        if args_to_set["age__reference"] not in (None, "birth", "gestational"):
+        if self._in_construct_mode and args_to_set["age__reference"] == "unspecified":
+            args_to_set["age__reference"] = None
+        elif args_to_set["age__reference"] not in (None, "birth", "gestational"):
             raise ValueError("age__reference, if supplied, must be 'birth' or 'gestational'.")
 
         weight = args_to_set['weight']

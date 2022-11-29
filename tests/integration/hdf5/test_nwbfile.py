@@ -203,15 +203,18 @@ class TestSubjectIO(NWBH5IOMixin, TestCase):
 
     def setUpContainer(self):
         """ Return the test Subject """
-        return Subject(age='P90D',
-                       description='An unfortunate rat',
-                       genotype='WT',
-                       sex='M',
-                       species='Rattus norvegicus',
-                       subject_id='RAT123',
-                       weight='2 kg',
-                       date_of_birth=datetime(1970, 1, 1, 12, tzinfo=tzutc()),
-                       strain='my_strain')
+        return Subject(
+            age="P90D",
+            age__reference="gestational",
+            description="An unfortunate rat",
+            genotype="WT",
+            sex="M",
+            species="Rattus norvegicus",
+            subject_id="RAT123",
+            weight="2 kg",
+            date_of_birth=datetime(1970, 1, 1, 12, tzinfo=tzutc()),
+            strain="my_strain",
+        )
 
     def addContainer(self, nwbfile):
         """ Add the test Subject to the given NWBFile """
@@ -220,6 +223,40 @@ class TestSubjectIO(NWBH5IOMixin, TestCase):
     def getContainer(self, nwbfile):
         """ Return the test Subject from the given NWBFile """
         return nwbfile.subject
+
+    def test_roundtrip(self):
+        super().test_roundtrip()
+        self.assertEqual(self.read_container.age__reference, self.container.age__reference)
+
+
+class TestSubjectAgeReferenceRegressionIO(NWBH5IOMixin, TestCase):
+
+    def setUpContainer(self):
+        """ Return the test Subject """
+        return Subject(
+            age="P90D",
+            age__reference=None,
+            description="An unfortunate rat",
+            genotype="WT",
+            sex="M",
+            species="Rattus norvegicus",
+            subject_id="RAT123",
+            weight="2 kg",
+            date_of_birth=datetime(1970, 1, 1, 12, tzinfo=tzutc()),
+            strain="my_strain",
+        )
+
+    def addContainer(self, nwbfile):
+        """ Add the test Subject to the given NWBFile """
+        nwbfile.subject = self.container
+
+    def getContainer(self, nwbfile):
+        """ Return the test Subject from the given NWBFile """
+        return nwbfile.subject
+
+    def test_roundtrip(self):
+        super().test_roundtrip()
+        self.assertEqual(self.read_container.age__reference, None)
 
 
 class TestEmptySubjectIO(TestSubjectIO):
