@@ -76,11 +76,12 @@ Install from Git repository
 ---------------------------
 
 After you have created and activated a virtual environment, clone the PyNWB git repository from GitHub, install the
-package requirements using the `pip <https://pip.pypa.io/en/stable/>`_ Python package manager, and install PyNWB in editable mode.
+package requirements using the `pip <https://pip.pypa.io/en/stable/>`_ Python package manager, and install PyNWB in
+editable mode.
 
 .. code::
 
-   $ git clone --recurse-submodules git@github.com:NeurodataWithoutBorders/pynwb.git
+   $ git clone --recurse-submodules https://github.com/NeurodataWithoutBorders/pynwb.git
    $ cd pynwb
    $ pip install -r requirements.txt
    $ pip install -e .
@@ -94,7 +95,7 @@ virtualenv or conda environment.
 
 .. code::
 
-   $ git clone --recurse-submodules git@github.com:NeurodataWithoutBorders/pynwb.git
+   $ git clone --recurse-submodules https://github.com/NeurodataWithoutBorders/pynwb.git
    $ cd pynwb
    $ pip install -r requirements.txt -r requirements-dev.txt
    $ pip install -e .
@@ -123,12 +124,15 @@ FAQ
 1.  I am using a git cloned copy of PyNWB and getting the error:
     ``RuntimeError: Unable to load a TypeMap - no namespace file found``
 
+    or the error:
+    ``RuntimeError: 'core' is not a registered namespace.``
+
     - The PyNWB repo uses git submodules that have to be checked out when cloning the repos. Please make sure you
       are using the ``--recurse-submodules`` flag when running ``git clone``:
 
       .. code-block:: bash
 
-          git clone --recurse-submodules git@github.com:NeurodataWithoutBorders/pynwb.git
+          git clone --recurse-submodules https://github.com/NeurodataWithoutBorders/pynwb.git
 
       You can also run the following on your existing cloned repo.
 
