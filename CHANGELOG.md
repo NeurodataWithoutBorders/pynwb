@@ -1,5 +1,87 @@
 # PyNWB Changelog
 
+## Upcoming
+
+### Enhancements and minor changes
+- `Subject.age` can be input as a `timedelta`. @bendichter [#1590](https://github.com/NeurodataWithoutBorders/pynwb/pull/1590)
+- Add module `pynwb.testing.mock.icephys` and corresponding tests. @bendichter 
+  [1595](https://github.com/NeurodataWithoutBorders/pynwb/pull/1595)
+- Remove redundant object mapper code. @rly [#1600](https://github.com/NeurodataWithoutBorders/pynwb/pull/1600)
+- Fix pending deprecations and issues in CI. @rly [#1594](https://github.com/NeurodataWithoutBorders/pynwb/pull/1594)
+
+### Documentation and tutorial enhancements:
+- Adjusted [ecephys tutorial](https://pynwb.readthedocs.io/en/stable/tutorials/domain/ecephys.html) to create fake data with proper dimensions @bendichter [#1581](https://github.com/NeurodataWithoutBorders/pynwb/pull/1581)
+- Refactored testing documentation, including addition of section on ``pynwb.testing.mock`` submodule. @bendichter
+  [#1583](https://github.com/NeurodataWithoutBorders/pynwb/pull/1583)
+- Update round trip tutorial to the newer ``NWBH5IOMixin`` and ``AcquisitionH5IOMixin`` classes. @bendichter
+  [#1586](https://github.com/NeurodataWithoutBorders/pynwb/pull/1586)
+- More informative error message for common installation error. @bendichter, @rly
+  [#1591](https://github.com/NeurodataWithoutBorders/pynwb/pull/1591)
+  
+### Bug fixes
+- Add shape constraint to `PatchClampSeries.data`. @bendichter 
+  [#1596](https://github.com/NeurodataWithoutBorders/pynwb/pull/1596)
+- Update the [images tutorial](https://pynwb.readthedocs.io/en/stable/tutorials/domain/images.html) to provide example usage of an ``IndexSeries``
+  with a reference to ``Images``. @bendichter [#1602](https://github.com/NeurodataWithoutBorders/pynwb/pull/1602)
+## PyNWB 2.2.0 (October 19, 2022)
+
+### Enhancements and minor changes
+- Enhanced `pynwb.validate` API function to accept a list of file paths as well as the ability to operate on cached
+  namespaces. Also adjusted the validate CLI to directly use the API function. @CodyCBakerPhD
+  [#1511](https://github.com/NeurodataWithoutBorders/pynwb/pull/1511)
+
+### Internal enhancements
+- Moved CI to GitHub Actions. @rly [#1560](https://github.com/NeurodataWithoutBorders/pynwb/pull/1560),
+  [#1566](https://github.com/NeurodataWithoutBorders/pynwb/pull/1566)
+
+### Bug fixes
+- Fixed bug in ``pynwb.testing.mock.file.mock_NWBFile`` to identifier UUID to string. @oruebel
+  [#1557](https://github.com/NeurodataWithoutBorders/pynwb/pull/1557)
+- Minor fixes to test suite to prevent warnings. @rly
+  [#1571](https://github.com/NeurodataWithoutBorders/pynwb/pull/1571)
+- Made build wheel python 3 only. @mavaylon1
+  [#1572](https://github.com/NeurodataWithoutBorders/pynwb/pull/1572)
+- Updated README.rst. @mavaylon1
+  [#1573](https://github.com/NeurodataWithoutBorders/pynwb/pull/1573)
+
+## PyNWB 2.1.1 (September 1, 2022)
+
+### Documentation and tutorial enhancements:
+- Added support for explicit ordering of sphinx gallery tutorials in the docs. @oruebel
+  [#1504](https://github.com/NeurodataWithoutBorders/pynwb/pull/1504), @bdichter
+  [#1495](https://github.com/NeurodataWithoutBorders/pynwb/pull/1495)
+- Added developer guide on how to create a new tutorial. @oruebel
+  [#1504](https://github.com/NeurodataWithoutBorders/pynwb/pull/1504)
+- Added images tutorial. @weiglszonja
+  [#1470](https://github.com/NeurodataWithoutBorders/pynwb/pull/1470)
+- Added example code for fsspec in the streaming tutorial. @bdichter
+  [#1499](https://github.com/NeurodataWithoutBorders/pynwb/pull/1499)
+- Add voxel_mask tutorial. @codycbakerphd (#1544)
+
+### Enhancements and minor changes
+- Updated coverage workflow, report separate unit vs integration coverage. @rly
+  [#1509](https://github.com/NeurodataWithoutBorders/pynwb/pull/1509)
+- Deleted test files generated from running sphinx gallery examples. @rly
+  [#1517](https://github.com/NeurodataWithoutBorders/pynwb/pull/1517)
+- Enabled passing an S3File created through s3fs, which provides a method for reading an NWB file directly
+  from s3 that is an alternative to ros3. This required relaxing of `NWBHDF5IO` input validation. The `path`
+  arg is not needed if `file` is provided. `mode` now has a default value of "r".
+  @bendichter
+  [#1499](https://github.com/NeurodataWithoutBorders/pynwb/pull/1499)
+- Added a method to `NWBMixin` that only raises an error when a check is violated on instance creation,
+  otherwise throws a warning when reading from a file. The new checks in `ImageSeries` when `external_file`
+  is provided is used with this method to ensure that that files with invalid data can be read, but prohibits
+  the user from creating new instances when these checks are violated. @weiglszonja
+  [#1516](https://github.com/NeurodataWithoutBorders/pynwb/pull/1516)
+- Created a GitHub Actions workflow to generate test files for testing backward compatibility. @rly
+  [#1548](https://github.com/NeurodataWithoutBorders/pynwb/pull/1548)
+- Updated requirements, including allowing numpy 1.23. @rly
+  [#1550](https://github.com/NeurodataWithoutBorders/pynwb/pull/1550)
+- Enhanced docs for ``LabMetaData`` to clarify its usage. @oruebel
+  [#1546](https://github.com/NeurodataWithoutBorders/pynwb/pull/1546)
+- Add testing/mock, which provides mock neurodata objects for testing. @bendichter
+  [#1454](https://github.com/NeurodataWithoutBorders/pynwb/pull/1454)
+
 ## PyNWB 2.1.0 (July 6, 2022)
 
 ### Breaking changes:
@@ -14,7 +96,7 @@
   change, the impact user codes should be minimal as this change primarily adds functionality while the overall
   behavior of the API is largely consistent with existing behavior. @oruebel, @rly (#1390)
 
-# Enhancements and minor changes
+### Enhancements and minor changes
 - A warning is now raised if `SpatialSeries.data` has more than 3 columns. @bendichter, @rly (#1455, #1480)
 - The arguments x, y, z, imp, location, filtering are no longer required in the electrodes table.
   @h-mayorquin, @rly (#1448)

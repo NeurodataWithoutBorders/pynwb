@@ -1,0 +1,47 @@
+name: Run NWB Inspector tests
+on:
+  pull_request:
+  schedule:
+    - cron: '0 5 * * *'  # once per day at midnight ET
+  workflow_dispatch:
+
+jobs:
+  run-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Cancel non-latest runs
+        uses: styfle/cancel-workflow-action@0.11.0
+        with:
+          all_but_latest: true
+          access_token: ${{ github.token }}
+
+      - uses: actions/checkout@v3
+        with:
+          submodules: 'recursive'
+          fetch-depth: 0  # tags are required for versioneer to determine the version
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Update pip
+        run: python -m pip install --upgrade pip
+
+      - name: Clone NWB Inspector and install dev branch of PyNWB
+        run: |
+          python -m pip list
+          git clone https://github.com/NeurodataWithoutBorders/nwbinspector.git
+          cd nwbinspector
+          python -m pip install -r requirements.txt pytest
+          # must install in editable mode for coverage to find sources
+          python -m pip install -e .  # this might install a pinned version of pynwb instead of the current one
+          cd ..
+          python -m pip uninstall -y pynwb  # uninstall the pinned version of pynwb
+          python -m pip install .  # reinstall current branch of pynwb
+          python -m pip list
+
+      - name: Run NWB Inspector tests on NWB Inspector dev branch
+        run: |
+          cd nwbinspector
+          pytest

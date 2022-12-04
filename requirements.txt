@@ -1,7 +1,9 @@
 # pinned dependencies to reproduce an entire development environment to use PyNWB
-h5py==3.6.0
-hdmf==3.3.2
-numpy==1.21.5  # note that numpy 1.22 dropped python 3.7 support
-pandas==1.3.5  # note that pandas 1.4 dropped python 3.7 support
+h5py==3.7.0
+hdmf==3.4.6
+numpy==1.23.3;python_version>='3.8'
+numpy==1.21.5;python_version<'3.8'  # note that numpy 1.22 dropped python 3.7 support
+pandas==1.5.0;python_version>='3.8'
+pandas==1.3.5;python_version<'3.8'  # note that pandas 1.4 dropped python 3.7 support
 python-dateutil==2.8.2
-setuptools==62.2.0
+setuptools==65.4.1

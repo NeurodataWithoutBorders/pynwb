@@ -1,8 +1,8 @@
+from hdmf.build import LinkBuilder
+
 from .core import NWBContainerMapper
 from .. import register_map
-
 from ..base import TimeSeries, ProcessingModule
-from hdmf.build import LinkBuilder
 
 
 @register_map(ProcessingModule)
@@ -14,10 +14,6 @@ class ModuleMap(NWBContainerMapper):
         table_spec = self.spec.get_neurodata_type('DynamicTable')
         self.map_spec('data_interfaces', containers_spec)
         self.map_spec('data_interfaces', table_spec)
-
-    @NWBContainerMapper.constructor_arg('name')
-    def name(self, builder, manager):
-        return builder.name
 
 
 @register_map(TimeSeries)
@@ -43,10 +39,6 @@ class TimeSeriesMap(NWBContainerMapper):
         # TODO map the sync group to something
         sync_spec = self.spec.get_group('sync')
         self.unmap(sync_spec)
-
-    @NWBContainerMapper.constructor_arg('name')
-    def name(self, builder, manager):
-        return builder.name
 
     @NWBContainerMapper.object_attr("timestamps")
     def timestamps_attr(self, container, manager):

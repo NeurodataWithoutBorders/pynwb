@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from dateutil.tz import tzlocal
 from collections.abc import Iterable
 from warnings import warn
@@ -7,6 +7,7 @@ import copy as _copy
 import numpy as np
 import pandas as pd
 
+from hdmf.common import DynamicTableRegion, DynamicTable
 from hdmf.utils import docval, getargs, get_docval, popargs, popargs_to_dict, AllowPositional
 
 from . import register_class, CORE_NAMESPACE
@@ -21,7 +22,6 @@ from .ophys import ImagingPlane
 from .ogen import OptogeneticStimulusSite
 from .misc import Units
 from .core import NWBContainer, NWBDataInterface, MultiContainerInterface, ScratchData, LabelledDict
-from hdmf.common import DynamicTableRegion, DynamicTable
 
 
 def _not_parent(arg):
@@ -30,14 +30,27 @@ def _not_parent(arg):
 
 @register_class('LabMetaData', CORE_NAMESPACE)
 class LabMetaData(NWBContainer):
+    """
+    Container for storing lab-specific meta-data
 
-    @docval({'name': 'name', 'type': str, 'doc': 'name of metadata'})
+    The LabMetaData class serves as a base type for defining lab specific meta-data.
+    To define your own lab-specific metadata, create a Neurodata Extension (NDX) for
+    NWB that defines the data to add. Using the LabMetaData container as a base type
+    makes it easy to add your data to an NWBFile without having to modify the NWBFile
+    type itself, since adding of LabMetaData is already implemented. For more details
+    on how to create an extension see the
+    :nwb_overview:`Extending NWB <extensions_tutorial/extensions_tutorial_home.html>`
+    tutorial.
+    """
+
+    @docval({'name': 'name', 'type': str, 'doc': 'name of lab metadata'})
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
 
 @register_class('Subject', CORE_NAMESPACE)
 class Subject(NWBContainer):
+    """Subject information and metadata."""
 
     __nwbfields__ = (
         'age',
@@ -51,29 +64,35 @@ class Subject(NWBContainer):
         'strain'
     )
 
-    @docval({'name': 'age', 'type': str,
-             'doc': ('The age of the subject. The ISO 8601 Duration format is recommended, e.g., "P90D" for '
-                     '90 days old.'), 'default': None},
-            {'name': 'description', 'type': str,
-             'doc': 'A description of the subject, e.g., "mouse A10".', 'default': None},
-            {'name': 'genotype', 'type': str,
-             'doc': 'The genotype of the subject, e.g., "Sst-IRES-Cre/wt;Ai32(RCL-ChR2(H134R)_EYFP)/wt".',
-             'default': None},
-            {'name': 'sex', 'type': str,
-             'doc': ('The sex of the subject. Using "F" (female), "M" (male), "U" (unknown), or "O" (other) '
-                     'is recommended.'), 'default': None},
-            {'name': 'species', 'type': str,
-             'doc': ('The species of the subject. The formal latin binomal name is recommended, e.g., "Mus musculus"'),
-             'default': None},
-            {'name': 'subject_id', 'type': str, 'doc': 'A unique identifier for the subject, e.g., "A10"',
-             'default': None},
-            {'name': 'weight', 'type': (float, str),
-             'doc': ('The weight of the subject, including units. Using kilograms is recommended. e.g., "0.02 kg". '
-                     'If a float is provided, then the weight will be stored as "[value] kg".'),
-             'default': None},
-            {'name': 'date_of_birth', 'type': datetime, 'default': None,
-             'doc': 'The datetime of the date of birth. May be supplied instead of age.'},
-            {'name': 'strain', 'type': str, 'doc': 'The strain of the subject, e.g., "C57BL/6J"', 'default': None})
+    @docval(
+        {
+            "name": "age",
+            "type": (str, timedelta),
+            "doc": 'The age of the subject. The ISO 8601 Duration format is recommended, e.g., "P90D" for 90 days old.'
+                   'A timedelta will automatically be converted to The ISO 8601 Duration format.',
+            "default": None,
+        },
+        {'name': 'description', 'type': str,
+         'doc': 'A description of the subject, e.g., "mouse A10".', 'default': None},
+        {'name': 'genotype', 'type': str,
+         'doc': 'The genotype of the subject, e.g., "Sst-IRES-Cre/wt;Ai32(RCL-ChR2(H134R)_EYFP)/wt".',
+         'default': None},
+        {'name': 'sex', 'type': str,
+         'doc': ('The sex of the subject. Using "F" (female), "M" (male), "U" (unknown), or "O" (other) '
+                 'is recommended.'), 'default': None},
+        {'name': 'species', 'type': str,
+         'doc': 'The species of the subject. The formal latin binomal name is recommended, e.g., "Mus musculus"',
+         'default': None},
+        {'name': 'subject_id', 'type': str, 'doc': 'A unique identifier for the subject, e.g., "A10"',
+         'default': None},
+        {'name': 'weight', 'type': (float, str),
+         'doc': ('The weight of the subject, including units. Using kilograms is recommended. e.g., "0.02 kg". '
+                 'If a float is provided, then the weight will be stored as "[value] kg".'),
+         'default': None},
+        {'name': 'date_of_birth', 'type': datetime, 'default': None,
+         'doc': 'The datetime of the date of birth. May be supplied instead of age.'},
+        {'name': 'strain', 'type': str, 'doc': 'The strain of the subject, e.g., "C57BL/6J"', 'default': None},
+    )
     def __init__(self, **kwargs):
         keys_to_set = ("age",
                        "description",
@@ -91,6 +110,9 @@ class Subject(NWBContainer):
         weight = args_to_set['weight']
         if isinstance(weight, float):
             args_to_set['weight'] = str(weight) + ' kg'
+
+        if isinstance(args_to_set["age"], timedelta):
+            args_to_set["age"] = pd.Timedelta(args_to_set["age"]).isoformat()
 
         date_of_birth = args_to_set['date_of_birth']
         if date_of_birth and date_of_birth.tzinfo is None:
@@ -562,7 +584,7 @@ class NWBFile(MultiContainerInterface):
     @docval(*get_docval(TimeIntervals.add_column))
     def add_epoch_column(self, **kwargs):
         """
-        Add a column to the electrode table.
+        Add a column to the epoch table.
         See :py:meth:`~pynwb.core.TimeIntervals.add_column` for more details
         """
         self.__check_epochs()
@@ -600,16 +622,16 @@ class NWBFile(MultiContainerInterface):
     def add_electrode_column(self, **kwargs):
         """
         Add a column to the electrode table.
-        See :py:meth:`~hdmf.common.DynamicTable.add_column` for more details
+        See :py:meth:`~hdmf.common.table.DynamicTable.add_column` for more details
         """
         self.__check_electrodes()
         self.electrodes.add_column(**kwargs)
 
-    @docval({'name': 'x', 'type': 'float', 'doc': 'the x coordinate of the position (+x is posterior)',
+    @docval({'name': 'x', 'type': float, 'doc': 'the x coordinate of the position (+x is posterior)',
              'default': None},
-            {'name': 'y', 'type': 'float', 'doc': 'the y coordinate of the position (+y is inferior)', 'default': None},
-            {'name': 'z', 'type': 'float', 'doc': 'the z coordinate of the position (+z is right)', 'default': None},
-            {'name': 'imp', 'type': 'float', 'doc': 'the impedance of the electrode, in ohms', 'default': None},
+            {'name': 'y', 'type': float, 'doc': 'the y coordinate of the position (+y is inferior)', 'default': None},
+            {'name': 'z', 'type': float, 'doc': 'the z coordinate of the position (+z is right)', 'default': None},
+            {'name': 'imp', 'type': float, 'doc': 'the impedance of the electrode, in ohms', 'default': None},
             {'name': 'location', 'type': str,
              'doc': 'the location of electrode within the subject e.g. brain region. Required.',
              'default': None},
@@ -620,9 +642,9 @@ class NWBFile(MultiContainerInterface):
              'doc': 'the ElectrodeGroup object to add to this NWBFile. Required.',
              'default': None},
             {'name': 'id', 'type': int, 'doc': 'a unique identifier for the electrode', 'default': None},
-            {'name': 'rel_x', 'type': 'float', 'doc': 'the x coordinate within the electrode group', 'default': None},
-            {'name': 'rel_y', 'type': 'float', 'doc': 'the y coordinate within the electrode group', 'default': None},
-            {'name': 'rel_z', 'type': 'float', 'doc': 'the z coordinate within the electrode group', 'default': None},
+            {'name': 'rel_x', 'type': float, 'doc': 'the x coordinate within the electrode group', 'default': None},
+            {'name': 'rel_y', 'type': float, 'doc': 'the y coordinate within the electrode group', 'default': None},
+            {'name': 'rel_z', 'type': float, 'doc': 'the z coordinate within the electrode group', 'default': None},
             {'name': 'reference', 'type': str, 'doc': 'Description of the reference electrode and/or reference scheme\
                 used for this  electrode, e.g.,"stainless steel skull screw" or "online common average referencing". ',
                 'default': None},
@@ -633,7 +655,7 @@ class NWBFile(MultiContainerInterface):
     def add_electrode(self, **kwargs):
         """
         Add an electrode to the electrodes table.
-        See :py:meth:`~hdmf.common.DynamicTable.add_row` for more details.
+        See :py:meth:`~hdmf.common.table.DynamicTable.add_row` for more details.
 
         Required fields are *location* and
         *group* and any columns that have been added
@@ -702,7 +724,7 @@ class NWBFile(MultiContainerInterface):
     def add_unit_column(self, **kwargs):
         """
         Add a column to the unit table.
-        See :py:meth:`~hdmf.common.DynamicTable.add_column` for more details
+        See :py:meth:`~hdmf.common.table.DynamicTable.add_column` for more details
         """
         self.__check_units()
         self.units.add_column(**kwargs)
@@ -711,7 +733,7 @@ class NWBFile(MultiContainerInterface):
     def add_unit(self, **kwargs):
         """
         Add a unit to the unit table.
-        See :py:meth:`~hdmf.common.DynamicTable.add_row` for more details.
+        See :py:meth:`~hdmf.common.table.DynamicTable.add_row` for more details.
 
         """
         self.__check_units()
@@ -725,7 +747,7 @@ class NWBFile(MultiContainerInterface):
     def add_trial_column(self, **kwargs):
         """
         Add a column to the trial table.
-        See :py:meth:`~hdmf.common.DynamicTable.add_column` for more details
+        See :py:meth:`~hdmf.common.table.DynamicTable.add_column` for more details
         """
         self.__check_trials()
         self.trials.add_column(**kwargs)
@@ -734,7 +756,7 @@ class NWBFile(MultiContainerInterface):
     def add_trial(self, **kwargs):
         """
         Add a trial to the trial table.
-        See :py:meth:`~hdmf.common.DynamicTable.add_interval` for more details.
+        See :py:meth:`~hdmf.common.table.DynamicTable.add_interval` for more details.
 
         Required fields are *start_time*, *stop_time*, and any columns that have
         been added (through calls to `add_trial_columns`).
@@ -752,8 +774,8 @@ class NWBFile(MultiContainerInterface):
     @docval(*get_docval(DynamicTable.add_column))
     def add_invalid_times_column(self, **kwargs):
         """
-        Add a column to the trial table.
-        See :py:meth:`~hdmf.common.DynamicTable.add_column` for more details
+        Add a column to the invalid times table.
+        See :py:meth:`~hdmf.common.table.DynamicTable.add_column` for more details
         """
         self.__check_invalid_times()
         self.invalid_times.add_column(**kwargs)
@@ -761,8 +783,8 @@ class NWBFile(MultiContainerInterface):
     @docval(*get_docval(TimeIntervals.add_interval), allow_extra=True)
     def add_invalid_time_interval(self, **kwargs):
         """
-        Add a trial to the trial table.
-        See :py:meth:`~hdmf.common.DynamicTable.add_row` for more details.
+        Add a time interval to the invalid times table.
+        See :py:meth:`~hdmf.common.table.DynamicTable.add_row` for more details.
 
         Required fields are *start_time*, *stop_time*, and any columns that have
         been added (through calls to `add_invalid_times_columns`).

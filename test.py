@@ -170,6 +170,9 @@ def validate_nwbs():
                 cmds += [["python", "-m", "pynwb.validate", "--no-cached-namespace", nwb]]
 
                 for ns in namespaces:
+                    # for some reason, this logging command is necessary to correctly printing the namespace in the
+                    # next logging command
+                    logging.info("Namespace found: %s" % ns)
                     cmds += [["python", "-m", "pynwb.validate", "--cached-namespace", "--ns", ns, nwb]]
 
                 for cmd in cmds:
@@ -224,6 +227,54 @@ def run_integration_tests(verbose=True):
     else:
         logging.info('all classes have integration tests')
 
+    # also test the validation script
+    run_test_suite("tests/validation", "validation tests", verbose=verbose)
+
+
+def clean_up_tests():
+    # remove files generated from running example files
+    files_to_remove = [
+        "advanced_io_example.nwb",
+        "basic_alternative_custom_write.nwb",
+        "basic_iterwrite_example.nwb",
+        "basic_sparse_iterwrite_*.nwb",
+        "basic_sparse_iterwrite_*.npy",
+        "basics_tutorial.nwb",
+        "behavioral_tutorial.nwb",
+        "brain_observatory.nwb",
+        "cache_spec_example.nwb",
+        "ecephys_tutorial.nwb",
+        "ecog.extensions.yaml",
+        "ecog.namespace.yaml",
+        "ex_test_icephys_file.nwb",
+        "example_timeintervals_file.nwb",
+        "exported_nwbfile.nwb",
+        "external_linkcontainer_example.nwb",
+        "external_linkdataset_example.nwb",
+        "external1_example.nwb",
+        "external2_example.nwb",
+        "icephys_example.nwb",
+        "icephys_pandas_testfile.nwb",
+        "images_tutorial.nwb",
+        "manifest.json",
+        "mylab.extensions.yaml",
+        "mylab.namespace.yaml",
+        "nwbfile.nwb",
+        "ophys_tutorial.nwb",
+        "processed_data.nwb",
+        "raw_data.nwb",
+        "scratch_analysis.nwb",
+        "test_cortical_surface.nwb",
+        "test_icephys_file.nwb",
+        "test_multicontainerinterface.extensions.yaml",
+        "test_multicontainerinterface.namespace.yaml",
+        "test_multicontainerinterface.nwb",
+    ]
+    for f in files_to_remove:
+        for name in glob.glob(f):
+            if os.path.exists(name):
+                os.remove(name)
+
 
 def main():
     # setup and parse arguments
@@ -242,7 +293,7 @@ def main():
     parser.add_argument('-b', '--backwards', action='append_const', const=flags['backwards'], dest='suites',
                         help='run backwards compatibility tests')
     parser.add_argument('-w', '--validation', action='append_const', const=flags['validation'], dest='suites',
-                        help='run validation tests')
+                        help='run example tests and validation tests on example NWB files')
     parser.add_argument('-r', '--ros3', action='append_const', const=flags['ros3'], dest='suites',
                         help='run ros3 streaming tests')
     args = parser.parse_args()
@@ -299,6 +350,10 @@ def main():
     # Run ros3 streaming tests
     if flags['ros3'] in args.suites:
         run_test_suite("tests/integration/ros3", "pynwb ros3 streaming tests", verbose=args.verbosity)
+
+    # Delete files generated from running example tests above
+    if flags['example'] in args.suites or flags['validation'] in args.suites:
+        clean_up_tests()
 
     final_message = 'Ran %s tests' % TOTAL
     exitcode = 0

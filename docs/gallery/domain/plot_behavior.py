@@ -15,7 +15,8 @@ The examples below follow this general workflow for adding behavior data to an :
 * create an object:
 
   * :py:class:`~pynwb.base.TimeSeries` for continuous time series data,
-  * :py:class:`~pynwb.behavior.SpatialSeries` for continuous spatial data (e.g. position, direction relative to some reference frame),
+  * :py:class:`~pynwb.behavior.SpatialSeries` for continuous spatial data (e.g. position, direction relative to some
+    reference frame),
   * :py:class:`~pynwb.misc.IntervalSeries` or :py:class:`~pynwb.epoch.TimeIntervals` for time intervals
 
 * store that object inside a behavior interface object:
@@ -136,7 +137,8 @@ position = Position(spatial_series=position_spatial_series)
 #
 # .. seealso::
 #    You can learn more about best practices that can be applied to
-#    :py:class:`~pynwb.behavior.SpatialSeries` at `NWB Best Practices <https://www.nwb.org/best-practices/#timeseries>`_.
+#    :py:class:`~pynwb.behavior.SpatialSeries` at `NWB Best Practices
+#    <https://nwbinspector.readthedocs.io/en/dev/best_practices/time_series.html>`_.
 #
 
 ####################
@@ -144,7 +146,7 @@ position = Position(spatial_series=position_spatial_series)
 # -----------------------------------
 #
 # Create a processing module called ``"behavior"`` for storing behavioral data in the :py:class:`~pynwb.file.NWBFile`
-# using the :py:meth:`~pynwb.file.NWBFile.create_processing_module` method, then and add the
+# using the :py:meth:`~pynwb.file.NWBFile.create_processing_module` method, and then add the
 # :py:class:`~pynwb.behavior.Position` object to the processing module.
 
 
@@ -241,7 +243,8 @@ behavior_module.add(behavioral_events)
 ####################
 # Storing only the timestamps of the events is possible with the `ndx-events <https://pypi.org/project/ndx-events/>`_
 # NWB extension. You can also add labels associated with the events with this extension.
-# You can find information about installation and example usage `here <https://github.com/nwb-extensions/ndx-events-record>`_.
+# You can find information about installation and example usage `here
+# <https://github.com/nwb-extensions/ndx-events-record>`_.
 #
 # .. seealso::
 #    You can learn more about using extensions in the :ref:`tutorial-extending-nwb` tutorial.
@@ -375,8 +378,7 @@ behavior_module.add(eye_tracking)
 # Writing the behavior data to an NWB file
 # ----------------------------------------
 #
-# As demonstrated in the :ref:`basic_writing` tutorial, we will use :py:class:`~pynwb.NWBHDF5IO`
-# to write the file.
+# As demonstrated in the :ref:`basic_writing` tutorial, we will use :py:class:`~pynwb.NWBHDF5IO` to write the file.
 
 with NWBHDF5IO("behavioral_tutorial.nwb", "w") as io:
     io.write(nwbfile)

@@ -1,11 +1,11 @@
 from bisect import bisect_left
 
-from hdmf.utils import docval, getargs, popargs, get_docval
 from hdmf.data_utils import DataIO
+from hdmf.common import DynamicTable
+from hdmf.utils import docval, getargs, popargs, get_docval
 
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries, TimeSeriesReferenceVectorData, TimeSeriesReference
-from hdmf.common import DynamicTable
 
 
 @register_class('TimeIntervals', CORE_NAMESPACE)
@@ -31,8 +31,8 @@ class TimeIntervals(DynamicTable):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-    @docval({'name': 'start_time', 'type': 'float', 'doc': 'Start time of epoch, in seconds'},
-            {'name': 'stop_time', 'type': 'float', 'doc': 'Stop time of epoch, in seconds'},
+    @docval({'name': 'start_time', 'type': float, 'doc': 'Start time of epoch, in seconds'},
+            {'name': 'stop_time', 'type': float, 'doc': 'Stop time of epoch, in seconds'},
             {'name': 'tags', 'type': (str, list, tuple), 'doc': 'user-defined tags used throughout time intervals',
              'default': None},
             {'name': 'timeseries', 'type': (list, tuple, TimeSeries), 'doc': 'the TimeSeries this epoch applies to',

@@ -130,7 +130,7 @@ nwbfile.add_epoch(6.0, 8.0, ['second', 'example'], [test_ts, ])
 # Custom Time Intervals
 # ^^^^^^^^^^^^^^^^^^^^^
 #
-# To define custom, experiment-specific :py:class:`~pynwb.epoch.TimeIntervals` we can wither add them
+# To define custom, experiment-specific :py:class:`~pynwb.epoch.TimeIntervals` we can add them
 # either: 1) when creating the :py:class:`~pynwb.file.NWBFile` by defining the
 # :py:meth:`~pynwb.file.NWBFile.__init__.intervals` constructor argument or 2) via the
 # :py:meth:`~pynwb.file.NWBFile.add_time_intervals` or :py:meth:`~pynwb.file.NWBFile.create_time_intervals`
@@ -238,7 +238,8 @@ from pynwb import NWBHDF5IO
 with NWBHDF5IO('example_timeintervals_file.nwb', 'w') as io:
     io.write(nwbfile)
 # read the file
-io = NWBHDF5IO('example_timeintervals_file.nwb', 'r')
-nwbfile_in = io.read()
-# plot the sleep stages TimeIntervals table
-nwbfile.get_time_intervals('sleep_stages').to_dataframe()
+with NWBHDF5IO('example_timeintervals_file.nwb', 'r') as io:
+    nwbfile_in = io.read()
+
+    # plot the sleep stages TimeIntervals table
+    nwbfile_in.get_time_intervals('sleep_stages').to_dataframe()

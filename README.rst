@@ -1,7 +1,7 @@
 .. image:: docs/source/figures/logo_pynwb.png
     :width: 200px
 
-PyNWB is a Python package for working with NWB files. The PyNWB 
+PyNWB is a Python package for working with NWB files. The PyNWB
 documentation can be found at https://pynwb.readthedocs.io
 
 Latest Release
@@ -13,35 +13,47 @@ Latest Release
 .. image:: https://anaconda.org/conda-forge/pynwb/badges/version.svg
      :target: https://anaconda.org/conda-forge/pynwb
 
-
-Build Status
-============
-
-.. table::
-
-  +-----------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------+
-  | Linux                                                                                   | Windows and MacOS                                                                                                               |
-  +=========================================================================================+=================================================================================================================================+
-  | .. image:: https://circleci.com/gh/NeurodataWithoutBorders/pynwb.svg?style=shield       | .. image:: https://dev.azure.com/NeurodataWithoutBorders/pynwb/_apis/build/status/NeurodataWithoutBorders.pynwb?branchName=dev  |
-  |     :target: https://circleci.com/gh/NeurodataWithoutBorders/pynwb                      |     :target: https://dev.azure.com/NeurodataWithoutBorders/pynwb/_build/latest?definitionId=3&branchName=dev                    |
-  +-----------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------+
-
-
-**Conda**
-
-
-.. image:: https://circleci.com/gh/conda-forge/pynwb-feedstock.svg?style=shield
-     :target: https://circleci.com/gh/conda-forge/pynwb-feedstocks
-
-
-Overall Health
+Code Coverage
 ==============
 
 .. image:: https://github.com/NeurodataWithoutBorders/pynwb/workflows/Run%20coverage/badge.svg
     :target: https://github.com/NeurodataWithoutBorders/pynwb/actions?query=workflow%3A%22Run+coverage%22
 
+Overall test coverage
+
 .. image:: https://codecov.io/gh/NeurodataWithoutBorders/pynwb/branch/dev/graph/badge.svg
     :target: https://codecov.io/gh/NeurodataWithoutBorders/pynwb
+
+Unit test coverage
+
+.. image:: https://codecov.io/gh/NeurodataWithoutBorders/pynwb/branch/dev/graph/badge.svg?flag=unit
+    :target: https://codecov.io/gh/NeurodataWithoutBorders/pynwb
+
+Integration test coverage
+
+.. image:: https://codecov.io/gh/NeurodataWithoutBorders/pynwb/branch/dev/graph/badge.svg?flag=integration
+    :target: https://codecov.io/gh/NeurodataWithoutBorders/pynwb
+
+Overall Health
+==============
+
+.. image:: https://github.com/NeurodataWithoutBorders/pynwb/actions/workflows/run_tests.yml/badge.svg
+    :target: https://github.com/NeurodataWithoutBorders/pynwb/actions/workflows/run_tests.yml
+
+.. image:: https://github.com/NeurodataWithoutBorders/pynwb/actions/workflows/run_flake8.yml/badge.svg
+    :target: https://github.com/NeurodataWithoutBorders/pynwb/actions/workflows/run_flake8.yml
+
+.. image:: https://github.com/NeurodataWithoutBorders/pynwb/actions/workflows/check_external_links.yml/badge.svg
+    :target: https://github.com/NeurodataWithoutBorders/pynwb/actions/workflows/check_external_links.yml
+
+.. image:: https://github.com/NeurodataWithoutBorders/pynwb/actions/workflows/run_inspector_tests.yml/badge.svg
+    :target: https://github.com/NeurodataWithoutBorders/pynwb/actions/workflows/run_inspector_tests.yml
+
+.. image:: https://github.com/NeurodataWithoutBorders/pynwb/actions/workflows/run_all_tests.yml/badge.svg
+    :target: https://github.com/NeurodataWithoutBorders/pynwb/actions/workflows/run_all_tests.yml
+
+.. image:: https://github.com/NeurodataWithoutBorders/pynwb/actions/workflows/deploy_release.yml/badge.svg
+    :target: https://github.com/NeurodataWithoutBorders/pynwb/actions/workflows/deploy_release.yml
 
 .. image:: https://requires.io/github/NeurodataWithoutBorders/pynwb/requirements.svg?branch=dev
      :target: https://requires.io/github/NeurodataWithoutBorders/pynwb/requirements/?branch=dev
@@ -53,7 +65,13 @@ Overall Health
 
 .. image:: https://img.shields.io/pypi/l/pynwb.svg
      :target: https://github.com/neurodatawithoutborders/pynwb/blob/dev/license.txt
-     :alt:    PyPI - License
+     :alt: PyPI - License
+
+**Conda**
+
+.. image:: https://circleci.com/gh/conda-forge/pynwb-feedstock.svg?style=shield
+     :target: https://circleci.com/gh/conda-forge/pynwb-feedstock
+     :alt: Conda Feedstock Status
 
 NWB Format API
 ==============
@@ -73,7 +91,7 @@ breaking down the barriers to data sharing in neuroscience.
 Installation
 ============
 
-See the PyNWB documentation for details http://pynwb.readthedocs.io/en/latest/getting_started.html#installation
+See the PyNWB documentation for details https://pynwb.readthedocs.io/en/stable/install_users.html
 
 Code of Conduct
 ===============
@@ -88,7 +106,7 @@ For details on how to contribute to PyNWB see our `contribution guidelines <docs
 Citing NWB
 ==========
 
-* **Manuscript:** Oliver Rübel, Andrew Tritt, Ryan Ly, Benjamin K. Dichter, Satrajit Ghosh, Lawrence Niu, Ivan Soltesz, Karel Svoboda, Loren Frank, Kristofer E. Bouchard, "The Neurodata Without Borders ecosystem for neurophysiological data science", bioRxiv 2021.03.13.435173, March 15, 2021, doi: https://doi.org/10.1101/2021.03.13.435173
+* **Manuscript:** Oliver Rübel, Andrew Tritt, Ryan Ly, Benjamin K Dichter, Satrajit Ghosh, Lawrence Niu, Pamela Baker, Ivan Soltesz, Lydia Ng, Karel Svoboda, Loren Frank, Kristofer E Bouchard. (2022). The Neurodata Without Borders ecosystem for neurophysiological data science. eLife, 11:e78362. doi: https://doi.org/10.7554/eLife.78362
 * **RRID:** (PyNWB, RRID:SCR_017452)
 
 LICENSE

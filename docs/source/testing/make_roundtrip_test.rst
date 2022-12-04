@@ -24,18 +24,18 @@ cause the roundtrip NWB file to be deleted once the test has completed
 Before writing tests, we also suggest you familiarize yourself with the
 :ref:`software architecture <software-architecture>` of PyNWB.
 
---------------------
-``TestMapRoundTrip``
---------------------
+-----------------
+``NWBH5IOMixin``
+-----------------
 
-To write a roundtrip test, you will need to subclass the ``TestMapRoundTrip`` class and override some of
-its instance methods.
+To write a roundtrip test, you will need to subclass the :py:class:`~pynwb.testing.testh5io.NWBH5IOMixin` class and
+override some of its instance methods.
 
-``TestMapRoundTrip`` provides four methods for testing the process of going from in-memory Python object to data
-stored on disk and back. Three of these methods--``setUpContainer``, ``addContainer``, and ``getContainer``--are
-required for carrying out the roundtrip test. The fourth method is required for testing the conversion
-from the container to the :py:mod:`builder <hdmf.build.builders>`--the intermediate data structure
-that gets used by :py:class:`~hdmf.backends.io.HDMFIO` implementations for writing to disk.
+:py:class:`~pynwb.testing.testh5io.NWBH5IOMixin` provides four methods for testing the process of going from
+in-memory Python object to data stored on disk and back. Three of these methods--``setUpContainer``,
+``addContainer``, and ``getContainer``--are required for carrying out the roundtrip test. The fourth method is
+required for testing the conversion from the container to the :py:mod:`builder <hdmf.build.builders>`--the
+intermediate data structure that gets used by :py:class:`~hdmf.backends.io.HDMFIO` implementations for writing to disk.
 
 If you do not want to test step of the process, you can just implement ``setUpContainer``, ``addContainer``, and
 ``getContainer``.
@@ -51,21 +51,29 @@ Here is an example using a generic :py:class:`~pynwb.base.TimeSeries`:
 
 .. code-block:: python
 
-    from . base import TestMapRoundTrip
+    from pynwb.testing import NWBH5IOMixin, TestCase
 
-    class TimeSeriesRoundTrip(TestMapRoundTrip):
+
+    class TimeSeriesRoundTrip(NWBH5IOMixin, TestCase):
 
         def setUpContainer(self):
-            return TimeSeries('test_timeseries', 'example_source', list(range(100, 200, 10)),
-                              'SIunit', timestamps=list(range(10)), resolution=0.1)
+            return TimeSeries(
+                "test_timeseries",
+                "example_source",
+                list(range(100, 200, 10)),
+                "SIunit",
+                timestamps=list(range(10)),
+                resolution=0.1,
+            )
 
 
 ################
 ``addContainer``
 ################
 
-The next thing is to tell the ``TestMapRoundTrip`` how to add the container to an NWBFile. This method takes a single
-argument--the :py:class:`~pynwb.file.NWBFile` instance that will be used to write your container.
+The next thing is to tell the :py:class:`~pynwb.testing.testh5io.NWBH5IOMixin` how to add the container to an NWBFile.
+This method takes a single argument--the :py:class:`~pynwb.file.NWBFile` instance that will be used to write your
+container.
 
 This method is required because different container types are allowed in different parts of an NWBFile. This method is
 also where you can add additional containers that your container of interest depends on. For example, for the
@@ -79,7 +87,7 @@ Continuing from our example above, we will add the method for adding a generic :
 
 .. code-block:: python
 
-    class TimeSeriesRoundTrip(TestMapRoundTrip):
+    class TimeSeriesRoundTrip(NWBH5IOMixin, TestCase):
 
         def addContainer(self, nwbfile):
             nwbfile.add_acquisition(self.container)
@@ -89,9 +97,9 @@ Continuing from our example above, we will add the method for adding a generic :
 ``getContainer``
 ################
 
-Finally, you need to tell ``TestMapRoundTrip`` how to get back the container we added. As with ``addContainer``, this
-method takes an :py:class:`~pynwb.file.NWBFile` as its single argument. The only difference is that this
-:py:class:`~pynwb.file.NWBFile` instance is what was read back in.
+Finally, you need to tell :py:class:`~pynwb.testing.testh5io.NWBH5IOMixin` how to get back the container we added. As
+with ``addContainer``, this method takes an :py:class:`~pynwb.file.NWBFile` as its single argument. The only
+difference is that this :py:class:`~pynwb.file.NWBFile` instance is what was read back in.
 
 Again, since not all containers go in the same place, we need to tell the test harness how to get back our container
 of interest.
@@ -100,7 +108,7 @@ To finish off example from above, we will add the method for getting back our ge
 
 .. code-block:: python
 
-    class TimeSeriesRoundTrip(TestMapRoundTrip):
+    class TimeSeriesRoundTrip(NWBH5IOMixin, TestCase):
 
         def getContainer(self, nwbfile):
             return nwbfile.get_acquisition(self.container.name)
@@ -126,31 +134,43 @@ Continuing from the :py:class:`~pynwb.base.TimeSeries` example, lets add ``setUp
 
     from hdmf.build import GroupBuilder
 
-    class TimeSeriesRoundTrip(TestMapRoundTrip):
+    class TimeSeriesRoundTrip(NWBH5IOMixin, TestCase):
 
         def setUpBuilder(self):
-            return GroupBuilder('test_timeseries',
-                                attributes={'source': 'example_source',
-                                            'namespace': base.CORE_NAMESPACE,
-                                            'neurodata_type': 'TimeSeries',
-                                            'description': 'no description',
-                                            'comments': 'no comments'},
-                                datasets={'data': DatasetBuilder('data', list(range(100, 200, 10)),
-                                                                 attributes={'unit': 'SIunit',
-                                                                             'conversion': 1.0,
-                                                                             'resolution': 0.1}),
-                                          'timestamps': DatasetBuilder('timestamps', list(range(10)),
-                                                                       attributes={'unit': 'Seconds', 'interval': 1})})
+            return GroupBuilder(
+                'test_timeseries',
+                attributes={
+                    'source': 'example_source',
+                    'namespace': base.CORE_NAMESPACE,
+                    'neurodata_type': 'TimeSeries',
+                    'description': 'no description',
+                    'comments': 'no comments',
+                },
+                datasets={
+                    'data': DatasetBuilder(
+                        'data', list(range(100, 200, 10)),
+                        attributes={
+                            'unit': 'SIunit',
+                            'conversion': 1.0,
+                            'resolution': 0.1,
+                        }
+                    ),
+                    'timestamps': DatasetBuilder(
+                        'timestamps', list(range(10)),
+                        attributes={'unit': 'Seconds', 'interval': 1},
+                    )
+                }
+            )
 
 .. _rt_below:
 
 -----------------------
-``TestDataInterfaceIO``
+``AcquisitionH5IOMixin``
 -----------------------
 
 If you are testing something that can go in *acquisition*, you can avoid writing ``addContainer`` and ``getContainer``
-by extending ``TestDataInterfaceIO``.  This class has already overridden these methods to add your container object to
-acquisition.
+by extending :py:class:`~pynwb.testing.testh5io.AcquisitionH5IOMixin`.  This class has already overridden these
+methods to add your container object to acquisition.
 
 Even if your container can go in acquisition, you may still need to override ``addContainer`` if your container depends
 other containers that you need to add to the :py:class:`~pynwb.file.NWBFile` that will be written.

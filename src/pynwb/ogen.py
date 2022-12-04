@@ -8,18 +8,17 @@ from .device import Device
 
 @register_class('OptogeneticStimulusSite', CORE_NAMESPACE)
 class OptogeneticStimulusSite(NWBContainer):
-    '''
-    '''
+    """Optogenetic stimulus site."""
 
     __nwbfields__ = ('device',
                      'description',
                      'excitation_lambda',
                      'location')
 
-    @docval({'name': 'name', 'type': str, 'doc': 'The name of this stimulus site'},
-            {'name': 'device', 'type': Device, 'doc': 'the device that was used'},
+    @docval({'name': 'name', 'type': str, 'doc': 'The name of this stimulus site.'},
+            {'name': 'device', 'type': Device, 'doc': 'The device that was used.'},
             {'name': 'description', 'type': str, 'doc': 'Description of site.'},
-            {'name': 'excitation_lambda', 'type': 'float', 'doc': 'Excitation wavelength in nm.'},
+            {'name': 'excitation_lambda', 'type': float, 'doc': 'Excitation wavelength in nm.'},
             {'name': 'location', 'type': str, 'doc': 'Location of stimulation site.'})
     def __init__(self, **kwargs):
         args_to_set = popargs_to_dict(('device', 'description', 'excitation_lambda', 'location'), kwargs)

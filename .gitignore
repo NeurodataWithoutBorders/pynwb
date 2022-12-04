@@ -58,6 +58,7 @@ docs/tmpl.index.rst
 # coverage output
 tests/coverage/htmlcov
 .coverage
+.coverage.*
 
 # duecredit output
 .duecredit.p
@@ -68,5 +69,8 @@ tests/coverage/htmlcov
 # vscode
 .vscode/
 
-#mypy
+# mypy
 .mypy_cache/
+
+# macos
+.DS_Store
