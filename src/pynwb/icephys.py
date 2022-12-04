@@ -79,25 +79,63 @@ class PatchClampSeries(TimeSeries):
     (this class should not be instantiated directly).
     '''
 
-    __nwbfields__ = ('electrode',
-                     'gain',
-                     'stimulus_description',
-                     'sweep_number')
+    __nwbfields__ = (
+        'electrode',
+        'gain',
+        'stimulus_description',
+        'sweep_number',
+    )
 
-    @docval(*get_docval(TimeSeries.__init__, 'name'),  # required
-            {'name': 'data', 'type': ('array_data', 'data', TimeSeries),  # required
-             'doc': 'The data values. The first dimension must be time.'},
-            {'name': 'unit', 'type': str, 'doc': 'The base unit of measurement (should be SI unit)'},  # required
-            {'name': 'electrode', 'type': IntracellularElectrode,  # required
-             'doc': 'IntracellularElectrode group that describes the electrode that was used to apply '
-                     'or record this data.'},
-            {'name': 'gain', 'type': float, 'doc': 'Units: Volt/Amp (v-clamp) or Volt/Volt (c-clamp)'},  # required
-            {'name': 'stimulus_description', 'type': str, 'doc': 'the stimulus name/protocol', 'default': "N/A"},
-            *get_docval(TimeSeries.__init__, 'resolution', 'conversion', 'timestamps', 'starting_time', 'rate',
-                        'comments', 'description', 'control', 'control_description', 'offset'),
-            {'name': 'sweep_number', 'type': (int, 'uint32', 'uint64'),
-             'doc': 'Sweep number, allows for grouping different PatchClampSeries together '
-                    'via the sweep_table', 'default': None})
+    @docval(
+        *get_docval(TimeSeries.__init__, 'name'),  # required
+        {
+            "name": "data",
+            "type": ("array_data", "data", TimeSeries),
+            "doc": "The data values. The first dimension must be time.",
+            "shape": (None,),
+        },   # required
+        {
+            'name': 'unit',
+            'type': str,
+            'doc': 'The base unit of measurement (should be SI unit)',
+        },  # required
+        {
+            'name': 'electrode',
+            'type': IntracellularElectrode,
+            'doc': 'IntracellularElectrode group that describes the electrode that was '
+                   'used to apply or record this data.',
+        },    # required
+        {
+            'name': 'gain',
+            'type': float,
+            'doc': 'Units: Volt/Amp (v-clamp) or Volt/Volt (c-clamp)',
+        },  # required
+        {
+            'name': 'stimulus_description',
+            'type': str,
+            'doc': 'the stimulus name/protocol',
+            'default': "N/A",
+        },
+        *get_docval(
+            TimeSeries.__init__,
+            'resolution',
+            'conversion',
+            'timestamps',
+            'starting_time',
+            'rate',
+            'comments',
+            'description',
+            'control',
+            'control_description',
+            'offset',
+        ),
+        {
+            'name': 'sweep_number', 'type': (int, 'uint32', 'uint64'),
+            'doc': 'Sweep number, allows for grouping different PatchClampSeries '
+                   'together via the sweep_table',
+            'default': None,
+        }
+    )
     def __init__(self, **kwargs):
         name, data, unit, stimulus_description = popargs('name', 'data', 'unit', 'stimulus_description', kwargs)
         electrode, gain, sweep_number = popargs('electrode', 'gain', 'sweep_number', kwargs)
