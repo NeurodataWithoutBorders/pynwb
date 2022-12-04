@@ -122,7 +122,7 @@ class SpikeEventSeries(ElectricalSeries):
         if not (isinstance(data, TimeSeries) or isinstance(timestamps, TimeSeries)):
             if not (isinstance(data, DataChunkIterator) or isinstance(timestamps, DataChunkIterator)):
                 if len(data) != len(timestamps):
-                    raise Exception('Must provide the same number of timestamps and spike events')
+                    raise ValueError('Must provide the same number of timestamps and spike events')
             else:
                 # TODO: add check when we have DataChunkIterators
                 pass
