@@ -162,7 +162,7 @@ class ElectrodeGroupConstructor(TestCase):
 
     def test_init_position_bad(self):
         dev1 = Device('dev1')
-        with self.assertRaises(TypeError):
+        with self.assertRaises(ValueError):
             ElectrodeGroup('elec1', 'electrode description', 'electrode location', dev1, (1, 2))
 
 
