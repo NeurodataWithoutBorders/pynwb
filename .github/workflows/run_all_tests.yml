@@ -44,13 +44,19 @@ jobs:
           - { name: macos-python3.10-upgraded    , test-tox-env: py310-upgraded  , build-tox-env: build-py310-upgraded  , python-ver: "3.10", os: macos-latest }
           - { name: macos-python3.10-prerelease  , test-tox-env: py310-prerelease, build-tox-env: build-py310-prerelease, python-ver: "3.10", os: macos-latest }
     steps:
+      - name: Cancel non-latest runs
+        uses: styfle/cancel-workflow-action@0.11.0
+        with:
+          all_but_latest: true
+          access_token: ${{ github.token }}
+
       - uses: actions/checkout@v3
         with:
           submodules: 'recursive'
           fetch-depth: 0  # tags are required for versioneer to determine the version
 
       - name: Set up Python
-        uses: actions/setup-python@v3
+        uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-ver }}
 
@@ -100,9 +106,10 @@ jobs:
           # - { name: macos-gallery-python3.10-upgraded    , test-tox-env: gallery-py310-upgraded  , python-ver: "3.10", os: macos-latest }
           # - { name: macos-gallery-python3.10-prerelease  , test-tox-env: gallery-py310-prerelease, python-ver: "3.10", os: macos-latest }
     steps:
-      - name: Cancel any previous incomplete runs
-        uses: styfle/cancel-workflow-action@0.9.1
+      - name: Cancel non-latest runs
+        uses: styfle/cancel-workflow-action@0.11.0
         with:
+          all_but_latest: true
           access_token: ${{ github.token }}
 
       - uses: actions/checkout@v3
@@ -110,7 +117,7 @@ jobs:
           submodules: 'recursive'
 
       - name: Set up Python
-        uses: actions/setup-python@v3
+        uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-ver }}
 
@@ -142,9 +149,10 @@ jobs:
           - { name: conda-linux-python3.10-upgraded  , test-tox-env: py310-upgraded  , build-tox-env: build-py310-upgraded  , python-ver: "3.10", os: ubuntu-latest }
           - { name: conda-linux-python3.10-prerelease, test-tox-env: py310-prerelease, build-tox-env: build-py310-prerelease, python-ver: "3.10", os: ubuntu-latest }
     steps:
-      - name: Cancel any previous incomplete runs
-        uses: styfle/cancel-workflow-action@0.9.1
+      - name: Cancel non-latest runs
+        uses: styfle/cancel-workflow-action@0.11.0
         with:
+          all_but_latest: true
           access_token: ${{ github.token }}
 
       - uses: actions/checkout@v3
@@ -194,9 +202,10 @@ jobs:
           - { name: windows-python3.9-ros3, python-ver: "3.9", os: windows-latest }
           - { name: macos-python3.9-ros3  , python-ver: "3.9", os: macos-latest }
     steps:
-      - name: Cancel any previous incomplete runs
-        uses: styfle/cancel-workflow-action@0.9.1
+      - name: Cancel non-latest runs
+        uses: styfle/cancel-workflow-action@0.11.0
         with:
+          all_but_latest: true
           access_token: ${{ github.token }}
 
       - uses: actions/checkout@v3
@@ -239,9 +248,10 @@ jobs:
           - { name: windows-gallery-python3.9-ros3, python-ver: "3.9", os: windows-latest }
           - { name: macos-gallery-python3.9-ros3  , python-ver: "3.9", os: macos-latest }
     steps:
-      - name: Cancel any previous incomplete runs
-        uses: styfle/cancel-workflow-action@0.9.1
+      - name: Cancel non-latest runs
+        uses: styfle/cancel-workflow-action@0.11.0
         with:
+          all_but_latest: true
           access_token: ${{ github.token }}
 
       - uses: actions/checkout@v3

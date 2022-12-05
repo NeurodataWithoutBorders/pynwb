@@ -34,6 +34,16 @@ from pynwb.testing.mock.ecephys import (
     mock_SpikeEventSeries,
 )
 
+from pynwb.testing.mock.icephys import (
+    mock_IntracellularElectrode,
+    mock_CurrentClampSeries,
+    mock_IZeroClampSeries,
+    mock_VoltageClampSeries,
+    mock_VoltageClampStimulusSeries,
+    mock_CurrentClampStimulusSeries,
+    mock_IntracellularRecordingsTable,
+)
+
 import pytest
 
 from pynwb.testing.mock.utils import name_generator, name_generator_registry
@@ -63,6 +73,13 @@ from pynwb.testing.mock.utils import name_generator, name_generator_registry
         mock_Subject,
         mock_NWBFile,
         mock_TimeSeries,
+        mock_CurrentClampSeries,
+        mock_IZeroClampSeries,
+        mock_VoltageClampSeries,
+        mock_VoltageClampStimulusSeries,
+        mock_IntracellularElectrode,
+        mock_CurrentClampStimulusSeries,
+        mock_IntracellularRecordingsTable,
     ],
 )
 def test_mock(mock_function):

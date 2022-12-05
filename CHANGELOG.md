@@ -5,7 +5,10 @@
 ### Enhancements and minor changes
 - `Subject.age` can be input as a `timedelta` type. @bendichter [#1590](https://github.com/NeurodataWithoutBorders/pynwb/pull/1590)
 - Add `Subject.age__reference` field. @bendichter ([#1540](https://github.com/NeurodataWithoutBorders/pynwb/pull/1540))
+- Add module `pynwb.testing.mock.icephys` and corresponding tests. @bendichter 
+  [1595](https://github.com/NeurodataWithoutBorders/pynwb/pull/1595)
 - Remove redundant object mapper code. @rly [#1600](https://github.com/NeurodataWithoutBorders/pynwb/pull/1600)
+- Fix pending deprecations and issues in CI. @rly [#1594](https://github.com/NeurodataWithoutBorders/pynwb/pull/1594)
 
 ### Documentation and tutorial enhancements:
 - Adjusted [ecephys tutorial](https://pynwb.readthedocs.io/en/stable/tutorials/domain/ecephys.html) to create fake data with proper dimensions @bendichter [#1581](https://github.com/NeurodataWithoutBorders/pynwb/pull/1581)
@@ -15,9 +18,12 @@
   [#1586](https://github.com/NeurodataWithoutBorders/pynwb/pull/1586)
 - More informative error message for common installation error. @bendichter, @rly
   [#1591](https://github.com/NeurodataWithoutBorders/pynwb/pull/1591)
+  
+### Bug fixes
+- Add shape constraint to `PatchClampSeries.data`. @bendichter 
+  [#1596](https://github.com/NeurodataWithoutBorders/pynwb/pull/1596)
 - Update the [images tutorial](https://pynwb.readthedocs.io/en/stable/tutorials/domain/images.html) to provide example usage of an ``IndexSeries``
   with a reference to ``Images``. @bendichter [#1602](https://github.com/NeurodataWithoutBorders/pynwb/pull/1602)
-
 ## PyNWB 2.2.0 (October 19, 2022)
 
 ### Enhancements and minor changes
