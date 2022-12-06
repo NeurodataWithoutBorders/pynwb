@@ -77,9 +77,9 @@ class Subject(NWBContainer):
             "name": "age__reference",
             "type": str,
             "doc": "Age is with reference to this event. Can be 'birth' or 'gestational'. If reference is omitted, "
-                   "'birth' is implied.",
+                   "then 'birth' is implied. Value can be None when read from an NWB file with schema version "
+                   "2.0 to 2.5 where age__reference is missing.",
             "default": "birth",
-            "allow_none": True,
         },
         {
             "name": "description",
@@ -121,9 +121,15 @@ class Subject(NWBContainer):
         )
         args_to_set = popargs_to_dict(keys_to_set, kwargs)
         super().__init__(name="subject", **kwargs)
+
+        # when the Subject I/O mapper (see pynwb.io.file.py) reads an age__reference value of None from an NWB 2.0-2.5
+        # file, it sets the value to "unspecified" so that when Subject.__init__ is called, the incoming
+        # age__reference value is NOT replaced by the default value specified in the docval.
+        # then we replace "unspecified" with None here.
+        # the ONLY way that age__reference can now be None is if it is read as None from the file.
         if self._in_construct_mode and args_to_set["age__reference"] == "unspecified":
             args_to_set["age__reference"] = None
-        elif args_to_set["age__reference"] not in (None, "birth", "gestational"):
+        elif args_to_set["age__reference"] not in ("birth", "gestational"):
             raise ValueError("age__reference, if supplied, must be 'birth' or 'gestational'.")
 
         weight = args_to_set['weight']

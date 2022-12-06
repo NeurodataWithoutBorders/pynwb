@@ -5,6 +5,7 @@ from hdmf.build import ObjectMapper
 from .. import register_map
 from ..file import NWBFile, Subject
 from ..core import ScratchData
+from ..utils import get_nwb_version
 
 
 @register_map(NWBFile)
@@ -223,7 +224,13 @@ class SubjectMap(ObjectMapper):
 
     @ObjectMapper.constructor_arg("age__reference")
     def age_reference_none(self, builder, manager):
-        age__reference = builder.get("age__reference")
-        if age__reference is None:
-            return "unspecified"  # this is handled specially in Subject.__init__
-        return age__reference
+        age_builder = builder.get("age")
+        age_reference = None
+        if age_builder is not None:
+            age_reference = age_builder["attributes"].get("reference")
+        if age_reference is None:
+            if get_nwb_version(builder) < (2, 6, 0):
+                return "unspecified"  # this is handled specially in Subject.__init__
+            else:
+                return "birth"
+        return age_reference

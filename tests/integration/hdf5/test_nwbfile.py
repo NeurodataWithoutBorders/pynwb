@@ -224,18 +224,13 @@ class TestSubjectIO(NWBH5IOMixin, TestCase):
         """ Return the test Subject from the given NWBFile """
         return nwbfile.subject
 
-    def test_roundtrip(self):
-        super().test_roundtrip()
-        self.assertEqual(self.read_container.age__reference, self.container.age__reference)
 
-
-class TestSubjectAgeReferenceRegressionIO(NWBH5IOMixin, TestCase):
+class TestSubjectAgeReferenceNotSetIO(NWBH5IOMixin, TestCase):
 
     def setUpContainer(self):
         """ Return the test Subject """
         return Subject(
             age="P90D",
-            age__reference=None,
             description="An unfortunate rat",
             genotype="WT",
             sex="M",
@@ -253,10 +248,6 @@ class TestSubjectAgeReferenceRegressionIO(NWBH5IOMixin, TestCase):
     def getContainer(self, nwbfile):
         """ Return the test Subject from the given NWBFile """
         return nwbfile.subject
-
-    def test_roundtrip(self):
-        super().test_roundtrip()
-        self.assertEqual(self.read_container.age__reference, None)
 
 
 class TestEmptySubjectIO(TestSubjectIO):
