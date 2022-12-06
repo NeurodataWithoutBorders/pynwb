@@ -122,11 +122,11 @@ class Subject(NWBContainer):
         args_to_set = popargs_to_dict(keys_to_set, kwargs)
         super().__init__(name="subject", **kwargs)
 
-        # when the Subject I/O mapper (see pynwb.io.file.py) reads an age__reference value of None from an NWB 2.0-2.5
-        # file, it sets the value to "unspecified" so that when Subject.__init__ is called, the incoming
-        # age__reference value is NOT replaced by the default value specified in the docval.
-        # then we replace "unspecified" with None here.
-        # the ONLY way that age__reference can now be None is if it is read as None from the file.
+        # NOTE when the Subject I/O mapper (see pynwb.io.file.py) reads an age__reference value of None from an
+        # NWB 2.0-2.5 file, it sets the value to "unspecified" so that when Subject.__init__ is called, the incoming
+        # age__reference value is NOT replaced by the default value ("birth") specified in the docval.
+        # then we replace "unspecified" with None here. the user will never see the value "unspecified".
+        # the ONLY way that age__reference can now be None is if it is read as None from an NWB 2.0-2.5 file.
         if self._in_construct_mode and args_to_set["age__reference"] == "unspecified":
             args_to_set["age__reference"] = None
         elif args_to_set["age__reference"] not in ("birth", "gestational"):
