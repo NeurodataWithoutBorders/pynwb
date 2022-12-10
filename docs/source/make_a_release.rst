@@ -159,6 +159,7 @@ Publish release on PyPI: Step-by-step
 .. _ReadTheDocs project: https://readthedocs.org/projects/pynwb/builds/
 .. _PyNWB PyPI project page: https://pypi.org/project/pynwb
 .. _Python instructions for creating a virtual environment: https://docs.python.org/3/library/venv.html#creating-virtual-environments
+.. _PyPI: https://pypi.org/project/pynwb
 
 
 --------------------------------------------
