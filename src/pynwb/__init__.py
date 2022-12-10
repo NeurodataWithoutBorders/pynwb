@@ -307,11 +307,14 @@ from . import _version    # noqa: F401,E402
 __version__ = _version.get_versions()['version']
 
 from ._due import due, BibTeX  # noqa: E402
-due.cite(BibTeX("""
+due.cite(
+    BibTeX("""
 @article {10.7554/eLife.78362,
 article_type = {journal},
 title = {{The Neurodata Without Borders ecosystem for neurophysiological data science}},
-author = {R\"ubel, Oliver and Tritt, Andrew and Ly, Ryan and Dichter, Benjamin K and Ghosh, Satrajit and Niu, Lawrence and Baker, Pamela and Soltesz, Ivan and Ng, Lydia and Svoboda, Karel and Frank, Loren and Bouchard, Kristofer E},
+author = {R\"ubel, Oliver and Tritt, Andrew and Ly, Ryan and Dichter, Benjamin K and
+          Ghosh, Satrajit and Niu, Lawrence and Baker, Pamela and Soltesz, Ivan and Ng,
+          Lydia and Svoboda, Karel and Frank, Loren and Bouchard, Kristofer E},
 editor = {Colgin, Laura L and Jadhav, Shantanu P},
 volume = {11},
 year = {2022},
@@ -325,6 +328,9 @@ keywords = {Neurophysiology, data ecosystem, data language, data standard, FAIR 
 journal = {eLife},
 issn = {2050-084X},
 publisher = {eLife Sciences Publications, Ltd}}
-"""), description="The Neurodata Without Borders ecosystem for neurophysiological data science",  # noqa: E501
-         path="pynwb/", version=__version__, cite_module=True)
+"""),
+    description="The Neurodata Without Borders ecosystem for neurophysiological data science",
+    path="pynwb/", version=__version__,
+    cite_module=True
+)
 del due, BibTeX
