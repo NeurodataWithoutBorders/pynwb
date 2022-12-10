@@ -17,6 +17,7 @@
   [#1586](https://github.com/NeurodataWithoutBorders/pynwb/pull/1586)
 - More informative error message for common installation error. @bendichter, @rly
   [#1591](https://github.com/NeurodataWithoutBorders/pynwb/pull/1591)
+- Update citation for PyNWB in docs and duecredit to use the eLife NWB paper. @oruebel [#1604](https://github.com/NeurodataWithoutBorders/pynwb/pull/1604)
   
 ### Bug fixes
 - Add shape constraint to `PatchClampSeries.data`. @bendichter 
