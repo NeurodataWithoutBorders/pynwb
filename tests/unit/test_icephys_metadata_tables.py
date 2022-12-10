@@ -671,8 +671,21 @@ class IntracellularRecordingsTableTests(ICEphysMetaTestBase):
             rate=100_000.,
         )
 
+        # test retrieve electrode from stimulus (when both stimulus and response are given)
         itr = IntracellularRecordingsTable()
         itr.add_recording(stimulus=cCSS, response=cCS)
+        self.assertEqual(itr["electrodes"].values[0], elec)
+        del itr
+
+        # test retrieve electrode from stimulus (when only stimulus is given)
+        itr = IntracellularRecordingsTable()
+        itr.add_recording(stimulus=cCSS, response=None)
+        self.assertEqual(itr["electrodes"].values[0], elec)
+        del itr
+
+        # test retrieve electrode from response (when only response is given)
+        itr = IntracellularRecordingsTable()
+        itr.add_recording(stimulus=None, response=cCS)
         self.assertEqual(itr["electrodes"].values[0], elec)
 
 
