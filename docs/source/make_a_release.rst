@@ -16,7 +16,7 @@ A core developer should use the following steps to create a release ``X.Y.Z`` of
 Prerequisites
 -------------
 
-* All CI tests are passing on `GitHub Actions`_.
+* All CI tests are passing on :pynwb:`GitHub Actions <actions>`.
 
 * You have a `GPG signing key`_.
 
@@ -61,7 +61,7 @@ means that ``echo "Hello"`` should be copied and evaluated in the terminal.
 Publish release on PyPI: Step-by-step
 -------------------------------------
 
-1. Make sure that all CI tests are passing on `GitHub Actions`_.
+1. Make sure that all CI tests are passing on :pynwb:`GitHub Actions <actions>`.
 
 
 2. List all tags sorted by version.
@@ -109,19 +109,19 @@ Publish release on PyPI: Step-by-step
 
   .. important::
 
-      This will trigger the "Deploy release" GitHub Actions workflow which will automatically upload the wheels
-      and source distribution to both the `PyNWB PyPI project page`_ and a new `GitHub release`_
-      using the nwb-bot account.
+      This will trigger the "Deploy release" GitHub Actions workflow which will automatically
+      upload the wheels and source distribution to both the  `PyNWB PyPI project page`_ and a
+      new :pynwb:`GitHub release <releases>` using the nwb-bot account.
 
 
-7. Check the status of the builds on `GitHub Actions`_.
+7. Check the status of the builds on :pynwb:`GitHub Actions <actions>`.
 
 
 8. Once the builds are completed, check that the distributions are available on `PyNWB PyPI project page`_ and that
-   a new `GitHub release`_ was created.
+   a new :pynwb:`GitHub release <releases>` was created.
 
 
-9. Copy the release notes from ``CHANGELOG.md`` to the newly created `GitHub release`_.
+9. Copy the release notes from ``CHANGELOG.md`` to the newly created :pynwb:`GitHub release <releases>`.
 
 
 10. Create a clean testing environment to test the installation.
@@ -157,10 +157,9 @@ Publish release on PyPI: Step-by-step
 
 .. _GPG signing key: https://docs.github.com/en/authentication/managing-commit-signature-verification/generating-a-new-gpg-key
 .. _ReadTheDocs project: https://readthedocs.org/projects/pynwb/builds/
-.. _GitHub Actions: https://github.com/NeurodataWithoutBorders/pynwb/actions
-.. _GitHub release: https://github.com/NeurodataWithoutBorders/pynwb/releases
 .. _PyNWB PyPI project page: https://pypi.org/project/pynwb
 .. _Python instructions for creating a virtual environment: https://docs.python.org/3/library/venv.html#creating-virtual-environments
+.. _PyPI: https://pypi.org/project/pynwb
 
 
 --------------------------------------------
