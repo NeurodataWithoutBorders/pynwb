@@ -506,26 +506,33 @@ class IntracellularRecordingsTable(AlignedDynamicTable):
 
         super().__init__(**kwargs)
 
-    @docval({'name': 'electrode', 'type': IntracellularElectrode, 'doc': 'The intracellular electrode used'},
-            {'name': 'stimulus_start_index', 'type': int, 'doc': 'Start index of the stimulus', 'default': None},
-            {'name': 'stimulus_index_count', 'type': int, 'doc': 'Stop index of the stimulus', 'default': None},
-            {'name': 'stimulus', 'type': TimeSeries,
-             'doc': 'The TimeSeries (usually a PatchClampSeries) with the stimulus',
-             'default': None},
-            {'name': 'response_start_index', 'type': int, 'doc': 'Start index of the response', 'default': None},
-            {'name': 'response_index_count', 'type': int, 'doc': 'Stop index of the response', 'default': None},
-            {'name': 'response', 'type': TimeSeries,
-             'doc': 'The TimeSeries (usually a PatchClampSeries) with the response',
-             'default': None},
-            {'name': 'electrode_metadata', 'type': dict,
-             'doc': 'Additional electrode metadata to be stored in the electrodes table', 'default': None},
-            {'name': 'stimulus_metadata', 'type': dict,
-             'doc': 'Additional stimulus metadata to be stored in the stimuli table', 'default': None},
-            {'name': 'response_metadata', 'type': dict,
-             'doc': 'Additional resposnse metadata to be stored in the responses table', 'default': None},
-            returns='Integer index of the row that was added to this table',
-            rtype=int,
-            allow_extra=True)
+    @docval(
+        {
+            "name": "electrode",
+            "type": IntracellularElectrode,
+            "doc": "The intracellular electrode used",
+            "default": None,
+        },
+        {'name': 'stimulus_start_index', 'type': int, 'doc': 'Start index of the stimulus', 'default': None},
+        {'name': 'stimulus_index_count', 'type': int, 'doc': 'Stop index of the stimulus', 'default': None},
+        {'name': 'stimulus', 'type': TimeSeries,
+         'doc': 'The TimeSeries (usually a PatchClampSeries) with the stimulus',
+         'default': None},
+        {'name': 'response_start_index', 'type': int, 'doc': 'Start index of the response', 'default': None},
+        {'name': 'response_index_count', 'type': int, 'doc': 'Stop index of the response', 'default': None},
+        {'name': 'response', 'type': TimeSeries,
+         'doc': 'The TimeSeries (usually a PatchClampSeries) with the response',
+         'default': None},
+        {'name': 'electrode_metadata', 'type': dict,
+         'doc': 'Additional electrode metadata to be stored in the electrodes table', 'default': None},
+        {'name': 'stimulus_metadata', 'type': dict,
+         'doc': 'Additional stimulus metadata to be stored in the stimuli table', 'default': None},
+        {'name': 'response_metadata', 'type': dict,
+         'doc': 'Additional resposnse metadata to be stored in the responses table', 'default': None},
+        returns='Integer index of the row that was added to this table',
+        rtype=int,
+        allow_extra=True,
+    )
     def add_recording(self, **kwargs):
         """
         Add a single recording to the IntracellularRecordingsTable table.
@@ -546,6 +553,14 @@ class IntracellularRecordingsTable(AlignedDynamicTable):
                                                                        'response',
                                                                        kwargs)
         electrode = popargs('electrode', kwargs)
+
+        # if electrode is not provided, take from stimulus or response object
+        if electrode is None:
+            if stimulus:
+                electrode = stimulus.electrode
+            elif response:
+                electrode = response.electrode
+
         # Confirm that we have at least a valid stimulus or response
         if stimulus is None and response is None:
             raise ValueError("stimulus and response cannot both be None.")
@@ -580,8 +595,10 @@ class IntracellularRecordingsTable(AlignedDynamicTable):
             #     warnings.warn("sweep_number are usually expected to be the same for PatchClampSeries type "
             #                   "stimulus and response pairs in an intracellular recording.")
             if response.electrode != stimulus.electrode:
-                raise ValueError("electrodes are usually expected to be the same for PatchClampSeries type "
-                                 "stimulus and response pairs in an intracellular recording.")
+                raise ValueError(
+                    "electrodes are usually expected to be the same for PatchClampSeries type stimulus and response "
+                    "pairs in an intracellular recording."
+                )
 
         # Compile the electrodes table data
         electrodes = copy(popargs('electrode_metadata', kwargs))

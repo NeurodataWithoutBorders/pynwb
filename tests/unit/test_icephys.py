@@ -1,7 +1,15 @@
 import numpy as np
 
-from pynwb.icephys import (PatchClampSeries, CurrentClampSeries, IZeroClampSeries, CurrentClampStimulusSeries,
-                           VoltageClampSeries, VoltageClampStimulusSeries, IntracellularElectrode, SweepTable)
+from pynwb.icephys import (
+    PatchClampSeries,
+    CurrentClampSeries,
+    IZeroClampSeries,
+    CurrentClampStimulusSeries,
+    VoltageClampSeries,
+    VoltageClampStimulusSeries,
+    IntracellularElectrode,
+    SweepTable,
+)
 from pynwb.device import Device
 from pynwb.testing import TestCase
 from pynwb.file import NWBFile  # Needed to test icephys functionality defined on NWBFile
