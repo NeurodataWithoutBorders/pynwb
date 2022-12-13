@@ -197,6 +197,7 @@ def _make_empty_with_extension():
     test_name = 'nwbfile_with_extension'
     _write(test_name, nwbfile)
 
+
 def _make_subject_without_age_reference():
     """Create a test file without a value for age_reference."""
     nwbfile = NWBFile(session_description='ADDME',

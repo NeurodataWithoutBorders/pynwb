@@ -16,5 +16,5 @@ def get_nwb_version(builder: Builder):
     nwb_version = root_builder.attributes.get("nwb_version")
     if nwb_version is None:
         raise ValueError("'nwb_version' attribute is missing from root of NWB file.")
-    nwb_version = re.match("(\d+\.\d+\.\d+)", nwb_version)[0]  # trim off any non-numeric symbols at end
+    nwb_version = re.match(r"(\d+\.\d+\.\d+)", nwb_version)[0]  # trim off any non-numeric symbols at end
     return tuple([int(i) for i in nwb_version.split(".")])
