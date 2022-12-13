@@ -10,33 +10,27 @@ Continuous Integration
 
 PyNWB is tested against Ubuntu, macOS, and Windows operating systems.
 The project has both unit and integration tests.
-Tests run on `GitHub Actions`_.
+Tests run on :pynwb:`GitHub Actions <actions>`.
 
-Each time a PR is published or updated, the project is built, packaged, and tested on all supported operating systems
-and python distributions. That way, as a contributor, you know if you introduced regressions or coding style
+Each time a PR is published or updated, the project is built, packaged, and
+tested on all supported operating systems and python distributions. That way,
+as a contributor, you know if you introduced regressions or coding style
 inconsistencies.
 
-There are badges in the README_ file which shows the current condition of the dev branch.
-
-.. _GitHub Actions: https://github.com/NeurodataWithoutBorders/pynwb/actions
-.. _README: https://github.com/NeurodataWithoutBorders/pynwb#readme
-
+There are badges in the :pynwb:`README <#readme>` file which shows
+the current condition of the dev branch.
 
 --------
 Coverage
 --------
 
-Code coverage is computed and reported using the coverage_ tool. There are two coverage-related badges in the README_
-file. One shows the status of the `GitHub Action workflow`_ which runs the coverage_ tool and uploads the report to
+Code coverage is computed and reported using the coverage_ tool. There are two coverage-related
+badges in the :pynwb:`README <#readme>` file. One shows the status of the :pynwb:`GitHub Action workflow <actions?query=workflow%3A%22Run+coverage%22>` which runs the coverage_ tool and uploads the report to
 codecov_, and the other badge shows the percentage coverage reported from codecov_. A detailed report can be found on
 codecov_, which shows line by line which lines are covered by the tests.
 
 .. _coverage: https://coverage.readthedocs.io
-.. _GitHub Action workflow: https://github.com/NeurodataWithoutBorders/pynwb/actions?query=workflow%3A%22Run+coverage%22
 .. _codecov: https://codecov.io/gh/NeurodataWithoutBorders/pynwb/tree/dev/src/pynwb
-
-..  _software_process_requirement_specifications:
-
 
 --------------------------
 Requirement Specifications
@@ -61,7 +55,7 @@ The final one is within :pynwb:`setup.py <blob/dev/setup.py>`, which contains a 
 running PyNWB.
 
 In order to check the status of the required packages, requires.io_ is used to create a badge on the project
-README_. If all the required packages are up to date, a green badge appears.
+:pynwb:`README <#readme>`. If all the required packages are up to date, a green badge appears.
 
 If some of the packages are outdated, see :ref:`update_requirements_files`.
 
@@ -86,7 +80,6 @@ thus do not serve as a complete installation. For a complete source code archive
 by CircleCI, typically named `pynwb-{version}.tar.gz`.
 
 .. _versioneer: https://github.com/warner/python-versioneer
-.. _release: https://github.com/NeurodataWithoutBorders/pynwb/releases
 
 ----------------------------------------------------
 Coordinating with nwb-schema Repository and Releases

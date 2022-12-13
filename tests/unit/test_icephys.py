@@ -1,7 +1,15 @@
 import numpy as np
 
-from pynwb.icephys import (PatchClampSeries, CurrentClampSeries, IZeroClampSeries, CurrentClampStimulusSeries,
-                           VoltageClampSeries, VoltageClampStimulusSeries, IntracellularElectrode, SweepTable)
+from pynwb.icephys import (
+    PatchClampSeries,
+    CurrentClampSeries,
+    IZeroClampSeries,
+    CurrentClampStimulusSeries,
+    VoltageClampSeries,
+    VoltageClampStimulusSeries,
+    IntracellularElectrode,
+    SweepTable,
+)
 from pynwb.device import Device
 from pynwb.testing import TestCase
 from pynwb.file import NWBFile  # Needed to test icephys functionality defined on NWBFile
@@ -199,6 +207,19 @@ class PatchClampSeriesConstructor(TestCase):
         with self.assertRaises(TypeError):
             PatchClampSeries('test_pCS', list(), 'unit',
                              electrode_name, 1.0, timestamps=list(), sweep_number=1.5)
+
+    def test_data_shape(self):
+        electrode_name = GetElectrode()
+
+        with self.assertRaises(ValueError):
+            PatchClampSeries(
+                name="test_pCS",
+                data=np.ones((30, 2)),
+                unit="unit",
+                electrode=electrode_name,
+                gain=1.0,
+                rate=100_000.,
+            )
 
 
 class CurrentClampSeriesConstructor(TestCase):

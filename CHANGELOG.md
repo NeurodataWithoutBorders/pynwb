@@ -5,15 +5,30 @@
 ### Enhancements and minor changes
 - Added a class and tests for the `OnePhotonSeries`. @CodyCBakerPhD [#1593](https://github.com/NeurodataWithoutBorders/pynwb/pull/1593)
 - `Subject.age` can be input as a `timedelta`. @bendichter [#1590](https://github.com/NeurodataWithoutBorders/pynwb/pull/1590)
+- `IntracellularRecordingsTable.add_recording`: the `electrode` arg is now optional, and is automatically populated from the stimulus or response.
+  [#1597](https://github.com/NeurodataWithoutBorders/pynwb/pull/1597)
+- Add module `pynwb.testing.mock.icephys` and corresponding tests. @bendichter
+  [1595](https://github.com/NeurodataWithoutBorders/pynwb/pull/1595)
+- Remove redundant object mapper code. @rly [#1600](https://github.com/NeurodataWithoutBorders/pynwb/pull/1600)
+- Fix pending deprecations and issues in CI. @rly [#1594](https://github.com/NeurodataWithoutBorders/pynwb/pull/1594)
 
 ### Documentation and tutorial enhancements:
 - Adjusted [ecephys tutorial](https://pynwb.readthedocs.io/en/stable/tutorials/domain/ecephys.html) to create fake data with proper dimensions @bendichter [#1581](https://github.com/NeurodataWithoutBorders/pynwb/pull/1581)
-- Refactored testing documentation, including addition of section on ``pynwb.testing.mock`` submodule. @bendichter 
+- Refactored testing documentation, including addition of section on ``pynwb.testing.mock`` submodule. @bendichter
   [#1583](https://github.com/NeurodataWithoutBorders/pynwb/pull/1583)
-- Update round trip tutorial to the newer ``NWBH5IOMixin`` and ``AcquisitionH5IOMixin`` classes. @bendichter 
+- Update round trip tutorial to the newer ``NWBH5IOMixin`` and ``AcquisitionH5IOMixin`` classes. @bendichter
   [#1586](https://github.com/NeurodataWithoutBorders/pynwb/pull/1586)
 - More informative error message for common installation error. @bendichter, @rly
   [#1591](https://github.com/NeurodataWithoutBorders/pynwb/pull/1591)
+- Update citation for PyNWB in docs and duecredit to use the eLife NWB paper. @oruebel [#1604](https://github.com/NeurodataWithoutBorders/pynwb/pull/1604)
+- Fix docs build warnings due to use of hardcoded links. @oruebel [#1604](https://github.com/NeurodataWithoutBorders/pynwb/pull/1604)
+
+### Bug fixes
+- Add shape constraint to `PatchClampSeries.data`. @bendichter
+  [#1596](https://github.com/NeurodataWithoutBorders/pynwb/pull/1596)
+- Update the [images tutorial](https://pynwb.readthedocs.io/en/stable/tutorials/domain/images.html) to provide example usage of an ``IndexSeries``
+  with a reference to ``Images``. @bendichter [#1602](https://github.com/NeurodataWithoutBorders/pynwb/pull/1602)
+- Fixed an issue with the `tox` tool when upgrading to tox 4. @rly [#1608](https://github.com/NeurodataWithoutBorders/pynwb/pull/1608)
 
 ## PyNWB 2.2.0 (October 19, 2022)
 
