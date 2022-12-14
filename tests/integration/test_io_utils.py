@@ -14,6 +14,7 @@ def test_get_nwb_version():
     assert get_nwb_version(builder1) == (2, 0, 0)
     assert get_nwb_version(builder2) == (2, 0, 0)
 
+
 def test_get_nwb_version_missing():
     """Get the NWB version from a builder where the root builder does not have an nwb_version attribute."""
     builder1 = GroupBuilder(name="root")
