@@ -5,7 +5,7 @@ from hdmf.build import ObjectMapper
 from .. import register_map
 from ..file import NWBFile, Subject
 from ..core import ScratchData
-from ..utils import get_nwb_version
+from .utils import get_nwb_version
 
 
 @register_map(NWBFile)
