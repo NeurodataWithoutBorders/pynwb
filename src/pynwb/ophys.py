@@ -196,7 +196,7 @@ class OnePhotonSeries(ImageSeries):
             raise ValueError(f"Binning value must be >= 0: {args_to_set['binning']}")
         if isinstance(args_to_set["binning"], int):
             args_to_set["binning"] = np.uint(args_to_set["binning"])
-        
+
         for key, val in args_to_set.items():
             setattr(self, key, val)
 
