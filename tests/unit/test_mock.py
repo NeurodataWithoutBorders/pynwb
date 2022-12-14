@@ -4,6 +4,7 @@ from pynwb.testing.mock.base import mock_TimeSeries
 
 from pynwb.testing.mock.ophys import (
     mock_ImagingPlane,
+    mock_OnePhotonSeries,
     mock_TwoPhotonSeries,
     mock_RoiResponseSeries,
     mock_PlaneSegmentation,
@@ -52,6 +53,7 @@ from pynwb.testing.mock.utils import name_generator, name_generator_registry
 @pytest.mark.parametrize(
     "mock_function", [
         mock_ImagingPlane,
+        mock_OnePhotonSeries,
         mock_TwoPhotonSeries,
         mock_RoiResponseSeries,
         mock_PlaneSegmentation,
