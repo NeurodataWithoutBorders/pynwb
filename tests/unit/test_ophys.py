@@ -215,6 +215,19 @@ class OnePhotonSeriesConstructor(TestCase):
         self.assertEqual(one_photon_series.format, "external")
         self.assertIsNone(one_photon_series.dimension)
 
+    def test_negative_binning_assertion(self):
+        ip = create_imaging_plane()
+        
+        with self.assertRaisesWith(exc_type=ValueError, exc_msg="Binning value must be >= 0: -1"):
+            one_photon_series = OnePhotonSeries(
+                name="test_one_photon_series_binning_assertion",
+                unit="unit",
+                data=np.empty(shape=(10,100,100)),
+                imaging_plane=ip,
+                rate=1.,
+                binning=-1,
+            )
+        
 
 class TwoPhotonSeriesConstructor(TestCase):
 
