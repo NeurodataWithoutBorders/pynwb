@@ -3,7 +3,8 @@
 ## Upcoming
 
 ### Enhancements and minor changes
-- `Subject.age` can be input as a `timedelta`. @bendichter [#1590](https://github.com/NeurodataWithoutBorders/pynwb/pull/1590)
+- `Subject.age` can be input as a `timedelta` type. @bendichter [#1590](https://github.com/NeurodataWithoutBorders/pynwb/pull/1590)
+- Add `Subject.age__reference` field. @bendichter ([#1540](https://github.com/NeurodataWithoutBorders/pynwb/pull/1540))
 - `IntracellularRecordingsTable.add_recording`: the `electrode` arg is now optional, and is automatically populated from the stimulus or response.
   [#1597](https://github.com/NeurodataWithoutBorders/pynwb/pull/1597)
 - Add module `pynwb.testing.mock.icephys` and corresponding tests. @bendichter
