@@ -54,6 +54,7 @@ class Subject(NWBContainer):
 
     __nwbfields__ = (
         'age',
+        "age__reference",
         'description',
         'genotype',
         'sex',
@@ -72,8 +73,20 @@ class Subject(NWBContainer):
                    'A timedelta will automatically be converted to The ISO 8601 Duration format.',
             "default": None,
         },
-        {'name': 'description', 'type': str,
-         'doc': 'A description of the subject, e.g., "mouse A10".', 'default': None},
+        {
+            "name": "age__reference",
+            "type": str,
+            "doc": "Age is with reference to this event. Can be 'birth' or 'gestational'. If reference is omitted, "
+                   "then 'birth' is implied. Value can be None when read from an NWB file with schema version "
+                   "2.0 to 2.5 where age__reference is missing.",
+            "default": "birth",
+        },
+        {
+            "name": "description",
+            "type": str,
+            "doc": 'A description of the subject, e.g., "mouse A10".',
+            "default": None,
+        },
         {'name': 'genotype', 'type': str,
          'doc': 'The genotype of the subject, e.g., "Sst-IRES-Cre/wt;Ai32(RCL-ChR2(H134R)_EYFP)/wt".',
          'default': None},
@@ -94,18 +107,30 @@ class Subject(NWBContainer):
         {'name': 'strain', 'type': str, 'doc': 'The strain of the subject, e.g., "C57BL/6J"', 'default': None},
     )
     def __init__(self, **kwargs):
-        keys_to_set = ("age",
-                       "description",
-                       "genotype",
-                       "sex",
-                       "species",
-                       "subject_id",
-                       "weight",
-                       "date_of_birth",
-                       "strain")
+        keys_to_set = (
+            "age",
+            "age__reference",
+            "description",
+            "genotype",
+            "sex",
+            "species",
+            "subject_id",
+            "weight",
+            "date_of_birth",
+            "strain",
+        )
         args_to_set = popargs_to_dict(keys_to_set, kwargs)
-        kwargs['name'] = 'subject'
-        super().__init__(**kwargs)
+        super().__init__(name="subject", **kwargs)
+
+        # NOTE when the Subject I/O mapper (see pynwb.io.file.py) reads an age__reference value of None from an
+        # NWB 2.0-2.5 file, it sets the value to "unspecified" so that when Subject.__init__ is called, the incoming
+        # age__reference value is NOT replaced by the default value ("birth") specified in the docval.
+        # then we replace "unspecified" with None here. the user will never see the value "unspecified".
+        # the ONLY way that age__reference can now be None is if it is read as None from an NWB 2.0-2.5 file.
+        if self._in_construct_mode and args_to_set["age__reference"] == "unspecified":
+            args_to_set["age__reference"] = None
+        elif args_to_set["age__reference"] not in ("birth", "gestational"):
+            raise ValueError("age__reference, if supplied, must be 'birth' or 'gestational'.")
 
         weight = args_to_set['weight']
         if isinstance(weight, float):
