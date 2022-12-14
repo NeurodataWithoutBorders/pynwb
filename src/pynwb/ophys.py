@@ -150,7 +150,7 @@ class OnePhotonSeries(ImageSeries):
         },
         {
             "name": "binning",
-            "type": int,
+            "type": (int, "uint"),
             "doc": "Amount of pixels combined into 'bins'; could be 1, 2, 4, 8, etc.",
             "default": None,
         },
@@ -192,6 +192,11 @@ class OnePhotonSeries(ImageSeries):
         args_to_set = popargs_to_dict(keys_to_set, kwargs)
         super().__init__(**kwargs)
 
+        if args_to_set["binning"] < 0:
+            raise ValueError(f"Binning value must be >= 0: {args_to_set['binning']}")
+        if isinstance(args_to_set["binning"], int):
+            args_to_set["binning"] = np.uint(args_to_set["binning"])
+        
         for key, val in args_to_set.items():
             setattr(self, key, val)
 
