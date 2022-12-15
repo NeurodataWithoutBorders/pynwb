@@ -113,10 +113,3 @@ class TestReadOldVersions(TestCase):
             with NWBHDF5IO(str(f), 'r') as io:
                 read_nwbfile = io.read()
                 np.testing.assert_array_equal(read_nwbfile.acquisition['test_imageseries'].starting_frame, [1, 2, 3])
-
-    def test_read_subject_no_age__reference(self):
-        """Test that reading a Subject without an age__reference set with NWB schema 2.5.0 sets the value to None"""
-        f = Path(__file__).parent / '2.2.0_subject_no_age__reference.nwb'
-        with NWBHDF5IO(str(f), 'r') as io:
-            read_nwbfile = io.read()
-            self.assertIsNone(read_nwbfile.subject.age__reference)
