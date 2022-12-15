@@ -227,8 +227,6 @@ def run_integration_tests(verbose=True):
     else:
         logging.info('all classes have integration tests')
 
-    run_test_suite("tests/integration/utils", "integration utils tests", verbose=verbose)
-
     # also test the validation script
     run_test_suite("tests/validation", "validation tests", verbose=verbose)
 

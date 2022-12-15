@@ -437,35 +437,29 @@ Fields:
 
 class SubjectTest(TestCase):
     def setUp(self):
-        self.subject = Subject(
-            age='P90D',
-            age__reference="birth",
-            description='An unfortunate rat',
-            genotype='WT',
-            sex='M',
-            species='Rattus norvegicus',
-            subject_id='RAT123',
-            weight='2 kg',
-            date_of_birth=datetime(2017, 5, 1, 12, tzinfo=tzlocal()),
-            strain='my_strain',
-        )
+        self.subject = Subject(age='P90D',
+                               description='An unfortunate rat',
+                               genotype='WT',
+                               sex='M',
+                               species='Rattus norvegicus',
+                               subject_id='RAT123',
+                               weight='2 kg',
+                               date_of_birth=datetime(2017, 5, 1, 12, tzinfo=tzlocal()),
+                               strain='my_strain')
         self.start = datetime(2017, 5, 1, 12, tzinfo=tzlocal())
         self.path = 'nwbfile_test.h5'
-        self.nwbfile = NWBFile(
-            'a test session description for a test NWBFile',
-            'FILE123',
-            self.start,
-            experimenter='A test experimenter',
-            lab='a test lab',
-            institution='a test institution',
-            experiment_description='a test experiment description',
-            session_id='test1',
-            subject=self.subject,
-        )
+        self.nwbfile = NWBFile('a test session description for a test NWBFile',
+                               'FILE123',
+                               self.start,
+                               experimenter='A test experimenter',
+                               lab='a test lab',
+                               institution='a test institution',
+                               experiment_description='a test experiment description',
+                               session_id='test1',
+                               subject=self.subject)
 
     def test_constructor(self):
         self.assertEqual(self.subject.age, 'P90D')
-        self.assertEqual(self.subject.age__reference, "birth")
         self.assertEqual(self.subject.description, 'An unfortunate rat')
         self.assertEqual(self.subject.genotype, 'WT')
         self.assertEqual(self.subject.sex, 'M')
@@ -484,31 +478,6 @@ class SubjectTest(TestCase):
             weight=2.3,
         )
         self.assertEqual(subject.weight, '2.3 kg')
-
-    def test_age_reference_arg_check(self):
-        with self.assertRaisesWith(ValueError, "age__reference, if supplied, must be 'birth' or 'gestational'."):
-            Subject(subject_id='RAT123', age='P90D', age__reference='brth')
-
-    def test_age_regression_1(self):
-        subject = Subject(
-            age='P90D',
-            description='An unfortunate rat',
-            subject_id='RAT123',
-        )
-
-        self.assertEqual(subject.age, 'P90D')
-        self.assertEqual(subject.age__reference, "birth")
-        self.assertEqual(subject.description, 'An unfortunate rat')
-        self.assertEqual(subject.subject_id, 'RAT123')
-
-    def test_age_regression_2(self):
-        subject = Subject(
-            description='An unfortunate rat',
-            subject_id='RAT123',
-        )
-
-        self.assertEqual(subject.description, 'An unfortunate rat')
-        self.assertEqual(subject.subject_id, 'RAT123')
 
     def test_subject_age_duration(self):
         subject = Subject(
