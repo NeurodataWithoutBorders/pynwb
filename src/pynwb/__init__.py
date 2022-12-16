@@ -269,7 +269,7 @@ class NWBHDF5IO(_HDF5IO):
         """
         Read the NWB file from the IO source.
 
-        :raises : If the NWB file version is missing or not support
+        :raises TypeError: If the NWB file version is missing or not support
 
         :return: NWBFile container
         """
