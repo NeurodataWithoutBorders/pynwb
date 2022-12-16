@@ -211,6 +211,7 @@ class NWBHDF5IO(_HDF5IO):
     def __init__(self, **kwargs):
         path, mode, manager, extensions, load_namespaces, file_obj, comm, driver =\
             popargs('path', 'mode', 'manager', 'extensions', 'load_namespaces', 'file', 'comm', 'driver', kwargs)
+        # Define the BuildManager to use
         if load_namespaces:
             if manager is not None:
                 warn("loading namespaces from file - ignoring 'manager'")
@@ -237,7 +238,52 @@ class NWBHDF5IO(_HDF5IO):
                 manager = get_manager(extensions=extensions)
             elif manager is None:
                 manager = get_manager()
+        # Open the file
         super().__init__(path, manager=manager, mode=mode, file=file_obj, comm=comm, driver=driver)
+
+    @property
+    def nwb_version(self):
+        """
+        Get the version tuple for the NWB file.
+
+        NOTE: The version will be None if no data has been written yet
+
+        :returns: Tuple with the file version or None if the version is missing
+        """
+        # Get the version string for the NWB file
+        try:
+            nwb_version_string = self._file.attrs['nwb_version']
+        #  KeyError occurs  when the file is empty (e.g., when creating a new file nothing has been written)
+        #  or when the HDF5 file is not a valid NWB file
+        except KeyError:
+            return None
+        # Parse the version string
+        nwb_version = tuple([int(j) if j.isnumeric() else j
+                             for i in nwb_version_string.split(".")
+                             for j in i.split("-")])
+        return nwb_version
+
+    @docval(*get_docval(_HDF5IO.read),
+            {'name': 'skip_version_check', 'type': bool, 'doc': 'skip checking of NWB version', 'default': False})
+    def read(self, **kwargs):
+        """
+        Read the NWB file from the IO source.
+
+        :raises : If the NWB file version is missing or not support
+
+        :return: NWBFile container
+        """
+        # Check that the NWB file is supported
+        skip_verison_check = popargs('skip_version_check', kwargs)
+        if not skip_verison_check:
+            file_version = self.nwb_version
+            if file_version is None:
+                raise TypeError("Missing NWB version in file. The file is not a valid NWB file.")
+            if file_version[0] < 2:
+                raise TypeError("NWB version %s not supported. PyNWB supports NWB files version 2 and above." %
+                                str(file_version))
+        # read the file
+        return super().read(**kwargs)
 
     @docval({'name': 'src_io', 'type': HDMFIO,
              'doc': 'the HDMFIO object (such as NWBHDF5IO) that was used to read the data to export'},
@@ -247,7 +293,8 @@ class NWBHDF5IO(_HDF5IO):
             {'name': 'write_args', 'type': dict, 'doc': 'arguments to pass to :py:meth:`write_builder`',
              'default': None})
     def export(self, **kwargs):
-        """Export an NWB file to a new NWB file using the HDF5 backend.
+        """
+        Export an NWB file to a new NWB file using the HDF5 backend.
 
         If ``nwbfile`` is provided, then the build manager of ``src_io`` is used to build the container,
         and the resulting builder will be exported to the new backend. So if ``nwbfile`` is provided,
