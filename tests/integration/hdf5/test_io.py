@@ -418,6 +418,30 @@ class TestNWBHDF5IO(TestCase):
     def tearDown(self):
         remove_test_file(self.path)
 
+    def test_nwb_version_property(self):
+        """Test reading of files with missing nwb_version"""
+        # check empty version before write
+        with NWBHDF5IO(self.path, 'w') as io:
+            self.assertIsNone(io.nwb_version)
+        # write the example file
+        with NWBHDF5IO(self.path, 'w') as io:
+            io.write(self.nwbfile)
+        # check behavior for various different version strings
+        for ver in [("2.0.5", (2, 0, 5)),
+                    ("2.0.5-alpha", (2, 0, 5, "alpha")),
+                    ("bad_version", ("bad_version", ))]:
+            # Set version string
+            with File(self.path, mode='a') as io:
+                io.attrs['nwb_version'] = ver[0]
+            # Assert expected result for nwb_version tuple
+            with NWBHDF5IO(self.path, 'r') as io:
+                self.assertTupleEqual(io.nwb_version, ver[1])
+        # check empty version attribute
+        with File(self.path, mode='a') as io:
+            del io.attrs['nwb_version']
+        with NWBHDF5IO(self.path, 'r') as io:
+            self.assertIsNone(io.nwb_version)
+
     def test_check_nwb_version_ok(self):
         """Test that opening a current NWBFile passes the version check"""
         with NWBHDF5IO(self.path, 'w') as io:
