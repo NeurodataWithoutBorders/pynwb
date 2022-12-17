@@ -244,14 +244,12 @@ class NWBHDF5IO(_HDF5IO):
     @property
     def nwb_version(self):
         """
-        Get the version tuple for the NWB file.
+        Get the version of the NWB file opened via this NWBHDF5IO object.
 
-        NOTE: The version will be None if no data has been written yet
-
-        :returns: Tuple consisting of: 1) the original version string and 2) a tuple with the parsed
-                  components of the version string, containing ints and strings, e.g., (2, 5, 1, beta).
-                  (None, None) will be returned if the nwb_version is missing, e.g., when no data has
-                  been written to the file yet.
+        :returns: Tuple consisting of: 1) the original version string as stored in the file and
+                  2) a tuple with the parsed components of the version string, consisting of integers
+                  and strings, e.g., (2, 5, 1, beta). (None, None) will be returned if the nwb_version
+                  is missing, e.g., in the case when no data has been written to the file yet.
         """
         # Get the version string for the NWB file
         try:
@@ -272,7 +270,7 @@ class NWBHDF5IO(_HDF5IO):
         """
         Read the NWB file from the IO source.
 
-        :raises TypeError: If the NWB file version is missing or not support
+        :raises TypeError: If the NWB file version is missing or not supported
 
         :return: NWBFile container
         """
