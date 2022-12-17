@@ -248,7 +248,10 @@ class NWBHDF5IO(_HDF5IO):
 
         NOTE: The version will be None if no data has been written yet
 
-        :returns: Tuple with the file version or None if the version is missing
+        :returns: Tuple consisting of: 1) the original version string and 2) a tuple with the parsed
+                  components of the version string, containing ints and strings, e.g., (2, 5, 1, beta).
+                  (None, None) will be returned if the nwb_version is missing, e.g., when no data has
+                  been written to the file yet.
         """
         # Get the version string for the NWB file
         try:
@@ -256,12 +259,12 @@ class NWBHDF5IO(_HDF5IO):
         #  KeyError occurs  when the file is empty (e.g., when creating a new file nothing has been written)
         #  or when the HDF5 file is not a valid NWB file
         except KeyError:
-            return None
+            return None, None
         # Parse the version string
-        nwb_version = tuple([int(j) if j.isnumeric() else j
-                             for i in nwb_version_string.split(".")
-                             for j in i.split("-")])
-        return nwb_version
+        nwb_version_parts = nwb_version_string.replace("-", ".").replace("_", ".").split(".")
+        nwb_version = tuple([int(i) if i.isnumeric() else i
+                             for i in nwb_version_parts])
+        return nwb_version_string, nwb_version
 
     @docval(*get_docval(_HDF5IO.read),
             {'name': 'skip_version_check', 'type': bool, 'doc': 'skip checking of NWB version', 'default': False})
@@ -276,12 +279,12 @@ class NWBHDF5IO(_HDF5IO):
         # Check that the NWB file is supported
         skip_verison_check = popargs('skip_version_check', kwargs)
         if not skip_verison_check:
-            file_version = self.nwb_version
+            file_version_str, file_version = self.nwb_version
             if file_version is None:
                 raise TypeError("Missing NWB version in file. The file is not a valid NWB file.")
             if file_version[0] < 2:
                 raise TypeError("NWB version %s not supported. PyNWB supports NWB files version 2 and above." %
-                                str(file_version))
+                                str(file_version_str))
         # read the file
         return super().read(**kwargs)
 
