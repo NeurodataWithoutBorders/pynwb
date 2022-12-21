@@ -3,6 +3,7 @@
 ## Upcoming
 
 ### Enhancements and minor changes
+- Added a class and tests for the `OnePhotonSeries` new in NWB v2.6.0. @CodyCBakerPhD [#1593](https://github.com/NeurodataWithoutBorders/pynwb/pull/1593)(see also NWB Schema [#523](https://github.com/NeurodataWithoutBorders/nwb-schema/pull/523)
 - `Subject.age` can be input as a `timedelta` type. @bendichter [#1590](https://github.com/NeurodataWithoutBorders/pynwb/pull/1590)
 - Add `Subject.age__reference` field. @bendichter ([#1540](https://github.com/NeurodataWithoutBorders/pynwb/pull/1540))
 - `IntracellularRecordingsTable.add_recording`: the `electrode` arg is now optional, and is automatically populated from the stimulus or response.

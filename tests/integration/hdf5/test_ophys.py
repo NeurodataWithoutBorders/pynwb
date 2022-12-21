@@ -7,6 +7,7 @@ from pynwb.ophys import (
     OpticalChannel,
     PlaneSegmentation,
     ImageSegmentation,
+    OnePhotonSeries,
     TwoPhotonSeries,
     RoiResponseSeries,
     MotionCorrection,
@@ -133,6 +134,37 @@ class TestMotionCorrection(NWBH5IOMixin, TestCase):
     def getContainer(self, nwbfile):
         """ Return the test ImagingPlane from the given NWBFile """
         return nwbfile.processing['ophys'].data_interfaces['MotionCorrection']
+
+
+class TestOnePhotonSeriesIO(AcquisitionH5IOMixin, TestCase):
+
+    def setUpContainer(self):
+        """ Return the test OnePhotonSeries to read/write """
+        self.device, self.optical_channel, self.imaging_plane = make_imaging_plane()
+        data = np.ones((10, 2, 2))
+        timestamps = list(map(lambda x: x/10, range(10)))
+        ret = OnePhotonSeries(
+            name='test_2ps',
+            imaging_plane=self.imaging_plane,
+            data=data,
+            unit='image_unit',
+            format='raw',
+            pmt_gain=1.7,
+            scan_line_rate=3.4,
+            exposure_time=123.,
+            binning=2,
+            power=9001.,
+            intensity=5.,
+            timestamps=timestamps,
+            dimension=[2],
+        )
+        return ret
+
+    def addContainer(self, nwbfile):
+        """ Add the test OnePhotonSeries as an acquisition and add Device and ImagingPlane to the given NWBFile """
+        nwbfile.add_device(self.device)
+        nwbfile.add_imaging_plane(self.imaging_plane)
+        nwbfile.add_acquisition(self.container)
 
 
 class TestTwoPhotonSeriesIO(AcquisitionH5IOMixin, TestCase):
