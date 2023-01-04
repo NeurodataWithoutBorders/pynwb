@@ -579,7 +579,7 @@ class IntracellularRecordingsTableTests(ICEphysMetaTestBase):
         with NWBHDF5IO(self.path, 'w') as io:
             io.write(curr)
         with NWBHDF5IO(self.path, 'r') as io:
-            incon = io.read()
+            incon = io.read(skip_version_check=True)
             self.assertListEqual(incon.categories, curr.categories)
             for n in curr.categories:
                 # empty columns from file have dtype int64 or float64 but empty in-memory columns have dtype object
