@@ -13,5 +13,5 @@ jobs:
       - uses: actions/add-to-project@v0.4.0
         with:
           project-url: https://github.com/orgs/NeurodataWithoutBorders/projects/7
-          github-token: ${{ secrets.project_token }}
+          github-token: ${{ secrets.PROJECT_TOKEN }}
          
