@@ -1,0 +1,17 @@
+name: Add issues to Development Project Board
+
+on:
+  issues:
+    types:
+      - opened
+
+jobs:
+  add-to-project:
+    name: Add issue to project
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/add-to-project@v0.4.0
+        with:
+          project-url: https://github.com/orgs/NeurodataWithoutBorders/projects/7
+          github-token: ${{ secrets.BOT_GITHUB_TOKEN }}
+         
