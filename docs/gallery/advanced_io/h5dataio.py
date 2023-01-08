@@ -234,7 +234,7 @@ from pynwb.file import TimeSeries
 
 wrapped_data = H5DataIO(
     data=data,
-    **hdf5plugin.Zstd().filter_id,  # set the compression and compression_opts parameters
+    **hdf5plugin.Zstd(clevel=3),  # set the compression and compression_opts parameters
     allow_plugin_filters=True,
 )
 
