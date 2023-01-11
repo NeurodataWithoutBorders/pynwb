@@ -483,7 +483,7 @@ del temp  # Flush to disk
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 #
 # Note, we here use a generator for simplicity but we could equally well also implement our own
-# :py:class:`~hdmf.data_utils.AbstractDataChunkIterator` or use :py:class:`~hdmf.data_utils.GenericDataChunkIterator`
+# :py:class:`~hdmf.data_utils.AbstractDataChunkIterator` or use :py:class:`~hdmf.data_utils.GenericDataChunkIterator`.
 
 
 def iter_largearray(filename, shape, dtype='float64'):
