@@ -691,14 +691,14 @@ from hdmf.backends.hdf5.h5_utils import H5DataIO
 
 # Use H5DataIO to specify how to setup the dataset in the file
 dataio = H5DataIO(
-    shape=(0, 10),           # Initial shape. If the shape is known then set to full shape
-    dtype=np.dtype('float'), # dtype of the dataset
-    maxshape=(None, 10),     # Make the time dimension resizable
-    chunks=(131072, 2),      # Use 2MB chunks
-    compression='gzip',      # Enable GZip compression
-    compression_opts=4,      # GZip aggression
-    shuffle=True,            # Enable shuffle filter
-    fillvalue=np.nan         # Use NAN as fillvalue
+    shape=(0, 10),            # Initial shape. If the shape is known then set to full shape
+    dtype=np.dtype('float'),  # dtype of the dataset
+    maxshape=(None, 10),      # Make the time dimension resizable
+    chunks=(131072, 2),       # Use 2MB chunks
+    compression='gzip',       # Enable GZip compression
+    compression_opts=4,       # GZip aggression
+    shuffle=True,             # Enable shuffle filter
+    fillvalue=np.nan          # Use NAN as fillvalue
 )
 
 # Write a test NWB file with our dataset and keep the NWB file (i.e., the  NWBHDF5IO object) open
