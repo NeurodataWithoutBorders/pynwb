@@ -30,7 +30,7 @@ HDF5 installed in a MPI configuration.
 #   from dateutil import tz
 #   from pynwb import NWBHDF5IO, NWBFile, TimeSeries
 #   from datetime import datetime
-#   from hdmf.data_utils import DataChunkIterator
+#   from hdmf.backends.hdf5.h5_utils import H5DataIO
 #
 #   start_time = datetime(2018, 4, 25, 2, 30, 3, tzinfo=tz.gettz('US/Pacific'))
 #   fname = 'test_parallel_pynwb.nwb'
@@ -40,9 +40,11 @@ HDF5 installed in a MPI configuration.
 #   # write in parallel but we do not write any data
 #   if rank == 0:
 #       nwbfile = NWBFile('aa', 'aa', start_time)
-#       data = DataChunkIterator(data=None, maxshape=(4,), dtype=np.dtype('int'))
+#       data = H5DataIO(shape=(4,),
+#                       maxshape=(4,),
+#                       dtype=np.dtype('int'))
 #
-#       nwbfile.add_acquisition(TimeSeries('ts_name', description='desc', data=data,
+#       nwbfile.add_acquisition(TimeSeries(name='ts_name', description='desc', data=data,
 #                                          rate=100., unit='m'))
 #       with NWBHDF5IO(fname, 'w') as io:
 #           io.write(nwbfile)
@@ -58,24 +60,9 @@ HDF5 installed in a MPI configuration.
 #       print(io.read().acquisition['ts_name'].data[rank])
 
 ####################
-# To specify details about chunking, compression and other HDF5-specific I/O options,
-# we can wrap data via ``H5DataIO``, e.g,
 #
-# .. code-block:: python
+# .. note::
 #
-#   data = H5DataIO(DataChunkIterator(data=None, maxshape=(100000, 100),
-#                                     dtype=np.dtype('float')),
-#                                     chunks=(10, 10), maxshape=(None, None))
+#    Using :py:class:`hdmf.backends.hdf5.h5_utils.H5DataIO` we can also specify further
+#    details about the data layout, e.g., via the chunking and compression parameters.
 #
-# would initialize your dataset with a shape of (100000, 100) and maxshape of (None, None)
-# and your own custom chunking of (10, 10).
-
-####################
-# Disclaimer
-# ----------------
-#
-# External links included in the tutorial are being provided as a convenience and for informational purposes only;
-# they do not constitute an endorsement or an approval by the authors of any of the products, services or opinions of
-# the corporation or organization or individual. The authors bear no responsibility for the accuracy, legality or
-# content of the external site or for that of subsequent links. Contact the external site for answers to questions
-# regarding its content.

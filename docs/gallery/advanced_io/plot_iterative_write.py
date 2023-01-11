@@ -42,6 +42,7 @@ writing large arrays without loading all data into memory and streaming data wri
 #   * **Data generators** Data generators are in many ways similar to data streams only that the
 #     data is typically being generated locally and programmatically rather than from an external
 #     data source.
+#
 # * **Sparse data arrays** In order to reduce storage size of sparse arrays a challenge is that while
 #   the data array (e.g., a matrix) may be large, only few values are set. To avoid storage overhead
 #   for storing the full array we can employ (in HDF5) a combination of chunking, compression, and
@@ -70,6 +71,13 @@ writing large arrays without loading all data into memory and streaming data wri
 #   also supports buffered read, i.e., multiple values from the input iterator can be combined to a single chunk.
 #   This is useful for buffered I/O operations, e.g., to improve performance by accumulating data in memory and
 #   writing larger blocks at once.
+#
+# * :py:class:`~hdmf.data_utils.GenericDataChunkIterator` is a semi-abstract version of a
+#   :py:class:`~hdmf.data_utils.AbstractDataChunkIterator` that automatically handles the selection of
+#   buffer regions and resolves communication of compatible chunk regions. Users specify chunk
+#   and buffer shapes or sizes and the iterator will manage how to break the data up for write.
+#   For further details, see the
+#   :hdmf-docs:`GenericDataChunkIterator tutorial <tutorials/plot_generic_data_chunk_tutorial.html>`.
 #
 
 ####################
@@ -107,11 +115,15 @@ from pynwb import NWBFile, TimeSeries
 from pynwb import NWBHDF5IO
 
 
-def write_test_file(filename, data):
+def write_test_file(filename, data, close_io=True):
     """
+
     Simple helper function to write an NWBFile with a single timeseries containing data
     :param filename: String with the name of the output file
     :param data: The data of the timeseries
+    :param close_io: Close and destroy the NWBHDF5IO object used for writing (default=True)
+
+    :returns: None if close_io==True otherwise return NWBHDF5IO object used for write
     """
 
     # Create a test NWBfile
@@ -133,7 +145,11 @@ def write_test_file(filename, data):
     # Write the data to file
     io = NWBHDF5IO(filename, 'w')
     io.write(nwbfile)
-    io.close()
+    if close_io:
+        io.close()
+        del io
+        io = None
+    return io
 
 
 ####################
@@ -196,12 +212,6 @@ print("maxshape=%s, recommended_data_shape=%s, dtype=%s" % (str(data.maxshape),
                                                             str(data.dtype)))
 
 ####################
-# ``[Out]:``
-#
-# .. code-block:: python
-#
-#   maxshape=(None, 10), recommended_data_shape=(1, 10), dtype=float64
-#
 # As we can see :py:class:`~hdmf.data_utils.DataChunkIterator` automatically recommends
 # in its ``maxshape`` that the first dimensions of our array should be unlimited (``None``) and the second
 # dimension be ``10`` (i.e., the length of our chunk. Since :py:class:`~hdmf.data_utils.DataChunkIterator`
@@ -216,8 +226,11 @@ print("maxshape=%s, recommended_data_shape=%s, dtype=%s" % (str(data.maxshape),
 #    :py:class:`~hdmf.data_utils.DataChunkIterator` assumes that our generators yields in **consecutive order**
 #    **single** complete element along the **first dimension** of our a array (i.e., iterate over the first
 #    axis and yield one-element-at-a-time). This behavior is useful in many practical cases. However, if
-#    this strategy does not match our needs, then you can alternatively implement our own derived
-#    :py:class:`~hdmf.data_utils.AbstractDataChunkIterator`.  We show an example of this next.
+#    this strategy does not match our needs, then using :py:class:`~hdmf.data_utils.GenericDataChunkIterator`
+#    or implementing your own derived :py:class:`~hdmf.data_utils.AbstractDataChunkIterator` may be more
+#    appropriate. We show an example of how to implement your own :py:class:`~hdmf.data_utils.AbstractDataChunkIterator`
+#    next. See the :hdmf-docs:`GenericDataChunkIterator tutorial <tutorials/plot_generic_data_chunk_tutorial.html>` as
+#    part of the HDMF documentation for details on how to use :py:class:`~hdmf.data_utils.GenericDataChunkIterator`.
 #
 
 
@@ -387,26 +400,6 @@ print("   File Size     :  %.5f MB" % (file_size_largechunks_compressed / mbfact
 print("   Reduction     :  %.2f x" % (expected_size / file_size_largechunks_compressed))
 
 ####################
-# ``[Out]:``
-#
-#  .. code-block:: python
-#
-#        1) Sparse Matrix Size:
-#           Expected Size :  8000000.00 MB
-#           Occupied Size :  0.80000 MB
-#        2) NWB HDF5 file (no compression):
-#           File Size     :  0.89 MB
-#           Reduction     :  9035219.28 x
-#        3) NWB HDF5 file (with GZIP compression):
-#           File Size     :  0.88847 MB
-#           Reduction     :  9004283.79 x
-#        4) NWB HDF5 file (large chunks):
-#           File Size     :  80.08531 MB
-#           Reduction     :  99893.47 x
-#        5) NWB HDF5 file (large chunks with compression):
-#           File Size     :  1.14671 MB
-#           Reduction     :  6976450.12 x
-#
 # Discussion
 # ^^^^^^^^^^
 #
@@ -490,7 +483,7 @@ del temp  # Flush to disk
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 #
 # Note, we here use a generator for simplicity but we could equally well also implement our own
-# :py:class:`~hdmf.data_utils.AbstractDataChunkIterator`.
+# :py:class:`~hdmf.data_utils.AbstractDataChunkIterator` or use :py:class:`~hdmf.data_utils.GenericDataChunkIterator`.
 
 
 def iter_largearray(filename, shape, dtype='float64'):
@@ -552,15 +545,6 @@ with NWBHDF5IO('basic_sparse_iterwrite_largearray.nwb', 'r') as io:
         print("Success: All data values match")
     else:
         print("ERROR: Mismatch between data")
-
-
-####################
-# ``[Out]:``
-#
-#  .. code-block:: python
-#
-#       Success: All data values match
-
 
 ####################
 # Example: Convert arrays stored in multiple files
@@ -705,46 +689,37 @@ write_test_file(filename='basic_sparse_iterwrite_multifile.nwb',
 #
 from hdmf.backends.hdf5.h5_utils import H5DataIO
 
-write_test_file(filename='basic_alternative_custom_write.nwb',
-                data=H5DataIO(data=np.empty(shape=(0, 10), dtype='float'),
-                              maxshape=(None, 10),  # <-- Make the time dimension resizable
-                              chunks=(131072, 2),   # <-- Use 2MB chunks
-                              compression='gzip',   # <-- Enable GZip compression
-                              compression_opts=4,   # <-- GZip aggression
-                              shuffle=True,         # <-- Enable shuffle filter
-                              fillvalue=np.nan      # <-- Use NAN as fillvalue
-                              )
-                )
+# Use H5DataIO to specify how to setup the dataset in the file
+dataio = H5DataIO(
+    shape=(0, 10),            # Initial shape. If the shape is known then set to full shape
+    dtype=np.dtype('float'),  # dtype of the dataset
+    maxshape=(None, 10),      # Make the time dimension resizable
+    chunks=(131072, 2),       # Use 2MB chunks
+    compression='gzip',       # Enable GZip compression
+    compression_opts=4,       # GZip aggression
+    shuffle=True,             # Enable shuffle filter
+    fillvalue=np.nan          # Use NAN as fillvalue
+)
+
+# Write a test NWB file with our dataset and keep the NWB file (i.e., the  NWBHDF5IO object) open
+io = write_test_file(
+    filename='basic_alternative_custom_write.nwb',
+    data=dataio,
+    close_io=False
+)
 
 ####################
 # Step 2: Get the dataset(s) to be updated
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 #
-from pynwb import NWBHDF5IO    # noqa
 
-io = NWBHDF5IO('basic_alternative_custom_write.nwb', mode='a')
-nwbfile = io.read()
-data = nwbfile.get_acquisition('synthetic_timeseries').data
+# Let's check what the data looks like before we write
+print("Before write: Shape= %s, Chunks= %s, Maxshape=%s" %
+      (str(dataio.dataset.shape), str(dataio.dataset.chunks), str(dataio.dataset.maxshape)))
 
-# Let's check what the data looks like
-print("Shape %s, Chunks: %s, Maxshape=%s" % (str(data.shape), str(data.chunks), str(data.maxshape)))
-
-####################
-# ``[Out]:``
-#
-#  .. code-block:: python
-#
-#       Shape (0, 10), Chunks: (131072, 2), Maxshape=(None, 10)
-#
-
-####################
-# Step 3: Implement custom write
-# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-#
-
-data.resize((8, 10))    # <-- Allocate the space with need
-data[0:3, :] = 1        # <-- Write timesteps 0,1,2
-data[3:6, :] = 2        # <-- Write timesteps 3,4,5,  Note timesteps 6,7 are not being initialized
+dataio.dataset.resize((8, 10))    # <-- Allocate space. Only needed if we didn't set the initial shape large enough
+dataio.dataset[0:3, :] = 1        # <-- Write timesteps 0,1,2
+dataio.dataset[3:6, :] = 2        # <-- Write timesteps 3,4,5,  Note timesteps 6,7 are not being initialized
 io.close()              # <-- Close the file
 
 
@@ -756,20 +731,13 @@ from pynwb import NWBHDF5IO    # noqa
 
 io = NWBHDF5IO('basic_alternative_custom_write.nwb', mode='a')
 nwbfile = io.read()
-data = nwbfile.get_acquisition('synthetic_timeseries').data
-print(data[:])
+dataset = nwbfile.get_acquisition('synthetic_timeseries').data
+print("After write: Shape= %s, Chunks= %s, Maxshape=%s" %
+      (str(dataset.shape), str(dataset.chunks), str(dataset.maxshape)))
+print(dataset[:])
 io.close()
 
 ####################
-# ``[Out]:``
+# We allocated our data to be ``shape=(8, 10)`` but we only wrote data to the first 6 rows of the
+# array. As expected, we therefore, see our ``fillvalue`` of ``nan`` in the last two rows of the data.
 #
-#  .. code-block:: python
-#
-#       [[  1.   1.   1.   1.   1.   1.   1.   1.   1.   1.]
-#        [  1.   1.   1.   1.   1.   1.   1.   1.   1.   1.]
-#        [  1.   1.   1.   1.   1.   1.   1.   1.   1.   1.]
-#        [  2.   2.   2.   2.   2.   2.   2.   2.   2.   2.]
-#        [  2.   2.   2.   2.   2.   2.   2.   2.   2.   2.]
-#        [  2.   2.   2.   2.   2.   2.   2.   2.   2.   2.]
-#        [ nan  nan  nan  nan  nan  nan  nan  nan  nan  nan]
-#        [ nan  nan  nan  nan  nan  nan  nan  nan  nan  nan]]
