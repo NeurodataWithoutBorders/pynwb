@@ -9,6 +9,7 @@ PAPER          =
 BUILDDIR       = _build
 SRCDIR         = ../src
 RSTDIR         = source
+GALLERYDIR     = gallery
 PKGNAME        = pynwb
 
 # Internal variables.
@@ -45,7 +46,7 @@ help:
 	@echo "  apidoc     to build RST from source code"
 
 clean:
-	-rm -rf $(BUILDDIR)/* $(RSTDIR)/$(PKGNAME)*.rst $(RSTDIR)/tutorials
+	-rm -rf $(BUILDDIR)/* $(RSTDIR)/$(PKGNAME)*.rst $(RSTDIR)/tutorials $(GALLERYDIR)/advanced_io/*.npy $(GALLERYDIR)/advanced_io/*.nwb
 
 html:
 	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(BUILDDIR)/html
