@@ -230,7 +230,7 @@ print("maxshape=%s, recommended_data_shape=%s, dtype=%s" % (str(data.maxshape),
 #    or implementing your own derived :py:class:`~hdmf.data_utils.AbstractDataChunkIterator` may be more
 #    appropriate. We show an example of how to implement your own :py:class:`~hdmf.data_utils.AbstractDataChunkIterator`
 #    next. See the :hdmf-docs:`GenericDataChunkIterator tutorial <tutorials/plot_generic_data_chunk_tutorial.html>` as
-#    part of the HDMF documentation for details on how to use :py:class:`~hdmf.data_utils.GenerictDataChunkIterator`.
+#    part of the HDMF documentation for details on how to use :py:class:`~hdmf.data_utils.GenericDataChunkIterator`.
 #
 
 
