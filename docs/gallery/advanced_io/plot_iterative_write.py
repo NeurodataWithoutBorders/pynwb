@@ -74,9 +74,9 @@ writing large arrays without loading all data into memory and streaming data wri
 #
 # * :py:class:`~hdmf.data_utils.GenericDataChunkIterator` is a semi-abstract version of a
 #   :py:class:`~hdmf.data_utils.AbstractDataChunkIterator` that automatically handles the selection of
-#   buffer regions and resolves communication of compatible chunk regions. User specify chunk
-#   and buffer shapes or sizes and the iterator manages how to break the data up for write.
-#   For further detail see the
+#   buffer regions and resolves communication of compatible chunk regions. Users specify chunk
+#   and buffer shapes or sizes and the iterator will manage how to break the data up for write.
+#   For further details, see the
 #   :hdmf-docs:`GenericDataChunkIterator tutorial <tutorials/plot_generic_data_chunk_tutorial.html>`.
 #
 
