@@ -11,7 +11,7 @@ efficiently working with neurodata stored in the NWB format. If you are new to N
 and would like to learn more, then please also visit the :nwb_overview:`NWB Overview <>`
 website, which provides an entry point for researchers and developers interested in using NWB.
 
-`Neurodata Without Borders (NWB) <http://www.nwb.org/>`_ is a project to develop a
+`Neurodata Without Borders (NWB) <https://www.nwb.org/>`_ is a project to develop a
 unified data format for cellular-based neurophysiology data, focused on the
 dynamics of groups of neurons measured under a large range of experimental
 conditions.

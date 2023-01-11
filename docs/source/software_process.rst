@@ -30,7 +30,7 @@ codecov_, and the other badge shows the percentage coverage reported from codeco
 codecov_, which shows line by line which lines are covered by the tests.
 
 .. _coverage: https://coverage.readthedocs.io
-.. _codecov: https://codecov.io/gh/NeurodataWithoutBorders/pynwb/tree/dev/src/pynwb
+.. _codecov: https://app.codecov.io/gh/NeurodataWithoutBorders/pynwb/tree/dev/src/pynwb
 
 --------------------------
 Requirement Specifications

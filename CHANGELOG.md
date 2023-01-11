@@ -23,6 +23,8 @@
   [#1591](https://github.com/NeurodataWithoutBorders/pynwb/pull/1591)
 - Updated citation for PyNWB in docs and duecredit to use the eLife NWB paper. @oruebel [#1604](https://github.com/NeurodataWithoutBorders/pynwb/pull/1604)
 - Fixed docs build warnings due to use of hardcoded links. @oruebel [#1604](https://github.com/NeurodataWithoutBorders/pynwb/pull/1604)
+- Updated the [iterative write tutorial](https://pynwb.readthedocs.io/en/stable/tutorials/advanced_io/iterative_write.html) to reference the new ``GenericDataChunkIterator`` functionality and use the new ``H5DataIO.dataset`` property to simplify the custom I/O section. @oruebel [#1633](https://github.com/NeurodataWithoutBorders/pynwb/pull/1633)
+- Updated the [parallel I/O tutorial](https://pynwb.readthedocs.io/en/stable/tutorials/advanced_io/parallelio.html) to use the new ``H5DataIO.dataset`` feature to set up an empty dataset for parallel write. @oruebel [#1633](https://github.com/NeurodataWithoutBorders/pynwb/pull/1633)
 
 ### Bug fixes
 - Added shape constraint to `PatchClampSeries.data`. @bendichter
