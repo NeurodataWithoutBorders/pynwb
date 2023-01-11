@@ -53,7 +53,7 @@ if "%1" == "clean" (
 	del /q %RSTDIR%\%PKGNAME%*.rst
 	rmdir /q /s %RSTDIR%\tutorials
 	del /q /s %GALLERYDIR%\advanced_io\*.npy
-    del /q /s %GALLERYDIR%\advanced_io\*.nwb
+        del /q /s %GALLERYDIR%\advanced_io\*.nwb
 	goto end
 )
 
