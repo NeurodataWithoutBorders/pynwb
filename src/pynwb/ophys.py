@@ -120,6 +120,87 @@ class ImagingPlane(NWBContainer):
             setattr(self, key, val)
 
 
+@register_class("OnePhotonSeries", CORE_NAMESPACE)
+class OnePhotonSeries(ImageSeries):
+    """Image stack recorded over time from 1-photon microscope."""
+
+    __nwbfields__ = (
+        "imaging_plane", "pmt_gain", "scan_line_rate", "exposure_time", "binning", "power", "intensity"
+    )
+
+    @docval(
+        *get_docval(ImageSeries.__init__, "name"),  # required
+        {"name": "imaging_plane", "type": ImagingPlane, "doc": "Imaging plane class/pointer."},  # required
+        *get_docval(ImageSeries.__init__, "data", "unit", "format"),
+        {"name": "pmt_gain", "type": float, "doc": "Photomultiplier gain.", "default": None},
+        {
+            "name": "scan_line_rate",
+            "type": float,
+            "doc": (
+                "Lines imaged per second. This is also stored in /general/optophysiology but is kept "
+                "here as it is useful information for analysis, and so good to be stored w/ the actual data."
+             ),
+            "default": None,
+        },
+        {
+            "name": "exposure_time",
+            "type": float,
+            "doc": "Exposure time of the sample; often the inverse of the frequency.",
+            "default": None,
+        },
+        {
+            "name": "binning",
+            "type": (int, "uint"),
+            "doc": "Amount of pixels combined into 'bins'; could be 1, 2, 4, 8, etc.",
+            "default": None,
+        },
+        {
+            "name": "power",
+            "type": float,
+            "doc": "Power of the excitation in mW, if known.",
+            "default": None,
+        },
+        {
+            "name": "intensity",
+            "type": float,
+            "doc": "Intensity of the excitation in mW/mm^2, if known.",
+            "default": None,
+        },
+        *get_docval(
+            ImageSeries.__init__,
+            "external_file",
+            "starting_frame",
+            "bits_per_pixel",
+            "dimension",
+            "resolution",
+            "conversion",
+            "timestamps",
+            "starting_time",
+            "rate",
+            "comments",
+            "description",
+            "control",
+            "control_description",
+            "device",
+            "offset",
+        )
+    )
+    def __init__(self, **kwargs):
+        keys_to_set = (
+            "imaging_plane", "pmt_gain", "scan_line_rate", "exposure_time", "binning", "power", "intensity"
+        )
+        args_to_set = popargs_to_dict(keys_to_set, kwargs)
+        super().__init__(**kwargs)
+
+        if args_to_set["binning"] < 0:
+            raise ValueError(f"Binning value must be >= 0: {args_to_set['binning']}")
+        if isinstance(args_to_set["binning"], int):
+            args_to_set["binning"] = np.uint(args_to_set["binning"])
+
+        for key, val in args_to_set.items():
+            setattr(self, key, val)
+
+
 @register_class('TwoPhotonSeries', CORE_NAMESPACE)
 class TwoPhotonSeries(ImageSeries):
     """Image stack recorded over time from 2-photon microscope."""

@@ -5,8 +5,19 @@ import numpy as np
 from pynwb.base import TimeSeries
 from pynwb.device import Device
 from pynwb.image import ImageSeries
-from pynwb.ophys import (TwoPhotonSeries, RoiResponseSeries, DfOverF, Fluorescence, PlaneSegmentation,
-                         ImageSegmentation, OpticalChannel, ImagingPlane, MotionCorrection, CorrectedImageStack)
+from pynwb.ophys import (
+    OnePhotonSeries,
+    TwoPhotonSeries,
+    RoiResponseSeries,
+    DfOverF,
+    Fluorescence,
+    PlaneSegmentation,
+    ImageSegmentation,
+    OpticalChannel,
+    ImagingPlane,
+    MotionCorrection,
+    CorrectedImageStack
+)
 from pynwb.testing import TestCase
 
 
@@ -168,6 +179,53 @@ class ImagingPlaneConstructor(TestCase):
                 location='location',
                 reference_frame='reference_frame',
                 unit='my_unit'
+            )
+
+
+class OnePhotonSeriesConstructor(TestCase):
+
+    def test_init(self):
+        ip = create_imaging_plane()
+        one_photon_series = OnePhotonSeries(
+            name="test_one_photon_series",
+            unit="unit",
+            imaging_plane=ip,
+            pmt_gain=1.,
+            scan_line_rate=2.,
+            exposure_time=123.,
+            binning=2,
+            power=9001.,
+            intensity=5.,
+            external_file=["external_file"],
+            starting_frame=[0],
+            format="external",
+            timestamps=list(),
+        )
+        self.assertEqual(one_photon_series.name, 'test_one_photon_series')
+        self.assertEqual(one_photon_series.unit, 'unit')
+        self.assertEqual(one_photon_series.imaging_plane, ip)
+        self.assertEqual(one_photon_series.pmt_gain, 1.)
+        self.assertEqual(one_photon_series.scan_line_rate, 2.)
+        self.assertEqual(one_photon_series.exposure_time, 123.)
+        self.assertEqual(one_photon_series.binning, 2)
+        self.assertEqual(one_photon_series.power, 9001.)
+        self.assertEqual(one_photon_series.intensity, 5.)
+        self.assertEqual(one_photon_series.external_file, ["external_file"])
+        self.assertEqual(one_photon_series.starting_frame, [0])
+        self.assertEqual(one_photon_series.format, "external")
+        self.assertIsNone(one_photon_series.dimension)
+
+    def test_negative_binning_assertion(self):
+        ip = create_imaging_plane()
+
+        with self.assertRaisesWith(exc_type=ValueError, exc_msg="Binning value must be >= 0: -1"):
+            OnePhotonSeries(
+                name="test_one_photon_series_binning_assertion",
+                unit="unit",
+                data=np.empty(shape=(10, 100, 100)),
+                imaging_plane=ip,
+                rate=1.,
+                binning=-1,
             )
 
 
