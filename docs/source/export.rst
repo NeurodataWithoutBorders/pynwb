@@ -7,14 +7,14 @@ You can use the export feature of PyNWB to create a modified version of an exist
 original file.
 
 To do so, first open the NWB file using :py:class:`~pynwb.NWBHDF5IO`. Then, read the NWB file into an
-:py:class:`~pynwb.file.NWBFile` object,
-modify the ``NWBFile`` object or its child objects, and export the modified ``NWBFile`` object to a new file path.
-The modifications will appear in the exported file and not the original file.
+:py:class:`~pynwb.file.NWBFile` object, modify the :py:class:`~pynwb.file.NWBFile` object or its child objects, and
+export the modified :py:class:`~pynwb.file.NWBFile` object to a new file path. The modifications will appear in the
+exported file and not the original file.
 
 These modifications can consist of removals of containers, additions of containers, and changes to container attributes.
 If container attributes are changed, then
 :py:meth:`NWBFile.set_modified() <hdmf.container.AbstractContainer.set_modified>` must be called
-on the ``NWBFile`` before exporting.
+on the :py:class:`~pynwb.file.NWBFile` before exporting.
 
 .. code-block:: python
 
@@ -31,7 +31,7 @@ on the ``NWBFile`` before exporting.
     Modifications to :py:class:`h5py.Dataset <h5py.Dataset>` objects act *directly* on the read file on disk.
     Changes are applied immediately and do not require exporting or writing the file. If you want to modify a dataset
     only in the new file, than you should replace the whole object with a new array holding the modified data. To
-    prevent unintentional changes to the source file, the source file should be opened with ``mode='r'``.
+    prevent unintentional changes to the source file, the source file should be opened with :py:code:`mode='r'`.
 
 .. note::
 
@@ -41,9 +41,10 @@ on the ``NWBFile`` before exporting.
 
 .. note::
 
-    After exporting an ``NWBFile``, the object IDs of the ``NWBFile`` and its child containers will be identical to the
-    object IDs of the read ``NWBFile`` and its child containers. The object ID of a container uniquely identifies the
-    container within a file, but should *not* be used to distinguish between two different files.
+    After exporting an :py:class:`~pynwb.file.NWBFile`, the object IDs of the :py:class:`~pynwb.file.NWBFile` and its
+    child containers will be identical to the object IDs of the read :py:class:`~pynwb.file.NWBFile` and its child
+    containers. The object ID of a container uniquely identifies the container within a file, but should *not* be
+    used to distinguish between two different files.
 
 .. seealso::
 
@@ -65,9 +66,9 @@ See also this `h5copy tutorial <https://support.hdfgroup.org/HDF5/Tutor/cmdtoole
 How do I generate new object IDs for a newly exported NWB file?
 ---------------------------------------------------------------------------------------------------------
 Before calling ``export``, call the method
-:py:meth:`generate_new_id <hdmf.container.AbstractContainer.generate_new_id>` on the ``NWBFile`` to generate
-a new set of object IDs for the ``NWBFile`` and all of its children, recursively. Then export the ``NWBFile``.
-The original NWB file is preserved.
+:py:meth:`generate_new_id <hdmf.container.AbstractContainer.generate_new_id>` on the :py:class:`~pynwb.file.NWBFile`
+to generate a new set of object IDs for the ``NWBFile`` and all of its children, recursively. Then export the
+:py:class:`~pynwb.file.NWBFile`. The original NWB file is preserved.
 
 .. code-block:: python
 
@@ -106,10 +107,10 @@ from the HDF5 Group. See also this `h5copy tutorial <https://support.hdfgroup.or
 
 How do I write a newly instantiated ``NWBFile`` to two different file paths?
 -----------------------------------------------------------------------------------------------------------------------
-PyNWB does not support writing an ``NWBFile`` that was not read from a file to two different files.
-For example, if you instantiate ``NWBFile`` A and write it to file path 1, you cannot also write it to file path 2.
-However, you can first write the ``NWBFile`` to file path 1, read the ``NWBFile`` from file path 1, and
-then export it to file path 2.
+PyNWB does not support writing an :py:class:`~pynwb.file.NWBFile` that was not read from a file to two different files.
+For example, if you instantiate :py:class:`~pynwb.file.NWBFile` A and write it to file path 1, you cannot also write it
+to file path 2. However, you can first write the :py:class:`~pynwb.file.NWBFile`` to file path 1, read the
+:py:class:`~pynwb.file.NWBFile` from file path 1, and then export it to file path 2.
 
 .. code-block:: python
 

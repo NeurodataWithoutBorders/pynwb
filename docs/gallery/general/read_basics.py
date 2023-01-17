@@ -331,7 +331,7 @@ for time in stim_on_times_landscapes[:3]:
 # object and accessing its attributes, but it may be useful to explore the data in a
 # more interactive, visual way.
 #
-# You can use `NWBWidgets <https://github.com/NeurodataWithoutBorders/nwb-jupyter-widgets>`_,
+# You can use `NWBWidgets <https://github.com/NeurodataWithoutBorders/nwbwidgets>`_,
 # a package containing interactive widgets for visualizing NWB data,
 # or you can use the `HDFView <https://www.hdfgroup.org/downloads/hdfview>`_
 # tool, which can open any generic HDF5 file, which an NWB file is.
