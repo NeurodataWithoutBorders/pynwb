@@ -16,6 +16,7 @@
 - Updated ``NWBHDF5IO.read`` to check NWB version before read and raise more informative error if an unsupported version is found @oruebel [#1612](https://github.com/NeurodataWithoutBorders/pynwb/pull/1612)
 - Updated NWB Schema tp 2.6.0 @mavaylon1 [#1636](https://github.com/NeurodataWithoutBorders/pynwb/pull/1636)
 
+
 ### Documentation and tutorial enhancements:
 - Adjusted [ecephys tutorial](https://pynwb.readthedocs.io/en/stable/tutorials/domain/ecephys.html) to create fake data with proper dimensions @bendichter [#1581](https://github.com/NeurodataWithoutBorders/pynwb/pull/1581)
 - Refactored testing documentation, including addition of section on ``pynwb.testing.mock`` submodule. @bendichter
