@@ -16,9 +16,20 @@ import h5py
 
 from pynwb.testing import TestCase, remove_test_file, create_icephys_stimulus_and_response
 from pynwb.file import NWBFile
-from pynwb.icephys import (VoltageClampStimulusSeries, VoltageClampSeries, CurrentClampStimulusSeries,
-                           IZeroClampSeries, IntracellularRecordingsTable, SimultaneousRecordingsTable,
-                           SequentialRecordingsTable, RepetitionsTable, ExperimentalConditionsTable)
+from pynwb.icephys import (
+    VoltageClampStimulusSeries,
+    VoltageClampSeries,
+    CurrentClampStimulusSeries,
+    IZeroClampSeries,
+    SimultaneousRecordingsTable,
+    SequentialRecordingsTable,
+    RepetitionsTable,
+    ExperimentalConditionsTable,
+    IntracellularElectrode,
+    CurrentClampSeries,
+    IntracellularRecordingsTable
+)
+from pynwb.device import Device
 from pynwb.base import TimeSeriesReferenceVectorData
 from pynwb import NWBHDF5IO
 from hdmf.utils import docval, popargs
@@ -568,7 +579,7 @@ class IntracellularRecordingsTableTests(ICEphysMetaTestBase):
         with NWBHDF5IO(self.path, 'w') as io:
             io.write(curr)
         with NWBHDF5IO(self.path, 'r') as io:
-            incon = io.read()
+            incon = io.read(skip_version_check=True)
             self.assertListEqual(incon.categories, curr.categories)
             for n in curr.categories:
                 # empty columns from file have dtype int64 or float64 but empty in-memory columns have dtype object
@@ -628,6 +639,54 @@ class IntracellularRecordingsTableTests(ICEphysMetaTestBase):
         # Write our test file
         with NWBHDF5IO(self.path, 'w') as io:
             io.write(local_nwbfile)
+
+    def test_no_electrode(self):
+        device = Device(name='device_name')
+        elec = IntracellularElectrode(
+            name='test_iS',
+            device=device,
+            description='description',
+            slice='slice',
+            seal='seal',
+            location='location',
+            resistance='resistance',
+            filtering='filtering',
+            initial_access_resistance='initial_access_resistance',
+            cell_id='this_cell',
+        )
+
+        cCSS = CurrentClampStimulusSeries(
+            name="test_cCSS",
+            data=np.ones((30,)),
+            electrode=elec,
+            gain=1.0,
+            rate=100_000.,
+        )
+
+        cCS = CurrentClampSeries(
+            name="test_cCS",
+            data=np.ones((30,)),
+            electrode=elec,
+            gain=1.0,
+            rate=100_000.,
+        )
+
+        # test retrieve electrode from stimulus (when both stimulus and response are given)
+        itr = IntracellularRecordingsTable()
+        itr.add_recording(stimulus=cCSS, response=cCS)
+        self.assertEqual(itr["electrodes"].values[0], elec)
+        del itr
+
+        # test retrieve electrode from stimulus (when only stimulus is given)
+        itr = IntracellularRecordingsTable()
+        itr.add_recording(stimulus=cCSS, response=None)
+        self.assertEqual(itr["electrodes"].values[0], elec)
+        del itr
+
+        # test retrieve electrode from response (when only response is given)
+        itr = IntracellularRecordingsTable()
+        itr.add_recording(stimulus=None, response=cCS)
+        self.assertEqual(itr["electrodes"].values[0], elec)
 
 
 class SimultaneousRecordingsTableTests(ICEphysMetaTestBase):

@@ -31,8 +31,8 @@ class ElectrodeGroup(NWBContainer):
         args_to_set = popargs_to_dict(('description', 'location', 'device', 'position'), kwargs)
         super().__init__(**kwargs)
         if args_to_set['position'] and len(args_to_set['position']) != 3:
-            raise Exception('ElectrodeGroup position argument must have three elements: x, y, z, but received: %s'
-                            % args_to_set['position'])
+            raise ValueError('ElectrodeGroup position argument must have three elements: x, y, z, but received: %s'
+                             % str(args_to_set['position']))
         for key, val in args_to_set.items():
             setattr(self, key, val)
 
@@ -122,7 +122,7 @@ class SpikeEventSeries(ElectricalSeries):
         if not (isinstance(data, TimeSeries) or isinstance(timestamps, TimeSeries)):
             if not (isinstance(data, DataChunkIterator) or isinstance(timestamps, DataChunkIterator)):
                 if len(data) != len(timestamps):
-                    raise Exception('Must provide the same number of timestamps and spike events')
+                    raise ValueError('Must provide the same number of timestamps and spike events')
             else:
                 # TODO: add check when we have DataChunkIterators
                 pass

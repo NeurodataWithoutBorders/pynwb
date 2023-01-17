@@ -164,9 +164,9 @@ Continuing from the :py:class:`~pynwb.base.TimeSeries` example, lets add ``setUp
 
 .. _rt_below:
 
------------------------
+------------------------
 ``AcquisitionH5IOMixin``
------------------------
+------------------------
 
 If you are testing something that can go in *acquisition*, you can avoid writing ``addContainer`` and ``getContainer``
 by extending :py:class:`~pynwb.testing.testh5io.AcquisitionH5IOMixin`.  This class has already overridden these

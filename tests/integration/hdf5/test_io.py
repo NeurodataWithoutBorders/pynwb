@@ -418,9 +418,83 @@ class TestNWBHDF5IO(TestCase):
     def tearDown(self):
         remove_test_file(self.path)
 
+    def test_nwb_version_property(self):
+        """Test reading of files with missing nwb_version"""
+        # check empty version before write
+        with NWBHDF5IO(self.path, 'w') as io:
+            self.assertTupleEqual(io.nwb_version, (None, None))
+        # write the example file
+        with NWBHDF5IO(self.path, 'w') as io:
+            io.write(self.nwbfile)
+        # check behavior for various different version strings
+        for ver in [("2.0.5", (2, 0, 5)),
+                    ("2.0.5-alpha", (2, 0, 5, "alpha")),
+                    ("1.0.4_beta", (1, 0, 4, "beta")),
+                    ("bad_version", ("bad", "version", ))]:
+            # Set version string
+            with File(self.path, mode='a') as io:
+                io.attrs['nwb_version'] = ver[0]
+            # Assert expected result for nwb_version tuple
+            with NWBHDF5IO(self.path, 'r') as io:
+                self.assertEqual(io.nwb_version[0], ver[0])
+                self.assertTupleEqual(io.nwb_version[1], ver[1])
+        # check empty version attribute
+        with File(self.path, mode='a') as io:
+            del io.attrs['nwb_version']
+        with NWBHDF5IO(self.path, 'r') as io:
+            self.assertTupleEqual(io.nwb_version, (None, None))
+
+    def test_check_nwb_version_ok(self):
+        """Test that opening a current NWBFile passes the version check"""
+        with NWBHDF5IO(self.path, 'w') as io:
+            io.write(self.nwbfile)
+        with NWBHDF5IO(self.path, 'r') as io:
+            self.assertIsNotNone(io.nwb_version[0])
+            self.assertIsNotNone(io.nwb_version[1])
+            self.assertGreater(io.nwb_version[1][0], 1)
+            read_file = io.read()
+            self.assertContainerEqual(read_file, self.nwbfile)
+
+    def test_check_nwb_version_missing_version(self):
+        """Test reading of files with missing nwb_version"""
+        # write the example file
+        with NWBHDF5IO(self.path, 'w') as io:
+            io.write(self.nwbfile)
+        # remove the version attribute
+        with File(self.path, mode='a') as io:
+            del io.attrs['nwb_version']
+        # test that reading the file without a version strings fails
+        with self.assertRaisesWith(
+                TypeError,
+                "Missing NWB version in file. The file is not a valid NWB file."):
+            with NWBHDF5IO(self.path, 'r') as io:
+                _ = io.read()
+        # test that reading the file when skipping the version check works
+        with NWBHDF5IO(self.path, 'r') as io:
+            read_file = io.read(skip_version_check=True)
+            self.assertContainerEqual(read_file, self.nwbfile)
+
+    def test_check_nwb_version_old_version(self):
+        """Test reading of files with version less than 2 """
+        # write the example file
+        with NWBHDF5IO(self.path, 'w') as io:
+            io.write(self.nwbfile)
+        # remove the version attribute
+        with File(self.path, mode='a') as io:
+            io.attrs['nwb_version'] = "1.0.5"
+        # test that reading the file without a version strings fails
+        with self.assertRaisesWith(
+                TypeError,
+                "NWB version 1.0.5 not supported. PyNWB supports NWB files version 2 and above."):
+            with NWBHDF5IO(self.path, 'r') as io:
+                _ = io.read()
+        # test that reading the file when skipping the version check works
+        with NWBHDF5IO(self.path, 'r') as io:
+            read_file = io.read(skip_version_check=True)
+            self.assertContainerEqual(read_file, self.nwbfile)
+
     def test_round_trip_with_path_string(self):
         """Opening a NWBHDF5IO with a path string should work correctly"""
-
         path_str = self.path
         with NWBHDF5IO(path_str, 'w') as io:
             io.write(self.nwbfile)

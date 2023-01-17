@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from dateutil.tz import tzlocal
 from collections.abc import Iterable
 from warnings import warn
@@ -64,29 +64,35 @@ class Subject(NWBContainer):
         'strain'
     )
 
-    @docval({'name': 'age', 'type': str,
-             'doc': ('The age of the subject. The ISO 8601 Duration format is recommended, e.g., "P90D" for '
-                     '90 days old.'), 'default': None},
-            {'name': 'description', 'type': str,
-             'doc': 'A description of the subject, e.g., "mouse A10".', 'default': None},
-            {'name': 'genotype', 'type': str,
-             'doc': 'The genotype of the subject, e.g., "Sst-IRES-Cre/wt;Ai32(RCL-ChR2(H134R)_EYFP)/wt".',
-             'default': None},
-            {'name': 'sex', 'type': str,
-             'doc': ('The sex of the subject. Using "F" (female), "M" (male), "U" (unknown), or "O" (other) '
-                     'is recommended.'), 'default': None},
-            {'name': 'species', 'type': str,
-             'doc': ('The species of the subject. The formal latin binomal name is recommended, e.g., "Mus musculus"'),
-             'default': None},
-            {'name': 'subject_id', 'type': str, 'doc': 'A unique identifier for the subject, e.g., "A10"',
-             'default': None},
-            {'name': 'weight', 'type': (float, str),
-             'doc': ('The weight of the subject, including units. Using kilograms is recommended. e.g., "0.02 kg". '
-                     'If a float is provided, then the weight will be stored as "[value] kg".'),
-             'default': None},
-            {'name': 'date_of_birth', 'type': datetime, 'default': None,
-             'doc': 'The datetime of the date of birth. May be supplied instead of age.'},
-            {'name': 'strain', 'type': str, 'doc': 'The strain of the subject, e.g., "C57BL/6J"', 'default': None})
+    @docval(
+        {
+            "name": "age",
+            "type": (str, timedelta),
+            "doc": 'The age of the subject. The ISO 8601 Duration format is recommended, e.g., "P90D" for 90 days old.'
+                   'A timedelta will automatically be converted to The ISO 8601 Duration format.',
+            "default": None,
+        },
+        {'name': 'description', 'type': str,
+         'doc': 'A description of the subject, e.g., "mouse A10".', 'default': None},
+        {'name': 'genotype', 'type': str,
+         'doc': 'The genotype of the subject, e.g., "Sst-IRES-Cre/wt;Ai32(RCL-ChR2(H134R)_EYFP)/wt".',
+         'default': None},
+        {'name': 'sex', 'type': str,
+         'doc': ('The sex of the subject. Using "F" (female), "M" (male), "U" (unknown), or "O" (other) '
+                 'is recommended.'), 'default': None},
+        {'name': 'species', 'type': str,
+         'doc': 'The species of the subject. The formal latin binomal name is recommended, e.g., "Mus musculus"',
+         'default': None},
+        {'name': 'subject_id', 'type': str, 'doc': 'A unique identifier for the subject, e.g., "A10"',
+         'default': None},
+        {'name': 'weight', 'type': (float, str),
+         'doc': ('The weight of the subject, including units. Using kilograms is recommended. e.g., "0.02 kg". '
+                 'If a float is provided, then the weight will be stored as "[value] kg".'),
+         'default': None},
+        {'name': 'date_of_birth', 'type': datetime, 'default': None,
+         'doc': 'The datetime of the date of birth. May be supplied instead of age.'},
+        {'name': 'strain', 'type': str, 'doc': 'The strain of the subject, e.g., "C57BL/6J"', 'default': None},
+    )
     def __init__(self, **kwargs):
         keys_to_set = ("age",
                        "description",
@@ -104,6 +110,9 @@ class Subject(NWBContainer):
         weight = args_to_set['weight']
         if isinstance(weight, float):
             args_to_set['weight'] = str(weight) + ' kg'
+
+        if isinstance(args_to_set["age"], timedelta):
+            args_to_set["age"] = pd.Timedelta(args_to_set["age"]).isoformat()
 
         date_of_birth = args_to_set['date_of_birth']
         if date_of_birth and date_of_birth.tzinfo is None:

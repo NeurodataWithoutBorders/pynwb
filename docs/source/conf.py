@@ -151,6 +151,7 @@ extlinks = {'incf_lesson': ('https://training.incf.org/lesson/%s', ''),
             'nwb_extension': ('https://github.com/nwb-extensions/%s', ''),
             'pynwb': ('https://github.com/NeurodataWithoutBorders/pynwb/%s', ''),
             'nwb_overview': ('https://nwb-overview.readthedocs.io/en/latest/%s', ''),
+            'hdmf-docs': ('https://hdmf.readthedocs.io/en/stable/%s', ''),
             'dandi': ('https://www.dandiarchive.org/%s', '')}
 
 # Add any paths that contain templates here, relative to this directory.

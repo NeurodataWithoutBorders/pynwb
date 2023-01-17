@@ -101,10 +101,16 @@ def load_namespaces(**kwargs):
     return __TYPE_MAP.load_namespaces(namespace_path)
 
 
-# load the core namespace i.e. base NWB specification
+# load the core namespace, i.e. base NWB specification
 __resources = __get_resources()
 if os.path.exists(__resources['namespace_path']):
     load_namespaces(__resources['namespace_path'])
+else:
+    raise RuntimeError(
+        "'core' is not a registered namespace. If you installed PyNWB locally using a git clone, you need to "
+        "use the --recurse_submodules flag when cloning. See developer installation instructions here: "
+        "https://pynwb.readthedocs.io/en/stable/install_developers.html#install-from-git-repository"
+    )
 
 
 def available_namespaces():
@@ -205,6 +211,7 @@ class NWBHDF5IO(_HDF5IO):
     def __init__(self, **kwargs):
         path, mode, manager, extensions, load_namespaces, file_obj, comm, driver =\
             popargs('path', 'mode', 'manager', 'extensions', 'load_namespaces', 'file', 'comm', 'driver', kwargs)
+        # Define the BuildManager to use
         if load_namespaces:
             if manager is not None:
                 warn("loading namespaces from file - ignoring 'manager'")
@@ -231,7 +238,53 @@ class NWBHDF5IO(_HDF5IO):
                 manager = get_manager(extensions=extensions)
             elif manager is None:
                 manager = get_manager()
+        # Open the file
         super().__init__(path, manager=manager, mode=mode, file=file_obj, comm=comm, driver=driver)
+
+    @property
+    def nwb_version(self):
+        """
+        Get the version of the NWB file opened via this NWBHDF5IO object.
+
+        :returns: Tuple consisting of: 1) the original version string as stored in the file and
+                  2) a tuple with the parsed components of the version string, consisting of integers
+                  and strings, e.g., (2, 5, 1, beta). (None, None) will be returned if the nwb_version
+                  is missing, e.g., in the case when no data has been written to the file yet.
+        """
+        # Get the version string for the NWB file
+        try:
+            nwb_version_string = self._file.attrs['nwb_version']
+        #  KeyError occurs  when the file is empty (e.g., when creating a new file nothing has been written)
+        #  or when the HDF5 file is not a valid NWB file
+        except KeyError:
+            return None, None
+        # Parse the version string
+        nwb_version_parts = nwb_version_string.replace("-", ".").replace("_", ".").split(".")
+        nwb_version = tuple([int(i) if i.isnumeric() else i
+                             for i in nwb_version_parts])
+        return nwb_version_string, nwb_version
+
+    @docval(*get_docval(_HDF5IO.read),
+            {'name': 'skip_version_check', 'type': bool, 'doc': 'skip checking of NWB version', 'default': False})
+    def read(self, **kwargs):
+        """
+        Read the NWB file from the IO source.
+
+        :raises TypeError: If the NWB file version is missing or not supported
+
+        :return: NWBFile container
+        """
+        # Check that the NWB file is supported
+        skip_verison_check = popargs('skip_version_check', kwargs)
+        if not skip_verison_check:
+            file_version_str, file_version = self.nwb_version
+            if file_version is None:
+                raise TypeError("Missing NWB version in file. The file is not a valid NWB file.")
+            if file_version[0] < 2:
+                raise TypeError("NWB version %s not supported. PyNWB supports NWB files version 2 and above." %
+                                str(file_version_str))
+        # read the file
+        return super().read(**kwargs)
 
     @docval({'name': 'src_io', 'type': HDMFIO,
              'doc': 'the HDMFIO object (such as NWBHDF5IO) that was used to read the data to export'},
@@ -241,7 +294,8 @@ class NWBHDF5IO(_HDF5IO):
             {'name': 'write_args', 'type': dict, 'doc': 'arguments to pass to :py:meth:`write_builder`',
              'default': None})
     def export(self, **kwargs):
-        """Export an NWB file to a new NWB file using the HDF5 backend.
+        """
+        Export an NWB file to a new NWB file using the HDF5 backend.
 
         If ``nwbfile`` is provided, then the build manager of ``src_io`` is used to build the container,
         and the resulting builder will be exported to the new backend. So if ``nwbfile`` is provided,
@@ -301,19 +355,30 @@ from . import _version    # noqa: F401,E402
 __version__ = _version.get_versions()['version']
 
 from ._due import due, BibTeX  # noqa: E402
-due.cite(BibTeX("""
-@article {R{\"u}bel2021.03.13.435173,
-    author = {R{\"u}bel, Oliver and Tritt, Andrew and Ly, Ryan and Dichter, Benjamin K. and Ghosh, Satrajit and Niu, Lawrence and Soltesz, Ivan and Svoboda, Karel and Frank, Loren and Bouchard, Kristofer E.},
-    title = {The Neurodata Without Borders ecosystem for neurophysiological data science},
-    elocation-id = {2021.03.13.435173},
-    year = {2021},
-    doi = {10.1101/2021.03.13.435173},
-    publisher = {Cold Spring Harbor Laboratory},
-    abstract = {The neurophysiology of cells and tissues are monitored electrophysiologically and optically in diverse experiments and species, ranging from flies to humans. Understanding the brain requires integration of data across this diversity, and thus these data must be findable, accessible, interoperable, and reusable (FAIR). This requires a standard language for data and metadata that can coevolve with neuroscience. We describe design and implementation principles for a language for neurophysiology data. Our software (Neurodata Without Borders, NWB) defines and modularizes the interdependent, yet separable, components of a data language. We demonstrate NWB{\textquoteright}s impact through unified description of neurophysiology data across diverse modalities and species. NWB exists in an ecosystem which includes data management, analysis, visualization, and archive tools. Thus, the NWB data language enables reproduction, interchange, and reuse of diverse neurophysiology data. More broadly, the design principles of NWB are generally applicable to enhance discovery across biology through data FAIRness.Competing Interest StatementThe authors have declared no competing interest.},
-    URL = {https://www.biorxiv.org/content/early/2021/03/15/2021.03.13.435173},
-    eprint = {https://www.biorxiv.org/content/early/2021/03/15/2021.03.13.435173.full.pdf},
-    journal = {bioRxiv}
-}
-"""), description="The Neurodata Without Borders ecosystem for neurophysiological data science",  # noqa: E501
-         path="pynwb/", version=__version__, cite_module=True)
+due.cite(
+    BibTeX("""
+@article {10.7554/eLife.78362,
+article_type = {journal},
+title = {{The Neurodata Without Borders ecosystem for neurophysiological data science}},
+author = {R\"ubel, Oliver and Tritt, Andrew and Ly, Ryan and Dichter, Benjamin K and
+          Ghosh, Satrajit and Niu, Lawrence and Baker, Pamela and Soltesz, Ivan and Ng,
+          Lydia and Svoboda, Karel and Frank, Loren and Bouchard, Kristofer E},
+editor = {Colgin, Laura L and Jadhav, Shantanu P},
+volume = {11},
+year = {2022},
+month = {oct},
+pub_date = {2022-10-04},
+pages = {e78362},
+citation = {eLife 2022;11:e78362},
+doi = {10.7554/eLife.78362},
+url = {https://doi.org/10.7554/eLife.78362},
+keywords = {Neurophysiology, data ecosystem, data language, data standard, FAIR data, archive},
+journal = {eLife},
+issn = {2050-084X},
+publisher = {eLife Sciences Publications, Ltd}}
+"""),
+    description="The Neurodata Without Borders ecosystem for neurophysiological data science",
+    path="pynwb/", version=__version__,
+    cite_module=True
+)
 del due, BibTeX
