@@ -12,7 +12,6 @@ from pynwb.file import Subject
 from pynwb.epoch import TimeIntervals
 from pynwb.ecephys import ElectricalSeries
 from pynwb.testing import NWBH5IOMixin, NWBH5IOFlexMixin, TestCase, remove_test_file
-from pynwb.testing.mock.file import mock_NWBFile
 
 
 class TestNWBFileHDF5IO(TestCase):
