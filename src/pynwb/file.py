@@ -18,6 +18,7 @@ from .ecephys import ElectrodeGroup
 from .icephys import (IntracellularElectrode, SweepTable, PatchClampSeries, IntracellularRecordingsTable,
                       SimultaneousRecordingsTable, SequentialRecordingsTable, RepetitionsTable,
                       ExperimentalConditionsTable)
+from .image import Images
 from .ophys import ImagingPlane
 from .ogen import OptogeneticStimulusSite
 from .misc import Units
@@ -156,7 +157,7 @@ class NWBFile(MultiContainerInterface):
         {
             'attr': 'stimulus_template',
             'add': '_add_stimulus_template_internal',
-            'type': TimeSeries,
+            'type': (TimeSeries, Images),
             'get': 'get_stimulus_template'
         },
         {
@@ -838,7 +839,7 @@ class NWBFile(MultiContainerInterface):
         if use_sweep_table:
             self._update_sweep_table(timeseries)
 
-    @docval({'name': 'timeseries', 'type': TimeSeries},
+    @docval({'name': 'timeseries', 'type': (TimeSeries, Images)},
             {'name': 'use_sweep_table', 'type': bool, 'default': False, 'doc': 'Use the deprecated SweepTable'})
     def add_stimulus_template(self, **kwargs):
         timeseries = popargs('timeseries', kwargs)

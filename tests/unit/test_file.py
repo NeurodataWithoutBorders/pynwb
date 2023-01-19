@@ -5,6 +5,7 @@ from datetime import datetime, timedelta
 from dateutil.tz import tzlocal, tzutc
 
 from pynwb import NWBFile, TimeSeries, NWBHDF5IO
+from pynwb.base import Image, Images
 from pynwb.file import Subject, ElectrodeTable
 from pynwb.epoch import TimeIntervals
 from pynwb.ecephys import ElectricalSeries
@@ -151,6 +152,12 @@ class NWBFileTest(TestCase):
     def test_add_stimulus_template(self):
         self.nwbfile.add_stimulus_template(TimeSeries('test_ts', [0, 1, 2, 3, 4, 5],
                                                       'grams', timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5]))
+        self.assertEqual(len(self.nwbfile.stimulus_template), 1)
+
+    def test_add_stimulus_template_images(self):
+        image1 = Image(name='test_image1', data=np.ones((10, 10)))
+        images = Images(name='images_name', images=[image1])
+        self.nwbfile.add_stimulus_template(images)
         self.assertEqual(len(self.nwbfile.stimulus_template), 1)
 
     def test_add_analysis(self):
