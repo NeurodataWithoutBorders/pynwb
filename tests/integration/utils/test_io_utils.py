@@ -28,3 +28,21 @@ class TestGetNWBVersion(TestCase):
 
         with pytest.raises(ValueError, match="'nwb_version' attribute is missing from the root of the NWB file."):
             get_nwb_version(builder1)
+
+    def test_get_nwb_version_prerelease_false(self):
+        """Get the NWB version from a builder."""
+        builder1 = GroupBuilder(name="root")
+        builder1.set_attribute(name="nwb_version", value="2.0.0-alpha")
+        assert get_nwb_version(builder1) == (2, 0, 0)
+
+    def test_get_nwb_version_prerelease_true1(self):
+        """Get the NWB version from a builder."""
+        builder1 = GroupBuilder(name="root")
+        builder1.set_attribute(name="nwb_version", value="2.0.0-alpha")
+        assert get_nwb_version(builder1, include_prerelease=True) == (2, 0, 0, "alpha")
+
+    def test_get_nwb_version_prerelease_true2(self):
+        """Get the NWB version from a builder."""
+        builder1 = GroupBuilder(name="root")
+        builder1.set_attribute(name="nwb_version", value="2.0.0-alpha.sha-test.5114f85")
+        assert get_nwb_version(builder1, include_prerelease=True) == (2, 0, 0, "alpha.sha-test.5114f85")
