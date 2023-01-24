@@ -7,10 +7,11 @@ from hdmf.backends.hdf5 import HDF5IO
 from hdmf.common import DynamicTable
 
 from pynwb import NWBFile, TimeSeries, NWBHDF5IO, get_manager
+from pynwb.base import Image, Images
 from pynwb.file import Subject
 from pynwb.epoch import TimeIntervals
 from pynwb.ecephys import ElectricalSeries
-from pynwb.testing import NWBH5IOMixin, TestCase, remove_test_file
+from pynwb.testing import NWBH5IOMixin, NWBH5IOFlexMixin, TestCase, remove_test_file
 
 
 class TestNWBFileHDF5IO(TestCase):
@@ -586,3 +587,35 @@ class TestElectrodesRegion(NWBH5IOMixin, TestCase):
         super().test_roundtrip()
         for ii, item in enumerate(self.read_container):
             pd.testing.assert_frame_equal(self.table[ii+1], item)
+
+
+class TestAddStimulusTemplateTimeSeries(NWBH5IOFlexMixin, TestCase):
+
+    def getContainerType(self):
+        return "time series stored as a stimulus template"
+
+    def addContainer(self):
+        ts = TimeSeries(
+            name="test_ts",
+            data=[0, 1, 2, 3, 4, 5],
+            unit="grams",
+            timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5]
+        )
+        self.nwbfile.add_stimulus_template(ts)
+
+    def getContainer(self, nwbfile):
+        return nwbfile.get_stimulus_template("test_ts")
+
+
+class TestAddStimulusTemplateImages(NWBH5IOFlexMixin, TestCase):
+
+    def getContainerType(self):
+        return "images stored as a stimulus template"
+
+    def addContainer(self):
+        image1 = Image(name="test_image1", data=np.ones((10, 10)))
+        images = Images(name="images_name", images=[image1])
+        self.nwbfile.add_stimulus_template(images)
+
+    def getContainer(self, nwbfile):
+        return nwbfile.get_stimulus_template("images_name")
