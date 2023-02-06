@@ -36,6 +36,7 @@
 - Updated the [images tutorial](https://pynwb.readthedocs.io/en/stable/tutorials/domain/images.html) to provide example usage of an ``IndexSeries``
   with a reference to ``Images``. @bendichter [#1602](https://github.com/NeurodataWithoutBorders/pynwb/pull/1602)
 - Fixed an issue with the `tox` tool when upgrading to tox 4. @rly [#1608](https://github.com/NeurodataWithoutBorders/pynwb/pull/1608)
+- Fixed an issue where `Images` were not allowed as stimulus templates. @rly [#1638](https://github.com/NeurodataWithoutBorders/pynwb/pull/1638)
 
 ## PyNWB 2.2.0 (October 19, 2022)
 
