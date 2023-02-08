@@ -1,6 +1,6 @@
 # PyNWB Changelog
 
-## PyNWB 2.3.0 (March 8, 2023)
+## PyNWB 2.3.0 (February 9, 2023)
 
 ### Enhancements and minor changes
 - Added support for NWB Schema 2.6.0. @mavaylon1 [#1636](https://github.com/NeurodataWithoutBorders/pynwb/pull/1636)
@@ -16,6 +16,7 @@
 - Added ``NWBHDF5IO.nwb_version`` property to get the NWB version from an NWB HDF5 file @oruebel [#1612](https://github.com/NeurodataWithoutBorders/pynwb/pull/1612)
 - Updated ``NWBHDF5IO.read`` to check NWB version before read and raise more informative error if an unsupported version is found @oruebel [#1612](https://github.com/NeurodataWithoutBorders/pynwb/pull/1612)
 - Added the `driver` keyword argument to the `pynwb.validate` function as well as the corresponding namespace caching. @CodyCBakerPhD [#1588](https://github.com/NeurodataWithoutBorders/pynwb/pull/1588)
+- Updated HDMF requirement to version 3.5.1. [#1611](https://github.com/NeurodataWithoutBorders/pynwb/pull/1611)
 
 ### Documentation and tutorial enhancements:
 - Adjusted [ecephys tutorial](https://pynwb.readthedocs.io/en/stable/tutorials/domain/ecephys.html) to create fake data with proper dimensions @bendichter [#1581](https://github.com/NeurodataWithoutBorders/pynwb/pull/1581)
