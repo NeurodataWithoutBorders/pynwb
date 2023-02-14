@@ -147,7 +147,10 @@ jobs:
           conda config --set always_yes yes --set changeps1 no
           conda info
           # there are incompatibilies in the python 3.7 workflow when importlib-metadata>=4
-          conda install -c conda-forge tox "importlib_metadata<4"
+          if [[ "${{ matrix.python-ver }}" == "3.7" ]]; then
+            conda install -c conda-forge "importlib_metadata<4"
+          fi
+          conda install -c conda-forge tox
           conda list
 
       - name: Run tox tests
