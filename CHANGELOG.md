@@ -1,6 +1,6 @@
 # PyNWB Changelog
 
-## PyNWB 2.3.0 (February 9, 2023)
+## PyNWB 2.3.0 (February 15, 2023)
 
 ### Enhancements and minor changes
 - Added support for NWB Schema 2.6.0. @mavaylon1 [#1636](https://github.com/NeurodataWithoutBorders/pynwb/pull/1636)
