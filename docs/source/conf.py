@@ -146,13 +146,13 @@ intersphinx_mapping = {
     'fsspec': ("https://filesystem-spec.readthedocs.io/en/latest/", None),
 }
 
-extlinks = {'incf_lesson': ('https://training.incf.org/lesson/%s', ''),
-            'incf_collection': ('https://training.incf.org/collection/%s', ''),
-            'nwb_extension': ('https://github.com/nwb-extensions/%s', ''),
-            'pynwb': ('https://github.com/NeurodataWithoutBorders/pynwb/%s', ''),
-            'nwb_overview': ('https://nwb-overview.readthedocs.io/en/latest/%s', ''),
-            'hdmf-docs': ('https://hdmf.readthedocs.io/en/stable/%s', ''),
-            'dandi': ('https://www.dandiarchive.org/%s', '')}
+extlinks = {'incf_lesson': ('https://training.incf.org/lesson/%s', '%s'),
+            'incf_collection': ('https://training.incf.org/collection/%s', '%s'),
+            'nwb_extension': ('https://github.com/nwb-extensions/%s', '%s'),
+            'pynwb': ('https://github.com/NeurodataWithoutBorders/pynwb/%s', '%s'),
+            'nwb_overview': ('https://nwb-overview.readthedocs.io/en/latest/%s', '%s'),
+            'hdmf-docs': ('https://hdmf.readthedocs.io/en/stable/%s', '%s'),
+            'dandi': ('https://www.dandiarchive.org/%s', '%s')}
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
