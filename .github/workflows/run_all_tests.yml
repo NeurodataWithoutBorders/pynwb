@@ -171,7 +171,8 @@ jobs:
         run: |
           conda config --set always_yes yes --set changeps1 no
           conda info
-          conda install -c conda-forge tox
+          # there are incompatibilies in the python 3.7 workflow when importlib-metadata>=4
+          conda install -c conda-forge tox "importlib_metadata<4"
           conda list
 
       - name: Run tox tests
