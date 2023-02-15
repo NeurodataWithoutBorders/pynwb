@@ -561,3 +561,17 @@ class TestTimestampsRefAware(TestCase):
                     'TEST124',
                     self.start_time,
                     timestamps_reference_time=self.ref_time_notz)
+
+
+class TestTimezone(TestCase):
+    def test_raise_warning__add_missing_timezone(self):
+        with self.assertWarnsWith(UserWarning, "Date is missing timezone information. Updating to local timezone."):
+            Subject(age='P90D',
+                    description='An unfortunate rat',
+                    genotype='WT',
+                    sex='M',
+                    species='Rattus norvegicus',
+                    subject_id='RAT123',
+                    weight='2 kg',
+                    date_of_birth=datetime(2017, 5, 1, 12),
+                    strain='my_strain')
