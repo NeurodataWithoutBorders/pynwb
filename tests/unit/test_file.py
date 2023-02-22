@@ -6,7 +6,7 @@ from dateutil.tz import tzlocal, tzutc
 
 from pynwb import NWBFile, TimeSeries, NWBHDF5IO
 from pynwb.base import Image, Images
-from pynwb.file import Subject, ElectrodeTable
+from pynwb.file import Subject, ElectrodeTable, _add_missing_timezone
 from pynwb.epoch import TimeIntervals
 from pynwb.ecephys import ElectricalSeries
 from pynwb.testing import TestCase, remove_test_file
@@ -592,3 +592,9 @@ class TestTimestampsRefAware(TestCase):
                     'TEST124',
                     self.start_time,
                     timestamps_reference_time=self.ref_time_notz)
+
+
+class TestTimezone(TestCase):
+    def test_raise_warning__add_missing_timezone(self):
+        with self.assertWarnsWith(UserWarning, "Date is missing timezone information. Updating to local timezone."):
+            _add_missing_timezone(datetime(2017, 5, 1, 12))

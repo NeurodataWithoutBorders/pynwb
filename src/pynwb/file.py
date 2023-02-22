@@ -1145,7 +1145,7 @@ def _add_missing_timezone(date):
     if not isinstance(date, datetime):
         raise ValueError("require datetime object")
     if date.tzinfo is None:
-        warn("Date is missing timezone information. Updating to local timezone.")
+        warn("Date is missing timezone information. Updating to local timezone.", stacklevel=2)
         return date.replace(tzinfo=tzlocal())
     return date
 
