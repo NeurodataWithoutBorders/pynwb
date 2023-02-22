@@ -163,20 +163,20 @@ jobs:
         uses: conda-incubator/setup-miniconda@v2
         with:
           auto-update-conda: true
-          auto-activate-base: true
-          activate-environment: true
           python-version: ${{ matrix.python-ver }}
 
       - name: Install build dependencies
         run: |
           conda config --set always_yes yes --set changeps1 no
           conda info
-          # there are incompatibilies in the python 3.7 workflow when importlib-metadata>=4
-          if [[ "${{ matrix.python-ver }}" == "3.7" ]]; then
-            conda install -c conda-forge "importlib_metadata<4"
-          fi
-          conda install -c conda-forge tox
-          conda list
+          # the conda dependency resolution for tox under python 3.7 can install the wrong importlib_metadata
+          conda install -c conda-forge tox "importlib_metadata>4"
+
+      - name: Conda reporting
+        run: |
+          conda info
+          conda config --show-sources
+          conda list --show-channel-urls
 
       - name: Run tox tests
         run: |
@@ -276,9 +276,13 @@ jobs:
         run: |
           pip install matplotlib
           pip install -e .
-          conda info
-          conda list
           pip list
+
+      - name: Conda reporting
+        run: |
+          conda info
+          conda config --show-sources
+          conda list --show-channel-urls
 
       - name: Run gallery ros3 tests
         run: |
