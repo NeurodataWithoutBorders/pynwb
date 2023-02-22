@@ -2,6 +2,7 @@ from datetime import datetime
 import numpy as np
 from pathlib import Path
 from pynwb import NWBFile, NWBHDF5IO, __version__, TimeSeries, get_class, load_namespaces
+from pynwb.file import Subject
 from pynwb.image import ImageSeries
 from pynwb.spec import NWBNamespaceBuilder, export_spec, NWBGroupSpec, NWBAttributeSpec
 
@@ -197,6 +198,23 @@ def _make_empty_with_extension():
     _write(test_name, nwbfile)
 
 
+def _make_subject_without_age_reference():
+    """Create a test file without a value for age_reference."""
+    nwbfile = NWBFile(session_description='ADDME',
+                      identifier='ADDME',
+                      session_start_time=datetime.now().astimezone())
+    subject = Subject(
+        age="P90D",
+        description="A rat",
+        subject_id="RAT123",
+    )
+
+    nwbfile.subject = subject
+
+    test_name = 'subject_no_age__reference'
+    _write(test_name, nwbfile)
+
+
 if __name__ == '__main__':
     # install these versions of PyNWB and run this script to generate new files
     # python src/pynwb/testing/make_test_files.py
@@ -221,3 +239,6 @@ if __name__ == '__main__':
         _make_imageseries_non_external_format()
         _make_imageseries_nonmatch_starting_frame()
         _make_empty_with_extension()
+
+    if __version__ == "2.2.0":
+        _make_subject_without_age_reference()

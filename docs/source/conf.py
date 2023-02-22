@@ -146,13 +146,13 @@ intersphinx_mapping = {
     'fsspec': ("https://filesystem-spec.readthedocs.io/en/latest/", None),
 }
 
-extlinks = {'incf_lesson': ('https://training.incf.org/lesson/%s', ''),
-            'incf_collection': ('https://training.incf.org/collection/%s', ''),
-            'nwb_extension': ('https://github.com/nwb-extensions/%s', ''),
-            'pynwb': ('https://github.com/NeurodataWithoutBorders/pynwb/%s', ''),
-            'nwb_overview': ('https://nwb-overview.readthedocs.io/en/latest/%s', ''),
-            'hdmf-docs': ('https://hdmf.readthedocs.io/en/stable/%s', ''),
-            'dandi': ('https://www.dandiarchive.org/%s', '')}
+extlinks = {'incf_lesson': ('https://training.incf.org/lesson/%s', '%s'),
+            'incf_collection': ('https://training.incf.org/collection/%s', '%s'),
+            'nwb_extension': ('https://github.com/nwb-extensions/%s', '%s'),
+            'pynwb': ('https://github.com/NeurodataWithoutBorders/pynwb/%s', '%s'),
+            'nwb_overview': ('https://nwb-overview.readthedocs.io/en/latest/%s', '%s'),
+            'hdmf-docs': ('https://hdmf.readthedocs.io/en/stable/%s', '%s'),
+            'dandi': ('https://www.dandiarchive.org/%s', '%s')}
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -169,7 +169,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'PyNWB'
-copyright = u'2017-2022, Neurodata Without Borders'
+copyright = u'2017-2023, Neurodata Without Borders'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the

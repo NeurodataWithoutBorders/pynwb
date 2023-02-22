@@ -1,9 +1,12 @@
 # PyNWB Changelog
 
-## Upcoming
+## PyNWB 2.3.0 (February 23, 2023)
 
 ### Enhancements and minor changes
-- `Subject.age` can be input as a `timedelta`. @bendichter [#1590](https://github.com/NeurodataWithoutBorders/pynwb/pull/1590)
+- Added support for NWB Schema 2.6.0. @mavaylon1 [#1636](https://github.com/NeurodataWithoutBorders/pynwb/pull/1636)
+- Added a class and tests for the `OnePhotonSeries` new in NWB v2.6.0. @CodyCBakerPhD [#1593](https://github.com/NeurodataWithoutBorders/pynwb/pull/1593)(see also NWB Schema [#523](https://github.com/NeurodataWithoutBorders/nwb-schema/pull/523)
+- `Subject.age` can be input as a `timedelta` type. @bendichter [#1590](https://github.com/NeurodataWithoutBorders/pynwb/pull/1590)
+- Added `Subject.age__reference` field. @bendichter ([#1540](https://github.com/NeurodataWithoutBorders/pynwb/pull/1540))
 - `IntracellularRecordingsTable.add_recording`: the `electrode` arg is now optional, and is automatically populated from the stimulus or response.
   [#1597](https://github.com/NeurodataWithoutBorders/pynwb/pull/1597)
 - Added module `pynwb.testing.mock.icephys` and corresponding tests. @bendichter
@@ -13,6 +16,7 @@
 - Added ``NWBHDF5IO.nwb_version`` property to get the NWB version from an NWB HDF5 file @oruebel [#1612](https://github.com/NeurodataWithoutBorders/pynwb/pull/1612)
 - Updated ``NWBHDF5IO.read`` to check NWB version before read and raise more informative error if an unsupported version is found @oruebel [#1612](https://github.com/NeurodataWithoutBorders/pynwb/pull/1612)
 - Added the `driver` keyword argument to the `pynwb.validate` function as well as the corresponding namespace caching. @CodyCBakerPhD [#1588](https://github.com/NeurodataWithoutBorders/pynwb/pull/1588)
+- Updated HDMF requirement to version 3.5.1. [#1611](https://github.com/NeurodataWithoutBorders/pynwb/pull/1611)
 - Increased the stacklevel of the warning from `_add_missing_timezone` in `pynwb.file` to make identification of which datetime field is missing a timezone easier. @CodyCBakerPhD [#1641](https://github.com/NeurodataWithoutBorders/pynwb/pull/1641)
 
 ### Documentation and tutorial enhancements:
