@@ -1,0 +1,6 @@
+[codespell]
+# in principle .ipynb can be corrected -- a good number of typos there
+# nwb-schema -- excluding since submodule, should have its own fixes/checks
+skip = .git,*.pdf,*.svg,venvs,env,*.ipynb,nwb-schema
+# it is optin in a url
+ignore-words-list = optin
