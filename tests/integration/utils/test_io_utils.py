@@ -46,3 +46,10 @@ class TestGetNWBVersion(TestCase):
         builder1 = GroupBuilder(name="root")
         builder1.set_attribute(name="nwb_version", value="2.0.0-alpha.sha-test.5114f85")
         assert get_nwb_version(builder1, include_prerelease=True) == (2, 0, 0, "alpha.sha-test.5114f85")
+
+    def test_get_nwb_version_20b(self):
+        """Get the NWB version from a builder where version == "2.0b"."""
+        builder1 = GroupBuilder(name="root")
+        builder1.set_attribute(name="nwb_version", value="2.0b")
+        assert get_nwb_version(builder1) == (2, 0, 0)
+        assert get_nwb_version(builder1, include_prerelease=True) == (2, 0, 0, "b")
