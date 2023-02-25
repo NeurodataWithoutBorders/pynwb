@@ -3,7 +3,8 @@
 ## PyNWB 2.3.1 (February 24, 2023)
 
 ### Bug fixes
-- Fixed an issue where  NWB files with version "2.0b" could not be read. @rly [#1651](https://github.com/NeurodataWithoutBorders/pynwb/pull/1651)
+- Fixed an issue where  NWB files with version "2.0b" could not be read.
+  @rly [#1651](https://github.com/NeurodataWithoutBorders/pynwb/pull/1651)
 
 ## PyNWB 2.3.0 (February 23, 2023)
 
