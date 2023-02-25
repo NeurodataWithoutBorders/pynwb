@@ -13,6 +13,9 @@ def get_nwb_version(builder: Builder, include_prerelease=False) -> Tuple[int, ..
     If the "nwb_version" attribute on the root builder equals "2.5.1-alpha" and include_prerelease=True,
     then (2, 5, 1, "alpha") is returned.
 
+    If the "nwb_version" attribute == "2.0b" (the only deviation from semantic versioning in the 2.x series), then
+    if include_prerelease=True, (2, 0, 0, "b") is returned; else, (2, 0, 0) is returned.
+
     :param builder: Any builder within an NWB file.
     :type builder: Builder
     :param include_prerelease: Whether to include prerelease information in the returned tuple.
@@ -28,6 +31,12 @@ def get_nwb_version(builder: Builder, include_prerelease=False) -> Tuple[int, ..
     nwb_version = root_builder.attributes.get("nwb_version")
     if nwb_version is None:
         raise ValueError("'nwb_version' attribute is missing from the root of the NWB file.")
+    # handle special non-semver case
+    if nwb_version == "2.0b":
+        if not include_prerelease:
+            return (2, 0, 0)
+        else:
+            return (2, 0, 0, "b")
     nwb_version_match = re.match(r"(\d+\.\d+\.\d+)", nwb_version)[0]  # trim off any non-numeric symbols at end
     version_list = [int(i) for i in nwb_version_match.split(".")]
     if include_prerelease:
