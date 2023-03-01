@@ -21,7 +21,7 @@ class TestValidateCLI(TestCase):
     # is not used, then each "coverage run" will overwrite the .coverage file from a
     # previous "coverage run".
     # NOTE the run_coverage.yml GitHub Action runs "python -m coverage combine" to
-    # combine the individual coverage reprots into one .coverage file.
+    # combine the individual coverage reports into one .coverage file.
 
     def test_validate_file_no_cache(self):
         """Test that validating a file with no cached spec against the core namespace succeeds."""

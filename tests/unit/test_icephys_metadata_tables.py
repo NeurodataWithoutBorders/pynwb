@@ -419,7 +419,7 @@ class IntracellularRecordingsTableTests(ICEphysMetaTestBase):
                 response=self.response,
                 id=np.int64(10)
             )
-        # Stimulus/Reponse index count too large
+        # Stimulus/Response index count too large
         with self.assertRaises(IndexError):
             ir = IntracellularRecordingsTable()
             ir.add_recording(
@@ -438,7 +438,7 @@ class IntracellularRecordingsTableTests(ICEphysMetaTestBase):
                 response=self.response,
                 id=np.int64(10)
             )
-        # Stimulus/Reponse start+count combination too large
+        # Stimulus/Response start+count combination too large
         with self.assertRaises(IndexError):
             ir = IntracellularRecordingsTable()
             ir.add_recording(
@@ -1149,7 +1149,7 @@ class NWBFileTests(TestCase):
             identifier='EXAMPLE_ID',
             session_start_time=datetime.now(tzlocal())
         )
-        # set the icephys_filtering attribute and make sure we get a deprectation warning
+        # set the icephys_filtering attribute and make sure we get a deprecation warning
         with warnings.catch_warnings(record=True) as w:
             nwbfile.icephys_filtering = 'test filtering'
             assert issubclass(w[-1].category, DeprecationWarning)
@@ -1326,7 +1326,7 @@ class NWBFileTests(TestCase):
         res = nwbfile.icephys_sequential_recordings[0]
         # check the id value
         self.assertEqual(res.index[0], sequential_recording_id)
-        # Check that our sequential recording containts 1 simultaneous recording
+        # Check that our sequential recording contains 1 simultaneous recording
         assert_array_equal(res.loc[sequential_recording_id]['simultaneous_recordings'],
                            simultaneous_recordings_indices)
 

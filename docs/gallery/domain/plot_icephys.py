@@ -462,7 +462,7 @@ icephys_simultaneous_recordings.add_column(
 print(icephys_simultaneous_recordings.colnames)
 
 #####################################################################
-# As we can see, we now have succesfully created a new custom column.
+# As we can see, we now have successfully created a new custom column.
 #
 # .. note:: The same process applies to all our other tables as well. We can use the
 #         corresponding :py:meth:`~pynwb.file.NWBFile.get_intracellular_recordings`,
@@ -498,7 +498,7 @@ rowindex = nwbfile.add_icephys_simultaneous_recording(
 # .. note:: The ``recordings`` argument is the list of indices of the rows in the
 #           :py:class:`~pynwb.icephys.IntracellularRecordingsTable` that we want
 #           to reference. The indices are determined by the order in which we
-#           added the elements to the table. If we don't know the row indicies,
+#           added the elements to the table. If we don't know the row indices,
 #           but only the ids of the relevant intracellular recordings, then
 #           we can search for them as follows:
 
@@ -571,7 +571,7 @@ rowindex = nwbfile.add_icephys_repetition(sequential_recordings=[0], id=17)
 rowindex = nwbfile.add_icephys_experimental_condition(repetitions=[0], id=19)
 
 #####################################################################
-# As mentioned earlier, to add additonal columns to any of the tables, we can
+# As mentioned earlier, to add additional columns to any of the tables, we can
 # use the ``.add_column`` function on the corresponding table after they have
 # been created.
 
