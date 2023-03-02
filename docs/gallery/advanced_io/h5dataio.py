@@ -92,7 +92,7 @@ data = np.arange(10000).reshape((1000, 10))
 wrapped_data = H5DataIO(
     data=data,
     chunks=True,          # <---- Enable chunking
-    maxshape=(None, 10),  # <---- Make the time dimension unlimited and hence resizeable
+    maxshape=(None, 10),  # <---- Make the time dimension unlimited and hence resizable
 )
 test_ts = TimeSeries(
     name='test_chunked_timeseries',

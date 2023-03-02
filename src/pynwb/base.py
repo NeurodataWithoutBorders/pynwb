@@ -560,7 +560,7 @@ class TimeSeriesReferenceVectorData(VectorData):
 
         The function uses :py:class:`~pynwb.base.TimeSeriesReferenceVectorData.TIME_SERIES_REFERENCE_TUPLE`
         to describe individual records in the dataset. This allows the code to avoid exposing internal
-        details of the schema to the user and simplifies handling of missing values by explictly
+        details of the schema to the user and simplifies handling of missing values by explicitly
         representing missing values via
         :py:class:`~pynwb.base.TimeSeriesReferenceVectorData.TIME_SERIES_REFERENCE_NONE_TYPE`
         rather than the internal representation used for storage of ``(-1, -1, TimeSeries)``.

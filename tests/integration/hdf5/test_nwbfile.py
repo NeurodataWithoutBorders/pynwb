@@ -267,7 +267,7 @@ class TestEpochsIO(NWBH5IOMixin, TestCase):
         """ Add the test epochs to the given NWBFile """
         nwbfile.add_epoch_column(
             name='temperature',
-            description='average temperture (c) during epoch'
+            description='average temperature (c) during epoch'
         )
 
         nwbfile.add_epoch(
