@@ -151,7 +151,7 @@ image_series2 = TwoPhotonSeries(
 
 ####################
 # Since these two-photon data are raw, acquired data, we will add the
-# :py:class:`~pynwb.ophys.TwoPhotonSeries` objects to the :py:class:`~pynwb.NWBFile`
+# :py:class:`~pynwb.ophys.TwoPhotonSeries` objects to the :py:class:`~pynwb.file.NWBFile`
 # as acquired data.
 
 
