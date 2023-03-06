@@ -397,12 +397,12 @@ ps2.to_dataframe()
 # To create a :py:class:`~pynwb.ophys.RoiResponseSeries` object, we will need to reference
 # a set of rows from a :py:class:`~pynwb.ophys.PlaneSegmentation` table to
 # indicate which ROIs correspond to which rows of your recorded data matrix.
-# This is done using a :py:class:`~pynwb.core.DynamicTableRegion`, which is a type of link that
-# allows you to reference specific rows of a :py:class:`~pynwb.core.DynamicTable`,
+# This is done using a :py:class:`~hdmf.common.table.DynamicTableRegion`, which is a type of link that
+# allows you to reference specific rows of a :py:class:`~hdmf.common.table.DynamicTable`,
 # such as a :py:class:`~pynwb.ophys.PlaneSegmentation` table by row indices.
 #
 #
-# First, we create a :py:class:`~pynwb.core.DynamicTableRegion` that references
+# First, we create a :py:class:`~hdmf.common.table.DynamicTableRegion` that references
 # the first two ROIs of the :py:class:`~pynwb.ophys.PlaneSegmentation` table.
 
 rt_region = ps.create_roi_table_region(
