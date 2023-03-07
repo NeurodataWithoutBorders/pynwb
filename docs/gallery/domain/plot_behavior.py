@@ -38,9 +38,11 @@ clarity, we define them here:
 # sphinx_gallery_thumbnail_path = 'figures/gallery_thumbnails_behavior.png'
 
 from datetime import datetime
+from uuid import uuid4
 
 import numpy as np
 from dateutil import tz
+from dateutil.tz import tzlocal
 from pynwb.misc import IntervalSeries
 
 from pynwb.epoch import TimeIntervals
@@ -64,17 +66,15 @@ from pynwb.behavior import (
 # Create an :py:class:`~pynwb.file.NWBFile` object with the required fields
 # (``session_description``, ``identifier``, ``session_start_time``) and additional metadata.
 
-session_start_time = datetime(2018, 4, 25, 2, 30, 3, tzinfo=tz.gettz("US/Pacific"))
-
 nwbfile = NWBFile(
-    session_description="Mouse exploring an open field",  # required
-    identifier="Mouse5_Day3",  # required
-    session_start_time=session_start_time,  # required
-    session_id="session_1234",  # optional
-    experimenter="My Name",  # optional
-    lab="My Lab Name",  # optional
-    institution="University of My Institution",  # optional
-    related_publications="DOI:10.1016/j.neuron.2016.12.011",  # optional
+    session_description="my first synthetic recording",
+    identifier=uuid4(),
+    session_start_time=datetime.now(tzlocal()),
+    experimenter="Baggins, Bilbo",
+    lab="Bag End Laboratory",
+    institution="University of Middle Earth at the Shire",
+    experiment_description="I went on an adventure with thirteen dwarves to reclaim vast treasures.",
+    session_id="LONELYMTN",
 )
 
 nwbfile

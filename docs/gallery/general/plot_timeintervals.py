@@ -38,16 +38,24 @@ a :py:class:`~hdmf.common.table.DynamicTable` with the following columns:
 
 # sphinx_gallery_thumbnail_path = 'figures/gallery_thumbnails_timeintervals.png'
 from datetime import datetime
+from uuid import uuid4
+
 from dateutil.tz import tzlocal
 from pynwb import NWBFile
 from pynwb import TimeSeries
 import numpy as np
 
 # create the NWBFile
-nwbfile = NWBFile(session_description='NWBFile to illustrate TimeIntervals basics',
-                  identifier='NWB123',
-                  session_start_time=datetime(2017, 4, 3, 11, tzinfo=tzlocal()),
-                  file_create_date=datetime(2017, 4, 15, 12, tzinfo=tzlocal()))
+nwbfile = NWBFile(
+    session_description="my first synthetic recording",  # required
+    identifier=uuid4(),  # required
+    session_start_time=datetime(2017, 4, 3, 11, tzinfo=tzlocal()),  # required
+    experimenter="Baggins, Bilbo",  # optional
+    lab="Bag End Laboratory",  # optional
+    institution="University of Middle Earth at the Shire",  # optional
+    experiment_description="I went on an adventure with thirteen dwarves to reclaim vast treasures.",  # optional
+    session_id="LONELYMTN",  # optional
+)
 # create some example TimeSeries
 test_ts = TimeSeries(name='series1',
                      data=np.arange(1000),

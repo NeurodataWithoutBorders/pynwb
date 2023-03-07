@@ -81,6 +81,8 @@ related tables.
 # sphinx_gallery_thumbnail_path = 'figures/gallery_thumbnails_icephys.png'
 # Standard Python imports
 from datetime import datetime
+from uuid import uuid4
+
 from dateutil.tz import tzlocal
 import numpy as np
 import pandas
@@ -112,9 +114,15 @@ from pynwb.core import DynamicTable, VectorData
 
 # Create an ICEphysFile
 ex_nwbfile = NWBFile(
-    session_description='my first recording',
-    identifier='EXAMPLE_ID',
-    session_start_time=datetime.now(tzlocal())
+    session_description="my first synthetic recording",
+    identifier=uuid4(),
+    session_start_time=datetime.now(tzlocal()),
+    experimenter="Baggins, Bilbo",
+    lab="Bag End Laboratory",
+    institution="University of Middle Earth at the Shire",
+    experiment_description="I went on an adventure with thirteen dwarves "
+                           "to reclaim vast treasures.",
+    session_id="LONELYMTN",
 )
 
 # Add a device
