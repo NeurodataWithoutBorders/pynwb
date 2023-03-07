@@ -18,19 +18,19 @@ related to the experiment. This tutorial focuses in particular on the usage of:
 The following examples will reference variables that may not be defined within the block they are used in. For
 clarity, we define them here:
 """
+# Define file paths used in the tutorial
+
 # sphinx_gallery_thumbnail_path = 'figures/gallery_thumbnails_image_data.png'
 from datetime import datetime
-from dateutil import tz
+import os
 
 import numpy as np
 from PIL import Image
-
+from dateutil import tz
 from pynwb import NWBFile, NWBHDF5IO
 from pynwb.base import Images
 from pynwb.image import RGBAImage, RGBImage, GrayscaleImage, OpticalSeries, ImageSeries
 
-# Define file paths used in the tutorial
-import os
 nwbfile_path = os.path.abspath("images_tutorial.nwb")
 moviefiles_path = [
     os.path.abspath("image/file_1.tiff"),
@@ -290,7 +290,7 @@ idx_series = IndexSeries(
     data=[0, 1, 0, 1],
     indexed_images=images,
     unit="N/A",
-    timestamps=[.1, .2, .3, .4],
+    timestamps=[0.1, 0.2, 0.3, 0.4],
 )
 
 ####################

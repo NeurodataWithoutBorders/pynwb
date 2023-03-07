@@ -66,43 +66,42 @@ import numpy as np
 
 # Create the base data
 start_time = datetime(2017, 4, 3, 11, tzinfo=tzlocal())
-create_date = datetime(2017, 4, 15, 12, tzinfo=tzlocal())
 data = np.arange(1000).reshape((100, 10))
 timestamps = np.arange(100)
-filename1 = 'external1_example.nwb'
-filename2 = 'external2_example.nwb'
-filename3 = 'external_linkcontainer_example.nwb'
-filename4 = 'external_linkdataset_example.nwb'
+filename1 = "external1_example.nwb"
+filename2 = "external2_example.nwb"
+filename3 = "external_linkcontainer_example.nwb"
+filename4 = "external_linkdataset_example.nwb"
 
 # Create the first file
-nwbfile1 = NWBFile(session_description='demonstrate external files',
-                   identifier='NWBE1',
-                   session_start_time=start_time,
-                   file_create_date=create_date)
+nwbfile1 = NWBFile(
+    session_description="demonstrate external files",
+    identifier="NWBE1",
+    session_start_time=start_time,
+)
 # Create the second file
-test_ts1 = TimeSeries(name='test_timeseries1',
-                      data=data,
-                      unit='SIunit',
-                      timestamps=timestamps)
+test_ts1 = TimeSeries(
+    name="test_timeseries1", data=data, unit="SIunit", timestamps=timestamps
+)
 nwbfile1.add_acquisition(test_ts1)
 # Write the first file
-io = NWBHDF5IO(filename1, 'w')
+io = NWBHDF5IO(filename1, "w")
 io.write(nwbfile1)
 io.close()
 
 # Create the second file
-nwbfile2 = NWBFile(session_description='demonstrate external files',
-                   identifier='NWBE2',
-                   session_start_time=start_time,
-                   file_create_date=create_date)
+nwbfile2 = NWBFile(
+    session_description="demonstrate external files",
+    identifier="NWBE2",
+    session_start_time=start_time,
+)
 # Create the second file
-test_ts2 = TimeSeries(name='test_timeseries2',
-                      data=data,
-                      unit='SIunit',
-                      timestamps=timestamps)
+test_ts2 = TimeSeries(
+    name="test_timeseries2", data=data, unit="SIunit", timestamps=timestamps
+)
 nwbfile2.add_acquisition(test_ts2)
 # Write the second file
-io = NWBHDF5IO(filename2, 'w')
+io = NWBHDF5IO(filename2, "w")
 io.write(nwbfile2)
 io.close()
 
@@ -117,10 +116,11 @@ io.close()
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 # Create the first file
-nwbfile4 = NWBFile(session_description='demonstrate external files',
-                   identifier='NWBE4',
-                   session_start_time=start_time,
-                   file_create_date=create_date)
+nwbfile4 = NWBFile(
+    session_description="demonstrate external files",
+    identifier="NWBE4",
+    session_start_time=start_time,
+)
 
 
 ####################
@@ -130,9 +130,9 @@ nwbfile4 = NWBFile(session_description='demonstrate external files',
 #
 
 # Get the first timeseries
-io1 = NWBHDF5IO(filename1, 'r')
+io1 = NWBHDF5IO(filename1, "r")
 nwbfile1 = io1.read()
-timeseries_1 = nwbfile1.get_acquisition('test_timeseries1')
+timeseries_1 = nwbfile1.get_acquisition("test_timeseries1")
 timeseries_1_data = timeseries_1.data
 
 ####################
@@ -142,10 +142,12 @@ timeseries_1_data = timeseries_1.data
 # To link to the dataset we can simply assign the data object (here `` timeseries_1.data``) to a new ``TimeSeries``
 
 # Create a new timeseries that links to our data
-test_ts4 = TimeSeries(name='test_timeseries4',
-                      data=timeseries_1_data,   # <-------
-                      unit='SIunit',
-                      timestamps=timestamps)
+test_ts4 = TimeSeries(
+    name="test_timeseries4",
+    data=timeseries_1_data,  # <-------
+    unit="SIunit",
+    timestamps=timestamps,
+)
 nwbfile4.add_acquisition(test_ts4)
 
 ####################
@@ -158,11 +160,12 @@ nwbfile4.add_acquisition(test_ts4)
 from hdmf.backends.hdf5.h5_utils import H5DataIO
 
 # Create another timeseries that links to the same data
-test_ts5 = TimeSeries(name='test_timeseries5',
-                      data=H5DataIO(data=timeseries_1_data,     # <-------
-                                    link_data=True),            # <-------
-                      unit='SIunit',
-                      timestamps=timestamps)
+test_ts5 = TimeSeries(
+    name="test_timeseries5",
+    data=H5DataIO(data=timeseries_1_data, link_data=True),  # <-------  # <-------
+    unit="SIunit",
+    timestamps=timestamps,
+)
 nwbfile4.add_acquisition(test_ts5)
 
 ####################
@@ -171,9 +174,10 @@ nwbfile4.add_acquisition(test_ts5)
 #
 from pynwb import NWBHDF5IO
 
-io4 = NWBHDF5IO(filename4, 'w')
-io4.write(nwbfile4,
-          link_data=True)     # <-------- Specify default behavior to link rather than copy data
+io4 = NWBHDF5IO(filename4, "w")
+io4.write(
+    nwbfile4, link_data=True
+)  # <-------- Specify default behavior to link rather than copy data
 io4.close()
 io1.close()
 
@@ -211,14 +215,14 @@ manager = get_manager()
 #
 
 # Get the first timeseries
-io1 = NWBHDF5IO(filename1, 'r', manager=manager)
+io1 = NWBHDF5IO(filename1, "r", manager=manager)
 nwbfile1 = io1.read()
-timeseries_1 = nwbfile1.get_acquisition('test_timeseries1')
+timeseries_1 = nwbfile1.get_acquisition("test_timeseries1")
 
 # Get the second timeseries
-io2 = NWBHDF5IO(filename2, 'r', manager=manager)
+io2 = NWBHDF5IO(filename2, "r", manager=manager)
 nwbfile2 = io2.read()
-timeseries_2 = nwbfile2.get_acquisition('test_timeseries2')
+timeseries_2 = nwbfile2.get_acquisition("test_timeseries2")
 
 ####################
 # Step 2: Add the container to another NWBFile
@@ -230,15 +234,16 @@ timeseries_2 = nwbfile2.get_acquisition('test_timeseries2')
 #
 
 # Create a new NWBFile that links to the external timeseries
-nwbfile3 = NWBFile(session_description='demonstrate external files',
-                   identifier='NWBE3',
-                   session_start_time=start_time,
-                   file_create_date=create_date)
-nwbfile3.add_acquisition(timeseries_1)             # <--------
-nwbfile3.add_acquisition(timeseries_2)             # <--------
+nwbfile3 = NWBFile(
+    session_description="demonstrate external files",
+    identifier="NWBE3",
+    session_start_time=start_time,
+)
+nwbfile3.add_acquisition(timeseries_1)  # <--------
+nwbfile3.add_acquisition(timeseries_2)  # <--------
 
 # Write our third file that includes our two timeseries as external links
-io3 = NWBHDF5IO(filename3, 'w', manager=manager)
+io3 = NWBHDF5IO(filename3, "w", manager=manager)
 io3.write(nwbfile3)
 io3.close()
 io1.close()

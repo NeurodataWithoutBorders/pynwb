@@ -60,9 +60,9 @@ device = nwbfile.create_device(name='Heka ITC-1600')
 # To create an electrode group, you can use the :py:class:`~pynwb.file.NWBFile` instance method
 # :py:meth:`~pynwb.file.NWBFile.create_icephys_electrode`.
 
-elec = nwbfile.create_icephys_electrode(name="elec0",
-                                        description='a mock intracellular electrode',
-                                        device=device)
+elec = nwbfile.create_icephys_electrode(
+    name="elec0", description='a mock intracellular electrode', device=device
+)
 
 #######################
 # Stimulus data
@@ -99,7 +99,8 @@ nwbfile.add_stimulus(ccss, use_sweep_table=True)
 from pynwb.icephys import VoltageClampStimulusSeries
 
 vcss = VoltageClampStimulusSeries(
-    name="vcss", data=[2, 3, 4, 5, 6], starting_time=234.5, rate=10e3, electrode=elec, gain=0.03, sweep_number=1)
+    name="vcss", data=[2, 3, 4, 5, 6], starting_time=234.5, rate=10e3, electrode=elec, gain=0.03, sweep_number=1
+)
 
 nwbfile.add_stimulus(vcss, use_sweep_table=True)
 
@@ -111,10 +112,19 @@ nwbfile.add_stimulus(vcss, use_sweep_table=True)
 from pynwb.icephys import CurrentClampSeries
 
 ccs = CurrentClampSeries(
-    name="ccs", data=[0.1, 0.2, 0.3, 0.4, 0.5],
-    conversion=1e-12, resolution=np.nan, starting_time=123.6, rate=20e3,
-    electrode=elec, gain=0.02, bias_current=1e-12, bridge_balance=70e6,
-    capacitance_compensation=1e-12, sweep_number=0)
+    name="ccs",
+    data=[0.1, 0.2, 0.3, 0.4, 0.5],
+    conversion=1e-12,
+    resolution=np.nan,
+    starting_time=123.6,
+    rate=20e3,
+    electrode=elec,
+    gain=0.02,
+    bias_current=1e-12,
+    bridge_balance=70e6,
+    capacitance_compensation=1e-12,
+    sweep_number=0,
+)
 
 nwbfile.add_acquisition(ccs, use_sweep_table=True)
 
@@ -125,10 +135,18 @@ nwbfile.add_acquisition(ccs, use_sweep_table=True)
 from pynwb.icephys import VoltageClampSeries
 
 vcs = VoltageClampSeries(
-    name="vcs", data=[0.1, 0.2, 0.3, 0.4, 0.5],
-    conversion=1e-12, resolution=np.nan, starting_time=234.5, rate=20e3,
-    electrode=elec, gain=0.02, capacitance_slow=100e-12, resistance_comp_correction=70.0,
-    sweep_number=1)
+    name="vcs",
+    data=[0.1, 0.2, 0.3, 0.4, 0.5],
+    conversion=1e-12,
+    resolution=np.nan,
+    starting_time=234.5,
+    rate=20e3,
+    electrode=elec,
+    gain=0.02,
+    capacitance_slow=100e-12,
+    resistance_comp_correction=70.0,
+    sweep_number=1.
+)
 
 nwbfile.add_acquisition(vcs, use_sweep_table=True)
 

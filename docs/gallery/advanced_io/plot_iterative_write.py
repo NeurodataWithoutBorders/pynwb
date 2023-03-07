@@ -128,22 +128,24 @@ def write_test_file(filename, data, close_io=True):
 
     # Create a test NWBfile
     start_time = datetime(2017, 4, 3, 11, tzinfo=tzlocal())
-    create_date = datetime(2017, 4, 15, 12, tzinfo=tzlocal())
-    nwbfile = NWBFile('demonstrate NWBFile basics',
-                      'NWB123',
-                      start_time,
-                      file_create_date=create_date)
+    nwbfile = NWBFile(
+        "demonstrate NWBFile basics",
+        "NWB123",
+        start_time,
+    )
 
     # Create our time series
-    test_ts = TimeSeries(name='synthetic_timeseries',
-                         data=data,                     # <---------
-                         unit='SIunit',
-                         rate=1.0,
-                         starting_time=0.0)
+    test_ts = TimeSeries(
+        name="synthetic_timeseries",
+        data=data,  # <---------
+        unit="SIunit",
+        rate=1.0,
+        starting_time=0.0,
+    )
     nwbfile.add_acquisition(test_ts)
 
     # Write the data to file
-    io = NWBHDF5IO(filename, 'w')
+    io = NWBHDF5IO(filename, "w")
     io.write(nwbfile)
     if close_io:
         io.close()
@@ -166,6 +168,7 @@ def write_test_file(filename, data, close_io=True):
 #
 from math import sin, pi
 from random import random
+
 import numpy as np
 
 
@@ -176,7 +179,7 @@ def iter_sin(chunk_length=10, max_chunks=100):
     """
     x = 0
     num_chunks = 0
-    while (x < 0.5 and num_chunks < max_chunks):
+    while x < 0.5 and num_chunks < max_chunks:
         val = np.asarray([sin(random() * 2 * pi) for i in range(chunk_length)])
         x = random()
         num_chunks += 1
@@ -186,7 +189,7 @@ def iter_sin(chunk_length=10, max_chunks=100):
 
 ####################
 # Step 2: Wrap the generator in a DataChunkIterator
-# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 #
 
 from hdmf.data_utils import DataChunkIterator
@@ -195,21 +198,21 @@ data = DataChunkIterator(data=iter_sin(10))
 
 ####################
 # Step 3: Write the data as usual
-# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 #
 # Here we use our wrapped generator to create the data for a synthetic time series.
 
-write_test_file(filename='basic_iterwrite_example.nwb',
-                data=data)
+write_test_file(filename="basic_iterwrite_example.nwb", data=data)
 
 ####################
 # Discussion
 # ^^^^^^^^^^
 # Note, we here actually do not know how long our timeseries will be.
 
-print("maxshape=%s, recommended_data_shape=%s, dtype=%s" % (str(data.maxshape),
-                                                            str(data.recommended_data_shape()),
-                                                            str(data.dtype)))
+print(
+    "maxshape=%s, recommended_data_shape=%s, dtype=%s"
+    % (str(data.maxshape), str(data.recommended_data_shape()), str(data.dtype))
+)
 
 ####################
 # As we can see :py:class:`~hdmf.data_utils.DataChunkIterator` automatically recommends
@@ -241,11 +244,10 @@ print("maxshape=%s, recommended_data_shape=%s, dtype=%s" % (str(data.maxshape),
 # Step 1: Create a data chunk iterator for our sparse matrix
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-from hdmf.data_utils import AbstractDataChunkIterator, DataChunk
+from hdmf.data_utils import AbstractDataChunkIterator
 
 
 class SparseMatrixIterator(AbstractDataChunkIterator):
-
     def __init__(self, shape, num_chunks, chunk_shape):
         """
         :param shape: 2D tuple with the shape of the matrix
@@ -268,13 +270,18 @@ class SparseMatrixIterator(AbstractDataChunkIterator):
         """
         if self.__chunks_created < self.num_chunks:
             data = np.random.rand(np.prod(self.chunk_shape)).reshape(self.chunk_shape)
-            xmin = np.random.randint(0, int(self.shape[0] / self.chunk_shape[0]), 1)[0] * self.chunk_shape[0]
+            xmin = (
+                np.random.randint(0, int(self.shape[0] / self.chunk_shape[0]), 1)[0]
+                * self.chunk_shape[0]
+            )
             xmax = xmin + self.chunk_shape[0]
-            ymin = np.random.randint(0, int(self.shape[1] / self.chunk_shape[1]), 1)[0] * self.chunk_shape[1]
+            ymin = (
+                np.random.randint(0, int(self.shape[1] / self.chunk_shape[1]), 1)[0]
+                * self.chunk_shape[1]
+            )
             ymax = ymin + self.chunk_shape[1]
             self.__chunks_created += 1
-            return DataChunk(data=data,
-                             selection=np.s_[xmin:xmax, ymin:ymax])
+            return DataChunk(data=data, selection=np.s_[xmin:xmax, ymin:ymax])
         else:
             raise StopIteration
 
@@ -314,20 +321,19 @@ chunk_shape = (10, 10)
 num_values = num_chunks * np.prod(chunk_shape)
 
 # Create our sparse matrix data.
-data = SparseMatrixIterator(shape=(xsize, ysize),
-                            num_chunks=num_chunks,
-                            chunk_shape=chunk_shape)
+data = SparseMatrixIterator(
+    shape=(xsize, ysize), num_chunks=num_chunks, chunk_shape=chunk_shape
+)
 
 #####################
 # In order to also enable compression and other advanced HDF5 dataset I/O features we can then also
 # wrap our data via :py:class:`~hdmf.backends.hdf5.h5_utils.H5DataIO`.
 from hdmf.backends.hdf5.h5_utils import H5DataIO
-matrix2 = SparseMatrixIterator(shape=(xsize, ysize),
-                               num_chunks=num_chunks,
-                               chunk_shape=chunk_shape)
-data2 = H5DataIO(data=matrix2,
-                 compression='gzip',
-                 compression_opts=4)
+
+matrix2 = SparseMatrixIterator(
+    shape=(xsize, ysize), num_chunks=num_chunks, chunk_shape=chunk_shape
+)
+data2 = H5DataIO(data=matrix2, compression="gzip", compression_opts=4)
 
 ######################
 # We can now also customize the chunking , fillvalue and other settings
@@ -335,23 +341,22 @@ data2 = H5DataIO(data=matrix2,
 from hdmf.backends.hdf5.h5_utils import H5DataIO
 
 # Increase the chunk size and add compression
-matrix3 = SparseMatrixIterator(shape=(xsize, ysize),
-                               num_chunks=num_chunks,
-                               chunk_shape=chunk_shape)
-data3 = H5DataIO(data=matrix3,
-                 chunks=(100, 100),
-                 fillvalue=np.nan)
+matrix3 = SparseMatrixIterator(
+    shape=(xsize, ysize), num_chunks=num_chunks, chunk_shape=chunk_shape
+)
+data3 = H5DataIO(data=matrix3, chunks=(100, 100), fillvalue=np.nan)
 
 # Increase the chunk size and add compression
-matrix4 = SparseMatrixIterator(shape=(xsize, ysize),
-                               num_chunks=num_chunks,
-                               chunk_shape=chunk_shape)
-data4 = H5DataIO(data=matrix4,
-                 compression='gzip',
-                 compression_opts=4,
-                 chunks=(100, 100),
-                 fillvalue=np.nan
-                 )
+matrix4 = SparseMatrixIterator(
+    shape=(xsize, ysize), num_chunks=num_chunks, chunk_shape=chunk_shape
+)
+data4 = H5DataIO(
+    data=matrix4,
+    compression="gzip",
+    compression_opts=4,
+    chunks=(100, 100),
+    fillvalue=np.nan,
+)
 
 ####################
 # Step 3: Write the data as usual
@@ -359,14 +364,10 @@ data4 = H5DataIO(data=matrix4,
 #
 # Here we simply use our ``SparseMatrixIterator`` as input for our ``TimeSeries``
 
-write_test_file(filename='basic_sparse_iterwrite_example.nwb',
-                data=data)
-write_test_file(filename='basic_sparse_iterwrite_compressed_example.nwb',
-                data=data2)
-write_test_file(filename='basic_sparse_iterwrite_largechunks_example.nwb',
-                data=data3)
-write_test_file(filename='basic_sparse_iterwrite_largechunks_compressed_example.nwb',
-                data=data4)
+write_test_file(filename="basic_sparse_iterwrite_example.nwb", data=data)
+write_test_file(filename="basic_sparse_iterwrite_compressed_example.nwb", data=data2)
+write_test_file(filename="basic_sparse_iterwrite_largechunks_example.nwb", data=data3)
+write_test_file(filename="basic_sparse_iterwrite_largechunks_compressed_example.nwb", data=data4)
 
 ####################
 # Check the results
@@ -375,13 +376,19 @@ write_test_file(filename='basic_sparse_iterwrite_largechunks_compressed_example.
 # Now lets check out the size of our data file and compare it against the expected full size of our matrix
 import os
 
-expected_size = xsize * ysize * 8              # This is the full size of our matrix in byte
-occupied_size = num_values * 8    # Number of non-zero values in out matrix
-file_size = os.stat('basic_sparse_iterwrite_example.nwb').st_size  # Real size of the file
-file_size_compressed = os.stat('basic_sparse_iterwrite_compressed_example.nwb').st_size
-file_size_largechunks = os.stat('basic_sparse_iterwrite_largechunks_example.nwb').st_size
-file_size_largechunks_compressed = os.stat('basic_sparse_iterwrite_largechunks_compressed_example.nwb').st_size
-mbfactor = 1000. * 1000  # Factor used to convert to MegaBytes
+expected_size = xsize * ysize * 8  # This is the full size of our matrix in byte
+occupied_size = num_values * 8  # Number of non-zero values in out matrix
+file_size = os.stat(
+    "basic_sparse_iterwrite_example.nwb"
+).st_size  # Real size of the file
+file_size_compressed = os.stat("basic_sparse_iterwrite_compressed_example.nwb").st_size
+file_size_largechunks = os.stat(
+    "basic_sparse_iterwrite_largechunks_example.nwb"
+).st_size
+file_size_largechunks_compressed = os.stat(
+    "basic_sparse_iterwrite_largechunks_compressed_example.nwb"
+).st_size
+mbfactor = 1000.0 * 1000  # Factor used to convert to MegaBytes
 
 print("1) Sparse Matrix Size:")
 print("   Expected Size :  %.2f MB" % (expected_size / mbfactor))
@@ -469,12 +476,15 @@ print("   Reduction     :  %.2f x" % (expected_size / file_size_largechunks_comp
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 import numpy as np
+
 # Create the test data
-datashape = (100, 10)   # OK, this not really large, but we just want to show how it works
+datashape = (100, 10)  # OK, this not really large, but we just want to show how it works
 num_values = np.prod(datashape)
 arrdata = np.arange(num_values).reshape(datashape)
 # Write the test data to disk
-temp = np.memmap('basic_sparse_iterwrite_testdata.npy', dtype='float64', mode='w+', shape=datashape)
+temp = np.memmap(
+    "basic_sparse_iterwrite_testdata.npy", dtype="float64", mode="w+", shape=datashape
+)
 temp[:] = arrdata
 del temp  # Flush to disk
 
@@ -486,14 +496,14 @@ del temp  # Flush to disk
 # :py:class:`~hdmf.data_utils.AbstractDataChunkIterator` or use :py:class:`~hdmf.data_utils.GenericDataChunkIterator`.
 
 
-def iter_largearray(filename, shape, dtype='float64'):
+def iter_largearray(filename, shape, dtype="float64"):
     """
     Generator reading [chunk_size, :] elements from our array in each iteration.
     """
     for i in range(shape[0]):
         # Open the file and read the next chunk
-        newfp = np.memmap(filename, dtype=dtype, mode='r', shape=shape)
-        curr_data = newfp[i:(i + 1), ...][0]
+        newfp = np.memmap(filename, dtype=dtype, mode="r", shape=shape)
+        curr_data = newfp[i : (i + 1), ...][0]
         del newfp  # Reopen the file in each iterator to prevent accumulation of data in memory
         yield curr_data
     return
@@ -506,10 +516,13 @@ def iter_largearray(filename, shape, dtype='float64'):
 
 from hdmf.data_utils import DataChunkIterator
 
-data = DataChunkIterator(data=iter_largearray(filename='basic_sparse_iterwrite_testdata.npy',
-                                              shape=datashape),
-                         maxshape=datashape,
-                         buffer_size=10)   # Buffer 10 elements into a chunk, i.e., create chunks of shape (10,10)
+data = DataChunkIterator(
+    data=iter_largearray(
+        filename="basic_sparse_iterwrite_testdata.npy", shape=datashape
+    ),
+    maxshape=datashape,
+    buffer_size=10,
+)  # Buffer 10 elements into a chunk, i.e., create chunks of shape (10,10)
 
 
 ####################
@@ -517,8 +530,7 @@ data = DataChunkIterator(data=iter_largearray(filename='basic_sparse_iterwrite_t
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 #
 
-write_test_file(filename='basic_sparse_iterwrite_largearray.nwb',
-                data=data)
+write_test_file(filename="basic_sparse_iterwrite_largearray.nwb", data=data)
 
 ####################
 # .. tip::
@@ -535,11 +547,11 @@ write_test_file(filename='basic_sparse_iterwrite_largearray.nwb',
 # Read the NWB file
 from pynwb import NWBHDF5IO  # noqa: F811
 
-with NWBHDF5IO('basic_sparse_iterwrite_largearray.nwb', 'r') as io:
+with NWBHDF5IO("basic_sparse_iterwrite_largearray.nwb", "r") as io:
     nwbfile = io.read()
-    data = nwbfile.get_acquisition('synthetic_timeseries').data
+    data = nwbfile.get_acquisition("synthetic_timeseries").data
     # Compare all the data values of our two arrays
-    data_match = np.all(arrdata == data[:])   # Don't do this for very large arrays!
+    data_match = np.all(arrdata == data[:])  # Don't do this for very large arrays!
     # Print result message
     if data_match:
         print("Success: All data values match")
@@ -561,13 +573,16 @@ with NWBHDF5IO('basic_sparse_iterwrite_largearray.nwb', 'r') as io:
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 import numpy as np
+
 # Create the test data
 num_channels = 10
 num_steps = 100
-channel_files = ['basic_sparse_iterwrite_testdata_channel_%i.npy' % i for i in range(num_channels)]
+channel_files = [
+    "basic_sparse_iterwrite_testdata_channel_%i.npy" % i for i in range(num_channels)
+]
 for f in channel_files:
-    temp = np.memmap(f, dtype='float64', mode='w+', shape=(num_steps,))
-    temp[:] = np.arange(num_steps, dtype='float64')
+    temp = np.memmap(f, dtype="float64", mode="w+", shape=(num_steps,))
+    temp[:] = np.arange(num_steps, dtype="float64")
     del temp  # Flush to disk
 
 #####################
@@ -578,7 +593,6 @@ from hdmf.data_utils import AbstractDataChunkIterator, DataChunk  # noqa: F811
 
 
 class MultiFileArrayIterator(AbstractDataChunkIterator):
-
     def __init__(self, channel_files, num_steps):
         """
         :param channel_files: List of files with the channels
@@ -598,28 +612,31 @@ class MultiFileArrayIterator(AbstractDataChunkIterator):
         Return in each iteration the data from a single file
         """
         if self.__curr_index < len(channel_files):
-            newfp = np.memmap(channel_files[self.__curr_index],
-                              dtype='float64', mode='r', shape=(self.num_steps,))
+            newfp = np.memmap(
+                channel_files[self.__curr_index],
+                dtype="float64",
+                mode="r",
+                shape=(self.num_steps,),
+            )
             curr_data = newfp[:]
             i = self.__curr_index
             self.__curr_index += 1
             del newfp
-            return DataChunk(data=curr_data,
-                             selection=np.s_[:, i])
+            return DataChunk(data=curr_data, selection=np.s_[:, i])
         else:
             raise StopIteration
 
     next = __next__
 
     def recommended_chunk_shape(self):
-        return None   # Use autochunking
+        return None  # Use autochunking
 
     def recommended_data_shape(self):
         return self.shape
 
     @property
     def dtype(self):
-        return np.dtype('float64')
+        return np.dtype("float64")
 
     @property
     def maxshape(self):
@@ -638,8 +655,7 @@ data = MultiFileArrayIterator(channel_files, num_steps)
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 #
 
-write_test_file(filename='basic_sparse_iterwrite_multifile.nwb',
-                data=data)
+write_test_file(filename="basic_sparse_iterwrite_multifile.nwb", data=data)
 
 ####################
 # Discussion
@@ -691,21 +707,19 @@ from hdmf.backends.hdf5.h5_utils import H5DataIO
 
 # Use H5DataIO to specify how to setup the dataset in the file
 dataio = H5DataIO(
-    shape=(0, 10),            # Initial shape. If the shape is known then set to full shape
-    dtype=np.dtype('float'),  # dtype of the dataset
-    maxshape=(None, 10),      # Make the time dimension resizable
-    chunks=(131072, 2),       # Use 2MB chunks
-    compression='gzip',       # Enable GZip compression
-    compression_opts=4,       # GZip aggression
-    shuffle=True,             # Enable shuffle filter
-    fillvalue=np.nan          # Use NAN as fillvalue
+    shape=(0, 10),  # Initial shape. If the shape is known then set to full shape
+    dtype=np.dtype("float"),  # dtype of the dataset
+    maxshape=(None, 10),  # Make the time dimension resizable
+    chunks=(131072, 2),  # Use 2MB chunks
+    compression="gzip",  # Enable GZip compression
+    compression_opts=4,  # GZip aggression
+    shuffle=True,  # Enable shuffle filter
+    fillvalue=np.nan,  # Use NAN as fillvalue
 )
 
 # Write a test NWB file with our dataset and keep the NWB file (i.e., the  NWBHDF5IO object) open
 io = write_test_file(
-    filename='basic_alternative_custom_write.nwb',
-    data=dataio,
-    close_io=False
+    filename="basic_alternative_custom_write.nwb", data=dataio, close_io=False
 )
 
 ####################
@@ -714,26 +728,38 @@ io = write_test_file(
 #
 
 # Let's check what the data looks like before we write
-print("Before write: Shape= %s, Chunks= %s, Maxshape=%s" %
-      (str(dataio.dataset.shape), str(dataio.dataset.chunks), str(dataio.dataset.maxshape)))
+print(
+    "Before write: Shape= %s, Chunks= %s, Maxshape=%s"
+    % (
+        str(dataio.dataset.shape),
+        str(dataio.dataset.chunks),
+        str(dataio.dataset.maxshape),
+    )
+)
 
-dataio.dataset.resize((8, 10))    # <-- Allocate space. Only needed if we didn't set the initial shape large enough
-dataio.dataset[0:3, :] = 1        # <-- Write timesteps 0,1,2
-dataio.dataset[3:6, :] = 2        # <-- Write timesteps 3,4,5,  Note timesteps 6,7 are not being initialized
-io.close()              # <-- Close the file
+dataio.dataset.resize(
+    (8, 10)
+)  # <-- Allocate space. Only needed if we didn't set the initial shape large enough
+dataio.dataset[0:3, :] = 1  # <-- Write timesteps 0,1,2
+dataio.dataset[
+    3:6, :
+] = 2  # <-- Write timesteps 3,4,5,  Note timesteps 6,7 are not being initialized
+io.close()  # <-- Close the file
 
 
 ####################
 # Check the results
 # ^^^^^^^^^^^^^^^^^
 
-from pynwb import NWBHDF5IO    # noqa
+from pynwb import NWBHDF5IO  # noqa
 
-io = NWBHDF5IO('basic_alternative_custom_write.nwb', mode='a')
+io = NWBHDF5IO("basic_alternative_custom_write.nwb", mode="a")
 nwbfile = io.read()
-dataset = nwbfile.get_acquisition('synthetic_timeseries').data
-print("After write: Shape= %s, Chunks= %s, Maxshape=%s" %
-      (str(dataset.shape), str(dataset.chunks), str(dataset.maxshape)))
+dataset = nwbfile.get_acquisition("synthetic_timeseries").data
+print(
+    "After write: Shape= %s, Chunks= %s, Maxshape=%s"
+    % (str(dataset.shape), str(dataset.chunks), str(dataset.maxshape))
+)
 print(dataset[:])
 io.close()
 

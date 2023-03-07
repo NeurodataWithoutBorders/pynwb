@@ -225,8 +225,8 @@ behavior_module.add(behavioral_time_series)
 # :py:class:`~pynwb.behavior.BehavioralEvents` is an interface for storing behavioral events.
 # We can use it for storing the timing and amount of rewards (e.g. water amount) or lever press times.
 
-reward_amount = [1., 1.5, 1., 1.5]
-events_timestamps = [1., 2., 5., 6.]
+reward_amount = [1.0, 1.5, 1.0, 1.5]
+events_timestamps = [1.0, 2.0, 5.0, 6.0]
 
 time_series = TimeSeries(
     name="lever_presses",
