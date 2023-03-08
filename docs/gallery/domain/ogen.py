@@ -92,5 +92,3 @@ ogen_series = OptogeneticSeries(
 )
 
 nwbfile.add_stimulus(ogen_series)
-
-
