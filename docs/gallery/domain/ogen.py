@@ -6,8 +6,8 @@ Optogenetics
 
 This tutorial will demonstrate how to write optogenetics data.
 
-Creating and Writing NWB files
-------------------------------
+Creating an NWBFile object
+--------------------------
 
 When creating a NWB file, the first step is to create the :py:class:`~pynwb.file.NWBFile` object.
 """
