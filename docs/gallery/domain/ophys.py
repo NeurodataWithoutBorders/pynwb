@@ -80,7 +80,7 @@ nwbfile = NWBFile(
 #     :alt: imaging plane UML diagram
 #     :align: center
 #
-# Create a :py:class:`~pynwb.device.Device` named ``"Microscope"`` in the :py:class:`~pynwb.NWBFile` object. Then
+# Create a :py:class:`~pynwb.device.Device` named ``"Microscope"`` in the :py:class:`~pynwb.file.NWBFile` object. Then
 # create an  :py:class:`~pynwb.ophys.OpticalChannel` named ``"OpticalChannel"`` and an
 # :py:class:`~pynwb.ophys.ImagingPlane` named ``"ImagingPlane"``, passing in the :py:class:`~pynwb.ophys.OpticalChannel`
 # object and the :py:class:`~pynwb.device.Device` object.
@@ -143,7 +143,7 @@ one_p_series2 = OnePhotonSeries(
 
 ####################
 # Since these one-photon data are raw, acquired data, we will add the
-# :py:class:`~pynwb.ophys.OnePhotonSeries` objects to the :py:class:`~pynwb.NWBFile`
+# :py:class:`~pynwb.ophys.OnePhotonSeries` objects to the :py:class:`~pynwb.file.NWBFile`
 # as acquired data.
 
 nwbfile.add_acquisition(one_p_series1)
@@ -532,7 +532,7 @@ with NWBHDF5IO("ophys_tutorial.nwb", "r") as io:
 # ------------------------------
 #
 # Data arrays are read passively from the file.
-# Calling the data attribute on a :py:class:`~pynwb.base.pynwb.TimeSeries`
+# Calling the data attribute on a :py:class:`~pynwb.base.TimeSeries`
 # such as a :py:class:`~pynwb.ophys.RoiResponseSeries` does not read the data
 # values, but presents an :py:class:`~h5py` object that can be indexed to read data.
 # You can use the ``[:]`` operator to read the entire data array into memory.
