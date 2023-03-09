@@ -36,6 +36,7 @@ from pynwb.ophys import (
     CorrectedImageStack,
     MotionCorrection,
     RoiResponseSeries,
+    OnePhotonSeries,
 )
 
 import matplotlib.pyplot as plt
@@ -45,7 +46,6 @@ import matplotlib.pyplot as plt
 # ------------------------------
 #
 # When creating a NWB file, the first step is to create the :py:class:`~pynwb.file.NWBFile` object.
-from src.pynwb.ophys import OnePhotonSeries
 
 nwbfile = NWBFile(
     session_description="my first synthetic recording",
