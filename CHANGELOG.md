@@ -6,6 +6,9 @@
 ### Enhancements and minor changes
 - Fixed typos and added codespell GitHub action to check spelling in the future. @yarikoptic [#1648](https://github.com/NeurodataWithoutBorders/pynwb/pull/1648)
 
+### Documentation and tutorial enhancements
+- Add tutorial for optogenetics [#1657](https://github.com/NeurodataWithoutBorders/pynwb/pull/1657)
+
 ## PyNWB 2.3.1 (February 24, 2023)
 
 ### Bug fixes
