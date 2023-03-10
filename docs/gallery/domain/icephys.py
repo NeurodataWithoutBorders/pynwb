@@ -24,6 +24,8 @@ SweepTable to manage recordings.
 
 # sphinx_gallery_thumbnail_path = 'figures/gallery_thumbnails_icephys_sweeptable.png'
 from datetime import datetime
+from uuid import uuid4
+
 from dateutil.tz import tzlocal
 from pynwb import NWBFile
 import numpy as np
@@ -32,7 +34,7 @@ nwbfile = NWBFile(
     session_description="my first synthetic recording",
     identifier=str(uuid4()),
     session_start_time=datetime.now(tzlocal()),
-    experimenter=["Baggins, Bilbo",],
+    experimenter=["Baggins, Bilbo", ],
     lab="Bag End Laboratory",
     institution="University of Middle Earth at the Shire",
     experiment_description="I went on an adventure to reclaim vast treasures.",
