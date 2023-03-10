@@ -28,12 +28,16 @@ from dateutil.tz import tzlocal
 from pynwb import NWBFile
 import numpy as np
 
-nwbfile = NWBFile('my first synthetic recording', 'EXAMPLE_ID', datetime.now(tzlocal()),
-                  experimenter='Dr. Bilbo Baggins',
-                  lab='Bag End Laboratory',
-                  institution='University of Middle Earth at the Shire',
-                  experiment_description='I went on an adventure with thirteen dwarves to reclaim vast treasures.',
-                  session_id='LONELYMTN')
+nwbfile = NWBFile(
+    session_description="my first synthetic recording",
+    identifier=str(uuid4()),
+    session_start_time=datetime.now(tzlocal()),
+    experimenter=["Baggins, Bilbo",],
+    lab="Bag End Laboratory",
+    institution="University of Middle Earth at the Shire",
+    experiment_description="I went on an adventure to reclaim vast treasures.",
+    session_id="LONELYMTN001",
+)
 
 #######################
 # Device metadata

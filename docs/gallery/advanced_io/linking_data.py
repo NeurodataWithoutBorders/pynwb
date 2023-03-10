@@ -58,6 +58,8 @@ PyNWB supports linking between files using external links.
 
 # sphinx_gallery_thumbnail_path = 'figures/gallery_thumbnails_linking_data.png'
 from datetime import datetime
+from uuid import uuid4
+
 from dateutil.tz import tzlocal
 from pynwb import NWBFile
 from pynwb import TimeSeries
@@ -75,10 +77,16 @@ filename3 = 'external_linkcontainer_example.nwb'
 filename4 = 'external_linkdataset_example.nwb'
 
 # Create the first file
-nwbfile1 = NWBFile(session_description='demonstrate external files',
-                   identifier='NWBE1',
-                   session_start_time=start_time,
-                   file_create_date=create_date)
+nwbfile = NWBFile(
+    session_description="my first synthetic recording",
+    identifier=str(uuid4()),
+    session_start_time=datetime.now(tzlocal()),
+    experimenter=["Baggins, Bilbo", ],
+    lab="Bag End Laboratory",
+    institution="University of Middle Earth at the Shire",
+    experiment_description="I went on an adventure to reclaim vast treasures.",
+    session_id="LONELYMTN001",
+)
 # Create the second file
 test_ts1 = TimeSeries(name='test_timeseries1',
                       data=data,

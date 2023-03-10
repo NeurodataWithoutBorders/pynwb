@@ -23,6 +23,8 @@ clarity, we define them here:
 
 # sphinx_gallery_thumbnail_path = 'figures/gallery_thumbnails_ecephys.png'
 from datetime import datetime
+from uuid import uuid4
+
 from dateutil.tz import tzlocal
 
 import numpy as np
@@ -38,14 +40,13 @@ from pynwb.ecephys import ElectricalSeries, LFP
 
 nwbfile = NWBFile(
     session_description="my first synthetic recording",
-    identifier="EXAMPLE_ID",
+    identifier=str(uuid4()),
     session_start_time=datetime.now(tzlocal()),
-    experimenter="Dr. Bilbo Baggins",
+    experimenter=["Baggins, Bilbo", ],
     lab="Bag End Laboratory",
     institution="University of Middle Earth at the Shire",
-    experiment_description="I went on an adventure with thirteen dwarves "
-    "to reclaim vast treasures.",
-    session_id="LONELYMTN",
+    experiment_description="I went on an adventure to reclaim vast treasures.",
+    session_id="LONELYMTN001",
 )
 
 #######################
