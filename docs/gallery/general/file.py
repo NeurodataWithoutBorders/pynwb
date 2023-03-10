@@ -168,6 +168,13 @@ nwbfile = NWBFile(
 print(nwbfile)
 
 ####################
+# .. note::
+#
+#     See the `NWBFile Best Practices <https://nwbinspector.readthedocs.io/en/dev/best_practices/nwbfile_metadata.html#file-metadata>`_
+#     for detailed information about the arguments to
+#     :py:class:`~pynwb.file.NWBFile`
+
+####################
 # .. _basic_subject:
 #
 # Subject Information
