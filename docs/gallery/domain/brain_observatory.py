@@ -17,8 +17,6 @@ Create an nwb file from Allen Brain Observatory data.
 #     :url: https://gist.githubusercontent.com/nicain/82e6b3d8f9ff5b85ef01a582e41e2389/raw/
 
 # sphinx_gallery_thumbnail_path = 'figures/gallery_thumbnails_allenbrainobservatory.png'
-from datetime import datetime
-from dateutil.tz import tzlocal
 
 from allensdk.core.brain_observatory_cache import BrainObservatoryCache
 import allensdk.brain_observatory.stimulus_info as si

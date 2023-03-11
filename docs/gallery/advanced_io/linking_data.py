@@ -68,7 +68,6 @@ import numpy as np
 
 # Create the base data
 start_time = datetime(2017, 4, 3, 11, tzinfo=tzlocal())
-create_date = datetime(2017, 4, 15, 12, tzinfo=tzlocal())
 data = np.arange(1000).reshape((100, 10))
 timestamps = np.arange(100)
 filename1 = 'external1_example.nwb'
@@ -77,7 +76,7 @@ filename3 = 'external_linkcontainer_example.nwb'
 filename4 = 'external_linkdataset_example.nwb'
 
 # Create the first file
-nwbfile = NWBFile(
+nwbfile1 = NWBFile(
     session_description="my first synthetic recording",
     identifier=str(uuid4()),
     session_start_time=datetime.now(tzlocal()),
@@ -101,8 +100,7 @@ io.close()
 # Create the second file
 nwbfile2 = NWBFile(session_description='demonstrate external files',
                    identifier='NWBE2',
-                   session_start_time=start_time,
-                   file_create_date=create_date)
+                   session_start_time=start_time)
 # Create the second file
 test_ts2 = TimeSeries(name='test_timeseries2',
                       data=data,
@@ -125,10 +123,11 @@ io.close()
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 # Create the first file
-nwbfile4 = NWBFile(session_description='demonstrate external files',
-                   identifier='NWBE4',
-                   session_start_time=start_time,
-                   file_create_date=create_date)
+nwbfile4 = NWBFile(
+    session_description='demonstrate external files',
+    identifier='NWBE4',
+    session_start_time=start_time,
+)
 
 
 ####################
@@ -238,10 +237,11 @@ timeseries_2 = nwbfile2.get_acquisition('test_timeseries2')
 #
 
 # Create a new NWBFile that links to the external timeseries
-nwbfile3 = NWBFile(session_description='demonstrate external files',
-                   identifier='NWBE3',
-                   session_start_time=start_time,
-                   file_create_date=create_date)
+nwbfile3 = NWBFile(
+    session_description='demonstrate external files',
+    identifier='NWBE3',
+    session_start_time=start_time,
+)
 nwbfile3.add_acquisition(timeseries_1)             # <--------
 nwbfile3.add_acquisition(timeseries_2)             # <--------
 
