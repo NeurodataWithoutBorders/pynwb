@@ -21,6 +21,8 @@ clarity, we define them here:
 
 # sphinx_gallery_thumbnail_path = 'figures/gallery_thumbnails_ophys.png'
 from datetime import datetime
+from uuid import uuid4
+
 from dateutil.tz import tzlocal
 
 import numpy as np
@@ -39,15 +41,14 @@ import matplotlib.pyplot as plt
 
 
 nwbfile = NWBFile(
-    'my first synthetic recording',
-    'EXAMPLE_ID',
-    datetime.now(tzlocal()),
-    experimenter='Dr. Bilbo Baggins',
-    lab='Bag End Laboratory',
-    institution='University of Middle Earth at the Shire',
-    experiment_description='I went on an adventure with thirteen dwarves '
-                           'to reclaim vast treasures.',
-    session_id='LONELYMTN'
+    session_description="my first synthetic recording",
+    identifier=str(uuid4()),
+    session_start_time=datetime.now(tzlocal()),
+    experimenter=["Baggins, Bilbo", ],
+    lab="Bag End Laboratory",
+    institution="University of Middle Earth at the Shire",
+    experiment_description="I went on an adventure to reclaim vast treasures.",
+    session_id="LONELYMTN001",
 )
 
 ####################
