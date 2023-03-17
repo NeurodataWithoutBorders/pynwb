@@ -443,7 +443,7 @@ class TestNWBHDF5IO(TestCase):
             del io.attrs['nwb_version']
         with NWBHDF5IO(self.path, 'r') as io:
             self.assertTupleEqual(io.nwb_version, (None, None))
-        # check that it works when setting the attribute to a fixed-legnth numpy-bytes string
+        # check that it works when setting the attribute to a fixed-length numpy-bytes string
         with File(self.path, mode='a') as io:
             io.attrs['nwb_version'] = np.asarray("2.0.5", dtype=np.bytes_)[()]
         with NWBHDF5IO(self.path, 'r') as io:
