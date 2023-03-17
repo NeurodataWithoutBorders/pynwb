@@ -259,7 +259,7 @@ class NWBHDF5IO(_HDF5IO):
         except KeyError:
             return None, None
         # Other system may have written nwb_version as a fixed-length string, resulting in a numpy.bytes_ object
-        # on read, rather than a variable length string. To address this, decode the bytes if necessary.
+        # on read, rather than a variable-length string. To address this, decode the bytes if necessary.
         if not isinstance(nwb_version_string, str):
             nwb_version_string = nwb_version_string.decode()
 
