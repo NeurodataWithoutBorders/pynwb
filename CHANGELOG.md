@@ -7,6 +7,7 @@
 
 ### Bug fixes
 - Fixed bug in ``NWBHDF5IO.nwb_version`` property to support files written by third-party software with a fixed-length ``nwb_version`` attribute. @oruebel [#1669](https://github.com/NeurodataWithoutBorders/pynwb/pull/1669)
+- Fixed search bar and missing jquery in ReadTheDocs documentation. @rly [#1671](https://github.com/NeurodataWithoutBorders/pynwb/pull/1671)
 - Requires [HDMF 3.5.2](https://github.com/hdmf-dev/hdmf/releases/tag/3.5.2) which includes bug fixes. @rly [#1672](https://github.com/NeurodataWithoutBorders/pynwb/pull/1672)
 
 ## PyNWB 2.3.1 (February 24, 2023)

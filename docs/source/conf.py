@@ -57,6 +57,7 @@ extensions = [
     'sphinx.ext.extlinks',
     'sphinx_gallery.gen_gallery',
     'sphinx_copybutton',
+    "sphinxcontrib.jquery",  # can be removed as soon as the theme no longer depends on jQuery
 ]
 
 from sphinx_gallery.sorting import ExplicitOrder
