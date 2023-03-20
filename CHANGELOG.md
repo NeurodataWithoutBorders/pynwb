@@ -1,6 +1,6 @@
 # PyNWB Changelog
 
-## PyNWB 2.3.2 (Upcoming)
+## PyNWB 2.3.2 (March 20, 2023)
 
 ### Enhancements and minor changes
 - Fixed typos and added codespell GitHub action to check spelling in the future. @yarikoptic [#1648](https://github.com/NeurodataWithoutBorders/pynwb/pull/1648)
