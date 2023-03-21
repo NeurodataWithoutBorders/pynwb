@@ -79,8 +79,8 @@ nwbfile.add_ogen_site(ogen_stim_site)
 # With the :py:class:`~pynwb.ogen.OptogeneticStimulusSite` added, you can now create a
 # :py:class:`~pynwb.ogen.OptogeneticSeries`. Here, we will generate some random data using numpy and specify the
 # timing using ``rate``. By default, the starting time of the time series is the session start time, specified in
-:py:class:`~pynwb.file.NWBFile`. 
-If you have samples at irregular intervals, you should use ``timestamps`` instead.
+# :py:class:`~pynwb.file.NWBFile`. 
+# If you have samples at irregular intervals, you should use ``timestamps`` instead.
 
 import numpy as np
 from pynwb.ogen import OptogeneticSeries
