@@ -86,7 +86,7 @@ from pynwb.ogen import OptogeneticSeries
 
 ogen_series = OptogeneticSeries(
     name="OptogeneticSeries",
-    data=np.random.randn(20),
+    data=np.random.randn(20),  # watts
     site=ogen_site,
     rate=30.0,  # Hz
 )
