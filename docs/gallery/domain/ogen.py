@@ -34,7 +34,7 @@ nwbfile = NWBFile(
 # -----------------------
 # The :py:mod:`~pynwb.ogen` module contains two data types that you will need to write optogenetics data,
 # :py:class:`~pynwb.ogen.OptogeneticStimulusSite`, which contains metadata about the stimulus site, and
-# :py:class:`~pynwb.ogen.OptogeneticSeries`, which contains the values of the time series.
+# :py:class:`~pynwb.ogen.OptogeneticSeries`, which contains the power applied by the laser over time, in watts.
 #
 # First, you need to create a :py:class:`~pynwb.device.Device` object linked to the :py:class:`~pynwb.file.NWBFile`:
 
