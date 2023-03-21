@@ -258,6 +258,11 @@ class NWBHDF5IO(_HDF5IO):
         #  or when the HDF5 file is not a valid NWB file
         except KeyError:
             return None, None
+        # Other system may have written nwb_version as a fixed-length string, resulting in a numpy.bytes_ object
+        # on read, rather than a variable-length string. To address this, decode the bytes if necessary.
+        if not isinstance(nwb_version_string, str):
+            nwb_version_string = nwb_version_string.decode()
+
         # Parse the version string
         nwb_version_parts = nwb_version_string.replace("-", ".").replace("_", ".").split(".")
         nwb_version = tuple([int(i) if i.isnumeric() else i
