@@ -5,11 +5,11 @@ channels:
   - defaults
 dependencies:
   - python==3.10
-  - h5py==3.7.0
+  - h5py==3.8.0
   - hdmf==3.5.1
   - matplotlib==3.7.1
-  - numpy==1.24.2
-  - pandas==1.5.3
+  - numpy==1.23.3
+  - pandas==1.5.0
   - python-dateutil==2.8.2
   - setuptools
-  - dandi==0.51.0
+  - dandi==0.51.0  # NOTE: dandi does not support osx-arm64
