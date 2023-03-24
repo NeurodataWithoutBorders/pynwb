@@ -173,7 +173,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { name: linux-python3.9-ros3  , python-ver: "3.9", os: ubuntu-latest }
+          - { name: linux-python3.10-ros3  , python-ver: "3.10", os: ubuntu-latest }
     steps:
       - name: Cancel non-latest runs
         uses: styfle/cancel-workflow-action@0.11.0
@@ -217,7 +217,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { name: linux-gallery-python3.9-ros3  , python-ver: "3.9", os: ubuntu-latest }
+          - { name: linux-gallery-python3.10-ros3  , python-ver: "3.10", os: ubuntu-latest }
     steps:
       - name: Cancel non-latest runs
         uses: styfle/cancel-workflow-action@0.11.0
