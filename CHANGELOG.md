@@ -6,6 +6,7 @@
 - Fixed typos and added codespell GitHub action to check spelling in the future. @yarikoptic [#1648](https://github.com/NeurodataWithoutBorders/pynwb/pull/1648)
 
 ### Documentation and tutorial enhancements
+- Added `OnePhotonSeries` to [calcium imaging tutorial](https://pynwb.readthedocs.io/en/stable/tutorials/domain/ophys.html#sphx-glr-tutorials-domain-ophys-py). @bendichter [#1658](https://github.com/NeurodataWithoutBorders/pynwb/pull/1658)
 - Add tutorial for optogenetics. @bendichter [#1657](https://github.com/NeurodataWithoutBorders/pynwb/pull/1657)
 - Update testing of gallery examples and disable testing of the allensdk tutorial.
   [#1680](https://github.com/NeurodataWithoutBorders/pynwb/pull/1680)
