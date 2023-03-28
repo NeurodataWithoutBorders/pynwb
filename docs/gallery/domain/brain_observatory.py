@@ -71,7 +71,7 @@ for stimulus in stimulus_list:
         data=dataset.get_stimulus_template(stimulus),
         unit='NA',
         format='raw',
-        timestamps=[0.0])
+        timestamps=timestamps[dataset.get_stimulus_table(stimulus).start.values])
     image_index = IndexSeries(
         name=stimulus,
         data=dataset.get_stimulus_table(stimulus).frame.values,
