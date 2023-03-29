@@ -25,11 +25,11 @@ clarity, we define them here:
 from datetime import datetime
 from uuid import uuid4
 
+import numpy as np
 from dateutil.tz import tzlocal
 
-import numpy as np
-from pynwb import NWBFile, NWBHDF5IO
-from pynwb.ecephys import ElectricalSeries, LFP
+from pynwb import NWBHDF5IO, NWBFile
+from pynwb.ecephys import LFP, ElectricalSeries
 
 #######################
 # Creating and Writing NWB files
@@ -42,7 +42,9 @@ nwbfile = NWBFile(
     session_description="my first synthetic recording",
     identifier=str(uuid4()),
     session_start_time=datetime.now(tzlocal()),
-    experimenter=["Baggins, Bilbo", ],
+    experimenter=[
+        "Baggins, Bilbo",
+    ],
     lab="Bag End Laboratory",
     institution="University of Middle Earth at the Shire",
     experiment_description="I went on an adventure to reclaim vast treasures.",

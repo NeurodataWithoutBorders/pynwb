@@ -38,25 +38,34 @@ a :py:class:`~hdmf.common.table.DynamicTable` with the following columns:
 
 # sphinx_gallery_thumbnail_path = 'figures/gallery_thumbnails_timeintervals.png'
 from datetime import datetime
-from dateutil.tz import tzlocal
-from pynwb import NWBFile
-from pynwb import TimeSeries
+from uuid import uuid4
+
 import numpy as np
+from dateutil.tz import tzlocal
+
+from pynwb import NWBFile, TimeSeries
 
 # create the NWBFile
-nwbfile = NWBFile(session_description='NWBFile to illustrate TimeIntervals basics',
-                  identifier='NWB123',
-                  session_start_time=datetime(2017, 4, 3, 11, tzinfo=tzlocal()),
-                  file_create_date=datetime(2017, 4, 15, 12, tzinfo=tzlocal()))
+nwbfile = NWBFile(
+    session_description="my first synthetic recording",  # required
+    identifier=str(uuid4()),  # required
+    session_start_time=datetime(2017, 4, 3, 11, tzinfo=tzlocal()),  # required
+    experimenter="Baggins, Bilbo",  # optional
+    lab="Bag End Laboratory",  # optional
+    institution="University of Middle Earth at the Shire",  # optional
+    experiment_description="I went on an adventure with thirteen dwarves to reclaim vast treasures.",  # optional
+    session_id="LONELYMTN",  # optional
+)
 # create some example TimeSeries
-test_ts = TimeSeries(name='series1',
-                     data=np.arange(1000),
-                     unit='m',
-                     timestamps=np.linspace(0.5, 601, 1000))
-rate_ts = TimeSeries(name='series2',
-                     data=np.arange(600),
-                     unit='V',
-                     starting_time=0.0, rate=1.0)
+test_ts = TimeSeries(
+    name="series1",
+    data=np.arange(1000),
+    unit="m",
+    timestamps=np.linspace(0.5, 601, 1000),
+)
+rate_ts = TimeSeries(
+    name="series2", data=np.arange(600), unit="V", starting_time=0.0, rate=1.0
+)
 # Add the TimeSeries to the file
 nwbfile.add_acquisition(test_ts)
 nwbfile.add_acquisition(rate_ts)
@@ -91,20 +100,50 @@ nwbfile.add_acquisition(rate_ts)
 #
 # Lets add an additional column and some trial data with tags and timeseries references.
 
-nwbfile.add_trial_column(name='stim', description='the visual stimuli during the trial')
+nwbfile.add_trial_column(name="stim", description="the visual stimuli during the trial")
 
-nwbfile.add_trial(start_time=0.0, stop_time=2.0, stim='dog',
-                  tags=['animal'], timeseries=[test_ts, rate_ts])
-nwbfile.add_trial(start_time=3.0, stop_time=5.0, stim='mountain',
-                  tags=['landscape'], timeseries=[test_ts, rate_ts])
-nwbfile.add_trial(start_time=6.0, stop_time=8.0, stim='desert',
-                  tags=['landscape'], timeseries=[test_ts, rate_ts])
-nwbfile.add_trial(start_time=9.0, stop_time=11.0, stim='tree',
-                  tags=['landscape', 'plant'], timeseries=[test_ts, rate_ts])
-nwbfile.add_trial(start_time=12.0, stop_time=14.0, stim='bird',
-                  tags=['animal'], timeseries=[test_ts, rate_ts])
-nwbfile.add_trial(start_time=15.0, stop_time=17.0, stim='flower',
-                  tags=['animal'], timeseries=[test_ts, rate_ts])
+nwbfile.add_trial(
+    start_time=0.0,
+    stop_time=2.0,
+    stim="dog",
+    tags=["animal"],
+    timeseries=[test_ts, rate_ts],
+)
+nwbfile.add_trial(
+    start_time=3.0,
+    stop_time=5.0,
+    stim="mountain",
+    tags=["landscape"],
+    timeseries=[test_ts, rate_ts],
+)
+nwbfile.add_trial(
+    start_time=6.0,
+    stop_time=8.0,
+    stim="desert",
+    tags=["landscape"],
+    timeseries=[test_ts, rate_ts],
+)
+nwbfile.add_trial(
+    start_time=9.0,
+    stop_time=11.0,
+    stim="tree",
+    tags=["landscape", "plant"],
+    timeseries=[test_ts, rate_ts],
+)
+nwbfile.add_trial(
+    start_time=12.0,
+    stop_time=14.0,
+    stim="bird",
+    tags=["animal"],
+    timeseries=[test_ts, rate_ts],
+)
+nwbfile.add_trial(
+    start_time=15.0,
+    stop_time=17.0,
+    stim="flower",
+    tags=["animal"],
+    timeseries=[test_ts, rate_ts],
+)
 
 ####################
 # Epochs
@@ -113,8 +152,22 @@ nwbfile.add_trial(start_time=15.0, stop_time=17.0, stim='flower',
 # Similarly, epochs can be added to an NWB file using the method :py:meth:`~pynwb.file.NWBFile.add_epoch` and
 # :py:meth:`~pynwb.file.NWBFile.add_epoch_column`.
 
-nwbfile.add_epoch(2.0, 4.0, ['first', 'example'], [test_ts, ])
-nwbfile.add_epoch(6.0, 8.0, ['second', 'example'], [test_ts, ])
+nwbfile.add_epoch(
+    2.0,
+    4.0,
+    ["first", "example"],
+    [
+        test_ts,
+    ],
+)
+nwbfile.add_epoch(
+    6.0,
+    8.0,
+    ["second", "example"],
+    [
+        test_ts,
+    ],
+)
 
 ####################
 # Invalid Times
@@ -123,8 +176,22 @@ nwbfile.add_epoch(6.0, 8.0, ['second', 'example'], [test_ts, ])
 # Similarly, invalid times can be added using the method :py:meth:`~pynwb.file.NWBFile.add_invalid_time_interval` and
 # :py:meth:`~pynwb.file.NWBFile.add_invalid_times_column`.
 
-nwbfile.add_epoch(2.0, 4.0, ['first', 'example'], [test_ts, ])
-nwbfile.add_epoch(6.0, 8.0, ['second', 'example'], [test_ts, ])
+nwbfile.add_epoch(
+    2.0,
+    4.0,
+    ["first", "example"],
+    [
+        test_ts,
+    ],
+)
+nwbfile.add_epoch(
+    6.0,
+    8.0,
+    ["second", "example"],
+    [
+        test_ts,
+    ],
+)
 
 ####################
 # Custom Time Intervals
@@ -147,8 +214,8 @@ sleep_stages = TimeIntervals(
 sleep_stages.add_column(name="stage", description="stage of sleep")
 sleep_stages.add_column(name="confidence", description="confidence in stage (0-1)")
 
-sleep_stages.add_row(start_time=0.3, stop_time=0.5, stage=1, confidence=.5)
-sleep_stages.add_row(start_time=0.7, stop_time=0.9, stage=2, confidence=.99)
+sleep_stages.add_row(start_time=0.3, stop_time=0.5, stage=1, confidence=0.5)
+sleep_stages.add_row(start_time=0.7, stop_time=0.9, stage=2, confidence=0.99)
 sleep_stages.add_row(start_time=1.3, stop_time=3.0, stage=3, confidence=0.7)
 
 _ = nwbfile.add_time_intervals(sleep_stages)
@@ -164,7 +231,7 @@ _ = nwbfile.add_time_intervals(sleep_stages)
 # via the :py:meth:`~pynwb.file.NWBFile.get_time_intervals`  method. E.g.:
 
 _ = nwbfile.intervals
-_ = nwbfile.get_time_intervals('sleep_stages')
+_ = nwbfile.get_time_intervals("sleep_stages")
 
 
 ####################
@@ -178,7 +245,7 @@ nwbfile.trials.to_dataframe()
 # This approach makes it easy to query the data to, e.g., locate all time intervals within a certain time range
 
 trials_df = nwbfile.trials.to_dataframe()
-trials_df.query('(start_time > 2.0) & (stop_time < 9.0)')
+trials_df.query("(start_time > 2.0) & (stop_time < 9.0)")
 
 ####################
 # Accessing referenced TimeSeries
@@ -194,7 +261,7 @@ trials_df.query('(start_time > 2.0) & (stop_time < 9.0)')
 # for the corresponding time range from the :py:class:`~pynwb.base.TimeSeries`.
 
 # Get a single example TimeSeriesReference from the trials table
-example_tsr = nwbfile.trials['timeseries'][0][0]
+example_tsr = nwbfile.trials["timeseries"][0][0]
 
 # Get the data values from the timeseries. This is a shorthand for:
 # _ = example_tsr.timeseries.data[example_tsr.idx_start: (example_tsr.idx_start + example_tsr.count)]
@@ -234,12 +301,13 @@ example_tsr.isvalid()
 # Reading and writing the data is as usual:
 
 from pynwb import NWBHDF5IO
+
 # write the file
-with NWBHDF5IO('example_timeintervals_file.nwb', 'w') as io:
+with NWBHDF5IO("example_timeintervals_file.nwb", "w") as io:
     io.write(nwbfile)
 # read the file
-with NWBHDF5IO('example_timeintervals_file.nwb', 'r') as io:
+with NWBHDF5IO("example_timeintervals_file.nwb", "r") as io:
     nwbfile_in = io.read()
 
     # plot the sleep stages TimeIntervals table
-    nwbfile_in.get_time_intervals('sleep_stages').to_dataframe()
+    nwbfile_in.get_time_intervals("sleep_stages").to_dataframe()

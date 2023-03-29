@@ -1,10 +1,18 @@
 # pinned dependencies to reproduce an entire development environment to use PyNWB, run PyNWB tests, check code style,
-# compute coverage, and create test environments
+# compute coverage, and create test environments. note that depending on the version of python installed, different
+# versions of requirements may be installed due to package incompatibilities.
+#
+black==23.3.0
 codecov==2.1.12
-coverage==6.4.2
-flake8==5.0.4;
+codespell==2.2.4
+coverage==7.2.2
+flake8==6.0.0; python_version >= "3.8"
+flake8==5.0.4; python_version == "3.8"
 flake8-debugger==4.1.2
 flake8-print==5.0.0
+isort==5.12.0; python_version >= "3.8"
+isort==5.11.5; python_version == "3.8"
 pytest==7.1.2
-pytest-cov==3.0.0
-tox==3.25.1
+pytest-cov==4.0.0
+tox==4.4.8; python_version >= "3.8"
+tox==3.28.0; python_version == "3.8"
