@@ -1,10 +1,20 @@
 # PyNWB Changelog
 
-
 ## PyNWB 2.3.2 (Upcoming)
 
 ### Enhancements and minor changes
 - Fixed typos and added codespell GitHub action to check spelling in the future. @yarikoptic [#1648](https://github.com/NeurodataWithoutBorders/pynwb/pull/1648)
+
+### Documentation and tutorial enhancements
+- Added `OnePhotonSeries` to [calcium imaging tutorial](https://pynwb.readthedocs.io/en/stable/tutorials/domain/ophys.html#sphx-glr-tutorials-domain-ophys-py). @bendichter [#1658](https://github.com/NeurodataWithoutBorders/pynwb/pull/1658)
+- Add tutorial for optogenetics. @bendichter [#1657](https://github.com/NeurodataWithoutBorders/pynwb/pull/1657)
+- Update testing of gallery examples and disable testing of the allensdk tutorial.
+  [#1680](https://github.com/NeurodataWithoutBorders/pynwb/pull/1680)
+
+### Bug fixes
+- Fixed bug in ``NWBHDF5IO.nwb_version`` property to support files written by third-party software with a fixed-length ``nwb_version`` attribute. @oruebel [#1669](https://github.com/NeurodataWithoutBorders/pynwb/pull/1669)
+- Fixed search bar and missing jquery in ReadTheDocs documentation. @rly [#1671](https://github.com/NeurodataWithoutBorders/pynwb/pull/1671)
+- Fixed issue with deprecated pkg_resources. @rly [#1678](https://github.com/NeurodataWithoutBorders/pynwb/pull/1678)
 
 ## PyNWB 2.3.1 (February 24, 2023)
 

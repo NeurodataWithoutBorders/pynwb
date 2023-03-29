@@ -24,10 +24,13 @@ We will briefly show tools for exploring NWB Files interactively and refer the r
 The following examples will reference variables that may not be defined within the block they are used in. For
 clarity, we define them here:
 """
+import matplotlib.pyplot as plt
+
 # sphinx_gallery_thumbnail_path = 'figures/gallery_thumbnails_read_basics.png'
 import numpy as np
+from dandi.dandiapi import DandiAPIClient
+
 from pynwb import NWBHDF5IO
-import matplotlib.pyplot as plt
 
 ####################
 # Read the data
@@ -96,7 +99,6 @@ import matplotlib.pyplot as plt
 # We can read these from the DANDI archive URL where ``dandiset_id`` is "000004" and
 # file is located in "sub-P11HMH" folder.
 
-from dandi.dandiapi import DandiAPIClient
 
 dandiset_id = "000004"
 filepath = "sub-P11HMH/sub-P11HMH_ses-20061101_ecephys+image.nwb"

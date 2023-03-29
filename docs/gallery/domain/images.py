@@ -18,19 +18,23 @@ related to the experiment. This tutorial focuses in particular on the usage of:
 The following examples will reference variables that may not be defined within the block they are used in. For
 clarity, we define them here:
 """
+# Define file paths used in the tutorial
+
+import os
+
 # sphinx_gallery_thumbnail_path = 'figures/gallery_thumbnails_image_data.png'
 from datetime import datetime
-from dateutil import tz
+from uuid import uuid4
 
 import numpy as np
+from dateutil import tz
+from dateutil.tz import tzlocal
 from PIL import Image
 
-from pynwb import NWBFile, NWBHDF5IO
+from pynwb import NWBHDF5IO, NWBFile
 from pynwb.base import Images
-from pynwb.image import RGBAImage, RGBImage, GrayscaleImage, OpticalSeries, ImageSeries
+from pynwb.image import GrayscaleImage, ImageSeries, OpticalSeries, RGBAImage, RGBImage
 
-# Define file paths used in the tutorial
-import os
 nwbfile_path = os.path.abspath("images_tutorial.nwb")
 moviefiles_path = [
     os.path.abspath("image/file_1.tiff"),
@@ -48,14 +52,16 @@ moviefiles_path = [
 session_start_time = datetime(2018, 4, 25, 2, 30, 3, tzinfo=tz.gettz("US/Pacific"))
 
 nwbfile = NWBFile(
-    session_description="Mouse exploring an open field",  # required
-    identifier="Mouse5_Day3",  # required
-    session_start_time=session_start_time,  # required
-    session_id="session_1234",  # optional
-    experimenter="My Name",  # optional
-    lab="My Lab Name",  # optional
-    institution="University of My Institution",  # optional
-    related_publications="DOI:10.1016/j.neuron.2016.12.011",  # optional
+    session_description="my first synthetic recording",
+    identifier=str(uuid4()),
+    session_start_time=datetime.now(tzlocal()),
+    experimenter=[
+        "Baggins, Bilbo",
+    ],
+    lab="Bag End Laboratory",
+    institution="University of Middle Earth at the Shire",
+    experiment_description="I went on an adventure to reclaim vast treasures.",
+    session_id="LONELYMTN001",
 )
 
 nwbfile
@@ -260,9 +266,8 @@ nwbfile.add_acquisition(images)
 
 from scipy import misc
 
-from pynwb.image import Images, IndexSeries, GrayscaleImage, RGBImage
 from pynwb.base import ImageReferences
-
+from pynwb.image import GrayscaleImage, Images, IndexSeries, RGBImage
 
 gs_face = GrayscaleImage(
     name="gs_face",
@@ -290,7 +295,7 @@ idx_series = IndexSeries(
     data=[0, 1, 0, 1],
     indexed_images=images,
     unit="N/A",
-    timestamps=[.1, .2, .3, .4],
+    timestamps=[0.1, 0.2, 0.3, 0.4],
 )
 
 ####################
