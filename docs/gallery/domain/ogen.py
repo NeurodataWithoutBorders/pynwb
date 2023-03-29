@@ -16,6 +16,7 @@ from datetime import datetime
 from uuid import uuid4
 
 from dateutil.tz import tzlocal
+
 from pynwb import NWBFile
 
 nwbfile = NWBFile(
@@ -83,8 +84,8 @@ nwbfile.add_ogen_site(ogen_stim_site)
 # If you have samples at irregular intervals, you should use ``timestamps`` instead.
 
 import numpy as np
-from pynwb.ogen import OptogeneticSeries
 
+from pynwb.ogen import OptogeneticSeries
 
 ogen_series = OptogeneticSeries(
     name="OptogeneticSeries",

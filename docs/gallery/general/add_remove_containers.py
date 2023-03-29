@@ -22,10 +22,12 @@ same file or export the data to a new file.
 #
 # For example:
 
-# sphinx_gallery_thumbnail_path = 'figures/gallery_thumbnails_add_remove_containers.png'
-from pynwb import NWBFile, NWBHDF5IO, TimeSeries
 import datetime
+
 import numpy as np
+
+# sphinx_gallery_thumbnail_path = 'figures/gallery_thumbnails_add_remove_containers.png'
+from pynwb import NWBHDF5IO, NWBFile, TimeSeries
 
 # first, write a test NWB file
 nwbfile = NWBFile(

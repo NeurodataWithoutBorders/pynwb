@@ -40,10 +40,10 @@ a :py:class:`~hdmf.common.table.DynamicTable` with the following columns:
 from datetime import datetime
 from uuid import uuid4
 
-from dateutil.tz import tzlocal
-from pynwb import NWBFile
-from pynwb import TimeSeries
 import numpy as np
+from dateutil.tz import tzlocal
+
+from pynwb import NWBFile, TimeSeries
 
 # create the NWBFile
 nwbfile = NWBFile(

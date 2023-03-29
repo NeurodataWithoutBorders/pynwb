@@ -35,7 +35,7 @@ in PyNWB for creating  Neurodata Extensions (NDX).
 # it calls :py:meth:`~hdmf.spec.write.NamespaceBuilder.export` to save the extensions to disk for downstream use.
 
 # sphinx_gallery_thumbnail_path = 'figures/gallery_thumbnails_extensions.png'
-from pynwb.spec import NWBNamespaceBuilder, NWBGroupSpec, NWBAttributeSpec
+from pynwb.spec import NWBAttributeSpec, NWBGroupSpec, NWBNamespaceBuilder
 
 ns_path = "mylab.namespace.yaml"
 ext_source = "mylab.extensions.yaml"
@@ -106,9 +106,10 @@ ns_builder.export(ns_path)
 # to the neurodata types in the extension.
 
 
-from pynwb import register_class, load_namespaces
-from pynwb.ecephys import ElectricalSeries
 from hdmf.utils import docval, get_docval, popargs
+
+from pynwb import load_namespaces, register_class
+from pynwb.ecephys import ElectricalSeries
 
 ns_path = "mylab.namespace.yaml"
 load_namespaces(ns_path)
@@ -169,7 +170,9 @@ AutoTetrodeSeries = get_class("TetrodeSeries", "mylab")
 # To demonstrate this, first we will make some fake data using our extensions.
 
 from datetime import datetime
+
 from dateutil.tz import tzlocal
+
 from pynwb import NWBFile
 
 start_time = datetime(2017, 4, 3, 11, tzinfo=tzlocal())
@@ -265,7 +268,7 @@ with NWBHDF5IO("cache_spec_example.nwb", mode="r", load_namespaces=True) as io:
 # then how to use the new data types. First, we use `pynwb` to define the new
 # data types.
 
-from pynwb.spec import NWBNamespaceBuilder, NWBGroupSpec, NWBAttributeSpec
+from pynwb.spec import NWBAttributeSpec, NWBGroupSpec, NWBNamespaceBuilder
 
 name = "test_multicontainerinterface"
 ns_path = name + ".namespace.yaml"
@@ -305,7 +308,7 @@ ns_builder.export(ns_path)
 # Then create Container classes registered to the new data types (this is
 # generally done in a different file)
 
-from pynwb import register_class, load_namespaces
+from pynwb import load_namespaces, register_class
 from pynwb.file import MultiContainerInterface, NWBContainer
 
 load_namespaces(ns_path)
@@ -340,9 +343,11 @@ class PotatoSack(MultiContainerInterface):
 ####################
 # Then use the objects (again, this would often be done in a different file).
 
-from pynwb import NWBHDF5IO, NWBFile
 from datetime import datetime
+
 from dateutil.tz import tzlocal
+
+from pynwb import NWBHDF5IO, NWBFile
 
 # You can add potatoes to a potato sack in different ways
 potato_sack = PotatoSack(potatos=Potato(name="potato1", age=2.3, weight=3.0))
@@ -389,7 +394,7 @@ with NWBHDF5IO("test_multicontainerinterface.nwb", "r") as io:
 #
 # First, we set up our extension. I am going to use the name `ecog`
 
-from pynwb.spec import NWBDatasetSpec, NWBNamespaceBuilder, NWBGroupSpec
+from pynwb.spec import NWBDatasetSpec, NWBGroupSpec, NWBNamespaceBuilder
 
 name = "ecog"
 ns_path = name + ".namespace.yaml"
@@ -461,9 +466,11 @@ ns_builder.export(ns_path)
 #
 # Finally, we should test the new types to make sure they run as expected
 
-from pynwb import load_namespaces, get_class, NWBHDF5IO, NWBFile
 from datetime import datetime
+
 import numpy as np
+
+from pynwb import NWBHDF5IO, NWBFile, get_class, load_namespaces
 
 load_namespaces("ecog.namespace.yaml")
 CorticalSurface = get_class("CorticalSurface", "ecog")

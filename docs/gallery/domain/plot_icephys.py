@@ -83,25 +83,23 @@ related tables.
 from datetime import datetime
 from uuid import uuid4
 
-from dateutil.tz import tzlocal
 import numpy as np
 import pandas
+from dateutil.tz import tzlocal
 
 # Set pandas rendering option to avoid very wide tables in the html docs
 pandas.set_option("display.max_colwidth", 30)
 pandas.set_option("display.max_rows", 10)
 
-# Import main NWB file class
-from pynwb import NWBFile
-
-# Import icephys TimeSeries types used
-from pynwb.icephys import VoltageClampStimulusSeries, VoltageClampSeries
-
 # Import I/O class used for reading and writing NWB files
-from pynwb import NWBHDF5IO
+# Import main NWB file class
+from pynwb import NWBHDF5IO, NWBFile
 
 # Import additional core datatypes used in the example
 from pynwb.core import DynamicTable, VectorData
+
+# Import icephys TimeSeries types used
+from pynwb.icephys import VoltageClampSeries, VoltageClampStimulusSeries
 
 #####################################################################
 # A brief example
@@ -210,11 +208,11 @@ with NWBHDF5IO(ex_testpath, "r") as io:
 
 # Optionally plot the organization of our example NWB file
 try:
-    from hdmf_docutils.doctools.render import (
-        NXGraphHierarchyDescription,
-        HierarchyDescription,
-    )
     import matplotlib.pyplot as plt
+    from hdmf_docutils.doctools.render import (
+        HierarchyDescription,
+        NXGraphHierarchyDescription,
+    )
 
     ex_file_hierarchy = HierarchyDescription.from_hdf5(ex_testpath)
     ex_file_graph = NXGraphHierarchyDescription(ex_file_hierarchy)

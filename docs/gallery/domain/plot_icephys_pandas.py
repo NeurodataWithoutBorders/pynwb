@@ -23,15 +23,16 @@ tables and how to create an NWBFile for intracellular electrophysiology data.
 # Imports used in the tutorial
 # ------------------------------
 
-# sphinx_gallery_thumbnail_path = 'figures/gallery_thumbnails_icephys_pandas.png'
-# Standard Python imports
-import numpy as np
-import pandas
+import os
 
 #####################################################################
 # Settings for improving rendering of tables in the online tutorial
 import dataframe_image
-import os
+
+# sphinx_gallery_thumbnail_path = 'figures/gallery_thumbnails_icephys_pandas.png'
+# Standard Python imports
+import numpy as np
+import pandas
 
 # Get the path to the this tutorial
 try:

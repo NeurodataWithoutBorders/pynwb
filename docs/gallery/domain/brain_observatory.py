@@ -18,14 +18,13 @@ Create an nwb file from Allen Brain Observatory data.
 
 # sphinx_gallery_thumbnail_path = 'figures/gallery_thumbnails_allenbrainobservatory.png'
 
-from allensdk.core.brain_observatory_cache import BrainObservatoryCache
 import allensdk.brain_observatory.stimulus_info as si
+from allensdk.core.brain_observatory_cache import BrainObservatoryCache
 
-from pynwb import NWBFile, NWBHDF5IO, TimeSeries
-from pynwb.ophys import OpticalChannel, DfOverF, ImageSegmentation
-from pynwb.image import ImageSeries, IndexSeries
+from pynwb import NWBHDF5IO, NWBFile, TimeSeries
 from pynwb.device import Device
-
+from pynwb.image import ImageSeries, IndexSeries
+from pynwb.ophys import DfOverF, ImageSegmentation, OpticalChannel
 
 # Settings:
 ophys_experiment_id = 562095852

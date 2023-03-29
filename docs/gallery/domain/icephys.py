@@ -26,10 +26,10 @@ SweepTable to manage recordings.
 from datetime import datetime
 from uuid import uuid4
 
+import numpy as np
 from dateutil.tz import tzlocal
 
 from pynwb import NWBFile
-import numpy as np
 
 nwbfile = NWBFile(
     session_description="my first synthetic recording",

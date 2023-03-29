@@ -27,11 +27,13 @@ and scratch space.
 # To demonstrate linking and scratch space, lets assume we are starting with some acquired data.
 #
 
-# sphinx_gallery_thumbnail_path = 'figures/gallery_thumbnails_scratch.png'
-from pynwb import NWBFile, TimeSeries, NWBHDF5IO
 from datetime import datetime
-from dateutil.tz import tzlocal
+
 import numpy as np
+from dateutil.tz import tzlocal
+
+# sphinx_gallery_thumbnail_path = 'figures/gallery_thumbnails_scratch.png'
+from pynwb import NWBHDF5IO, NWBFile, TimeSeries
 
 # set up the NWBFile
 start_time = datetime(2019, 4, 3, 11, tzinfo=tzlocal())

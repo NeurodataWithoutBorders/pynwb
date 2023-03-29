@@ -25,11 +25,11 @@ clarity, we define them here:
 from datetime import datetime
 from uuid import uuid4
 
+import numpy as np
 from dateutil.tz import tzlocal
 
-import numpy as np
-from pynwb import NWBFile, NWBHDF5IO
-from pynwb.ecephys import ElectricalSeries, LFP
+from pynwb import NWBHDF5IO, NWBFile
+from pynwb.ecephys import LFP, ElectricalSeries
 
 #######################
 # Creating and Writing NWB files

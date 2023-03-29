@@ -122,16 +122,18 @@ More commonly, you will be creating instances of classes that extend this class.
 The following examples will reference variables that may not be defined within the block they are used in. For
 clarity, we define them here:
 """
+from datetime import datetime
+
 # sphinx_gallery_thumbnail_path = 'figures/gallery_thumbnails_file.png'
 from uuid import uuid4
 
 import numpy as np
-from pynwb import NWBFile, TimeSeries, NWBHDF5IO
+from dateutil import tz
+
+from pynwb import NWBHDF5IO, NWBFile, TimeSeries
+from pynwb.behavior import Position, SpatialSeries
 from pynwb.epoch import TimeIntervals
 from pynwb.file import Subject
-from pynwb.behavior import SpatialSeries, Position
-from datetime import datetime
-from dateutil import tz
 
 ####################
 # .. _basics_nwbfile:

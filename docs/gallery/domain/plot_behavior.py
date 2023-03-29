@@ -43,21 +43,20 @@ from uuid import uuid4
 import numpy as np
 from dateutil import tz
 from dateutil.tz import tzlocal
-from pynwb.misc import IntervalSeries
 
-from pynwb.epoch import TimeIntervals
-
-from pynwb import NWBFile, TimeSeries, NWBHDF5IO
+from pynwb import NWBHDF5IO, NWBFile, TimeSeries
 from pynwb.behavior import (
-    SpatialSeries,
-    BehavioralTimeSeries,
-    Position,
-    BehavioralEvents,
-    CompassDirection,
     BehavioralEpochs,
-    PupilTracking,
+    BehavioralEvents,
+    BehavioralTimeSeries,
+    CompassDirection,
     EyeTracking,
+    Position,
+    PupilTracking,
+    SpatialSeries,
 )
+from pynwb.epoch import TimeIntervals
+from pynwb.misc import IntervalSeries
 
 ####################
 # Create an NWB File

@@ -19,7 +19,9 @@ from PyNWB.
 #
 
 from datetime import datetime
+
 from dateutil.tz import tzlocal
+
 from pynwb import NWBFile
 
 start_time = datetime(2017, 4, 3, 11, tzinfo=tzlocal())
@@ -34,8 +36,9 @@ nwbfile = NWBFile(
 ####################
 # Normally if we create a :py:class:`~pynwb.file.TimeSeries` we would do
 
-from pynwb import TimeSeries
 import numpy as np
+
+from pynwb import TimeSeries
 
 data = np.arange(100, 200, 10)
 timestamps = np.arange(10)
@@ -229,8 +232,8 @@ io.close()
 # This command automatically installs the filters. Here is an example of how you would use the Z Standard algorithm:
 
 import hdf5plugin
-
 from hdmf.backends.hdf5.h5_utils import H5DataIO
+
 from pynwb.file import TimeSeries
 
 wrapped_data = H5DataIO(

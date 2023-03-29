@@ -60,11 +60,10 @@ PyNWB supports linking between files using external links.
 from datetime import datetime
 from uuid import uuid4
 
-from dateutil.tz import tzlocal
-from pynwb import NWBFile
-from pynwb import TimeSeries
-from pynwb import NWBHDF5IO
 import numpy as np
+from dateutil.tz import tzlocal
+
+from pynwb import NWBHDF5IO, NWBFile, TimeSeries
 
 # Create the base data
 start_time = datetime(2017, 4, 3, 11, tzinfo=tzlocal())

@@ -110,10 +110,11 @@ writing large arrays without loading all data into memory and streaming data wri
 
 # sphinx_gallery_thumbnail_path = 'figures/gallery_thumbnails_iterative_write.png'
 from datetime import datetime
-from dateutil.tz import tzlocal
-from pynwb import NWBFile, TimeSeries
-from pynwb import NWBHDF5IO
 from uuid import uuid4
+
+from dateutil.tz import tzlocal
+
+from pynwb import NWBHDF5IO, NWBFile, TimeSeries
 
 
 def write_test_file(filename, data, close_io=True):
@@ -166,9 +167,10 @@ def write_test_file(filename, data, close_io=True):
 # Step 1: Define the data generator
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 #
-from math import sin, pi
-import numpy as np
+from math import pi, sin
 from random import random
+
+import numpy as np
 
 
 def iter_sin(chunk_length=10, max_chunks=100):

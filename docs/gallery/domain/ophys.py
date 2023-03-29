@@ -23,25 +23,22 @@ clarity, we define them here:
 from datetime import datetime
 from uuid import uuid4
 
-from dateutil.tz import tzlocal
-
 import matplotlib.pyplot as plt
 import numpy as np
 from dateutil.tz import tzlocal
-from pynwb import NWBFile, TimeSeries, NWBHDF5IO
+
+from pynwb import NWBHDF5IO, NWBFile, TimeSeries
 from pynwb.image import ImageSeries
 from pynwb.ophys import (
-    TwoPhotonSeries,
-    OpticalChannel,
-    ImageSegmentation,
-    Fluorescence,
     CorrectedImageStack,
+    Fluorescence,
+    ImageSegmentation,
     MotionCorrection,
-    RoiResponseSeries,
     OnePhotonSeries,
+    OpticalChannel,
+    RoiResponseSeries,
+    TwoPhotonSeries,
 )
-
-import matplotlib.pyplot as plt
 
 ####################
 # Creating and Writing NWB files
