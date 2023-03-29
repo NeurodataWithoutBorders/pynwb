@@ -10,6 +10,7 @@
 - Add tutorial for optogenetics. @bendichter [#1657](https://github.com/NeurodataWithoutBorders/pynwb/pull/1657)
 - Update testing of gallery examples and disable testing of the allensdk tutorial.
   [#1680](https://github.com/NeurodataWithoutBorders/pynwb/pull/1680)
+- Updated tutorials to follow best practices. @bendichter [#1656](https://github.com/NeurodataWithoutBorders/pynwb/pull/1656)
 
 ### Bug fixes
 - Fixed bug when initializing ``OnePhotonSeries`` with no value for ``binning``. @bendichter [#1660](https://github.com/NeurodataWithoutBorders/pynwb/pull/1660)
