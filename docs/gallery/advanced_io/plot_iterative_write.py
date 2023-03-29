@@ -478,7 +478,7 @@ print("   Reduction     :  %.2f x" % (expected_size / file_size_largechunks_comp
 import numpy as np
 
 # Create the test data
-datashape = (100, 10)  # OK, this not really large, but we just want to show how it works
+datashape = (100, 10)  # This is not really large, but we just want to show how it works
 num_values = np.prod(datashape)
 arrdata = np.arange(num_values).reshape(datashape)
 # Write the test data to disk
