@@ -162,7 +162,7 @@ from hdmf.backends.hdf5.h5_utils import H5DataIO
 # Create another timeseries that links to the same data
 test_ts5 = TimeSeries(
     name="test_timeseries5",
-    data=H5DataIO(data=timeseries_1_data, link_data=True),  # <-------  # <-------
+    data=H5DataIO(data=timeseries_1_data, link_data=True),  # <-------
     unit="SIunit",
     timestamps=timestamps,
 )
