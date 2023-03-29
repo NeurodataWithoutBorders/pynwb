@@ -367,7 +367,9 @@ data4 = H5DataIO(
 write_test_file(filename="basic_sparse_iterwrite_example.nwb", data=data)
 write_test_file(filename="basic_sparse_iterwrite_compressed_example.nwb", data=data2)
 write_test_file(filename="basic_sparse_iterwrite_largechunks_example.nwb", data=data3)
-write_test_file(filename="basic_sparse_iterwrite_largechunks_compressed_example.nwb", data=data4)
+write_test_file(
+    filename="basic_sparse_iterwrite_largechunks_compressed_example.nwb", data=data4
+)
 
 ####################
 # Check the results

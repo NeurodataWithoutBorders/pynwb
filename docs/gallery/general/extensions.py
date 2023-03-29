@@ -1,4 +1,4 @@
-'''
+"""
 .. _tutorial-extending-nwb:
 
 Extending NWB
@@ -18,7 +18,7 @@ in PyNWB for creating  Neurodata Extensions (NDX).
    For more information on available tools for creating extensions, see
    :nwb_overview:`here <core_tools/core_tools_home.html#svg-version-1-1-width-1-5em-height-1-5em-class-sd-octicon-sd-octicon-diff-added-viewbox-0-0-16-16-aria-hidden-true-path-fill-rule-evenodd-d-m13-25-2-5h2-75a-25-25-0-00-25-25v10-5c0-138-112-25-25-25h10-5a-25-25-0-00-25-25v2-75a-25-25-0-00-25-25zm2-75-1h10-5c-966-0-1-75-784-1-75-1-75v10-5a1-75-1-75-0-0113-25-15h2-75a1-75-1-75-0-011-13-25v2-75c1-1-784-1-784-1-2-75-1zm8-4a-75-75-0-01-75-75v2-5h2-5a-75-75-0-010-1-5h-2-5v2-5a-75-75-0-01-1-5-0v-2-5h-2-5a-75-75-0-010-1-5h2-5v-2-5a-75-75-0-018-4z-path-svg-extending-nwb>`.
 
-'''
+"""
 
 ####################
 # .. _defining_extension:
@@ -40,14 +40,18 @@ from pynwb.spec import NWBNamespaceBuilder, NWBGroupSpec, NWBAttributeSpec
 ns_path = "mylab.namespace.yaml"
 ext_source = "mylab.extensions.yaml"
 
-ns_builder = NWBNamespaceBuilder('Extension for use in my Lab', "mylab", version='0.1.0')
+ns_builder = NWBNamespaceBuilder(
+    "Extension for use in my Lab", "mylab", version="0.1.0"
+)
 
-ns_builder.include_type('ElectricalSeries', namespace='core')
+ns_builder.include_type("ElectricalSeries", namespace="core")
 
-ext = NWBGroupSpec('A custom ElectricalSeries for my lab',
-                   attributes=[NWBAttributeSpec('trode_id', 'the tetrode id', 'int')],
-                   neurodata_type_inc='ElectricalSeries',
-                   neurodata_type_def='TetrodeSeries')
+ext = NWBGroupSpec(
+    "A custom ElectricalSeries for my lab",
+    attributes=[NWBAttributeSpec("trode_id", "the tetrode id", "int")],
+    neurodata_type_inc="ElectricalSeries",
+    neurodata_type_def="TetrodeSeries",
+)
 
 ns_builder.add_spec(ext_source, ext)
 ns_builder.export(ns_path)
@@ -110,15 +114,16 @@ ns_path = "mylab.namespace.yaml"
 load_namespaces(ns_path)
 
 
-@register_class('TetrodeSeries', 'mylab')
+@register_class("TetrodeSeries", "mylab")
 class TetrodeSeries(ElectricalSeries):
+    __nwbfields__ = ("trode_id",)
 
-    __nwbfields__ = ('trode_id',)
-
-    @docval(*get_docval(ElectricalSeries.__init__) + (
-        {'name': 'trode_id', 'type': int, 'doc': 'the tetrode id'},))
+    @docval(
+        *get_docval(ElectricalSeries.__init__)
+        + ({"name": "trode_id", "type": int, "doc": "the tetrode id"},)
+    )
     def __init__(self, **kwargs):
-        trode_id = popargs('trode_id', kwargs)
+        trode_id = popargs("trode_id", kwargs)
         super().__init__(**kwargs)
         self.trode_id = trode_id
 
@@ -143,7 +148,7 @@ from pynwb import get_class, load_namespaces
 ns_path = "mylab.namespace.yaml"
 load_namespaces(ns_path)
 
-AutoTetrodeSeries = get_class('TetrodeSeries', 'mylab')
+AutoTetrodeSeries = get_class("TetrodeSeries", "mylab")
 
 ####################
 # .. note::
@@ -170,26 +175,33 @@ from pynwb import NWBFile
 start_time = datetime(2017, 4, 3, 11, tzinfo=tzlocal())
 create_date = datetime(2017, 4, 15, 12, tzinfo=tzlocal())
 
-nwbfile = NWBFile('demonstrate caching', 'NWB456', start_time,
-                  file_create_date=create_date)
+nwbfile = NWBFile(
+    "demonstrate caching", "NWB456", start_time, file_create_date=create_date
+)
 
-device = nwbfile.create_device(name='trodes_rig123')
+device = nwbfile.create_device(name="trodes_rig123")
 
-electrode_name = 'tetrode1'
+electrode_name = "tetrode1"
 description = "an example tetrode"
 location = "somewhere in the hippocampus"
 
-electrode_group = nwbfile.create_electrode_group(electrode_name,
-                                                 description=description,
-                                                 location=location,
-                                                 device=device)
+electrode_group = nwbfile.create_electrode_group(
+    electrode_name, description=description, location=location, device=device
+)
 for idx in [1, 2, 3, 4]:
-    nwbfile.add_electrode(id=idx,
-                          x=1.0, y=2.0, z=3.0,
-                          imp=float(-idx),
-                          location='CA1', filtering='none',
-                          group=electrode_group)
-electrode_table_region = nwbfile.create_electrode_table_region([0, 2], 'the first and third electrodes')
+    nwbfile.add_electrode(
+        id=idx,
+        x=1.0,
+        y=2.0,
+        z=3.0,
+        imp=float(-idx),
+        location="CA1",
+        filtering="none",
+        group=electrode_group,
+    )
+electrode_table_region = nwbfile.create_electrode_table_region(
+    [0, 2], "the first and third electrodes"
+)
 
 import numpy as np
 
@@ -199,17 +211,19 @@ data_len = 1000
 data = np.random.rand(data_len * 2).reshape((data_len, 2))
 timestamps = np.arange(data_len) / rate
 
-ts = TetrodeSeries('test_ephys_data',
-                   data,
-                   electrode_table_region,
-                   timestamps=timestamps,
-                   trode_id=1,
-                   # Alternatively, could specify starting_time and rate as follows
-                   # starting_time=ephys_timestamps[0],
-                   # rate=rate,
-                   resolution=0.001,
-                   comments="This data was randomly generated with numpy, using 1234 as the seed",
-                   description="Random numbers generated with numpy.random.rand")
+ts = TetrodeSeries(
+    "test_ephys_data",
+    data,
+    electrode_table_region,
+    timestamps=timestamps,
+    trode_id=1,
+    # Alternatively, could specify starting_time and rate as follows
+    # starting_time=ephys_timestamps[0],
+    # rate=rate,
+    resolution=0.001,
+    comments="This data was randomly generated with numpy, using 1234 as the seed",
+    description="Random numbers generated with numpy.random.rand",
+)
 nwbfile.add_acquisition(ts)
 
 ####################
@@ -223,7 +237,7 @@ nwbfile.add_acquisition(ts)
 
 from pynwb import NWBHDF5IO
 
-io = NWBHDF5IO('cache_spec_example.nwb', mode='w')
+io = NWBHDF5IO("cache_spec_example.nwb", mode="w")
 io.write(nwbfile)
 io.close()
 
@@ -237,7 +251,7 @@ io.close()
 # explicitly specify this. This behavior is enabled by the *load_namespaces*
 # argument to the :py:class:`~pynwb.NWBHDF5IO` constructor.
 
-with NWBHDF5IO('cache_spec_example.nwb', mode='r', load_namespaces=True) as io:
+with NWBHDF5IO("cache_spec_example.nwb", mode="r", load_namespaces=True) as io:
     nwbfile = io.read()
 
 ####################
@@ -253,32 +267,36 @@ with NWBHDF5IO('cache_spec_example.nwb', mode='r', load_namespaces=True) as io:
 
 from pynwb.spec import NWBNamespaceBuilder, NWBGroupSpec, NWBAttributeSpec
 
-name = 'test_multicontainerinterface'
+name = "test_multicontainerinterface"
 ns_path = name + ".namespace.yaml"
 ext_source = name + ".extensions.yaml"
 
-ns_builder = NWBNamespaceBuilder(name + ' extensions', name, version='0.1.0')
-ns_builder.include_type('NWBDataInterface', namespace='core')
+ns_builder = NWBNamespaceBuilder(name + " extensions", name, version="0.1.0")
+ns_builder.include_type("NWBDataInterface", namespace="core")
 
-potato = NWBGroupSpec(neurodata_type_def='Potato',
-                      neurodata_type_inc='NWBDataInterface',
-                      doc='A potato', quantity='*',
-                      attributes=[
-                          NWBAttributeSpec(name='weight',
-                                           doc='weight of potato',
-                                           dtype='float',
-                                           required=True),
-                          NWBAttributeSpec(name='age',
-                                           doc='age of potato',
-                                           dtype='float',
-                                           required=False)
-                      ])
+potato = NWBGroupSpec(
+    neurodata_type_def="Potato",
+    neurodata_type_inc="NWBDataInterface",
+    doc="A potato",
+    quantity="*",
+    attributes=[
+        NWBAttributeSpec(
+            name="weight", doc="weight of potato", dtype="float", required=True
+        ),
+        NWBAttributeSpec(
+            name="age", doc="age of potato", dtype="float", required=False
+        ),
+    ],
+)
 
-potato_sack = NWBGroupSpec(neurodata_type_def='PotatoSack',
-                           neurodata_type_inc='NWBDataInterface',
-                           name='potato_sack',
-                           doc='A sack of potatoes', quantity='?',
-                           groups=[potato])
+potato_sack = NWBGroupSpec(
+    neurodata_type_def="PotatoSack",
+    neurodata_type_inc="NWBDataInterface",
+    name="potato_sack",
+    doc="A sack of potatoes",
+    quantity="?",
+    groups=[potato],
+)
 
 ns_builder.add_spec(ext_source, potato_sack)
 ns_builder.export(ns_path)
@@ -293,28 +311,29 @@ from pynwb.file import MultiContainerInterface, NWBContainer
 load_namespaces(ns_path)
 
 
-@register_class('Potato', name)
+@register_class("Potato", name)
 class Potato(NWBContainer):
-    __nwbfields__ = ('name', 'weight', 'age')
+    __nwbfields__ = ("name", "weight", "age")
 
-    @docval({'name': 'name', 'type': str, 'doc': 'who names a potato?'},
-            {'name': 'weight', 'type': float, 'doc': 'weight of potato in grams'},
-            {'name': 'age', 'type': float, 'doc': 'age of potato in days'})
+    @docval(
+        {"name": "name", "type": str, "doc": "who names a potato?"},
+        {"name": "weight", "type": float, "doc": "weight of potato in grams"},
+        {"name": "age", "type": float, "doc": "age of potato in days"},
+    )
     def __init__(self, **kwargs):
-        super().__init__(name=kwargs['name'])
-        self.weight = kwargs['weight']
-        self.age = kwargs['age']
+        super().__init__(name=kwargs["name"])
+        self.weight = kwargs["weight"]
+        self.age = kwargs["age"]
 
 
-@register_class('PotatoSack', name)
+@register_class("PotatoSack", name)
 class PotatoSack(MultiContainerInterface):
-
     __clsconf__ = {
-        'attr': 'potatos',
-        'type': Potato,
-        'add': 'add_potato',
-        'get': 'get_potato',
-        'create': 'create_potato',
+        "attr": "potatos",
+        "type": Potato,
+        "add": "add_potato",
+        "get": "get_potato",
+        "create": "create_potato",
     }
 
 
@@ -326,17 +345,19 @@ from datetime import datetime
 from dateutil.tz import tzlocal
 
 # You can add potatoes to a potato sack in different ways
-potato_sack = PotatoSack(potatos=Potato(name='potato1', age=2.3, weight=3.0))
-potato_sack.add_potato(Potato('potato2', 3.0, 4.0))
-potato_sack.create_potato('big_potato', 10.0, 20.0)
+potato_sack = PotatoSack(potatos=Potato(name="potato1", age=2.3, weight=3.0))
+potato_sack.add_potato(Potato("potato2", 3.0, 4.0))
+potato_sack.create_potato("big_potato", 10.0, 20.0)
 
-nwbfile = NWBFile("a file with metadata", "NB123A", datetime(2018, 6, 1, tzinfo=tzlocal()))
+nwbfile = NWBFile(
+    "a file with metadata", "NB123A", datetime(2018, 6, 1, tzinfo=tzlocal())
+)
 
-pmod = nwbfile.create_processing_module('module_name', 'desc')
+pmod = nwbfile.create_processing_module("module_name", "desc")
 pmod.add_container(potato_sack)
 
 
-with NWBHDF5IO('test_multicontainerinterface.nwb', 'w') as io:
+with NWBHDF5IO("test_multicontainerinterface.nwb", "w") as io:
     io.write(nwbfile)
 
 ####################
@@ -345,9 +366,9 @@ with NWBHDF5IO('test_multicontainerinterface.nwb', 'w') as io:
 
 load_namespaces(ns_path)
 # from xxx import PotatoSack, Potato
-with NWBHDF5IO('test_multicontainerinterface.nwb', 'r') as io:
+with NWBHDF5IO("test_multicontainerinterface.nwb", "r") as io:
     nwb = io.read()
-    print(nwb.get_processing_module()['potato_sack'].get_potato('big_potato').weight)
+    print(nwb.get_processing_module()["potato_sack"].get_potato("big_potato").weight)
 # note: you can call get_processing_module() with or without the module name as
 # an argument. however, if there is more than one module, the name is required.
 # here, there is more than one potato, so the name of the potato is required as
@@ -370,7 +391,7 @@ with NWBHDF5IO('test_multicontainerinterface.nwb', 'r') as io:
 
 from pynwb.spec import NWBDatasetSpec, NWBNamespaceBuilder, NWBGroupSpec
 
-name = 'ecog'
+name = "ecog"
 ns_path = name + ".namespace.yaml"
 ext_source = name + ".extensions.yaml"
 
@@ -379,18 +400,31 @@ ext_source = name + ".extensions.yaml"
 # class is `CorticalSurface`, and it requires two matrices, `vertices` and
 # `faces`.
 
-surface = NWBGroupSpec(doc='brain cortical surface',
-                       datasets=[
-                           NWBDatasetSpec(doc='faces for surface, indexes vertices', shape=(None, 3),
-                                          name='faces', dtype='uint', dims=('face_number', 'vertex_index')),
-                           NWBDatasetSpec(doc='vertices for surface, points in 3D space', shape=(None, 3),
-                                          name='vertices', dtype='float', dims=('vertex_number', 'xyz'))],
-                       neurodata_type_def='CorticalSurface',
-                       neurodata_type_inc='NWBDataInterface')
+surface = NWBGroupSpec(
+    doc="brain cortical surface",
+    datasets=[
+        NWBDatasetSpec(
+            doc="faces for surface, indexes vertices",
+            shape=(None, 3),
+            name="faces",
+            dtype="uint",
+            dims=("face_number", "vertex_index"),
+        ),
+        NWBDatasetSpec(
+            doc="vertices for surface, points in 3D space",
+            shape=(None, 3),
+            name="vertices",
+            dtype="float",
+            dims=("vertex_number", "xyz"),
+        ),
+    ],
+    neurodata_type_def="CorticalSurface",
+    neurodata_type_inc="NWBDataInterface",
+)
 
 # Now we set up the builder and add this object
 
-ns_builder = NWBNamespaceBuilder(name + ' extensions', name, version='0.1.0')
+ns_builder = NWBNamespaceBuilder(name + " extensions", name, version="0.1.0")
 ns_builder.add_spec(ext_source, surface)
 ns_builder.export(ns_path)
 
@@ -431,23 +465,28 @@ from pynwb import load_namespaces, get_class, NWBHDF5IO, NWBFile
 from datetime import datetime
 import numpy as np
 
-load_namespaces('ecog.namespace.yaml')
-CorticalSurface = get_class('CorticalSurface', 'ecog')
+load_namespaces("ecog.namespace.yaml")
+CorticalSurface = get_class("CorticalSurface", "ecog")
 
-cortical_surface = CorticalSurface(vertices=[[0.0, 1.0, 1.0],
-                                             [1.0, 1.0, 2.0],
-                                             [2.0, 2.0, 1.0],
-                                             [2.0, 1.0, 1.0],
-                                             [1.0, 2.0, 1.0]],
-                                   faces=np.array([[0, 1, 2], [1, 2, 3]]).astype('uint'),
-                                   name='cortex')
+cortical_surface = CorticalSurface(
+    vertices=[
+        [0.0, 1.0, 1.0],
+        [1.0, 1.0, 2.0],
+        [2.0, 2.0, 1.0],
+        [2.0, 1.0, 1.0],
+        [1.0, 2.0, 1.0],
+    ],
+    faces=np.array([[0, 1, 2], [1, 2, 3]]).astype("uint"),
+    name="cortex",
+)
 
-nwbfile = NWBFile('my first synthetic recording', 'EXAMPLE_ID', datetime.now())
+nwbfile = NWBFile("my first synthetic recording", "EXAMPLE_ID", datetime.now())
 
-cortex_module = nwbfile.create_processing_module(name='cortex',
-                                                 description='description')
+cortex_module = nwbfile.create_processing_module(
+    name="cortex", description="description"
+)
 cortex_module.add_container(cortical_surface)
 
 
-with NWBHDF5IO('test_cortical_surface.nwb', 'w') as io:
+with NWBHDF5IO("test_cortical_surface.nwb", "w") as io:
     io.write(nwbfile)

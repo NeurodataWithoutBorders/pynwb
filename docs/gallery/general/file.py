@@ -159,7 +159,9 @@ nwbfile = NWBFile(
     identifier=str(uuid4()),  # required
     session_start_time=session_start_time,  # required
     session_id="session_1234",  # optional
-    experimenter=["Baggins, Bilbo", ],  # optional
+    experimenter=[
+        "Baggins, Bilbo",
+    ],  # optional
     lab="Bag End Laboratory",  # optional
     institution="University of My Institution",  # optional
     experiment_description="I went on an adventure to reclaim vast treasures.",  # optional

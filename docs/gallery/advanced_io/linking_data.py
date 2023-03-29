@@ -240,8 +240,8 @@ nwbfile3 = NWBFile(
     identifier=str(uuid4()),
     session_start_time=start_time,
 )
-nwbfile3.add_acquisition(timeseries_1)             # <--------
-nwbfile3.add_acquisition(timeseries_2)             # <--------
+nwbfile3.add_acquisition(timeseries_1)  # <--------
+nwbfile3.add_acquisition(timeseries_2)  # <--------
 
 # Write our third file that includes our two timeseries as external links
 with NWBHDF5IO(filename3, "w", manager=manager) as io3:

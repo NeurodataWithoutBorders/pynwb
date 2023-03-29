@@ -1,4 +1,4 @@
-'''
+"""
 .. _streaming:
 
 Streaming NWB files
@@ -128,6 +128,6 @@ fsspec has many advantages over ros3:
 6. In our hands, fsspec is faster out-of-the-box.
 
 For these reasons, we would recommend use fsspec for most Python users.
-'''
+"""
 
 # sphinx_gallery_thumbnail_path = 'figures/gallery_thumbnails_streaming.png'
