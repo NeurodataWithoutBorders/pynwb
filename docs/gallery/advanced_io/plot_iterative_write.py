@@ -768,6 +768,7 @@ print(
     % (str(dataset.shape), str(dataset.chunks), str(dataset.maxshape))
 )
 print(dataset[:])
+io.close()
 
 ####################
 # We allocated our data to be ``shape=(8, 10)`` but we only wrote data to the first 6 rows of the
