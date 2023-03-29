@@ -175,9 +175,8 @@ nwbfile4.add_acquisition(test_ts5)
 from pynwb import NWBHDF5IO
 
 io4 = NWBHDF5IO(filename4, "w")
-io4.write(
-    nwbfile4, link_data=True
-)  # <-------- Specify default behavior to link rather than copy data
+# Use link_data=True to specify default behavior to link rather than copy data
+io4.write(nwbfile4, link_data=True)
 io4.close()
 io1.close()
 
