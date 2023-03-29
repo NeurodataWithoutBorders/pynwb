@@ -9,12 +9,12 @@ writing large arrays without loading all data into memory and streaming data wri
 
 ####################
 # Introduction
-# --------------------------------------------
+# ------------
 
 
 ####################
 # What is Iterative Data Write?
-# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 #
 # In the typical write process, datasets are created and written as a whole. In contrast,
 # iterative data write refers to the writing of the content of a dataset in an incremental,
@@ -51,7 +51,7 @@ writing large arrays without loading all data into memory and streaming data wri
 
 ####################
 # Iterating Over Data Arrays
-# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^
 #
 # In PyNWB the process of iterating over large data arrays is implemented via the concept of
 # :py:class:`~hdmf.data_utils.DataChunk` and :py:class:`~hdmf.data_utils.AbstractDataChunkIterator`.
@@ -82,7 +82,7 @@ writing large arrays without loading all data into memory and streaming data wri
 
 ####################
 # Iterative Data Write: API
-# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+# ^^^^^^^^^^^^^^^^^^^^^^^^^
 #
 # On the front end, all a user needs to do is to create or wrap their data in a
 # :py:class:`~hdmf.data_utils.AbstractDataChunkIterator`. The I/O backend (e.g.,
@@ -102,7 +102,7 @@ writing large arrays without loading all data into memory and streaming data wri
 #    the same time.
 #
 # Preparations:
-# ^^^^^^^^^^^^^^^^^^^^
+# ^^^^^^^^^^^^^
 #
 # The data write in our examples really does not change. We, therefore, here create a
 # simple helper function first to write a simple NWBFile containing a single timeseries to
@@ -113,6 +113,7 @@ from datetime import datetime
 from dateutil.tz import tzlocal
 from pynwb import NWBFile, TimeSeries
 from pynwb import NWBHDF5IO
+from uuid import uuid4
 
 
 def write_test_file(filename, data, close_io=True):
@@ -129,18 +130,17 @@ def write_test_file(filename, data, close_io=True):
     # Create a test NWBfile
     start_time = datetime(2017, 4, 3, 11, tzinfo=tzlocal())
     nwbfile = NWBFile(
-        "demonstrate NWBFile basics",
-        "NWB123",
-        start_time,
+        session_description="demonstrate iterative write",
+        identifier=str(uuid4()),
+        session_start_time=start_time,
     )
 
     # Create our time series
     test_ts = TimeSeries(
         name="synthetic_timeseries",
-        data=data,  # <---------
-        unit="SIunit",
+        data=data,
+        unit="n/a",
         rate=1.0,
-        starting_time=0.0,
     )
     nwbfile.add_acquisition(test_ts)
 
@@ -156,7 +156,7 @@ def write_test_file(filename, data, close_io=True):
 
 ####################
 # Example: Write Data from Generators and Streams
-# -----------------------------------------------------
+# -----------------------------------------------
 #
 # Here we use a simple data generator but PyNWB does not make any assumptions about what happens
 # inside the generator. Instead of creating data programmatically, you may hence, e.g., receive
@@ -167,9 +167,8 @@ def write_test_file(filename, data, close_io=True):
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 #
 from math import sin, pi
-from random import random
-
 import numpy as np
+from random import random
 
 
 def iter_sin(chunk_length=10, max_chunks=100):
@@ -239,12 +238,12 @@ print(
 
 ####################
 # Example: Optimizing Sparse Data Array I/O and Storage
-# -------------------------------------------------------
+# -----------------------------------------------------
 #
 # Step 1: Create a data chunk iterator for our sparse matrix
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-from hdmf.data_utils import AbstractDataChunkIterator
+from hdmf.data_utils import AbstractDataChunkIterator, DataChunk
 
 
 class SparseMatrixIterator(AbstractDataChunkIterator):
@@ -310,7 +309,7 @@ class SparseMatrixIterator(AbstractDataChunkIterator):
 
 #####################
 # Step 2: Instantiate our sparse matrix
-# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 #
 
 # Setting for our random sparse matrix
@@ -336,7 +335,7 @@ matrix2 = SparseMatrixIterator(
 data2 = H5DataIO(data=matrix2, compression="gzip", compression_opts=4)
 
 ######################
-# We can now also customize the chunking , fillvalue and other settings
+# We can now also customize the chunking, fill value, and other settings
 #
 from hdmf.backends.hdf5.h5_utils import H5DataIO
 
@@ -360,7 +359,7 @@ data4 = H5DataIO(
 
 ####################
 # Step 3: Write the data as usual
-# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 #
 # Here we simply use our ``SparseMatrixIterator`` as input for our ``TimeSeries``
 
@@ -466,7 +465,7 @@ print("   Reduction     :  %.2f x" % (expected_size / file_size_largechunks_comp
 
 ####################
 # Example: Convert large binary data arrays
-# -----------------------------------------------------
+# -----------------------------------------
 #
 # When converting large data files, a typical problem is that it is often too expensive to load all the data
 # into memory. This example is very similar to the data generator example only that instead of generating
@@ -475,7 +474,7 @@ print("   Reduction     :  %.2f x" % (expected_size / file_size_largechunks_comp
 
 ####################
 # Create example data
-# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+# ^^^^^^^^^^^^^^^^^^^
 
 import numpy as np
 
@@ -492,7 +491,7 @@ del temp  # Flush to disk
 
 ####################
 # Step 1: Create a generator for our array
-# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 #
 # Note, we here use a generator for simplicity but we could equally well also implement our own
 # :py:class:`~hdmf.data_utils.AbstractDataChunkIterator` or use :py:class:`~hdmf.data_utils.GenericDataChunkIterator`.
@@ -513,7 +512,7 @@ def iter_largearray(filename, shape, dtype="float64"):
 
 ####################
 # Step 2: Wrap the generator in a DataChunkIterator
-# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 #
 
 from hdmf.data_utils import DataChunkIterator
@@ -529,7 +528,7 @@ data = DataChunkIterator(
 
 ####################
 # Step 3: Write the data as usual
-# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 #
 
 write_test_file(filename="basic_sparse_iterwrite_largearray.nwb", data=data)
@@ -562,7 +561,7 @@ with NWBHDF5IO("basic_sparse_iterwrite_largearray.nwb", "r") as io:
 
 ####################
 # Example: Convert arrays stored in multiple files
-# -----------------------------------------------------
+# ------------------------------------------------
 #
 # In practice, data from recording devices may be distributed across many files, e.g., one file per time range
 # or one file per recording channel. Using iterative data write provides an elegant solution to this problem
@@ -572,7 +571,7 @@ with NWBHDF5IO("basic_sparse_iterwrite_largearray.nwb", "r") as io:
 
 ####################
 # Create example data
-# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+# ^^^^^^^^^^^^^^^^^^^
 
 import numpy as np
 
@@ -589,7 +588,7 @@ for f in channel_files:
 
 #####################
 # Step 1: Create a data chunk iterator for our multifile array
-# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 from hdmf.data_utils import AbstractDataChunkIterator, DataChunk  # noqa: F811
 
@@ -654,7 +653,7 @@ data = MultiFileArrayIterator(channel_files, num_steps)
 
 ####################
 # Step 3: Write the data as usual
-# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 #
 
 write_test_file(filename="basic_sparse_iterwrite_multifile.nwb", data=data)
@@ -692,7 +691,7 @@ write_test_file(filename="basic_sparse_iterwrite_multifile.nwb", data=data)
 
 ####################
 # Alternative Approach: User-defined dataset write
-# ----------------------------------------------------
+# ------------------------------------------------
 #
 # In the above cases we used the built-in capabilities of PyNWB to perform iterative data write. To
 # gain more fine-grained control of the write process we can alternatively use PyNWB to setup the full
@@ -703,7 +702,7 @@ write_test_file(filename="basic_sparse_iterwrite_multifile.nwb", data=data)
 
 ####################
 # Step 1: Initially allocate the data as empty
-# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 #
 from hdmf.backends.hdf5.h5_utils import H5DataIO
 
@@ -719,14 +718,14 @@ dataio = H5DataIO(
     fillvalue=np.nan,  # Use NAN as fillvalue
 )
 
-# Write a test NWB file with our dataset and keep the NWB file (i.e., the  NWBHDF5IO object) open
+# Write a test NWB file with our dataset and keep the NWB file (i.e., the NWBHDF5IO object) open
 io = write_test_file(
     filename="basic_alternative_custom_write.nwb", data=dataio, close_io=False
 )
 
 ####################
 # Step 2: Get the dataset(s) to be updated
-# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 #
 
 # Let's check what the data looks like before we write
@@ -739,14 +738,18 @@ print(
     )
 )
 
-dataio.dataset.resize(
-    (8, 10)
-)  # <-- Allocate space. Only needed if we didn't set the initial shape large enough
-dataio.dataset[0:3, :] = 1  # <-- Write timesteps 0,1,2
-dataio.dataset[
-    3:6, :
-] = 2  # <-- Write timesteps 3,4,5,  Note timesteps 6,7 are not being initialized
-io.close()  # <-- Close the file
+# Allocate space. Only needed if we didn't set the initial shape large enough
+dataio.dataset.resize((8, 10))
+
+# Write 1s in timesteps 0-2
+dataio.dataset[0:3, :] = 1
+
+# Write 2s in timesteps 3-5
+# NOTE: timesteps 6 and 7 are not being initialized
+dataio.dataset[3:6, :] = 2
+
+# Close the file
+io.close()
 
 
 ####################
@@ -755,7 +758,7 @@ io.close()  # <-- Close the file
 
 from pynwb import NWBHDF5IO  # noqa
 
-io = NWBHDF5IO("basic_alternative_custom_write.nwb", mode="a")
+io = NWBHDF5IO("basic_alternative_custom_write.nwb", mode="r")
 nwbfile = io.read()
 dataset = nwbfile.get_acquisition("synthetic_timeseries").data
 print(
@@ -763,7 +766,6 @@ print(
     % (str(dataset.shape), str(dataset.chunks), str(dataset.maxshape))
 )
 print(dataset[:])
-io.close()
 
 ####################
 # We allocated our data to be ``shape=(8, 10)`` but we only wrote data to the first 6 rows of the

@@ -119,7 +119,7 @@ from pynwb.core import DynamicTable, VectorData
 # Create an ICEphysFile
 ex_nwbfile = NWBFile(
     session_description="my first synthetic recording",
-    identifier=uuid4(),
+    identifier=str(uuid4()),
     session_start_time=datetime.now(tzlocal()),
     experimenter="Baggins, Bilbo",
     lab="Bag End Laboratory",

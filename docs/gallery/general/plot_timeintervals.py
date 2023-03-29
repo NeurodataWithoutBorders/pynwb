@@ -48,7 +48,7 @@ import numpy as np
 # create the NWBFile
 nwbfile = NWBFile(
     session_description="my first synthetic recording",  # required
-    identifier=uuid4(),  # required
+    identifier=str(uuid4()),  # required
     session_start_time=datetime(2017, 4, 3, 11, tzinfo=tzlocal()),  # required
     experimenter="Baggins, Bilbo",  # optional
     lab="Bag End Laboratory",  # optional
