@@ -41,23 +41,21 @@ from datetime import datetime
 from uuid import uuid4
 
 import numpy as np
-from dateutil import tz
 from dateutil.tz import tzlocal
-from pynwb.misc import IntervalSeries
 
-from pynwb.epoch import TimeIntervals
-
-from pynwb import NWBFile, TimeSeries, NWBHDF5IO
+from pynwb import NWBHDF5IO, NWBFile, TimeSeries
 from pynwb.behavior import (
-    SpatialSeries,
-    BehavioralTimeSeries,
-    Position,
-    BehavioralEvents,
-    CompassDirection,
     BehavioralEpochs,
-    PupilTracking,
+    BehavioralEvents,
+    BehavioralTimeSeries,
+    CompassDirection,
     EyeTracking,
+    Position,
+    PupilTracking,
+    SpatialSeries,
 )
+from pynwb.epoch import TimeIntervals
+from pynwb.misc import IntervalSeries
 
 ####################
 # Create an NWB File
@@ -66,13 +64,13 @@ from pynwb.behavior import (
 # Create an :py:class:`~pynwb.file.NWBFile` object with the required fields
 # (``session_description``, ``identifier``, ``session_start_time``) and additional metadata.
 
-session_start_time = datetime(2018, 4, 25, 2, 30, 3, tzinfo=tz.gettz("US/Pacific"))
-
 nwbfile = NWBFile(
     session_description="my first synthetic recording",
     identifier=str(uuid4()),
     session_start_time=datetime.now(tzlocal()),
-    experimenter=["Baggins, Bilbo", ],
+    experimenter=[
+        "Baggins, Bilbo",
+    ],
     lab="Bag End Laboratory",
     institution="University of Middle Earth at the Shire",
     experiment_description="I went on an adventure to reclaim vast treasures.",
@@ -227,8 +225,8 @@ behavior_module.add(behavioral_time_series)
 # :py:class:`~pynwb.behavior.BehavioralEvents` is an interface for storing behavioral events.
 # We can use it for storing the timing and amount of rewards (e.g. water amount) or lever press times.
 
-reward_amount = [1., 1.5, 1., 1.5]
-events_timestamps = [1., 2., 5., 6.]
+reward_amount = [1.0, 1.5, 1.0, 1.5]
+events_timestamps = [1.0, 2.0, 5.0, 6.0]
 
 time_series = TimeSeries(
     name="lever_presses",

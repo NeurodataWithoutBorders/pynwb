@@ -23,23 +23,22 @@ clarity, we define them here:
 from datetime import datetime
 from uuid import uuid4
 
+import matplotlib.pyplot as plt
+import numpy as np
 from dateutil.tz import tzlocal
 
-import numpy as np
-from pynwb import NWBFile, TimeSeries, NWBHDF5IO
+from pynwb import NWBHDF5IO, NWBFile, TimeSeries
 from pynwb.image import ImageSeries
 from pynwb.ophys import (
-    TwoPhotonSeries,
-    OpticalChannel,
-    ImageSegmentation,
-    Fluorescence,
     CorrectedImageStack,
+    Fluorescence,
+    ImageSegmentation,
     MotionCorrection,
-    RoiResponseSeries,
     OnePhotonSeries,
+    OpticalChannel,
+    RoiResponseSeries,
+    TwoPhotonSeries,
 )
-
-import matplotlib.pyplot as plt
 
 ####################
 # Creating and Writing NWB files
@@ -51,7 +50,9 @@ nwbfile = NWBFile(
     session_description="my first synthetic recording",
     identifier=str(uuid4()),
     session_start_time=datetime.now(tzlocal()),
-    experimenter=["Baggins, Bilbo", ],
+    experimenter=[
+        "Baggins, Bilbo",
+    ],
     lab="Bag End Laboratory",
     institution="University of Middle Earth at the Shire",
     experiment_description="I went on an adventure to reclaim vast treasures.",
@@ -503,7 +504,7 @@ with NWBHDF5IO("ophys_tutorial.nwb", "w") as io:
 
 ####################
 # Read the NWBFile
-# ------------------------------
+# ----------------
 #
 # We can access the raw data by indexing ``nwbfile.acquisition`` with a name
 # of the :py:class:`~pynwb.ophys.TwoPhotonSeries`, e.g., ``"TwoPhotonSeries1"``.
@@ -515,7 +516,7 @@ with NWBHDF5IO("ophys_tutorial.nwb", "w") as io:
 # :py:class:`~pynwb.ophys.Fluorescence` object. The default name of
 # :py:class:`~pynwb.ophys.Fluorescence` objects is ``"Fluorescence"``.
 # Finally, we can access the :py:class:`~pynwb.ophys.RoiResponseSeries` object
-# inside of the :py:class:`~pynwb.ophys.Fluorescence` object by indexing it
+# inside the :py:class:`~pynwb.ophys.Fluorescence` object by indexing it
 # with the name of the :py:class:`~pynwb.ophys.RoiResponseSeries` object,
 # which we named ``"RoiResponseSeries"``.
 
@@ -561,7 +562,9 @@ with NWBHDF5IO("ophys_tutorial.nwb", "r") as io:
 with NWBHDF5IO("ophys_tutorial.nwb", "r") as io:
     read_nwbfile = io.read()
 
-    roi_resp_series = read_nwbfile.processing["ophys"]["Fluorescence"]["RoiResponseSeries"]
+    roi_resp_series = read_nwbfile.processing["ophys"]["Fluorescence"][
+        "RoiResponseSeries"
+    ]
 
     print("section of fluorescence responses:")
     print(roi_resp_series.data[0:10, 0:3])

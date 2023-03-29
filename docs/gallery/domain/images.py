@@ -18,22 +18,23 @@ related to the experiment. This tutorial focuses in particular on the usage of:
 The following examples will reference variables that may not be defined within the block they are used in. For
 clarity, we define them here:
 """
+# Define file paths used in the tutorial
+
+import os
+
 # sphinx_gallery_thumbnail_path = 'figures/gallery_thumbnails_image_data.png'
 from datetime import datetime
 from uuid import uuid4
 
-from dateutil import tz
-
 import numpy as np
-from PIL import Image
+from dateutil import tz
 from dateutil.tz import tzlocal
+from PIL import Image
 
-from pynwb import NWBFile, NWBHDF5IO
+from pynwb import NWBHDF5IO, NWBFile
 from pynwb.base import Images
-from pynwb.image import RGBAImage, RGBImage, GrayscaleImage, OpticalSeries, ImageSeries
+from pynwb.image import GrayscaleImage, ImageSeries, OpticalSeries, RGBAImage, RGBImage
 
-# Define file paths used in the tutorial
-import os
 nwbfile_path = os.path.abspath("images_tutorial.nwb")
 moviefiles_path = [
     os.path.abspath("image/file_1.tiff"),
@@ -54,7 +55,9 @@ nwbfile = NWBFile(
     session_description="my first synthetic recording",
     identifier=str(uuid4()),
     session_start_time=datetime.now(tzlocal()),
-    experimenter=["Baggins, Bilbo", ],
+    experimenter=[
+        "Baggins, Bilbo",
+    ],
     lab="Bag End Laboratory",
     institution="University of Middle Earth at the Shire",
     experiment_description="I went on an adventure to reclaim vast treasures.",
@@ -263,9 +266,8 @@ nwbfile.add_acquisition(images)
 
 from scipy import misc
 
-from pynwb.image import Images, IndexSeries, GrayscaleImage, RGBImage
 from pynwb.base import ImageReferences
-
+from pynwb.image import GrayscaleImage, Images, IndexSeries, RGBImage
 
 gs_face = GrayscaleImage(
     name="gs_face",
@@ -293,7 +295,7 @@ idx_series = IndexSeries(
     data=[0, 1, 0, 1],
     indexed_images=images,
     unit="N/A",
-    timestamps=[.1, .2, .3, .4],
+    timestamps=[0.1, 0.2, 0.3, 0.4],
 )
 
 ####################
