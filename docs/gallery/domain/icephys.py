@@ -160,7 +160,7 @@ vcs = VoltageClampSeries(
     gain=0.02,
     capacitance_slow=100e-12,
     resistance_comp_correction=70.0,
-    sweep_number=1.0,
+    sweep_number=1,
 )
 
 nwbfile.add_acquisition(vcs, use_sweep_table=True)
