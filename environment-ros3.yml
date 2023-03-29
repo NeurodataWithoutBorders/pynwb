@@ -4,12 +4,12 @@ channels:
   - conda-forge
   - defaults
 dependencies:
-  - python=3.9
-  - h5py==3.6.0
-  - hdmf==3.3.2
-  - matplotlib==3.5.1
-  - numpy==1.21.5
-  - pandas==1.3.5
+  - python==3.10
+  - h5py==3.8.0
+  - hdmf==3.5.1
+  - matplotlib==3.7.1
+  - numpy==1.23.3
+  - pandas==1.5.0
   - python-dateutil==2.8.2
   - setuptools
-  - dandi==0.46.3
+  - dandi==0.51.0  # NOTE: dandi does not support osx-arm64

@@ -155,16 +155,24 @@ from dateutil import tz
 session_start_time = datetime(2018, 4, 25, 2, 30, 3, tzinfo=tz.gettz("US/Pacific"))
 
 nwbfile = NWBFile(
-    session_description="my first synthetic recording",  # required
-    identifier=uuid4(),  # required
+    session_description="Mouse exploring an open field",  # required
+    identifier=str(uuid4()),  # required
     session_start_time=session_start_time,  # required
-    experimenter="Baggins, Bilbo",  # optional
+    session_id="session_1234",  # optional
+    experimenter=["Baggins, Bilbo", ],  # optional
     lab="Bag End Laboratory",  # optional
-    institution="University of Middle Earth at the Shire",  # optional
-    experiment_description="I went on an adventure with thirteen dwarves to reclaim vast treasures.",  # optional
-    session_id="LONELYMTN",  # optional
+    institution="University of My Institution",  # optional
+    experiment_description="I went on an adventure to reclaim vast treasures.",  # optional
+    related_publications="DOI:10.1016/j.neuron.2016.12.011",  # optional
 )
 print(nwbfile)
+
+####################
+# .. note::
+#
+#     See the `NWBFile Best Practices <https://nwbinspector.readthedocs.io/en/dev/best_practices/nwbfile_metadata.html#file-metadata>`_
+#     for detailed information about the arguments to
+#     :py:class:`~pynwb.file.NWBFile`
 
 ####################
 # .. _basic_subject:

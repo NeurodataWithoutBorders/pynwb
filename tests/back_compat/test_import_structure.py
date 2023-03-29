@@ -34,7 +34,6 @@ class TestImportStructure(TestCase):
             "__TYPE_MAP",
             "__builtins__",
             "__cached__",
-            "__core_ns_file_name",
             "__doc__",
             "__file__",
             "__get_resources",

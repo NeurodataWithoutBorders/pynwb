@@ -78,12 +78,9 @@ jobs:
       matrix:
         include:
           - { name: linux-gallery-python3.7-minimum    , test-tox-env: gallery-py37-minimum  , python-ver: "3.7" , os: ubuntu-latest }
-          - { name: linux-gallery-python3.8-upgraded   , test-tox-env: gallery-py38-upgraded , python-ver: "3.8" , os: ubuntu-latest }
-          # allensdk is not compatible with python 3.9+, so run gallery tests only on python <=3.8
-          # - { name: linux-gallery-python3.10-upgraded  , test-tox-env: gallery-py310-upgraded, python-ver: "3.10", os: ubuntu-latest }
+          - { name: linux-gallery-python3.10-upgraded  , test-tox-env: gallery-py310-upgraded, python-ver: "3.10", os: ubuntu-latest }
           - { name: windows-gallery-python3.7-minimum  , test-tox-env: gallery-py37-minimum  , python-ver: "3.7" , os: windows-latest }
-          - { name: windows-gallery-python3.8-upgraded , test-tox-env: gallery-py38-upgraded , python-ver: "3.8" , os: windows-latest }
-          # - { name: windows-gallery-python3.10-upgraded, test-tox-env: gallery-py310-upgraded, python-ver: "3.10", os: windows-latest }
+          - { name: windows-gallery-python3.10-upgraded, test-tox-env: gallery-py310-upgraded, python-ver: "3.10", os: windows-latest }
     steps:
       - name: Cancel non-latest runs
         uses: styfle/cancel-workflow-action@0.11.0
@@ -176,7 +173,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { name: linux-python3.9-ros3  , python-ver: "3.9", os: ubuntu-latest }
+          - { name: linux-python3.10-ros3  , python-ver: "3.10", os: ubuntu-latest }
     steps:
       - name: Cancel non-latest runs
         uses: styfle/cancel-workflow-action@0.11.0
@@ -220,7 +217,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { name: linux-gallery-python3.9-ros3  , python-ver: "3.9", os: ubuntu-latest }
+          - { name: linux-gallery-python3.10-ros3  , python-ver: "3.10", os: ubuntu-latest }
     steps:
       - name: Cancel non-latest runs
         uses: styfle/cancel-workflow-action@0.11.0

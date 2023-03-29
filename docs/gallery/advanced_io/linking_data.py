@@ -58,6 +58,8 @@ PyNWB supports linking between files using external links.
 
 # sphinx_gallery_thumbnail_path = 'figures/gallery_thumbnails_linking_data.png'
 from datetime import datetime
+from uuid import uuid4
+
 from dateutil.tz import tzlocal
 from pynwb import NWBFile
 from pynwb import TimeSeries
@@ -76,7 +78,7 @@ filename4 = "external_linkdataset_example.nwb"
 # Create the first file
 nwbfile1 = NWBFile(
     session_description="demonstrate external files",
-    identifier="NWBE1",
+    identifier=str(uuid4()),
     session_start_time=start_time,
 )
 # Create the second file
@@ -84,26 +86,29 @@ test_ts1 = TimeSeries(
     name="test_timeseries1", data=data, unit="SIunit", timestamps=timestamps
 )
 nwbfile1.add_acquisition(test_ts1)
+
 # Write the first file
-io = NWBHDF5IO(filename1, "w")
-io.write(nwbfile1)
-io.close()
+with NWBHDF5IO(filename1, "w") as io:
+    io.write(nwbfile1)
 
 # Create the second file
 nwbfile2 = NWBFile(
     session_description="demonstrate external files",
-    identifier="NWBE2",
+    identifier=str(uuid4()),
     session_start_time=start_time,
 )
 # Create the second file
 test_ts2 = TimeSeries(
-    name="test_timeseries2", data=data, unit="SIunit", timestamps=timestamps
+    name="test_timeseries2",
+    data=data,
+    unit="SIunit",
+    timestamps=timestamps,
 )
 nwbfile2.add_acquisition(test_ts2)
+
 # Write the second file
-io = NWBHDF5IO(filename2, "w")
-io.write(nwbfile2)
-io.close()
+with NWBHDF5IO(filename2, "w") as io:
+    io.write(nwbfile2)
 
 
 #####################
@@ -118,7 +123,7 @@ io.close()
 # Create the first file
 nwbfile4 = NWBFile(
     session_description="demonstrate external files",
-    identifier="NWBE4",
+    identifier=str(uuid4()),
     session_start_time=start_time,
 )
 
@@ -172,12 +177,9 @@ nwbfile4.add_acquisition(test_ts5)
 # Step 4: Write the data
 # ^^^^^^^^^^^^^^^^^^^^^^^
 #
-from pynwb import NWBHDF5IO
-
-io4 = NWBHDF5IO(filename4, "w")
-# Use link_data=True to specify default behavior to link rather than copy data
-io4.write(nwbfile4, link_data=True)
-io4.close()
+with NWBHDF5IO(filename4, "w") as io4:
+    # Use link_data=True to specify default behavior to link rather than copy data
+    io4.write(nwbfile4, link_data=True)
 io1.close()
 
 #####################
@@ -235,16 +237,15 @@ timeseries_2 = nwbfile2.get_acquisition("test_timeseries2")
 # Create a new NWBFile that links to the external timeseries
 nwbfile3 = NWBFile(
     session_description="demonstrate external files",
-    identifier="NWBE3",
+    identifier=str(uuid4()),
     session_start_time=start_time,
 )
-nwbfile3.add_acquisition(timeseries_1)  # <--------
-nwbfile3.add_acquisition(timeseries_2)  # <--------
+nwbfile3.add_acquisition(timeseries_1)             # <--------
+nwbfile3.add_acquisition(timeseries_2)             # <--------
 
 # Write our third file that includes our two timeseries as external links
-io3 = NWBHDF5IO(filename3, "w", manager=manager)
-io3.write(nwbfile3)
-io3.close()
+with NWBHDF5IO(filename3, "w", manager=manager) as io3:
+    io3.write(nwbfile3)
 io1.close()
 io2.close()
 

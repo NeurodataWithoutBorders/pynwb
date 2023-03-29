@@ -23,6 +23,8 @@ clarity, we define them here:
 from datetime import datetime
 from uuid import uuid4
 
+from dateutil.tz import tzlocal
+
 import matplotlib.pyplot as plt
 import numpy as np
 from dateutil.tz import tzlocal
@@ -36,7 +38,10 @@ from pynwb.ophys import (
     CorrectedImageStack,
     MotionCorrection,
     RoiResponseSeries,
+    OnePhotonSeries,
 )
+
+import matplotlib.pyplot as plt
 
 ####################
 # Creating and Writing NWB files
@@ -44,16 +49,15 @@ from pynwb.ophys import (
 #
 # When creating a NWB file, the first step is to create the :py:class:`~pynwb.file.NWBFile` object.
 
-
 nwbfile = NWBFile(
     session_description="my first synthetic recording",
-    identifier=uuid4(),
+    identifier=str(uuid4()),
     session_start_time=datetime.now(tzlocal()),
-    experimenter="Baggins, Bilbo",
+    experimenter=["Baggins, Bilbo", ],
     lab="Bag End Laboratory",
     institution="University of Middle Earth at the Shire",
-    experiment_description="I went on an adventure with thirteen dwarves to reclaim vast treasures.",
-    session_id="LONELYMTN",
+    experiment_description="I went on an adventure to reclaim vast treasures.",
+    session_id="LONELYMTN001",
 )
 
 ####################
@@ -78,7 +82,7 @@ nwbfile = NWBFile(
 #     :alt: imaging plane UML diagram
 #     :align: center
 #
-# Create a :py:class:`~pynwb.device.Device` named ``"Microscope"`` in the :py:class:`~pynwb.NWBFile` object. Then
+# Create a :py:class:`~pynwb.device.Device` named ``"Microscope"`` in the :py:class:`~pynwb.file.NWBFile` object. Then
 # create an  :py:class:`~pynwb.ophys.OpticalChannel` named ``"OpticalChannel"`` and an
 # :py:class:`~pynwb.ophys.ImagingPlane` named ``"ImagingPlane"``, passing in the :py:class:`~pynwb.ophys.OpticalChannel`
 # object and the :py:class:`~pynwb.device.Device` object.
@@ -108,16 +112,51 @@ imaging_plane = nwbfile.create_imaging_plane(
     origin_coords=[1.0, 2.0, 3.0],
     origin_coords_unit="meters",
 )
+####################
+# One-photon Series
+# -----------------
+# Now that we have our :py:class:`~pynwb.ophys.ImagingPlane`, we can create a
+# :py:class:`~pynwb.ophys.OnePhotonSeries` object to store raw one-photon imaging data.
+# Here, we have two options. The first option is to supply the raw image data to PyNWB,
+# using the data argument. The other option is to provide a path to the image files.
+# These two options have trade-offs, so it is worth spending time considering how you
+# want to store this data.
+
+# using internal data. this data will be stored inside the NWB file
+one_p_series1 = OnePhotonSeries(
+    name="OnePhotonSeries_internal",
+    data=np.ones((1000, 100, 100)),
+    imaging_plane=imaging_plane,
+    rate=1.0,
+    unit="normalized amplitude",
+)
+
+# using external data. only the file paths will be stored inside the NWB file
+one_p_series2 = OnePhotonSeries(
+    name="OnePhotonSeries_external",
+    dimension=[100, 100],
+    external_file=["images.tiff"],
+    imaging_plane=imaging_plane,
+    starting_frame=[0],
+    format="external",
+    starting_time=0.0,
+    rate=1.0,
+)
+
+####################
+# Since these one-photon data are raw, acquired data, we will add the
+# :py:class:`~pynwb.ophys.OnePhotonSeries` objects to the :py:class:`~pynwb.file.NWBFile`
+# as acquired data.
+
+nwbfile.add_acquisition(one_p_series1)
+nwbfile.add_acquisition(one_p_series2)
 
 ####################
 # Two-photon Series
-# ----------------------------
-#
-# Now that we have our :py:class:`~pynwb.ophys.ImagingPlane`, we can create a
-# :py:class:`~pynwb.ophys.TwoPhotonSeries` object to store our raw two-photon imaging data.
-# Here, we have two options. The first option is to supply the raw image data to PyNWB,
-# using the data argument. The other option is to provide a path to the image files.
-# These two options have trade-offs, so it is worth spending time considering how you want to store this data.
+# -----------------
+# Another option is to create a :py:class:`~pynwb.ophys.TwoPhotonSeries` object to store
+# our raw two-photon imaging data. This class behaves similarly to
+# :py:class:`~pynwb.ophys.OnePhotonSeries`.
 #
 # .. only:: html
 #
@@ -135,7 +174,7 @@ imaging_plane = nwbfile.create_imaging_plane(
 #
 
 # using internal data. this data will be stored inside the NWB file
-image_series1 = TwoPhotonSeries(
+two_p_series1 = TwoPhotonSeries(
     name="TwoPhotonSeries1",
     data=np.ones((1000, 100, 100)),
     imaging_plane=imaging_plane,
@@ -144,7 +183,7 @@ image_series1 = TwoPhotonSeries(
 )
 
 # using external data. only the file paths will be stored inside the NWB file
-image_series2 = TwoPhotonSeries(
+two_p_series2 = TwoPhotonSeries(
     name="TwoPhotonSeries2",
     dimension=[100, 100],
     external_file=["images.tiff"],
@@ -155,18 +194,12 @@ image_series2 = TwoPhotonSeries(
     rate=1.0,
 )
 
-####################
-# Since these two-photon data are raw, acquired data, we will add the
-# :py:class:`~pynwb.ophys.TwoPhotonSeries` objects to the :py:class:`~pynwb.NWBFile`
-# as acquired data.
-
-
-nwbfile.add_acquisition(image_series1)
-nwbfile.add_acquisition(image_series2)
+nwbfile.add_acquisition(two_p_series1)
+nwbfile.add_acquisition(two_p_series2)
 
 ####################
 # Motion Correction (optional)
-# ---------------------------------
+# ----------------------------
 #
 # You can also store the result of motion correction.
 # These should be stored in a :py:class:`~pynwb.ophys.MotionCorrection` object,
@@ -193,7 +226,7 @@ xy_translation = TimeSeries(
 
 corrected_image_stack = CorrectedImageStack(
     corrected=corrected,
-    original=image_series1,
+    original=one_p_series1,
     xy_translation=xy_translation,
 )
 
@@ -213,7 +246,7 @@ ophys_module.add(motion_correction)
 
 ####################
 # Plane Segmentation
-# ---------------------------------
+# ------------------
 #
 # The :py:class:`~pynwb.ophys.PlaneSegmentation` class stores the detected
 # regions of interest in the :py:class:`~pynwb.ophys.TwoPhotonSeries` data.
@@ -266,7 +299,7 @@ ps = img_seg.create_plane_segmentation(
     name="PlaneSegmentation",
     description="output from segmenting my favorite imaging plane",
     imaging_plane=imaging_plane,
-    reference_images=image_series1,  # optional
+    reference_images=one_p_series1,  # optional
 )
 
 ophys_module.add(img_seg)
@@ -281,8 +314,8 @@ ophys_module.add(img_seg)
 # You can add ROIs to the :py:class:`~pynwb.ophys.PlaneSegmentation` table using
 # an image mask or a pixel mask. An image mask is an array that is the same size
 # as a single frame of the :py:class:`~pynwb.ophys.TwoPhotonSeries` that
-# indicates the mask weight of each pixel in the image.
-# Image mask values (weights) may be boolean or continuous between 0 and 1.
+# indicates the mask weight of each pixel in the image. Image mask values (weights) may
+# be boolean or continuous between 0 and 1.
 
 
 for _ in range(30):
@@ -304,8 +337,8 @@ plt.imshow(image_mask)
 # ^^^^^^^^^^^
 #
 # Alternatively, you could define ROIs using a pixel mask, which is an array of
-# triplets (x, y, weight) that have a non-zero weight. All undefined pixels
-# are assumed to be 0.
+# triplets (x, y, weight) that have a non-zero weight. All undefined pixels are assumed
+# to be 0.
 #
 # .. note::
 #    You need to be consistent within a :py:class:`~pynwb.ophys.PlaneSegmentation` table.
@@ -315,7 +348,7 @@ ps2 = img_seg.create_plane_segmentation(
     name="PlaneSegmentation2",
     description="output from segmenting my favorite imaging plane",
     imaging_plane=imaging_plane,
-    reference_images=image_series1,  # optional
+    reference_images=one_p_series1,  # optional
 )
 
 for _ in range(30):
@@ -338,8 +371,8 @@ for _ in range(30):
 #
 # When storing the segmentation of volumetric imaging, you can use imaging masks.
 # Alternatively, you could define ROIs using a voxel mask, which is an array of
-# triplets (x, y, z, weight) that have a non-zero weight. All undefined voxels
-# are assumed to be 0.
+# triplets (x, y, z, weight) that have a non-zero weight. All undefined voxels are
+# assumed to be 0.
 #
 # .. note::
 #    You need to be consistent within a :py:class:`~pynwb.ophys.PlaneSegmentation` table.
@@ -349,8 +382,10 @@ ps3 = img_seg.create_plane_segmentation(
     name="PlaneSegmentation3",
     description="output from segmenting my favorite imaging plane",
     imaging_plane=imaging_plane,
-    reference_images=image_series1,  # optional
+    reference_images=one_p_series1,  # optional
 )
+
+from itertools import product
 
 for _ in range(30):
     # randomly generate example starting points for region
@@ -360,18 +395,16 @@ for _ in range(30):
 
     # define an example 4 x 3 x 2 voxel region of weight '0.5'
     voxel_mask = []
-    for ix in range(x, x + 4):
-        for iy in range(y, y + 3):
-            for iz in range(z, z + 2):
-                voxel_mask.append((ix, iy, iz, 0.5))
+    for ix, iy, iz in product(range(x, x + 4), range(y, y + 3), range(z, z + 2)):
+        voxel_mask.append((ix, iy, iz, 0.5))
 
     # add voxel mask to plane segmentation
     ps3.add_roi(voxel_mask=voxel_mask)
 
 
 ####################
-# We can view the :py:class:`~pynwb.ophys.PlaneSegmentation` table with pixel
-# masks in tabular form by converting it to a :py:class:`~pandas.DataFrame`.
+# We can view the :py:class:`~pynwb.ophys.PlaneSegmentation` table with pixel masks in
+# tabular form by converting it to a :py:class:`~pandas.DataFrame`.
 
 ps2.to_dataframe()
 
@@ -379,8 +412,8 @@ ps2.to_dataframe()
 # Storing Fluorescence Measurements
 # ---------------------------------
 #
-# Now that the regions of interest are stored, you can store fluorescence data for these ROIs.
-# This type of data is stored using the :py:class:`~pynwb.ophys.RoiResponseSeries`
+# Now that the regions of interest are stored, you can store fluorescence data for these
+# ROIs. This type of data is stored using the :py:class:`~pynwb.ophys.RoiResponseSeries`
 # and :py:class:`~pynwb.ophys.Fluorescence` classes.
 #
 # .. only:: html
@@ -501,7 +534,7 @@ with NWBHDF5IO("ophys_tutorial.nwb", "r") as io:
 # ------------------------------
 #
 # Data arrays are read passively from the file.
-# Calling the data attribute on a :py:class:`~pynwb.base.pynwb.TimeSeries`
+# Calling the data attribute on a :py:class:`~pynwb.base.TimeSeries`
 # such as a :py:class:`~pynwb.ophys.RoiResponseSeries` does not read the data
 # values, but presents an :py:class:`~h5py` object that can be indexed to read data.
 # You can use the ``[:]`` operator to read the entire data array into memory.
@@ -530,6 +563,7 @@ with NWBHDF5IO("ophys_tutorial.nwb", "r") as io:
 with NWBHDF5IO("ophys_tutorial.nwb", "r") as io:
     read_nwbfile = io.read()
 
-    roi_resp = read_nwbfile.processing["ophys"]["Fluorescence"]["RoiResponseSeries"]
+    roi_resp_series = read_nwbfile.processing["ophys"]["Fluorescence"]["RoiResponseSeries"]
+
     print("section of fluorescence responses:")
-    print(roi_resp.data[0:10, 0:3])
+    print(roi_resp_series.data[0:10, 0:3])
