@@ -13,6 +13,7 @@ from hdmf.backends.io import HDMFIO
 from hdmf.backends.hdf5 import HDF5IO as _HDF5IO
 from hdmf.build import BuildManager, TypeMap
 import hdmf.common
+from hdmf.common.resources import ExternalResources
 
 CORE_NAMESPACE = 'core'
 __core_ns_file_name = 'nwb.namespace.yaml'
@@ -207,10 +208,12 @@ class NWBHDF5IO(_HDF5IO):
             {'name': 'file', 'type': [h5py.File, 'S3File'], 'doc': 'a pre-existing h5py.File object', 'default': None},
             {'name': 'comm', 'type': "Intracomm", 'doc': 'the MPI communicator to use for parallel I/O',
              'default': None},
-            {'name': 'driver', 'type': str, 'doc': 'driver for h5py to use when opening HDF5 file', 'default': None})
+            {'name': 'driver', 'type': str, 'doc': 'driver for h5py to use when opening HDF5 file', 'default': None},
+            {'name': 'external_resources', 'type': ExternalResources, 'doc': 'The external resources associated with the file.', 'default': None},)
     def __init__(self, **kwargs):
-        path, mode, manager, extensions, load_namespaces, file_obj, comm, driver =\
-            popargs('path', 'mode', 'manager', 'extensions', 'load_namespaces', 'file', 'comm', 'driver', kwargs)
+        path, mode, manager, extensions, load_namespaces, file_obj, comm, driver, external_resources =\
+            popargs('path', 'mode', 'manager', 'extensions', 'load_namespaces', 'file', 'comm', 'driver', 'external_resources', kwargs)
+        self.external_resources = external_resources
         # Define the BuildManager to use
         if load_namespaces:
             if manager is not None:
@@ -240,7 +243,7 @@ class NWBHDF5IO(_HDF5IO):
                 manager = get_manager()
         # Open the file
         super().__init__(path, manager=manager, mode=mode, file=file_obj, comm=comm, driver=driver)
-
+        
     @property
     def nwb_version(self):
         """
@@ -284,7 +287,12 @@ class NWBHDF5IO(_HDF5IO):
                 raise TypeError("NWB version %s not supported. PyNWB supports NWB files version 2 and above." %
                                 str(file_version_str))
         # read the file
-        return super().read(**kwargs)
+        if self.external_resources is not None:
+            file = super().read(**kwargs)
+            file.set_er(self.external_resources)
+            return file
+        else:
+            return super().read(**kwargs)
 
     @docval({'name': 'src_io', 'type': HDMFIO,
              'doc': 'the HDMFIO object (such as NWBHDF5IO) that was used to read the data to export'},
