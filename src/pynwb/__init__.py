@@ -243,7 +243,7 @@ class NWBHDF5IO(_HDF5IO):
                 manager = get_manager()
         # Open the file
         super().__init__(path, manager=manager, mode=mode, file=file_obj, comm=comm, driver=driver)
-        
+
     @property
     def nwb_version(self):
         """
@@ -343,7 +343,7 @@ class NWBHDF5IO(_HDF5IO):
 from . import io as __io  # noqa: F401,E402
 from .core import NWBContainer, NWBData  # noqa: F401,E402
 from .base import TimeSeries, ProcessingModule  # noqa: F401,E402
-from .file import NWBFile  # noqa: F401,E402
+from .file import NWBFile # noqa: F401,E402
 
 from . import behavior  # noqa: F401,E402
 from . import device  # noqa: F401,E402

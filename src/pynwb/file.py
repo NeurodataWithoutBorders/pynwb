@@ -8,7 +8,7 @@ import numpy as np
 import pandas as pd
 
 from hdmf.common import DynamicTableRegion, DynamicTable
-from hdmf.common.resources import ExternalResourcesManager
+from hdmf.container import ExternalResourcesManager
 from hdmf.utils import docval, getargs, get_docval, popargs, popargs_to_dict, AllowPositional
 
 from . import register_class, CORE_NAMESPACE
@@ -148,6 +148,9 @@ class Subject(NWBContainer):
         for key, val in args_to_set.items():
             setattr(self, key, val)
 
+# class NWBExternalResourcesManager(ExternalResourcesManager):
+#     def __init__(self):
+#         super().__init__()
 
 @register_class('NWBFile', CORE_NAMESPACE)
 class NWBFile(MultiContainerInterface, ExternalResourcesManager):
