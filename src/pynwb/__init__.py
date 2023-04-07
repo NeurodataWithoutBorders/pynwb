@@ -289,7 +289,7 @@ class NWBHDF5IO(_HDF5IO):
         # read the file
         if self.external_resources is not None:
             file = super().read(**kwargs)
-            file.set_er(self.external_resources)
+            file.set_external_resources(self.external_resources)
             return file
         else:
             return super().read(**kwargs)
