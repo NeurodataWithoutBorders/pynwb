@@ -74,7 +74,10 @@ setup_args = {
                 'NWB '
                 'NWB:N '
                 'NeurodataWithoutBorders',
-    'zip_safe': False
+    'zip_safe': False,
+    'entry_points': {
+        'console_scripts': ['validate_nwb=pynwb.validation:validate_cli'],
+    }
 }
 
 if __name__ == '__main__':

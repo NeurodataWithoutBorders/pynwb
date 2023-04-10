@@ -1,6 +1,6 @@
 from pynwb import NWBHDF5IO
 from pynwb import validate
-from pynwb.validate import _get_cached_namespaces_to_validate
+from pynwb.validation import _get_cached_namespaces_to_validate
 from pynwb.testing import TestCase
 import urllib.request
 import h5py

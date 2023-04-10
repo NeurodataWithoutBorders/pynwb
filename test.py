@@ -153,8 +153,8 @@ def validate_nwbs():
                             print("Error: %s" % err)
 
                 def get_namespaces(nwbfile):
-                    comp = run(["python", "-m", "pynwb.validate",
-                               "--list-namespaces", "--cached-namespace", nwb],
+                    comp = run(["validate_nwb",
+                               "--list-namespaces", nwbfile],
                                stdout=PIPE, stderr=STDOUT, universal_newlines=True, timeout=30)
 
                     if comp.returncode != 0:
@@ -169,15 +169,14 @@ def validate_nwbs():
                     ERRORS += 1
 
                 cmds = []
-                cmds += [["python", "-m", "pynwb.validate", nwb]]
-                cmds += [["python", "-m", "pynwb.validate", "--cached-namespace", nwb]]
-                cmds += [["python", "-m", "pynwb.validate", "--no-cached-namespace", nwb]]
+                cmds += [["validate_nwb", nwb]]
+                cmds += [["validate_nwb", "--no-cached-namespace", nwb]]
 
                 for ns in namespaces:
                     # for some reason, this logging command is necessary to correctly printing the namespace in the
                     # next logging command
                     logging.info("Namespace found: %s" % ns)
-                    cmds += [["python", "-m", "pynwb.validate", "--cached-namespace", "--ns", ns, nwb]]
+                    cmds += [["validate_nwb", "-n", ns, nwb]]
 
                 for cmd in cmds:
                     logging.info("Validating with \"%s\"." % (" ".join(cmd[:-1])))

@@ -3,12 +3,12 @@
 Validating NWB files
 ====================
 
-Validating NWB files is handled by a command-line tool available in :py:mod:`~pynwb`.
+Validating NWB files is handled by a command-line tool available after installing ``pynwb``.
 The validator can be invoked like so:
 
 .. code-block:: bash
 
-  python -m pynwb.validate test.nwb
+  validate_nwb test.nwb
 
 If the file contains no NWB extensions, then this command will validate the file ``test.nwb`` against the
 *core* NWB specification. On success, the output will is:
@@ -29,7 +29,7 @@ within the ``test.nwb`` file.
 
 .. code-block:: bash
 
-  python -m pynwb.validate -n ndx-my-extension test.nwb
+  validate_nwb -n ndx-my-extension test.nwb
 
 To validate against the version of the **core** NWB specification that is included with the installed version of
 PyNWB, use the ``--no-cached-namespace`` flag. This can be useful in validating files against newer or older versions
@@ -37,27 +37,27 @@ of the **core** NWB specification that are installed with newer or older version
 
 .. code-block:: bash
 
-  python -m pynwb.validate --no-cached-namespace test.nwb
+  validate_nwb --no-cached-namespace test.nwb
 
-.. Last updated 8/13/2021
+.. Last updated 4/10/2023
 .. code-block:: text
 
-  $python -m pynwb.validate --help
-  usage: validate.py [-h] [-n NS] [-lns] [--cached-namespace | --no-cached-namespace] paths [paths ...]
+  $ validate_nwb --help
+  usage: validate_nwb [-h] [-l] [-n NS] [--no-cached-namespace] paths [paths ...]
 
-  Validate an NWB file
+  Validate one or more NWB files
 
   positional arguments:
-    paths                 NWB file paths
+    paths                 NWB file path(s)
 
-  optional arguments:
+  options:
     -h, --help            show this help message and exit
-    -n NS, --ns NS        the namespace to validate against
-    -lns, --list-namespaces
+    -l, --list-namespaces
                           List the available namespaces and exit.
-    --cached-namespace    Use the cached namespace (default).
+    -n NS, --ns NS        the namespace to validate against
     --no-cached-namespace
-                          Don't use the cached namespace.
+                          Use the namespace installed with PyNWB (2.6.0) instead of the cached
+                          namespace(s).
 
   If --ns is not specified, validate against all namespaces in the NWB file.
 
