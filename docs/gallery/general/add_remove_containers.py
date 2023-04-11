@@ -46,7 +46,7 @@ with NWBHDF5IO(filename, "r+") as io:
 
     # create a TimeSeries and add it to the file under the acquisition group
     data = list(range(100, 200, 10))
-    timestamps = np.arange(10, dtype=np.float)
+    timestamps = np.arange(10, dtype=float)
     test_ts = TimeSeries(
         name="test_timeseries", data=data, unit="m", timestamps=timestamps
     )
