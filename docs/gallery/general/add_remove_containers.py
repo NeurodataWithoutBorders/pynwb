@@ -46,7 +46,7 @@ with NWBHDF5IO(filename, "r+") as io:
 
     # create a TimeSeries and add it to the file under the acquisition group
     data = list(range(100, 200, 10))
-    timestamps = np.arange(10, dtype=np.float)
+    timestamps = np.arange(10, dtype=float)
     test_ts = TimeSeries(
         name="test_timeseries", data=data, unit="m", timestamps=timestamps
     )
@@ -112,7 +112,7 @@ nwbfile = NWBFile(
     session_start_time=datetime.datetime.now(datetime.timezone.utc),
 )
 data1 = list(range(100, 200, 10))
-timestamps1 = np.arange(10, dtype=np.float)
+timestamps1 = np.arange(10, dtype=float)
 test_ts1 = TimeSeries(
     name="test_timeseries1", data=data1, unit="m", timestamps=timestamps1
 )
@@ -123,7 +123,7 @@ nwbfile.create_processing_module(
     name="behavior", description="processed behavioral data"
 )
 data2 = list(range(100, 200, 10))
-timestamps2 = np.arange(10, dtype=np.float)
+timestamps2 = np.arange(10, dtype=float)
 test_ts2 = TimeSeries(
     name="test_timeseries2", data=data2, unit="m", timestamps=timestamps2
 )
@@ -141,7 +141,7 @@ with NWBHDF5IO(filename, mode="r") as read_io:
 
     # add a new TimeSeries to the behavior processing module
     data3 = list(range(100, 200, 10))
-    timestamps3 = np.arange(10, dtype=np.float)
+    timestamps3 = np.arange(10, dtype=float)
     test_ts3 = TimeSeries(
         name="test_timeseries3", data=data3, unit="m", timestamps=timestamps3
     )
