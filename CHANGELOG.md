@@ -5,6 +5,10 @@
 ### Enhancements and minor changes
 - Add testing support for Python 3.11. @rly [#1687](https://github.com/NeurodataWithoutBorders/pynwb/pull/1687)
 
+### Bug fixes
+- Remove unused, deprecated `codecov` package from dev installation requirements. @rly
+  [#1688](https://github.com/NeurodataWithoutBorders/pynwb/pull/1688)
+
 ## PyNWB 2.3.2 (April 10, 2023)
 
 ### Enhancements and minor changes
