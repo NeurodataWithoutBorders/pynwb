@@ -1,6 +1,6 @@
 # PyNWB Changelog
 
-## PyNWB 2.4.0 (Upcoming)
+## PyNWB 2.3.3 (Upcoming)
 
 ### Enhancements and minor changes
 - Add testing support for Python 3.11. @rly [#1687](https://github.com/NeurodataWithoutBorders/pynwb/pull/1687)
