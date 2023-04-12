@@ -340,7 +340,7 @@ class TestEpochsIODf(TestEpochsIO):
                                [(4, 1, tsa)]],
                 'tags': [[''], [''], ['fizz', 'buzz'], ['qaz']]
             },
-            index=pd.Index(np.arange(4), name='id')
+            index=pd.Index(np.arange(4, dtype=np.int64), name='id')
         )
         # pop the timeseries column out because ts_obt has rows of lists of tuples and ts_exp has rows of lists of lists
         ts_obt = df_obt.pop('timeseries')
@@ -367,7 +367,7 @@ class TestEpochsIODf(TestEpochsIO):
                 'stop_time': [0.25, 0.30, 0.40, 0.45],
                 'tags': [[''], [''], ['fizz', 'buzz'], ['qaz']]
             },
-            index=pd.Index(np.arange(4), name='id')
+            index=pd.Index(np.arange(4, dtype=np.int64), name='id')
         )
 
         df_obt = self.read_container.to_dataframe(exclude=set(['timeseries', 'timeseries_index']))
