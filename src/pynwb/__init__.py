@@ -209,7 +209,9 @@ class NWBHDF5IO(_HDF5IO):
             {'name': 'comm', 'type': "Intracomm", 'doc': 'the MPI communicator to use for parallel I/O',
              'default': None},
             {'name': 'driver', 'type': str, 'doc': 'driver for h5py to use when opening HDF5 file', 'default': None},
-            {'name': 'external_resources', 'type': ExternalResources, 'doc': 'The external resources associated with the file.', 'default': None},)
+            {'name': 'external_resources', 'type': str,
+             'doc': 'The path to the ExternalResources',
+             'default': None},)
     def __init__(self, **kwargs):
         path, mode, manager, extensions, load_namespaces, file_obj, comm, driver, external_resources =\
             popargs('path', 'mode', 'manager', 'extensions', 'load_namespaces', 'file', 'comm', 'driver', 'external_resources', kwargs)
@@ -289,7 +291,8 @@ class NWBHDF5IO(_HDF5IO):
         # read the file
         if self.external_resources is not None:
             file = super().read(**kwargs)
-            file.set_external_resources(self.external_resources)
+            er_read=ExternalResources.from_flat_tsv(path=self.external_resources)
+            file.link_resources(er_read)
             return file
         else:
             return super().read(**kwargs)
@@ -344,6 +347,7 @@ from . import io as __io  # noqa: F401,E402
 from .core import NWBContainer, NWBData  # noqa: F401,E402
 from .base import TimeSeries, ProcessingModule  # noqa: F401,E402
 from .file import NWBFile # noqa: F401,E402
+from .resources import ExternalResources
 
 from . import behavior  # noqa: F401,E402
 from . import device  # noqa: F401,E402
