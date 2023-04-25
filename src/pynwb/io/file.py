@@ -208,6 +208,13 @@ class NWBFileMap(ObjectMapper):
             ret = (container.related_publications,)
         return ret
 
+    # @ObjectMapper.constructor_arg("electrodes")
+    # def electrodes_carg(self, builder, manager):
+    #     electrodes_builder = builder.get("electrodes")
+    #     if electrodes_builder is None:
+    #         return None
+    #     # if electrodes_builder.attributes["neurodata_type"] == "DynamicTable"
+
 
 @register_map(Subject)
 class SubjectMap(ObjectMapper):

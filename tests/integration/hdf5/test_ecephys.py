@@ -1,10 +1,7 @@
-from hdmf.common import DynamicTableRegion
-
-from pynwb.ecephys import ElectrodeGroup, ElectricalSeries, FilteredEphys, LFP, Clustering, ClusterWaveforms,\
-                          SpikeEventSeries, EventWaveform, EventDetection, FeatureExtraction
+from pynwb.ecephys import (ElectrodeGroup, ElectricalSeries, FilteredEphys, LFP, Clustering, ClusterWaveforms,
+                          SpikeEventSeries, EventWaveform, EventDetection, FeatureExtraction)
 from pynwb.device import Device
-from pynwb.file import ElectrodeTable as get_electrode_table
-from pynwb.testing import NWBH5IOMixin, AcquisitionH5IOMixin, TestCase
+from pynwb.testing import NWBH5IOMixin, AcquisitionH5IOMixin, TestCase, NWBH5IOFlexMixin
 
 
 class TestElectrodeGroupIO(NWBH5IOMixin, TestCase):
@@ -28,30 +25,55 @@ class TestElectrodeGroupIO(NWBH5IOMixin, TestCase):
         return nwbfile.get_electrode_group(self.container.name)
 
 
-class TestElectricalSeriesIO(AcquisitionH5IOMixin, TestCase):
+class ElectricalSeriesIOMixin(NWBH5IOFlexMixin):
+    """
+    Mixin class for methods to run a roundtrip test writing an NWB file with multiple ElectricalSeries.
 
-    @staticmethod
-    def make_electrode_table(self):
-        """ Make an electrode table, electrode group, and device """
-        self.table = get_electrode_table()
-        self.dev1 = Device(name='dev1')
-        self.group = ElectrodeGroup(name='tetrode1',
-                                    description='tetrode description',
-                                    location='tetrode location',
-                                    device=self.dev1)
-        for i in range(4):
-            self.table.add_row(location='CA1', group=self.group, group_name='tetrode1')
+    The abstract method setUpContainer needs to be implemented by classes that include this mixin.
+        def setUpContainer(self):
+            # return a test Container to read/write
+    """
 
-    def setUpContainer(self):
-        """ Return the test ElectricalSeries to read/write """
-        self.make_electrode_table(self)
-        region = DynamicTableRegion(name='electrodes',
-                                    data=[0, 2],
-                                    description='the first and third electrodes',
-                                    table=self.table)
+    def addAssociatedContainers(self):
+        """Add the associated Device, ElectrodeGroup, and electrodes to the file."""
+        device = Device(name="dev1")
+        self.nwbfile.add_device(device)
+
+        electrode_group = ElectrodeGroup(
+            name='tetrode1',
+            description='tetrode description',
+            location='tetrode location',
+            device=device,
+        )
+        self.nwbfile.add_electrode_group(electrode_group)
+
+        self.nwbfile.add_electrode(location='CA1', group=electrode_group)
+        self.nwbfile.add_electrode(location='CA1', group=electrode_group)
+        self.nwbfile.add_electrode(location='CA1', group=electrode_group)
+        self.nwbfile.add_electrode(location='CA1', group=electrode_group)
+
+        self.nwbfile.create_processing_module(
+            name="ecephys",
+            description="processed ecephys data"
+        )
+
+
+class TestElectricalSeriesIO(ElectricalSeriesIOMixin, TestCase):
+
+    def getContainerType(self):
+        return "an ElectricalSeries object"
+
+    def addContainer(self):
+        """Add the test ElectricalSeries and the associated Device, ElectrodeGroup, and electrodes to the file."""
+        self.addAssociatedContainers()
+        region = self.nwbfile.create_electrode_table_region(
+            name='electrodes',
+            region=[0, 2],
+            description='the first and third electrodes',
+        )
         data = list(zip(range(10), range(10, 20)))
         timestamps = list(map(lambda x: x/10., range(10)))
-        channel_conversion = [1., 2., 3., 4.]
+        channel_conversion = [1., 2.]
         filtering = 'Low-pass filter at 300 Hz'
         es = ElectricalSeries(
             name='test_eS',
@@ -61,14 +83,10 @@ class TestElectricalSeriesIO(AcquisitionH5IOMixin, TestCase):
             filtering=filtering,
             timestamps=timestamps
         )
-        return es
+        self.nwbfile.add_acquisition(es)
 
-    def addContainer(self, nwbfile):
-        """ Add the test ElectricalSeries and related objects to the given NWBFile """
-        nwbfile.add_device(self.dev1)
-        nwbfile.add_electrode_group(self.group)
-        nwbfile.set_electrode_table(self.table)
-        nwbfile.add_acquisition(self.container)
+    def getContainer(self, nwbfile):
+        return nwbfile.acquisition["test_eS"]
 
     def test_eg_ref(self):
         """
@@ -82,58 +100,73 @@ class TestElectricalSeriesIO(AcquisitionH5IOMixin, TestCase):
         self.assertIsInstance(row2.iloc[0]['group'], ElectrodeGroup)
 
 
-class MultiElectricalSeriesIOMixin(AcquisitionH5IOMixin):
-    """
-    Mixin class for methods to run a roundtrip test writing an NWB file with multiple ElectricalSeries.
-
-    The abstract method setUpContainer needs to be implemented by classes that include this mixin.
-        def setUpContainer(self):
-            # return a test Container to read/write
-    """
+class MultiElectricalSeriesIOMixin(ElectricalSeriesIOMixin):
 
     def setUpTwoElectricalSeries(self):
         """ Return two test ElectricalSeries to read/write """
-        TestElectricalSeriesIO.make_electrode_table(self)
-        region1 = DynamicTableRegion(name='electrodes',
-                                     data=[0, 2],
-                                     description='the first and third electrodes',
-                                     table=self.table)
-        region2 = DynamicTableRegion(name='electrodes',
-                                     data=[1, 3],
-                                     description='the second and fourth electrodes',
-                                     table=self.table)
+        region1 = self.nwbfile.create_electrode_table_region(
+            name='electrodes',
+            region=[0, 2],
+            description='the first and third electrodes',
+        )
         data1 = list(zip(range(10), range(10, 20)))
-        data2 = list(zip(reversed(range(10)), reversed(range(10, 20))))
         timestamps = list(map(lambda x: x/10., range(10)))
-        es1 = ElectricalSeries(name='test_eS1', data=data1, electrodes=region1, timestamps=timestamps)
-        es2 = ElectricalSeries(name='test_eS2', data=data2, electrodes=region2, channel_conversion=[4., .4],
-                               timestamps=timestamps)
-        return es1, es2
+        channel_conversion = [1., 2.]
+        filtering = 'Low-pass filter at 300 Hz'
+        es1 = ElectricalSeries(
+            name='test_eS1',
+            data=data1,
+            electrodes=region1,
+            channel_conversion=channel_conversion,
+            filtering=filtering,
+            timestamps=timestamps
+        )
 
-    def addContainer(self, nwbfile):
-        """ Add the test ElectricalSeries and related objects to the given NWBFile """
-        nwbfile.add_device(self.dev1)
-        nwbfile.add_electrode_group(self.group)
-        nwbfile.set_electrode_table(self.table)
-        nwbfile.add_acquisition(self.container)
+        region2 = self.nwbfile.create_electrode_table_region(
+            name='electrodes',
+            region=[1, 3],
+            description='the second and fourth electrodes',
+        )
+        data2 = list(zip(reversed(range(10)), reversed(range(10, 20))))
+        es2 = ElectricalSeries(
+            name='test_eS2',
+            data=data2,
+            electrodes=region2,
+            timestamps=timestamps  # link timestamps
+        )
+        return es1, es2
 
 
 class TestLFPIO(MultiElectricalSeriesIOMixin, TestCase):
 
-    def setUpContainer(self):
+    def getContainerType(self) -> str:
+        return "an LFP object"
+
+    def addContainer(self):
         """ Return a test LFP to read/write """
-        es = self.setUpTwoElectricalSeries()
-        lfp = LFP(es)
-        return lfp
+        self.addAssociatedContainers()
+        es1, es2 = self.setUpTwoElectricalSeries()
+        lfp = LFP([es1, es2])
+        self.nwbfile.processing["ecephys"].add(lfp)
+
+    def getContainer(self, nwbfile):
+        return nwbfile.processing["ecephys"]["LFP"]
 
 
 class TestFilteredEphysIO(MultiElectricalSeriesIOMixin, TestCase):
 
-    def setUpContainer(self):
-        """ Return a test FilteredEphys to read/write """
-        es = self.setUpTwoElectricalSeries()
-        fe = FilteredEphys(es)
-        return fe
+    def getContainerType(self) -> str:
+        return "a FilteredEphys object"
+
+    def addContainer(self):
+        """ Return a test LFP to read/write """
+        self.addAssociatedContainers()
+        es1, es2 = self.setUpTwoElectricalSeries()
+        fe = FilteredEphys([es1, es2])
+        self.nwbfile.processing["ecephys"].add(fe)
+
+    def getContainer(self, nwbfile):
+        return nwbfile.processing["ecephys"]["FilteredEphys"]
 
 
 class TestClusteringIO(AcquisitionH5IOMixin, TestCase):
@@ -155,28 +188,28 @@ class TestClusteringIO(AcquisitionH5IOMixin, TestCase):
             return super().roundtripExportContainer(cache_spec)
 
 
-class EventWaveformConstructor(AcquisitionH5IOMixin, TestCase):
+class TestEventWaveform(ElectricalSeriesIOMixin, TestCase):
 
-    def setUpContainer(self):
+    def getContainerType(self) -> str:
+        return "an EventWaveform object"
+
+    def addContainer(self):
         """ Return a test EventWaveform to read/write """
-        TestElectricalSeriesIO.make_electrode_table(self)
-        region = DynamicTableRegion(name='electrodes',
-                                    data=[0, 2],
-                                    description='the first and third electrodes',
-                                    table=self.table)
-        sES = SpikeEventSeries(name='test_sES',
+        self.addAssociatedContainers()
+        region = self.nwbfile.create_electrode_table_region(
+            name='electrodes',
+            region=[0, 2],
+            description='the first and third electrodes',
+        )
+        ses = SpikeEventSeries(name='test_sES',
                                data=((1, 1), (2, 2), (3, 3)),
                                timestamps=[0., 1., 2.],
                                electrodes=region)
-        ew = EventWaveform(sES)
-        return ew
+        ew = EventWaveform(ses)
+        self.nwbfile.add_acquisition(ew)
 
-    def addContainer(self, nwbfile):
-        """ Add the test EventWaveform and related objects to the given NWBFile """
-        nwbfile.add_device(self.dev1)
-        nwbfile.add_electrode_group(self.group)
-        nwbfile.set_electrode_table(self.table)
-        nwbfile.add_acquisition(self.container)
+    def getContainer(self, nwbfile):
+        return nwbfile.acquisition["EventWaveform"]
 
 
 class ClusterWaveformsConstructor(AcquisitionH5IOMixin, TestCase):
@@ -210,51 +243,53 @@ class ClusterWaveformsConstructor(AcquisitionH5IOMixin, TestCase):
             return super().roundtripExportContainer(cache_spec)
 
 
-class FeatureExtractionConstructor(AcquisitionH5IOMixin, TestCase):
+class TestFeatureExtraction(ElectricalSeriesIOMixin, TestCase):
 
-    def setUpContainer(self):
+    def getContainerType(self) -> str:
+        return "a FeatureExtraction object"
+
+    def addContainer(self):
         """ Return a test FeatureExtraction to read/write """
+        self.addAssociatedContainers()
+        region = self.nwbfile.create_electrode_table_region(
+            name='electrodes',
+            region=[0, 2],
+            description='the first and third electrodes',
+        )
         event_times = [1.9, 3.5]
-        TestElectricalSeriesIO.make_electrode_table(self)
-        region = DynamicTableRegion(name='electrodes',
-                                    data=[0, 2],
-                                    description='the first and third electrodes',
-                                    table=self.table)
         description = ['desc1', 'desc2', 'desc3']
         features = [[[0., 1., 2.], [3., 4., 5.]], [[6., 7., 8.], [9., 10., 11.]]]
         fe = FeatureExtraction(electrodes=region, description=description, times=event_times, features=features)
-        return fe
+        self.nwbfile.add_acquisition(fe)
 
-    def addContainer(self, nwbfile):
-        """ Add the test FeatureExtraction and related objects to the given NWBFile """
-        nwbfile.add_device(self.dev1)
-        nwbfile.add_electrode_group(self.group)
-        nwbfile.set_electrode_table(self.table)
-        nwbfile.add_acquisition(self.container)
+    def getContainer(self, nwbfile):
+        return nwbfile.acquisition["FeatureExtraction"]
 
 
-class EventDetectionConstructor(AcquisitionH5IOMixin, TestCase):
+class TestEventDetection(ElectricalSeriesIOMixin, TestCase):
 
-    def setUpContainer(self):
+    def getContainerType(self) -> str:
+        return "an EventDetection object"
+
+    def addContainer(self):
         """ Return a test EventDetection to read/write """
-        TestElectricalSeriesIO.make_electrode_table(self)
-        region = DynamicTableRegion(name='electrodes',
-                                    data=[0, 2],
-                                    description='the first and third electrodes',
-                                    table=self.table)
+        self.addAssociatedContainers()
+        region = self.nwbfile.create_electrode_table_region(
+            name='electrodes',
+            region=[0, 2],
+            description='the first and third electrodes',
+        )
+
         data = list(range(10))
         ts = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
-        self.eS = ElectricalSeries(name='test_eS', data=data, electrodes=region, timestamps=ts)
-        eD = EventDetection(detection_method='detection_method',
-                            source_electricalseries=self.eS,
+        es = ElectricalSeries(name='test_eS', data=data, electrodes=region, timestamps=ts)
+        self.nwbfile.add_acquisition(es)
+
+        ed = EventDetection(detection_method='detection_method',
+                            source_electricalseries=es,
                             source_idx=(1, 2, 3),
                             times=(0.1, 0.2, 0.3))
-        return eD
+        self.nwbfile.add_acquisition(ed)
 
-    def addContainer(self, nwbfile):
-        """ Add the test EventDetection and related objects to the given NWBFile """
-        nwbfile.add_device(self.dev1)
-        nwbfile.add_electrode_group(self.group)
-        nwbfile.set_electrode_table(self.table)
-        nwbfile.add_acquisition(self.eS)
-        nwbfile.add_acquisition(self.container)
+    def getContainer(self, nwbfile):
+        return nwbfile.acquisition["EventDetection"]
