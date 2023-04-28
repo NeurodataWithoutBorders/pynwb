@@ -214,6 +214,74 @@ def _make_subject_without_age_reference():
     test_name = 'subject_no_age__reference'
     _write(test_name, nwbfile)
 
+def _make_old_electrodes_table_basic():
+    """Create a test file with the old electrodes table and only the required fields."""
+    nwbfile = NWBFile(session_description='ADDME',
+                      identifier='ADDME',
+                      session_start_time=datetime.now().astimezone())
+    device = nwbfile.create_device(name='dev1')
+    group = nwbfile.create_electrode_group(
+        name='tetrode1',
+        description='tetrode description',
+        location='tetrode location',
+        device=device,
+    )
+    nwbfile.add_electrode(location="CA1", group=group)
+    nwbfile.add_electrode(location="CA1", group=group)
+
+    test_name = 'old_electrodes_table_basic'
+    _write(test_name, nwbfile)
+
+def _make_old_electrodes_table_full():
+    """Create a test file with the old electrodes table and all fields."""
+    nwbfile = NWBFile(session_description='ADDME',
+                      identifier='ADDME',
+                      session_start_time=datetime.now().astimezone())
+    device = nwbfile.create_device(name='dev1')
+    group = nwbfile.create_electrode_group(
+        name='tetrode1',
+        description='tetrode description',
+        location='tetrode location',
+        device=device,
+    )
+    nwbfile.add_electrode_column(
+        name="verified_location",
+        description="location verified after histology"
+    )
+    nwbfile.add_electrode(
+        location="CA1",
+        group=group,
+        group_name="tetrode1",
+        x=1.0,
+        y=2.0,
+        z=3.0,
+        imp=4.0,
+        rel_x=0.1,
+        rel_y=0.2,
+        rel_z=0.3,
+        filtering='Low-pass filter at 300 Hz',
+        reference="None",
+        verified_location="CA1"
+    )
+    nwbfile.add_electrode(
+        location="CA1",
+        group=group,
+        group_name="tetrode1",
+        x=1.1,
+        y=2.1,
+        z=3.1,
+        imp=4.1,
+        rel_x=0.11,
+        rel_y=0.21,
+        rel_z=0.31,
+        filtering='Low-pass filter at 300 Hz',
+        reference="None",
+        verified_location="CA1"
+    )
+
+    test_name = 'old_electrodes_table_full'
+    _write(test_name, nwbfile)
+
 
 if __name__ == '__main__':
     # install these versions of PyNWB and run this script to generate new files
@@ -242,3 +310,9 @@ if __name__ == '__main__':
 
     if __version__ == "2.2.0":
         _make_subject_without_age_reference()
+
+    # if __version__ == "2.3.2":
+    if 1:
+        _make_old_electrodes_table_basic()
+        _make_old_electrodes_table_full()
+
