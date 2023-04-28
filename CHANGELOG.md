@@ -8,6 +8,8 @@
 ### Bug fixes
 - Remove unused, deprecated `codecov` package from dev installation requirements. @rly
   [#1688](https://github.com/NeurodataWithoutBorders/pynwb/pull/1688)
+- Remove references to discontinued `requires.io` service in documentation. @rly
+  [#1690](https://github.com/NeurodataWithoutBorders/pynwb/pull/1690)
 
 ## PyNWB 2.3.2 (April 10, 2023)
 
