@@ -2,8 +2,7 @@ Prepare for release of PyNWB [version]
 
 ### Before merging:
 - [ ] Major and minor releases: Update package versions in `requirements.txt`, `requirements-dev.txt`,
-  `requirements-doc.txt`, `requirements-min.txt`, `setup.py` as needed
-  See https://requires.io/github/NeurodataWithoutBorders/pynwb/requirements/?branch=dev
+  `requirements-doc.txt`, `requirements-min.txt`, `environment-ros3.yml`, and `setup.py` as needed.
 - [ ] Check legal file dates and information in `Legal.txt`, `license.txt`, `README.rst`, `docs/source/conf.py`,
   and any other locations as needed
 - [ ] Update `setup.py` as needed
