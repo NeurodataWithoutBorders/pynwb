@@ -1,5 +1,41 @@
 # PyNWB Changelog
 
+## PyNWB 2.3.3 (Upcoming)
+
+### Enhancements and minor changes
+- Add testing support for Python 3.11. @rly [#1687](https://github.com/NeurodataWithoutBorders/pynwb/pull/1687)
+
+### Bug fixes
+- Remove unused, deprecated `codecov` package from dev installation requirements. @rly
+  [#1688](https://github.com/NeurodataWithoutBorders/pynwb/pull/1688)
+- Remove references to discontinued `requires.io` service in documentation. @rly
+  [#1690](https://github.com/NeurodataWithoutBorders/pynwb/pull/1690)
+
+## PyNWB 2.3.2 (April 10, 2023)
+
+### Enhancements and minor changes
+- Fixed typos and added codespell GitHub action to check spelling in the future. @yarikoptic [#1648](https://github.com/NeurodataWithoutBorders/pynwb/pull/1648)
+
+### Documentation and tutorial enhancements
+- Added `OnePhotonSeries` to [calcium imaging tutorial](https://pynwb.readthedocs.io/en/stable/tutorials/domain/ophys.html#sphx-glr-tutorials-domain-ophys-py). @bendichter [#1658](https://github.com/NeurodataWithoutBorders/pynwb/pull/1658)
+- Add tutorial for optogenetics. @bendichter [#1657](https://github.com/NeurodataWithoutBorders/pynwb/pull/1657)
+- Update testing of gallery examples and disable testing of the allensdk tutorial.
+  [#1680](https://github.com/NeurodataWithoutBorders/pynwb/pull/1680)
+- Updated tutorials to follow best practices. @bendichter [#1656](https://github.com/NeurodataWithoutBorders/pynwb/pull/1656)
+
+### Bug fixes
+- Fixed bug when initializing ``OnePhotonSeries`` with no value for ``binning``. @bendichter [#1660](https://github.com/NeurodataWithoutBorders/pynwb/pull/1660)
+- Fixed bug in ``NWBHDF5IO.nwb_version`` property to support files written by third-party software with a fixed-length ``nwb_version`` attribute. @oruebel [#1669](https://github.com/NeurodataWithoutBorders/pynwb/pull/1669)
+- Fixed search bar and missing jquery in ReadTheDocs documentation. @rly [#1671](https://github.com/NeurodataWithoutBorders/pynwb/pull/1671)
+- Requires [HDMF 3.5.4](https://github.com/hdmf-dev/hdmf/releases/tag/3.5.4) which includes bug fixes. @rly [#1672](https://github.com/NeurodataWithoutBorders/pynwb/pull/1672)
+- Fixed issue with deprecated pkg_resources. @rly [#1678](https://github.com/NeurodataWithoutBorders/pynwb/pull/1678)
+
+## PyNWB 2.3.1 (February 24, 2023)
+
+### Bug fixes
+- Fixed an issue where  NWB files with version "2.0b" could not be read.
+  @rly [#1651](https://github.com/NeurodataWithoutBorders/pynwb/pull/1651)
+
 ## PyNWB 2.3.0 (February 23, 2023)
 
 ### Enhancements and minor changes

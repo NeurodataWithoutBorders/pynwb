@@ -18,7 +18,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.10'
+          python-version: '3.11'
 
       - name: Install build dependencies
         run: |
@@ -28,11 +28,11 @@ jobs:
 
       - name: Run tox tests
         run: |
-          tox -e py310-upgraded
+          tox -e py311-upgraded
 
       - name: Build wheel and source distribution
         run: |
-          tox -e build-py310-upgraded
+          tox -e build-py311-upgraded
           ls -1 dist
 
       - name: Test installation from a wheel

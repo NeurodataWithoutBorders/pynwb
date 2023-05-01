@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-'''
+"""
 .. _icephys_tutorial:
 
 Intracellular Electrophysiology Data using SweepTable
@@ -13,7 +13,7 @@ SweepTable to manage recordings.
     intracellular electrophysiology metadata tables to allow for a more complete description of
     intracellular electrophysiology experiments. See the :doc:`Intracellular electrophysiology  <plot_icephys>`
     tutorial for details.
-'''
+"""
 
 #######################
 # Creating and Writing NWB files
@@ -24,16 +24,25 @@ SweepTable to manage recordings.
 
 # sphinx_gallery_thumbnail_path = 'figures/gallery_thumbnails_icephys_sweeptable.png'
 from datetime import datetime
-from dateutil.tz import tzlocal
-from pynwb import NWBFile
-import numpy as np
+from uuid import uuid4
 
-nwbfile = NWBFile('my first synthetic recording', 'EXAMPLE_ID', datetime.now(tzlocal()),
-                  experimenter='Dr. Bilbo Baggins',
-                  lab='Bag End Laboratory',
-                  institution='University of Middle Earth at the Shire',
-                  experiment_description='I went on an adventure with thirteen dwarves to reclaim vast treasures.',
-                  session_id='LONELYMTN')
+import numpy as np
+from dateutil.tz import tzlocal
+
+from pynwb import NWBFile
+
+nwbfile = NWBFile(
+    session_description="my first synthetic recording",
+    identifier=str(uuid4()),
+    session_start_time=datetime.now(tzlocal()),
+    experimenter=[
+        "Baggins, Bilbo",
+    ],
+    lab="Bag End Laboratory",
+    institution="University of Middle Earth at the Shire",
+    experiment_description="I went on an adventure to reclaim vast treasures.",
+    session_id="LONELYMTN001",
+)
 
 #######################
 # Device metadata
@@ -43,7 +52,7 @@ nwbfile = NWBFile('my first synthetic recording', 'EXAMPLE_ID', datetime.now(tzl
 # To create a device, you can use the :py:class:`~pynwb.device.Device` instance method
 # :py:meth:`~pynwb.file.NWBFile.create_device`.
 
-device = nwbfile.create_device(name='Heka ITC-1600')
+device = nwbfile.create_device(name="Heka ITC-1600")
 
 #######################
 # Electrode metadata
@@ -53,9 +62,9 @@ device = nwbfile.create_device(name='Heka ITC-1600')
 # To create an electrode group, you can use the :py:class:`~pynwb.file.NWBFile` instance method
 # :py:meth:`~pynwb.file.NWBFile.create_icephys_electrode`.
 
-elec = nwbfile.create_icephys_electrode(name="elec0",
-                                        description='a mock intracellular electrode',
-                                        device=device)
+elec = nwbfile.create_icephys_electrode(
+    name="elec0", description="a mock intracellular electrode", device=device
+)
 
 #######################
 # Stimulus data
@@ -81,7 +90,14 @@ elec = nwbfile.create_icephys_electrode(name="elec0",
 from pynwb.icephys import CurrentClampStimulusSeries
 
 ccss = CurrentClampStimulusSeries(
-    name="ccss", data=[1, 2, 3, 4, 5], starting_time=123.6, rate=10e3, electrode=elec, gain=0.02, sweep_number=0)
+    name="ccss",
+    data=[1, 2, 3, 4, 5],
+    starting_time=123.6,
+    rate=10e3,
+    electrode=elec,
+    gain=0.02,
+    sweep_number=0,
+)
 
 nwbfile.add_stimulus(ccss, use_sweep_table=True)
 
@@ -92,7 +108,14 @@ nwbfile.add_stimulus(ccss, use_sweep_table=True)
 from pynwb.icephys import VoltageClampStimulusSeries
 
 vcss = VoltageClampStimulusSeries(
-    name="vcss", data=[2, 3, 4, 5, 6], starting_time=234.5, rate=10e3, electrode=elec, gain=0.03, sweep_number=1)
+    name="vcss",
+    data=[2, 3, 4, 5, 6],
+    starting_time=234.5,
+    rate=10e3,
+    electrode=elec,
+    gain=0.03,
+    sweep_number=1,
+)
 
 nwbfile.add_stimulus(vcss, use_sweep_table=True)
 
@@ -104,10 +127,19 @@ nwbfile.add_stimulus(vcss, use_sweep_table=True)
 from pynwb.icephys import CurrentClampSeries
 
 ccs = CurrentClampSeries(
-    name="ccs", data=[0.1, 0.2, 0.3, 0.4, 0.5],
-    conversion=1e-12, resolution=np.nan, starting_time=123.6, rate=20e3,
-    electrode=elec, gain=0.02, bias_current=1e-12, bridge_balance=70e6,
-    capacitance_compensation=1e-12, sweep_number=0)
+    name="ccs",
+    data=[0.1, 0.2, 0.3, 0.4, 0.5],
+    conversion=1e-12,
+    resolution=np.nan,
+    starting_time=123.6,
+    rate=20e3,
+    electrode=elec,
+    gain=0.02,
+    bias_current=1e-12,
+    bridge_balance=70e6,
+    capacitance_compensation=1e-12,
+    sweep_number=0,
+)
 
 nwbfile.add_acquisition(ccs, use_sweep_table=True)
 
@@ -118,10 +150,18 @@ nwbfile.add_acquisition(ccs, use_sweep_table=True)
 from pynwb.icephys import VoltageClampSeries
 
 vcs = VoltageClampSeries(
-    name="vcs", data=[0.1, 0.2, 0.3, 0.4, 0.5],
-    conversion=1e-12, resolution=np.nan, starting_time=234.5, rate=20e3,
-    electrode=elec, gain=0.02, capacitance_slow=100e-12, resistance_comp_correction=70.0,
-    sweep_number=1)
+    name="vcs",
+    data=[0.1, 0.2, 0.3, 0.4, 0.5],
+    conversion=1e-12,
+    resolution=np.nan,
+    starting_time=234.5,
+    rate=20e3,
+    electrode=elec,
+    gain=0.02,
+    capacitance_slow=100e-12,
+    resistance_comp_correction=70.0,
+    sweep_number=1,
+)
 
 nwbfile.add_acquisition(vcs, use_sweep_table=True)
 
@@ -133,7 +173,7 @@ nwbfile.add_acquisition(vcs, use_sweep_table=True)
 
 from pynwb import NWBHDF5IO
 
-with NWBHDF5IO('icephys_example.nwb', 'w') as io:
+with NWBHDF5IO("icephys_example.nwb", "w") as io:
     io.write(nwbfile)
 
 ####################
@@ -147,7 +187,7 @@ with NWBHDF5IO('icephys_example.nwb', 'w') as io:
 #
 # Now that you have written some intracellular electrophysiology data, you can read it back in.
 
-io = NWBHDF5IO('icephys_example.nwb', 'r')
+io = NWBHDF5IO("icephys_example.nwb", "r")
 nwbfile = io.read()
 
 ####################
@@ -157,17 +197,17 @@ nwbfile = io.read()
 #
 # First, get the :py:class:`~pynwb.icephys.CurrentClampStimulusSeries` we added as stimulus data.
 
-ccss = nwbfile.get_stimulus('ccss')
+ccss = nwbfile.get_stimulus("ccss")
 
 ####################
 # Grabbing acquisition data can be done via :py:meth:`~pynwb.file.NWBFile.get_acquisition`
 
-vcs = nwbfile.get_acquisition('vcs')
+vcs = nwbfile.get_acquisition("vcs")
 
 ####################
 # We can also get back the electrode we added.
 
-elec = nwbfile.get_icephys_electrode('elec0')
+elec = nwbfile.get_icephys_electrode("elec0")
 
 ####################
 # Alternatively, we can also get this electrode from the :py:class:`~pynwb.icephys.CurrentClampStimulusSeries`
@@ -178,7 +218,7 @@ elec = ccss.electrode
 ####################
 # And the device name via :py:meth:`~pynwb.file.NWBFile.get_device`
 
-device = nwbfile.get_device('Heka ITC-1600')
+device = nwbfile.get_device("Heka ITC-1600")
 
 ####################
 # If you have data from multiple electrodes and multiple sweeps, it can be

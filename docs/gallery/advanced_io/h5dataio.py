@@ -1,11 +1,11 @@
-'''
+"""
 Defining HDF5 Dataset I/O Settings (chunking, compression, etc.)
 ================================================================
 
 The HDF5 storage backend supports a broad range of advanced dataset I/O options, such as,
 chunking and compression. Here we demonstrate how to use these features
 from PyNWB.
-'''
+"""
 
 ####################
 # Wrapping data arrays with :py:class:`~hdmf.backends.hdf5.h5_utils.H5DataIO`
@@ -19,30 +19,33 @@ from PyNWB.
 #
 
 from datetime import datetime
+
 from dateutil.tz import tzlocal
+
 from pynwb import NWBFile
 
 start_time = datetime(2017, 4, 3, 11, tzinfo=tzlocal())
-create_date = datetime(2017, 4, 15, 12, tzinfo=tzlocal())
 
-nwbfile = NWBFile(session_description='demonstrate advanced HDF5 I/O features',
-                  identifier='NWB123',
-                  session_start_time=start_time,
-                  file_create_date=create_date)
+nwbfile = NWBFile(
+    session_description="demonstrate advanced HDF5 I/O features",
+    identifier="NWB123",
+    session_start_time=start_time,
+)
 
 
 ####################
 # Normally if we create a :py:class:`~pynwb.file.TimeSeries` we would do
 
-from pynwb import TimeSeries
 import numpy as np
+
+from pynwb import TimeSeries
 
 data = np.arange(100, 200, 10)
 timestamps = np.arange(10)
 test_ts = TimeSeries(
-    name='test_regular_timeseries',
+    name="test_regular_timeseries",
     data=data,
-    unit='SIunit',
+    unit="SIunit",
     timestamps=timestamps,
 )
 nwbfile.add_acquisition(test_ts)
@@ -52,10 +55,11 @@ nwbfile.add_acquisition(test_ts)
 # :py:class:`~hdmf.backends.hdf5.h5_utils.H5DataIO`. Everything else remains the same
 
 from hdmf.backends.hdf5.h5_utils import H5DataIO
+
 test_ts = TimeSeries(
-    name='test_compressed_timeseries',
-    data=H5DataIO(data=data, compression=True),   # <----
-    unit='SIunit',
+    name="test_compressed_timeseries",
+    data=H5DataIO(data=data, compression=True),  # <----
+    unit="SIunit",
     timestamps=timestamps,
 )
 nwbfile.add_acquisition(test_ts)
@@ -91,13 +95,13 @@ nwbfile.add_acquisition(test_ts)
 data = np.arange(10000).reshape((1000, 10))
 wrapped_data = H5DataIO(
     data=data,
-    chunks=True,          # <---- Enable chunking
-    maxshape=(None, 10),  # <---- Make the time dimension unlimited and hence resizeable
+    chunks=True,  # <---- Enable chunking
+    maxshape=(None, 10),  # <---- Make the time dimension unlimited and hence resizable
 )
 test_ts = TimeSeries(
-    name='test_chunked_timeseries',
-    data=wrapped_data,    # <----
-    unit='SIunit',
+    name="test_chunked_timeseries",
+    data=wrapped_data,  # <----
+    unit="SIunit",
     starting_time=0.0,
     rate=10.0,
 )
@@ -122,7 +126,7 @@ nwbfile.add_acquisition(test_ts)
 
 ####################
 # Compression and Other I/O Filters
-# -----------------------------------
+# ---------------------------------
 #
 # HDF5 supports I/O filters, i.e, data transformation (e.g, compression) that are applied transparently on
 # read/write operations.  I/O filters operate on a per-chunk basis in HDF5 and as such require the use of chunking.
@@ -133,13 +137,13 @@ nwbfile.add_acquisition(test_ts)
 
 wrapped_data = H5DataIO(
     data=data,
-    compression='gzip',              # <---- Use GZip
-    compression_opts=4,              # <---- Optional GZip aggression option
+    compression="gzip",  # <---- Use GZip
+    compression_opts=4,  # <---- Optional GZip aggression option
 )
 test_ts = TimeSeries(
-    name='test_gzipped_timeseries',
-    data=wrapped_data,                # <----
-    unit='SIunit',
+    name="test_gzipped_timeseries",
+    data=wrapped_data,  # <----
+    unit="SIunit",
     starting_time=0.0,
     rate=10.0,
 )
@@ -160,7 +164,7 @@ nwbfile.add_acquisition(test_ts)
 
 from pynwb import NWBHDF5IO
 
-with NWBHDF5IO('advanced_io_example.nwb', 'w') as io:
+with NWBHDF5IO("advanced_io_example.nwb", "w") as io:
     io.write(nwbfile)
 
 ####################
@@ -170,17 +174,17 @@ with NWBHDF5IO('advanced_io_example.nwb', 'w') as io:
 #
 # Nothing has changed for read. All the above advanced I/O features are handled transparently.
 
-io = NWBHDF5IO('advanced_io_example.nwb', 'r')
+io = NWBHDF5IO("advanced_io_example.nwb", "r")
 nwbfile = io.read()
 
 ####################
 # Now lets have a look to confirm that all our I/O settings where indeed used.
 
 for k, v in nwbfile.acquisition.items():
-    print("name=%s, chunks=%s, compression=%s, maxshape=%s" % (k,
-                                                               v.data.chunks,
-                                                               v.data.compression,
-                                                               v.data.maxshape))
+    print(
+        "name=%s, chunks=%s, compression=%s, maxshape=%s"
+        % (k, v.data.chunks, v.data.compression, v.data.maxshape)
+    )
 io.close()
 ####################
 #
@@ -228,8 +232,8 @@ io.close()
 # This command automatically installs the filters. Here is an example of how you would use the Z Standard algorithm:
 
 import hdf5plugin
-
 from hdmf.backends.hdf5.h5_utils import H5DataIO
+
 from pynwb.file import TimeSeries
 
 wrapped_data = H5DataIO(
@@ -239,9 +243,9 @@ wrapped_data = H5DataIO(
 )
 
 test_ts = TimeSeries(
-    name='test_gzipped_timeseries',
+    name="test_gzipped_timeseries",
     data=wrapped_data,
-    unit='SIunit',
+    unit="SIunit",
     starting_time=0.0,
     rate=10.0,
 )
@@ -262,7 +266,7 @@ test_ts = TimeSeries(
 
 ####################
 # Disclaimer
-# ----------------
+# ----------
 #
 # External links included in the tutorial are being provided as a convenience and for informational purposes only;
 # they do not constitute an endorsement or an approval by the authors of any of the products, services or opinions of

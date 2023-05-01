@@ -136,7 +136,7 @@ class TestSweepTableRoundTripEasy(NWBH5IOMixin, TestCase):
         with warnings.catch_warnings(record=True) as w:
             warnings.simplefilter('ignore', DeprecationWarning)
             sweeptable = SweepTable(name='sweep_table')
-            # Reissue any other warnings that may have occured
+            # Reissue any other warnings that may have occurred
             for i in w:
                 warnings.warn(i.message, i.category)
         return sweeptable
@@ -207,7 +207,7 @@ class TestSweepTableRoundTripComplicated(NWBH5IOMixin, TestCase):
         with warnings.catch_warnings(record=True) as w:
             warnings.simplefilter('ignore', DeprecationWarning)
             sweeptable = SweepTable(name='sweep_table')
-            # Reissue any other warnings that may have occured
+            # Reissue any other warnings that may have occurred
             for i in w:
                 warnings.warn(i.message, i.category)
         return sweeptable

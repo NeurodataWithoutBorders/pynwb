@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-'''
+"""
 .. _icephys_tutorial_new:
 
 Intracellular Electrophysiology
@@ -72,7 +72,7 @@ related tables.
           we may only exclude tables from the top of the hierarchy. This means, for example,
           a file containing a :py:class:`~pynwb.icephys.SimultaneousRecordingsTable` then
           must also always contain a corresponding :py:class:`~pynwb.icephys.IntracellularRecordingsTable`.
-'''
+"""
 
 #####################################################################
 # Imports used in the tutorial
@@ -81,21 +81,25 @@ related tables.
 # sphinx_gallery_thumbnail_path = 'figures/gallery_thumbnails_icephys.png'
 # Standard Python imports
 from datetime import datetime
-from dateutil.tz import tzlocal
+from uuid import uuid4
+
 import numpy as np
 import pandas
+from dateutil.tz import tzlocal
+
 # Set pandas rendering option to avoid very wide tables in the html docs
 pandas.set_option("display.max_colwidth", 30)
 pandas.set_option("display.max_rows", 10)
 
-# Import main NWB file class
-from pynwb import NWBFile
-# Import icephys TimeSeries types used
-from pynwb.icephys import VoltageClampStimulusSeries, VoltageClampSeries
 # Import I/O class used for reading and writing NWB files
-from pynwb import NWBHDF5IO
+# Import main NWB file class
+from pynwb import NWBHDF5IO, NWBFile
+
 # Import additional core datatypes used in the example
 from pynwb.core import DynamicTable, VectorData
+
+# Import icephys TimeSeries types used
+from pynwb.icephys import VoltageClampSeries, VoltageClampStimulusSeries
 
 #####################################################################
 # A brief example
@@ -112,19 +116,23 @@ from pynwb.core import DynamicTable, VectorData
 
 # Create an ICEphysFile
 ex_nwbfile = NWBFile(
-    session_description='my first recording',
-    identifier='EXAMPLE_ID',
-    session_start_time=datetime.now(tzlocal())
+    session_description="my first synthetic recording",
+    identifier=str(uuid4()),
+    session_start_time=datetime.now(tzlocal()),
+    experimenter="Baggins, Bilbo",
+    lab="Bag End Laboratory",
+    institution="University of Middle Earth at the Shire",
+    experiment_description="I went on an adventure with thirteen dwarves "
+    "to reclaim vast treasures.",
+    session_id="LONELYMTN",
 )
 
 # Add a device
-ex_device = ex_nwbfile.create_device(name='Heka ITC-1600')
+ex_device = ex_nwbfile.create_device(name="Heka ITC-1600")
 
 # Add an intracellular electrode
 ex_electrode = ex_nwbfile.create_icephys_electrode(
-    name="elec0",
-    description='a mock intracellular electrode',
-    device=ex_device
+    name="elec0", description="a mock intracellular electrode", device=ex_device
 )
 
 # Create an ic-ephys stimulus
@@ -134,12 +142,12 @@ ex_stimulus = VoltageClampStimulusSeries(
     starting_time=123.6,
     rate=10e3,
     electrode=ex_electrode,
-    gain=0.02
+    gain=0.02,
 )
 
 # Create an ic-response
 ex_response = VoltageClampSeries(
-    name='response',
+    name="response",
     data=[0.1, 0.2, 0.3, 0.4, 0.5],
     conversion=1e-12,
     resolution=np.nan,
@@ -148,7 +156,7 @@ ex_response = VoltageClampSeries(
     electrode=ex_electrode,
     gain=0.02,
     capacitance_slow=100e-12,
-    resistance_comp_correction=70.0
+    resistance_comp_correction=70.0,
 )
 
 # (A) Add an intracellular recording to the file
@@ -157,42 +165,63 @@ ex_response = VoltageClampSeries(
 #     NOTE: It is allowed to add a recording with just a stimulus or a response
 #     NOTE: We can  add custom columns to any of our tables in steps (A)-(E)
 ex_ir_index = ex_nwbfile.add_intracellular_recording(
-    electrode=ex_electrode,
-    stimulus=ex_stimulus,
-    response=ex_response
+    electrode=ex_electrode, stimulus=ex_stimulus, response=ex_response
 )
 
 # (B) Add a list of sweeps to the simultaneous recordings table
-ex_sweep_index = ex_nwbfile.add_icephys_simultaneous_recording(recordings=[ex_ir_index, ])
+ex_sweep_index = ex_nwbfile.add_icephys_simultaneous_recording(
+    recordings=[
+        ex_ir_index,
+    ]
+)
 
 # (C) Add a list of simultaneous recordings table indices as a sequential recording
 ex_sequence_index = ex_nwbfile.add_icephys_sequential_recording(
-    simultaneous_recordings=[ex_sweep_index, ],
-    stimulus_type='square'
+    simultaneous_recordings=[
+        ex_sweep_index,
+    ],
+    stimulus_type="square",
 )
 
 # (D) Add a list of sequential recordings table indices as a repetition
-run_index = ex_nwbfile.add_icephys_repetition(sequential_recordings=[ex_sequence_index, ])
+run_index = ex_nwbfile.add_icephys_repetition(
+    sequential_recordings=[
+        ex_sequence_index,
+    ]
+)
 
 # (E) Add a list of repetition table indices as a experimental condition
-ex_nwbfile.add_icephys_experimental_condition(repetitions=[run_index, ])
+ex_nwbfile.add_icephys_experimental_condition(
+    repetitions=[
+        run_index,
+    ]
+)
 
 # Write our test file
 ex_testpath = "ex_test_icephys_file.nwb"
-with NWBHDF5IO(ex_testpath, 'w') as io:
+with NWBHDF5IO(ex_testpath, "w") as io:
     io.write(ex_nwbfile)
 
 # Read the data back in
-with NWBHDF5IO(ex_testpath, 'r') as io:
+with NWBHDF5IO(ex_testpath, "r") as io:
     infile = io.read()
 
 # Optionally plot the organization of our example NWB file
 try:
-    from hdmf_docutils.doctools.render import NXGraphHierarchyDescription, HierarchyDescription
     import matplotlib.pyplot as plt
+    from hdmf_docutils.doctools.render import (
+        HierarchyDescription,
+        NXGraphHierarchyDescription,
+    )
+
     ex_file_hierarchy = HierarchyDescription.from_hdf5(ex_testpath)
     ex_file_graph = NXGraphHierarchyDescription(ex_file_hierarchy)
-    ex_fig = ex_file_graph.draw(show_plot=False, figsize=(12, 16), label_offset=(0.0, 0.0065), label_font_size=10)
+    ex_fig = ex_file_graph.draw(
+        show_plot=False,
+        figsize=(12, 16),
+        label_offset=(0.0, 0.0065),
+        label_font_size=10,
+    )
     plt.show()
 except ImportError:  # ignore in case hdmf_docutils is not installed
     pass
@@ -211,14 +240,16 @@ except ImportError:  # ignore in case hdmf_docutils is not installed
 
 # Create the file
 nwbfile = NWBFile(
-    session_description='my first synthetic recording',
-    identifier='EXAMPLE_ID',
+    session_description="my first synthetic recording",
+    identifier=str(uuid4()),
     session_start_time=datetime.now(tzlocal()),
-    experimenter='Dr. Bilbo Baggins',
-    lab='Bag End Laboratory',
-    institution='University of Middle Earth at the Shire',
-    experiment_description='I went on an adventure with thirteen dwarves to reclaim vast treasures.',
-    session_id='LONELYMTN'
+    experimenter=[
+        "Baggins, Bilbo",
+    ],
+    lab="Bag End Laboratory",
+    institution="University of Middle Earth at the Shire",
+    experiment_description="I went on an adventure to reclaim vast treasures.",
+    session_id="LONELYMTN001",
 )
 
 #####################################################################
@@ -229,7 +260,7 @@ nwbfile = NWBFile(
 # To create a device, you can use the :py:class:`~pynwb.file.NWBFile` instance method
 # :py:meth:`~pynwb.file.NWBFile.create_device`.
 
-device = nwbfile.create_device(name='Heka ITC-1600')
+device = nwbfile.create_device(name="Heka ITC-1600")
 
 #####################################################################
 # Electrode metadata
@@ -240,9 +271,7 @@ device = nwbfile.create_device(name='Heka ITC-1600')
 # :py:meth:`~pynwb.file.NWBFile.create_icephys_electrode`.
 
 electrode = nwbfile.create_icephys_electrode(
-    name="elec0",
-    description='a mock intracellular electrode',
-    device=device
+    name="elec0", description="a mock intracellular electrode", device=device
 )
 
 #####################################################################
@@ -275,12 +304,12 @@ stimulus = VoltageClampStimulusSeries(
     rate=10e3,
     electrode=electrode,
     gain=0.02,
-    sweep_number=np.uint64(15)
+    sweep_number=np.uint64(15),
 )
 
 # Create and icephys response
 response = VoltageClampSeries(
-    name='vcs',
+    name="vcs",
     data=[0.1, 0.2, 0.3, 0.4, 0.5],
     conversion=1e-12,
     resolution=np.nan,
@@ -290,7 +319,7 @@ response = VoltageClampSeries(
     gain=0.02,
     capacitance_slow=100e-12,
     resistance_comp_correction=70.0,
-    sweep_number=np.uint64(15)
+    sweep_number=np.uint64(15),
 )
 
 #####################################################################
@@ -315,10 +344,7 @@ response = VoltageClampSeries(
 # newly created row. The ``rowindex`` is used in subsequent tables that reference rows in our table.
 
 rowindex = nwbfile.add_intracellular_recording(
-    electrode=electrode,
-    stimulus=stimulus,
-    response=response,
-    id=10
+    electrode=electrode, stimulus=stimulus, response=response, id=10
 )
 
 #####################################################################
@@ -350,7 +376,7 @@ rowindex2 = nwbfile.add_intracellular_recording(
     response=response,
     response_start_index=2,
     response_index_count=3,
-    id=11
+    id=11,
 )
 
 #####################################################################
@@ -363,9 +389,7 @@ rowindex2 = nwbfile.add_intracellular_recording(
 #           ``numpy.ma.masked_array`` or as a ``np.ma.core.MaskedConstant``.
 
 rowindex3 = nwbfile.add_intracellular_recording(
-    electrode=electrode,
-    response=response,
-    id=12
+    electrode=electrode, response=response, id=12
 )
 
 #####################################################################
@@ -380,9 +404,9 @@ rowindex3 = nwbfile.add_intracellular_recording(
 # We can add a column to the main intracellular recordings table as follows.
 
 nwbfile.intracellular_recordings.add_column(
-    name='recording_tag',
-    data=['A1', 'A2', 'A3'],
-    description='String with a recording tag'
+    name="recording_tag",
+    data=["A1", "A2", "A3"],
+    description="String with a recording tag",
 )
 
 #####################################################################
@@ -397,16 +421,20 @@ nwbfile.intracellular_recordings.add_column(
 
 # Create a new DynamicTable for our category that contains a location column of type VectorData
 location_column = VectorData(
-    name='location',
-    data=['Mordor', 'Gondor', 'Rohan'],
-    description='Recording location in Middle Earth'
+    name="location",
+    data=["Mordor", "Gondor", "Rohan"],
+    description="Recording location in Middle Earth",
 )
 
 lab_category = DynamicTable(
-    name='recording_lab_data',
-    description='category table for lab-specific recording metadata',
-    colnames=['location', ],
-    columns=[location_column, ]
+    name="recording_lab_data",
+    description="category table for lab-specific recording metadata",
+    colnames=[
+        "location",
+    ],
+    columns=[
+        location_column,
+    ],
 )
 # Add the table as a new category to our intracellular_recordings
 nwbfile.intracellular_recordings.add_category(category=lab_category)
@@ -423,10 +451,10 @@ nwbfile.intracellular_recordings.add_category(category=lab_category)
 # All we need to do is indicate the name of the category we want to add the column to.
 
 nwbfile.intracellular_recordings.add_column(
-    name='voltage_threshold',
+    name="voltage_threshold",
     data=[0.1, 0.12, 0.13],
-    description='Just an example column on the electrodes category table',
-    category='electrodes'
+    description="Just an example column on the electrodes category table",
+    category="electrodes",
 )
 
 #####################################################################
@@ -456,13 +484,13 @@ print(nwbfile.icephys_simultaneous_recordings)
 
 icephys_simultaneous_recordings = nwbfile.get_icephys_simultaneous_recordings()
 icephys_simultaneous_recordings.add_column(
-    name='simultaneous_recording_tag',
-    description='A custom tag for simultaneous_recordings'
+    name="simultaneous_recording_tag",
+    description="A custom tag for simultaneous_recordings",
 )
 print(icephys_simultaneous_recordings.colnames)
 
 #####################################################################
-# As we can see, we now have succesfully created a new custom column.
+# As we can see, we now have successfully created a new custom column.
 #
 # .. note:: The same process applies to all our other tables as well. We can use the
 #         corresponding :py:meth:`~pynwb.file.NWBFile.get_intracellular_recordings`,
@@ -491,18 +519,18 @@ print(icephys_simultaneous_recordings.colnames)
 rowindex = nwbfile.add_icephys_simultaneous_recording(
     recordings=[rowindex, rowindex2, rowindex3],
     id=12,
-    simultaneous_recording_tag='LabTag1'
+    simultaneous_recording_tag="LabTag1",
 )
 
 #####################################################################
 # .. note:: The ``recordings`` argument is the list of indices of the rows in the
 #           :py:class:`~pynwb.icephys.IntracellularRecordingsTable` that we want
 #           to reference. The indices are determined by the order in which we
-#           added the elements to the table. If we don't know the row indicies,
+#           added the elements to the table. If we don't know the row indices,
 #           but only the ids of the relevant intracellular recordings, then
 #           we can search for them as follows:
 
-temp_row_indices = (nwbfile.intracellular_recordings.id == [10, 11])
+temp_row_indices = nwbfile.intracellular_recordings.id == [10, 11]
 print(temp_row_indices)
 
 #####################################################################
@@ -522,9 +550,11 @@ print(temp_row_indices)
 # the existing rows. E.g.:
 
 nwbfile.icephys_simultaneous_recordings.add_column(
-    name='simultaneous_recording_type',
-    description='Description of the type of simultaneous_recording',
-    data=['SimultaneousRecordingType1', ]
+    name="simultaneous_recording_type",
+    description="Description of the type of simultaneous_recording",
+    data=[
+        "SimultaneousRecordingType1",
+    ],
 )
 
 #####################################################################
@@ -539,9 +569,7 @@ nwbfile.icephys_simultaneous_recordings.add_column(
 # the :py:class:`~pynwb.icephys.SimultaneousRecordingsTable`.
 
 rowindex = nwbfile.add_icephys_sequential_recording(
-    simultaneous_recordings=[0],
-    stimulus_type='square',
-    id=15
+    simultaneous_recordings=[0], stimulus_type="square", id=15
 )
 
 #####################################################################
@@ -571,24 +599,20 @@ rowindex = nwbfile.add_icephys_repetition(sequential_recordings=[0], id=17)
 rowindex = nwbfile.add_icephys_experimental_condition(repetitions=[0], id=19)
 
 #####################################################################
-# As mentioned earlier, to add additonal columns to any of the tables, we can
+# As mentioned earlier, to add additional columns to any of the tables, we can
 # use the ``.add_column`` function on the corresponding table after they have
 # been created.
 
 nwbfile.icephys_experimental_conditions.add_column(
-    name='tag',
+    name="tag",
     data=np.arange(1),
-    description='integer tag for a experimental condition'
+    description="integer tag for a experimental condition",
 )
 
 #####################################################################
 # When we add new items, then we now also need to set the values for the new column, e.g.:
 
-rowindex = nwbfile.add_icephys_experimental_condition(
-    repetitions=[0],
-    id=21,
-    tag=3
-)
+rowindex = nwbfile.add_icephys_experimental_condition(repetitions=[0], id=21, tag=3)
 
 #####################################################################
 # Read/write the NWBFile
@@ -597,11 +621,11 @@ rowindex = nwbfile.add_icephys_experimental_condition(
 
 # Write our test file
 testpath = "test_icephys_file.nwb"
-with NWBHDF5IO(testpath, 'w') as io:
+with NWBHDF5IO(testpath, "w") as io:
     io.write(nwbfile)
 
 # Read the data back in
-with NWBHDF5IO(testpath, 'r') as io:
+with NWBHDF5IO(testpath, "r") as io:
     infile = io.read()
 
 
@@ -651,53 +675,93 @@ nwbfile.icephys_experimental_conditions.to_dataframe()
 # of the data (i.e., generate --> write --> read) produces the correct results.
 
 # Read the data back in
-with NWBHDF5IO(testpath, 'r') as io:
+with NWBHDF5IO(testpath, "r") as io:
     infile = io.read()
 
     # assert intracellular_recordings
-    assert np.all(infile.intracellular_recordings.id[:] == nwbfile.intracellular_recordings.id[:])
+    assert np.all(
+        infile.intracellular_recordings.id[:] == nwbfile.intracellular_recordings.id[:]
+    )
 
     # Assert that the ids and the VectorData, VectorIndex, and table target of the
     # recordings column of the Sweeps table are correct
-    assert np.all(infile.icephys_simultaneous_recordings.id[:] ==
-                  nwbfile.icephys_simultaneous_recordings.id[:])
-    assert np.all(infile.icephys_simultaneous_recordings['recordings'].target.data[:] ==
-                  nwbfile.icephys_simultaneous_recordings['recordings'].target.data[:])
-    assert np.all(infile.icephys_simultaneous_recordings['recordings'].data[:] ==
-                  nwbfile.icephys_simultaneous_recordings['recordings'].data[:])
-    assert (infile.icephys_simultaneous_recordings['recordings'].target.table.name ==
-            nwbfile.icephys_simultaneous_recordings['recordings'].target.table.name)
+    assert np.all(
+        infile.icephys_simultaneous_recordings.id[:]
+        == nwbfile.icephys_simultaneous_recordings.id[:]
+    )
+    assert np.all(
+        infile.icephys_simultaneous_recordings["recordings"].target.data[:]
+        == nwbfile.icephys_simultaneous_recordings["recordings"].target.data[:]
+    )
+    assert np.all(
+        infile.icephys_simultaneous_recordings["recordings"].data[:]
+        == nwbfile.icephys_simultaneous_recordings["recordings"].data[:]
+    )
+    assert (
+        infile.icephys_simultaneous_recordings["recordings"].target.table.name
+        == nwbfile.icephys_simultaneous_recordings["recordings"].target.table.name
+    )
 
     # Assert that the ids and the VectorData, VectorIndex, and table target of the simultaneous
     #  recordings column of the SweepSequences table are correct
-    assert np.all(infile.icephys_sequential_recordings.id[:] ==
-                  nwbfile.icephys_sequential_recordings.id[:])
-    assert np.all(infile.icephys_sequential_recordings['simultaneous_recordings'].target.data[:] ==
-                  nwbfile.icephys_sequential_recordings['simultaneous_recordings'].target.data[:])
-    assert np.all(infile.icephys_sequential_recordings['simultaneous_recordings'].data[:] ==
-                  nwbfile.icephys_sequential_recordings['simultaneous_recordings'].data[:])
-    assert (infile.icephys_sequential_recordings['simultaneous_recordings'].target.table.name ==
-            nwbfile.icephys_sequential_recordings['simultaneous_recordings'].target.table.name)
+    assert np.all(
+        infile.icephys_sequential_recordings.id[:]
+        == nwbfile.icephys_sequential_recordings.id[:]
+    )
+    assert np.all(
+        infile.icephys_sequential_recordings["simultaneous_recordings"].target.data[:]
+        == nwbfile.icephys_sequential_recordings["simultaneous_recordings"].target.data[
+            :
+        ]
+    )
+    assert np.all(
+        infile.icephys_sequential_recordings["simultaneous_recordings"].data[:]
+        == nwbfile.icephys_sequential_recordings["simultaneous_recordings"].data[:]
+    )
+    assert (
+        infile.icephys_sequential_recordings[
+            "simultaneous_recordings"
+        ].target.table.name
+        == nwbfile.icephys_sequential_recordings[
+            "simultaneous_recordings"
+        ].target.table.name
+    )
 
     # Assert that the ids and the VectorData, VectorIndex, and table target of the
     # sequential_recordings column of the Repetitions table are correct
     assert np.all(infile.icephys_repetitions.id[:] == nwbfile.icephys_repetitions.id[:])
-    assert np.all(infile.icephys_repetitions['sequential_recordings'].target.data[:] ==
-                  nwbfile.icephys_repetitions['sequential_recordings'].target.data[:])
-    assert np.all(infile.icephys_repetitions['sequential_recordings'] .data[:] ==
-                  nwbfile.icephys_repetitions['sequential_recordings'].data[:])
-    assert (infile.icephys_repetitions['sequential_recordings'].target.table.name ==
-            nwbfile.icephys_repetitions['sequential_recordings'].target.table.name)
+    assert np.all(
+        infile.icephys_repetitions["sequential_recordings"].target.data[:]
+        == nwbfile.icephys_repetitions["sequential_recordings"].target.data[:]
+    )
+    assert np.all(
+        infile.icephys_repetitions["sequential_recordings"].data[:]
+        == nwbfile.icephys_repetitions["sequential_recordings"].data[:]
+    )
+    assert (
+        infile.icephys_repetitions["sequential_recordings"].target.table.name
+        == nwbfile.icephys_repetitions["sequential_recordings"].target.table.name
+    )
 
     # Assert that the ids and the VectorData, VectorIndex, and table target of the
     # repetitions column of the Conditions table are correct
-    assert np.all(infile.icephys_experimental_conditions.id[:] ==
-                  nwbfile.icephys_experimental_conditions.id[:])
-    assert np.all(infile.icephys_experimental_conditions['repetitions'].target.data[:] ==
-                  nwbfile.icephys_experimental_conditions['repetitions'].target.data[:])
-    assert np.all(infile.icephys_experimental_conditions['repetitions'] .data[:] ==
-                  nwbfile.icephys_experimental_conditions['repetitions'].data[:])
-    assert (infile.icephys_experimental_conditions['repetitions'].target.table.name ==
-            nwbfile.icephys_experimental_conditions['repetitions'].target.table.name)
-    assert np.all(infile.icephys_experimental_conditions['tag'][:] ==
-                  nwbfile.icephys_experimental_conditions['tag'][:])
+    assert np.all(
+        infile.icephys_experimental_conditions.id[:]
+        == nwbfile.icephys_experimental_conditions.id[:]
+    )
+    assert np.all(
+        infile.icephys_experimental_conditions["repetitions"].target.data[:]
+        == nwbfile.icephys_experimental_conditions["repetitions"].target.data[:]
+    )
+    assert np.all(
+        infile.icephys_experimental_conditions["repetitions"].data[:]
+        == nwbfile.icephys_experimental_conditions["repetitions"].data[:]
+    )
+    assert (
+        infile.icephys_experimental_conditions["repetitions"].target.table.name
+        == nwbfile.icephys_experimental_conditions["repetitions"].target.table.name
+    )
+    assert np.all(
+        infile.icephys_experimental_conditions["tag"][:]
+        == nwbfile.icephys_experimental_conditions["tag"][:]
+    )

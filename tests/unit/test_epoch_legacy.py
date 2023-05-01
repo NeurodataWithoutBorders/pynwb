@@ -17,7 +17,7 @@ class TestTimeIntervalsIO(NWBH5IOMixin, TestCase):
     IntracellularRecordingTable type.
 
     This is technically a round-trip test, but without round-trip we can't test the object-mapper and
-    including it here makes sure this get's included in code-coverage tests as well.
+    including it here makes sure this gets included in code-coverage tests as well.
     """
 
     def setUpContainer(self):
@@ -33,10 +33,10 @@ class TestTimeIntervalsIO(NWBH5IOMixin, TestCase):
         ]
         nwbfile.add_acquisition(tsa)
         nwbfile.add_acquisition(tsb)
-        # Add a custom colum
+        # Add a custom column
         nwbfile.add_epoch_column(
             name='temperature',
-            description='average temperture (c) during epoch'
+            description='average temperature (c) during epoch'
         )
         # Add some epochs
         nwbfile.add_epoch(

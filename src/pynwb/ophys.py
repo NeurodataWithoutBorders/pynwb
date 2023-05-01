@@ -192,7 +192,7 @@ class OnePhotonSeries(ImageSeries):
         args_to_set = popargs_to_dict(keys_to_set, kwargs)
         super().__init__(**kwargs)
 
-        if args_to_set["binning"] < 0:
+        if args_to_set["binning"] is not None and args_to_set["binning"] < 0:
             raise ValueError(f"Binning value must be >= 0: {args_to_set['binning']}")
         if isinstance(args_to_set["binning"], int):
             args_to_set["binning"] = np.uint(args_to_set["binning"])

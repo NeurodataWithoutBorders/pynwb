@@ -122,14 +122,18 @@ More commonly, you will be creating instances of classes that extend this class.
 The following examples will reference variables that may not be defined within the block they are used in. For
 clarity, we define them here:
 """
+from datetime import datetime
+
 # sphinx_gallery_thumbnail_path = 'figures/gallery_thumbnails_file.png'
+from uuid import uuid4
+
 import numpy as np
-from pynwb import NWBFile, TimeSeries, NWBHDF5IO
+from dateutil import tz
+
+from pynwb import NWBHDF5IO, NWBFile, TimeSeries
+from pynwb.behavior import Position, SpatialSeries
 from pynwb.epoch import TimeIntervals
 from pynwb.file import Subject
-from pynwb.behavior import SpatialSeries, Position
-from datetime import datetime
-from dateutil import tz
 
 ####################
 # .. _basics_nwbfile:
@@ -154,15 +158,25 @@ session_start_time = datetime(2018, 4, 25, 2, 30, 3, tzinfo=tz.gettz("US/Pacific
 
 nwbfile = NWBFile(
     session_description="Mouse exploring an open field",  # required
-    identifier="Mouse5_Day3",  # required
+    identifier=str(uuid4()),  # required
     session_start_time=session_start_time,  # required
     session_id="session_1234",  # optional
-    experimenter="My Name",  # optional
-    lab="My Lab Name",  # optional
+    experimenter=[
+        "Baggins, Bilbo",
+    ],  # optional
+    lab="Bag End Laboratory",  # optional
     institution="University of My Institution",  # optional
+    experiment_description="I went on an adventure to reclaim vast treasures.",  # optional
     related_publications="DOI:10.1016/j.neuron.2016.12.011",  # optional
 )
 print(nwbfile)
+
+####################
+# .. note::
+#
+#     See the `NWBFile Best Practices <https://nwbinspector.readthedocs.io/en/dev/best_practices/nwbfile_metadata.html#file-metadata>`_
+#     for detailed information about the arguments to
+#     :py:class:`~pynwb.file.NWBFile`
 
 ####################
 # .. _basic_subject:

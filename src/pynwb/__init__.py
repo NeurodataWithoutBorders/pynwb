@@ -16,16 +16,24 @@ import hdmf.common
 from hdmf.common.resources import ExternalResources
 
 CORE_NAMESPACE = 'core'
-__core_ns_file_name = 'nwb.namespace.yaml'
 
 from .spec import NWBDatasetSpec, NWBGroupSpec, NWBNamespace  # noqa E402
 from .validate import validate  # noqa: F401, E402
 
 
 def __get_resources():
-    from pkg_resources import resource_filename
+    try:
+        from importlib.resources import files
+    except ImportError:
+        # TODO: Remove when python 3.9 becomes the new minimum
+        from importlib_resources import files
+
+    __location_of_this_file = files(__name__)
+    __core_ns_file_name = 'nwb.namespace.yaml'
+    __schema_dir = 'nwb-schema/core'
+
     ret = dict()
-    ret['namespace_path'] = os.path.join(resource_filename(__name__, 'nwb-schema/core'), __core_ns_file_name)
+    ret['namespace_path'] = str(__location_of_this_file / __schema_dir / __core_ns_file_name)
     return ret
 
 
@@ -263,6 +271,11 @@ class NWBHDF5IO(_HDF5IO):
         #  or when the HDF5 file is not a valid NWB file
         except KeyError:
             return None, None
+        # Other system may have written nwb_version as a fixed-length string, resulting in a numpy.bytes_ object
+        # on read, rather than a variable-length string. To address this, decode the bytes if necessary.
+        if not isinstance(nwb_version_string, str):
+            nwb_version_string = nwb_version_string.decode()
+
         # Parse the version string
         nwb_version_parts = nwb_version_string.replace("-", ".").replace("_", ".").split(".")
         nwb_version = tuple([int(i) if i.isnumeric() else i

@@ -21,8 +21,9 @@ jobs:
         include:
           - { name: linux-python3.7-minimum      , test-tox-env: py37-minimum    , build-tox-env: build-py37-minimum    , python-ver: "3.7" , os: ubuntu-latest }
           # NOTE config below with "upload-wheels: true" specifies that wheels should be uploaded as an artifact
-          - { name: linux-python3.10-upgraded    , test-tox-env: py310-upgraded  , build-tox-env: build-py310-upgraded  , python-ver: "3.10", os: ubuntu-latest , upload-wheels: true }
+          - { name: linux-python3.11-upgraded    , test-tox-env: py311-upgraded  , build-tox-env: build-py311-upgraded  , python-ver: "3.11", os: ubuntu-latest , upload-wheels: true }
           - { name: windows-python3.7-minimum    , test-tox-env: py37-minimum    , build-tox-env: build-py37-minimum    , python-ver: "3.7" , os: windows-latest }
+          - { name: windows-python3.11-upgraded  , test-tox-env: py311-upgraded  , build-tox-env: build-py311-upgraded  , python-ver: "3.11", os: windows-latest }
           - { name: macos-python3.7-minimum      , test-tox-env: py37-minimum    , build-tox-env: build-py37-minimum    , python-ver: "3.7" , os: macos-latest }
     steps:
       - name: Cancel non-latest runs
@@ -78,12 +79,9 @@ jobs:
       matrix:
         include:
           - { name: linux-gallery-python3.7-minimum    , test-tox-env: gallery-py37-minimum  , python-ver: "3.7" , os: ubuntu-latest }
-          - { name: linux-gallery-python3.8-upgraded   , test-tox-env: gallery-py38-upgraded , python-ver: "3.8" , os: ubuntu-latest }
-          # allensdk is not compatible with python 3.9+, so run gallery tests only on python <=3.8
-          # - { name: linux-gallery-python3.10-upgraded  , test-tox-env: gallery-py310-upgraded, python-ver: "3.10", os: ubuntu-latest }
+          - { name: linux-gallery-python3.11-upgraded  , test-tox-env: gallery-py311-upgraded, python-ver: "3.11", os: ubuntu-latest }
           - { name: windows-gallery-python3.7-minimum  , test-tox-env: gallery-py37-minimum  , python-ver: "3.7" , os: windows-latest }
-          - { name: windows-gallery-python3.8-upgraded , test-tox-env: gallery-py38-upgraded , python-ver: "3.8" , os: windows-latest }
-          # - { name: windows-gallery-python3.10-upgraded, test-tox-env: gallery-py310-upgraded, python-ver: "3.10", os: windows-latest }
+          - { name: windows-gallery-python3.11-upgraded, test-tox-env: gallery-py311-upgraded, python-ver: "3.11", os: windows-latest }
     steps:
       - name: Cancel non-latest runs
         uses: styfle/cancel-workflow-action@0.11.0
@@ -121,7 +119,7 @@ jobs:
       matrix:
         include:
           - { name: conda-linux-python3.7-minimum    , test-tox-env: py37-minimum    , build-tox-env: build-py37-minimum    , python-ver: "3.7" , os: ubuntu-latest }
-          - { name: conda-linux-python3.10-upgraded  , test-tox-env: py310-upgraded  , build-tox-env: build-py310-upgraded  , python-ver: "3.10", os: ubuntu-latest }
+          - { name: conda-linux-python3.11-upgraded  , test-tox-env: py311-upgraded  , build-tox-env: build-py311-upgraded  , python-ver: "3.11", os: ubuntu-latest }
     steps:
       - name: Cancel non-latest runs
         uses: styfle/cancel-workflow-action@0.11.0
@@ -176,7 +174,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { name: linux-python3.9-ros3  , python-ver: "3.9", os: ubuntu-latest }
+          - { name: linux-python3.11-ros3  , python-ver: "3.11", os: ubuntu-latest }
     steps:
       - name: Cancel non-latest runs
         uses: styfle/cancel-workflow-action@0.11.0
@@ -220,7 +218,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { name: linux-gallery-python3.9-ros3  , python-ver: "3.9", os: ubuntu-latest }
+          - { name: linux-gallery-python3.11-ros3  , python-ver: "3.11", os: ubuntu-latest }
     steps:
       - name: Cancel non-latest runs
         uses: styfle/cancel-workflow-action@0.11.0
@@ -278,7 +276,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.10'
+          python-version: '3.11'
 
       - name: Download wheel and source distributions from artifact
         uses: actions/download-artifact@v3

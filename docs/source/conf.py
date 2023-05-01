@@ -57,6 +57,7 @@ extensions = [
     'sphinx.ext.extlinks',
     'sphinx_gallery.gen_gallery',
     'sphinx_copybutton',
+    "sphinxcontrib.jquery",  # can be removed as soon as the theme no longer depends on jQuery
 ]
 
 from sphinx_gallery.sorting import ExplicitOrder
@@ -136,7 +137,7 @@ sphinx_gallery_conf = {
 }
 
 intersphinx_mapping = {
-    'python': ('https://docs.python.org/3.10', None),
+    'python': ('https://docs.python.org/3.11', None),
     'numpy': ('https://numpy.org/doc/stable/', None),
     'matplotlib': ('https://matplotlib.org/stable/', None),
     'h5py': ('https://docs.h5py.org/en/latest/', None),
@@ -146,13 +147,16 @@ intersphinx_mapping = {
     'fsspec': ("https://filesystem-spec.readthedocs.io/en/latest/", None),
 }
 
-extlinks = {'incf_lesson': ('https://training.incf.org/lesson/%s', '%s'),
-            'incf_collection': ('https://training.incf.org/collection/%s', '%s'),
-            'nwb_extension': ('https://github.com/nwb-extensions/%s', '%s'),
-            'pynwb': ('https://github.com/NeurodataWithoutBorders/pynwb/%s', '%s'),
-            'nwb_overview': ('https://nwb-overview.readthedocs.io/en/latest/%s', '%s'),
-            'hdmf-docs': ('https://hdmf.readthedocs.io/en/stable/%s', '%s'),
-            'dandi': ('https://www.dandiarchive.org/%s', '%s')}
+extlinks = {
+    'incf_lesson': ('https://training.incf.org/lesson/%s', '%s'),
+    'incf_collection': ('https://training.incf.org/collection/%s', '%s'),
+    'nwb_extension': ('https://github.com/nwb-extensions/%s', '%s'),
+    'pynwb': ('https://github.com/NeurodataWithoutBorders/pynwb/%s', '%s'),
+    'nwb_overview': ('https://nwb-overview.readthedocs.io/en/latest/%s', '%s'),
+    'hdmf-docs': ('https://hdmf.readthedocs.io/en/stable/%s', '%s'),
+    'dandi': ('https://www.dandiarchive.org/%s', '%s'),
+    "nwbinspector": ("https://nwbinspector.readthedocs.io/en/dev/%s", "%s"),
+}
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
