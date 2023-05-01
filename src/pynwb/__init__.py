@@ -302,11 +302,11 @@ class NWBHDF5IO(_HDF5IO):
                 raise TypeError("NWB version %s not supported. PyNWB supports NWB files version 2 and above." %
                                 str(file_version_str))
         # read the file
+        file = super().read(**kwargs)
         if self.external_resources is not None:
-            file = super().read(**kwargs)
             er_read=ExternalResources.from_flat_tsv(path=self.external_resources)
             file.link_resources(er_read)
-            return file
+        return file
         else:
             return super().read(**kwargs)
 
