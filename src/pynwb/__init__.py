@@ -307,8 +307,6 @@ class NWBHDF5IO(_HDF5IO):
             er_read=ExternalResources.from_flat_tsv(path=self.external_resources)
             file.link_resources(er_read)
         return file
-        else:
-            return super().read(**kwargs)
 
     @docval({'name': 'src_io', 'type': HDMFIO,
              'doc': 'the HDMFIO object (such as NWBHDF5IO) that was used to read the data to export'},
