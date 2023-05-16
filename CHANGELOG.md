@@ -10,6 +10,8 @@
   [#1688](https://github.com/NeurodataWithoutBorders/pynwb/pull/1688)
 - Remove references to discontinued `requires.io` service in documentation. @rly
   [#1690](https://github.com/NeurodataWithoutBorders/pynwb/pull/1690)
+- Update `requirements-doc.txt` to resolve Python 3.7 incompatibility. @rly
+  [#1694](https://github.com/NeurodataWithoutBorders/pynwb/pull/1694)
 
 ## PyNWB 2.3.2 (April 10, 2023)
 
