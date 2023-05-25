@@ -40,7 +40,3 @@ class TestReadNWBDandisets(TestCase):
             with NWBHDF5IO(path=s3_url, load_namespaces=True, driver="ros3") as io:
                 nwbfile = io.read()
                 print(nwbfile)
-
-
-
-
