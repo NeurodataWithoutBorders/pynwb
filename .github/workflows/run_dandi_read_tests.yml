@@ -1,8 +1,7 @@
 name: Run DANDI read tests
 on:
-  pull_request:  # TODO remove me
   schedule:
-    - cron: '0 5 * * *'  # once per day at midnight ET
+    - cron: '0 6 * * *'  # once per day at 1am ET
   workflow_dispatch:
 
 jobs:
