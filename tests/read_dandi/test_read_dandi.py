@@ -1,4 +1,6 @@
 from dandi.dandiapi import DandiAPIClient
+import sys
+import traceback
 
 from pynwb import NWBHDF5IO
 from pynwb.testing import TestCase
@@ -12,6 +14,7 @@ class TestReadNWBDandisets(TestCase):
         client = DandiAPIClient()
         dandisets = client.get_dandisets()
 
+        failed_reads = dict()
         for i, dandiset in enumerate(dandisets):
             dandiset_metadata = dandiset.get_raw_metadata()
 
@@ -37,6 +40,14 @@ class TestReadNWBDandisets(TestCase):
 
             s3_url = first_asset.get_content_url(follow_redirects=1, strip_query=True)
 
-            with NWBHDF5IO(path=s3_url, load_namespaces=True, driver="ros3") as io:
-                nwbfile = io.read()
-                print(nwbfile)
+            try:
+                with NWBHDF5IO(path=s3_url, load_namespaces=True, driver="ros3") as io:
+                    nwbfile = io.read()
+                    print(nwbfile)
+            except Exception as e:
+                print(traceback.format_exc())
+                failed_reads[dandiset] = e
+
+        if failed_reads:
+            print(failed_reads)
+            sys.exit(1)
