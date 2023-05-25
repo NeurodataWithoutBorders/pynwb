@@ -42,7 +42,7 @@ class TestReadNWBDandisets(TestCase):
 
             try:
                 with NWBHDF5IO(path=s3_url, load_namespaces=True, driver="ros3") as io:
-                    nwbfile = io.read()
+                    io.read()
             except Exception as e:
                 print(traceback.format_exc())
                 failed_reads[dandiset] = e
