@@ -1,14 +1,52 @@
 import warnings
 from collections.abc import Iterable
 
-from hdmf.common import DynamicTableRegion
+from hdmf.common import DynamicTableRegion, DynamicTable
 from hdmf.data_utils import DataChunkIterator, assertEqualShape
-from hdmf.utils import docval, popargs, get_docval, popargs_to_dict, get_data_shape
+from hdmf.utils import docval, popargs, get_docval, popargs_to_dict, get_data_shape, AllowPositional
 
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries
 from .core import NWBContainer, NWBDataInterface, MultiContainerInterface
 from .device import Device
+
+
+@register_class("ElectrodesTable", CORE_NAMESPACE)
+class ElectrodesTable(DynamicTable):
+
+    __columns__ = (
+        {"name": "location", "description": "The location of the electrode within the subject, e.g., a particular brain region."},
+        {"name": "group", "description": "A reference to the ElectrodeGroup that this electrode is part of."},
+        {"name": "group_name", "description": "The name of the ElectrodeGroup this electrode is a part of."},
+        {"name": "x", "description": "The x coordinate of the electrode location in the brain (+x is posterior)."},
+        {"name": "y", "description": "The y coordinate of the electrode location in the brain (+y is inferior)."},
+        {"name": "z", "description": "The z coordinate of the electrode location in the brain (+z is right)."},
+        {"name": "imp", "description": "The impedance of the electrode, in ohms."},
+        {"name": "filtering", "description": "Description of hardware filtering, including the filter name and frequency cutoffs."},
+        {"name": "rel_x", "description": "The x coordinate of the electrode location within the electrode group."},
+        {"name": "rel_y", "description": "The y coordinate of the electrode location within the electrode group."},
+        {"name": "rel_z", "description": "The z coordinate of the electrode location within the electrode group."},
+        {"name": "reference",
+         "description": ("Description of the reference electrode and/or reference scheme used for this "
+                         "electrode, e.g., 'stainless steel skull screw' or 'online common average referencing'.")},
+    )
+
+    @docval(
+        {"name": "name", "type": str, "doc": "The name of this electrodes table", "default": "electrodes"},
+        {"name": "description", "type": str, "doc": "description of this electrode group",
+         "default": "Metadata about extracellular electrodes"},
+        *get_docval(DynamicTable.__init__, "id", "columns", "colnames"),
+    )
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+    @docval(*get_docval(DynamicTable.add_row, "data", "id"),
+            {'name': 'enforce_unique_id', 'type': bool, 'doc': 'enforce that the id in the table must be unique',
+             'default': True},
+            allow_extra=True,
+            allow_positional=AllowPositional.ERROR)
+    def add_electrode(self, **kwargs):
+        super().add_row(**kwargs)
 
 
 @register_class('ElectrodeGroup', CORE_NAMESPACE)

@@ -208,6 +208,34 @@ class NWBFileMap(ObjectMapper):
             ret = (container.related_publications,)
         return ret
 
+    @ObjectMapper.constructor_arg("electrodes")
+    def electrodes_carg(self, builder, manager):
+        electrodes_builder = builder.groups["general"].groups["extracellular_ephys"].groups["electrodes"]
+        breakpoint()
+        if electrodes_builder is None:
+            return None
+        if electrodes_builder.attributes['neurodata_type'] != 'ElectrodesTable':
+            # override builder attributes
+            electrodes_builder.attributes['neurodata_type'] = 'ElectrodesTable'
+            electrodes_builder.attributes['namespace'] = 'core'
+        return manager.construct(electrodes_builder)
+            # # construct new columns list
+            # columns = list()
+            # for dset_builder in builder.datasets.values():
+            #     dset_obj = manager.construct(dset_builder)  # these have already been constructed
+            #     # go through only the column datasets and replace the 'timeseries' column class in-place.
+            #     if isinstance(dset_obj, VectorData):
+            #         if dset_obj.name == 'timeseries':
+            #             # replacing the class in-place is possible because the VectorData and
+            #             # TimeSeriesReferenceVectorData have the same memory layout and the old and new
+            #             # schema are compatible (i.e., only the neurodata_type was changed in 2.5)
+            #             dset_obj.__class__ = TimeSeriesReferenceVectorData
+            #             # Execute init logic specific for TimeSeriesReferenceVectorData
+            #             dset_obj._init_internal()
+            #         columns.append(dset_obj)
+            # # overwrite the columns constructor argument
+            # return columns
+
 
 @register_map(Subject)
 class SubjectMap(ObjectMapper):

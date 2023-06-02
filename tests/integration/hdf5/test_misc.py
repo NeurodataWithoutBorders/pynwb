@@ -3,10 +3,9 @@ import numpy as np
 from hdmf.common import DynamicTable, VectorData, DynamicTableRegion
 from pynwb import TimeSeries
 from pynwb.misc import Units, DecompositionSeries
-from pynwb.testing import NWBH5IOMixin, AcquisitionH5IOMixin, TestCase
+from pynwb.testing import NWBH5IOMixin, AcquisitionH5IOMixin, TestCase, NWBH5IOFlexMixin
 from pynwb.ecephys import ElectrodeGroup
 from pynwb.device import Device
-from pynwb.file import ElectrodeTable as get_electrode_table
 
 
 class TestUnitsIO(AcquisitionH5IOMixin, TestCase):
@@ -137,42 +136,53 @@ class TestDecompositionSeriesIO(NWBH5IOMixin, TestCase):
         return nwbfile.processing['test_mod']['LFPSpectralAnalysis']
 
 
-class TestDecompositionSeriesWithSourceChannelsIO(AcquisitionH5IOMixin, TestCase):
+class TestDecompositionSeriesWithSourceChannelsIO(NWBH5IOFlexMixin, TestCase):
 
-    @staticmethod
-    def make_electrode_table(self):
-        """ Make an electrode table, electrode group, and device """
-        self.table = get_electrode_table()
-        self.dev1 = Device(name='dev1')
-        self.group = ElectrodeGroup(name='tetrode1',
-                                    description='tetrode description',
-                                    location='tetrode location',
-                                    device=self.dev1)
-        for i in range(4):
-            self.table.add_row(location='CA1', group=self.group, group_name='tetrode1')
+    def getContainerType(self) -> str:
+        return "a DecompositionSeries with source channels"
 
-    def setUpContainer(self):
+    def addAssociatedContainers(self):
+        """Add the associated Device, ElectrodeGroup, and electrodes to the file."""
+        device = Device(name="dev1")
+        self.nwbfile.add_device(device)
+
+        electrode_group = ElectrodeGroup(
+            name='tetrode1',
+            description='tetrode description',
+            location='tetrode location',
+            device=device,
+        )
+        self.nwbfile.add_electrode_group(electrode_group)
+
+        self.nwbfile.add_electrode(location='CA1', group=electrode_group)
+        self.nwbfile.add_electrode(location='CA1', group=electrode_group)
+        self.nwbfile.add_electrode(location='CA1', group=electrode_group)
+        self.nwbfile.add_electrode(location='CA1', group=electrode_group)
+
+        self.nwbfile.create_processing_module(
+            name="ecephys",
+            description="processed ecephys data"
+        )
+
+    def addContainer(self):
         """ Return the test ElectricalSeries to read/write """
-        self.make_electrode_table(self)
-        region = DynamicTableRegion(name='source_channels',
-                                    data=[0, 2],
-                                    description='the first and third electrodes',
-                                    table=self.table)
+        self.addAssociatedContainers()
+        region = self.nwbfile.create_electrode_table_region(
+            name='source_channels',
+            region=[0, 2],
+            description='the first and third electrodes',
+        )
         data = np.random.randn(100, 2, 30)
         timestamps = np.arange(100)/100
-        ds = DecompositionSeries(name='test_DS',
+        ds = DecompositionSeries(name='test_ds',
                                  data=data,
                                  source_channels=region,
                                  timestamps=timestamps,
                                  metric='amplitude')
-        return ds
+        self.nwbfile.processing["ecephys"].add(ds)
 
-    def addContainer(self, nwbfile):
-        """ Add the test ElectricalSeries and related objects to the given NWBFile """
-        nwbfile.add_device(self.dev1)
-        nwbfile.add_electrode_group(self.group)
-        nwbfile.set_electrode_table(self.table)
-        nwbfile.add_acquisition(self.container)
+    def getContainer(self, nwbfile):
+        return nwbfile.processing["ecephys"]["test_ds"]
 
     def test_eg_ref(self):
         """

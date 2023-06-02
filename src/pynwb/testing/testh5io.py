@@ -228,7 +228,7 @@ class NWBH5IOFlexMixin(metaclass=ABCMeta):
 
     def setUp(self):
         container_type = self.getContainerType().replace(" ", "_")
-        session_description = 'A file to test writing and reading a %s' % container_type
+        session_description = 'A file to test writing and reading %s' % container_type
         identifier = 'TEST_%s' % container_type
         session_start_time = datetime(1971, 1, 1, 12, tzinfo=tzutc())
         self.nwbfile = NWBFile(
@@ -251,7 +251,7 @@ class NWBH5IOFlexMixin(metaclass=ABCMeta):
         remove_test_file(self.filename)
         remove_test_file(self.export_filename)
 
-    def getContainerType() -> str:
+    def getContainerType(self) -> str:
         """Return the name of the type of Container being tested, for test ID purposes."""
         raise NotImplementedError('Cannot run test unless getContainerType is implemented.')
 
@@ -369,10 +369,16 @@ class NWBH5IOFlexMixin(metaclass=ABCMeta):
             with NWBHDF5IO(self.filename, mode='r') as io:
                 errors = pynwb_validate(io)
                 if errors:
-                    raise Exception("\n".join(errors))
+                    err_str = ""
+                    for err in errors:
+                        err_str = str(err) + "\n"
+                    raise Exception(err_str)
 
         if os.path.exists(self.export_filename):
             with NWBHDF5IO(self.filename, mode='r') as io:
                 errors = pynwb_validate(io)
                 if errors:
-                    raise Exception("\n".join(errors))
+                    err_str = ""
+                    for err in errors:
+                        err_str = str(err) + "\n"
+                    raise Exception(err_str)

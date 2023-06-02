@@ -463,44 +463,37 @@ class TestDynamicTableFromDataframeIO(NWBH5IOMixin, TestCase):
         dyn_tab.to_dataframe()  # also test 2D column round-trip
 
 
-class TestElectrodes(NWBH5IOMixin, TestCase):
+class TestElectrodes(NWBH5IOFlexMixin, TestCase):
 
-    def setUpContainer(self):
-        """
-        Return placeholder table for electrodes. Tested electrodes are added directly to the NWBFile in addContainer
-        """
-        return DynamicTable(name='electrodes', description='a placeholder table')
+    def getContainerType(self):
+        return "the electrodes table of the NWB file"
 
-    def addContainer(self, nwbfile):
+    def addContainer(self):
         """ Add electrodes and related objects to the given NWBFile """
-        self.dev1 = nwbfile.create_device(name='dev1')
-        self.group = nwbfile.create_electrode_group(
+        dev1 = self.nwbfile.create_device(name='dev1')
+        group = self.nwbfile.create_electrode_group(
             name='tetrode1',
             description='tetrode description',
             location='tetrode location',
-            device=self.dev1
+            device=dev1
         )
 
-        nwbfile.add_electrode(
+        self.nwbfile.add_electrode(
             id=1,
             x=1.0, y=2.0, z=3.0,
             imp=-1.0,
             location='CA1',
             filtering='none',
-            group=self.group,
-            group_name='tetrode1'
+            group=group,
         )
-        nwbfile.add_electrode(
+        self.nwbfile.add_electrode(
             id=2,
             x=1.0, y=2.0, z=3.0,
             imp=-2.0,
             location='CA1',
             filtering='none',
-            group=self.group,
-            group_name='tetrode1'
+            group=group,
         )
-
-        self.container = nwbfile.electrodes  # override self.container which has the placeholder
 
     def getContainer(self, nwbfile):
         """ Return the test electrodes table from the given NWBFile """
@@ -620,7 +613,7 @@ class TestElectrodesRegion(NWBH5IOMixin, TestCase):
 class TestAddStimulusTemplateTimeSeries(NWBH5IOFlexMixin, TestCase):
 
     def getContainerType(self):
-        return "time series stored as a stimulus template"
+        return "a time series object stored as a stimulus template"
 
     def addContainer(self):
         ts = TimeSeries(
@@ -638,7 +631,7 @@ class TestAddStimulusTemplateTimeSeries(NWBH5IOFlexMixin, TestCase):
 class TestAddStimulusTemplateImages(NWBH5IOFlexMixin, TestCase):
 
     def getContainerType(self):
-        return "images stored as a stimulus template"
+        return "an images object stored as a stimulus template"
 
     def addContainer(self):
         image1 = Image(name="test_image1", data=np.ones((10, 10)))

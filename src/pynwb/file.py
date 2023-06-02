@@ -14,7 +14,7 @@ from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries, ProcessingModule
 from .device import Device
 from .epoch import TimeIntervals
-from .ecephys import ElectrodeGroup
+from .ecephys import ElectrodeGroup, ElectrodesTable
 from .icephys import (IntracellularElectrode, SweepTable, PatchClampSeries, IntracellularRecordingsTable,
                       SimultaneousRecordingsTable, SequentialRecordingsTable, RepetitionsTable,
                       ExperimentalConditionsTable)
@@ -265,7 +265,7 @@ class NWBFile(MultiContainerInterface):
                      'virus',
                      'stimulus_notes',
                      'lab',
-                     {'name': 'electrodes', 'child': True,  'required_name': 'electrodes'},
+                     {'name': 'electrodes', 'child': True, 'required_name': 'electrodes'},
                      {'name': 'epochs', 'child': True, 'required_name': 'epochs'},
                      {'name': 'trials', 'child': True, 'required_name': 'trials'},
                      {'name': 'units', 'child': True, 'required_name': 'units'},
@@ -374,7 +374,7 @@ class NWBFile(MultiContainerInterface):
              'doc': 'ProcessingModule objects belonging to this NWBFile', 'default': None},
             {'name': 'lab_meta_data', 'type': (list, tuple), 'default': None,
              'doc': 'an extension that contains lab-specific meta-data'},
-            {'name': 'electrodes', 'type': DynamicTable,
+            {'name': 'electrodes', 'type': ElectrodesTable,
              'doc': 'the ElectrodeTable that belongs to this NWBFile', 'default': None},
             {'name': 'electrode_groups', 'type': Iterable,
              'doc': 'the ElectrodeGroups that belong to this NWBFile', 'default': None},
@@ -642,7 +642,7 @@ class NWBFile(MultiContainerInterface):
 
     def __check_electrodes(self):
         if self.electrodes is None:
-            self.electrodes = ElectrodeTable()
+            self.electrodes = ElectrodesTable()
 
     @docval(*get_docval(DynamicTable.add_column))
     def add_electrode_column(self, **kwargs):
@@ -653,77 +653,16 @@ class NWBFile(MultiContainerInterface):
         self.__check_electrodes()
         self.electrodes.add_column(**kwargs)
 
-    @docval({'name': 'x', 'type': float, 'doc': 'the x coordinate of the position (+x is posterior)',
-             'default': None},
-            {'name': 'y', 'type': float, 'doc': 'the y coordinate of the position (+y is inferior)', 'default': None},
-            {'name': 'z', 'type': float, 'doc': 'the z coordinate of the position (+z is right)', 'default': None},
-            {'name': 'imp', 'type': float, 'doc': 'the impedance of the electrode, in ohms', 'default': None},
-            {'name': 'location', 'type': str,
-             'doc': 'the location of electrode within the subject e.g. brain region. Required.',
-             'default': None},
-            {'name': 'filtering', 'type': str,
-             'doc': 'description of hardware filtering, including the filter name and frequency cutoffs',
-             'default': None},
-            {'name': 'group', 'type': ElectrodeGroup,
-             'doc': 'the ElectrodeGroup object to add to this NWBFile. Required.',
-             'default': None},
-            {'name': 'id', 'type': int, 'doc': 'a unique identifier for the electrode', 'default': None},
-            {'name': 'rel_x', 'type': float, 'doc': 'the x coordinate within the electrode group', 'default': None},
-            {'name': 'rel_y', 'type': float, 'doc': 'the y coordinate within the electrode group', 'default': None},
-            {'name': 'rel_z', 'type': float, 'doc': 'the z coordinate within the electrode group', 'default': None},
-            {'name': 'reference', 'type': str, 'doc': 'Description of the reference electrode and/or reference scheme\
-                used for this  electrode, e.g.,"stainless steel skull screw" or "online common average referencing". ',
-                'default': None},
-            {'name': 'enforce_unique_id', 'type': bool, 'doc': 'enforce that the id in the table must be unique',
-             'default': True},
+    @docval(*get_docval(ElectrodesTable.add_electrode),
             allow_extra=True,
-            allow_positional=AllowPositional.WARNING)
+            allow_positional=AllowPositional.ERROR)
     def add_electrode(self, **kwargs):
         """
         Add an electrode to the electrodes table.
-        See :py:meth:`~hdmf.common.table.DynamicTable.add_row` for more details.
-
-        Required fields are *location* and
-        *group* and any columns that have been added
-        (through calls to `add_electrode_columns`).
+        See :py:meth:`~pynwb.ecephys.ElectrodesTable.add_electrode` for more details.
         """
         self.__check_electrodes()
-        d = _copy.copy(kwargs['data']) if kwargs.get('data') is not None else kwargs
-
-        # NOTE location and group are required arguments. in PyNWB 2.1.0 we made x, y, z optional arguments, and
-        # in order to avoid breaking API changes, the order of the arguments needed to be maintained even though
-        # these optional arguments came before the required arguments, so in docval these required arguments are
-        # displayed as optional when really they are required. this should be changed when positional arguments
-        # are not allowed
-        if not d['location']:
-            raise ValueError("The 'location' argument is required when creating an electrode.")
-        if not kwargs['group']:
-            raise ValueError("The 'group' argument is required when creating an electrode.")
-        if d.get('group_name', None) is None:
-            d['group_name'] = d['group'].name
-
-        new_cols = [('x', 'the x coordinate of the position (+x is posterior)'),
-                    ('y', 'the y coordinate of the position (+y is inferior)'),
-                    ('z', 'the z coordinate of the position (+z is right)'),
-                    ('imp', 'the impedance of the electrode, in ohms'),
-                    ('filtering', 'description of hardware filtering, including the filter name and frequency cutoffs'),
-                    ('rel_x', 'the x coordinate within the electrode group'),
-                    ('rel_y', 'the y coordinate within the electrode group'),
-                    ('rel_z', 'the z coordinate within the electrode group'),
-                    ('reference', 'Description of the reference electrode and/or reference scheme used for this \
-                        electrode, e.g.,"stainless steel skull screw" or "online common average referencing".')
-                    ]
-
-        # add column if the arg is supplied and column does not yet exist
-        # do not pass arg to add_row if arg is not supplied
-        for col_name, col_doc in new_cols:
-            if kwargs[col_name] is not None:
-                if col_name not in self.electrodes:
-                    self.electrodes.add_column(col_name, col_doc)
-            else:
-                d.pop(col_name)  # remove args from d if not set
-
-        self.electrodes.add_row(**d)
+        self.electrodes.add_electrode(**kwargs)
 
     @docval({'name': 'region', 'type': (slice, list, tuple), 'doc': 'the indices of the table'},
             {'name': 'description', 'type': str, 'doc': 'a brief description of what this electrode is'},
@@ -821,13 +760,15 @@ class NWBFile(MultiContainerInterface):
     @docval({'name': 'electrode_table', 'type': DynamicTable, 'doc': 'the ElectrodeTable for this file'})
     def set_electrode_table(self, **kwargs):
         """
+        This method is deprecated as of PyNWB 3.0.0 and will be removed in a future release.
         Set the electrode table of this NWBFile to an existing ElectrodeTable
         """
+        warn("NWBFile.set_electrode_table has been replaced by the setter for NWBFile.electrodes.", DeprecationWarning)
         if self.electrodes is not None:
             msg = 'ElectrodeTable already exists, cannot overwrite'
             raise ValueError(msg)
         electrode_table = getargs('electrode_table', kwargs)
-        self.electrodes = electrode_table
+        self.electrodes = kwargs["electrode_table"]
 
     def _check_sweep_table(self):
         """
@@ -1164,6 +1105,9 @@ def _tablefunc(table_name, description, columns):
 
 def ElectrodeTable(name='electrodes',
                    description='metadata about extracellular electrodes'):
+    warn("The ElectrodeTable method is deprecated as of PyNWB 3.0.0 and will be removed in a future release. "
+         "Please use the ElectrodesTable class instead.",
+         DeprecationWarning)
     return _tablefunc(name, description,
                       [('location', 'the location of channel within the subject e.g. brain region'),
                        ('group', 'a reference to the ElectrodeGroup this electrode is a part of'),

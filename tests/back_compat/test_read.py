@@ -3,6 +3,7 @@ from pathlib import Path
 import warnings
 
 from pynwb import NWBHDF5IO, validate, TimeSeries
+from pynwb.ecephys import ElectrodesTable
 from pynwb.image import ImageSeries
 from pynwb.testing import TestCase
 
@@ -120,3 +121,11 @@ class TestReadOldVersions(TestCase):
         with NWBHDF5IO(str(f), 'r') as io:
             read_nwbfile = io.read()
             self.assertIsNone(read_nwbfile.subject.age__reference)
+
+    def test_read_old_electrodes_table_basic(self):
+        """Test reading an old electrodes table (DynamicTable) with only required fields."""
+        f = Path(__file__).parent / '2.3.2_old_electrodes_table_basic.nwb'
+        with NWBHDF5IO(str(f), 'r') as io:
+            read_nwbfile = io.read()
+            self.assertIsInstance(read_nwbfile.electrodes, ElectrodesTable)
+            self.assertEqual(read_nwbfile.electrodes[0, "location"], "CA1")
