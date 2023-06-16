@@ -345,6 +345,29 @@ class NWBHDF5IO(_HDF5IO):
         super().export(**kwargs)
 
 
+@docval({'name': 'path', 'type': str, 'doc': 'the path to the NWB file or directory'},
+        {'name': 'mode', 'type': str,
+         'doc': 'the mode to open the HDF5 file with, one of ("w", "r", "r+", "a", "w-")'},
+        {'name': 'load_namespaces', 'type': bool,
+         'doc': 'whether or not to load cached namespaces from given path', 'default': True},
+        {'name': 'manager', 'type': BuildManager, 'doc': 'the BuildManager to use for I/O', 'default': None},
+        {'name': 'extensions', 'type': (str, TypeMap, list),
+         'doc': 'a path to a namespace, a TypeMap, or a list consisting paths \
+         to namespaces and TypeMaps', 'default': None},
+        {'name': 'file', 'type': h5py.File, 'doc': 'a pre-existing h5py.File object', 'default': None},
+        is_method=False)
+def NWBIO(**kwargs):
+    """Automatically detect the appropriate io class."""
+    path = popargs('path', kwargs)
+    if os.path.isfile(path):  # hdf5 is the only single-file backend currently supported
+        return NWBHDF5IO(path, **kwargs)
+    elif os.path.isdir(path):  # zarr is the only directory backend currently supported
+        from hdmf_zarr import NWBZarrIO
+        return NWBZarrIO(path, **kwargs)
+    else:
+        raise ValueError('Failed to import "{}" because it is not a file.'.format(path))
+
+
 from . import io as __io  # noqa: F401,E402
 from .core import NWBContainer, NWBData  # noqa: F401,E402
 from .base import TimeSeries, ProcessingModule  # noqa: F401,E402
