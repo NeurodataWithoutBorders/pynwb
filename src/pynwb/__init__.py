@@ -147,6 +147,25 @@ def register_class(**kwargs):
     else:
         _dec(container_cls)
 
+def get_nwbfile_version(h5py_file):
+    # Get the version string for the NWB file
+    try:
+        nwb_version_string = h5py_file.attrs['nwb_version']
+    #  KeyError occurs  when the file is empty (e.g., when creating a new file nothing has been written)
+    #  or when the HDF5 file is not a valid NWB file
+    except KeyError:
+        return None, None
+    # Other system may have written nwb_version as a fixed-length string, resulting in a numpy.bytes_ object
+    # on read, rather than a variable-length string. To address this, decode the bytes if necessary.
+    if not isinstance(nwb_version_string, str):
+        nwb_version_string = nwb_version_string.decode()
+
+    # Parse the version string
+    nwb_version_parts = nwb_version_string.replace("-", ".").replace("_", ".").split(".")
+    nwb_version = tuple([int(i) if i.isnumeric() else i
+                         for i in nwb_version_parts])
+    return nwb_version_string, nwb_version
+
 
 # a function to register an object mapper for a container class
 @docval({"name": "container_cls", "type": type,
@@ -200,6 +219,18 @@ def get_class(**kwargs):
 
 
 class NWBHDF5IO(_HDF5IO):
+
+    @staticmethod
+    def can_read(path):
+        """Determine whether a given path is readable by this class"""
+        if not os.path.isfile(path):  # path is file that exists
+            return False
+        try:
+            with h5py.File(path, "r") as file:   # path is HDF5 file
+                return get_nwbfile_version(file)[1][0] >= 2    # Major version of NWB >= 2
+        except IOError:
+            return False
+
 
     @docval({'name': 'path', 'type': (str, Path), 'doc': 'the path to the HDF5 file', 'default': None},
             {'name': 'mode', 'type': str,
@@ -259,23 +290,7 @@ class NWBHDF5IO(_HDF5IO):
                   and strings, e.g., (2, 5, 1, beta). (None, None) will be returned if the nwb_version
                   is missing, e.g., in the case when no data has been written to the file yet.
         """
-        # Get the version string for the NWB file
-        try:
-            nwb_version_string = self._file.attrs['nwb_version']
-        #  KeyError occurs  when the file is empty (e.g., when creating a new file nothing has been written)
-        #  or when the HDF5 file is not a valid NWB file
-        except KeyError:
-            return None, None
-        # Other system may have written nwb_version as a fixed-length string, resulting in a numpy.bytes_ object
-        # on read, rather than a variable-length string. To address this, decode the bytes if necessary.
-        if not isinstance(nwb_version_string, str):
-            nwb_version_string = nwb_version_string.decode()
-
-        # Parse the version string
-        nwb_version_parts = nwb_version_string.replace("-", ".").replace("_", ".").split(".")
-        nwb_version = tuple([int(i) if i.isnumeric() else i
-                             for i in nwb_version_parts])
-        return nwb_version_string, nwb_version
+        get_nwbfile_version(self._file)
 
     @docval(*get_docval(_HDF5IO.read),
             {'name': 'skip_version_check', 'type': bool, 'doc': 'skip checking of NWB version', 'default': False})
