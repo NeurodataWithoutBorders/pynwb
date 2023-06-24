@@ -1,3 +1,4 @@
+from typing import Optional
 from uuid import uuid4
 from datetime import datetime
 from dateutil.tz import tzlocal
@@ -7,10 +8,10 @@ from .utils import name_generator
 
 
 def mock_NWBFile(
-    session_description='session_description',
-    identifier=None,
-    session_start_time=datetime(1970, 1, 1, tzinfo=tzlocal()),
-    subject=None,
+    session_description: str = 'session_description',
+    identifier: Optional[str] = None,
+    session_start_time: datetime = datetime(1970, 1, 1, tzinfo=tzlocal()),
+    subject: Optional[Subject] = None,
     **kwargs
 ):
     return NWBFile(
@@ -23,15 +24,21 @@ def mock_NWBFile(
 
 
 def mock_Subject(
-    age="P50D",
-    description="this is a mock mouse.",
-    sex="F",
-    subject_id=None,
+    age: Optional[str] = "P50D",
+    description: str = "this is a mock mouse.",
+    sex: Optional[str] = "F",
+    subject_id: Optional[str] = None,
+    nwbfile: Optional[NWBFile] = None,
 ):
 
-    return Subject(
+    subject = Subject(
         age=age,
         description=description,
         sex=sex,
         subject_id=subject_id or name_generator("subject"),
     )
+
+    if nwbfile is not None:
+        nwbfile.subject = subject
+
+    return subject
