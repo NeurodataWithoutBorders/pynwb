@@ -3,7 +3,6 @@ from pynwb.testing import NWBH5IOMixin, TestCase
 from pynwb import NWBFile, NWBHDF5IO
 from pynwb.base import TimeSeries, TimeSeriesReference, TimeSeriesReferenceVectorData
 import numpy as np
-import warnings
 import h5py
 
 
