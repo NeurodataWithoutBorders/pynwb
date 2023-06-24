@@ -96,7 +96,7 @@ def mock_SpikeEventSeries(
     timestamps=np.arange(10).astype(float),
     electrodes: Optional[DynamicTableRegion] = None,
     nwbfile: Optional[NWBFile] = None,
-):
+) -> SpikeEventSeries:
     spike_event_series = SpikeEventSeries(
         name=name or name_generator("SpikeEventSeries"),
         description=description,
