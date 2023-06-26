@@ -62,7 +62,7 @@ Then in Python:
 
     # create a cache to save downloaded data to disk (optional)
     fs = CachingFileSystem(
-        fs=fsspec.filesystem("http"),
+        fs=fs,
         cache_storage="nwb-cache",  # Local folder for the cache
     )
 
