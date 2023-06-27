@@ -53,7 +53,7 @@ nwbfile = NWBFile(
 
 #######################
 # Electrodes Table
-# ------------------------------
+# ----------------
 #
 # In order to store extracellular electrophysiology data, you first must create an electrodes table
 # describing the electrodes that generated this data. Extracellular electrodes are stored in an
@@ -139,9 +139,9 @@ nwbfile.electrodes.to_dataframe()
 # objects. :py:class:`~pynwb.ecephys.ElectricalSeries` is a subclass of :py:class:`~pynwb.base.TimeSeries`
 # specialized for voltage data. To create the :py:class:`~pynwb.ecephys.ElectricalSeries` objects, we need to
 # reference a set of rows in the ``"electrodes"`` table to indicate which electrodes were recorded. We will do this
-# by creating a :py:class:`~pynwb.core.DynamicTableRegion`, which is a type of link that allows you to reference
-# :py:meth:~pynwb.file.NWBFile.create_electrode_table_region` is a convenience function that creates a
-# :py:class:`~pynwb.core.DynamicTableRegion` which references the ``"electrodes"`` table.
+# by creating a :py:class:`~hdmf.common.table.DynamicTableRegion`, which is a type of link that allows you to reference
+# :py:meth:`~pynwb.file.NWBFile.create_electrode_table_region` is a convenience function that creates a
+# :py:class:`~hdmf.common.table.DynamicTableRegion` which references the ``"electrodes"`` table.
 
 
 all_table_region = nwbfile.create_electrode_table_region(
@@ -154,7 +154,7 @@ all_table_region = nwbfile.create_electrode_table_region(
 # ^^^^^^^^^^^^^^^^^
 #
 # Now create an :py:class:`~pynwb.ecephys.ElectricalSeries` object to store raw data collected
-# during the experiment, passing in this ``"all_table_region"`` :py:class:`~pynwb.core.DynamicTableRegion`
+# during the experiment, passing in this ``"all_table_region"`` :py:class:`~hdmf.common.table.DynamicTableRegion`
 # reference to all rows of the electrodes table.
 #
 # .. only:: html
@@ -203,7 +203,7 @@ nwbfile.add_acquisition(raw_electrical_series)
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 #
 # Now create an :py:class:`~pynwb.ecephys.ElectricalSeries` object to store LFP data collected during the experiment,
-# again passing in the :py:class:`~pynwb.core.DynamicTableRegion` reference to all rows of the ``"electrodes"`` table.
+# again passing in the :py:class:`~hdmf.common.table.DynamicTableRegion` reference to all rows of the ``"electrodes"`` table.
 
 
 lfp_data = np.random.randn(50, 12)
@@ -256,7 +256,7 @@ ecephys_module.add(lfp)
 # .. _units_electrode:
 #
 # Spike Times
-# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+# ^^^^^^^^^^^
 #
 # Spike times are stored in the :py:class:`~pynwb.misc.Units` table, which is a subclass of
 # :py:class:`~hdmf.common.table.DynamicTable`. Adding columns to the :py:class:`~pynwb.misc.Units` table is analogous
