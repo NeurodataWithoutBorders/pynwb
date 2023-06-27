@@ -29,7 +29,7 @@ def mock_ElectrodeGroup(
             nwbfile.add_electrode_group(electrode_group)
         if nwbfile is not None:
             msg = "Device has NWBFile as parent already set. Use that for the NWBFile."
-            raise ValueError(msg)        
+            raise ValueError(msg)
 
     return electrode_group
 
@@ -64,7 +64,9 @@ def mock_ElectrodeTable(n_rows=5, group=None, nwbfile=None):
     return table
 
 
-def mock_electrodes(n_electrodes=5, table=mock_ElectrodeTable(n_rows=5)):
+def mock_electrodes(n_electrodes=5, table=mock_ElectrodeTable(n_rows=5), nwbfile=None):
+    if table.parent is None and nwbfile is not None:
+        nwbfile.set_electrode_table(table)
     return DynamicTableRegion(
         name="electrodes",
         data=list(range(n_electrodes)),
