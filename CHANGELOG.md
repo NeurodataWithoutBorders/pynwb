@@ -1,6 +1,6 @@
 # PyNWB Changelog
 
-## PyNWB 2.3.3 (Upcoming)
+## PyNWB 2.3.3 (June 26, 2023)
 
 ### Enhancements and minor changes
 - Add testing support for Python 3.11. @rly [#1687](https://github.com/NeurodataWithoutBorders/pynwb/pull/1687)
@@ -13,6 +13,8 @@
   [#1690](https://github.com/NeurodataWithoutBorders/pynwb/pull/1690)
 - Update `requirements-doc.txt` to resolve Python 3.7 incompatibility. @rly
   [#1694](https://github.com/NeurodataWithoutBorders/pynwb/pull/1694)
+- Fixed test battery to show and check for warnings appropriately. @rly
+  [#1698](https://github.com/NeurodataWithoutBorders/pynwb/pull/1698)
 
 ## PyNWB 2.3.2 (April 10, 2023)
 
