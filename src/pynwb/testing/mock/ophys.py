@@ -83,7 +83,7 @@ def mock_ImagingPlane(
 
 def mock_OnePhotonSeries(
     name: Optional[str] = None,
-    imaging_plane: Optional[ImagingPlane ] = None,
+    imaging_plane: Optional[ImagingPlane] = None,
     data=None,
     rate: Optional[float] = 50.0,
     unit: str = "n.a.",
