@@ -26,12 +26,10 @@ def mock_ElectrodeGroup(
     if device is not None and device.parent is not None:
         if nwbfile is None:
             nwbfile = device.parent
+            nwbfile.add_electrode_group(electrode_group)
         if nwbfile is not None:
             msg = "Device has NWBFile as parent already set. Use that for the NWBFile."
-            raise ValueError(msg)
-
-    if nwbfile is not None:
-        nwbfile.add_electrode_group(electrode_group)
+            raise ValueError(msg)        
 
     return electrode_group
 
