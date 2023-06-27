@@ -107,7 +107,7 @@ class NWBH5IOMixin(metaclass=ABCMeta):
                                            BrokenLinkWarning)):
                     raise Exception('%s: %s' % (w.category.__name__, w.message))
                 else:
-                    warnings.warn(w.message, w.category)
+                    warnings.showwarning(w.message, w.category, w.filename, w.lineno, w.file, w.line)
 
         try:
             return self.getContainer(self.read_nwbfile)
@@ -141,7 +141,7 @@ class NWBH5IOMixin(metaclass=ABCMeta):
                                            BrokenLinkWarning)):
                     raise Exception('%s: %s' % (w.category.__name__, w.message))
                 else:
-                    warnings.warn(w.message, w.category)
+                    warnings.showwarning(w.message, w.category, w.filename, w.lineno, w.file, w.line)
 
         try:
             return self.getContainer(self.read_exported_nwbfile)

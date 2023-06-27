@@ -57,10 +57,12 @@ Then in Python:
     import h5py
     from fsspec.implementations.cached import CachingFileSystem
 
-    # first, create a virtual filesystem based on the http protocol and use
-    # caching to save accessed data to RAM.
+    # first, create a virtual filesystem based on the http protocol
+    fs=fsspec.filesystem("http")
+
+    # create a cache to save downloaded data to disk (optional)
     fs = CachingFileSystem(
-        fs=fsspec.filesystem("http"),
+        fs=fs,
         cache_storage="nwb-cache",  # Local folder for the cache
     )
 
