@@ -89,7 +89,7 @@ def mock_VoltageClampSeries(
     )
 
     if nwbfile is not None:
-        nwbfile.add_action(voltage_clamp_series)
+        nwbfile.add_acquisition(voltage_clamp_series)
 
     return voltage_clamp_series
 
@@ -246,8 +246,8 @@ def mock_IntracellularRecordingsTable(
         electrode = mock_IntracellularElectrode(nwbfile=nwbfile)
         irt.add_recording(
             electrode=electrode,
-            stimulus=mock_VoltageClampStimulusSeries(electrode=electrode),
-            response=mock_VoltageClampSeries(electrode=electrode),
+            stimulus=mock_VoltageClampStimulusSeries(electrode=electrode, nwbfile=nwbfile),
+            response=mock_VoltageClampSeries(electrode=electrode, nwbfile=nwbfile),
         )
 
     if nwbfile is not None:

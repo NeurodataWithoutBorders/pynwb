@@ -29,7 +29,7 @@ def mock_ElectrodeGroup(
     )
 
     if nwbfile is not None:
-        nwbfile.electrode_groups.append(electrode_group)
+        nwbfile.add_electrode_group(electrode_group)
 
     return electrode_group
 
@@ -74,7 +74,7 @@ def mock_ElectricalSeries(
     electrodes: Optional[DynamicTableRegion] = None,
     filtering: str = "filtering",
     nwbfile: Optional[NWBFile] = None
-):
+) -> ElectricalSeries:
     electrical_series = ElectricalSeries(
         name=name or name_generator("ElectricalSeries"),
         description=description,
@@ -87,6 +87,8 @@ def mock_ElectricalSeries(
 
     if nwbfile is not None:
         nwbfile.add_acquisition(electrical_series)
+
+    return electrical_series
 
 
 def mock_SpikeEventSeries(

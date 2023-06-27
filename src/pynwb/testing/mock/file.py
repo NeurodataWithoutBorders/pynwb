@@ -11,14 +11,12 @@ def mock_NWBFile(
     session_description: str = 'session_description',
     identifier: Optional[str] = None,
     session_start_time: datetime = datetime(1970, 1, 1, tzinfo=tzlocal()),
-    subject: Optional[Subject] = None,
     **kwargs
 ):
     return NWBFile(
         session_description=session_description,
         identifier=identifier or str(uuid4()),
         session_start_time=session_start_time,
-        subject=subject or mock_Subject(),
         **kwargs
     )
 

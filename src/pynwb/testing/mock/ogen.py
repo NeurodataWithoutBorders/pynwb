@@ -27,7 +27,7 @@ def mock_OptogeneticStimulusSite(
     )
 
     if nwbfile is not None:
-        nwbfile.add_optogenetic_stimulus_site(optogenetic_stimulus_site)
+        nwbfile.add_ogen_site(optogenetic_stimulus_site)
 
     return optogenetic_stimulus_site
 

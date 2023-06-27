@@ -32,7 +32,7 @@ def mock_OpticalChannel(
     )
 
     if nwbfile is not None:
-        nwbfile.add_optical_channel(optical_channel)
+        mock_ImagingPlane(nwbfile=nwbfile, optical_channel=optical_channel)
 
     return optical_channel
 
@@ -76,7 +76,9 @@ def mock_ImagingPlane(
     )
 
     if nwbfile is not None:
-        nwbfile.imaging_plane = imaging_plane
+        if "ophys" not in nwbfile.processing:
+            nwbfile.create_processing_module("ophys", "ophys")
+        nwbfile.add_imaging_plane(imaging_plane)
 
     return imaging_plane
 
