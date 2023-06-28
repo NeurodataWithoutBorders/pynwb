@@ -222,7 +222,8 @@ class NWBHDF5IO(_HDF5IO):
              'default': None},)
     def __init__(self, **kwargs):
         path, mode, manager, extensions, load_namespaces, file_obj, comm, driver, external_resources =\
-            popargs('path', 'mode', 'manager', 'extensions', 'load_namespaces', 'file', 'comm', 'driver', 'external_resources', kwargs)
+            popargs('path', 'mode', 'manager', 'extensions', 'load_namespaces',
+                    'file', 'comm', 'driver', 'external_resources', kwargs)
         self.external_resources = external_resources
         # Define the BuildManager to use
         if load_namespaces:
@@ -304,7 +305,7 @@ class NWBHDF5IO(_HDF5IO):
         # read the file
         file = super().read(**kwargs)
         if self.external_resources is not None:
-            er_read=ExternalResources.from_flat_tsv(path=self.external_resources)
+            er_read = ExternalResources.from_flat_tsv(path=self.external_resources)
             file.link_resources(er_read)
         return file
 
@@ -357,9 +358,7 @@ class NWBHDF5IO(_HDF5IO):
 from . import io as __io  # noqa: F401,E402
 from .core import NWBContainer, NWBData  # noqa: F401,E402
 from .base import TimeSeries, ProcessingModule  # noqa: F401,E402
-from .file import NWBFile # noqa: F401,E402
-from .resources import ExternalResources
-
+from .file import NWBFile  # noqa: F401,E402
 from . import behavior  # noqa: F401,E402
 from . import device  # noqa: F401,E402
 from . import ecephys  # noqa: F401,E402

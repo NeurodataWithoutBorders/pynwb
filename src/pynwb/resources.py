@@ -1,7 +1,7 @@
 from hdmf.common import ExternalResources as hdmf_ExternalResources
 from . import get_type_map as tm
-from . import register_class, CORE_NAMESPACE
 from hdmf.utils import docval, get_docval
+
 
 class ExternalResources(hdmf_ExternalResources):
     @docval(*get_docval(hdmf_ExternalResources.__init__))

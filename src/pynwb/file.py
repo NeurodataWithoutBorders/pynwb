@@ -148,9 +148,6 @@ class Subject(NWBContainer):
         for key, val in args_to_set.items():
             setattr(self, key, val)
 
-# class NWBExternalResourcesManager(ExternalResourcesManager):
-#     def __init__(self):
-#         super().__init__()
 
 @register_class('NWBFile', CORE_NAMESPACE)
 class NWBFile(MultiContainerInterface, ExternalResourcesManager):
