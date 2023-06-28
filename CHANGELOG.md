@@ -1,5 +1,10 @@
 # PyNWB Changelog
 
+## PyNWB 2.3.4 (Upcoming)
+
+### Enhancements and minor changes
+- Add support for `ExternalResources`. @mavaylon1 [#1684](https://github.com/NeurodataWithoutBorders/pynwb/pull/1684)
+
 ## PyNWB 2.3.3 (June 26, 2023)
 
 ### Enhancements and minor changes
