@@ -80,7 +80,7 @@ jobs:
         include:
           - { name: linux-gallery-python3.8-minimum    , test-tox-env: gallery-py38-minimum  , python-ver: "3.8" , os: ubuntu-latest }
           - { name: linux-gallery-python3.11-upgraded  , test-tox-env: gallery-py311-upgraded, python-ver: "3.11", os: ubuntu-latest }
-          - { name: windows-gallery-python3.8-minimum  , test-tox-env: gallery-py37-minimum  , python-ver: "3.8" , os: windows-latest }
+          - { name: windows-gallery-python3.8-minimum  , test-tox-env: gallery-py38-minimum  , python-ver: "3.8" , os: windows-latest }
           - { name: windows-gallery-python3.11-upgraded, test-tox-env: gallery-py311-upgraded, python-ver: "3.11", os: windows-latest }
     steps:
       - name: Cancel non-latest runs
@@ -118,7 +118,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { name: conda-linux-python3.8-minimum    , test-tox-env: py37-minimum    , build-tox-env: build-py37-minimum    ,  python-ver: "3.8" , os: ubuntu-latest }
+          - { name: conda-linux-python3.8-minimum    , test-tox-env: py38-minimum    , build-tox-env:  build-py38-minimum   ,  python-ver: "3.8" , os: ubuntu-latest }
           - { name: conda-linux-python3.11-upgraded  , test-tox-env: py311-upgraded  , build-tox-env: build-py311-upgraded  , python-ver: "3.11", os: ubuntu-latest }
     steps:
       - name: Cancel non-latest runs

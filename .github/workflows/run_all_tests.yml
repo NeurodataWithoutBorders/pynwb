@@ -89,13 +89,13 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { name: linux-gallery-python3.8-minimum      , test-tox-env: gallery-py37-minimum    , python-ver: "3.8", os: ubuntu-latest }
+          - { name: linux-gallery-python3.8-minimum      , test-tox-env: gallery-py38-minimum    , python-ver: "3.8", os: ubuntu-latest }
           - { name: linux-gallery-python3.11-upgraded    , test-tox-env: gallery-py311-upgraded  , python-ver: "3.11", os: ubuntu-latest }
           - { name: linux-gallery-python3.11-prerelease  , test-tox-env: gallery-py311-prerelease, python-ver: "3.11", os: ubuntu-latest }
-          - { name: windows-gallery-python3.8-minimum    , test-tox-env: gallery-py37-minimum    , python-ver: "3.8", os: windows-latest }
+          - { name: windows-gallery-python3.8-minimum    , test-tox-env: gallery-py38-minimum    , python-ver: "3.8", os: windows-latest }
           - { name: windows-gallery-python3.11-upgraded  , test-tox-env: gallery-py311-upgraded  , python-ver: "3.11", os: windows-latest }
           - { name: windows-gallery-python3.11-prerelease, test-tox-env: gallery-py311-prerelease, python-ver: "3.11", os: windows-latest }
-          - { name: macos-gallery-python3.8-minimum      , test-tox-env: gallery-py37-minimum    , python-ver: "3.8", os: macos-latest }
+          - { name: macos-gallery-python3.8-minimum      , test-tox-env: gallery-py38-minimum    , python-ver: "3.8",  os: macos-latest }
           - { name: macos-gallery-python3.11-upgraded    , test-tox-env: gallery-py311-upgraded  , python-ver: "3.11", os: macos-latest }
           - { name: macos-gallery-python3.11-prerelease  , test-tox-env: gallery-py311-prerelease, python-ver: "3.11", os: macos-latest }
     steps:
