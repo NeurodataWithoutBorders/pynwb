@@ -22,7 +22,6 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { name: linux-python3.7-minimum      , test-tox-env: py37-minimum    , build-tox-env: build-py37-minimum    , python-ver: "3.7" , os: ubuntu-latest }
           - { name: linux-python3.8              , test-tox-env: py38            , build-tox-env: build-py38            , python-ver: "3.8" , os: ubuntu-latest }
           - { name: linux-python3.9              , test-tox-env: py39            , build-tox-env: build-py39            , python-ver: "3.9" , os: ubuntu-latest }
           - { name: linux-python3.10             , test-tox-env: py310           , build-tox-env: build-py310           , python-ver: "3.10", os: ubuntu-latest }
@@ -30,7 +29,6 @@ jobs:
           - { name: linux-python3.11-optional    , test-tox-env: py311-optional  , build-tox-env: build-py311-optional  , python-ver: "3.11", os: ubuntu-latest }
           - { name: linux-python3.11-upgraded    , test-tox-env: py311-upgraded  , build-tox-env: build-py311-upgraded  , python-ver: "3.11", os: ubuntu-latest }
           - { name: linux-python3.11-prerelease  , test-tox-env: py311-prerelease, build-tox-env: build-py311-prerelease, python-ver: "3.11", os: ubuntu-latest }
-          - { name: windows-python3.7-minimum    , test-tox-env: py37-minimum    , build-tox-env: build-py37-minimum    , python-ver: "3.7" , os: windows-latest }
           - { name: windows-python3.8            , test-tox-env: py38            , build-tox-env: build-py38            , python-ver: "3.8" , os: windows-latest }
           - { name: windows-python3.9            , test-tox-env: py39            , build-tox-env: build-py39            , python-ver: "3.9" , os: windows-latest }
           - { name: windows-python3.10           , test-tox-env: py310           , build-tox-env: build-py310           , python-ver: "3.10", os: windows-latest }
@@ -38,7 +36,6 @@ jobs:
           - { name: windows-python3.11-optional  , test-tox-env: py311-optional  , build-tox-env: build-py311-optional  , python-ver: "3.11", os: windows-latest }
           - { name: windows-python3.11-upgraded  , test-tox-env: py311-upgraded  , build-tox-env: build-py311-upgraded  , python-ver: "3.11", os: windows-latest }
           - { name: windows-python3.11-prerelease, test-tox-env: py311-prerelease, build-tox-env: build-py311-prerelease, python-ver: "3.11", os: windows-latest }
-          - { name: macos-python3.7-minimum      , test-tox-env: py37-minimum    , build-tox-env: build-py37-minimum    , python-ver: "3.7" , os: macos-latest }
           - { name: macos-python3.8              , test-tox-env: py38            , build-tox-env: build-py38            , python-ver: "3.8" , os: macos-latest }
           - { name: macos-python3.9              , test-tox-env: py39            , build-tox-env: build-py39            , python-ver: "3.9" , os: macos-latest }
           - { name: macos-python3.10             , test-tox-env: py310           , build-tox-env: build-py310           , python-ver: "3.10", os: macos-latest }
@@ -92,13 +89,13 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { name: linux-gallery-python3.7-minimum      , test-tox-env: gallery-py37-minimum    , python-ver: "3.7" , os: ubuntu-latest }
+          - { name: linux-gallery-python3.8-minimum      , test-tox-env: gallery-py37-minimum    , python-ver: "3.8", os: ubuntu-latest }
           - { name: linux-gallery-python3.11-upgraded    , test-tox-env: gallery-py311-upgraded  , python-ver: "3.11", os: ubuntu-latest }
           - { name: linux-gallery-python3.11-prerelease  , test-tox-env: gallery-py311-prerelease, python-ver: "3.11", os: ubuntu-latest }
-          - { name: windows-gallery-python3.7-minimum    , test-tox-env: gallery-py37-minimum    , python-ver: "3.7" , os: windows-latest }
+          - { name: windows-gallery-python3.8-minimum    , test-tox-env: gallery-py37-minimum    , python-ver: "3.8", os: windows-latest }
           - { name: windows-gallery-python3.11-upgraded  , test-tox-env: gallery-py311-upgraded  , python-ver: "3.11", os: windows-latest }
           - { name: windows-gallery-python3.11-prerelease, test-tox-env: gallery-py311-prerelease, python-ver: "3.11", os: windows-latest }
-          - { name: macos-gallery-python3.7-minimum      , test-tox-env: gallery-py37-minimum    , python-ver: "3.7" , os: macos-latest }
+          - { name: macos-gallery-python3.8-minimum      , test-tox-env: gallery-py37-minimum    , python-ver: "3.8", os: macos-latest }
           - { name: macos-gallery-python3.11-upgraded    , test-tox-env: gallery-py311-upgraded  , python-ver: "3.11", os: macos-latest }
           - { name: macos-gallery-python3.11-prerelease  , test-tox-env: gallery-py311-prerelease, python-ver: "3.11", os: macos-latest }
     steps:
@@ -137,7 +134,6 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { name: conda-linux-python3.7-minimum    , test-tox-env: py37-minimum    , build-tox-env: build-py37-minimum    , python-ver: "3.7" , os: ubuntu-latest }
           - { name: conda-linux-python3.8            , test-tox-env: py38            , build-tox-env: build-py38            , python-ver: "3.8" , os: ubuntu-latest }
           - { name: conda-linux-python3.9            , test-tox-env: py39            , build-tox-env: build-py39            , python-ver: "3.9" , os: ubuntu-latest }
           - { name: conda-linux-python3.10           , test-tox-env: py310           , build-tox-env: build-py310           , python-ver: "3.10", os: ubuntu-latest }
@@ -166,8 +162,6 @@ jobs:
         run: |
           conda config --set always_yes yes --set changeps1 no
           conda info
-          # the conda dependency resolution for tox under python 3.7 can install the wrong importlib_metadata
-          conda install -c conda-forge tox "importlib_metadata>4"
 
       - name: Conda reporting
         run: |
