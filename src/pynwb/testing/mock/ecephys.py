@@ -17,10 +17,10 @@ def mock_ElectrodeGroup(
     nwbfile=None
 ):
     electrode_group = ElectrodeGroup(
-        name=name or name_generator("ElectrodeGroup"),
+        name=name if name is not None else name_generator("ElectrodeGroup"),
         description=description,
         location=location,
-        device=device or mock_Device(),
+        device=device if device is not None else mock_Device()
         position=position,
     )
     if device is not None and device.parent is not None:
@@ -36,20 +36,21 @@ def mock_ElectrodeGroup(
 
 def mock_ElectrodeTable(n_rows=5, group=None, nwbfile=None):
     table = ElectrodeTable()
-    # group = group if group is not None else mock_ElectrodeGroup()
     group = group
-    if group is not None and group.parent is not None:
-        if nwbfile is None:
-            nwbfile = group.parent
-            nwbfile.set_electrode_table(table)
+
+    if group is not None:
+        if group.parent is not None:
+            if nwbfile is None:
+                nwbfile = group.parent
+                nwbfile.set_electrode_table(table)
+            else:
+                msg = "Group has NWBFile as parent already set. Use that for the NWBFile."
+                raise ValueError(msg)
         else:
-            msg = "Group has NWBFile as parent already set. Use that for the NWBFile."
-            raise ValueError(msg)
-    if group is not None and group.parent is None:
-        if nwbfile is not None:
-            nwbfile.add_electrode_group(group)
-            nwbfile.set_electrode_table(table)
-    if group is None:
+            if nwbfile is not None:
+                nwbfile.add_electrode_group(group)
+                nwbfile.set_electrode_table(table)
+    else:
         group = mock_ElectrodeGroup()
         if nwbfile is not None:
             nwbfile.add_electrode_group(group)
@@ -65,8 +66,13 @@ def mock_ElectrodeTable(n_rows=5, group=None, nwbfile=None):
 
 
 def mock_electrodes(n_electrodes=5, table=mock_ElectrodeTable(n_rows=5), nwbfile=None):
+    if table.parent is not None and nwbfile is not None:
+        msg = "The mock_ElectrodeTable already has an associated NWBFile."
+        raise ValueError(msg)
     if table.parent is None and nwbfile is not None:
         nwbfile.set_electrode_table(table)
+
+
     return DynamicTableRegion(
         name="electrodes",
         data=list(range(n_electrodes)),
@@ -86,25 +92,32 @@ def mock_ElectricalSeries(
     nwbfile=None
 ):
     series = ElectricalSeries(
-        name=name or name_generator("ElectricalSeries"),
+        name=name if name is not None else name_generator("ElectricalSeries"),
         description=description,
         data=data if data is not None else np.ones((10, 5)),
         rate=rate,
         timestamps=timestamps,
-        electrodes=electrodes or mock_electrodes(),
+        electrodes=electrodes if electrodes is not None else mock_electrodes(),
         filtering=filtering,
     )
 
-    if nwbfile is not None and (electrodes is None or electrodes.table.parent is None):
-        for group in series.electrodes.table.group.data:
-            if group.parent==None:
+    if nwbfile is not None:
+        if electrodes is None:
+            if series.electrodes.table.group.parent is None:
                 nwbfile.add_electrode_group(group)
                 nwbfile.add_device(group.device)
-            else:
-                continue
-        nwbfile.set_electrode_table(series.electrodes.table)
-        nwbfile.add_acquisition(series)
 
+            nwbfile.set_electrode_table(series.electrodes.table)
+            nwbfile.add_acquisition(series)
+        else:
+            if series.electrodes.table.parent is not None:
+                msg = "The mock_ElectrodeTable already has an associated NWBFile."
+                raise ValueError(msg)
+    else:
+        if electrodes is not None:
+            if series.electrodes.table.parent is not None:
+                nwbfile = series.electrodes.table.parent
+                nwbfile.add_acquisition(series)
     return series
 
 
@@ -114,11 +127,32 @@ def mock_SpikeEventSeries(
     data=None,
     timestamps=np.arange(10).astype(float),
     electrodes=None,
+    nwbfile=None
 ):
-    return SpikeEventSeries(
-        name=name or name_generator("SpikeEventSeries"),
+    spike_event_series = SpikeEventSeries(
+        name=name if name is not None else name_generator("SpikeEventSeries"),
         description=description,
         data=data if data is not None else np.ones((10, 5)),
         timestamps=timestamps if timestamps is not None else np.arange(10).astype(float),
         electrodes=electrodes if electrodes is not None else mock_electrodes(),
     )
+
+    if nwbfile is not None:
+        if electrodes is None:
+            if spike_event_series.electrodes.table.group.parent is None:
+                nwbfile.add_electrode_group(group)
+                nwbfile.add_device(group.device)
+
+            nwbfile.set_electrode_table(spike_event_series.electrodes.table)
+            nwbfile.add_acquisition(spike_event_series)
+        else:
+            if spike_event_series.electrodes.table.parent is not None:
+                msg = "The mock_ElectrodeTable already has an associated NWBFile."
+                raise ValueError(msg)
+    else:
+        if electrodes is not None:
+            if spike_event_series.electrodes.table.parent is not None:
+                nwbfile = spike_event_series.electrodes.table.parent
+                nwbfile.add_acquisition(spike_event_series)
+
+    return spike_event_series
