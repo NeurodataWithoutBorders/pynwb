@@ -20,7 +20,7 @@ def mock_ElectrodeGroup(
         name=name if name is not None else name_generator("ElectrodeGroup"),
         description=description,
         location=location,
-        device=device if device is not None else mock_Device()
+        device=device if device is not None else mock_Device(),
         position=position,
     )
     if device is not None and device.parent is not None:
