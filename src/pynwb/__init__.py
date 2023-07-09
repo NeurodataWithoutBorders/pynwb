@@ -217,12 +217,12 @@ class NWBHDF5IO(_HDF5IO):
             {'name': 'comm', 'type': "Intracomm", 'doc': 'the MPI communicator to use for parallel I/O',
              'default': None},
             {'name': 'driver', 'type': str, 'doc': 'driver for h5py to use when opening HDF5 file', 'default': None},
-            {'name': 'external_resources', 'type': str, 'doc': 'The path to the ExternalResources',
+            {'name': 'external_resources_path', 'type': str, 'doc': 'The path to the ExternalResources',
              'default': None},)
     def __init__(self, **kwargs):
-        path, mode, manager, extensions, load_namespaces, file_obj, comm, driver, external_resources =\
+        path, mode, manager, extensions, load_namespaces, file_obj, comm, driver, external_resources_path =\
             popargs('path', 'mode', 'manager', 'extensions', 'load_namespaces',
-                    'file', 'comm', 'driver', 'external_resources', kwargs)
+                    'file', 'comm', 'driver', 'external_resources_path', kwargs)
         # Define the BuildManager to use
         if load_namespaces:
             if manager is not None:
@@ -252,7 +252,7 @@ class NWBHDF5IO(_HDF5IO):
                 manager = get_manager()
         # Open the file
         super().__init__(path, manager=manager, mode=mode, file=file_obj, comm=comm,
-                         driver=driver, external_resources=external_resources)
+                         driver=driver, external_resources_path=external_resources_path)
 
     @property
     def nwb_version(self):
@@ -303,8 +303,8 @@ class NWBHDF5IO(_HDF5IO):
                                 str(file_version_str))
         # read the file
         file = super().read(**kwargs)
-        if self.external_resources is not None:
-            er_read = ExternalResources.from_norm_tsv(path=self.external_resources)
+        if self.external_resources_path is not None:
+            er_read = ExternalResources.from_norm_tsv(path=self.external_resources_path)
             file.link_resources(er_read)
         return file
 
