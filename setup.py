@@ -20,7 +20,7 @@ schema_dir = 'nwb-schema/core'
 
 reqs = [
     'h5py>=2.10',
-    'hdmf>=3.6.0',
+    'hdmf>=3.7.0',
     'numpy>=1.16',
     'pandas>=1.1.5',
     'python-dateutil>=2.7.3',
