@@ -303,9 +303,6 @@ class NWBHDF5IO(_HDF5IO):
                                 str(file_version_str))
         # read the file
         file = super().read(**kwargs)
-        if self.external_resources_path is not None:
-            er_read = ExternalResources.from_norm_tsv(path=self.external_resources_path)
-            file.link_resources(er_read)
         return file
 
     @docval({'name': 'src_io', 'type': HDMFIO,
