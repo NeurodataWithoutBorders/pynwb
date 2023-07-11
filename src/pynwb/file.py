@@ -851,6 +851,8 @@ class NWBFile(MultiContainerInterface):
     def add_acquisition(self, **kwargs):
         nwbdata = popargs('nwbdata', kwargs)
         self._add_acquisition_internal(nwbdata)
+        if isinstance(nwbdata, ElectricalSeries):
+            self.set_electrode_table(nwbdata.electrodes.table)
         use_sweep_table = popargs('use_sweep_table', kwargs)
         if use_sweep_table:
             self._update_sweep_table(nwbdata)
