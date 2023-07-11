@@ -1,5 +1,10 @@
 # PyNWB Changelog
 
+## PyNWB 2.4.0 (Upcoming)
+
+### Enhancements and minor changes
+- Update links for making a release. @mavaylon1 [#1720](https://github.com/NeurodataWithoutBorders/pynwb/pull/1720)
+
 ## PyNWB 2.3.3 (June 26, 2023)
 
 ### Enhancements and minor changes
