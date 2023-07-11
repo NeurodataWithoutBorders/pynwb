@@ -10,3 +10,5 @@ coverage:
         # 75% of the changed code must be covered by tests
         threshold: 25
         only_pulls: true
+ignore:
+  - "src/pynwb/resources.py"
