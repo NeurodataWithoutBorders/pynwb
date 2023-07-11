@@ -13,7 +13,6 @@ from hdmf.backends.io import HDMFIO
 from hdmf.backends.hdf5 import HDF5IO as _HDF5IO
 from hdmf.build import BuildManager, TypeMap
 import hdmf.common
-from hdmf.common.resources import ExternalResources
 
 CORE_NAMESPACE = 'core'
 
