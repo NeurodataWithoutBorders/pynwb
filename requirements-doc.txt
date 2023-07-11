@@ -11,5 +11,4 @@ sphinx-copybutton
 dataframe_image   # used to render large dataframe as image in the sphinx gallery to improve html display
 lxml  # used by dataframe_image when using the matplotlib backend
 hdf5plugin
-importlib-metadata<4.3; python_version < "3.8"  # TODO: remove when minimum python version is 3.8
 
