@@ -1,0 +1,24 @@
+id: pynert/termset/species_example
+name: Species
+prefixes:
+  NCBI_TAXON: https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?mode=Info&id= # update uri to remove ?/cgi
+  Ensemble: https://rest.ensembl.org/taxonomy/id/
+imports:
+  - linkml:types
+default_range: string
+
+enums:
+  Species:
+    permissible_values:
+      Homo sapiens:
+        description: tbd
+        meaning: NCBI_TAXON:9606
+      Mus musculus:
+        description: tbd
+        meaning: Ensemble:10090
+      Ursus arctos horribilis:
+        description: tbd
+        meaning: NCBI_TAXON:116960
+      Myrmecophaga tridactyla:
+        description: tbd
+        meaning: NCBI_TAXON:71006
