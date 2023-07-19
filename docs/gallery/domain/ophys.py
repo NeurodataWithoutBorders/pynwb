@@ -12,8 +12,7 @@ five main steps:
 4. Add image segmentation
 5. Add fluorescence and dF/F responses
 
-This tutorial assumes that transforming data between these states is done by users--PyNWB does not provide
-analysis functionality. It is recommended to cover :ref:`basics` before this tutorial.
+It is recommended to cover :ref:`basics` before this tutorial.
 
 The following examples will reference variables that may not be defined within the block they are used in. For
 clarity, we define them here:
@@ -41,10 +40,10 @@ from pynwb.ophys import (
 )
 
 ####################
-# Creating and Writing NWB files
-# ------------------------------
+# Creating the NWB file
+# ---------------------
 #
-# When creating a NWB file, the first step is to create the :py:class:`~pynwb.file.NWBFile` object.
+# When creating an NWB file, the first step is to create the :py:class:`~pynwb.file.NWBFile` object.
 
 nwbfile = NWBFile(
     session_description="my first synthetic recording",
@@ -82,9 +81,7 @@ nwbfile = NWBFile(
 #     :align: center
 #
 # Create a :py:class:`~pynwb.device.Device` named ``"Microscope"`` in the :py:class:`~pynwb.file.NWBFile` object. Then
-# create an  :py:class:`~pynwb.ophys.OpticalChannel` named ``"OpticalChannel"`` and an
-# :py:class:`~pynwb.ophys.ImagingPlane` named ``"ImagingPlane"``, passing in the :py:class:`~pynwb.ophys.OpticalChannel`
-# object and the :py:class:`~pynwb.device.Device` object.
+# create an  :py:class:`~pynwb.ophys.OpticalChannel` named ``"OpticalChannel"``.
 
 
 device = nwbfile.create_device(
@@ -97,6 +94,11 @@ optical_channel = OpticalChannel(
     description="an optical channel",
     emission_lambda=500.0,
 )
+
+####################
+# Now, create a :py:class:`~pynwb.ophys.ImagingPlane` named ``"ImagingPlane"``, passing in the
+# :py:class:`~pynwb.ophys.OpticalChannel` object and the :py:class:`~pynwb.device.Device` object.
+
 imaging_plane = nwbfile.create_imaging_plane(
     name="ImagingPlane",
     optical_channel=optical_channel,
@@ -111,15 +113,16 @@ imaging_plane = nwbfile.create_imaging_plane(
     origin_coords=[1.0, 2.0, 3.0],
     origin_coords_unit="meters",
 )
+
 ####################
 # One-photon Series
 # -----------------
 # Now that we have our :py:class:`~pynwb.ophys.ImagingPlane`, we can create a
 # :py:class:`~pynwb.ophys.OnePhotonSeries` object to store raw one-photon imaging data.
 # Here, we have two options. The first option is to supply the raw image data to PyNWB,
-# using the data argument. The other option is to provide a path to the image files.
-# These two options have trade-offs, so it is worth spending time considering how you
-# want to store this data.
+# using the data argument. The second option is to provide a path to the image files.
+# These two options have trade-offs, so it is worth considering how you want to store
+# this data.
 
 # using internal data. this data will be stored inside the NWB file
 one_p_series1 = OnePhotonSeries(
@@ -143,7 +146,7 @@ one_p_series2 = OnePhotonSeries(
 )
 
 ####################
-# Since these one-photon data are raw, acquired data, we will add the
+# Since these one-photon data are acquired data, we will add the
 # :py:class:`~pynwb.ophys.OnePhotonSeries` objects to the :py:class:`~pynwb.file.NWBFile`
 # as acquired data.
 
@@ -153,9 +156,8 @@ nwbfile.add_acquisition(one_p_series2)
 ####################
 # Two-photon Series
 # -----------------
-# Another option is to create a :py:class:`~pynwb.ophys.TwoPhotonSeries` object to store
-# our raw two-photon imaging data. This class behaves similarly to
-# :py:class:`~pynwb.ophys.OnePhotonSeries`.
+# :py:class:`~pynwb.ophys.TwoPhotonSeries` objects to store acquired two-photon imaging
+# data. This class behaves similarly to :py:class:`~pynwb.ophys.OnePhotonSeries`.
 #
 # .. only:: html
 #
@@ -200,11 +202,9 @@ nwbfile.add_acquisition(two_p_series2)
 # Motion Correction (optional)
 # ----------------------------
 #
-# You can also store the result of motion correction.
-# These should be stored in a :py:class:`~pynwb.ophys.MotionCorrection` object,
+# You can also store the result of motion correction using a :py:class:`~pynwb.ophys.MotionCorrection` object,
 # which is a :py:class:`~pynwb.core.MultiContainerInterface` (similar to :py:class:`~pynwb.behavior.Position`)
 # which holds 1 or more :py:class:`~pynwb.ophys.CorrectedImageStack` objects.
-
 
 corrected = ImageSeries(
     name="corrected",  # this must be named "corrected"
@@ -305,7 +305,7 @@ ophys_module.add(img_seg)
 
 ####################
 # Regions Of Interest (ROIs)
-# ---------------------------------
+# --------------------------
 #
 # Image masks
 # ^^^^^^^^^^^
@@ -323,7 +323,7 @@ for _ in range(30):
     # randomly generate example image masks
     x = np.random.randint(0, 95)
     y = np.random.randint(0, 95)
-    image_mask[x : x + 5, y : y + 5] = 1
+    image_mask[x:x + 5, y:y + 5] = 1
 
     # add image mask to plane segmentation
     ps.add_roi(image_mask=image_mask)
@@ -338,10 +338,7 @@ plt.imshow(image_mask)
 # Alternatively, you could define ROIs using a pixel mask, which is an array of
 # triplets (x, y, weight) that have a non-zero weight. All undefined pixels are assumed
 # to be 0.
-#
-# .. note::
-#    You need to be consistent within a :py:class:`~pynwb.ophys.PlaneSegmentation` table.
-#    You can add ROIs either using image masks, pixel masks, or voxel masks.
+
 
 ps2 = img_seg.create_plane_segmentation(
     name="PlaneSegmentation2",
@@ -368,7 +365,7 @@ for _ in range(30):
 # Voxel masks
 # ^^^^^^^^^^^
 #
-# When storing the segmentation of volumetric imaging, you can use imaging masks.
+# When storing the segmentation of volumetric imaging, you can use 3D imaging masks.
 # Alternatively, you could define ROIs using a voxel mask, which is an array of
 # triplets (x, y, z, weight) that have a non-zero weight. All undefined voxels are
 # assumed to be 0.
@@ -394,7 +391,11 @@ for _ in range(30):
 
     # define an example 4 x 3 x 2 voxel region of weight '0.5'
     voxel_mask = []
-    for ix, iy, iz in product(range(x, x + 4), range(y, y + 3), range(z, z + 2)):
+    for ix, iy, iz in product(
+        range(x, x + 4),
+        range(y, y + 3),
+        range(z, z + 2)
+    ):
         voxel_mask.append((ix, iy, iz, 0.5))
 
     # add voxel mask to plane segmentation
@@ -413,7 +414,7 @@ ps2.to_dataframe()
 #
 # Now that the regions of interest are stored, you can store fluorescence data for these
 # ROIs. This type of data is stored using the :py:class:`~pynwb.ophys.RoiResponseSeries`
-# and :py:class:`~pynwb.ophys.Fluorescence` classes.
+# classes.
 #
 # .. only:: html
 #
