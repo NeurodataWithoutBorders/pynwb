@@ -156,7 +156,7 @@ nwbfile.add_acquisition(one_p_series2)
 ####################
 # Two-photon Series
 # -----------------
-# :py:class:`~pynwb.ophys.TwoPhotonSeries` objects to store acquired two-photon imaging
+# :py:class:`~pynwb.ophys.TwoPhotonSeries` objects store acquired two-photon imaging
 # data. This class behaves similarly to :py:class:`~pynwb.ophys.OnePhotonSeries`.
 #
 # .. only:: html
