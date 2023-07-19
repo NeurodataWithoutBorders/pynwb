@@ -60,7 +60,7 @@ body:
     attributes:
       label: Python Version
       options:
-        - "3.7"
+        - "lower version (unsupported)"
         - "3.8"
         - "3.9"
         - "3.10"
