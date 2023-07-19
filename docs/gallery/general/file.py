@@ -16,13 +16,13 @@ part and go directly to :ref:`basics_nwbfile`.
 Background: Basic concepts
 --------------------------
 
-In the `NWB Format <https://nwb-schema.readthedocs.io>`_, each experimental session is typically
+In the `NWB Format <https://nwb-schema.readthedocs.io>`_, each experiment session is typically
 represented by a separate NWB file. NWB files are represented in PyNWB by :py:class:`~pynwb.file.NWBFile`
 objects which provide functionality for creating and retrieving:
 
  * :ref:`timeseries_overview` datasets, i.e., objects for storing time series data
  * :ref:`modules_overview`, i.e., objects for storing and grouping analyses, and
- * experimental metadata and other metadata related to data provenance.
+ * experiment metadata and other metadata related to data provenance.
 
 The following sections describe the :py:class:`~pynwb.base.TimeSeries` and :py:class:`~pynwb.base.ProcessingModules`
 classes in further detail.
@@ -184,7 +184,7 @@ print(nwbfile)
 # Subject Information
 # -------------------
 #
-# In the :py:class:`~pynwb.file.Subject` object we can store information about the experimental subject,
+# In the :py:class:`~pynwb.file.Subject` object we can store information about the experiment subject,
 # such as ``age``, ``species``, ``genotype``, ``sex``, and a ``description``.
 #
 # .. only:: html
@@ -205,7 +205,7 @@ print(nwbfile)
 # however it is recommended to follow particular conventions to help software tools interpret the data:
 #
 # * **age**: `ISO 8601 Duration format <https://en.wikipedia.org/wiki/ISO_8601#Durations>`_, e.g., ``"P90D"`` for 90 days old
-# * **species**: The formal latin binomial nomenclature, e.g., ``"Mus musculus"``, ``"Homo sapiens"``
+# * **species**: The formal Latin binomial nomenclature, e.g., ``"Mus musculus"``, ``"Homo sapiens"``
 # * **sex**: Single letter abbreviation, e.g., ``"F"`` (female), ``"M"`` (male), ``"U"`` (unknown), and ``"O"`` (other)
 #
 # Add the subject information to the :py:class:`~pynwb.file.NWBFile`
@@ -275,7 +275,7 @@ nwbfile.add_acquisition(time_series_with_timestamps)
 nwbfile.acquisition["test_timeseries"]
 
 ####################
-# or using the :py:meth:`~pynwb.file.NWBFile.get_acquisition` method:
+# or using the method :py:meth:`.NWBFile.get_acquisition`:
 nwbfile.get_acquisition("test_timeseries")
 
 
@@ -358,8 +358,8 @@ position_obj = Position(spatial_series=spatial_series_obj)
 # so it would be classified as processed data.
 #
 # Create a processing module called ``"behavior"`` for storing behavioral data in the :py:class:`~pynwb.file.NWBFile`
-# and add the :py:class:`~pynwb.behavior.Position` object to the processing module using the
-# :py:meth:`~pynwb.file.NWBFile.create_processing_module` method:
+# and add the :py:class:`~pynwb.behavior.Position` object to the processing module using the method
+# :py:meth:`.NWBFile.create_processing_module`:
 
 
 behavior_module = nwbfile.create_processing_module(
@@ -432,12 +432,11 @@ with NWBHDF5IO("basics_tutorial.nwb", "r") as io:
 
 ####################
 # It is often preferable to read only a portion of the data.
-# To do this, index or slice into the ``data`` attribute just like if you were
-# indexing or slicing a numpy array.
+# To do this, index or slice into the ``data`` attribute just like you
+# index or slice a numpy array.
 
 with NWBHDF5IO("basics_tutorial.nwb", "r") as io:
     read_nwbfile = io.read()
-    print(read_nwbfile.acquisition["test_timeseries"])
     print(read_nwbfile.acquisition["test_timeseries"].data[:2])
 
 ####################
@@ -453,7 +452,7 @@ with NWBHDF5IO("basics_tutorial.nwb", "r") as io:
 #
 # We can also access the :py:class:`~pynwb.behavior.SpatialSeries` data by referencing the names
 # of the objects in the hierarchy that contain it. We can access a processing module by indexing
-# ``"nwbfile.processing"`` with the name of the processing module, ``"behavior"``.
+# ``nwbfile.processing`` with the name of the processing module, ``"behavior"``.
 #
 # Then, we can access the :py:class:`~pynwb.behavior.Position` object inside of the ``"behavior"``
 # processing module by indexing it with the name of the :py:class:`~pynwb.behavior.Position` object,
@@ -479,6 +478,7 @@ with NWBHDF5IO("basics_tutorial.nwb", "r") as io:
 # data with the single timestamps instance. PyNWB enables this by letting you reuse timestamps across
 # :py:class:`~pynwb.base.TimeSeries` objects. To reuse a :py:class:`~pynwb.base.TimeSeries` timestamps in a new
 # :py:class:`~pynwb.base.TimeSeries`, pass the existing :py:class:`~pynwb.base.TimeSeries` as the new
+# :py:class:`~pynwb.base.TimeSeries`, pass the existing :py:class:`~pynwb.base.TimeSeries` as the new
 # :py:class:`~pynwb.base.TimeSeries` timestamps:
 
 data = list(range(101, 201, 10))
@@ -503,12 +503,12 @@ reuse_ts = TimeSeries(
 # Trials
 # ^^^^^^
 #
-# Trials are stored in :py:class:`pynwb.epoch.TimeIntervals` object which is
-# a subclass of :py:class:`pynwb.core.DynamicTable`.
-# :py:class:`pynwb.core.DynamicTable` objects are used to store tabular metadata
-# throughout NWB, including trials, electrodes and sorted units. They offer
-# flexibility for tabular data by allowing required columns, optional columns,
-# and custom columns which are not defined in the standard.
+# Trials are stored in :py:class:`~pynwb.epoch.TimeIntervals`, which is
+# a subclass of :py:class:`~hdmf.common.table.DynamicTable`.
+# :py:class:`~hdmf.common.table.DynamicTable` is used to store
+# tabular metadata throughout NWB, including trials, electrodes and sorted units. This
+# class offers flexibility for tabular data by allowing required columns, optional
+# columns, and custom columns which are not defined in the standard.
 #
 # .. only:: html
 #
@@ -524,7 +524,7 @@ reuse_ts = TimeSeries(
 #     :alt: trials UML diagram
 #     :align: center
 #
-# The ``trials`` :py:class:`pynwb.core.DynamicTable` can be thought of
+# The ``trials`` :py:class:`~pynwb.epoch.TimeIntervals` class can be thought of
 # as a table with this structure:
 #
 # .. image:: ../../_static/trials_example.png
@@ -532,18 +532,12 @@ reuse_ts = TimeSeries(
 #   :alt: trials table example
 #   :align: center
 #
-# Trials can be added to the :py:class:`~pynwb.file.NWBFile` using the
-# methods :py:meth:`~pynwb.file.NWBFile.add_trial_column` and :py:meth:`~pynwb.file.NWBFile.add_trial`
-# We can add custom, user-defined columns to the trials table to hold data
-# and metadata specific to this experiment or session.
-# By default, :py:class:`~pynwb.file.NWBFile` only requires the ``start_time``
-# and ``end_time`` of the trial. Additional columns can be added using
-# the :py:meth:`~pynwb.file.NWBFile.add_trial_column` method.
-#
-# Continue adding to our :py:class:`~pynwb.file.NWBFile` by creating a new
-# column for the trials table named ``'correct'``, which will be a boolean array.
-# Once all columns have been added, trial data can be populated using
-# :py:meth:`~pynwb.file.NWBFile.add_trial`.
+# By default, :py:class:`~pynwb.epoch.TimeIntervals` objects only require ``start_time``
+# and ``end_time`` of each trial. Additional columns can be added using
+# the method :py:meth:`.NWBFile.add_trial_column`. When all the desired custom columns
+# have been defined, use the :py:meth:`.NWBFile.add_trial` method to add each row.
+# In this case, we will add one custom column to the trials table named "correct"
+# which will take a boolean array, then add two trials as rows of the table.
 
 nwbfile.add_trial_column(
     name="correct",
@@ -553,7 +547,8 @@ nwbfile.add_trial(start_time=1.0, stop_time=5.0, correct=True)
 nwbfile.add_trial(start_time=6.0, stop_time=10.0, correct=False)
 
 ####################
-# Tabular data such as trials can be converted to a :py:class:`~pandas.DataFrame`.
+# :py:class:`~hdmf.common.table.DynamicTable` and its subclasses can be converted to a pandas
+# :py:class:`~pandas.DataFrame` for convenient analysis using :py:meth:`.DynamicTable.to_dataframe`.
 
 print(nwbfile.trials.to_dataframe())
 
@@ -563,8 +558,8 @@ print(nwbfile.trials.to_dataframe())
 # Epochs
 # ^^^^^^
 #
-# Epochs can be added to an NWB file using the method :py:meth:`~pynwb.file.NWBFile.add_epoch`.
-# The first and second arguments are the start time and stop times, respectively.
+# Like trials, epochs can be added to an NWB file using the methods
+# :py:meth:`.NWBFile.add_epoch_column` and :py:meth:`.NWBFile.add_epoch`.
 # The third argument is one or more tags for labeling the epoch, and the fourth argument is a
 # list of all the :py:class:`~pynwb.base.TimeSeries` that the epoch applies
 # to.
@@ -586,9 +581,8 @@ nwbfile.add_epoch(
 ####################
 # Other time intervals
 # ^^^^^^^^^^^^^^^^^^^^
-# Both ``epochs`` and ``trials`` are of of data type :py:class:`~pynwb.epoch.TimeIntervals`, which is a type of
-# ``DynamicTable`` for storing information about time intervals. ``"epochs"`` and ``"trials"``
-# are the two default names for :py:class:`~pynwb.base.TimeIntervals` objects, but you can also add your own
+# These :py:class:`~pynwb.epoch.TimeIntervals` objects are stored in ``NWBFile.intervals``. In addition to the default
+# ``epochs`` and ``trials``, you can also add your own with custom names.
 
 sleep_stages = TimeIntervals(
     name="sleep_stages",
@@ -616,35 +610,20 @@ with NWBHDF5IO("basics_tutorial.nwb", "w") as io:
 # Appending to an NWB file
 # ------------------------
 #
-# Using functionality discussed above, NWB allows appending to files. To append to a file, you must read the file, add
-# new components, and then write the file. Reading and writing is carried out using :py:class:`~pynwb.NWBHDF5IO`.
-# When reading the NWBFile, you must specify that you intend to modify it by setting the *mode* argument in the
-# :py:class:`~pynwb.NWBHDF5IO` constructor to ``'a'``. After you have read the file, you can add [#]_ new data to it
-# using the standard write/add functionality demonstrated above.
-#
-# Let's see how this works by adding another :py:class:`~pynwb.base.TimeSeries` to the BehavioralTimeSeries interface
-# we created above.
-#
-# First, read the file and get the interface object.
+# To append to a file, read it with :py:class:`~pynwb.NWBHDF5IO` and set the ``mode`` argument in the to ``'a'``.
+# After you have read the file, you can add [#]_ new data to it using the standard write/add functionality demonstrated
+# above. Let's see how this works by adding another :py:class:`~pynwb.base.TimeSeries` to acquisition.
+
 
 io = NWBHDF5IO("basics_tutorial.nwb", mode="a")
 nwbfile = io.read()
-position = nwbfile.processing["behavior"].data_interfaces["Position"]
 
-####################
-# Next, add a new :py:class:`~pynwb.behavior.SpatialSeries`.
-
-data = list(range(300, 400, 10))
-timestamps = list(range(10))
-
-new_spatial_series = SpatialSeries(
-    name="SpatialSeriesAppended",
-    data=data,
-    timestamps=timestamps,
-    reference_frame="starting_gate",
+new_time_series = TimeSeries(
+    name="new_time_series",
+    data=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+    timestamps=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
 )
-position.add_spatial_series(new_spatial_series)
-print(position)
+nwbfile.add_acquisition(new_time_series)
 
 ####################
 # Finally, write the changes back to the file and close it.
@@ -657,13 +636,10 @@ io.close()
 #    example, the default name for :py:class:`~pynwb.ophys.ImageSegmentation` is "ImageSegmentation" and the default
 #    name for :py:class:`~pynwb.ecephys.EventWaveform` is "EventWaveform".
 #
-# .. [#] HDF5 is currently the only backend supported by NWB.
+# .. [#] HDF5 is the primary backend supported by NWB.
 #
 # .. [#] Neurodata sets can be *very* large, so individual components of the dataset are only loaded into memory when
 #    you request them. This functionality is only possible if an open file handle is kept around until users want to
 #    load data.
 #
 # .. [#] NWB only supports *adding* to files. Removal and modifying of existing data is not allowed.
-
-####################
-# .. _hck04: https://github.com/NeurodataWithoutBorders/nwb_hackathons/tree/master/HCK04_2018_Seattle
