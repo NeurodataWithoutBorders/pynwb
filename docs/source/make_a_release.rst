@@ -220,8 +220,8 @@ In order to release a new version on conda-forge manually, follow the steps belo
 
 6. Modify ``meta.yaml``.
 
-   Update the `version string <https://github.com/conda-forge/pynwb-feedstock/blob/master/recipe/meta.yaml#L2>`_ and
-   `sha256 <https://github.com/conda-forge/pynwb-feedstock/blob/master/recipe/meta.yaml#L3>`_.
+   Update the `version string (line 2) <https://github.com/conda-forge/pynwb-feedstock/blob/master/recipe/meta.yaml>`_ and
+   `sha256 (line 3) <https://github.com/conda-forge/pynwb-feedstock/blob/master/recipe/meta.yaml>`_.
 
    We have to modify the sha and the version string in the ``meta.yaml`` file.
 
