@@ -1,4 +1,4 @@
-id: pynert/termset/species_example
+id: noteeooks/species_example
 name: Species
 prefixes:
   NCBI_TAXON: https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?mode=Info&id= # update uri to remove ?/cgi
@@ -11,14 +11,14 @@ enums:
   Species:
     permissible_values:
       Homo sapiens:
-        description: tbd
+        description: Humans
         meaning: NCBI_TAXON:9606
       Mus musculus:
-        description: tbd
+        description: Mouse
         meaning: Ensemble:10090
       Ursus arctos horribilis:
-        description: tbd
+        description: Brown Bear
         meaning: NCBI_TAXON:116960
       Myrmecophaga tridactyla:
-        description: tbd
+        description: Ant Eater
         meaning: NCBI_TAXON:71006
