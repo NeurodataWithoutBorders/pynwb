@@ -6,6 +6,14 @@
 - Add support for `ExternalResources`. @mavaylon1 [#1684](https://github.com/NeurodataWithoutBorders/pynwb/pull/1684)
 - Update links for making a release. @mavaylon1 [#1720](https://github.com/NeurodataWithoutBorders/pynwb/pull/1720)
 
+### Bug fixes
+- Fixed version of sphinx-gallery to 0.10.1 to avoid broken galley index in the docs. @oruebel
+  [#1728](https://github.com/NeurodataWithoutBorders/pynwb/pull/1728)
+
+### Documentation and tutorial enhancements
+- Added thumbnail for Optogentics tutorial @oruebel [#1729](https://github.com/NeurodataWithoutBorders/pynwb/pull/1729)
+
+
 ## PyNWB 2.3.3 (June 26, 2023)
 
 ### Enhancements and minor changes
@@ -21,8 +29,6 @@
   [#1694](https://github.com/NeurodataWithoutBorders/pynwb/pull/1694)
 - Fixed test battery to show and check for warnings appropriately. @rly
   [#1698](https://github.com/NeurodataWithoutBorders/pynwb/pull/1698)
-- Fixed version of sphinx-gallery to 0.10.1 to avoid broken galley index in the docs. @oruebel
-  [#1728](https://github.com/NeurodataWithoutBorders/pynwb/pull/1728)
 
 ## PyNWB 2.3.2 (April 10, 2023)
 
