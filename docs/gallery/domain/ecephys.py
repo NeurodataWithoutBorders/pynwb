@@ -346,7 +346,7 @@ with NWBHDF5IO("ecephys_tutorial.nwb", "r") as io:
 # Accessing your data
 # ^^^^^^^^^^^^^^^^^^^
 #
-# Data arrays are read passively from the file. Calling the data attribute on a :py:class:`~pynwb.base.pynwb.TimeSeries`
+# Data arrays are read passively from the file. Calling the data attribute on a :py:class:`~pynwb.base.TimeSeries`
 # such as a :py:class:`~pynwb.ecephys.ElectricalSeries` does not read the data values, but presents an
 # :py:class:`h5py.Dataset` object that can be indexed to read data. You can use the ``[:]`` operator to read the entire
 # data array into memory.
