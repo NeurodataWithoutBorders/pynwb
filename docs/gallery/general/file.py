@@ -533,7 +533,7 @@ reuse_ts = TimeSeries(
 #   :align: center
 #
 # By default, :py:class:`~pynwb.epoch.TimeIntervals` objects only require ``start_time``
-# and ``end_time`` of each trial. Additional columns can be added using
+# and ``stop_time`` of each trial. Additional columns can be added using
 # the method :py:meth:`.NWBFile.add_trial_column`. When all the desired custom columns
 # have been defined, use the :py:meth:`.NWBFile.add_trial` method to add each row.
 # In this case, we will add one custom column to the trials table named "correct"
