@@ -14,7 +14,7 @@ We will demonstrate how to use the `DANDI <https://gui.dandiarchive.org/>`_ neur
 the data in two different ways: (1) by downloading it to your computer and (2) streaming it.
 
 We will briefly show tools for exploring NWB Files interactively and refer the reader to the
-:nwb_overview:`NWB Overview <tools/tools_home.html>` documentation for more details about the available tools.
+:nwb_overview:`NWB Overview <tools/analysis_tools_home.html>` documentation for more details about the available tools.
 
 
 .. seealso::
