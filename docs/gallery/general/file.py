@@ -610,7 +610,7 @@ with NWBHDF5IO("basics_tutorial.nwb", "w") as io:
 # Appending to an NWB file
 # ------------------------
 #
-# To append to a file, read it with :py:class:`~pynwb.NWBHDF5IO` and set the ``mode`` argument in the to ``'a'``.
+# To append to a file, read it with :py:class:`~pynwb.NWBHDF5IO` and set the ``mode`` argument to ``'a'``.
 # After you have read the file, you can add [#]_ new data to it using the standard write/add functionality demonstrated
 # above. Let's see how this works by adding another :py:class:`~pynwb.base.TimeSeries` to acquisition.
 
