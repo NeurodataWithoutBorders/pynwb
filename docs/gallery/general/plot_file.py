@@ -119,6 +119,14 @@ More commonly, you will be creating instances of classes that extend this class.
     In addition to :py:class:`~pynwb.core.NWBContainer`, which functions as a common base type for Group objects,
     :py:class:`~pynwb.core.NWBData` provides a common base for the specification of datasets in the NWB format.
 
+NWB organizes data into different groups depending on the type of data. Groups can be thought of
+as folders within the file. Here are some of the groups within an :py:class:`~pynwb.file.NWBFile` and the types of
+data they are intended to store:
+ * **acquisition**: raw, acquired data that should never change
+ * **processing**: processed data, typically the results of preprocessing algorithms and could change
+ * **analysis**: results of data analysis
+ * **stimuli**: stimuli used in the experiment (e.g., images, videos, light pulses)
+
 The following examples will reference variables that may not be defined within the block they are used in. For
 clarity, we define them here:
 """
@@ -267,7 +275,8 @@ time_series_with_timestamps
 ####################
 # :py:class:`~pynwb.base.TimeSeries` objects can be added directly to :py:class:`~pynwb.file.NWBFile` using:
 #
-# * :py:meth:`~pynwb.file.NWBFile.add_acquisition` to  add *acquisition* data (raw, acquired data that should never change),
+# * :py:meth:`~pynwb.file.NWBFile.add_acquisition` to  add *acquisition* data (raw, acquired data that should never
+#   change),
 # * :py:meth:`~pynwb.file.NWBFile.add_stimulus` to add *stimulus* data, or
 # * :py:meth:`~pynwb.file.NWBFile.add_stimulus_template` to store *stimulus templates*.
 #

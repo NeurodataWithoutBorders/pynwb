@@ -12,6 +12,7 @@ Creating an NWBFile object
 When creating a NWB file, the first step is to create the :py:class:`~pynwb.file.NWBFile` object.
 """
 
+# sphinx_gallery_thumbnail_path = 'figures/gallery_thumbnails_ogen.png'
 from datetime import datetime
 from uuid import uuid4
 

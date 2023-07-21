@@ -3,7 +3,7 @@
 sphinx>=4  # improved support for docutils>=0.17
 sphinx_rtd_theme>=1  # <1 does not work with docutils>=0.17
 matplotlib
-sphinx-gallery
+sphinx-gallery==0.10.1 # See issue 1726. Gallery index is broken for 0.11 - 0.13. TODO relax version once issue is fixed
 # allensdk>=2.13.2  # allensdk reinstalls pynwb and hdmf. TODO set up a separate workflow to test allensdk
 # MarkupSafe==2.0.1  # resolve incompatibility between jinja2 and markupsafe: https://github.com/AllenInstitute/AllenSDK/issues/2308
 Pillow
