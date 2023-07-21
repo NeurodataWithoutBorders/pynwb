@@ -169,7 +169,7 @@ nwbfile = NWBFile(
     experiment_description="I went on an adventure to reclaim vast treasures.",  # optional
     related_publications="DOI:10.1016/j.neuron.2016.12.011",  # optional
 )
-print(nwbfile)
+nwbfile
 
 ####################
 # .. note::
@@ -204,20 +204,24 @@ print(nwbfile)
 # The fields in the :py:class:`~pynwb.file.Subject` object are all free-form text (any format will be valid),
 # however it is recommended to follow particular conventions to help software tools interpret the data:
 #
-# * **age**: `ISO 8601 Duration format <https://en.wikipedia.org/wiki/ISO_8601#Durations>`_, e.g., ``"P90D"`` for 90 days old
+# * **age**: `ISO 8601 Duration format <https://en.wikipedia.org/wiki/ISO_8601#Durations>`_, e.g., ``"P90D"`` for 90
+#   days old
 # * **species**: The formal latin binomial nomenclature, e.g., ``"Mus musculus"``, ``"Homo sapiens"``
 # * **sex**: Single letter abbreviation, e.g., ``"F"`` (female), ``"M"`` (male), ``"U"`` (unknown), and ``"O"`` (other)
 #
 # Add the subject information to the :py:class:`~pynwb.file.NWBFile`
 # by setting the ``subject`` field to the new :py:class:`~pynwb.file.Subject` object.
 
-nwbfile.subject = Subject(
+subject = Subject(
     subject_id="001",
     age="P90D",
     description="mouse 5",
     species="Mus musculus",
     sex="M",
 )
+
+nwbfile.subject = subject
+subject
 
 ####################
 # .. _basic_timeseries:
@@ -246,6 +250,7 @@ time_series_with_rate = TimeSeries(
     starting_time=0.0,
     rate=1.0,
 )
+time_series_with_rate
 
 ####################
 # For irregularly sampled recordings, we need to provide the ``timestamps`` for the ``data``:
@@ -257,6 +262,7 @@ time_series_with_timestamps = TimeSeries(
     unit="m",
     timestamps=timestamps,
 )
+time_series_with_timestamps
 
 ####################
 # :py:class:`~pynwb.base.TimeSeries` objects can be added directly to :py:class:`~pynwb.file.NWBFile` using:
@@ -307,7 +313,7 @@ nwbfile.get_acquisition("test_timeseries")
 # create fake data with shape (50, 2)
 # the first dimension should always represent time
 position_data = np.array([np.linspace(0, 10, 50), np.linspace(0, 8, 50)]).T
-position_timestamps = np.linspace(0, 50) / 200
+position_timestamps = np.linspace(0, 50).astype(float) / 200
 
 spatial_series_obj = SpatialSeries(
     name="SpatialSeries",
@@ -316,12 +322,13 @@ spatial_series_obj = SpatialSeries(
     timestamps=position_timestamps,
     reference_frame="(0,0) is bottom left corner",
 )
-print(spatial_series_obj)
+spatial_series_obj
 
 ####################
 # To help data analysis and visualization tools know that this :py:class:`~pynwb.behavior.SpatialSeries` object
 # represents the position of the subject, store the :py:class:`~pynwb.behavior.SpatialSeries` object inside
-# of a :py:class:`~pynwb.behavior.Position` object, which can hold one or more :py:class:`~pynwb.behavior.SpatialSeries` objects.
+# of a :py:class:`~pynwb.behavior.Position` object, which can hold one or more :py:class:`~pynwb.behavior.SpatialSeries`
+# objects.
 #
 # .. only:: html
 #
@@ -341,6 +348,7 @@ print(spatial_series_obj)
 
 # name is set to "Position" by default
 position_obj = Position(spatial_series=spatial_series_obj)
+position_obj
 
 ####################
 # Behavior Processing Module
@@ -359,7 +367,7 @@ position_obj = Position(spatial_series=spatial_series_obj)
 #
 # Create a processing module called ``"behavior"`` for storing behavioral data in the :py:class:`~pynwb.file.NWBFile`
 # and add the :py:class:`~pynwb.behavior.Position` object to the processing module using the
-# :py:meth:`~pynwb.file.NWBFile.create_processing_module` method:
+# method :py:meth:`NWBFile.create_processing_module`:
 
 
 behavior_module = nwbfile.create_processing_module(
@@ -386,7 +394,7 @@ behavior_module.add(position_obj)
 # Once the behavior processing module is added to the :py:class:`~pynwb.file.NWBFile`,
 # you can access it with:
 
-print(nwbfile.processing["behavior"])
+nwbfile.processing["behavior"]
 
 ####################
 # .. _basic_writing:
@@ -555,7 +563,7 @@ nwbfile.add_trial(start_time=6.0, stop_time=10.0, correct=False)
 ####################
 # Tabular data such as trials can be converted to a :py:class:`~pandas.DataFrame`.
 
-print(nwbfile.trials.to_dataframe())
+nwbfile.trials.to_dataframe()
 
 ####################
 # .. _basic_epochs:
@@ -582,6 +590,8 @@ nwbfile.add_epoch(
     tags=["second", "example"],
     timeseries=[time_series_with_timestamps],
 )
+
+nwbfile.epochs.to_dataframe()
 
 ####################
 # Other time intervals
@@ -644,7 +654,7 @@ new_spatial_series = SpatialSeries(
     reference_frame="starting_gate",
 )
 position.add_spatial_series(new_spatial_series)
-print(position)
+position
 
 ####################
 # Finally, write the changes back to the file and close it.
