@@ -622,6 +622,7 @@ new_time_series = TimeSeries(
     name="new_time_series",
     data=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
     timestamps=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+    unit="n.a.",
 )
 nwbfile.add_acquisition(new_time_series)
 
