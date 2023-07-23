@@ -7,8 +7,7 @@
 - Update links for making a release. @mavaylon1 [#1720](https://github.com/NeurodataWithoutBorders/pynwb/pull/1720)
 
 ### Bug fixes
-- Fixed version of sphinx-gallery to 0.10.1 to avoid broken galley index in the docs. @oruebel
-  [#1728](https://github.com/NeurodataWithoutBorders/pynwb/pull/1728)
+- Fixed sphinx-gallery setting to correctly display index in the docs with sphinx-gallery>=0.11. @oruebel [#1728](https://github.com/NeurodataWithoutBorders/pynwb/pull/1728)
 
 ### Documentation and tutorial enhancements
 - Added thumbnail for Optogentics tutorial @oruebel [#1729](https://github.com/NeurodataWithoutBorders/pynwb/pull/1729)
