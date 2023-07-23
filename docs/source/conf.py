@@ -134,6 +134,7 @@ sphinx_gallery_conf = {
     'min_reported_time': 5,
     'remove_config_comments': True,
     'within_subsection_order': CustomSphinxGallerySectionSortKey,
+    'nested_sections': False,  # See issue https://github.com/sphinx-gallery/sphinx-gallery/issues/1152
 }
 
 intersphinx_mapping = {
