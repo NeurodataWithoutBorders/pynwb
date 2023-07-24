@@ -1,7 +1,7 @@
 id: noteeooks/species_example
 name: Species
 prefixes:
-  NCBI_TAXON: https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?mode=Info&id= # update uri to remove ?/cgi
+  NCBI_TAXON: https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?mode=Info&id=
   Ensemble: https://rest.ensembl.org/taxonomy/id/
 imports:
   - linkml:types
