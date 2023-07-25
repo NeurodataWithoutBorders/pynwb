@@ -275,10 +275,9 @@ time_series_with_timestamps
 ####################
 # :py:class:`~pynwb.base.TimeSeries` objects can be added directly to :py:class:`~pynwb.file.NWBFile` using:
 #
-# * :py:meth:`~pynwb.file.NWBFile.add_acquisition` to  add *acquisition* data (raw, acquired data that should never
-#   change),
-# * :py:meth:`~pynwb.file.NWBFile.add_stimulus` to add *stimulus* data, or
-# * :py:meth:`~pynwb.file.NWBFile.add_stimulus_template` to store *stimulus templates*.
+# * :py:meth:`.NWBFile.add_acquisition` to  add *acquisition* data (raw, acquired data that should never change),
+# * :py:meth:`.NWBFile.add_stimulus` to add *stimulus* data, or
+# * :py:meth:`.NWBFile.add_stimulus_template` to store *stimulus templates*.
 #
 
 nwbfile.add_acquisition(time_series_with_timestamps)
@@ -383,6 +382,7 @@ behavior_module = nwbfile.create_processing_module(
     name="behavior", description="processed behavioral data"
 )
 behavior_module.add(position_obj)
+behavior_module
 
 ####################
 #
@@ -616,6 +616,8 @@ sleep_stages.add_row(start_time=0.7, stop_time=0.9, stage=2, confidence=0.99)
 sleep_stages.add_row(start_time=1.3, stop_time=3.0, stage=3, confidence=0.7)
 
 nwbfile.add_time_intervals(sleep_stages)
+
+sleep_stages.to_dataframe()
 
 ####################
 # Now we overwrite the file with all of the data
