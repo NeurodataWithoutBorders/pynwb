@@ -549,6 +549,21 @@ class NWBFile(MultiContainerInterface, ExternalResourcesManager):
             self.all_children()
         return self.__obj
 
+    @docval({'name': 'pynwb_class', 'type': type, 'doc': 'The PyNWB class to search for instances of.'},)
+    def find_all_of_class(self, pynwb_class: type):
+        """Return all PyNWB objects in the file that are instances of the pynwb_class class.
+
+        This includes objects that are instances of a subclass of the class.
+
+        .. code-block:: python
+
+            from pynwb import ImageSeries
+            obj_list = get_neurodata_type_objects(nwbfile, ImageSeries)
+
+        """
+        ret = [obj for obj in self.objects.values() if isinstance(obj, pynwb_class)]
+        return ret
+
     @property
     def modules(self):
         warn("NWBFile.modules has been replaced by NWBFile.processing.", DeprecationWarning)
