@@ -349,35 +349,6 @@ class NWBHDF5IO(_HDF5IO):
         kwargs['container'] = nwbfile
         super().export(**kwargs)
 
-    @docval({'name': 'neurodata_type', 'type': str, 'doc': 'The neurodata type to search for.'},
-            {'name': 'namespace', 'type': str, 'doc': 'The namespace of the neurodata type to search for.'},)
-    def get_neurodata_type_objs(self, neurodata_type: str, namespace: str):
-        """Return all PyNWB objects in the file that have a neurodata type from a namespace.
-
-        This works regardless of whether the extension was imported earlier in the python execution.
-
-        This method is useful for getting neurodata type objects from cached extensions where you
-        do not have easy access to a python class to pass to `NWBFile.find_all_of_class`.
-
-        All objects that are instances of the class associated with the given neurodata_type in the
-        given namespace will be returned. This includes objects that are instances of a subclass.
-
-        For example, if an extension defines a new neurodata type OnePhotonSeries that extends
-        ImageSeries, then `get_neurodata_type_objects_in_file(io, "ImageSeries", "core")` will
-        include all OnePhotonSeries objects.
-
-        .. code-block:: python
-
-            from pynwb import NWBHDF5IO
-            with NWBHDF5IO(filepath, mode="r", load_namespaces=True) as io:
-                obj_list = io.get_neurodata_type_objs("Subject", "core")
-
-        """
-        pynwb_cls = self.manager.type_map.get_dt_container_cls(neurodata_type, namespace)
-
-        read_nwbfile = self.read()
-        return read_nwbfile.find_all_of_class(pynwb_cls)
-
 
 from . import io as __io  # noqa: F401,E402
 from .core import NWBContainer, NWBData  # noqa: F401,E402

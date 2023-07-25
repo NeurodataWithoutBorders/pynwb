@@ -549,19 +549,28 @@ class NWBFile(MultiContainerInterface, ExternalResourcesManager):
             self.all_children()
         return self.__obj
 
-    @docval({'name': 'pynwb_class', 'type': type, 'doc': 'The PyNWB class to search for instances of.'},)
-    def find_all_of_class(self, pynwb_class: type):
-        """Return all PyNWB objects in the file that are instances of the pynwb_class class.
+    @docval({'name': 'neurodata_types', 'type': (type, str),
+             'doc': ('The PyNWB container class to search for instances of, or the string with the name of '
+                     'the neurodata_type')},)
+    def find_all(self, neurodata_type):
+        """Return all PyNWB objects in the file that are instances of the neurodata_type class.
 
-        This includes objects that are instances of a subclass of the class.
+        This includes objects that are instances of a subclass of the class. A string with the name of the
+        neurodata_type can also be passed in.
 
         .. code-block:: python
 
             from pynwb import ImageSeries
-            obj_list = get_neurodata_type_objects(nwbfile, ImageSeries)
+            obj_list = find_all(nwbfile, ImageSeries)
+            obj_list = find_all(nwbfile, "EcephysSpecimen")  # EcephysSpecimen is defined in a loaded extension
 
         """
-        ret = [obj for obj in self.objects.values() if isinstance(obj, pynwb_class)]
+        if isinstance(neurodata_type, str):
+            pynwb_cls = self.io.manager.type_map.get_dt_container_cls(neurodata_type)
+        else:
+            pynwb_cls = neurodata_type
+
+        ret = [obj for obj in self.objects.values() if isinstance(obj, pynwb_cls)]
         return ret
 
     @property
