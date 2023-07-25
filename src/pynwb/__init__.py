@@ -356,6 +356,9 @@ class NWBHDF5IO(_HDF5IO):
 
         This works regardless of whether the extension was imported earlier in the python execution.
 
+        This method is useful for getting neurodata type objects from cached extensions where you
+        do not have easy access to a python class to pass to `NWBFile.find_all_of_class`.
+
         All objects that are instances of the class associated with the given neurodata_type in the
         given namespace will be returned. This includes objects that are instances of a subclass.
 
