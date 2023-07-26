@@ -14,6 +14,10 @@ five main steps:
 
 It is recommended to cover :ref:`basics` before this tutorial.
 
+.. note:: It is recommended to check if your source data is supported by
+  `NeuroConv Optical Physiology Gallery <https://neuroconv.readthedocs.io/en/main/conversion_examples_gallery/conversion_example_gallery.html#optical-physiology>`_.
+  If it is supported, it is recommended to use NeuroConv to convert your data.
+
 The following examples will reference variables that may not be defined within the block they are used in. For
 clarity, we define them here:
 """
