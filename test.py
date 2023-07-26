@@ -304,12 +304,12 @@ def main():
                         help='run example tests with ros3 streaming')
     parser.add_argument('-b', '--backwards', action='append_const', const=flags['backwards'], dest='suites',
                         help='run backwards compatibility tests')
-    parser.add_argument('-w', '--validate-examples', action='append_const', const=flags['validate-examples'], dest='suites',
-                        help='run example tests and validation tests on example NWB files')
+    parser.add_argument('-w', '--validate-examples', action='append_const', const=flags['validate-examples'],
+                        dest='suites', help='run example tests and validation tests on example NWB files')
     parser.add_argument('-r', '--ros3', action='append_const', const=flags['ros3'], dest='suites',
                         help='run ros3 streaming tests')
-    parser.add_argument('-x', '--validation-module', action='append_const', const=flags['validation-module'], dest='suites',
-                        help='run ros3 streaming tests')
+    parser.add_argument('-x', '--validation-module', action='append_const', const=flags['validation-module'],
+                        dest='suites', help='run tests on pynwb.validate')
     args = parser.parse_args()
     if not args.suites:
         args.suites = list(flags.values())
