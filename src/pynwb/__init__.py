@@ -215,10 +215,13 @@ class NWBHDF5IO(_HDF5IO):
             {'name': 'file', 'type': [h5py.File, 'S3File'], 'doc': 'a pre-existing h5py.File object', 'default': None},
             {'name': 'comm', 'type': "Intracomm", 'doc': 'the MPI communicator to use for parallel I/O',
              'default': None},
-            {'name': 'driver', 'type': str, 'doc': 'driver for h5py to use when opening HDF5 file', 'default': None})
+            {'name': 'driver', 'type': str, 'doc': 'driver for h5py to use when opening HDF5 file', 'default': None},
+            {'name': 'external_resources_path', 'type': str, 'doc': 'The path to the ExternalResources',
+             'default': None},)
     def __init__(self, **kwargs):
-        path, mode, manager, extensions, load_namespaces, file_obj, comm, driver =\
-            popargs('path', 'mode', 'manager', 'extensions', 'load_namespaces', 'file', 'comm', 'driver', kwargs)
+        path, mode, manager, extensions, load_namespaces, file_obj, comm, driver, external_resources_path =\
+            popargs('path', 'mode', 'manager', 'extensions', 'load_namespaces',
+                    'file', 'comm', 'driver', 'external_resources_path', kwargs)
         # Define the BuildManager to use
         if load_namespaces:
             if manager is not None:
@@ -247,7 +250,8 @@ class NWBHDF5IO(_HDF5IO):
             elif manager is None:
                 manager = get_manager()
         # Open the file
-        super().__init__(path, manager=manager, mode=mode, file=file_obj, comm=comm, driver=driver)
+        super().__init__(path, manager=manager, mode=mode, file=file_obj, comm=comm,
+                         driver=driver, external_resources_path=external_resources_path)
 
     @property
     def nwb_version(self):
@@ -297,7 +301,8 @@ class NWBHDF5IO(_HDF5IO):
                 raise TypeError("NWB version %s not supported. PyNWB supports NWB files version 2 and above." %
                                 str(file_version_str))
         # read the file
-        return super().read(**kwargs)
+        file = super().read(**kwargs)
+        return file
 
     @docval({'name': 'src_io', 'type': HDMFIO,
              'doc': 'the HDMFIO object (such as NWBHDF5IO) that was used to read the data to export'},
@@ -349,7 +354,6 @@ from . import io as __io  # noqa: F401,E402
 from .core import NWBContainer, NWBData  # noqa: F401,E402
 from .base import TimeSeries, ProcessingModule  # noqa: F401,E402
 from .file import NWBFile  # noqa: F401,E402
-
 from . import behavior  # noqa: F401,E402
 from . import device  # noqa: F401,E402
 from . import ecephys  # noqa: F401,E402

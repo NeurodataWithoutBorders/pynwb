@@ -75,7 +75,7 @@ class CustomSphinxGallerySectionSortKey(ExampleTitleSortKey):
     # listed here will be added in alphabetical order based on title after the
     # explicitly listed galleries
     GALLERY_ORDER = {
-        'general': ['file.py'],
+        'general': ['plot_file.py'],
         # Sort domain-specific tutorials based on domain to group tutorials belonging to the same domain
         'domain': [
             "ecephys.py",
@@ -134,6 +134,7 @@ sphinx_gallery_conf = {
     'min_reported_time': 5,
     'remove_config_comments': True,
     'within_subsection_order': CustomSphinxGallerySectionSortKey,
+    'nested_sections': False,  # See issue https://github.com/sphinx-gallery/sphinx-gallery/issues/1152
 }
 
 intersphinx_mapping = {
