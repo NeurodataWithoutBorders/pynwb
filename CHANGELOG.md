@@ -1,5 +1,10 @@
 # PyNWB Changelog
 
+## PyNWB 2.4.1 (July 26, 2023)
+
+### Bug fixes
+- Stop running validation tests as part of integration tests. They cause issues in CI and can be run separately. @rly [#1740](https://github.com/NeurodataWithoutBorders/pynwb/pull/1740)
+
 ## PyNWB 2.4.0 (July 23, 2023)
 
 ### Enhancements and minor changes
