@@ -1,5 +1,10 @@
 # PyNWB Changelog
 
+## PyNWB 2.5.0 (Upcoming)
+
+### Enhancements and minor changes
+- Add `TimeSeries.get_timestamps`. @bendichter [#1741](https://github.com/NeurodataWithoutBorders/pynwb/pull/1741)
+
 ## PyNWB 2.4.0 (July 23, 2023)
 
 ### Enhancements and minor changes
