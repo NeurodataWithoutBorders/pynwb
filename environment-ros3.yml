@@ -12,4 +12,4 @@ dependencies:
   - pandas==2.0.0
   - python-dateutil==2.8.2
   - setuptools
-  - dandi==0.52.0  # NOTE: dandi does not support osx-arm64
+  - dandi==0.55.1  # NOTE: dandi does not support osx-arm64

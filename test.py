@@ -12,7 +12,16 @@ import sys
 import traceback
 import unittest
 
-flags = {'pynwb': 2, 'integration': 3, 'example': 4, 'backwards': 5, 'validation': 6, 'ros3': 7, 'example-ros3': 8}
+flags = {
+    'pynwb': 2,
+    'integration': 3,
+    'example': 4,
+    'backwards': 5,
+    'validate-examples': 6,
+    'ros3': 7,
+    'example-ros3': 8,
+    'validation-module': 9
+}
 
 TOTAL = 0
 FAILURES = 0
@@ -233,9 +242,6 @@ def run_integration_tests(verbose=True):
 
     run_test_suite("tests/integration/utils", "integration utils tests", verbose=verbose)
 
-    # also test the validation script
-    run_test_suite("tests/validation", "validation tests", verbose=verbose)
-
 
 def clean_up_tests():
     # remove files generated from running example files
@@ -298,18 +304,21 @@ def main():
                         help='run example tests with ros3 streaming')
     parser.add_argument('-b', '--backwards', action='append_const', const=flags['backwards'], dest='suites',
                         help='run backwards compatibility tests')
-    parser.add_argument('-w', '--validation', action='append_const', const=flags['validation'], dest='suites',
-                        help='run example tests and validation tests on example NWB files')
+    parser.add_argument('-w', '--validate-examples', action='append_const', const=flags['validate-examples'],
+                        dest='suites', help='run example tests and validation tests on example NWB files')
     parser.add_argument('-r', '--ros3', action='append_const', const=flags['ros3'], dest='suites',
                         help='run ros3 streaming tests')
+    parser.add_argument('-x', '--validation-module', action='append_const', const=flags['validation-module'],
+                        dest='suites', help='run tests on pynwb.validate')
     args = parser.parse_args()
     if not args.suites:
         args.suites = list(flags.values())
         # remove from test suites run by default
         args.suites.pop(args.suites.index(flags['example']))
         args.suites.pop(args.suites.index(flags['example-ros3']))
-        args.suites.pop(args.suites.index(flags['validation']))
+        args.suites.pop(args.suites.index(flags['validate-examples']))
         args.suites.pop(args.suites.index(flags['ros3']))
+        args.suites.pop(args.suites.index(flags['validation-module']))
 
     # set up logger
     root = logging.getLogger()
@@ -332,8 +341,10 @@ def main():
         run_test_suite("tests/unit", "pynwb unit tests", verbose=args.verbosity)
 
     # Run example tests
-    if flags['example'] in args.suites or flags['validation'] in args.suites:
+    is_run_example_tests = False
+    if flags['example'] in args.suites or flags['validate-examples'] in args.suites:
         run_example_tests()
+        is_run_example_tests = True
 
     # Run example tests with ros3 streaming examples
     # NOTE this requires h5py to be built with ROS3 support and the dandi package to be installed
@@ -342,12 +353,16 @@ def main():
         run_example_ros3_tests()
 
     # Run validation tests on the example NWB files generated above
-    if flags['validation'] in args.suites:
+    if flags['validate-examples'] in args.suites:
         validate_nwbs()
 
     # Run integration tests
     if flags['integration'] in args.suites:
         run_integration_tests(verbose=args.verbosity)
+
+    # Run validation module tests, requires coverage to be installed
+    if flags['validation-module'] in args.suites:
+        run_test_suite("tests/validation", "validation tests", verbose=args.verbosity)
 
     # Run backwards compatibility tests
     if flags['backwards'] in args.suites:
@@ -358,7 +373,7 @@ def main():
         run_test_suite("tests/integration/ros3", "pynwb ros3 streaming tests", verbose=args.verbosity)
 
     # Delete files generated from running example tests above
-    if flags['example'] in args.suites or flags['validation'] in args.suites:
+    if is_run_example_tests:
         clean_up_tests()
 
     final_message = 'Ran %s tests' % TOTAL
