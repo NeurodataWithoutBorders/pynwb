@@ -41,7 +41,7 @@ class TestReadNWBDandisets(TestCase):
             s3_url = first_asset.get_content_url(follow_redirects=1, strip_query=True)
 
             try:
-                with NWBHDF5IO(path=s3_url, load_namespaces=True, driver="ros3") as io:
+                with NWBHDF5IO(path=s3_url, driver="ros3") as io:
                     io.read()
             except Exception as e:
                 print(traceback.format_exc())

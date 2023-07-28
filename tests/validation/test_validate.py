@@ -222,13 +222,13 @@ class TestValidateFunction(TestCase):
 
     def test_validate_io_cached_extension(self):
         """Test that validating a file with cached spec against its cached namespaces succeeds."""
-        with NWBHDF5IO('tests/back_compat/2.1.0_nwbfile_with_extension.nwb', 'r', load_namespaces=True) as io:
+        with NWBHDF5IO('tests/back_compat/2.1.0_nwbfile_with_extension.nwb', 'r') as io:
             errors = validate(io)
             self.assertEqual(errors, [])
 
     def test_validate_io_cached_extension_pass_ns(self):
         """Test that validating a file with cached extension spec against the extension namespace succeeds."""
-        with NWBHDF5IO('tests/back_compat/2.1.0_nwbfile_with_extension.nwb', 'r', load_namespaces=True) as io:
+        with NWBHDF5IO('tests/back_compat/2.1.0_nwbfile_with_extension.nwb', 'r') as io:
             errors = validate(io, 'ndx-testextension')
             self.assertEqual(errors, [])
 
@@ -237,9 +237,7 @@ class TestValidateFunction(TestCase):
         For back-compatability, test that validating a file with cached extension spec against the core
         namespace succeeds when using the `io` + `namespace` keywords.
         """
-        with NWBHDF5IO(
-            path='tests/back_compat/2.1.0_nwbfile_with_extension.nwb', mode='r', load_namespaces=True
-        ) as io:
+        with NWBHDF5IO(path='tests/back_compat/2.1.0_nwbfile_with_extension.nwb', mode='r') as io:
             results = validate(io=io, namespace="core")
             self.assertEqual(results, [])
 

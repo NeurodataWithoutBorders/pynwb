@@ -542,7 +542,7 @@ class TestCacheSpec(TestCase):
                           lab='Chang Lab')
         with NWBHDF5IO(self.path, 'w') as io:
             io.write(nwbfile)
-        with NWBHDF5IO(self.path, 'r', load_namespaces=True) as reader:
+        with NWBHDF5IO(self.path, 'r') as reader:
             nwbfile = reader.read()
 
 
@@ -564,7 +564,7 @@ class TestNoCacheSpec(TestCase):
             io.write(nwbfile, cache_spec=False)
 
         with self.assertWarnsWith(UserWarning, "No cached namespaces found in %s" % self.path):
-            with NWBHDF5IO(self.path, 'r', load_namespaces=True) as reader:
+            with NWBHDF5IO(self.path, 'r') as reader:
                 nwbfile = reader.read()
 
 
