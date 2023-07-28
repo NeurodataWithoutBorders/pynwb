@@ -9,9 +9,11 @@ from pynwb.base import (
     TimeSeriesReference,
     ImageReferences
 )
+from pynwb.testing.mock.base import mock_TimeSeries
 from pynwb.testing import TestCase
 from hdmf.data_utils import DataChunkIterator
 from hdmf.backends.hdf5 import H5DataIO
+from numpy.testing import assert_array_equal
 
 
 class TestProcessingModule(TestCase):
@@ -385,6 +387,13 @@ class TestTimeSeries(TestCase):
                 unit="grams",
                 timestamps=[0.3, 0.4, 0.5, 0.6, 0.7, 0.8],
             )
+
+    def test_get_timestamps(self):
+        time_series = mock_TimeSeries(data=[1, 2, 3], rate=40.0, starting_time=30.0)
+        assert_array_equal(time_series.get_timestamps(), [30, 30+1/40, 30+2/40])
+
+        time_series = mock_TimeSeries(data=[1, 2, 3], timestamps=[3, 4, 5], rate=None)
+        assert_array_equal(time_series.get_timestamps(), [3, 4, 5])
 
 
 class TestImage(TestCase):

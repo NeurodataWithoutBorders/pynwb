@@ -281,6 +281,12 @@ class TimeSeries(NWBDataInterface):
     def time_unit(self):
         return self.__time_unit
 
+    def get_timestamps(self):
+        if self.fields.get('timestamps'):
+            return self.timestamps
+        else:
+            return np.arange(len(self.data)) / self.rate + self.starting_time
+
 
 @register_class('Image', CORE_NAMESPACE)
 class Image(NWBData):
