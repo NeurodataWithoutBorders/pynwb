@@ -10,12 +10,10 @@ from pynwb.base import (
     TimeSeriesReference,
     ImageReferences
 )
-from pynwb.testing.mock.base import mock_TimeSeries
 from pynwb.testing import TestCase
 from pynwb.testing.mock.base import mock_TimeSeries
 from hdmf.data_utils import DataChunkIterator
 from hdmf.backends.hdf5 import H5DataIO
-from numpy.testing import assert_array_equal
 
 
 class TestProcessingModule(TestCase):
