@@ -222,16 +222,12 @@ class NWBHDF5IO(_HDF5IO):
         path, mode, manager, extensions, load_namespaces, file_obj, comm, driver, external_resources_path =\
             popargs('path', 'mode', 'manager', 'extensions', 'load_namespaces',
                     'file', 'comm', 'driver', 'external_resources_path', kwargs)
+
         # Define the BuildManager to use
-        if mode in 'wx':
-            # namespaces are not loaded when creating an NWBHDF5IO object in write mode
+        if mode in 'wx' or manager is not None or extensions is not None:
             load_namespaces = False
 
         if load_namespaces:
-            if manager is not None:
-                warn("loading namespaces from file - ignoring 'manager'")
-            if extensions is not None:
-                warn("loading namespaces from file - ignoring 'extensions' argument")
 
             tm = get_type_map()
             super().load_namespaces(tm, path, file=file_obj, driver=driver)
