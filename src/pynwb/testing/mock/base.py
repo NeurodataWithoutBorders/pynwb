@@ -18,6 +18,7 @@ def mock_TimeSeries(
     control=None,
     control_description=None,
     continuity=None,
+    offset=0.,
 ):
     return TimeSeries(
         name=name or name_generator("TimeSeries"),
@@ -33,4 +34,5 @@ def mock_TimeSeries(
         control=control,
         control_description=control_description,
         continuity=continuity,
+        offset=offset,
     )
