@@ -4,7 +4,6 @@ for reading and writing data in NWB format
 import os.path
 from pathlib import Path
 from copy import deepcopy
-from warnings import warn
 import h5py
 
 from hdmf.spec import NamespaceCatalog
