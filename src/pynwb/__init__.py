@@ -205,7 +205,8 @@ class NWBHDF5IO(_HDF5IO):
              'doc': 'the mode to open the HDF5 file with, one of ("w", "r", "r+", "a", "w-", "x")',
              'default': 'r'},
             {'name': 'load_namespaces', 'type': bool,
-             'doc': 'whether or not to load cached namespaces from given path - not applicable in write mode',
+             'doc': ('whether or not to load cached namespaces from given path - not applicable in write mode '
+                     'or when `manager` is not None or when `extensions` is not None'),
              'default': True},
             {'name': 'manager', 'type': BuildManager, 'doc': 'the BuildManager to use for I/O', 'default': None},
             {'name': 'extensions', 'type': (str, TypeMap, list),
