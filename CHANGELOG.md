@@ -3,7 +3,8 @@
 ## PyNWB 2.5.0 (Upcoming)
 
 ### Enhancements and minor changes
-- Add `TimeSeries.get_timestamps`. @bendichter [#1741](https://github.com/NeurodataWithoutBorders/pynwb/pull/1741)
+- Add `TimeSeries.get_timestamps()`. @bendichter [#1741](https://github.com/NeurodataWithoutBorders/pynwb/pull/1741)
+- Add `TimeSeries.get_data_in_units()`. @bendichter [#1745](https://github.com/NeurodataWithoutBorders/pynwb/pull/1745)
 
 ## PyNWB 2.4.1 (July 26, 2023)
 - Stop running validation tests as part of integration tests. They cause issues in CI and can be run separately. @rly [#1740](https://github.com/NeurodataWithoutBorders/pynwb/pull/1740)
