@@ -7,9 +7,9 @@ neurodata objects. However, this can be quite laborious for some types. For inst
 :py:class:`~hdmf.common.table.DynamicTableRegion` of a :py:class:`~pynwb.ophys.PlaneSegmentation` table
 with the appropriate rows. This object in turn requires input of an :py:class:`~pynwb.ophys.ImageSegmentation` object,
 which in turn requires a :py:class:`~pynwb.device.Device` and an :py:class:`~pynwb.ophys.OpticalChannel` object. In
-the end, creating a single neurodata object in this case requires the creation of 5 other objects. ``testing.mock``
-is a module that creates boilerplate objects with a single line of code that can be used for testing. In this case, you
-could simply run
+the end, creating a single neurodata object in this case requires the creation of 5 other objects.
+:py:mod:`.testing.mock` is a module that creates boilerplate objects with a single line of code that can be used for
+testing. In this case, you could simply run
 
 .. code-block:: python
 
@@ -27,6 +27,44 @@ necessary neurodata types. You can customize any of these fields just as you wou
     from pynwb.testing.mock.ophys import mock_RoiResponseSeries
 
     roi_response_series = mock_RoiResponseSeries(data=[[1,2,3], [1,2,3]])
+
+
+If you want to create objects and automatically add them to an :py:class:`~pynwb.file.NWBFile`, create an
+:py:class:`~pynwb.file.NWBFile` and pass it into the mock function:
+
+.. code-block:: python
+
+    from pynwb.testing.mock.file import mock_NWBFile
+    from pynwb.testing.mock.ophys import mock_RoiResponseSeries
+
+    nwbfile = mock_NWBFile()
+    mock_RoiResponseSeries(nwbfile=nwbfile)
+
+Now this NWBFile contains an :py:class:`~pynwb.ophys.RoiResponseSeries` and all the upstream classes:
+
+.. code-block:: python
+
+    print(nwbfile)
+
+    root pynwb.file.NWBFile at 0x4335131760
+    Fields:
+      devices: {
+        Device <class 'pynwb.device.Device'>,
+        Device2 <class 'pynwb.device.Device'>
+      }
+      file_create_date: [datetime.datetime(2023, 6, 26, 21, 56, 44, 322249, tzinfo=tzlocal())]
+      identifier: 3c13e816-a50f-49a9-85ec-93b9944c3e79
+      imaging_planes: {
+        ImagingPlane <class 'pynwb.ophys.ImagingPlane'>,
+        ImagingPlane2 <class 'pynwb.ophys.ImagingPlane'>
+      }
+      processing: {
+        ophys <class 'pynwb.base.ProcessingModule'>
+      }
+      session_description: session_description
+      session_start_time: 1970-01-01 00:00:00-05:00
+      timestamps_reference_time: 1970-01-01 00:00:00-05:00
+
 
 Name generator
 --------------
