@@ -22,6 +22,7 @@ def mock_TimeSeries(
     control_description=None,
     continuity=None,
     nwbfile: Optional[NWBFile] = None,
+    offset=0.,
 ) -> TimeSeries:
     time_series = TimeSeries(
         name=name or name_generator("TimeSeries"),
@@ -37,6 +38,7 @@ def mock_TimeSeries(
         control=control,
         control_description=control_description,
         continuity=continuity,
+        offset=offset,
     )
 
     if nwbfile is not None:
