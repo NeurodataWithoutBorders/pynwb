@@ -287,6 +287,9 @@ class TimeSeries(NWBDataInterface):
         else:
             return np.arange(len(self.data)) / self.rate + self.starting_time
 
+    def get_data_in_units(self):
+        return np.asarray(self.data) * self.conversion + self.offset
+
 
 @register_class('Image', CORE_NAMESPACE)
 class Image(NWBData):
