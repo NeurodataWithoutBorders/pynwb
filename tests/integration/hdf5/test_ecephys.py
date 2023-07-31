@@ -106,8 +106,9 @@ class MultiElectricalSeriesIOMixin(AcquisitionH5IOMixin):
         data2 = list(zip(reversed(range(10)), reversed(range(10, 20))))
         timestamps = list(map(lambda x: x/10., range(10)))
         es1 = ElectricalSeries(name='test_eS1', data=data1, electrodes=region1, timestamps=timestamps)
-        es2 = ElectricalSeries(name='test_eS2', data=data2, electrodes=region2, channel_conversion=[4., .4],
-                               timestamps=timestamps)
+        es2 = ElectricalSeries(
+            name='test_eS2', data=data2, electrodes=region2, channel_conversion=[4., .4], timestamps=timestamps
+        )
         return es1, es2
 
     def addContainer(self, nwbfile):
