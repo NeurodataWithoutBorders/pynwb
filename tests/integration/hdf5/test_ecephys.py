@@ -1,7 +1,17 @@
 from hdmf.common import DynamicTableRegion
 
-from pynwb.ecephys import ElectrodeGroup, ElectricalSeries, FilteredEphys, LFP, Clustering, ClusterWaveforms,\
-                          SpikeEventSeries, EventWaveform, EventDetection, FeatureExtraction
+from pynwb.ecephys import (
+    ElectrodeGroup,
+    ElectricalSeries,
+    FilteredEphys,
+    LFP,
+    Clustering,
+    ClusterWaveforms,
+    SpikeEventSeries,
+    EventWaveform,
+    EventDetection,
+    FeatureExtraction,
+)
 from pynwb.device import Device
 from pynwb.file import ElectrodeTable as get_electrode_table
 from pynwb.testing import NWBH5IOMixin, AcquisitionH5IOMixin, TestCase

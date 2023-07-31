@@ -2,8 +2,18 @@ import warnings
 
 import numpy as np
 
-from pynwb.ecephys import ElectricalSeries, SpikeEventSeries, EventDetection, Clustering, EventWaveform,\
-                          ClusterWaveforms, LFP, FilteredEphys, FeatureExtraction, ElectrodeGroup
+from pynwb.ecephys import (
+    ElectricalSeries,
+    SpikeEventSeries,
+    EventDetection,
+    Clustering,
+    EventWaveform,
+    ClusterWaveforms,
+    LFP,
+    FilteredEphys,
+    FeatureExtraction,
+    ElectrodeGroup,
+)
 from pynwb.device import Device
 from pynwb.file import ElectrodeTable
 from pynwb.testing import TestCase
