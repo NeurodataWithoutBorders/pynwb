@@ -1,4 +1,4 @@
-from pynwb.resources import ExternalResources
+from pynwb.resources import HERD
 from pynwb.testing import TestCase
 
 
@@ -7,5 +7,5 @@ class TestNWBContainer(TestCase):
         """
         Test constructor
         """
-        er = ExternalResources()
+        er = HERD()
         self.assertIsInstance(er, ExternalResources)

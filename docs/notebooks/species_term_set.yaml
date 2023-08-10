@@ -1,0 +1,24 @@
+id: noteeooks/species_example
+name: Species
+prefixes:
+  NCBI_TAXON: https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?mode=Info&id=
+  Ensemble: https://rest.ensembl.org/taxonomy/id/
+imports:
+  - linkml:types
+default_range: string
+
+enums:
+  Species:
+    permissible_values:
+      Homo sapiens:
+        description: Humans
+        meaning: NCBI_TAXON:9606
+      Mus musculus:
+        description: Mouse
+        meaning: Ensemble:10090
+      Ursus arctos horribilis:
+        description: Brown Bear
+        meaning: NCBI_TAXON:116960
+      Myrmecophaga tridactyla:
+        description: Ant Eater
+        meaning: NCBI_TAXON:71006

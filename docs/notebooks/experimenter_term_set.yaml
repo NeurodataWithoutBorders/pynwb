@@ -1,0 +1,17 @@
+id: notebooks/species_example
+name: Experimenter
+prefixes:
+  ORCID: https://orcid.org/
+imports:
+  - linkml:types
+default_range: string
+
+enums:
+  Species:
+    permissible_values:
+      Dichter, Benjamin K.:
+        description: The ORCiD
+        meaning: ORCID:0000-0001-5725-6910
+      Rubel, Oliver:
+        description: The ORCiD
+        meaning: ORCID:0000-0001-9902-1984
