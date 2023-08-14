@@ -75,7 +75,7 @@ class AbstractFeatureSeries(TimeSeries):
             {'name': 'features', 'type': (list, np.ndarray), 'doc': 'the feature values for this time point'})
     def add_features(self, **kwargs):
         time, features = getargs('time', 'features', kwargs)
-        if type(self.timestamps) == list and type(self.data) is list:
+        if isinstance(self.timestamps, list) and isinstance(self.data, list):
             self.timestamps.append(time)
             self.data.append(features)
         else:
