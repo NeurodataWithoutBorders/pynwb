@@ -69,62 +69,47 @@ from pynwb import NWBHDF5IO
 #   :alt: selecting a folder on dandi
 #   :align: center
 #
-# Stream the data
-# ^^^^^^^^^^^^^^^
 #
-# Next, we will demonstrate how to stream the data from the DANDI archive without
-# having to download it to your machine.
-# Streaming data requires having HDF5 installed with the ROS3 (read-only S3) driver.
-# You can install from `conda-forge <https://conda-forge.org>`_ using ``conda``.
-# You might need to first uninstall a currently installed version of ``h5py``.
-#
-# .. code-block:: bash
-#
-#    $ pip uninstall h5py
-#    $ conda install -c conda-forge "h5py>=3.2"
-#
-# We can access the data stored in an S3 bucket using the DANDI API,
-# which can be installed from pip:
-#
-# .. code-block:: bash
-#
-#    $ pip install -U dandi
-#
-# .. seealso::
-#     You can learn more about streaming data in the :ref:`streaming` tutorial.
-#
-# Then, we will use the :py:class:`~dandi.dandiapi.DandiAPIClient` to obtain the S3 URL that points to the NWB File
-# stored in S3. We will need the identifier of the dataset (``dandiset_id``) and the path
-# to the NWB File.
-# We can read these from the DANDI archive URL where ``dandiset_id`` is "000004" and
-# file is located in "sub-P11HMH" folder.
-
-
-dandiset_id = "000004"
-filepath = "sub-P11HMH/sub-P11HMH_ses-20061101_ecephys+image.nwb"
-with DandiAPIClient() as client:
-    asset = client.get_dandiset(dandiset_id, "draft").get_asset_by_path(filepath)
-    s3_path = asset.get_content_url(follow_redirects=1, strip_query=True)
-
-####################
-# Using NWBHDF5IO
-# ---------------
+# Opening an NWB file with NWBHDF5IO
+# ----------------------------------
 #
 # Reading and writing NWB data is carried out using the :py:class:`~pynwb.NWBHDF5IO` class.
 # :py:class:`~pynwb.NWBHDF5IO` reads NWB data that is in the `HDF5 <https://www.hdfgroup.org/solutions/hdf5/>`_
 # storage format, a popular, hierarchical format for storing large-scale scientific data.
 #
-# The first argument to the constructor of :py:class:`~pynwb.NWBHDF5IO` is the ``file_path`` -
-# this can be the path that points to the downloaded file on your computer or
-# it can be an S3 URL.
-#
-# Use the ``read`` method to read the data into a :py:class:`~pynwb.file.NWBFile` object.
+# The first argument to the constructor of :py:class:`~pynwb.NWBHDF5IO` is the ``file_path``. Use the ``read`` method to
+# read the data into a :py:class:`~pynwb.file.NWBFile` object.
 
-# Open the file in read mode "r", and specify the driver as "ros3" for S3 files
-io = NWBHDF5IO(s3_path, mode="r", driver="ros3")
+filepath = "path/to/file.nwb"
+# Open the file in read mode "r",
+io = NWBHDF5IO(filepath, mode="r", load_namespaces=True)
 nwbfile = io.read()
 
-####################
+#######################################
+# :py:class:`~pynwb.NWBHDF5IO` can also be used as a context manager:
+
+with NWBHDF5IO(filepath, mode="r", load_namespaces=True) as io:
+    nwbfile = io.read()
+
+    # data accessible here
+
+# data not accessible here
+
+######################################
+# The advantage of using a context manager is that the file is closed automatically when the context finishes
+# successfully or if there is an error. Be aware that if you use this method, closing the context (unindenting the code)
+# will automatically close the :py:class:`~pynwb.NWBHDF5IO` object and the corresponding h5py File object. The data not
+# already read from the NWB file will then be inaccessible, so any code that reads data must be placed within the
+# context.
+
+#####################
+# .. seealso:: Streaming data
+#
+#   Instead of downloading data, another approach is to stream data directly from an archive. Streaming data allows you
+#   to download only the data you want from a file, so it can be a much better approach when the desired data files
+#   contain a lot of data you don't care about. There are several approaches to streaming NWB files, outlined in
+#   :ref:`streaming`.
+#
 # Access stimulus data
 # --------------------
 #
@@ -135,7 +120,7 @@ nwbfile.stimulus
 
 ####################
 # ``NWBFile.stimulus`` is a dictionary that can contain PyNWB objects representing
-# different types of data; such as images (grayscale, RGB) or time series of images.
+# different types of data, such as images (grayscale, RGB) or time series of images.
 # In this file, ``NWBFile.stimulus`` contains a single key "StimulusPresentation" with an
 # :py:class:`~pynwb.image.OpticalSeries` object representing what images were shown to the subject and at what times.
 
@@ -167,7 +152,7 @@ nwbfile.stimulus["StimulusPresentation"]
 # ------------------------
 # Data arrays are read passively from the NWB file.
 # Accessing the ``data`` attribute of the :py:class:`~pynwb.image.OpticalSeries` object
-# does not read the data values, but presents an HDF5 object that can be indexed to read data.
+# does not read the data values, but presents an :py:class:`h5py.Dataset` object that can be indexed to read data.
 # You can use the ``[:]`` operator to read the entire data array into memory.
 
 stimulus_presentation = nwbfile.stimulus["StimulusPresentation"]
@@ -298,8 +283,8 @@ trials_df = nwbfile.trials.to_dataframe()
 trials_df
 
 ####################
-# The :py:class:`~pynwb.file.NWBFile.stimulus` can be mapped one-to-one to each row (trial)
-# of :py:class:`~pynwb.file.NWBFile.trials` based on the ``stim_on_time`` column.
+# The stimulus can be mapped one-to-one to each row (trial) of
+# :py:class:`~pynwb.file.NWBFile.trials` based on the ``stim_on_time`` column.
 
 assert np.all(stimulus_presentation.timestamps[:] == trials_df.stim_on_time[:])
 
@@ -346,17 +331,14 @@ for time in stim_on_times_landscapes[:3]:
 #
 #    $ pip install -U nwbwidgets
 #
-# Then import the ``nwbwidgets`` package and run the ``nwb2widget()`` function on
+# Then import the :py:mod:`nwbwidgets` package and run the :py:func:`~nwbwidgets.view.nwb2widget` function on
 # the :py:class:`~pynwb.file.NWBFile` object.
 
-#####################
-#
-# .. code-block:: python
-#
-#     from nwbwidgets import nwb2widget
-#
-#     nwb2widget(nwbfile)
-#
+
+from nwbwidgets import nwb2widget
+
+nwb2widget(nwbfile)
+
 
 ####################
 #
