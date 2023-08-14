@@ -28,7 +28,6 @@ import matplotlib.pyplot as plt
 
 # sphinx_gallery_thumbnail_path = 'figures/gallery_thumbnails_read_basics.png'
 import numpy as np
-from dandi.dandiapi import DandiAPIClient
 
 from pynwb import NWBHDF5IO
 
