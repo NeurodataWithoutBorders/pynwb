@@ -146,6 +146,8 @@ intersphinx_mapping = {
     'pandas': ('https://pandas.pydata.org/pandas-docs/stable/', None),
     'dandi': ('https://dandi.readthedocs.io/en/stable/', None),
     'fsspec': ("https://filesystem-spec.readthedocs.io/en/latest/", None),
+    'nwbwidgets': ("https://nwb-widgets.readthedocs.io/en/latest/", None),
+    'nwb-overview': ("https://nwb-overview.readthedocs.io/en/latest/", None),
 }
 
 extlinks = {
