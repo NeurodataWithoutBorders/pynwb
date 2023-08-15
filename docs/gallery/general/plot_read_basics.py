@@ -87,6 +87,13 @@ download("https://api.dandiarchive.org/api/assets/0f57f0b0-f021-42bb-8eaa-56cd48
 #   Learn about all the different ways you can download data
 #   `here <https://www.dandiarchive.org/handbook/12_download/>`_
 #
+# .. seealso:: Streaming data
+#
+#   Instead of downloading data, another approach is to stream data directly from an archive. Streaming data allows you
+#   to download only the data you want from a file, so it can be a much better approach when the desired data files
+#   contain a lot of data you don't care about. There are several approaches to streaming NWB files, outlined in
+#   :ref:`streaming`.
+#
 # Opening an NWB file with NWBHDF5IO
 # ----------------------------------
 #
@@ -119,14 +126,6 @@ with NWBHDF5IO(filepath, mode="r", load_namespaces=True) as io2:
 # will automatically close the :py:class:`~pynwb.NWBHDF5IO` object and the corresponding h5py File object. The data not
 # already read from the NWB file will then be inaccessible, so any code that reads data must be placed within the
 # context.
-
-#####################
-# .. seealso:: Streaming data
-#
-#   Instead of downloading data, another approach is to stream data directly from an archive. Streaming data allows you
-#   to download only the data you want from a file, so it can be a much better approach when the desired data files
-#   contain a lot of data you don't care about. There are several approaches to streaming NWB files, outlined in
-#   :ref:`streaming`.
 #
 # Access stimulus data
 # --------------------
