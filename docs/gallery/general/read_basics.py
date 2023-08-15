@@ -24,9 +24,10 @@ We will briefly show tools for exploring NWB Files interactively and refer the r
 The following examples will reference variables that may not be defined within the block they are used in. For
 clarity, we define them here:
 """
-import matplotlib.pyplot as plt
 
 # sphinx_gallery_thumbnail_path = 'figures/gallery_thumbnails_read_basics.png'
+
+import matplotlib.pyplot as plt
 import numpy as np
 
 from pynwb import NWBHDF5IO
@@ -41,9 +42,13 @@ from pynwb import NWBHDF5IO
 # while they performed a recognition memory task.
 #
 # Download the data
-# ^^^^^^^^^^^^^^^^^
+# -----------------
 # First, we will demonstrate how to download an NWB data file from `DANDI <https://gui.dandiarchive.org/>`_
 # to your machine.
+#
+# Download using the DANDI Web UI
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+# You can download files directly from the DANDI website.
 #
 # 1. Go to the DANDI archive and open `this <https://gui.dandiarchive.org/dandiset/000004/draft>`_ dataset
 # 2. List the files in this dataset by clicking the "Files" button in Dandiset Actions (top right column of the page).
@@ -68,6 +73,19 @@ from pynwb import NWBHDF5IO
 #   :alt: selecting a folder on dandi
 #   :align: center
 #
+# Downloading data programmatically
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+# You can also download data using the `dandi` Python module.
+
+from dandi.download import download
+
+download("https://api.dandiarchive.org/api/assets/0f57f0b0-f021-42bb-8eaa-56cd482e2a29/download/", ".")
+
+######################################################
+# .. seealso::
+#
+#   Learn about all the different ways you can download data
+#   `here <https://www.dandiarchive.org/handbook/12_download/>`_
 #
 # Opening an NWB file with NWBHDF5IO
 # ----------------------------------
