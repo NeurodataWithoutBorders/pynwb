@@ -33,11 +33,9 @@ import numpy as np
 from pynwb import NWBHDF5IO
 
 ####################
-# Read the data
-# -------------
-# We will use the `DANDI <https://gui.dandiarchive.org/>`_ neurophysiology data archive
-# to access an NWB File. We will use data from one session of an experiment by
-# `Chandravadia et al. (2020) <https://www.nature.com/articles/s41597-020-0415-9>`_, where
+# We will access NWB data on the `DANDI Archive <https://gui.dandiarchive.org/>`_,
+# and demonstrate reading one session of an experiment by
+# `Chandravadia et al. (2020) <https://www.nature.com/articles/s41597-020-0415-9>`_. In this study,
 # the authors recorded single neuron activity from the medial temporal lobes of human subjects
 # while they performed a recognition memory task.
 #
@@ -75,7 +73,7 @@ from pynwb import NWBHDF5IO
 #
 # Downloading data programmatically
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-# You can also download data using the `dandi` Python module.
+# Alternatively, you can download data using the `dandi` Python module.
 
 from dandi.download import download
 
@@ -84,7 +82,7 @@ download("https://api.dandiarchive.org/api/assets/0f57f0b0-f021-42bb-8eaa-56cd48
 ######################################################
 # .. seealso::
 #
-#   Learn about all the different ways you can download data
+#   Learn about all the different ways you can download data from the DANDI Archive
 #   `here <https://www.dandiarchive.org/handbook/12_download/>`_
 #
 # .. seealso:: Streaming data
@@ -144,27 +142,6 @@ nwbfile.stimulus
 nwbfile.stimulus["StimulusPresentation"]
 
 ####################
-# .. code-block:: none
-#
-#     {'StimulusPresentation': StimulusPresentation pynwb.image.OpticalSeries at 0x140385583638560
-#     Fields:
-#       comments: no comments
-#       conversion: 1.0
-#       data: <HDF5 dataset "data": shape (200, 400, 300, 3), type "|u1">
-#       description: no description
-#       dimension: <HDF5 dataset "dimension": shape (3,), type "<i4">
-#       distance: 0.7
-#       field_of_view: <HDF5 dataset "field_of_view": shape (3,), type "<f8">
-#       format: raw
-#       interval: 1
-#       orientation: lower left
-#       resolution: -1.0
-#       timestamps: <HDF5 dataset "timestamps": shape (200,), type "<f8">
-#       timestamps_unit: seconds
-#       unit: pixels
-#     }
-#
-#
 # Lazy loading of datasets
 # ------------------------
 # Data arrays are read passively from the NWB file.
