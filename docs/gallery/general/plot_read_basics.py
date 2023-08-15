@@ -183,10 +183,6 @@ all_stimulus_data = stimulus_presentation.data[:]
 stimulus_presentation.data.shape
 
 ####################
-# .. code-block:: none
-#
-#     (200, 400, 300, 3)
-#
 # This :py:class:`~pynwb.image.OpticalSeries` data contains 200 images of size 400x300 pixels with three channels
 # (red, green, and blue).
 #
@@ -203,13 +199,6 @@ image = image[..., ::-1]
 plt.imshow(image, aspect="auto")
 
 ####################
-#
-# .. image:: ../../_static/demo_nwbfile_stimulus_plot_1.png
-#   :width: 500
-#   :alt: NWBFile stimulus image
-#   :align: center
-#
-#
 # Access single unit data
 # -----------------------
 # Data and metadata about sorted single units are stored in :py:class:`~pynwb.misc.Units`
@@ -226,7 +215,7 @@ units = nwbfile.units
 # We can view the single unit data as a :py:class:`~pandas.DataFrame`.
 
 units_df = units.to_dataframe()
-units_df
+units_df.head()
 
 ####################
 # To access the spike times of the first single unit, index :py:class:`~pynwb.file.NWBFile.units` with the column
@@ -236,12 +225,6 @@ units_df
 units["spike_times"][0]
 
 ####################
-# .. code-block:: none
-#
-#     array([5932.811644, 6081.077044, 6091.982364, 6093.127644, 6095.068204,
-#        6097.438244, 6116.694804, 6129.827604, 6134.825004, 6142.583924, ...])
-#
-#
 # Visualize spiking activity relative to stimulus onset
 # -----------------------------------------------------
 # We can look at when these single units spike relative to when image stimuli were presented to the subject.
@@ -278,12 +261,6 @@ for unit in range(3):
     axs[1].axvline(0, color=[0.5, 0.5, 0.5])
 
 ####################
-#
-# .. image:: ../../_static/demo_nwbfile_units_plot.png
-#   :width: 500
-#   :alt: NWBFile units visualization
-#   :align: center
-#
 # Access Trials
 # -------------
 # Trials are stored as :py:class:`~pynwb.epoch.TimeIntervals` object which is a subclass
@@ -297,7 +274,7 @@ for unit in range(3):
 # Similarly to :py:class:`~pynwb.misc.Units`, we can view trials as a :py:class:`pandas.DataFrame`.
 
 trials_df = nwbfile.trials.to_dataframe()
-trials_df
+trials_df.head()
 
 ####################
 # The stimulus can be mapped one-to-one to each row (trial) of
@@ -323,12 +300,6 @@ for time in stim_on_times_landscapes.iloc[:3]:
     plt.imshow(img, aspect="auto")
 
 ####################
-#
-# .. image:: ../../_static/demo_nwbfile_stimulus_plot_2.png
-#   :width: 500
-#   :alt: NWBFile landscapes stimuli image
-#   :align: center
-#
 # Exploring the NWB file
 # ----------------------
 # So far we have explored the NWB file by printing the :py:class:`~pynwb.file.NWBFile`
