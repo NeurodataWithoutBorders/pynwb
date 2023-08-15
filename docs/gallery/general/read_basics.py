@@ -97,7 +97,7 @@ download("https://api.dandiarchive.org/api/assets/0f57f0b0-f021-42bb-8eaa-56cd48
 # The first argument to the constructor of :py:class:`~pynwb.NWBHDF5IO` is the ``file_path``. Use the ``read`` method to
 # read the data into a :py:class:`~pynwb.file.NWBFile` object.
 
-filepath = "path/to/file.nwb"
+filepath = "sub-P11HMH_ses-20061101_ecephys+image.nwb"
 # Open the file in read mode "r",
 io = NWBHDF5IO(filepath, mode="r", load_namespaces=True)
 nwbfile = io.read()
