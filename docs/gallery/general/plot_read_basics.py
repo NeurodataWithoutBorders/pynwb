@@ -101,12 +101,13 @@ filepath = "sub-P11HMH_ses-20061101_ecephys+image.nwb"
 # Open the file in read mode "r",
 io = NWBHDF5IO(filepath, mode="r", load_namespaces=True)
 nwbfile = io.read()
+nwbfile
 
 #######################################
 # :py:class:`~pynwb.NWBHDF5IO` can also be used as a context manager:
 
-with NWBHDF5IO(filepath, mode="r", load_namespaces=True) as io:
-    nwbfile = io.read()
+with NWBHDF5IO(filepath, mode="r", load_namespaces=True) as io2:
+    nwbfile2 = io2.read()
 
     # data accessible here
 
@@ -311,7 +312,7 @@ assert np.all(stimulus_presentation.timestamps[:] == trials_df.stim_on_time[:])
 stim_on_times_landscapes = trials_df[
     trials_df.category_name == "landscapes"
 ].stim_on_time
-for time in stim_on_times_landscapes[:3]:
+for time in stim_on_times_landscapes.iloc[:3]:
     img = np.squeeze(
         stimulus_presentation.data[
             np.where(stimulus_presentation.timestamps[:] == time)
@@ -333,46 +334,5 @@ for time in stim_on_times_landscapes[:3]:
 # ----------------------
 # So far we have explored the NWB file by printing the :py:class:`~pynwb.file.NWBFile`
 # object and accessing its attributes, but it may be useful to explore the data in a
-# more interactive, visual way.
-#
-# You can use `NWBWidgets <https://github.com/NeurodataWithoutBorders/nwbwidgets>`_,
-# a package containing interactive widgets for visualizing NWB data,
-# or you can use the `HDFView <https://www.hdfgroup.org/downloads/hdfview>`_
-# tool, which can open any generic HDF5 file, which an NWB file is.
-#
-# NWBWidgets
-# ^^^^^^^^^^
-# Install NWBWidgets using pip install:
-#
-# .. code-block:: bash
-#
-#    $ pip install -U nwbwidgets
-#
-# Then import the :py:mod:`nwbwidgets` package and run the :py:func:`~nwbwidgets.view.nwb2widget` function on
-# the :py:class:`~pynwb.file.NWBFile` object.
-
-
-from nwbwidgets import nwb2widget
-
-nwb2widget(nwbfile)
-
-
-####################
-#
-# .. image:: ../../_static/demo_nwbwidgets.png
-#   :width: 700
-#   :alt: inspect nwb file with nwbwidgets
-#   :align: center
-#
-#
-# HDFView
-# ^^^^^^^
-# To use `HDFView <https://www.hdfgroup.org/downloads/hdfview>`_ to inspect and explore the NWB file,
-# download and install HDFView from `here <https://www.hdfgroup.org/downloads/hdfview>`_
-# and then open the NWB file using the application.
-#
-# .. image:: ../../_static/demo_hdfview.png
-#   :width: 700
-#   :alt: inspect nwb file with hdfview
-#   :align: center
-#
+# more interactive, visual way. See :ref:`analysistools-explore` for an updated list of programs for
+# exploring NWB files.
