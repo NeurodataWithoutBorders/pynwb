@@ -120,8 +120,8 @@ with NWBHDF5IO(s3_url, mode='r', load_namespaces=True, driver='ros3') as io:
 # Method 3: remfile
 # -----------------
 # remfile is another library that enables indexing and streaming of files in s3. remfile is simple, fast, and allows for
-# caching of data in the local filesystem. The one caveat of remfile is that it is a very new project that has not
-# been tested in a variety of use-cases. You can install remfile with pip:
+# caching of data in the local filesystem. The one caveat of remfile is that it is a very new project that has not been
+# tested in a variety of use-cases. You can install remfile with pip:
 #
 # .. code-block:: bash
 #
@@ -143,15 +143,14 @@ with h5py.File(file, "r") as f:
 ################################################
 # Which streaming method to choose?
 # ---------------------------------
+# When choosing a streaming method, consider these comparisons:
 #
-# fsspec has many advantages over ros3:
-#
-# 1. fsspec is easier to install
-# 2. fsspec supports caching, which will dramatically speed up repeated requests for the
-#    same region of data
-# 3. fsspec automatically retries when s3 fails to return.
-# 4. fsspec works with other storage backends and
-# 5. fsspec works with other types of files.
-# 6. In our hands, fsspec is faster out-of-the-box.
+# 1. fsspec and remfile are easier to install than ros3, requiring a simple pip-install that works across platforms.
+# 2. fsspec and remfile support caching, which will dramatically speed up repeated requests for the same region of data.
+# 3. fsspec and remfile automatically retries when s3 fails to return due to brief connection errors.
+# 4. fsspec works with other storage backends. remfile and ros3 only work with s3.
+# 5. fsspec and remfile work with other types of files. ros3 is a driver designed specifically for HDF5 files.
+# 6. In our hands, remfile is fastest, then fsspec, then ros3, though this could vary by file and access pattern.
+# 7. fsspec and ros3 are well-supported and popular community tool. remfile is much newer and not as well adopted.
 #
 # For these reasons, we would recommend use fsspec for most Python users.
