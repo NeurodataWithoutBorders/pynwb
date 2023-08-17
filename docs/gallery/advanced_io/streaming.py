@@ -117,6 +117,30 @@ with NWBHDF5IO(s3_url, mode='r', load_namespaces=True, driver='ros3') as io:
     print(nwbfile.acquisition['lick_times'].time_series['lick_left_times'].data[:])
 
 ##################################################
+# Method 3: remfile
+# -----------------
+# remfile is another library that enables indexing and streaming of files in s3. remfile is simple, fast, and allows for
+# caching of data in the local filesystem. The one caveat of remfile is that it is a very new project that has not
+# been tested in a variety of use-cases. You can install remfile with pip:
+#
+# .. code-block:: bash
+#
+#   pip install remfile
+#
+# Then remfile can be used similarly to fsspec
+
+import h5py
+from pynwb import NWBHDF5IO
+import remfile
+
+file = remfile.File(s3_url)
+
+with h5py.File(file, "r") as f:
+    with NWBHDF5IO(file=file, load_namespaces=True) as io:
+        nwbfile = io.read()
+        print(nwbfile.acquisition["lick_times"].time_series["lick_left_times"].data[:])
+
+################################################
 # Which streaming method to choose?
 # ---------------------------------
 #
