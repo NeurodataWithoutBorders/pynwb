@@ -110,7 +110,6 @@ jobs:
           submodules: 'recursive'
           fetch-depth: 0  # tags are required for versioneer to determine the version
 
-
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
