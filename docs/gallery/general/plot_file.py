@@ -122,10 +122,11 @@ More commonly, you will be creating instances of classes that extend this class.
 NWB organizes data into different groups depending on the type of data. Groups can be thought of
 as folders within the file. Here are some of the groups within an :py:class:`~pynwb.file.NWBFile` and the types of
 data they are intended to store:
- * **acquisition**: raw, acquired data that should never change
- * **processing**: processed data, typically the results of preprocessing algorithms and could change
- * **analysis**: results of data analysis
- * **stimuli**: stimuli used in the experiment (e.g., images, videos, light pulses)
+
+* **acquisition**: raw, acquired data that should never change
+* **processing**: processed data, typically the results of preprocessing algorithms and could change
+* **analysis**: results of data analysis
+* **stimuli**: stimuli used in the experiment (e.g., images, videos, light pulses)
 
 The following examples will reference variables that may not be defined within the block they are used in. For
 clarity, we define them here:

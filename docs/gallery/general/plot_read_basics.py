@@ -246,7 +246,7 @@ for unit in range(3):
 # and additional metadata.
 #
 # .. seealso::
-#     You can learn more about trials in the :ref:`basic_trials` tutorial section.
+#     You can learn more about trials in the :ref:`time_intervals` tutorial.
 #
 # Similarly to :py:class:`~pynwb.misc.Units`, we can view trials as a :py:class:`pandas.DataFrame`.
 
