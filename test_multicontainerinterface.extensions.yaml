@@ -1,0 +1,19 @@
+groups:
+- neurodata_type_def: PotatoSack
+  neurodata_type_inc: NWBDataInterface
+  name: potato_sack
+  doc: A sack of potatoes
+  quantity: '?'
+  groups:
+  - neurodata_type_def: Potato
+    neurodata_type_inc: NWBDataInterface
+    doc: A potato
+    quantity: '*'
+    attributes:
+    - name: weight
+      dtype: float
+      doc: weight of potato
+    - name: age
+      dtype: float
+      doc: age of potato
+      required: false

@@ -150,7 +150,7 @@ class Subject(NWBContainer):
 
 
 @register_class('NWBFile', CORE_NAMESPACE)
-class NWBFile(MultiContainerInterface, ExternalResourcesManager):
+class NWBFile(MultiContainerInterface, HERDManager):
     """
     A representation of an NWB file.
     """

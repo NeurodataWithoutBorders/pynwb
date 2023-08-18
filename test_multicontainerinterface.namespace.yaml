@@ -1,0 +1,9 @@
+namespaces:
+- doc: test_multicontainerinterface extensions
+  name: test_multicontainerinterface
+  schema:
+  - namespace: core
+    neurodata_types:
+    - NWBDataInterface
+  - source: test_multicontainerinterface.extensions.yaml
+  version: 0.1.0

@@ -1,0 +1,1059 @@
+======================================================================
+2023-08-18 14:18:32,255 - INFO - running pynwb unit tests
+test_init (unit.test_base.TestImage) ... test_images (unit.test_base.TestImages) ... test_add_data_interface (unit.test_base.TestProcessingModule)
+Test adding a data interface to a ProcessingModule using add(...) and retrieving it. ... test_deprecated_add_container (unit.test_base.TestProcessingModule) ... test_deprecated_add_data_interface (unit.test_base.TestProcessingModule) ... test_deprecated_get_container (unit.test_base.TestProcessingModule) ... test_deprecated_get_data_interface (unit.test_base.TestProcessingModule) ... test_get_data_interface (unit.test_base.TestProcessingModule)
+Test adding a data interface to a ProcessingModule and retrieving it using get(...). ... test_getitem (unit.test_base.TestProcessingModule)
+Test adding a data interface to a ProcessingModule and retrieving it using __getitem__(...). ... test_init (unit.test_base.TestProcessingModule)
+Test creating a ProcessingModule. ... test_bad_continuity_timeseries (unit.test_base.TestTimeSeries) ... test_conflicting_time_args (unit.test_base.TestTimeSeries) ... test_data_timeseries (unit.test_base.TestTimeSeries)
+Test that setting a TimeSeries.data to another TimeSeries links the data correctly. ... test_dataio_dci_data (unit.test_base.TestTimeSeries) ... test_dataio_dci_timestamps (unit.test_base.TestTimeSeries) ... test_dataio_list_data (unit.test_base.TestTimeSeries) ... test_dataio_list_timestamps (unit.test_base.TestTimeSeries) ... test_dci_data (unit.test_base.TestTimeSeries) ... test_dci_data_arr (unit.test_base.TestTimeSeries) ... test_dci_timestamps (unit.test_base.TestTimeSeries) ... test_dci_timestamps_arr (unit.test_base.TestTimeSeries) ... test_dimension_warning (unit.test_base.TestTimeSeries) ... test_get_data_in_units (unit.test_base.TestTimeSeries) ... test_get_timestamps (unit.test_base.TestTimeSeries) ... test_good_continuity_timeseries (unit.test_base.TestTimeSeries) ... test_init_conversion_offset (unit.test_base.TestTimeSeries) ... test_init_data_timestamps (unit.test_base.TestTimeSeries) ... test_init_datalink_set (unit.test_base.TestTimeSeries)
+Test creating a TimeSeries and that data_link is an empty set. ... test_init_no_parent (unit.test_base.TestTimeSeries)
+Test creating an empty TimeSeries and that it has no parent. ... test_init_rate (unit.test_base.TestTimeSeries) ... test_init_timestampslink_set (unit.test_base.TestTimeSeries)
+Test creating a TimeSeries and that timestamps_link is an empty set. ... test_no_starting_time (unit.test_base.TestTimeSeries)
+Test that if no starting_time is given, 0.0 is assumed. ... test_no_time (unit.test_base.TestTimeSeries) ... test_timestamps_timeseries (unit.test_base.TestTimeSeries)
+Test that setting a TimeSeries.timestamps to another TimeSeries links the timestamps correctly. ... test_check_types (unit.test_base.TestTimeSeriesReference) ... test_data_property (unit.test_base.TestTimeSeriesReference) ... test_data_property_bad_reference (unit.test_base.TestTimeSeriesReference) ... test_data_property_invalid_reference (unit.test_base.TestTimeSeriesReference) ... test_is_invalid (unit.test_base.TestTimeSeriesReference) ... test_is_valid (unit.test_base.TestTimeSeriesReference) ... test_is_valid_bad_index (unit.test_base.TestTimeSeriesReference) ... test_is_valid_no_num_samples (unit.test_base.TestTimeSeriesReference) ... test_timestamps_property (unit.test_base.TestTimeSeriesReference) ... test_timestamps_property_bad_reference (unit.test_base.TestTimeSeriesReference) ... test_timestamps_property_invalid_reference (unit.test_base.TestTimeSeriesReference) ... test_add_row (unit.test_base.TestTimeSeriesReferenceVectorData) ... test_add_row_get_length1_valid_data (unit.test_base.TestTimeSeriesReferenceVectorData)
+Get data from a TimeSeriesReferenceVectorData with one element and valid data ... test_add_row_restricted_type (unit.test_base.TestTimeSeriesReferenceVectorData) ... test_add_row_with_bad_tuple (unit.test_base.TestTimeSeriesReferenceVectorData) ... test_add_row_with_plain_tuple (unit.test_base.TestTimeSeriesReferenceVectorData) ... test_append (unit.test_base.TestTimeSeriesReferenceVectorData) ... test_append_get_length1_valid_data (unit.test_base.TestTimeSeriesReferenceVectorData)
+Get data from a TimeSeriesReferenceVectorData with one element and valid data ... test_append_restricted_type (unit.test_base.TestTimeSeriesReferenceVectorData) ... test_append_with_bad_tuple (unit.test_base.TestTimeSeriesReferenceVectorData) ... test_append_with_plain_tuple (unit.test_base.TestTimeSeriesReferenceVectorData) ... test_get_empty (unit.test_base.TestTimeSeriesReferenceVectorData)
+Get data from an empty TimeSeriesReferenceVectorData ... test_get_length1_invalid_data (unit.test_base.TestTimeSeriesReferenceVectorData)
+Get data from a TimeSeriesReferenceVectorData with one element and invalid data ... test_get_length5_valid_data (unit.test_base.TestTimeSeriesReferenceVectorData)
+Get data from a TimeSeriesReferenceVectorData with 5 elements ... test_get_length5_with_invalid_data (unit.test_base.TestTimeSeriesReferenceVectorData)
+Get data from a TimeSeriesReferenceVectorData with 5 elements ... test_init (unit.test_base.TestTimeSeriesReferenceVectorData) ... test_init (unit.test_behavior.BehavioralEpochsConstructor) ... test_init (unit.test_behavior.BehavioralEventsConstructor) ... test_init (unit.test_behavior.BehavioralTimeSeriesConstructor) ... test_init (unit.test_behavior.CompassDirectionConstructor) ... test_init (unit.test_behavior.EyeTrackingConstructor) ... test_init (unit.test_behavior.PositionConstructor) ... test_init (unit.test_behavior.PupilTrackingConstructor) ... test_gt_3_cols (unit.test_behavior.SpatialSeriesConstructor) ... test_init (unit.test_behavior.SpatialSeriesConstructor) ... test_set_unit (unit.test_behavior.SpatialSeriesConstructor) ... test_available_namespaces (unit.test_core.TestAvailableNamespaces) ... test_constructor (unit.test_core.TestNWBContainer)
+Test constructor ... test_nwbfields (unit.test_core.TestNWBContainer)
+Test that getters and setters work for nwbfields ... test_append_list (unit.test_core.TestNWBData) ... test_append_ndarray_2d (unit.test_core.TestNWBData) ... test_constructor (unit.test_core.TestNWBData)
+Test constructor ... test_extend_list (unit.test_core.TestNWBData) ... test_extend_ndarray_1d (unit.test_core.TestNWBData) ... test_extend_ndarray_2d (unit.test_core.TestNWBData) ... test_print_file (unit.test_core.TestPrint) ... test_constructor (unit.test_core_NWBContainer.TestNWBContainer)
+Test constructor ... test_nwbfields (unit.test_core_NWBContainer.TestNWBContainer)
+Test that getters and setters work for nwbfields ... test_init (unit.test_device.TestDevice) ... test_init (unit.test_ecephys.ClusterWaveformsConstructor) ... test_init (unit.test_ecephys.ClusteringConstructor) ... test_dimensions_warning (unit.test_ecephys.ElectricalSeriesConstructor) ... test_init (unit.test_ecephys.ElectricalSeriesConstructor) ... test_invalid_data_shape (unit.test_ecephys.ElectricalSeriesConstructor) ... test_link (unit.test_ecephys.ElectricalSeriesConstructor) ... test_init (unit.test_ecephys.ElectrodeGroupConstructor) ... test_init_position_bad (unit.test_ecephys.ElectrodeGroupConstructor) ... test_init_position_none (unit.test_ecephys.ElectrodeGroupConstructor) ... test_init (unit.test_ecephys.EventDetectionConstructor) ... test_init (unit.test_ecephys.EventWaveformConstructor) ... /Users/mavaylon/Research/NWB/hdmf2/hdmf/src/hdmf/common/table.py:1441: UserWarning: The linked table for DynamicTableRegion 'electrodes' does not share an ancestor with the DynamicTableRegion.
+  warn(msg)
+test_init (unit.test_ecephys.FeatureExtractionConstructor) ... test_invalid_init_mismatched_description (unit.test_ecephys.FeatureExtractionConstructor) ... test_invalid_init_mismatched_description2 (unit.test_ecephys.FeatureExtractionConstructor) ... test_invalid_init_mismatched_electrodes (unit.test_ecephys.FeatureExtractionConstructor) ... test_invalid_init_mismatched_event_times (unit.test_ecephys.FeatureExtractionConstructor) ... test_add_electrical_series (unit.test_ecephys.FilteredEphysTest) ... /Users/mavaylon/Research/NWB/hdmf2/hdmf/src/hdmf/common/table.py:1441: UserWarning: The linked table for DynamicTableRegion 'electrodes' does not share an ancestor with the DynamicTableRegion.
+  warn(msg)
+test_init (unit.test_ecephys.FilteredEphysTest) ... /Users/mavaylon/Research/NWB/hdmf2/hdmf/src/hdmf/common/table.py:1441: UserWarning: The linked table for DynamicTableRegion 'electrodes' does not share an ancestor with the DynamicTableRegion.
+  warn(msg)
+test_add_electrical_series (unit.test_ecephys.LFPTest) ... /Users/mavaylon/Research/NWB/hdmf2/hdmf/src/hdmf/common/table.py:1441: UserWarning: The linked table for DynamicTableRegion 'electrodes' does not share an ancestor with the DynamicTableRegion.
+  warn(msg)
+test_incorrect_timestamps (unit.test_ecephys.SpikeEventSeriesConstructor) ... test_init (unit.test_ecephys.SpikeEventSeriesConstructor) ... test_no_rate (unit.test_ecephys.SpikeEventSeriesConstructor) ... test_dataframe_roundtrip (unit.test_epoch.TimeIntervalsTest) ... test_dataframe_roundtrip_drop_ts (unit.test_epoch.TimeIntervalsTest) ... test_from_dataframe (unit.test_epoch.TimeIntervalsTest) ... test_from_dataframe_missing_required_cols (unit.test_epoch.TimeIntervalsTest) ... test_from_dataframe_missing_supplied_col (unit.test_epoch.TimeIntervalsTest) ... test_init (unit.test_epoch.TimeIntervalsTest) ... test_no_tags (unit.test_epoch.TimeIntervalsTest) ... test_legacy_format (unit.test_epoch_legacy.TestTimeIntervalsIO) ... test_roundtrip (unit.test_epoch_legacy.TestTimeIntervalsIO)
+Test whether the read Container has the same contents as the original Container and validate the file. ... test_roundtrip_export (unit.test_epoch_legacy.TestTimeIntervalsIO)
+Test whether the test Container read from an exported file has the same contents as the original test Container ... test_catch_dup_name (unit.test_extension.TestCatchDupNS) ... test_export (unit.test_extension.TestExtension) ... test_get_class (unit.test_extension.TestExtension) ... test_lab_meta (unit.test_extension.TestExtension) ... test_lab_meta_auto (unit.test_extension.TestExtension) ... test_load_namespace (unit.test_extension.TestExtension) ... test_load_namespace_with_reftype_attribute (unit.test_extension.TestExtension) ... test_load_namespace_with_reftype_attribute_check_autoclass_const (unit.test_extension.TestExtension) ... test_access_group_after_io (unit.test_file.NWBFileTest)
+Motivated by #739 ... test_access_processing (unit.test_file.NWBFileTest) ... test_add_acquisition (unit.test_file.NWBFileTest) ... test_add_acquisition_check_dups (unit.test_file.NWBFileTest) ... test_add_acquisition_invalid_name (unit.test_file.NWBFileTest) ... test_add_analysis (unit.test_file.NWBFileTest) ... test_add_electrode (unit.test_file.NWBFileTest) ... test_add_electrode_missing_group (unit.test_file.NWBFileTest)
+Test the case where the user creates an electrode table region with ... test_add_electrode_missing_location (unit.test_file.NWBFileTest)
+Test the case where the user creates an electrode table region with ... test_add_electrode_some_opt (unit.test_file.NWBFileTest) ... test_add_invalid_time_interval (unit.test_file.NWBFileTest) ... test_add_invalid_time_w_ts (unit.test_file.NWBFileTest) ... test_add_invalid_times_column (unit.test_file.NWBFileTest) ... test_add_stimulus (unit.test_file.NWBFileTest) ... test_add_stimulus_template (unit.test_file.NWBFileTest) ... test_add_stimulus_template_images (unit.test_file.NWBFileTest) ... test_add_trial (unit.test_file.NWBFileTest) ... test_add_trial_column (unit.test_file.NWBFileTest) ... test_add_unit (unit.test_file.NWBFileTest) ... test_add_unit_column (unit.test_file.NWBFileTest) ... test_all_children (unit.test_file.NWBFileTest) ... test_constructor (unit.test_file.NWBFileTest) ... test_copy (unit.test_file.NWBFileTest) ... test_create_custom_intervals (unit.test_file.NWBFileTest) ... test_create_electrode_group (unit.test_file.NWBFileTest) ... test_create_electrode_group_invalid_index (unit.test_file.NWBFileTest)
+Test the case where the user creates an electrode table region with ... test_epoch_tags (unit.test_file.NWBFileTest) ... test_fail_if_source_script_file_name_without_source_script (unit.test_file.NWBFileTest) ... test_get_acquisition_empty (unit.test_file.NWBFileTest) ... test_get_acquisition_multiple_elements (unit.test_file.NWBFileTest) ... test_get_neurodata_type (unit.test_file.NWBFileTest) ... test_multi_experimenters (unit.test_file.NWBFileTest) ... test_multi_publications (unit.test_file.NWBFileTest) ... test_print_units (unit.test_file.NWBFileTest) ... test_set_electrode_table (unit.test_file.NWBFileTest) ... test_age_reference_arg_check (unit.test_file.SubjectTest) ... test_age_regression_1 (unit.test_file.SubjectTest) ... test_age_regression_2 (unit.test_file.SubjectTest) ... test_constructor (unit.test_file.SubjectTest) ... test_nwbfile_constructor (unit.test_file.SubjectTest) ... test_subject_age_duration (unit.test_file.SubjectTest) ... test_weight_float (unit.test_file.SubjectTest) ... test_simple (unit.test_file.TestCacheSpec) ... test_simple (unit.test_file.TestNoCacheSpec) ... test_reftime_tzaware (unit.test_file.TestTimestampsRefAware) ... test_reftime_default (unit.test_file.TestTimestampsRefDefault) ... test_raise_warning__add_missing_timezone (unit.test_file.TestTimezone) ... test_init (unit.test_icephys.CurrentClampSeriesConstructor) ... test_unit_warning (unit.test_icephys.CurrentClampSeriesConstructor) ... test_init (unit.test_icephys.CurrentClampStimulusSeriesConstructor) ... test_unit_warning (unit.test_icephys.CurrentClampStimulusSeriesConstructor) ... test_init (unit.test_icephys.IZeroClampSeriesConstructor) ... test_stim_desc_warning (unit.test_icephys.IZeroClampSeriesConstructor) ... test_unit_warning (unit.test_icephys.IZeroClampSeriesConstructor) ... test_constructor (unit.test_icephys.IntracellularElectrodeConstructor) ... test_add_ic_electrode_deprecation (unit.test_icephys.NWBFileICEphys) ... test_create_ic_electrode_deprecation (unit.test_icephys.NWBFileICEphys) ... test_ic_electrodes_attribute_deprecation (unit.test_icephys.NWBFileICEphys) ... test_ic_electrodes_parameter_deprecation (unit.test_icephys.NWBFileICEphys) ... test_icephys_electrodes_parameter (unit.test_icephys.NWBFileICEphys) ... test_sweep_table_depractation_warn (unit.test_icephys.NWBFileICEphys) ... test_data_shape (unit.test_icephys.PatchClampSeriesConstructor) ... test_default (unit.test_icephys.PatchClampSeriesConstructor) ... test_sweepNumber_large_and_valid (unit.test_icephys.PatchClampSeriesConstructor) ... test_sweepNumber_throws_with_Float (unit.test_icephys.PatchClampSeriesConstructor) ... test_sweepNumber_throws_with_NaN (unit.test_icephys.PatchClampSeriesConstructor) ... test_sweepNumber_throws_with_negative (unit.test_icephys.PatchClampSeriesConstructor) ... test_sweepNumber_valid (unit.test_icephys.PatchClampSeriesConstructor) ... test_sweepNumber_valid_np (unit.test_icephys.PatchClampSeriesConstructor) ... test_init (unit.test_icephys.VoltageClampSeriesConstructor) ... test_unit_warning (unit.test_icephys.VoltageClampSeriesConstructor) ... test_init (unit.test_icephys.VoltageClampStimulusSeriesConstructor) ... test_unit_warning (unit.test_icephys.VoltageClampStimulusSeriesConstructor) ... test_basic_write (unit.test_icephys_metadata_tables.ExperimentalConditionsTableTests)
+Populate, write, and read the ExperimentalConditionsTable container and other required containers ... test_enforce_unique_id (unit.test_icephys_metadata_tables.ExperimentalConditionsTableTests)
+Test to ensure that unique ids are enforced on RepetitionsTable table ... test_init (unit.test_icephys_metadata_tables.ExperimentalConditionsTableTests)
+Test  __init__ to make sure we can instantiate the ExperimentalConditionsTable container ... test_missing_repetitions_on_init (unit.test_icephys_metadata_tables.ExperimentalConditionsTableTests)
+Test that ValueError is raised when repetitions is missing. This is ... test_add_column (unit.test_icephys_metadata_tables.IntracellularRecordingsTableTests) ... test_add_row (unit.test_icephys_metadata_tables.IntracellularRecordingsTableTests) ... test_add_row_check_start_index_and_index_count_are_fixed (unit.test_icephys_metadata_tables.IntracellularRecordingsTableTests) ... test_add_row_incompatible_types (unit.test_icephys_metadata_tables.IntracellularRecordingsTableTests) ... test_add_row_index_out_of_range (unit.test_icephys_metadata_tables.IntracellularRecordingsTableTests) ... test_add_row_no_response (unit.test_icephys_metadata_tables.IntracellularRecordingsTableTests) ... test_add_row_no_stimulus (unit.test_icephys_metadata_tables.IntracellularRecordingsTableTests) ... test_add_row_no_stimulus_and_response (unit.test_icephys_metadata_tables.IntracellularRecordingsTableTests) ... test_basic_write (unit.test_icephys_metadata_tables.IntracellularRecordingsTableTests)
+Populate, write, and read the SimultaneousRecordingsTable container and other required containers ... test_enforce_unique_id (unit.test_icephys_metadata_tables.IntracellularRecordingsTableTests)
+Test to ensure that unique ids are enforced on RepetitionsTable table ... test_error_if_IZeroClampSeries_with_stimulus (unit.test_icephys_metadata_tables.IntracellularRecordingsTableTests) ... test_inconsistent_PatchClampSeries (unit.test_icephys_metadata_tables.IntracellularRecordingsTableTests) ... test_init (unit.test_icephys_metadata_tables.IntracellularRecordingsTableTests) ... test_no_electrode (unit.test_icephys_metadata_tables.IntracellularRecordingsTableTests) ... test_noerror_if_IZeroClampSeries (unit.test_icephys_metadata_tables.IntracellularRecordingsTableTests) ... test_round_trip_container_no_data (unit.test_icephys_metadata_tables.IntracellularRecordingsTableTests)
+Test read and write the container by itself ... test_to_dataframe (unit.test_icephys_metadata_tables.IntracellularRecordingsTableTests) ... test_write_with_stimulus_template (unit.test_icephys_metadata_tables.IntracellularRecordingsTableTests)
+Populate, write, and read the SimultaneousRecordingsTable container and other required containers ... test_add_icephys_meta_full_roundtrip (unit.test_icephys_metadata_tables.NWBFileTests)
+This test adds all data and then constructs step-by-step the full table structure ... test_deprecate_simultaneous_recordings_on_add_stimulus (unit.test_icephys_metadata_tables.NWBFileTests)
+Test that warnings are raised if the user tries to use a simultaneous_recordings table ... test_deprecate_sweepstable_on_add_acquistion (unit.test_icephys_metadata_tables.NWBFileTests)
+Test that warnings are raised if the user tries to use a sweeps table ... test_deprecate_sweepstable_on_init (unit.test_icephys_metadata_tables.NWBFileTests)
+Test that warnings are raised if the user tries to use a sweeps table ... test_deprecate_sweeptable_on_add_stimulus_template (unit.test_icephys_metadata_tables.NWBFileTests)
+Make sure we warn when using the sweep-table ... test_deprectation_icephys_filtering_on_init (unit.test_icephys_metadata_tables.NWBFileTests) ... test_get_icephys_meta_parent_table (unit.test_icephys_metadata_tables.NWBFileTests)
+Create the table hierarchy step-by-step and check that as we add tables the get_icephys_meta_parent_table ... test_icephys_filtering_roundtrip (unit.test_icephys_metadata_tables.NWBFileTests) ... test_basic_write (unit.test_icephys_metadata_tables.RepetitionsTableTests)
+Populate, write, and read the RepetitionsTable container and other required containers ... test_enforce_unique_id (unit.test_icephys_metadata_tables.RepetitionsTableTests)
+Test to ensure that unique ids are enforced on RepetitionsTable table ... test_init (unit.test_icephys_metadata_tables.RepetitionsTableTests)
+Test  __init__ to make sure we can instantiate the RepetitionsTable container ... test_missing_sequential_recordings_on_init (unit.test_icephys_metadata_tables.RepetitionsTableTests)
+Test that ValueError is raised when sequential_recordings is missing. This is ... test_basic_write (unit.test_icephys_metadata_tables.SequentialRecordingsTableTests)
+Populate, write, and read the SequentialRecordingsTable container and other required containers ... test_enforce_unique_id (unit.test_icephys_metadata_tables.SequentialRecordingsTableTests)
+Test to ensure that unique ids are enforced on RepetitionsTable table ... test_init (unit.test_icephys_metadata_tables.SequentialRecordingsTableTests)
+Test  __init__ to make sure we can instantiate the SequentialRecordingsTable container ... test_missing_simultaneous_recordings_on_init (unit.test_icephys_metadata_tables.SequentialRecordingsTableTests)
+Test that ValueError is raised when simultaneous_recordings is missing. This is ... test_add_simultaneous_recording (unit.test_icephys_metadata_tables.SimultaneousRecordingsTableTests)
+Populate, write, and read the SimultaneousRecordingsTable container and other required containers ... test_basic_write (unit.test_icephys_metadata_tables.SimultaneousRecordingsTableTests)
+Populate, write, and read the SimultaneousRecordingsTable container and other required containers ... test_enforce_unique_id (unit.test_icephys_metadata_tables.SimultaneousRecordingsTableTests)
+Test to ensure that unique ids are enforced on RepetitionsTable table ... test_init (unit.test_icephys_metadata_tables.SimultaneousRecordingsTableTests)
+Test __init__ to make sure we can instantiate the SimultaneousRecordingsTable container ... test_missing_intracellular_recordings_on_init (unit.test_icephys_metadata_tables.SimultaneousRecordingsTableTests)
+Test that ValueError is raised when intracellular_recordings is missing. This is ... test_init (unit.test_image.ImageMaskSeriesConstructor) ... test_data_no_frame (unit.test_image.ImageSeriesConstructor) ... test_data_no_unit (unit.test_image.ImageSeriesConstructor) ... test_dimension_warning (unit.test_image.ImageSeriesConstructor)
+Test that a warning is raised when the dimensions of the data are not the ... test_dimension_warning_external_file_with_rate (unit.test_image.ImageSeriesConstructor)
+Test that a warning is not raised when external file is used with rate. ... test_dimension_warning_external_file_with_timestamps (unit.test_image.ImageSeriesConstructor)
+Test that a warning is not raised when external file is used with timestamps. ... test_external_file_default_format (unit.test_image.ImageSeriesConstructor)
+Test that format is set to 'external' if not provided, when external_file is provided. ... test_external_file_no_frame (unit.test_image.ImageSeriesConstructor) ... test_external_file_no_unit (unit.test_image.ImageSeriesConstructor) ... test_external_file_with_correct_format (unit.test_image.ImageSeriesConstructor)
+Test that warning is not raised when external_file is provided and format ... test_external_file_with_correct_starting_frame (unit.test_image.ImageSeriesConstructor)
+Test that ValueError is not raised when the length of starting_frame ... test_external_file_with_data (unit.test_image.ImageSeriesConstructor)
+Test that ValueError is raised when external_file is provided and ... test_external_file_with_data_construct_mode (unit.test_image.ImageSeriesConstructor)
+Test that UserWarning is raised when external_file is provided and ... test_external_file_with_default_starting_frame (unit.test_image.ImageSeriesConstructor)
+Test that starting_frame is set to [0] if not provided, when external_file is has length 1. ... test_external_file_with_incorrect_format (unit.test_image.ImageSeriesConstructor)
+Test that ValueError is raised when external_file is provided but ... test_external_file_with_incorrect_format_construct_mode (unit.test_image.ImageSeriesConstructor)
+Test that UserWarning is raised when external_file is provided but ... test_external_file_with_incorrect_starting_frame (unit.test_image.ImageSeriesConstructor)
+Test that ValueError is raised when the length of starting_frame ... test_external_file_with_incorrect_starting_frame_construct_mode (unit.test_image.ImageSeriesConstructor)
+Test that warning is raised when the length of starting_frame ... test_init (unit.test_image.ImageSeriesConstructor) ... test_no_data_no_file (unit.test_image.ImageSeriesConstructor) ... test_init (unit.test_image.IndexSeriesConstructor) ... test_init_bad_unit (unit.test_image.IndexSeriesConstructor) ... test_init_indexed_ts (unit.test_image.IndexSeriesConstructor) ... test_init (unit.test_image.OpticalSeriesConstructor) ... test_grayscale_image (unit.test_image.TestImageSubtypes) ... test_rgb_image (unit.test_image.TestImageSubtypes) ... test_rgba_image (unit.test_image.TestImageSubtypes) ... test_init (unit.test_misc.AbstractFeatureSeriesConstructor) ... test_init (unit.test_misc.AnnotationSeriesConstructor) ... test_init (unit.test_misc.DecompositionSeriesConstructor) ... test_init_delayed_bands (unit.test_misc.DecompositionSeriesConstructor) ... test_init_with_source_channels (unit.test_misc.DecompositionSeriesConstructor) ... test_add_interval (unit.test_misc.IntervalSeriesConstructor) ... test_init (unit.test_misc.IntervalSeriesConstructor) ... test_add_spike_times (unit.test_misc.UnitsTests) ... test_add_waveforms (unit.test_misc.UnitsTests) ... test_electrode_group (unit.test_misc.UnitsTests) ... test_get_obs_intervals (unit.test_misc.UnitsTests) ... test_get_spike_times (unit.test_misc.UnitsTests) ... test_get_spike_times_interval (unit.test_misc.UnitsTests) ... test_get_spike_times_multi (unit.test_misc.UnitsTests) ... test_get_spike_times_multi_interval (unit.test_misc.UnitsTests) ... test_init (unit.test_misc.UnitsTests) ... test_obs_intervals (unit.test_misc.UnitsTests) ... test_times (unit.test_misc.UnitsTests) ... test_times_and_intervals (unit.test_misc.UnitsTests) ... test_waveform_attrs (unit.test_misc.UnitsTests) ... test_init (unit.test_ogen.OptogeneticSeriesConstructor) ... test_init (unit.test_ophys.CorrectedImageStackConstructor) ... test_init (unit.test_ophys.DfOverFConstructor) ... /Users/mavaylon/Research/NWB/hdmf2/hdmf/src/hdmf/common/table.py:1441: UserWarning: The linked table for DynamicTableRegion 'rois' does not share an ancestor with the DynamicTableRegion.
+  warn(msg)
+test_init (unit.test_ophys.FluorescenceConstructor) ... /Users/mavaylon/Research/NWB/hdmf2/hdmf/src/hdmf/common/table.py:1441: UserWarning: The linked table for DynamicTableRegion 'rois' does not share an ancestor with the DynamicTableRegion.
+  warn(msg)
+test_init (unit.test_ophys.ImageSegmentationConstructor) ... test_conversion_deprecated (unit.test_ophys.ImagingPlaneConstructor) ... test_init (unit.test_ophys.ImagingPlaneConstructor) ... test_manifold_deprecated (unit.test_ophys.ImagingPlaneConstructor) ... test_unit_deprecated (unit.test_ophys.ImagingPlaneConstructor) ... test_init (unit.test_ophys.MotionCorrectionConstructor) ... test_init (unit.test_ophys.OnePhotonSeriesConstructor) ... test_negative_binning_assertion (unit.test_ophys.OnePhotonSeriesConstructor) ... test_init (unit.test_ophys.OpticalChannelConstructor) ... test_conversion_of_2d_image_mask_to_pixel_mask (unit.test_ophys.PlaneSegmentationConstructor) ... test_conversion_of_2d_pixel_mask_to_image_mask (unit.test_ophys.PlaneSegmentationConstructor) ... test_init (unit.test_ophys.PlaneSegmentationConstructor) ... test_init_3d_image_mask (unit.test_ophys.PlaneSegmentationConstructor) ... test_init_image_mask (unit.test_ophys.PlaneSegmentationConstructor) ... test_init_pixel_mask (unit.test_ophys.PlaneSegmentationConstructor) ... test_init_voxel_mask (unit.test_ophys.PlaneSegmentationConstructor) ... test_init (unit.test_ophys.RoiResponseSeriesConstructor) ... test_warnings (unit.test_ophys.RoiResponseSeriesConstructor) ... test_init (unit.test_ophys.TwoPhotonSeriesConstructor) ... test_constructor (unit.test_resources.TestNWBContainer)
+Test constructor ... /Users/mavaylon/Research/NWB/hdmf2/hdmf/src/hdmf/container.py:213: UserWarning: HERD is experimental -- it may be removed in the future and is not guaranteed to maintain backward compatibility
+  warn(_exp_warn_msg(cls))
+test_init (unit.test_retinotopy.AxisMapConstructor)
+Test that AxisMap constructor sets properties correctly. ... test_init_dimension_wrong_shape (unit.test_retinotopy.AxisMapConstructor)
+Test that creating an AxisMap with a dimension argument that is not 2 elements raises an error. ... test_init_fov_wrong_shape (unit.test_retinotopy.AxisMapConstructor)
+Test that creating an AxisMap with a dimension argument that is not 2 elements raises an error. ... test_init (unit.test_retinotopy.FocalDepthImageConstructor)
+Test that FocalDepthImage constructor sets properties correctly. ... test_init (unit.test_retinotopy.ImageRetinotopyConstructor)
+Test that ImagingRetinotopy constructor sets properties correctly. ... test_init_axis_descriptions_wrong_shape (unit.test_retinotopy.ImageRetinotopyConstructor)
+Test that creating a ImagingRetinotopy with a axis descriptions argument that is not 2 elements raises an ... test_init (unit.test_retinotopy.RetinotopyImageConstructor)
+Test that RetinotopyImage constructor sets properties correctly. ... test_init_dimension_wrong_shape (unit.test_retinotopy.RetinotopyImageConstructor)
+Test that creating a RetinotopyImage with a dimension argument that is not 2 elements raises an error. ... test_init_fov_wrong_shape (unit.test_retinotopy.RetinotopyImageConstructor)
+Test that creating a RetinotopyImage with a field of view argument that is not 2 elements raises an error. ... test_init (unit.test_retinotopy.RetinotopyMapConstructor)
+Test that RetinotopyMap constructor sets properties correctly. ... test_add_scratch_container (unit.test_scratch.TestScratchData) ... test_add_scratch_container_description (unit.test_scratch.TestScratchData) ... test_add_scratch_container_name (unit.test_scratch.TestScratchData) ... test_add_scratch_dataframe (unit.test_scratch.TestScratchData) ... test_add_scratch_dataframe_no_description (unit.test_scratch.TestScratchData) ... test_add_scratch_dynamictable (unit.test_scratch.TestScratchData) ... test_add_scratch_int (unit.test_scratch.TestScratchData) ... test_add_scratch_list (unit.test_scratch.TestScratchData) ... test_add_scratch_list_no_name (unit.test_scratch.TestScratchData) ... test_add_scratch_ndarray (unit.test_scratch.TestScratchData) ... test_add_scratch_ndarray_no_description (unit.test_scratch.TestScratchData) ... test_add_scratch_scratchdata (unit.test_scratch.TestScratchData) ... test_constructor_list (unit.test_scratch.TestScratchData) ... test_get_scratch_df_convert_false (unit.test_scratch.TestScratchData) ... test_get_scratch_list_convert_false (unit.test_scratch.TestScratchData) ... test_constructor (unit.test_spec.NWBNamespaceTest) ... test_constructor (unit.test_spec.NWBRefSpecTests) ... test_wrong_reference_type (unit.test_spec.NWBRefSpecTests) ... 
+----------------------------------------------------------------------
+Ran 338 tests in 36.836s
+
+OK
+======================================================================
+2023-08-18 14:19:11,805 - INFO - running example tests
+======================================================================
+2023-08-18 14:19:11,805 - INFO - Skipping domain/brain_observatory.py
+======================================================================
+2023-08-18 14:19:11,805 - INFO - Skipping advanced_io/streaming.py
+======================================================================
+2023-08-18 14:19:11,806 - INFO - Executing /Users/mavaylon/Research/NWB/pynwb/docs/gallery/general/plot_file.py
+test_timeseries pynwb.base.TimeSeries at 0x4942401248
+Fields:
+  comments: no comments
+  conversion: 1.0
+  data: <HDF5 dataset "data": shape (10,), type "<i8">
+  description: no description
+  interval: 1
+  offset: 0.0
+  resolution: -1.0
+  timestamps: <HDF5 dataset "timestamps": shape (10,), type "<f8">
+  timestamps_unit: seconds
+  unit: m
+
+[100 110 120 130 140 150 160 170 180 190]
+[100 110]
+behavior pynwb.base.ProcessingModule at 0x4936449424
+Fields:
+  data_interfaces: {
+    Position <class 'pynwb.behavior.Position'>
+  }
+  description: processed behavioral data
+
+Position pynwb.behavior.Position at 0x4936438912
+Fields:
+  spatial_series: {
+    SpatialSeries <class 'pynwb.behavior.SpatialSeries'>
+  }
+
+SpatialSeries pynwb.behavior.SpatialSeries at 0x4936443328
+Fields:
+  comments: no comments
+  conversion: 1.0
+  data: <HDF5 dataset "data": shape (50, 2), type "<f8">
+  description: (x,y) position in open field
+  interval: 1
+  offset: 0.0
+  reference_frame: (0,0) is bottom left corner
+  resolution: -1.0
+  timestamps: <HDF5 dataset "timestamps": shape (50,), type "<f8">
+  timestamps_unit: seconds
+  unit: meters
+
+======================================================================
+2023-08-18 14:19:15,416 - INFO - Executing /Users/mavaylon/Research/NWB/pynwb/docs/gallery/general/add_remove_containers.py
+root pynwb.file.NWBFile at 0x4945380880
+Fields:
+  acquisition: {
+    test_timeseries <class 'pynwb.base.TimeSeries'>
+  }
+  file_create_date: [datetime.datetime(2023, 8, 18, 14, 19, 15, 419168, tzinfo=tzoffset(None, -25200))]
+  identifier: NWB123
+  session_description: demonstrate adding to an NWB file
+  session_start_time: 2023-08-18 21:19:15.418902+00:00
+  timestamps_reference_time: 2023-08-18 21:19:15.418902+00:00
+
+root pynwb.file.NWBFile at 0x4942411856
+Fields:
+  file_create_date: [datetime.datetime(2023, 8, 18, 14, 19, 17, 33664, tzinfo=tzoffset(None, -25200))]
+  identifier: NWB123
+  processing: {
+    behavior <class 'pynwb.base.ProcessingModule'>
+  }
+  session_description: demonstrate export of an NWB file
+  session_start_time: 2023-08-18 21:19:17.033463+00:00
+  timestamps_reference_time: 2023-08-18 21:19:17.033463+00:00
+
+behavior pynwb.base.ProcessingModule at 0x4932733632
+Fields:
+  data_interfaces: {
+    test_timeseries3 <class 'pynwb.base.TimeSeries'>
+  }
+  description: processed behavioral data
+
+======================================================================
+2023-08-18 14:19:19,723 - INFO - Executing /Users/mavaylon/Research/NWB/pynwb/docs/gallery/general/scratch.py
+======================================================================
+2023-08-18 14:19:31,312 - INFO - Executing /Users/mavaylon/Research/NWB/pynwb/docs/gallery/general/extensions.py
+10.0
+======================================================================
+2023-08-18 14:19:36,980 - INFO - Executing /Users/mavaylon/Research/NWB/pynwb/docs/gallery/general/plot_timeintervals.py
+======================================================================
+2023-08-18 14:19:37,920 - INFO - Executing /Users/mavaylon/Research/NWB/pynwb/docs/gallery/general/plot_read_basics.py
+PATH                                      SIZE    DONE           DONE% CHECKSUM STATUS          MESSAGE
+sub-P11HMH_ses-20061101_ecephys+image.nwb 72.6 MB 72.6 MB         100%    ok    done                   
+Summary:                                  72.6 MB 72.6 MB                       1 done                 
+                                                  100.00%                                              
+======================================================================
+2023-08-18 14:21:07,831 - INFO - Executing /Users/mavaylon/Research/NWB/pynwb/docs/gallery/general/object_id.py
+d71cbd7e-d2f5-4069-83bc-99f66273817e
+04ff096b-0194-4854-b2e4-52f87ebc5733
+{'d71cbd7e-d2f5-4069-83bc-99f66273817e': root pynwb.file.NWBFile at 0x5323667632
+Fields:
+  acquisition: {
+    raw_timeseries <class 'pynwb.base.TimeSeries'>
+  }
+  file_create_date: [datetime.datetime(2023, 8, 18, 14, 21, 7, 833630, tzinfo=tzlocal())]
+  identifier: NWB456
+  session_description: demonstrate NWB object IDs
+  session_start_time: 2019-04-03 11:00:00-07:00
+  timestamps_reference_time: 2019-04-03 11:00:00-07:00
+, '04ff096b-0194-4854-b2e4-52f87ebc5733': raw_timeseries pynwb.base.TimeSeries at 0x5323668736
+Fields:
+  comments: no comments
+  conversion: 1.0
+  data: [ 1.41016945  1.74035723 -0.03593142 ...  0.54970498 -0.66568098
+  0.50192283]
+  description: no description
+  interval: 1
+  offset: 0.0
+  resolution: -1.0
+  timestamps: [0.00000000e+00 9.77517107e-02 1.95503421e-01 ... 9.98044966e+01
+ 9.99022483e+01 1.00000000e+02]
+  timestamps_unit: seconds
+  unit: m
+}
+root pynwb.file.NWBFile at 0x5323667632
+Fields:
+  acquisition: {
+    raw_timeseries <class 'pynwb.base.TimeSeries'>
+  }
+  file_create_date: [datetime.datetime(2023, 8, 18, 14, 21, 7, 833630, tzinfo=tzlocal())]
+  identifier: NWB456
+  session_description: demonstrate NWB object IDs
+  session_start_time: 2019-04-03 11:00:00-07:00
+  timestamps_reference_time: 2019-04-03 11:00:00-07:00
+
+raw_timeseries pynwb.base.TimeSeries at 0x5323668736
+Fields:
+  comments: no comments
+  conversion: 1.0
+  data: [ 1.41016945  1.74035723 -0.03593142 ...  0.54970498 -0.66568098
+  0.50192283]
+  description: no description
+  interval: 1
+  offset: 0.0
+  resolution: -1.0
+  timestamps: [0.00000000e+00 9.77517107e-02 1.95503421e-01 ... 9.98044966e+01
+ 9.99022483e+01 1.00000000e+02]
+  timestamps_unit: seconds
+  unit: m
+
+d71cbd7e-d2f5-4069-83bc-99f66273817e: NWBFile "root"
+04ff096b-0194-4854-b2e4-52f87ebc5733: TimeSeries "raw_timeseries"
+======================================================================
+2023-08-18 14:21:07,836 - INFO - Executing /Users/mavaylon/Research/NWB/pynwb/docs/gallery/domain/plot_icephys_pandas.py
+Traceback (most recent call last):
+  File "/Users/mavaylon/Research/NWB/pynwb/test.py", line 128, in __run_example_tests_helper
+    _import_from_file(script)
+  File "/Users/mavaylon/Research/NWB/pynwb/test.py", line 72, in _import_from_file
+    return imp.load_source(os.path.basename(script), script)
+  File "/Users/mavaylon/opt/anaconda3/envs/NWB2/lib/python3.10/imp.py", line 172, in load_source
+    module = _load(spec)
+  File "<frozen importlib._bootstrap>", line 719, in _load
+  File "<frozen importlib._bootstrap>", line 688, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 883, in exec_module
+  File "<frozen importlib._bootstrap>", line 241, in _call_with_frames_removed
+  File "/Users/mavaylon/Research/NWB/pynwb/docs/gallery/domain/plot_icephys_pandas.py", line 30, in <module>
+    import dataframe_image
+ModuleNotFoundError: No module named 'dataframe_image'
+
+======================================================================
+2023-08-18 14:21:07,841 - INFO - Executing /Users/mavaylon/Research/NWB/pynwb/docs/gallery/domain/ecephys.py
+ElectricalSeries pynwb.ecephys.ElectricalSeries at 0x5328888512
+Fields:
+  comments: no comments
+  conversion: 1.0
+  data: <HDF5 dataset "data": shape (50, 12), type "<f8">
+  description: no description
+  electrodes: electrodes <class 'hdmf.common.table.DynamicTableRegion'>
+  offset: 0.0
+  rate: 20000.0
+  resolution: -1.0
+  starting_time: 0.0
+  starting_time_unit: seconds
+  unit: volts
+
+ecephys pynwb.base.ProcessingModule at 0x5328889040
+Fields:
+  data_interfaces: {
+    LFP <class 'pynwb.ecephys.LFP'>
+  }
+  description: processed extracellular electrophysiology data
+
+LFP pynwb.ecephys.LFP at 0x5328889808
+Fields:
+  electrical_series: {
+    ElectricalSeries <class 'pynwb.ecephys.ElectricalSeries'>
+  }
+
+ElectricalSeries pynwb.ecephys.ElectricalSeries at 0x5328890048
+Fields:
+  comments: no comments
+  conversion: 1.0
+  data: <HDF5 dataset "data": shape (50, 12), type "<f8">
+  description: no description
+  electrodes: electrodes <class 'hdmf.common.table.DynamicTableRegion'>
+  offset: 0.0
+  rate: 200.0
+  resolution: -1.0
+  starting_time: 0.0
+  starting_time_unit: seconds
+  unit: volts
+
+[[ 0.33891529 -2.66695227 -0.3827544   0.85226525 -0.22679341 -1.73892007
+   0.05606152 -1.81729862 -0.15231013  0.72407169  1.17536102  0.08111961]
+ [ 0.54614618  0.30288809  0.28112518  0.55519439  1.28791292  1.41048453
+  -1.09756184  0.70686288  1.51756756  0.27342933 -0.65566672 -0.27213485]
+ [ 0.36422258 -0.92374008  1.53831035  0.55217796  0.78645115  0.64337151
+   0.6437752   0.09784649  1.26497563 -1.92969756 -2.38008885 -0.51477486]
+ [ 1.04751612 -0.06857616 -0.08431792  0.83739515  1.03112158 -0.33575517
+  -0.45386786  0.88966496 -0.89920708 -0.1477502   0.82053523 -0.28501848]
+ [-0.54014173  1.15554818 -0.55650486 -0.43902883  0.42796147  2.00690164
+  -0.19246387  0.01328205 -1.32120384  0.62202796  0.1262993   0.48596112]
+ [ 0.03577041 -0.20360157  0.79660165 -1.59844248 -0.9847291  -1.62712534
+  -1.45825148  0.41612407 -1.37160027 -2.2103461  -0.19709176  2.20474571]
+ [-1.52802718 -0.33313182 -1.22792301 -2.07022186  1.53919503 -0.54906182
+   0.49007771  0.84719023  1.22235128  2.71440446  0.41923355  1.62024421]
+ [-2.17928951  0.71324429 -1.64604506 -0.50310382 -0.29084127  0.01664707
+   0.52689394 -1.77235217 -0.23971511 -0.26673401  1.11801142  0.1746659 ]
+ [ 1.77578732 -0.84094512 -0.76010903 -0.40839526 -0.22940783  0.64807532
+  -0.7593824   0.61357805 -0.74877023 -0.18621264 -0.38810642  0.43125409]
+ [-0.59428689 -0.44944091  0.72895808 -0.74754212 -1.05836148 -1.33629319
+   0.02404322  1.37601751 -1.30381819  1.08097088 -1.76090307  0.56677573]
+ [ 1.32807466  0.36699218 -0.98872332 -1.26194341 -0.32169168 -0.36824013
+  -0.46478264  0.5677131  -0.76921824  0.65839612  1.08481528  1.00000453]
+ [-0.11661565 -2.04038465  0.38475091  0.46108697 -0.29319234 -0.82082462
+   0.5718123  -0.47719703  1.2534739   1.33491084  0.49633574  0.99308424]
+ [ 0.06945388  0.29657984  1.75166122  0.57972871 -0.9340628   0.12816954
+   1.69540881  0.49374827 -0.64270963 -1.87701233 -0.25220977 -1.0102795 ]
+ [ 0.16906002  0.87162776  0.8051556   1.15372307 -0.52078616 -0.3820881
+  -0.43218108 -1.54334932 -1.37442455  0.44708481  0.96054097 -1.72484193]
+ [-1.776178    0.74444884  1.46834571 -0.09793118  0.48571234  0.03851456
+   0.67009162 -0.27624247  0.14582382 -0.29549914 -0.58351995  1.64215299]
+ [ 0.97926242  0.42993499  0.30476845  0.09645255  0.05135545  1.01028408
+  -0.04834572  0.64154673 -2.25785472  0.87802803  0.8739559  -0.71020398]
+ [ 0.1939101   0.80163197  1.11242843  0.06384416 -0.11953401 -1.22833168
+  -0.03903634  1.20553578 -0.1463491  -0.54884439  1.75611591  1.13486753]
+ [ 0.89427446  0.20789437 -0.44867476 -0.06939966 -0.86301239 -0.42185274
+  -1.50839775 -1.62565691  0.69143768  0.03810335 -0.92252223  1.36358821]
+ [ 1.15541572 -1.92162204  1.11243515  0.76805635  0.25283272 -2.03076067
+  -0.18061847  1.29948141  0.44960176 -0.11375703  0.20593354  1.72995261]
+ [-1.87761701  0.20049977  0.14574395  1.12510711 -2.56255082  0.10536755
+  -0.88705934  0.91853246  1.26676694  0.11632041 -0.12954932  2.23161711]
+ [ 1.70266689 -0.55356502 -1.69515352  1.10184649  0.13845432 -0.49315618
+  -1.46640237 -0.46418337 -0.30816736  0.90056867  0.1470399  -0.78269956]
+ [-1.74445718 -0.90217582 -1.60290945  0.72445532 -2.2084459   0.08610067
+  -1.09983996 -0.88069084 -0.84401308  0.60921357 -1.55109759  0.0580076 ]
+ [ 0.43140014 -1.78925655 -0.2370344  -1.39239528  0.21684236  1.07555246
+  -0.90612552 -1.37414975  0.89226487  0.5580562   0.04346828 -1.8940476 ]
+ [-0.05275421  0.23581527  0.87191919 -0.09988723  1.40722139  0.60190053
+  -0.65068123 -0.61280282 -0.69960449 -0.01868571  0.61852539 -0.38681432]
+ [ 0.04547052  0.81200038 -0.35900529  0.67769308 -0.09564735 -0.06490225
+  -1.32940682  0.02628834 -0.39424728 -0.60090897  0.65857945 -0.36763073]
+ [-0.57063982  0.20066447  0.35240974 -1.09624327 -1.02827205 -2.58335252
+  -0.9307657  -0.0468591   0.6444687  -0.12569197 -1.75996504  1.23321466]
+ [-0.28438878  1.01553688 -1.3320655  -0.25010184  0.45659519 -1.97567769
+   0.01084665  0.76217138 -1.46082922 -0.17917593  0.2383192  -0.53562104]
+ [-0.52992167  0.13798398 -0.83773398  0.69842292  0.35189462  0.97081389
+  -0.34913349  0.30510024 -0.57992063 -0.72256975 -1.01600083  0.24575224]
+ [-0.53330878 -0.65421035 -0.56799342  0.11832417 -0.96734307 -0.67123967
+  -0.48591348 -0.72347125  0.48090615 -1.9864054   0.07185591  0.1749827 ]
+ [ 1.70034804 -0.94712099  0.58278652 -0.46459235  0.2732912  -0.27970934
+   0.5143209   0.59409536 -0.51180091  0.08388583  0.61929683  0.27056528]
+ [-0.40766215 -0.06568345 -0.67537635 -1.17590107  1.60073536  1.40385141
+  -0.72093784  1.00097995  0.52963311 -0.16958636  0.75232816  1.91962011]
+ [ 0.47515363  1.01765966  0.27801824  0.50159479 -2.16808771  0.03519919
+   0.44668259 -0.94235095 -0.9851909  -0.7231693  -1.21824673  0.46572626]
+ [ 1.47802905  1.8461786  -0.69327767 -0.29857872  0.60067644 -1.11404688
+  -0.14601918 -1.38776242  1.24209621  1.02738304 -1.49726524  2.03115452]
+ [ 0.05396785  0.9124829   0.30781815  0.81914319  1.14107339 -0.08785652
+   1.12405357  0.88703285  0.49456441  1.44172343 -0.57295358 -0.2594569 ]
+ [ 0.90400663 -0.7558123   0.2064122  -0.18073015 -0.25092291 -0.12050542
+  -0.69337724 -1.10491532  1.34528331  0.01684899  0.38333617  0.18528265]
+ [-0.36035422  1.00154815 -0.0313849   0.72325725  0.21215806  0.50462009
+  -0.17805476  0.24565669 -0.20529194 -1.01033394  0.73514963 -0.9460761 ]
+ [ 1.46488528 -1.66887799 -1.41802811 -0.15701394  2.26131255  0.51921567
+  -0.58198748  0.84292065 -0.28623763  0.02798821  0.42380868 -1.04064741]
+ [-0.53519036  0.16357742  0.54997265  1.31728088  1.1483118  -1.71043462
+  -0.09858297  1.01616192 -0.22803236 -0.8351051  -0.50408157  1.94119724]
+ [ 0.00525131  1.08786863  0.6381269  -0.8857534   0.91715187 -0.91197867
+   0.00322734  1.96742831  1.10316668  0.04944058  0.20173312  1.04459674]
+ [ 0.04699031  1.36109982 -0.12529091 -0.43124079  0.94079844  0.20798287
+   0.31885319  1.80031543 -0.09856005 -0.69244905  1.36775085  1.35958805]
+ [-0.93932743  0.58892143  0.12006391 -0.0327078  -1.0111691  -1.59428868
+   0.8046914   0.04717417  2.0044389   0.14446303  0.44346595 -0.48359963]
+ [-0.062805   -0.2020419  -0.59210255  0.07468892 -1.10234917  1.64230249
+  -1.30706795  0.72552097  0.62208553 -1.42397036  0.04235928 -0.50132905]
+ [-1.31100873  1.47947844 -1.41173287 -0.86564371 -0.9077108  -0.69601407
+   0.07724385 -0.20487376  0.72867874 -0.37272474  0.50300177 -0.15682319]
+ [-1.39687749  0.17780744  0.20138006  1.13190757 -0.11921733 -0.85034295
+  -0.71496695  1.33048654  1.21842232  0.40234567 -0.02045682 -1.43736612]
+ [-0.3835222  -1.84701825 -0.58744649 -0.04313819 -0.26006173  1.07148842
+  -0.08218463  0.13882562  0.29490549  1.40269266 -0.62221639 -0.52248697]
+ [ 0.17797111 -1.18548931 -0.40477545  0.23937594 -0.22120645  0.13241966
+  -0.04201653 -1.06127312  0.0764792   1.59921747 -0.51775726 -1.40062249]
+ [ 0.53858891  0.65628239 -0.41368077 -0.96959154  1.23457607 -0.13858975
+   2.37030628 -0.02225436  1.03320166  1.14762898 -0.07737072 -0.21399887]
+ [ 0.1950171   0.45756252  0.3548062   1.95120769  1.56800797  1.23256528
+   0.17426935  1.04895715 -0.42002232 -0.53887879 -0.88997812 -0.13198205]
+ [ 0.22700019 -0.54905202 -2.31283176  1.05541899  2.18889287 -0.17709257
+  -1.52585196  1.99191984  0.37891629 -0.4816925   1.09407178  0.45421159]
+ [ 0.29332215  0.23886707 -1.15430791 -0.2733871   1.62433371  0.41319217
+  -1.01470269  0.75258821 -0.41771631 -0.2771997   0.1094923   1.21481021]]
+section of LFP:
+[[ 0.33891529 -2.66695227 -0.3827544 ]
+ [ 0.54614618  0.30288809  0.28112518]
+ [ 0.36422258 -0.92374008  1.53831035]
+ [ 1.04751612 -0.06857616 -0.08431792]
+ [-0.54014173  1.15554818 -0.55650486]
+ [ 0.03577041 -0.20360157  0.79660165]
+ [-1.52802718 -0.33313182 -1.22792301]
+ [-2.17928951  0.71324429 -1.64604506]
+ [ 1.77578732 -0.84094512 -0.76010903]
+ [-0.59428689 -0.44944091  0.72895808]]
+
+spike times from 0th unit:
+[ 0.032  0.081  0.15   0.194  0.233  0.248  0.266  0.337  0.339  0.349
+  0.352  0.37   0.386  0.391  0.405  0.416  0.453  0.489  0.491  0.493
+  0.514  0.612  0.761  0.812  0.862  0.911  0.925  0.954  0.984  1.068
+  1.251  1.269  1.412  1.445  1.45   1.465  1.548  1.57   1.597  1.608
+  1.855  1.929  1.976  1.994  2.09   2.108  2.189  2.252  2.255  2.259
+  2.355  2.412  2.445  2.484  2.498  2.591  2.616  2.632  2.676  2.788
+  2.835  2.881  2.947  2.987  3.073  3.183  3.188  3.19   3.236  3.243
+  3.255  3.375  3.399  3.447  3.463  3.689  3.694  3.758  3.791  3.83
+  3.839  3.849  3.874  3.929  3.986  4.303  4.354  4.364  4.384  4.388
+  4.404  4.457  4.463  4.488  4.507  4.59   4.621  4.766  4.813  4.85
+  4.882  4.914  5.053  5.063  5.07   5.08   5.152  5.214  5.225  5.295
+  5.316  5.372  5.422  5.482  5.593  5.597  5.603  5.638  5.66   5.716
+  5.727  5.778  5.806  5.857  5.877  5.896  5.902  5.915  5.918  5.919
+  5.964  6.029  6.058  6.119  6.213  6.305  6.497  6.557  6.631  6.753
+  6.771  6.78   6.798  6.825  6.829  6.84   6.849  6.945  6.947  6.954
+  7.082  7.163  7.17   7.185  7.269  7.361  7.362  7.385  7.418  7.42
+  7.442  7.57   7.609  7.648  7.663  7.673  7.704  7.863  7.882  7.883
+  7.95   7.981  7.984  8.019  8.059  8.209  8.246  8.271  8.294  8.301
+  8.316  8.384  8.42   8.59   8.591  8.654  8.696  8.744  8.75   8.807
+  8.816  8.845  8.9    8.905  8.919  8.921  8.954  8.999  9.096  9.099
+  9.178  9.288  9.294  9.352  9.353  9.388  9.391  9.504  9.579  9.612
+  9.621  9.825  9.94   9.942 10.094 10.174 10.205 10.352 10.36  10.374
+ 10.387 10.39  10.435 10.483 10.601 10.634 10.661 10.7   10.869 10.896
+ 10.961 10.963 11.055 11.071 11.16  11.402 11.769 11.823 11.895 11.911
+ 11.916 11.995 12.023 12.129 12.191 12.202 12.222 12.224 12.348 12.357
+ 12.4   12.436 12.541 12.586 12.674 12.722 12.745 12.799 12.844 12.918
+ 12.992 12.998 13.038 13.049 13.059 13.076 13.127 13.265 13.306 13.339
+ 13.437 13.453 13.507 13.554 13.57  13.588 13.601 13.629 13.659 13.703
+ 13.725 13.737 13.765 13.963 13.964 13.982 14.    14.045 14.119 14.227
+ 14.259 14.268 14.32  14.342 14.348 14.364 14.4   14.461 14.49  14.494
+ 14.496 14.537 14.562 14.615 14.618 14.64  14.643 14.653 14.844 14.855
+ 14.99  15.058 15.076 15.218 15.232 15.308 15.314 15.329 15.33  15.382
+ 15.387 15.394 15.44  15.458 15.469 15.638 15.702 15.746 15.824 15.905
+ 15.928 16.041 16.086 16.142 16.155 16.167 16.176 16.222 16.305 16.311
+ 16.48  16.572 16.648 16.655 16.722 16.723 16.89  16.895 16.985 17.099
+ 17.24  17.27  17.373 17.445 17.48  17.518 17.551 17.564 17.605 17.715
+ 17.77  17.792 17.83  17.846 17.91  17.964 18.053 18.115 18.162 18.222
+ 18.315 18.344 18.385 18.421 18.532 18.538 18.545 18.571 18.617 18.636
+ 18.638 18.645 18.764 18.879 19.053 19.076 19.11  19.124 19.219 19.426
+ 19.446 19.51  19.551 19.63  19.702 19.703 19.743 19.963 19.998]
+======================================================================
+2023-08-18 14:21:08,967 - INFO - Executing /Users/mavaylon/Research/NWB/pynwb/docs/gallery/domain/icephys.py
+======================================================================
+2023-08-18 14:21:10,019 - INFO - Executing /Users/mavaylon/Research/NWB/pynwb/docs/gallery/domain/ogen.py
+======================================================================
+2023-08-18 14:21:10,023 - INFO - Executing /Users/mavaylon/Research/NWB/pynwb/docs/gallery/domain/plot_icephys.py
+None
+('recordings', 'simultaneous_recording_tag')
+[0 1]
+======================================================================
+2023-08-18 14:27:42,756 - INFO - Executing /Users/mavaylon/Research/NWB/pynwb/docs/gallery/domain/images.py
+ImageSeries pynwb.image.ImageSeries at 0x5331843584
+Fields:
+  comments: no comments
+  conversion: 1.0
+  data: <HDF5 dataset "data": shape (200, 50, 50, 3), type "|u1">
+  description: Image data of an animal moving in environment.
+  format: raw
+  offset: 0.0
+  rate: 1.0
+  resolution: -1.0
+  starting_time: 0.0
+  starting_time_unit: seconds
+  unit: n.a.
+
+[[[[216 240 158]
+   [207 147 133]
+   [119 238  70]
+   ...
+   [201 252 218]
+   [ 34  43 252]
+   [ 26 195 150]]
+
+  [[ 76 132  72]
+   [116 141 142]
+   [ 37 113 176]
+   ...
+   [163 176 169]
+   [ 64  14  88]
+   [113  62 105]]
+
+  [[142  68 252]
+   [131  52 135]
+   [166 140 162]
+   ...
+   [187 147 181]
+   [ 30 116 104]
+   [113  84  22]]
+
+  ...
+
+  [[ 57 199  35]
+   [ 80 189 205]
+   [  5  91 226]
+   ...
+   [ 70 189  81]
+   [190 194 209]
+   [ 32  51  33]]
+
+  [[ 97 182 100]
+   [ 96  97  55]
+   [113  94 124]
+   ...
+   [154 235 216]
+   [ 28 163 243]
+   [226 187 211]]
+
+  [[183 131 131]
+   [254  92   9]
+   [199 233  30]
+   ...
+   [210 122 109]
+   [114 162  68]
+   [ 36 125 240]]]
+
+
+ [[[129 170 184]
+   [ 75  61 167]
+   [ 96  14 191]
+   ...
+   [112  29 187]
+   [163 235   8]
+   [210 140  24]]
+
+  [[  9  54 154]
+   [  7 143  66]
+   [149 190  71]
+   ...
+   [145 127  17]
+   [205  97 171]
+   [237 110 104]]
+
+  [[253 230  67]
+   [187  16 204]
+   [190  13 160]
+   ...
+   [ 65  41 134]
+   [140 130 127]
+   [177  92 114]]
+
+  ...
+
+  [[160 168 173]
+   [197 105   5]
+   [226 208 220]
+   ...
+   [ 32  95  84]
+   [143 108   6]
+   [ 94  32  71]]
+
+  [[236 179 207]
+   [ 47 169  33]
+   [ 13  22   2]
+   ...
+   [201 241 140]
+   [192 251 174]
+   [116 172 134]]
+
+  [[209  30 171]
+   [196 134  29]
+   [248  35  84]
+   ...
+   [125  20 227]
+   [ 23  44  61]
+   [201 209 137]]]
+
+
+ [[[137 178 156]
+   [ 91 235 100]
+   [ 70 174 239]
+   ...
+   [ 58 133 182]
+   [238 131 216]
+   [105  75 116]]
+
+  [[119 156 184]
+   [224 249 231]
+   [181 112 144]
+   ...
+   [224 117  68]
+   [146 118 125]
+   [ 85 126 214]]
+
+  [[ 32 167  97]
+   [ 71 190  78]
+   [100  65  61]
+   ...
+   [144   1  13]
+   [128  52 165]
+   [151 227 192]]
+
+  ...
+
+  [[ 93 162  84]
+   [ 36 250 190]
+   [ 18  56  57]
+   ...
+   [161   7 107]
+   [170  61  70]
+   [ 99  20  14]]
+
+  [[ 62  92 115]
+   [103 136 227]
+   [105 119 135]
+   ...
+   [ 52   4 111]
+   [ 85 180 239]
+   [129 182   2]]
+
+  [[ 13 197 185]
+   [217 139 196]
+   [245 248 237]
+   ...
+   [ 88 253 208]
+   [109 215  79]
+   [ 12   0 242]]]
+
+
+ ...
+
+
+ [[[ 73  74 219]
+   [ 88  96  25]
+   [138 237 244]
+   ...
+   [253 182 132]
+   [129 202  70]
+   [103  82 234]]
+
+  [[145   8 191]
+   [128  94   8]
+   [246 156 100]
+   ...
+   [237  24 140]
+   [ 13 100 168]
+   [ 48 124 117]]
+
+  [[149 177  21]
+   [248  41 189]
+   [197 213 252]
+   ...
+   [  3   0 211]
+   [225 105 244]
+   [232 188  17]]
+
+  ...
+
+  [[197  32  16]
+   [163   1 178]
+   [190  48 155]
+   ...
+   [202 217  19]
+   [239 139  56]
+   [ 62 120 127]]
+
+  [[ 55 194  70]
+   [119  73 202]
+   [ 17  88 198]
+   ...
+   [ 76 165 105]
+   [191  55 180]
+   [ 79 150 246]]
+
+  [[ 42 199 187]
+   [ 59  13 245]
+   [ 97  68 186]
+   ...
+   [237  87 235]
+   [ 20 141  89]
+   [240 190 163]]]
+
+
+ [[[ 94  26 136]
+   [ 85  24 180]
+   [ 15 203 181]
+   ...
+   [ 23 189 175]
+   [ 93 165  24]
+   [  5 217 222]]
+
+  [[ 69 204  80]
+   [ 49 104 151]
+   [242 195  49]
+   ...
+   [ 41 126 191]
+   [211  53  60]
+   [245  30 252]]
+
+  [[123  13 181]
+   [100 113 222]
+   [234  33 124]
+   ...
+   [ 30  97 219]
+   [207  58 229]
+   [121  78  43]]
+
+  ...
+
+  [[238  44  20]
+   [233  32 100]
+   [215  95  18]
+   ...
+   [125  22 148]
+   [237  12  12]
+   [123  60  54]]
+
+  [[ 99  93 219]
+   [ 33 218 219]
+   [119 143 180]
+   ...
+   [ 20  58  57]
+   [ 37 160  73]
+   [122 254  91]]
+
+  [[ 42 209 156]
+   [ 93 232 140]
+   [211 136 220]
+   ...
+   [110  18 111]
+   [109 118  50]
+   [ 45 250 242]]]
+
+
+ [[[ 31 105 166]
+   [176 161  25]
+   [ 29 219 224]
+   ...
+   [182 104 229]
+   [123 225   0]
+   [121  42  20]]
+
+  [[168 161 206]
+   [122 143 125]
+   [224  76  74]
+   ...
+   [ 47 206  42]
+   [172 254 219]
+   [ 34 134  77]]
+
+  [[ 17 233 216]
+   [153 224  94]
+   [ 12  80   5]
+   ...
+   [158 143  39]
+   [ 46  32 250]
+   [245  34 129]]
+
+  ...
+
+  [[185 136  58]
+   [131 244 172]
+   [249  56 201]
+   ...
+   [ 30 251  15]
+   [ 10  72 205]
+   [170  89 248]]
+
+  [[ 22  73 138]
+   [243   6  69]
+   [245  25  50]
+   ...
+   [161 151 206]
+   [ 79  18 229]
+   [201 205  52]]
+
+  [[238  15  56]
+   [227  35 153]
+   [159 214 161]
+   ...
+   [135  33 177]
+   [100  61 198]
+   [231   5 253]]]]
+======================================================================
+2023-08-18 14:27:44,411 - INFO - Executing /Users/mavaylon/Research/NWB/pynwb/docs/gallery/domain/plot_behavior.py
+(BehavioralEpochs pynwb.behavior.BehavioralEpochs at 0x5349269344
+Fields:
+  interval_series: {
+    running <class 'pynwb.misc.IntervalSeries'>,
+    sleeping <class 'pynwb.misc.IntervalSeries'>
+  }
+, BehavioralEvents pynwb.behavior.BehavioralEvents at 0x5349269104
+Fields:
+  time_series: {
+    lever_presses <class 'pynwb.base.TimeSeries'>
+  }
+, BehavioralTimeSeries pynwb.behavior.BehavioralTimeSeries at 0x5349276688
+Fields:
+  time_series: {
+    speed <class 'pynwb.base.TimeSeries'>
+  }
+, CompassDirection pynwb.behavior.CompassDirection at 0x5340093968
+Fields:
+  spatial_series: {
+    SpatialSeries <class 'pynwb.behavior.SpatialSeries'>
+  }
+, EyeTracking pynwb.behavior.EyeTracking at 0x5488751952
+Fields:
+  spatial_series: {
+    left_eye_position <class 'pynwb.behavior.SpatialSeries'>,
+    right_eye_position <class 'pynwb.behavior.SpatialSeries'>
+  }
+, Position pynwb.behavior.Position at 0x5488750032
+Fields:
+  spatial_series: {
+    SpatialSeries <class 'pynwb.behavior.SpatialSeries'>
+  }
+, PupilTracking pynwb.behavior.PupilTracking at 0x5489306800
+Fields:
+  time_series: {
+    pupil_diameter <class 'pynwb.base.TimeSeries'>
+  }
+)
+SpatialSeries pynwb.behavior.SpatialSeries at 0x5349276400
+Fields:
+  comments: no comments
+  conversion: 1.0
+  data: <HDF5 dataset "data": shape (50, 2), type "<f8">
+  description: Position (x, y) in an open field.
+  interval: 1
+  offset: 0.0
+  reference_frame: (0,0) is bottom left corner
+  resolution: -1.0
+  timestamps: <HDF5 dataset "timestamps": shape (50,), type "<f8">
+  timestamps_unit: seconds
+  unit: meters
+
+[[ 0.          0.        ]
+ [ 0.20408163  0.16326531]
+ [ 0.40816327  0.32653061]
+ [ 0.6122449   0.48979592]
+ [ 0.81632653  0.65306122]
+ [ 1.02040816  0.81632653]
+ [ 1.2244898   0.97959184]
+ [ 1.42857143  1.14285714]
+ [ 1.63265306  1.30612245]
+ [ 1.83673469  1.46938776]
+ [ 2.04081633  1.63265306]
+ [ 2.24489796  1.79591837]
+ [ 2.44897959  1.95918367]
+ [ 2.65306122  2.12244898]
+ [ 2.85714286  2.28571429]
+ [ 3.06122449  2.44897959]
+ [ 3.26530612  2.6122449 ]
+ [ 3.46938776  2.7755102 ]
+ [ 3.67346939  2.93877551]
+ [ 3.87755102  3.10204082]
+ [ 4.08163265  3.26530612]
+ [ 4.28571429  3.42857143]
+ [ 4.48979592  3.59183673]
+ [ 4.69387755  3.75510204]
+ [ 4.89795918  3.91836735]
+ [ 5.10204082  4.08163265]
+ [ 5.30612245  4.24489796]
+ [ 5.51020408  4.40816327]
+ [ 5.71428571  4.57142857]
+ [ 5.91836735  4.73469388]
+ [ 6.12244898  4.89795918]
+ [ 6.32653061  5.06122449]
+ [ 6.53061224  5.2244898 ]
+ [ 6.73469388  5.3877551 ]
+ [ 6.93877551  5.55102041]
+ [ 7.14285714  5.71428571]
+ [ 7.34693878  5.87755102]
+ [ 7.55102041  6.04081633]
+ [ 7.75510204  6.20408163]
+ [ 7.95918367  6.36734694]
+ [ 8.16326531  6.53061224]
+ [ 8.36734694  6.69387755]
+ [ 8.57142857  6.85714286]
+ [ 8.7755102   7.02040816]
+ [ 8.97959184  7.18367347]
+ [ 9.18367347  7.34693878]
+ [ 9.3877551   7.51020408]
+ [ 9.59183673  7.67346939]
+ [ 9.79591837  7.83673469]
+ [10.          8.        ]]
+[[0.         0.        ]
+ [0.20408163 0.16326531]]
+======================================================================
+2023-08-18 14:27:45,859 - INFO - Executing /Users/mavaylon/Research/NWB/pynwb/docs/gallery/domain/ophys.py
+TwoPhotonSeries1 pynwb.ophys.TwoPhotonSeries at 0x5330602640
+Fields:
+  comments: no comments
+  conversion: 1.0
+  data: <HDF5 dataset "data": shape (1000, 100, 100), type "<f8">
+  description: no description
+  imaging_plane: ImagingPlane pynwb.ophys.ImagingPlane at 0x5330601728
+Fields:
+  conversion: 1.0
+  description: a very interesting part of the brain
+  device: Microscope pynwb.device.Device at 0x5330601872
+Fields:
+  description: My two-photon microscope
+  manufacturer: The best microscope manufacturer
+
+  excitation_lambda: 600.0
+  imaging_rate: 30.0
+  indicator: GFP
+  location: V1
+  optical_channel: (
+    OpticalChannel <class 'pynwb.ophys.OpticalChannel'>
+  )
+  unit: meters
+
+  offset: 0.0
+  rate: 1.0
+  resolution: -1.0
+  starting_time: 0.0
+  starting_time_unit: seconds
+  unit: normalized amplitude
+
+ophys pynwb.base.ProcessingModule at 0x5330603264
+Fields:
+  data_interfaces: {
+    Fluorescence <class 'pynwb.ophys.Fluorescence'>,
+    ImageSegmentation <class 'pynwb.ophys.ImageSegmentation'>,
+    MotionCorrection <class 'pynwb.ophys.MotionCorrection'>
+  }
+  description: optical physiology processed data
+
+Fluorescence pynwb.ophys.Fluorescence at 0x5330603600
+Fields:
+  roi_response_series: {
+    RoiResponseSeries <class 'pynwb.ophys.RoiResponseSeries'>
+  }
+
+RoiResponseSeries pynwb.ophys.RoiResponseSeries at 0x5330603888
+Fields:
+  comments: no comments
+  conversion: 1.0
+  data: <HDF5 dataset "data": shape (50, 2), type "<f8">
+  description: no description
+  offset: 0.0
+  rate: 30.0
+  resolution: -1.0
+  rois: rois <class 'hdmf.common.table.DynamicTableRegion'>
+  starting_time: 0.0
+  starting_time_unit: seconds
+  unit: lumens
+
+TwoPhotonSeries1 pynwb.ophys.TwoPhotonSeries at 0x5330075712
+Fields:
+  comments: no comments
+  conversion: 1.0
+  data: <HDF5 dataset "data": shape (1000, 100, 100), type "<f8">
+  description: no description
+  imaging_plane: ImagingPlane pynwb.ophys.ImagingPlane at 0x5330615216
+Fields:
+  conversion: 1.0
+  description: a very interesting part of the brain
+  device: Microscope pynwb.device.Device at 0x5330615408
+Fields:
+  description: My two-photon microscope
+  manufacturer: The best microscope manufacturer
+
+  excitation_lambda: 600.0
+  imaging_rate: 30.0
+  indicator: GFP
+  location: V1
+  optical_channel: (
+    OpticalChannel <class 'pynwb.ophys.OpticalChannel'>
+  )
+  unit: meters
+
+  offset: 0.0
+  rate: 1.0
+  resolution: -1.0
+  starting_time: 0.0
+  starting_time_unit: seconds
+  unit: normalized amplitude
+
+[[1. 1.]
+ [1. 1.]
+ [1. 1.]
+ [1. 1.]
+ [1. 1.]
+ [1. 1.]
+ [1. 1.]
+ [1. 1.]
+ [1. 1.]
+ [1. 1.]
+ [1. 1.]
+ [1. 1.]
+ [1. 1.]
+ [1. 1.]
+ [1. 1.]
+ [1. 1.]
+ [1. 1.]
+ [1. 1.]
+ [1. 1.]
+ [1. 1.]
+ [1. 1.]
+ [1. 1.]
+ [1. 1.]
+ [1. 1.]
+ [1. 1.]
+ [1. 1.]
+ [1. 1.]
+ [1. 1.]
+ [1. 1.]
+ [1. 1.]
+ [1. 1.]
+ [1. 1.]
+ [1. 1.]
+ [1. 1.]
+ [1. 1.]
+ [1. 1.]
+ [1. 1.]
+ [1. 1.]
+ [1. 1.]
+ [1. 1.]
+ [1. 1.]
+ [1. 1.]
+ [1. 1.]
+ [1. 1.]
+ [1. 1.]
+ [1. 1.]
+ [1. 1.]
+ [1. 1.]
+ [1. 1.]
+ [1. 1.]]
+section of fluorescence responses:
+[[1. 1.]
+ [1. 1.]
+ [1. 1.]
+ [1. 1.]
+ [1. 1.]
+ [1. 1.]
+ [1. 1.]
+ [1. 1.]
+ [1. 1.]
+ [1. 1.]]
+======================================================================
+2023-08-18 14:27:47,800 - INFO - Executing /Users/mavaylon/Research/NWB/pynwb/docs/gallery/advanced_io/linking_data.py
+/Users/mavaylon/opt/anaconda3/envs/NWB2/lib/python3.10/multiprocessing/resource_tracker.py:224: UserWarning: resource_tracker: There appear to be 1 leaked semaphore objects to clean up at shutdown
+  warnings.warn('resource_tracker: There appear to be %d '
