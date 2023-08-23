@@ -73,7 +73,6 @@ class TimeSeriesMap(NWBContainerMapper):
         else:
             return tstamps_builder.data
 
-
     @NWBContainerMapper.object_attr("data")
     def data_attr(self, container, manager):
         ret = container.fields.get('data')
