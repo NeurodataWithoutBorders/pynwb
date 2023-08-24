@@ -172,7 +172,8 @@ class TestTimeSeriesModularLinkViaTimeSeries(TestTimeSeriesModular):
     """
     def setUp(self):
         super().setUp()
-        self.skipTest("This behavior is currently broken. See issue .")
+        self.skipTest("This behavior is currently broken. "
+                      "See issue https://github.com/NeurodataWithoutBorders/pynwb/issues/1767")
 
     def roundtripContainer(self):
         # create and write data file
