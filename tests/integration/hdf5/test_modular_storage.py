@@ -78,7 +78,10 @@ class TestTimeSeriesModular(TestCase):
                 self.link_container = TimeSeries(
                     name='test_mod_ts',
                     unit='V',
-                    data=data_file_obt.get_acquisition('data_ts'),  # test direct link
+                    data=H5DataIO(
+                        data=data_file_obt.get_acquisition('data_ts').data,
+                        link_data=True  # test with setting link data
+                    ),
                     timestamps=H5DataIO(
                         data=data_file_obt.get_acquisition('data_ts').timestamps,
                         link_data=True  # test with setting link data
@@ -159,3 +162,54 @@ class TestTimeSeriesModular(TestCase):
 
     def getContainer(self, nwbfile):
         return nwbfile.get_acquisition('test_mod_ts')
+
+
+class TestTimeSeriesModularLinkViaTimeSeries(TestTimeSeriesModular):
+    """
+    Same as TestTimeSeriesModular but creating links by setting TimeSeries.data
+    and TimeSeries.timestamps to the other TimeSeries on construction, rather than
+    using H5DataIO.
+    """
+    def setUp(self):
+        super().setUp()
+        self.skipTest("This behavior is currently broken. See issue .")
+
+    def roundtripContainer(self):
+        # create and write data file
+        data_file = NWBFile(
+            session_description='a test file',
+            identifier='data_file',
+            session_start_time=self.start_time
+        )
+        data_file.add_acquisition(self.container)
+
+        with HDF5IO(self.data_filename, 'w', manager=get_manager()) as data_write_io:
+            data_write_io.write(data_file)
+
+        # read data file
+        with HDF5IO(self.data_filename, 'r', manager=get_manager()) as self.data_read_io:
+            data_file_obt = self.data_read_io.read()
+
+            # write "link file" with timeseries.data that is an external link to the timeseries in "data file"
+            # also link timeseries.timestamps.data to the timeseries.timestamps in "data file"
+            with HDF5IO(self.link_filename, 'w', manager=get_manager()) as link_write_io:
+                link_file = NWBFile(
+                    session_description='a test file',
+                    identifier='link_file',
+                    session_start_time=self.start_time
+                )
+                self.link_container = TimeSeries(
+                    name='test_mod_ts',
+                    unit='V',
+                    data=data_file_obt.get_acquisition('data_ts'),  # link by setting data to an external TimeSeries
+                    timestamps=data_file_obt.get_acquisition('data_ts'),  # link by setting to an external TimeSeries
+                )
+                link_file.add_acquisition(self.link_container)
+                link_write_io.write(link_file)
+
+        # note that self.link_container contains a link to a dataset that is now closed
+
+        # read the link file
+        self.link_read_io = HDF5IO(self.link_filename, 'r', manager=get_manager())
+        self.read_nwbfile = self.link_read_io.read()
+        return self.getContainer(self.read_nwbfile)
