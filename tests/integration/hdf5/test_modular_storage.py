@@ -31,7 +31,7 @@ class TestTimeSeriesModular(TestCase):
         )
         self.data_read_io = None          # HDF5IO used for reading the main data file
         self.read_data_nwbfile = None     # The NWBFile read after roundtrip
-        self.read_data_container = None   # self.container after rountrip
+        self.read_data_container = None   # self.container after roundtrip
 
         # Variables for the second file which links the main data file
         self.link_container = None        # The container with the links before write
