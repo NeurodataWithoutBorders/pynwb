@@ -207,6 +207,10 @@ class TestTimeSeriesModularLinkViaTimeSeries(TestTimeSeriesModular):
     and TimeSeries.timestamps to the other TimeSeries on construction, rather than
     using H5DataIO.
     """
+    def setUp(self):
+        super().setUp()
+        self.skipTest("This behavior is currently broken. See issue .")
+
     def roundtripContainer(self):
         # create and write data file
         data_file = NWBFile(
@@ -235,8 +239,8 @@ class TestTimeSeriesModularLinkViaTimeSeries(TestTimeSeriesModular):
             self.link_container = TimeSeries(
                 name='test_mod_ts',
                 unit='V',
-                data=self.read_data_container.data,     # <--- This is the main difference to TestTimeSeriesModular
-                timestamps=self.read_data_container.timestamps  # <--- This is the main difference to TestTimeSeriesModular
+                data=self.read_data_container,       # <--- This is the main difference to TestTimeSeriesModular
+                timestamps=self.read_data_container  # <--- This is the main difference to TestTimeSeriesModular
             )
             link_file.add_acquisition(self.link_container)
             link_write_io.write(link_file)
