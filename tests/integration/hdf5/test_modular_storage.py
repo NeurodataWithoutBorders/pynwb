@@ -14,29 +14,35 @@ from pynwb.testing import remove_test_file, TestCase
 class TestTimeSeriesModular(TestCase):
 
     def setUp(self):
-        self.start_time = datetime(1971, 1, 1, 12, tzinfo=tzutc())
+        # File paths
+        self.data_filename = os.path.join(os.getcwd(), 'test_time_series_modular_data.nwb')
+        self.link_filename = os.path.join(os.getcwd(), 'test_time_series_modular_link.nwb')
 
+        # Make the data container file write
+        self.start_time = datetime(1971, 1, 1, 12, tzinfo=tzutc())
         self.data = np.arange(2000).reshape((1000, 2))
         self.timestamps = np.linspace(0, 1, 1000)
-
+        # The container before roundtrip
         self.container = TimeSeries(
             name='data_ts',
             unit='V',
             data=self.data,
             timestamps=self.timestamps
         )
+        self.data_read_io = None          # HDF5IO used for reading the main data file
+        self.read_data_nwbfile = None     # The NWBFile read after roundtrip
+        self.read_data_container = None   # self.container after rountrip
 
-        self.data_filename = os.path.join(os.getcwd(), 'test_time_series_modular_data.nwb')
-        self.link_filename = os.path.join(os.getcwd(), 'test_time_series_modular_link.nwb')
-
-        self.read_container = None
-        self.link_read_io = None
-        self.data_read_io = None
+        # Variables for the second file which links the main data file
+        self.link_container = None        # The container with the links before write
+        self.read_link_container = None   # The container with the links after roundtrip
+        self.read_link_nwbfile = None     # The NWBFile container containing link_container after roundtrip
+        self.link_read_io = None          # HDF5IO use for reading the read_link_nwbfile
 
     def tearDown(self):
-        if self.read_container:
-            self.read_container.data.file.close()
-            self.read_container.timestamps.file.close()
+        if self.read_link_container:
+            self.read_link_container.data.file.close()
+            self.read_link_container.timestamps.file.close()
         if self.link_read_io:
             self.link_read_io.close()
         if self.data_read_io:
@@ -64,52 +70,83 @@ class TestTimeSeriesModular(TestCase):
             data_write_io.write(data_file)
 
         # read data file
-        with HDF5IO(self.data_filename, 'r', manager=get_manager()) as self.data_read_io:
-            data_file_obt = self.data_read_io.read()
+        self.data_read_io = HDF5IO(self.data_filename, 'r', manager=get_manager())
+        self.read_data_nwbfile = self.data_read_io.read()
+        self.read_data_container = self.read_data_nwbfile.get_acquisition('data_ts')
 
-            # write "link file" with timeseries.data that is an external link to the timeseries in "data file"
-            # also link timeseries.timestamps.data to the timeseries.timestamps in "data file"
-            with HDF5IO(self.link_filename, 'w', manager=get_manager()) as link_write_io:
-                link_file = NWBFile(
-                    session_description='a test file',
-                    identifier='link_file',
-                    session_start_time=self.start_time
+        # write "link file" with timeseries.data that is an external link to the timeseries in "data file"
+        # also link timeseries.timestamps.data to the timeseries.timestamps in "data file"
+        with HDF5IO(self.link_filename, 'w', manager=get_manager()) as link_write_io:
+            link_file = NWBFile(
+                session_description='a test file',
+                identifier='link_file',
+                session_start_time=self.start_time
+            )
+            self.link_container = TimeSeries(
+                name='test_mod_ts',
+                unit='V',
+                data=H5DataIO(
+                    data=self.read_data_container.data,
+                    link_data=True  # test with setting link data
+                ),
+                timestamps=H5DataIO(
+                    data=self.read_data_container.timestamps,
+                    link_data=True  # test with setting link data
                 )
-                self.link_container = TimeSeries(
-                    name='test_mod_ts',
-                    unit='V',
-                    data=H5DataIO(
-                        data=data_file_obt.get_acquisition('data_ts').data,
-                        link_data=True  # test with setting link data
-                    ),
-                    timestamps=H5DataIO(
-                        data=data_file_obt.get_acquisition('data_ts').timestamps,
-                        link_data=True  # test with setting link data
-                    )
-                )
-                link_file.add_acquisition(self.link_container)
-                link_write_io.write(link_file)
-
-        # note that self.link_container contains a link to a dataset that is now closed
+            )
+            link_file.add_acquisition(self.link_container)
+            link_write_io.write(link_file)
 
         # read the link file
         self.link_read_io = HDF5IO(self.link_filename, 'r', manager=get_manager())
-        self.read_nwbfile = self.link_read_io.read()
-        return self.getContainer(self.read_nwbfile)
+        self.read_link_nwbfile = self.link_read_io.read()
+        return self.getContainer(self.read_link_nwbfile)
 
     def test_roundtrip(self):
-        self.read_container = self.roundtripContainer()
+        # Roundtrip the container
+        self.read_link_container = self.roundtripContainer()
 
-        # make sure we get a completely new object
-        self.assertIsNotNone(str(self.container))  # added as a test to make sure printing works
+        # 1. Make sure our containers are set correctly for the test
+        # 1.1:  Make sure the container we read is not identical to the container we used for writing
+        self.assertNotEqual(id(self.link_container), id(self.read_link_container))
+        self.assertNotEqual(id(self.container), id(self.read_data_container))
+        # 1.2: Make sure the container we read is indeed the correct container we should use for testing
+        self.assertIs(self.read_link_nwbfile.objects[self.link_container.object_id], self.read_link_container)
+        self.assertIs(self.read_data_nwbfile.objects[self.container.object_id], self.read_data_container)
+        # 1.3: Make sure the object_ids of the container we wrote and read are the same
+        self.assertEqual(self.read_link_container.object_id, self.link_container.object_id)
+        self.assertEqual(self.read_data_container.object_id, self.container.object_id)
+        # 1.4: Make sure the object_ids between the source data and link data container are different
+        self.assertNotEqual(self.read_link_container.object_id, self.read_data_container.object_id)
+
+        # Test that printing works for the source data and linked data container
+        self.assertIsNotNone(str(self.container))
+        self.assertIsNotNone(str(self.read_data_container))
         self.assertIsNotNone(str(self.link_container))
-        self.assertIsNotNone(str(self.read_container))
-        self.assertFalse(self.link_container.timestamps.valid)
-        self.assertTrue(self.read_container.timestamps.id.valid)
-        self.assertNotEqual(id(self.link_container), id(self.read_container))
-        self.assertIs(self.read_nwbfile.objects[self.link_container.object_id], self.read_container)
-        self.assertContainerEqual(self.read_container, self.container, ignore_name=True, ignore_hdmf_attrs=True)
-        self.assertEqual(self.read_container.object_id, self.link_container.object_id)
+        self.assertIsNotNone(str(self.read_link_container))
+
+        # Test that timestamps and data are valid after write
+        self.assertTrue(self.read_link_container.timestamps.id.valid)
+        self.assertTrue(self.read_link_container.data.id.valid)
+        self.assertTrue(self.read_data_container.timestamps.id.valid)
+        self.assertTrue(self.read_data_container.data.id.valid)
+
+        # Make sure the data in the read data container and linked data container match the original container
+        self.assertContainerEqual(self.read_link_container, self.container, ignore_name=True, ignore_hdmf_attrs=True)
+        self.assertContainerEqual(self.read_data_container, self.container, ignore_name=True, ignore_hdmf_attrs=True)
+
+        # Make sure the timestamps and data are linked correctly. I.e., the filename of the h5py dataset should
+        # match between the data file and the file with links even-though they have been read from different files
+        self.assertEqual(
+            self.read_data_container.data.file.filename,  # Path where the source data is stored
+            self.read_link_container.data.file.filename   # Path where the linked h5py dataset points to
+        )
+        self.assertEqual(
+            self.read_data_container.timestamps.file.filename,  # Path where the source data is stored
+            self.read_link_container.timestamps.file.filename   # Path where the linked h5py dataset points to
+        )
+
+        # validate both the source data and linked data file via the pynwb validator
         self.validate()
 
     def test_link_root(self):
@@ -170,11 +207,6 @@ class TestTimeSeriesModularLinkViaTimeSeries(TestTimeSeriesModular):
     and TimeSeries.timestamps to the other TimeSeries on construction, rather than
     using H5DataIO.
     """
-    def setUp(self):
-        super().setUp()
-        self.skipTest("This behavior is currently broken. "
-                      "See issue https://github.com/NeurodataWithoutBorders/pynwb/issues/1767")
-
     def roundtripContainer(self):
         # create and write data file
         data_file = NWBFile(
@@ -188,29 +220,30 @@ class TestTimeSeriesModularLinkViaTimeSeries(TestTimeSeriesModular):
             data_write_io.write(data_file)
 
         # read data file
-        with HDF5IO(self.data_filename, 'r', manager=get_manager()) as self.data_read_io:
-            data_file_obt = self.data_read_io.read()
+        self.data_read_io = HDF5IO(self.data_filename, 'r', manager=get_manager())
+        self.read_data_nwbfile = self.data_read_io.read()
+        self.read_data_container = self.read_data_nwbfile.get_acquisition('data_ts')
 
-            # write "link file" with timeseries.data that is an external link to the timeseries in "data file"
-            # also link timeseries.timestamps.data to the timeseries.timestamps in "data file"
-            with HDF5IO(self.link_filename, 'w', manager=get_manager()) as link_write_io:
-                link_file = NWBFile(
-                    session_description='a test file',
-                    identifier='link_file',
-                    session_start_time=self.start_time
-                )
-                self.link_container = TimeSeries(
-                    name='test_mod_ts',
-                    unit='V',
-                    data=data_file_obt.get_acquisition('data_ts'),  # link by setting data to an external TimeSeries
-                    timestamps=data_file_obt.get_acquisition('data_ts'),  # link by setting to an external TimeSeries
-                )
-                link_file.add_acquisition(self.link_container)
-                link_write_io.write(link_file)
+        # write "link file" with timeseries.data that is an external link to the timeseries in "data file"
+        # also link timeseries.timestamps.data to the timeseries.timestamps in "data file"
+        with HDF5IO(self.link_filename, 'w', manager=get_manager()) as link_write_io:
+            link_file = NWBFile(
+                session_description='a test file',
+                identifier='link_file',
+                session_start_time=self.start_time
+            )
+            self.link_container = TimeSeries(
+                name='test_mod_ts',
+                unit='V',
+                data=self.read_data_container.data,     # <--- This is the main difference to TestTimeSeriesModular
+                timestamps=self.read_data_container.timestamps  # <--- This is the main difference to TestTimeSeriesModular
+            )
+            link_file.add_acquisition(self.link_container)
+            link_write_io.write(link_file)
 
         # note that self.link_container contains a link to a dataset that is now closed
 
         # read the link file
         self.link_read_io = HDF5IO(self.link_filename, 'r', manager=get_manager())
-        self.read_nwbfile = self.link_read_io.read()
-        return self.getContainer(self.read_nwbfile)
+        self.read_link_nwbfile = self.link_read_io.read()
+        return self.getContainer(self.read_link_nwbfile)
