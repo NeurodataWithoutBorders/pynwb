@@ -33,7 +33,7 @@ TimeSeries
 ^^^^^^^^^^
 
 :py:class:`~pynwb.base.TimeSeries` objects store time series data and correspond to the *TimeSeries* specifications
-provided by the `NWB Format`_ . Like the NWB specification, :py:class:`~pynwb.base.TimeSeries` Python objects
+provided by the `NWB Format`_. Like the NWB specification, :py:class:`~pynwb.base.TimeSeries` Python objects
 follow an object-oriented inheritance pattern, i.e., the class :py:class:`~pynwb.base.TimeSeries`
 serves as the base class for all other :py:class:`~pynwb.base.TimeSeries` types, such as,
 :py:class:`~pynwb.ecephys.ElectricalSeries`, which itself may have further subtypes, e.g.,
