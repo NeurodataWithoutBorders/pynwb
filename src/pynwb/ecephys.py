@@ -40,7 +40,7 @@ class ElectrodeGroup(NWBContainer):
                 if len(args_to_set['position'].dtype) != 3:
                     print("H1", len(args_to_set['position'].dtype))
                     position_dtype_valid = False
-            if position_dtype_valid:  # If we have list of element, then check that the elements are of lenght 3
+            if position_dtype_valid:  # If we have list of element, then check that the elements are of length 3
                 try:
                     if len(args_to_set['position'][0]) != 3:
                         position_dtype_valid = False
