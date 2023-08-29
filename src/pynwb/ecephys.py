@@ -26,13 +26,30 @@ class ElectrodeGroup(NWBContainer):
             {'name': 'location', 'type': str, 'doc': 'description of location of this electrode group'},
             {'name': 'device', 'type': Device, 'doc': 'the device that was used to record from this electrode group'},
             {'name': 'position', 'type': 'array_data',
-             'doc': 'stereotaxic position of this electrode group (x, y, z)', 'default': None})
+             'doc': 'Compound dataset with stereotaxic position of this electrode group (x, y, z). '
+                    'Each element of the data array must have three elements or the dtype of the '
+                    'array must be `(float, float, float)', 'default': None})
     def __init__(self, **kwargs):
         args_to_set = popargs_to_dict(('description', 'location', 'device', 'position'), kwargs)
         super().__init__(**kwargs)
-        if args_to_set['position'] and len(args_to_set['position']) != 3:
-            raise ValueError('ElectrodeGroup position argument must have three elements: x, y, z, but received: %s'
-                             % str(args_to_set['position']))
+        # position is a compound dataset, i.e., this must be an array with a compound data type of three floats
+        # or each element in the list must at least have three entries
+        if args_to_set['position'] is not None and len(args_to_set['position']) > 0:
+            # If we have a dtype, then check that it is valid
+            position_dtype_valid = True
+            if hasattr(args_to_set['position'], 'dtype'):
+                if len(args_to_set['position'].dtype) != 3:
+                    print("H1", len(args_to_set['position'].dtype))
+                    position_dtype_valid = False
+            if position_dtype_valid:
+                try:
+                    if len(args_to_set['position'][0]) != 3:
+                        position_dtype_valid = False
+                except TypeError:  # len not supported by first_position
+                    position_dtype_valid = False
+            if not position_dtype_valid:
+                raise ValueError('ElectrodeGroup position dataset must have three components (x, y, z) '
+                                 'for each array element, but received: %s' % str(args_to_set['position']))
         for key, val in args_to_set.items():
             setattr(self, key, val)
 
