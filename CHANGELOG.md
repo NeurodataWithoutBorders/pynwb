@@ -1,5 +1,11 @@
 # PyNWB Changelog
 
+## PyNWB 2.5.1 (Upcoming)
+
+### Bug fixes
+- Fixed bug in how `ElectrodGroup.__init__` validates its `position` argument. @oruebel [#1770](https://github.com/NeurodataWithoutBorders/pynwb/pull/1770)
+
+
 ## PyNWB 2.5.0 (August 18, 2023)
 
 ### Enhancements and minor changes
