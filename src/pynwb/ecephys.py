@@ -35,13 +35,12 @@ class ElectrodeGroup(NWBContainer):
         # position is a compound dataset, i.e., this must be an array with a compound data type of three floats
         # or each element in the list must at least have three entries
         if args_to_set['position'] is not None and len(args_to_set['position']) > 0:
-            # If we have a dtype, then check that it is valid
             position_dtype_valid = True
-            if hasattr(args_to_set['position'], 'dtype'):
+            if hasattr(args_to_set['position'], 'dtype'):  # If we have a dtype, then check that it is valid
                 if len(args_to_set['position'].dtype) != 3:
                     print("H1", len(args_to_set['position'].dtype))
                     position_dtype_valid = False
-            if position_dtype_valid:
+            if position_dtype_valid:  # If we have list of element, then check that the elements are of lenght 3
                 try:
                     if len(args_to_set['position'][0]) != 3:
                         position_dtype_valid = False
