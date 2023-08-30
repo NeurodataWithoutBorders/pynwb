@@ -290,7 +290,7 @@ class NWBHDF5IO(_HDF5IO):
                   and strings, e.g., (2, 5, 1, beta). (None, None) will be returned if the nwb_version
                   is missing, e.g., in the case when no data has been written to the file yet.
         """
-        get_nwbfile_version(self._file)
+        return get_nwbfile_version(self._file)
 
     @docval(*get_docval(_HDF5IO.read),
             {'name': 'skip_version_check', 'type': bool, 'doc': 'skip checking of NWB version', 'default': False})
