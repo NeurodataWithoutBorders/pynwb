@@ -12,7 +12,7 @@ and scratch space.
 
 .. note::
     The scratch space is explicitly for non-standardized data that is not intended for reuse
-    by others. Standard NWB:N types, and extension if required, should always be used for any data that you
+    by others. Standard NWB types, and extension if required, should always be used for any data that you
     intend to share. As such, published data should not include scratch data and a user should be able
     to ignore any data stored in scratch to use a file.
 
@@ -127,7 +127,7 @@ with NWBHDF5IO("processed_data.nwb", mode="w", manager=raw_io.manager) as io:
 #
 # You may end up wanting to store results from some one-off analysis, and writing an extension
 # to get your data into an NWBFile is too much over head. This is facilitated by the scratch space
-# in NWB:N. [#]_
+# in NWB. [#]_
 #
 # First, lets read our processed data and then make a copy
 
