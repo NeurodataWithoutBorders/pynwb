@@ -22,7 +22,7 @@ HDF5 installed in a MPI configuration.
 #
 # 3. **Read from the file in parallel using MPI**: Here each of the 4 MPI ranks reads one time
 # step from the file
-
+#
 # .. code-block:: python
 #
 #     from mpi4py import MPI
