@@ -122,17 +122,20 @@ More commonly, you will be creating instances of classes that extend this class.
 NWB organizes data into different groups depending on the type of data. Groups can be thought of
 as folders within the file. Here are some of the groups within an :py:class:`~pynwb.file.NWBFile` and the types of
 data they are intended to store:
- * **acquisition**: raw, acquired data that should never change
- * **processing**: processed data, typically the results of preprocessing algorithms and could change
- * **analysis**: results of data analysis
- * **stimuli**: stimuli used in the experiment (e.g., images, videos, light pulses)
+
+* **acquisition**: raw, acquired data that should never change
+* **processing**: processed data, typically the results of preprocessing algorithms and could change
+* **analysis**: results of data analysis
+* **stimuli**: stimuli used in the experiment (e.g., images, videos, light pulses)
 
 The following examples will reference variables that may not be defined within the block they are used in. For
 clarity, we define them here:
+
 """
-from datetime import datetime
 
 # sphinx_gallery_thumbnail_path = 'figures/gallery_thumbnails_file.png'
+
+from datetime import datetime
 from uuid import uuid4
 
 import numpy as np
@@ -156,7 +159,8 @@ from pynwb.file import Subject
 # occurred exactly at the session start time.
 #
 # Create an :py:class:`~pynwb.file.NWBFile` object with the required fields
-# (``session_description``, ``identifier``, ``session_start_time``) and additional metadata.
+# (:py:attr:`~pynwb.file.NWBFile.session_description`, :py:attr:`~pynwb.file.NWBFile.identifier`,
+# :py:attr:`~pynwb.file.NWBFile.session_start_time`) and additional metadata.
 #
 # .. note::
 #     Use keyword arguments when constructing :py:class:`~pynwb.file.NWBFile` objects.

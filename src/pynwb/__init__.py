@@ -216,13 +216,12 @@ class NWBHDF5IO(_HDF5IO):
             {'name': 'comm', 'type': "Intracomm", 'doc': 'the MPI communicator to use for parallel I/O',
              'default': None},
             {'name': 'driver', 'type': str, 'doc': 'driver for h5py to use when opening HDF5 file', 'default': None},
-            {'name': 'external_resources_path', 'type': str, 'doc': 'The path to the ExternalResources',
+            {'name': 'herd_path', 'type': str, 'doc': 'The path to the HERD',
              'default': None},)
     def __init__(self, **kwargs):
-        path, mode, manager, extensions, load_namespaces, file_obj, comm, driver, external_resources_path =\
+        path, mode, manager, extensions, load_namespaces, file_obj, comm, driver, herd_path =\
             popargs('path', 'mode', 'manager', 'extensions', 'load_namespaces',
-                    'file', 'comm', 'driver', 'external_resources_path', kwargs)
-
+                    'file', 'comm', 'driver', 'herd_path', kwargs)
         # Define the BuildManager to use
         if mode in 'wx' or manager is not None or extensions is not None:
             load_namespaces = False
@@ -248,7 +247,7 @@ class NWBHDF5IO(_HDF5IO):
                 manager = get_manager()
         # Open the file
         super().__init__(path, manager=manager, mode=mode, file=file_obj, comm=comm,
-                         driver=driver, external_resources_path=external_resources_path)
+                         driver=driver, herd_path=herd_path)
 
     @property
     def nwb_version(self):

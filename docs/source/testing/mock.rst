@@ -42,9 +42,9 @@ If you want to create objects and automatically add them to an :py:class:`~pynwb
 
 Now this NWBFile contains an :py:class:`~pynwb.ophys.RoiResponseSeries` and all the upstream classes:
 
-.. code-block:: python
+.. code-block::
 
-    print(nwbfile)
+    >>> print(nwbfile)
 
     root pynwb.file.NWBFile at 0x4335131760
     Fields:
