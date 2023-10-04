@@ -100,7 +100,7 @@ position_data.shape
 # .. note::
 #    :py:class:`~pynwb.behavior.SpatialSeries` data should be stored as one continuous stream,
 #    as it is acquired, not by trial as is often reshaped for analysis.
-#    Data can be trial-aligned on-the-fly using the trials table. See the :ref:`basic_trials` tutorial
+#    Data can be trial-aligned on-the-fly using the trials table. See the :ref:`time_intervals` tutorial
 #    for further information.
 #
 # For position data ``reference_frame`` indicates the zero-position, e.g.

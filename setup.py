@@ -20,7 +20,7 @@ schema_dir = 'nwb-schema/core'
 
 reqs = [
     'h5py>=2.10',
-    'hdmf>=3.5.4',
+    'hdmf>=3.9.0',
     'numpy>=1.16',
     'pandas>=1.1.5',
     'python-dateutil>=2.7.3',
@@ -44,10 +44,9 @@ setup_args = {
     'packages': pkgs,
     'package_dir': {'': 'src'},
     'package_data': {'pynwb': ["%s/*.yaml" % schema_dir, "%s/*.json" % schema_dir]},
-    'python_requires': '>=3.7',
+    'python_requires': '>=3.8',
     'classifiers': [
         "Programming Language :: Python",
-        "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",

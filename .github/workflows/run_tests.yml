@@ -19,12 +19,12 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { name: linux-python3.7-minimum      , test-tox-env: py37-minimum    , build-tox-env: build-py37-minimum    , python-ver: "3.7" , os: ubuntu-latest }
+          - { name: linux-python3.8-minimum      , test-tox-env: py38-minimum    , build-tox-env: build-py38-minimum   , python-ver: "3.8" , os: ubuntu-latest }
           # NOTE config below with "upload-wheels: true" specifies that wheels should be uploaded as an artifact
-          - { name: linux-python3.11-upgraded    , test-tox-env: py311-upgraded  , build-tox-env: build-py311-upgraded  , python-ver: "3.11", os: ubuntu-latest , upload-wheels: true }
-          - { name: windows-python3.7-minimum    , test-tox-env: py37-minimum    , build-tox-env: build-py37-minimum    , python-ver: "3.7" , os: windows-latest }
-          - { name: windows-python3.11-upgraded  , test-tox-env: py311-upgraded  , build-tox-env: build-py311-upgraded  , python-ver: "3.11", os: windows-latest }
-          - { name: macos-python3.7-minimum      , test-tox-env: py37-minimum    , build-tox-env: build-py37-minimum    , python-ver: "3.7" , os: macos-latest }
+          - { name: linux-python3.11-upgraded    , test-tox-env: py311-upgraded  , build-tox-env: build-py311-upgraded , python-ver: "3.11", os: ubuntu-latest , upload-wheels: true }
+          - { name: windows-python3.8-minimum    , test-tox-env: py38-minimum    , build-tox-env: build-py38-minimum   , python-ver: "3.8" , os: windows-latest }
+          - { name: windows-python3.11-upgraded  , test-tox-env: py311-upgraded  , build-tox-env: build-py311-upgraded , python-ver: "3.11", os: windows-latest }
+          - { name: macos-python3.8-minimum      , test-tox-env: py38-minimum    , build-tox-env: build-py38-minimum   , python-ver: "3.8" , os: macos-latest }
     steps:
       - name: Cancel non-latest runs
         uses: styfle/cancel-workflow-action@0.11.0
@@ -78,9 +78,9 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { name: linux-gallery-python3.7-minimum    , test-tox-env: gallery-py37-minimum  , python-ver: "3.7" , os: ubuntu-latest }
+          - { name: linux-gallery-python3.8-minimum    , test-tox-env: gallery-py38-minimum  , python-ver: "3.8" , os: ubuntu-latest }
           - { name: linux-gallery-python3.11-upgraded  , test-tox-env: gallery-py311-upgraded, python-ver: "3.11", os: ubuntu-latest }
-          - { name: windows-gallery-python3.7-minimum  , test-tox-env: gallery-py37-minimum  , python-ver: "3.7" , os: windows-latest }
+          - { name: windows-gallery-python3.8-minimum  , test-tox-env: gallery-py38-minimum  , python-ver: "3.8" , os: windows-latest }
           - { name: windows-gallery-python3.11-upgraded, test-tox-env: gallery-py311-upgraded, python-ver: "3.11", os: windows-latest }
     steps:
       - name: Cancel non-latest runs
@@ -92,6 +92,7 @@ jobs:
       - uses: actions/checkout@v3
         with:
           submodules: 'recursive'
+          fetch-depth: 0  # tags are required for versioneer to determine the version
 
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -118,7 +119,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { name: conda-linux-python3.7-minimum    , test-tox-env: py37-minimum    , build-tox-env: build-py37-minimum    , python-ver: "3.7" , os: ubuntu-latest }
+          - { name: conda-linux-python3.8-minimum    , test-tox-env: py38-minimum    , build-tox-env: build-py38-minimum    , python-ver: "3.8" , os: ubuntu-latest }
           - { name: conda-linux-python3.11-upgraded  , test-tox-env: py311-upgraded  , build-tox-env: build-py311-upgraded  , python-ver: "3.11", os: ubuntu-latest }
     steps:
       - name: Cancel non-latest runs
@@ -142,8 +143,7 @@ jobs:
         run: |
           conda config --set always_yes yes --set changeps1 no
           conda info
-          # the conda dependency resolution for tox under python 3.7 can install the wrong importlib_metadata
-          conda install -c conda-forge tox "importlib_metadata>4"
+          conda install -c conda-forge tox
 
       - name: Conda reporting
         run: |
@@ -174,7 +174,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { name: linux-python3.11-ros3  , python-ver: "3.11", os: ubuntu-latest }
+          - { name: conda-linux-python3.11-ros3  , python-ver: "3.11", os: ubuntu-latest }
     steps:
       - name: Cancel non-latest runs
         uses: styfle/cancel-workflow-action@0.11.0
@@ -185,6 +185,7 @@ jobs:
       - uses: actions/checkout@v3
         with:
           submodules: 'recursive'
+          fetch-depth: 0  # tags are required for versioneer to determine the version
 
       - name: Set up Conda
         uses: conda-incubator/setup-miniconda@v2
@@ -218,7 +219,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { name: linux-gallery-python3.11-ros3  , python-ver: "3.11", os: ubuntu-latest }
+          - { name: conda-linux-gallery-python3.11-ros3  , python-ver: "3.11", os: ubuntu-latest }
     steps:
       - name: Cancel non-latest runs
         uses: styfle/cancel-workflow-action@0.11.0
@@ -229,6 +230,7 @@ jobs:
       - uses: actions/checkout@v3
         with:
           submodules: 'recursive'
+          fetch-depth: 0  # tags are required for versioneer to determine the version
 
       - name: Set up Conda
         uses: conda-incubator/setup-miniconda@v2
@@ -272,6 +274,7 @@ jobs:
         uses: actions/checkout@v3
         with:
           submodules: 'recursive'
+          fetch-depth: 0  # tags are required for versioneer to determine the version
 
       - name: Set up Python
         uses: actions/setup-python@v4
