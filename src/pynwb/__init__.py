@@ -147,12 +147,13 @@ def register_class(**kwargs):
     else:
         _dec(container_cls)
 
+
 def get_nwbfile_version(h5py_file: h5py.File):
     """
     Get the NWB version of the file if it is an NWB file.
     :returns: Tuple consisting of: 1) the original version string as stored in the file and
               2) a tuple with the parsed components of the version string, consisting of integers
-              and strings, e.g., (2, 5, 1, beta). (None, None) will be returned if the file is not a valid NWB file 
+              and strings, e.g., (2, 5, 1, beta). (None, None) will be returned if the file is not a valid NWB file
               or the nwb_version is missing, e.g., in the case when no data has been written to the file yet.
     """
     # Get the version string for the NWB file
@@ -237,7 +238,6 @@ class NWBHDF5IO(_HDF5IO):
                 return get_nwbfile_version(file)[1][0] >= 2    # Major version of NWB >= 2
         except IOError:
             return False
-
 
     @docval({'name': 'path', 'type': (str, Path), 'doc': 'the path to the HDF5 file', 'default': None},
             {'name': 'mode', 'type': str,
