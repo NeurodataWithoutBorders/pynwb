@@ -4,7 +4,7 @@ import numpy as np
 
 from hdmf.common.table import DynamicTableRegion
 
-from ... import NWBFile
+from ... import NWBFile, ProcessingModule
 from ...device import Device
 from ...ophys import (
     RoiResponseSeries,
@@ -272,6 +272,8 @@ def mock_RoiResponseSeries(
     else:
         n_rois = 5
 
+    plane_seg = plane_segmentation or mock_PlaneSegmentation(n_rois=n_rois, nwbfile=nwbfile)
+
     roi_response_series = RoiResponseSeries(
         name=name if name is not None else name_generator("RoiResponseSeries"),
         data=data if data is not None else np.ones((30, n_rois)),
@@ -280,7 +282,7 @@ def mock_RoiResponseSeries(
         or DynamicTableRegion(
             name="rois",
             description="rois",
-            table=plane_segmentation or mock_PlaneSegmentation(n_rois=n_rois, nwbfile=nwbfile),
+            table=plane_seg,
             data=list(range(n_rois)),
         ),
         resolution=resolution,
@@ -298,6 +300,9 @@ def mock_RoiResponseSeries(
         if "ophys" not in nwbfile.processing:
             nwbfile.create_processing_module("ophys", "ophys")
 
+        if plane_seg.name not in nwbfile.processing["ophys"].data_interfaces:
+            nwbfile.processing["ophys"].add(plane_seg)
+
         nwbfile.processing["ophys"].add(roi_response_series)
 
     return roi_response_series
@@ -309,9 +314,9 @@ def mock_DfOverF(
     nwbfile: Optional[NWBFile] = None
 ) -> DfOverF:
     df_over_f = DfOverF(
-        roi_response_series=roi_response_series or [mock_RoiResponseSeries(nwbfile=nwbfile)],
         name=name if name is not None else name_generator("DfOverF"),
     )
+    plane_seg = mock_PlaneSegmentation(nwbfile=nwbfile)
 
     if nwbfile is not None:
         if "ophys" not in nwbfile.processing:
@@ -319,6 +324,14 @@ def mock_DfOverF(
 
         nwbfile.processing["ophys"].add(df_over_f)
 
+    else:
+        pm = ProcessingModule(name="ophys", description="ophys")
+        pm.add(plane_seg)
+        pm.add(df_over_f)
+
+    df_over_f.add_roi_response_series(
+        roi_response_series or mock_RoiResponseSeries(nwbfile=nwbfile, plane_segmentation=plane_seg)
+    )
     return df_over_f
 
 
@@ -328,13 +341,22 @@ def mock_Fluorescence(
     nwbfile: Optional[NWBFile] = None,
 ) -> Fluorescence:
     fluorescence = Fluorescence(
-        roi_response_series=roi_response_series or [mock_RoiResponseSeries(nwbfile=nwbfile)],
         name=name if name is not None else name_generator("Fluorescence"),
     )
+    plane_seg = mock_PlaneSegmentation(nwbfile=nwbfile)
 
     if nwbfile is not None:
         if "ophys" not in nwbfile.processing:
             nwbfile.create_processing_module("ophys", "ophys")
+
         nwbfile.processing["ophys"].add(fluorescence)
+    else:
+        pm = ProcessingModule(name="ophys", description="ophys")
+        pm.add(plane_seg)
+        pm.add(fluorescence)
+
+    fluorescence.add_roi_response_series(
+        roi_response_series or mock_RoiResponseSeries(nwbfile=nwbfile, plane_segmentation=plane_seg)
+    )
 
     return fluorescence
