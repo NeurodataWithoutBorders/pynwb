@@ -2,7 +2,7 @@ import warnings
 
 import numpy as np
 
-from pynwb.base import TimeSeries
+from pynwb.base import TimeSeries, ProcessingModule
 from pynwb.device import Device
 from pynwb.image import ImageSeries
 from pynwb.ophys import (
@@ -398,9 +398,15 @@ class RoiResponseSeriesConstructor(TestCase):
 
 class DfOverFConstructor(TestCase):
     def test_init(self):
-        ps = create_plane_segmentation()
-        rt_region = ps.create_roi_table_region(description='the second ROI', region=[1])
+        pm = ProcessingModule(name='ophys', description="Optical physiology")
 
+        ps = create_plane_segmentation()
+        pm.add(ps)
+
+        dof = DfOverF()
+        pm.add(dof)
+
+        rt_region = ps.create_roi_table_region(description='the second ROI', region=[1])
         rrs = RoiResponseSeries(
             name='test_ts',
             data=[1, 2, 3],
@@ -408,26 +414,32 @@ class DfOverFConstructor(TestCase):
             unit='unit',
             timestamps=[0.1, 0.2, 0.3]
         )
+        dof.add_roi_response_series(rrs)
 
-        dof = DfOverF(rrs)
         self.assertEqual(dof.roi_response_series['test_ts'], rrs)
 
 
 class FluorescenceConstructor(TestCase):
     def test_init(self):
-        ps = create_plane_segmentation()
-        rt_region = ps.create_roi_table_region(description='the second ROI', region=[1])
+        pm = ProcessingModule(name='ophys', description="Optical physiology")
 
-        ts = RoiResponseSeries(
+        ps = create_plane_segmentation()
+        pm.add(ps)
+
+        ff = Fluorescence()
+        pm.add(ff)
+
+        rt_region = ps.create_roi_table_region(description='the second ROI', region=[1])
+        rrs = RoiResponseSeries(
             name='test_ts',
             data=[1, 2, 3],
             rois=rt_region,
             unit='unit',
             timestamps=[0.1, 0.2, 0.3]
         )
+        ff.add_roi_response_series(rrs)
 
-        ff = Fluorescence(ts)
-        self.assertEqual(ff.roi_response_series['test_ts'], ts)
+        self.assertEqual(ff.roi_response_series['test_ts'], rrs)
 
 
 class ImageSegmentationConstructor(TestCase):
