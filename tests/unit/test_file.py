@@ -554,6 +554,18 @@ class TestNoCacheSpec(TestCase):
     def tearDown(self):
         remove_test_file(self.path)
 
+    def test_simple(self):
+        nwbfile = NWBFile(' ', ' ',
+                          datetime.now(tzlocal()),
+                          file_create_date=datetime.now(tzlocal()),
+                          institution='University of California, San Francisco',
+                          lab='Chang Lab')
+        with NWBHDF5IO(self.path, 'w') as io:
+            io.write(nwbfile, cache_spec=False)
+
+        with NWBHDF5IO(self.path, 'r') as reader:
+            nwbfile = reader.read()
+
 
 class TestTimestampsRefDefault(TestCase):
     def setUp(self):

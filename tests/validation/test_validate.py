@@ -2,6 +2,7 @@ import subprocess
 import re
 from unittest.mock import patch
 from io import StringIO
+import warnings
 
 from pynwb.testing import TestCase
 from pynwb import validate, NWBHDF5IO
@@ -29,8 +30,6 @@ class TestValidateCLI(TestCase):
                                  "tests/back_compat/1.0.2_nwbfile.nwb"], capture_output=True)
 
         stderr_regex = re.compile(
-            r".*UserWarning: No cached namespaces found in tests/back_compat/1\.0\.2_nwbfile\.nwb\s*"
-            r"warnings.warn\(msg\)\s*"
             r"The file tests/back_compat/1\.0\.2_nwbfile\.nwb has no cached namespace information\. "
             r"Falling back to PyNWB namespace information\.\s*"
         )
@@ -47,8 +46,6 @@ class TestValidateCLI(TestCase):
                                  "--ns", "notfound"], capture_output=True)
 
         stderr_regex = re.compile(
-            r".*UserWarning: No cached namespaces found in tests/back_compat/1\.0\.2_nwbfile\.nwb\s*"
-            r"warnings.warn\(msg\)\s*"
             r"The file tests/back_compat/1\.0\.2_nwbfile\.nwb has no cached namespace information\. "
             r"Falling back to PyNWB namespace information\.\s*"
             r"The namespace 'notfound' could not be found in PyNWB namespace information as only "
@@ -222,24 +219,44 @@ class TestValidateFunction(TestCase):
 
     def test_validate_io_cached_extension(self):
         """Test that validating a file with cached spec against its cached namespaces succeeds."""
-        with NWBHDF5IO('tests/back_compat/2.1.0_nwbfile_with_extension.nwb', 'r') as io:
-            errors = validate(io)
-            self.assertEqual(errors, [])
+        with warnings.catch_warnings(record=True):
+            warnings.filterwarnings(
+                "ignore",
+                message=r"Ignoring cached namespace .*",
+                category=UserWarning,
+            )
+            with NWBHDF5IO('tests/back_compat/2.1.0_nwbfile_with_extension.nwb', 'r') as io:
+                errors = validate(io)
+                self.assertEqual(errors, [])
 
     def test_validate_io_cached_extension_pass_ns(self):
         """Test that validating a file with cached extension spec against the extension namespace succeeds."""
-        with NWBHDF5IO('tests/back_compat/2.1.0_nwbfile_with_extension.nwb', 'r') as io:
-            errors = validate(io, 'ndx-testextension')
-            self.assertEqual(errors, [])
+        with warnings.catch_warnings(record=True):
+            warnings.filterwarnings(
+                "ignore",
+                message=r"Ignoring cached namespace .*",
+                category=UserWarning,
+            )
+            with NWBHDF5IO('tests/back_compat/2.1.0_nwbfile_with_extension.nwb', 'r') as io:
+                errors = validate(io, 'ndx-testextension')
+                self.assertEqual(errors, [])
 
     def test_validate_io_cached_core_with_io(self):
         """
         For back-compatability, test that validating a file with cached extension spec against the core
         namespace succeeds when using the `io` + `namespace` keywords.
         """
-        with NWBHDF5IO(path='tests/back_compat/2.1.0_nwbfile_with_extension.nwb', mode='r') as io:
-            results = validate(io=io, namespace="core")
-            self.assertEqual(results, [])
+        with warnings.catch_warnings(record=True):
+            warnings.filterwarnings(
+                "ignore",
+                message=r"Ignoring cached namespace .*",
+                category=UserWarning,
+            )
+            with NWBHDF5IO(
+                path='tests/back_compat/2.1.0_nwbfile_with_extension.nwb', mode='r'
+            ) as io:
+                results = validate(io=io, namespace="core")
+                self.assertEqual(results, [])
 
     def test_validate_file_cached_extension(self):
         """
