@@ -6,6 +6,7 @@
 - Add testing support for Python 3.11. @rly [#1687](https://github.com/NeurodataWithoutBorders/pynwb/pull/1687)
 - Add CI testing of NWB files on DANDI. @rly [#1695](https://github.com/NeurodataWithoutBorders/pynwb/pull/1695)
 - Add `NWBHDF5IO.can_read()`. @bendichter [#1703](https://github.com/NeurodataWithoutBorders/pynwb/pull/1703)
+- Add `pynwb.get_nwbfile_version()`. @bendichter [#1703](https://github.com/NeurodataWithoutBorders/pynwb/pull/1703)
 
 ### Bug fixes
 - Remove unused, deprecated `codecov` package from dev installation requirements. @rly
