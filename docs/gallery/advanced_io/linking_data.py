@@ -13,7 +13,7 @@ NBWContainer classes (e.g., :py:class:`~pynwb.base.TimeSeries`) support the inte
 HDF5 files with NWB data files via external links. To make things more concrete, let's look at the following use
 case. We want to simultaneously record multiple data streams during data acquisition. Using the concept of external
 links allows us to save each data stream to an external HDF5 files during data acquisition and to
-afterwards link the data into a single NWB:N file. In this case, each recording becomes represented by a
+afterwards link the data into a single NWB file. In this case, each recording becomes represented by a
 separate file-system object that can be set as read-only once the experiment is done.  In the following
 we are using :py:meth:`~pynwb.base.TimeSeries` as an example, but the same approach works for other
 NWBContainers as well.
