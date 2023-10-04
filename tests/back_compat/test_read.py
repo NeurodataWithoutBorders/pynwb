@@ -31,6 +31,16 @@ class TestReadOldVersions(TestCase):
                                "- expected an array of shape '[None]', got non-array data 'one publication'")],
     }
 
+    def get_io(self, path):
+        """Get an NWBHDF5IO object for the given path."""
+        with warnings.catch_warnings():
+            warnings.filterwarnings(
+                "ignore",
+                message=r"Ignoring cached namespace .*",
+                category=UserWarning,
+            )
+            return NWBHDF5IO(str(path), 'r')
+
     def test_read(self):
         """Test reading and validating all NWB files in the same folder as this file.
 
@@ -43,7 +53,7 @@ class TestReadOldVersions(TestCase):
             with self.subTest(file=f.name):
                 with warnings.catch_warnings(record=True) as warnings_on_read:
                     warnings.simplefilter("always")
-                    with NWBHDF5IO(str(f), 'r') as io:
+                    with self.get_io(f) as io:
                         errors = validate(io)
                         io.read()
                         for w in warnings_on_read:
@@ -69,28 +79,28 @@ class TestReadOldVersions(TestCase):
     def test_read_timeseries_no_data(self):
         """Test that a TimeSeries written without data is read with data set to the default value."""
         f = Path(__file__).parent / '1.5.1_timeseries_no_data.nwb'
-        with NWBHDF5IO(str(f), 'r') as io:
+        with self.get_io(f) as io:
             read_nwbfile = io.read()
             np.testing.assert_array_equal(read_nwbfile.acquisition['test_timeseries'].data, TimeSeries.DEFAULT_DATA)
 
     def test_read_timeseries_no_unit(self):
         """Test that an ImageSeries written without unit is read with unit set to the default value."""
         f = Path(__file__).parent / '1.5.1_timeseries_no_unit.nwb'
-        with NWBHDF5IO(str(f), 'r') as io:
+        with self.get_io(f) as io:
             read_nwbfile = io.read()
             self.assertEqual(read_nwbfile.acquisition['test_timeseries'].unit, TimeSeries.DEFAULT_UNIT)
 
     def test_read_imageseries_no_data(self):
         """Test that an ImageSeries written without data is read with data set to the default value."""
         f = Path(__file__).parent / '1.5.1_imageseries_no_data.nwb'
-        with NWBHDF5IO(str(f), 'r') as io:
+        with self.get_io(f) as io:
             read_nwbfile = io.read()
             np.testing.assert_array_equal(read_nwbfile.acquisition['test_imageseries'].data, ImageSeries.DEFAULT_DATA)
 
     def test_read_imageseries_no_unit(self):
         """Test that an ImageSeries written without unit is read with unit set to the default value."""
         f = Path(__file__).parent / '1.5.1_imageseries_no_unit.nwb'
-        with NWBHDF5IO(str(f), 'r') as io:
+        with self.get_io(f) as io:
             read_nwbfile = io.read()
             self.assertEqual(read_nwbfile.acquisition['test_imageseries'].unit, ImageSeries.DEFAULT_UNIT)
 
@@ -100,7 +110,7 @@ class TestReadOldVersions(TestCase):
         f = Path(__file__).parent / fbase
         expected_warning = self.expected_warnings[fbase][0]
         with self.assertWarnsWith(UserWarning, expected_warning):
-            with NWBHDF5IO(str(f), 'r') as io:
+            with self.get_io(f) as io:
                 read_nwbfile = io.read()
                 self.assertEqual(read_nwbfile.acquisition['test_imageseries'].format, "tiff")
 
@@ -110,13 +120,13 @@ class TestReadOldVersions(TestCase):
         f = Path(__file__).parent / fbase
         expected_warning = self.expected_warnings[fbase][0]
         with self.assertWarnsWith(UserWarning, expected_warning):
-            with NWBHDF5IO(str(f), 'r') as io:
+            with self.get_io(f) as io:
                 read_nwbfile = io.read()
                 np.testing.assert_array_equal(read_nwbfile.acquisition['test_imageseries'].starting_frame, [1, 2, 3])
 
     def test_read_subject_no_age__reference(self):
         """Test that reading a Subject without an age__reference set with NWB schema 2.5.0 sets the value to None"""
         f = Path(__file__).parent / '2.2.0_subject_no_age__reference.nwb'
-        with NWBHDF5IO(str(f), 'r') as io:
+        with self.get_io(f) as io:
             read_nwbfile = io.read()
             self.assertIsNone(read_nwbfile.subject.age__reference)

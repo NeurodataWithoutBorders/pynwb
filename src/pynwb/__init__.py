@@ -227,7 +227,6 @@ class NWBHDF5IO(_HDF5IO):
             load_namespaces = False
 
         if load_namespaces:
-
             tm = get_type_map()
             super().load_namespaces(tm, path, file=file_obj, driver=driver)
             manager = BuildManager(tm)
