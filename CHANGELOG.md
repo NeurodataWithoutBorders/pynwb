@@ -1,5 +1,11 @@
 # PyNWB Changelog
 
+## PyNWB 2.6.0 (Upcoming)
+
+### Enhancements and minor changes
+- Add `NWBHDF5IO.can_read()`. @bendichter [#1703](https://github.com/NeurodataWithoutBorders/pynwb/pull/1703)
+- Add `pynwb.get_nwbfile_version()`. @bendichter [#1703](https://github.com/NeurodataWithoutBorders/pynwb/pull/1703)
+
 ## PyNWB 2.5.0 (August 18, 2023)
 
 ### Enhancements and minor changes
