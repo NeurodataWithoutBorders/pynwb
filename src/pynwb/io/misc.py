@@ -1,6 +1,6 @@
-from .. import register_map
 from hdmf.common.io.table import DynamicTableMap
 
+from .. import register_map
 from pynwb.misc import Units
 
 

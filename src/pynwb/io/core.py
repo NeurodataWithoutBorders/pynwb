@@ -29,14 +29,7 @@ class NWBContainerMapper(NWBBaseTypeMapper):
 
 @register_map(NWBData)
 class NWBDataMap(NWBBaseTypeMapper):
-
-    @ObjectMapper.constructor_arg('name')
-    def carg_name(self, builder, manager):
-        return builder.name
-
-    @ObjectMapper.constructor_arg('data')
-    def carg_data(self, builder, manager):
-        return builder.data
+    pass
 
 
 @register_map(ScratchData)

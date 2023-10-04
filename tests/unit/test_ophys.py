@@ -1,10 +1,23 @@
+import warnings
+
 import numpy as np
 
-from pynwb.base import TimeSeries
+from pynwb.base import TimeSeries, ProcessingModule
 from pynwb.device import Device
 from pynwb.image import ImageSeries
-from pynwb.ophys import (TwoPhotonSeries, RoiResponseSeries, DfOverF, Fluorescence, PlaneSegmentation,
-                         ImageSegmentation, OpticalChannel, ImagingPlane, MotionCorrection, CorrectedImageStack)
+from pynwb.ophys import (
+    OnePhotonSeries,
+    TwoPhotonSeries,
+    RoiResponseSeries,
+    DfOverF,
+    Fluorescence,
+    PlaneSegmentation,
+    ImageSegmentation,
+    OpticalChannel,
+    ImagingPlane,
+    MotionCorrection,
+    CorrectedImageStack
+)
 from pynwb.testing import TestCase
 
 
@@ -43,11 +56,10 @@ def create_plane_segmentation():
 
     iSS = ImageSeries(
         name='test_iS',
-        data=np.ones((2, 2, 2)),
         unit='unit',
         external_file=['external_file'],
-        starting_frame=[1, 2, 3],
-        format='tiff',
+        starting_frame=[0],
+        format='external',
         timestamps=[1., 2.]
     )
 
@@ -170,6 +182,53 @@ class ImagingPlaneConstructor(TestCase):
             )
 
 
+class OnePhotonSeriesConstructor(TestCase):
+
+    def test_init(self):
+        ip = create_imaging_plane()
+        one_photon_series = OnePhotonSeries(
+            name="test_one_photon_series",
+            unit="unit",
+            imaging_plane=ip,
+            pmt_gain=1.,
+            scan_line_rate=2.,
+            exposure_time=123.,
+            binning=2,
+            power=9001.,
+            intensity=5.,
+            external_file=["external_file"],
+            starting_frame=[0],
+            format="external",
+            timestamps=list(),
+        )
+        self.assertEqual(one_photon_series.name, 'test_one_photon_series')
+        self.assertEqual(one_photon_series.unit, 'unit')
+        self.assertEqual(one_photon_series.imaging_plane, ip)
+        self.assertEqual(one_photon_series.pmt_gain, 1.)
+        self.assertEqual(one_photon_series.scan_line_rate, 2.)
+        self.assertEqual(one_photon_series.exposure_time, 123.)
+        self.assertEqual(one_photon_series.binning, 2)
+        self.assertEqual(one_photon_series.power, 9001.)
+        self.assertEqual(one_photon_series.intensity, 5.)
+        self.assertEqual(one_photon_series.external_file, ["external_file"])
+        self.assertEqual(one_photon_series.starting_frame, [0])
+        self.assertEqual(one_photon_series.format, "external")
+        self.assertIsNone(one_photon_series.dimension)
+
+    def test_negative_binning_assertion(self):
+        ip = create_imaging_plane()
+
+        with self.assertRaisesWith(exc_type=ValueError, exc_msg="Binning value must be >= 0: -1"):
+            OnePhotonSeries(
+                name="test_one_photon_series_binning_assertion",
+                unit="unit",
+                data=np.empty(shape=(10, 100, 100)),
+                imaging_plane=ip,
+                rate=1.,
+                binning=-1,
+            )
+
+
 class TwoPhotonSeriesConstructor(TestCase):
 
     def test_init(self):
@@ -182,8 +241,8 @@ class TwoPhotonSeriesConstructor(TestCase):
             pmt_gain=1.0,
             scan_line_rate=2.0,
             external_file=['external_file'],
-            starting_frame=[1, 2, 3],
-            format='tiff',
+            starting_frame=[0],
+            format='external',
             timestamps=list()
         )
         self.assertEqual(tPS.name, 'test_tPS')
@@ -193,39 +252,71 @@ class TwoPhotonSeriesConstructor(TestCase):
         self.assertEqual(tPS.pmt_gain, 1.0)
         self.assertEqual(tPS.scan_line_rate, 2.0)
         self.assertEqual(tPS.external_file, ['external_file'])
-        self.assertEqual(tPS.starting_frame, [1, 2, 3])
-        self.assertEqual(tPS.format, 'tiff')
+        self.assertEqual(tPS.starting_frame, [0])
+        self.assertEqual(tPS.format, 'external')
         self.assertIsNone(tPS.dimension)
 
 
 class MotionCorrectionConstructor(TestCase):
     def test_init(self):
-        MotionCorrection(list())
+        corrected = ImageSeries(
+            name='corrected',
+            data=np.ones((1000, 100, 100)),
+            unit='na',
+            format='raw',
+            starting_time=0.0,
+            rate=1.0
+        )
+
+        xy_translation = TimeSeries(
+            name='xy_translation',
+            data=np.ones((1000, 2)),
+            unit='pixels',
+            starting_time=0.0,
+            rate=1.0,
+        )
+
+        ip = create_imaging_plane()
+
+        image_series = TwoPhotonSeries(
+            name='TwoPhotonSeries1',
+            data=np.ones((1000, 100, 100)),
+            imaging_plane=ip,
+            rate=1.0,
+            unit='normalized amplitude'
+        )
+
+        corrected_image_stack = CorrectedImageStack(
+            corrected=corrected,
+            original=image_series,
+            xy_translation=xy_translation,
+        )
+
+        motion_correction = MotionCorrection(corrected_image_stacks=[corrected_image_stack])
+        self.assertEqual(motion_correction.corrected_image_stacks['CorrectedImageStack'], corrected_image_stack)
 
 
 class CorrectedImageStackConstructor(TestCase):
     def test_init(self):
         is1 = ImageSeries(
-            name='is1',
-            data=np.ones((2, 2, 2)),
+            name='corrected',
             unit='unit',
             external_file=['external_file'],
-            starting_frame=[1, 2, 3],
-            format='tiff',
+            starting_frame=[0],
+            format='external',
             timestamps=[1., 2.]
         )
         is2 = ImageSeries(
             name='is2',
-            data=np.ones((2, 2, 2)),
             unit='unit',
             external_file=['external_file'],
-            starting_frame=[1, 2, 3],
-            format='tiff',
+            starting_frame=[0],
+            format='external',
             timestamps=[1., 2.]
         )
-        tstamps = np.arange(1.0, 100.0, 0.1, dtype=np.float)
+        tstamps = np.arange(1.0, 100.0, 0.1, dtype=np.float64)
         ts = TimeSeries(
-            name="test_ts",
+            name='xy_translation',
             data=list(range(len(tstamps))),
             unit='unit',
             timestamps=tstamps
@@ -247,48 +338,108 @@ class RoiResponseSeriesConstructor(TestCase):
 
         ts = RoiResponseSeries(
             name='test_ts',
-            data=list(),
+            data=[1, 2, 3],
             rois=rt_region,
             unit='unit',
-            timestamps=list()
+            timestamps=[0.1, 0.2, 0.3]
         )
         self.assertEqual(ts.name, 'test_ts')
         self.assertEqual(ts.unit, 'unit')
         self.assertEqual(ts.rois, rt_region)
 
+    def test_warnings(self):
+        ps = create_plane_segmentation()
+        rt_region = ps.create_roi_table_region(description='the first two ROIs', region=[0, 1])
+
+        with warnings.catch_warnings(record=True) as w:
+            # Cause all warnings to always be triggered.
+            warnings.simplefilter("always")
+            RoiResponseSeries(
+                name="test_ts1",
+                data=np.ones((6, 2)),
+                rois=rt_region,
+                rate=30000.,
+                unit="n.a.",
+            )
+            self.assertEqual(w, [])
+
+        with warnings.catch_warnings(record=True) as w:
+            # Cause all warnings to always be triggered.
+            warnings.simplefilter("always")
+            RoiResponseSeries(
+                name="test_ts1",
+                data=np.ones((6, 3)),
+                rois=rt_region,
+                unit="n.a.",
+                timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5]
+            )
+            self.assertEqual(len(w), 1)
+            assert (
+                    "RoiResponseSeries 'test_ts1': The second dimension of data does not match the length of rois. "
+                    "Your data may be transposed."
+                ) in str(w[-1].message)
+
+        with warnings.catch_warnings(record=True) as w:
+            # Cause all warnings to always be triggered.
+            warnings.simplefilter("always")
+            RoiResponseSeries(
+                name="test_ts1",
+                data=np.ones((2, 6)),
+                rois=rt_region,
+                rate=30000.,
+                unit="n.a.",
+            )
+            self.assertEqual(len(w), 1)
+            assert (
+               "RoiResponseSeries 'test_ts1': The second dimension of data does not match the length of rois, "
+               "but instead the first does. Data is oriented incorrectly and should be transposed."
+                   ) in str(w[-1].message)
+
 
 class DfOverFConstructor(TestCase):
     def test_init(self):
-        ps = create_plane_segmentation()
-        rt_region = ps.create_roi_table_region(description='the second ROI', region=[1])
+        pm = ProcessingModule(name='ophys', description="Optical physiology")
 
+        ps = create_plane_segmentation()
+        pm.add(ps)
+
+        dof = DfOverF()
+        pm.add(dof)
+
+        rt_region = ps.create_roi_table_region(description='the second ROI', region=[1])
         rrs = RoiResponseSeries(
             name='test_ts',
-            data=list(),
+            data=[1, 2, 3],
             rois=rt_region,
             unit='unit',
-            timestamps=list()
+            timestamps=[0.1, 0.2, 0.3]
         )
+        dof.add_roi_response_series(rrs)
 
-        dof = DfOverF(rrs)
         self.assertEqual(dof.roi_response_series['test_ts'], rrs)
 
 
 class FluorescenceConstructor(TestCase):
     def test_init(self):
-        ps = create_plane_segmentation()
-        rt_region = ps.create_roi_table_region(description='the second ROI', region=[1])
+        pm = ProcessingModule(name='ophys', description="Optical physiology")
 
-        ts = RoiResponseSeries(
+        ps = create_plane_segmentation()
+        pm.add(ps)
+
+        ff = Fluorescence()
+        pm.add(ff)
+
+        rt_region = ps.create_roi_table_region(description='the second ROI', region=[1])
+        rrs = RoiResponseSeries(
             name='test_ts',
-            data=list(),
+            data=[1, 2, 3],
             rois=rt_region,
             unit='unit',
-            timestamps=list()
+            timestamps=[0.1, 0.2, 0.3]
         )
+        ff.add_roi_response_series(rrs)
 
-        ff = Fluorescence(ts)
-        self.assertEqual(ff.roi_response_series['test_ts'], ts)
+        self.assertEqual(ff.roi_response_series['test_ts'], rrs)
 
 
 class ImageSegmentationConstructor(TestCase):
@@ -307,12 +458,11 @@ class PlaneSegmentationConstructor(TestCase):
     def set_up_dependencies(self):
         iSS = ImageSeries(
             name='test_iS',
-            data=np.ones((2, 2, 2)),
             unit='unit',
             external_file=['external_file'],
-            starting_frame=[1, 2, 3],
-            format='tiff',
-            timestamps=list()
+            starting_frame=[0],
+            format='external',
+            timestamps=[1., 2.]
         )
 
         ip = create_imaging_plane()

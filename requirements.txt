@@ -1,5 +1,7 @@
-h5py==2.10.0
-hdmf==2.1.0
-numpy==1.18.5
-pandas==0.25.3
-python-dateutil==2.8.1
+# pinned dependencies to reproduce an entire development environment to use PyNWB
+h5py==3.8.0
+hdmf==3.9.0
+numpy==1.24.2
+pandas==2.0.0
+python-dateutil==2.8.2
+setuptools==65.5.1

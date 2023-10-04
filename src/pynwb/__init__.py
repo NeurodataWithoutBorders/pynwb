@@ -2,29 +2,37 @@
 for reading and writing data in NWB format
 '''
 import os.path
+from pathlib import Path
 from copy import deepcopy
 from warnings import warn
 import h5py
 
 from hdmf.spec import NamespaceCatalog
-from hdmf.utils import docval, getargs, popargs, call_docval_func, get_docval
+from hdmf.utils import docval, getargs, popargs, get_docval
 from hdmf.backends.io import HDMFIO
 from hdmf.backends.hdf5 import HDF5IO as _HDF5IO
-from hdmf.validate import ValidatorMap
 from hdmf.build import BuildManager, TypeMap
 import hdmf.common
 
-
 CORE_NAMESPACE = 'core'
-__core_ns_file_name = 'nwb.namespace.yaml'
 
 from .spec import NWBDatasetSpec, NWBGroupSpec, NWBNamespace  # noqa E402
+from .validate import validate  # noqa: F401, E402
 
 
 def __get_resources():
-    from pkg_resources import resource_filename
+    try:
+        from importlib.resources import files
+    except ImportError:
+        # TODO: Remove when python 3.9 becomes the new minimum
+        from importlib_resources import files
+
+    __location_of_this_file = files(__name__)
+    __core_ns_file_name = 'nwb.namespace.yaml'
+    __schema_dir = 'nwb-schema/core'
+
     ret = dict()
-    ret['namespace_path'] = os.path.join(resource_filename(__name__, 'nwb-schema/core'), __core_ns_file_name)
+    ret['namespace_path'] = str(__location_of_this_file / __schema_dir / __core_ns_file_name)
     return ret
 
 
@@ -40,10 +48,8 @@ global __TYPE_MAP
 __NS_CATALOG = NamespaceCatalog(NWBGroupSpec, NWBDatasetSpec, NWBNamespace)
 
 hdmf_typemap = hdmf.common.get_type_map()
-__NS_CATALOG.merge(hdmf_typemap.namespace_catalog)
-
 __TYPE_MAP = TypeMap(__NS_CATALOG)
-__TYPE_MAP.merge(hdmf_typemap)
+__TYPE_MAP.merge(hdmf_typemap, ns_catalog=True)
 
 
 @docval({'name': 'extensions', 'type': (str, TypeMap, list),
@@ -88,7 +94,7 @@ def get_manager(**kwargs):
     Get a BuildManager to use for I/O using the given extensions. If no extensions are provided,
     return a BuildManager that uses the core namespace
     '''
-    type_map = call_docval_func(get_type_map, kwargs)
+    type_map = get_type_map(**kwargs)
     return BuildManager(type_map)
 
 
@@ -103,10 +109,16 @@ def load_namespaces(**kwargs):
     return __TYPE_MAP.load_namespaces(namespace_path)
 
 
-# load the core namespace i.e. base NWB specification
+# load the core namespace, i.e. base NWB specification
 __resources = __get_resources()
 if os.path.exists(__resources['namespace_path']):
     load_namespaces(__resources['namespace_path'])
+else:
+    raise RuntimeError(
+        "'core' is not a registered namespace. If you installed PyNWB locally using a git clone, you need to "
+        "use the --recurse_submodules flag when cloning. See developer installation instructions here: "
+        "https://pynwb.readthedocs.io/en/stable/install_developers.html#install-from-git-repository"
+    )
 
 
 def available_namespaces():
@@ -184,26 +196,15 @@ def get_class(**kwargs):
 
     """
     neurodata_type, namespace = getargs('neurodata_type', 'namespace', kwargs)
-    return __TYPE_MAP.get_container_cls(namespace, neurodata_type)
-
-
-@docval({'name': 'io', 'type': HDMFIO, 'doc': 'the HDMFIO object to read from'},
-        {'name': 'namespace', 'type': str, 'doc': 'the namespace to validate against', 'default': CORE_NAMESPACE},
-        returns="errors in the file", rtype=list,
-        is_method=False)
-def validate(**kwargs):
-    """Validate an NWB file against a namespace"""
-    io, namespace = getargs('io', 'namespace', kwargs)
-    builder = io.read_builder()
-    validator = ValidatorMap(io.manager.namespace_catalog.get_namespace(name=namespace))
-    return validator.validate(builder)
+    return __TYPE_MAP.get_dt_container_cls(neurodata_type, namespace)
 
 
 class NWBHDF5IO(_HDF5IO):
 
-    @docval({'name': 'path', 'type': str, 'doc': 'the path to the HDF5 file'},
+    @docval({'name': 'path', 'type': (str, Path), 'doc': 'the path to the HDF5 file', 'default': None},
             {'name': 'mode', 'type': str,
-             'doc': 'the mode to open the HDF5 file with, one of ("w", "r", "r+", "a", "w-", "x")'},
+             'doc': 'the mode to open the HDF5 file with, one of ("w", "r", "r+", "a", "w-", "x")',
+             'default': 'r'},
             {'name': 'load_namespaces', 'type': bool,
              'doc': 'whether or not to load cached namespaces from given path - not applicable in write mode',
              'default': False},
@@ -211,12 +212,17 @@ class NWBHDF5IO(_HDF5IO):
             {'name': 'extensions', 'type': (str, TypeMap, list),
              'doc': 'a path to a namespace, a TypeMap, or a list consisting paths to namespaces and TypeMaps',
              'default': None},
-            {'name': 'file', 'type': h5py.File, 'doc': 'a pre-existing h5py.File object', 'default': None},
+            {'name': 'file', 'type': [h5py.File, 'S3File'], 'doc': 'a pre-existing h5py.File object', 'default': None},
             {'name': 'comm', 'type': "Intracomm", 'doc': 'the MPI communicator to use for parallel I/O',
-             'default': None})
+             'default': None},
+            {'name': 'driver', 'type': str, 'doc': 'driver for h5py to use when opening HDF5 file', 'default': None},
+            {'name': 'herd_path', 'type': str, 'doc': 'The path to the HERD',
+             'default': None},)
     def __init__(self, **kwargs):
-        path, mode, manager, extensions, load_namespaces, file_obj, comm =\
-            popargs('path', 'mode', 'manager', 'extensions', 'load_namespaces', 'file', 'comm', kwargs)
+        path, mode, manager, extensions, load_namespaces, file_obj, comm, driver, herd_path =\
+            popargs('path', 'mode', 'manager', 'extensions', 'load_namespaces',
+                    'file', 'comm', 'driver', 'herd_path', kwargs)
+        # Define the BuildManager to use
         if load_namespaces:
             if manager is not None:
                 warn("loading namespaces from file - ignoring 'manager'")
@@ -227,13 +233,13 @@ class NWBHDF5IO(_HDF5IO):
                 raise ValueError("cannot load namespaces from file when writing to it")
 
             tm = get_type_map()
-            super(NWBHDF5IO, self).load_namespaces(tm, path, file=file_obj)
+            super().load_namespaces(tm, path, file=file_obj, driver=driver)
             manager = BuildManager(tm)
 
             # XXX: Leaving this here in case we want to revert to this strategy for
             #      loading cached namespaces
             # ns_catalog = NamespaceCatalog(NWBGroupSpec, NWBDatasetSpec, NWBNamespace)
-            # super(NWBHDF5IO, self).load_namespaces(ns_catalog, path)
+            # super().load_namespaces(ns_catalog, path)
             # tm = TypeMap(ns_catalog)
             # tm.copy_mappers(get_type_map())
         else:
@@ -243,25 +249,111 @@ class NWBHDF5IO(_HDF5IO):
                 manager = get_manager(extensions=extensions)
             elif manager is None:
                 manager = get_manager()
-        super(NWBHDF5IO, self).__init__(path, manager=manager, mode=mode, file=file_obj, comm=comm)
+        # Open the file
+        super().__init__(path, manager=manager, mode=mode, file=file_obj, comm=comm,
+                         driver=driver, herd_path=herd_path)
 
-    @docval({'name': 'src_io', 'type': HDMFIO, 'doc': 'the HDMFIO object for reading the data to export'},
+    @property
+    def nwb_version(self):
+        """
+        Get the version of the NWB file opened via this NWBHDF5IO object.
+
+        :returns: Tuple consisting of: 1) the original version string as stored in the file and
+                  2) a tuple with the parsed components of the version string, consisting of integers
+                  and strings, e.g., (2, 5, 1, beta). (None, None) will be returned if the nwb_version
+                  is missing, e.g., in the case when no data has been written to the file yet.
+        """
+        # Get the version string for the NWB file
+        try:
+            nwb_version_string = self._file.attrs['nwb_version']
+        #  KeyError occurs  when the file is empty (e.g., when creating a new file nothing has been written)
+        #  or when the HDF5 file is not a valid NWB file
+        except KeyError:
+            return None, None
+        # Other system may have written nwb_version as a fixed-length string, resulting in a numpy.bytes_ object
+        # on read, rather than a variable-length string. To address this, decode the bytes if necessary.
+        if not isinstance(nwb_version_string, str):
+            nwb_version_string = nwb_version_string.decode()
+
+        # Parse the version string
+        nwb_version_parts = nwb_version_string.replace("-", ".").replace("_", ".").split(".")
+        nwb_version = tuple([int(i) if i.isnumeric() else i
+                             for i in nwb_version_parts])
+        return nwb_version_string, nwb_version
+
+    @docval(*get_docval(_HDF5IO.read),
+            {'name': 'skip_version_check', 'type': bool, 'doc': 'skip checking of NWB version', 'default': False})
+    def read(self, **kwargs):
+        """
+        Read the NWB file from the IO source.
+
+        :raises TypeError: If the NWB file version is missing or not supported
+
+        :return: NWBFile container
+        """
+        # Check that the NWB file is supported
+        skip_verison_check = popargs('skip_version_check', kwargs)
+        if not skip_verison_check:
+            file_version_str, file_version = self.nwb_version
+            if file_version is None:
+                raise TypeError("Missing NWB version in file. The file is not a valid NWB file.")
+            if file_version[0] < 2:
+                raise TypeError("NWB version %s not supported. PyNWB supports NWB files version 2 and above." %
+                                str(file_version_str))
+        # read the file
+        file = super().read(**kwargs)
+        return file
+
+    @docval({'name': 'src_io', 'type': HDMFIO,
+             'doc': 'the HDMFIO object (such as NWBHDF5IO) that was used to read the data to export'},
             {'name': 'nwbfile', 'type': 'NWBFile',
              'doc': 'the NWBFile object to export. If None, then the entire contents of src_io will be exported',
              'default': None},
             {'name': 'write_args', 'type': dict, 'doc': 'arguments to pass to :py:meth:`write_builder`',
-             'default': dict()})
+             'default': None})
     def export(self, **kwargs):
+        """
+        Export an NWB file to a new NWB file using the HDF5 backend.
+
+        If ``nwbfile`` is provided, then the build manager of ``src_io`` is used to build the container,
+        and the resulting builder will be exported to the new backend. So if ``nwbfile`` is provided,
+        ``src_io`` must have a non-None manager property. If ``nwbfile`` is None, then the contents of
+        ``src_io`` will be read and exported to the new backend.
+
+        Arguments can be passed in for the ``write_builder`` method using ``write_args``. Some arguments may not be
+        supported during export. ``{'link_data': False}`` can be used to copy any datasets linked to from
+        the original file instead of creating a new link to those datasets in the exported file.
+
+        The exported file will not contain any links to the original file. All links, internal and external,
+        will be preserved in the exported file. All references will also be preserved in the exported file.
+
+        The exported file will use the latest schema version supported by the version of PyNWB used. For example, if
+        the input file uses the NWB schema version 2.1 and the latest schema version supported by PyNWB is 2.3,
+        then the exported file will use the 2.3 NWB schema.
+
+        Example usage:
+
+        .. code-block:: python
+
+           with NWBHDF5IO(self.read_path, mode='r') as read_io:
+               nwbfile = read_io.read()
+               # ...  # modify nwbfile
+               nwbfile.set_modified()  # this may be necessary if the modifications are changes to attributes
+
+               with NWBHDF5IO(self.export_path, mode='w') as export_io:
+                   export_io.export(src_io=read_io, nwbfile=nwbfile)
+
+        See :ref:`export` and :ref:`modifying_data` for more information and examples.
+        """
         nwbfile = popargs('nwbfile', kwargs)
         kwargs['container'] = nwbfile
-        call_docval_func(super().export, kwargs)
+        super().export(**kwargs)
 
 
 from . import io as __io  # noqa: F401,E402
 from .core import NWBContainer, NWBData  # noqa: F401,E402
 from .base import TimeSeries, ProcessingModule  # noqa: F401,E402
 from .file import NWBFile  # noqa: F401,E402
-
 from . import behavior  # noqa: F401,E402
 from . import device  # noqa: F401,E402
 from . import ecephys  # noqa: F401,E402
@@ -276,6 +368,34 @@ from . import legacy  # noqa: F401,E402
 from hdmf.data_utils import DataChunkIterator  # noqa: F401,E402
 from hdmf.backends.hdf5 import H5DataIO  # noqa: F401,E402
 
-from ._version import get_versions  # noqa: E402
-__version__ = get_versions()['version']
-del get_versions
+from . import _version    # noqa: F401,E402
+__version__ = _version.get_versions()['version']
+
+from ._due import due, BibTeX  # noqa: E402
+due.cite(
+    BibTeX("""
+@article {10.7554/eLife.78362,
+article_type = {journal},
+title = {{The Neurodata Without Borders ecosystem for neurophysiological data science}},
+author = {R\"ubel, Oliver and Tritt, Andrew and Ly, Ryan and Dichter, Benjamin K and
+          Ghosh, Satrajit and Niu, Lawrence and Baker, Pamela and Soltesz, Ivan and Ng,
+          Lydia and Svoboda, Karel and Frank, Loren and Bouchard, Kristofer E},
+editor = {Colgin, Laura L and Jadhav, Shantanu P},
+volume = {11},
+year = {2022},
+month = {oct},
+pub_date = {2022-10-04},
+pages = {e78362},
+citation = {eLife 2022;11:e78362},
+doi = {10.7554/eLife.78362},
+url = {https://doi.org/10.7554/eLife.78362},
+keywords = {Neurophysiology, data ecosystem, data language, data standard, FAIR data, archive},
+journal = {eLife},
+issn = {2050-084X},
+publisher = {eLife Sciences Publications, Ltd}}
+"""),
+    description="The Neurodata Without Borders ecosystem for neurophysiological data science",
+    path="pynwb/", version=__version__,
+    cite_module=True
+)
+del due, BibTeX

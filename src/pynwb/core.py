@@ -1,12 +1,12 @@
-from h5py import RegionReference
-import numpy as np
-import pandas as pd
+from warnings import warn
 
-from hdmf import Container, Data, DataRegion, get_region_slicer
-from hdmf.container import AbstractContainer, MultiContainerInterface as hdmf_MultiContainerInterface
+import numpy as np
+
+from hdmf import Container, Data
+from hdmf.container import AbstractContainer, MultiContainerInterface as hdmf_MultiContainerInterface, Table
 from hdmf.common import DynamicTable, DynamicTableRegion  # noqa: F401
 from hdmf.common import VectorData, VectorIndex, ElementIdentifiers  # noqa: F401
-from hdmf.utils import docval, getargs, ExtenderMeta, call_docval_func, popargs
+from hdmf.utils import docval, popargs
 from hdmf.utils import LabelledDict  # noqa: F401
 
 from . import CORE_NAMESPACE, register_class
@@ -29,8 +29,22 @@ class NWBMixin(AbstractContainer):
         """
         Traverse parent hierarchy and return first instance of the specified data_type
         """
-        neurodata_type = getargs('neurodata_type', kwargs)
+        neurodata_type = kwargs['neurodata_type']
         return super().get_ancestor(data_type=neurodata_type)
+
+    def _error_on_new_warn_on_construct(self, error_msg: str):
+        """
+        Raise an error when a check is violated on instance creation.
+        To ensure backwards compatibility, this method throws a warning
+        instead of raising an error when reading from a file, ensuring that
+        files with invalid data can be read. If error_msg is set to None
+        the function will simply return without further action.
+        """
+        if error_msg is None:
+            return
+        if not self._in_construct_mode:
+            raise ValueError(error_msg)
+        warn(error_msg)
 
 
 @register_class('NWBContainer', CORE_NAMESPACE)
@@ -53,8 +67,8 @@ class NWBData(NWBMixin, Data):
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this container'},
             {'name': 'data', 'type': ('scalar_data', 'array_data', 'data', Data), 'doc': 'the source of the data'})
     def __init__(self, **kwargs):
-        call_docval_func(super(NWBData, self).__init__, kwargs)
-        self.__data = getargs('data', kwargs)
+        super().__init__(**kwargs)
+        self.__data = kwargs['data']
 
     @property
     def data(self):
@@ -72,7 +86,7 @@ class NWBData(NWBMixin, Data):
         if isinstance(self.data, list):
             self.data.append(arg)
         elif isinstance(self.data, np.ndarray):
-            self.__data = np.append(self.__data, [arg])
+            self.__data = np.concatenate((self.__data, [arg]))
         else:
             msg = "NWBData cannot append to object of type '%s'" % type(self.__data)
             raise ValueError(msg)
@@ -81,7 +95,7 @@ class NWBData(NWBMixin, Data):
         if isinstance(self.data, list):
             self.data.extend(arg)
         elif isinstance(self.data, np.ndarray):
-            self.__data = np.append(self.__data, [arg])
+            self.__data = np.concatenate((self.__data, arg))
         else:
             msg = "NWBData cannot extend object of type '%s'" % type(self.__data)
             raise ValueError(msg)
@@ -90,230 +104,44 @@ class NWBData(NWBMixin, Data):
 @register_class('ScratchData', CORE_NAMESPACE)
 class ScratchData(NWBData):
 
-    __nwbfields__ = ('description',)
+    __nwbfields__ = ('description', )
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this container'},
             {'name': 'data', 'type': ('scalar_data', 'array_data', 'data', Data), 'doc': 'the source of the data'},
-            {'name': 'description', 'type': str, 'doc': 'description of the data'})
+            {'name': 'notes', 'type': str,
+             'doc': 'notes about the data. This argument will be deprecated. Use description instead', 'default': ''},
+            {'name': 'description', 'type': str, 'doc': 'notes about the data', 'default': None})
     def __init__(self, **kwargs):
-        call_docval_func(super().__init__, kwargs)
-        self.description = getargs('description', kwargs)
-
-
-class NWBTable(NWBData):
-    r'''
-    Subclasses should specify the class attribute \_\_columns\_\_.
-
-    This should be a list of dictionaries with the following keys:
-
-    - ``name``            the column name
-    - ``type``            the type of data in this column
-    - ``doc``             a brief description of what gets stored in this column
-
-    For reference, this list of dictionaries will be used with docval to autogenerate
-    the ``add_row`` method for adding data to this table.
-
-    If \_\_columns\_\_ is not specified, no custom ``add_row`` method will be added.
-
-    The class attribute __defaultname__ can also be set to specify a default name
-    for the table class. If \_\_defaultname\_\_ is not specified, then ``name`` will
-    need to be specified when the class is instantiated.
-    '''
-
-    @ExtenderMeta.pre_init
-    def __build_table_class(cls, name, bases, classdict):
-        if hasattr(cls, '__columns__'):
-            columns = getattr(cls, '__columns__')
-
-            idx = dict()
-            for i, col in enumerate(columns):
-                idx[col['name']] = i
-            setattr(cls, '__colidx__', idx)
-
-            if cls.__init__ == bases[-1].__init__:     # check if __init__ is overridden
-                name = {'name': 'name', 'type': str, 'doc': 'the name of this table'}
-                defname = getattr(cls, '__defaultname__', None)
-                if defname is not None:
-                    name['default'] = defname
-
-                @docval(name,
-                        {'name': 'data', 'type': ('array_data', 'data'), 'doc': 'the data in this table',
-                         'default': list()})
-                def __init__(self, **kwargs):
-                    name, data = getargs('name', 'data', kwargs)
-                    colnames = [i['name'] for i in columns]
-                    super(cls, self).__init__(colnames, name, data)
-
-                setattr(cls, '__init__', __init__)
-
-            if cls.add_row == bases[-1].add_row:     # check if add_row is overridden
-
-                @docval(*columns)
-                def add_row(self, **kwargs):
-                    return super(cls, self).add_row(kwargs)
-
-                setattr(cls, 'add_row', add_row)
-
-    @docval({'name': 'columns', 'type': (list, tuple), 'doc': 'a list of the columns in this table'},
-            {'name': 'name', 'type': str, 'doc': 'the name of this container'},
-            {'name': 'data', 'type': ('array_data', 'data'), 'doc': 'the source of the data', 'default': list()})
-    def __init__(self, **kwargs):
-        self.__columns = tuple(popargs('columns', kwargs))
-        self.__col_index = {name: idx for idx, name in enumerate(self.__columns)}
-        call_docval_func(super(NWBTable, self).__init__, kwargs)
+        notes, description = popargs('notes', 'description', kwargs)
+        super().__init__(**kwargs)
+        if notes != '':
+            warn('The `notes` argument of ScratchData.__init__ will be deprecated. Use description instead.',
+                 PendingDeprecationWarning)
+            if notes != '' and description != '':
+                raise ValueError('Cannot provide both notes and description to ScratchData.__init__. The description '
+                                 'argument is recommended.')
+            description = notes
+        if not description:
+            warn('ScratchData.description will be required in a future major release of PyNWB.',
+                 PendingDeprecationWarning)
+        self.description = description
 
     @property
-    def columns(self):
-        return self.__columns
+    def notes(self):
+        warn('Use of ScratchData.notes will be deprecated. Use ScratchData.description instead.',
+             PendingDeprecationWarning)
+        return self.description
 
-    @docval({'name': 'values', 'type': dict, 'doc': 'the values for each column'})
-    def add_row(self, **kwargs):
-        values = getargs('values', kwargs)
-        if not isinstance(self.data, list):
-            msg = 'Cannot append row to %s' % type(self.data)
-            raise ValueError(msg)
-        ret = len(self.data)
-        self.data.append(tuple(values[col] for col in self.columns))
-        return ret
-
-    def which(self, **kwargs):
-        '''
-        Query a table
-        '''
-        if len(kwargs) != 1:
-            raise ValueError("only one column can be queried")
-        colname, value = kwargs.popitem()
-        idx = self.__colidx__.get(colname)
-        if idx is None:
-            msg = "no '%s' column in %s" % (colname, self.__class__.__name__)
-            raise KeyError(msg)
-        ret = list()
-        for i in range(len(self.data)):
-            row = self.data[i]
-            row_val = row[idx]
-            if row_val == value:
-                ret.append(i)
-        return ret
-
-    def __len__(self):
-        return len(self.data)
-
-    def __getitem__(self, args):
-        idx = args
-        col = None
-        if isinstance(args, tuple):
-            idx = args[1]
-            if isinstance(args[0], str):
-                col = self.__col_index.get(args[0])
-            elif isinstance(args[0], int):
-                col = args[0]
-            else:
-                raise KeyError('first argument must be a column name or index')
-            return self.data[idx][col]
-        elif isinstance(args, str):
-            col = self.__col_index.get(args)
-            if col is None:
-                raise KeyError(args)
-            return [row[col] for row in self.data]
-        else:
-            return self.data[idx]
-
-    def to_dataframe(self):
-        '''Produce a pandas DataFrame containing this table's data.
-        '''
-
-        data = {colname: self[colname] for ii, colname in enumerate(self.columns)}
-        return pd.DataFrame(data)
-
-    @classmethod
-    @docval(
-        {'name': 'df', 'type': pd.DataFrame, 'doc': 'input data'},
-        {'name': 'name', 'type': str, 'doc': 'the name of this container', 'default': None},
-        {
-            'name': 'extra_ok',
-            'type': bool,
-            'doc': 'accept (and ignore) unexpected columns on the input dataframe',
-            'default': False
-        },
-    )
-    def from_dataframe(cls, **kwargs):
-        '''Construct an instance of NWBTable (or a subclass) from a pandas DataFrame. The columns of the dataframe
-        should match the columns defined on the NWBTable subclass.
-        '''
-
-        df, name, extra_ok = getargs('df', 'name', 'extra_ok', kwargs)
-
-        cls_cols = list([col['name'] for col in getattr(cls, '__columns__')])
-        df_cols = list(df.columns)
-
-        missing_columns = set(cls_cols) - set(df_cols)
-        extra_columns = set(df_cols) - set(cls_cols)
-
-        if extra_columns:
-            raise ValueError(
-                'unrecognized column(s) {} for table class {} (columns {})'.format(
-                    extra_columns, cls.__name__, cls_cols
-                )
-            )
-
-        use_index = False
-        if len(missing_columns) == 1 and list(missing_columns)[0] == df.index.name:
-            use_index = True
-
-        elif missing_columns:
-            raise ValueError(
-                'missing column(s) {} for table class {} (columns {}, provided {})'.format(
-                    missing_columns, cls.__name__, cls_cols, df_cols
-                )
-            )
-
-        data = []
-        for index, row in df.iterrows():
-            if use_index:
-                data.append([
-                    row[colname] if colname != df.index.name else index
-                    for colname in cls_cols
-                ])
-            else:
-                data.append([row[colname] for colname in cls_cols])
-
-        if name is None:
-            return cls(data=data)
-        return cls(name=name, data=data)
+    @notes.setter
+    def notes(self, value):
+        warn('Use of ScratchData.notes will be deprecated. Use ScratchData.description instead.',
+             PendingDeprecationWarning)
+        self.description = value
 
 
-# diamond inheritance
-class NWBTableRegion(NWBData, DataRegion):
-    '''
-    A class for representing regions i.e. slices or indices into an NWBTable
-    '''
-
-    @docval({'name': 'name', 'type': str, 'doc': 'the name of this container'},
-            {'name': 'table', 'type': NWBTable, 'doc': 'the ElectrodeTable this region applies to'},
-            {'name': 'region', 'type': (slice, list, tuple, RegionReference), 'doc': 'the indices of the table'})
-    def __init__(self, **kwargs):
-        table, region = getargs('table', 'region', kwargs)
-        self.__table = table
-        self.__region = region
-        name = getargs('name', kwargs)
-        super(NWBTableRegion, self).__init__(name, table)
-        self.__regionslicer = get_region_slicer(self.__table.data, self.__region)
-
-    @property
-    def table(self):
-        '''The ElectrodeTable this region applies to'''
-        return self.__table
-
-    @property
-    def region(self):
-        '''The indices into table'''
-        return self.__region
-
-    def __len__(self):
-        return len(self.__regionslicer)
-
-    def __getitem__(self, idx):
-        return self.__regionslicer[idx]
+class NWBTable(Table):
+    """Defined in PyNWB for API backward compatibility. See HDMF Table for details."""
+    pass
 
 
 class MultiContainerInterface(NWBDataInterface, hdmf_MultiContainerInterface):

@@ -1,0 +1,64 @@
+name: Feature Request
+description: Suggest an idea for a brand new feature, or a change to an existing one.
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Thank you for your suggestion!
+
+        We welcome any ideas about how to make **PyNWB** better for the community.
+
+        Please keep in mind that new features may not get implemented immediately.
+  - type: textarea
+    id: summary
+    attributes:
+      label: What would you like to see added to PyNWB?
+      description: |
+        What are you trying to achieve with **PyNWB**?
+
+        Is this a more convenient way to do something that is already possible, or is a workaround currently unfeasible?
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: Is your feature request related to a problem?
+      description: A clear and concise description of what the problem is.
+  - type: textarea
+    id: solution
+    attributes:
+      label: What solution would you like?
+      description: |
+        A clear and concise description of what you want to happen.
+
+        Describe alternative solutions you have considered.
+    validations:
+      required: true
+  - type: dropdown
+    id: interest
+    attributes:
+      label: Do you have any interest in helping implement the feature?
+      description: |
+        We appreciate any help you can offer!
+
+        For information on how to contribute, please refer to our [contributing guidelines](https://github.com/NeurodataWithoutBorders/pynwb/blob/dev/docs/CONTRIBUTING.rst).
+      options:
+        - Yes.
+        - Yes, but I would need guidance.
+        - No.
+    validations:
+      required: true
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: Code of Conduct
+      description: By submitting this issue, you agree to follow our [Code of Conduct](https://github.com/NeurodataWithoutBorders/pynwb/blob/dev/.github/CODE_OF_CONDUCT.rst)
+      options:
+        - label: I agree to follow this project's [Code of Conduct](https://github.com/NeurodataWithoutBorders/pynwb/blob/dev/.github/CODE_OF_CONDUCT.rst)
+          required: true
+        - label: Have you checked the [Contributing](https://github.com/NeurodataWithoutBorders/pynwb/blob/dev/docs/CONTRIBUTING.rst) document?
+          required: true
+        - label: Have you ensured this change was not already [requested](https://github.com/NeurodataWithoutBorders/pynwb/issues)?
+          required: true

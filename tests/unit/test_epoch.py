@@ -5,15 +5,16 @@ from dateutil import tz
 
 from pynwb.epoch import TimeIntervals
 from pynwb import TimeSeries, NWBFile
+from pynwb.base import TimeSeriesReference, TimeSeriesReferenceVectorData
 from pynwb.testing import TestCase
 
 
 class TimeIntervalsTest(TestCase):
 
     def test_init(self):
-        tstamps = np.arange(1.0, 100.0, 0.1, dtype=np.float)
-        ts = TimeSeries("test_ts", list(range(len(tstamps))), 'unit', timestamps=tstamps)
-        ept = TimeIntervals('epochs', "TimeIntervals unittest")
+        tstamps = np.arange(1.0, 100.0, 0.1, dtype=np.float64)
+        ts = TimeSeries(name="test_ts", data=list(range(len(tstamps))), unit='unit', timestamps=tstamps)
+        ept = TimeIntervals(name='epochs', description="TimeIntervals unittest")
         self.assertEqual(ept.name, 'epochs')
         ept.add_interval(10.0, 20.0, ["test", "unittest", "pynwb"], ts)
         row = ept[0]
@@ -25,8 +26,8 @@ class TimeIntervalsTest(TestCase):
 
     def get_timeseries(self):
         return [
-            TimeSeries(name='a', timestamps=np.linspace(0, 1, 11)),
-            TimeSeries(name='b', timestamps=np.linspace(0.1, 5, 13)),
+            TimeSeries(name='a', data=[1]*11, unit='unit', timestamps=np.linspace(0, 1, 11)),
+            TimeSeries(name='b', data=[1]*13, unit='unit', timestamps=np.linspace(0.1, 5, 13)),
         ]
 
     def get_dataframe(self):
@@ -36,7 +37,11 @@ class TimeIntervalsTest(TestCase):
             'bar': ['fish', 'fowl', 'dog', 'cat'],
             'start_time': [0.2, 0.25, 0.30, 0.35],
             'stop_time': [0.25, 0.30, 0.40, 0.45],
-            'timeseries': [[tsa], [tsb], [], [tsb, tsa]],
+            'timeseries': [[TimeSeriesReference(idx_start=0, count=11, timeseries=tsa)],
+                           [TimeSeriesReference(idx_start=0, count=13, timeseries=tsb)],
+                           [],
+                           [TimeSeriesReference(idx_start=4, count=6, timeseries=tsb),
+                            TimeSeriesReference(idx_start=3, count=4, timeseries=tsa)]],
             'keys': ['q', 'w', 'e', 'r'],
             'tags': [[], [], ['fizz', 'buzz'], ['qaz']]
         })
@@ -46,12 +51,16 @@ class TimeIntervalsTest(TestCase):
         epochs = TimeIntervals.from_dataframe(df, name='test epochs')
         obtained = epochs.to_dataframe()
 
-        self.assertIs(obtained.loc[3, 'timeseries'][1], df.loc[3, 'timeseries'][1])
+        self.assertTupleEqual(obtained.loc[3, 'timeseries'][1], df.loc[3, 'timeseries'][1])
+        self.assertIsInstance(epochs.timeseries, TimeSeriesReferenceVectorData)
+        self.assertIsInstance(obtained.loc[3, 'timeseries'][1], TimeSeriesReference)
+        self.assertIsInstance(df.loc[3, 'timeseries'][1], TimeSeriesReference)
         self.assertEqual(obtained.loc[2, 'foo'], df.loc[2, 'foo'])
 
     def test_dataframe_roundtrip_drop_ts(self):
         df = self.get_dataframe()
         epochs = TimeIntervals.from_dataframe(df, name='test epochs')
+        self.assertIsInstance(epochs.timeseries, TimeSeriesReferenceVectorData)
         obtained = epochs.to_dataframe(exclude=set(['timeseries', 'timeseries_index']))
 
         self.assertNotIn('timeseries', obtained.columns)
@@ -77,7 +86,7 @@ class TimeIntervalsTest(TestCase):
         with self.assertRaises(ValueError):
             TimeIntervals.from_dataframe(df, name='ti_name')
 
-    def test_frorm_dataframe_missing_supplied_col(self):
+    def test_from_dataframe_missing_supplied_col(self):
         df = pd.DataFrame({'start_time': [1., 2., 3.], 'stop_time': [2., 3., 4.], 'label': ['a', 'b', 'c']})
         with self.assertRaises(ValueError):
             TimeIntervals.from_dataframe(df, name='ti_name', columns=[{'name': 'not there'}])

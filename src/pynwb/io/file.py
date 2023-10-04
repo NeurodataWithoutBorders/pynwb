@@ -1,15 +1,18 @@
 from dateutil.parser import parse as dateutil_parse
+
 from hdmf.build import ObjectMapper
+
 from .. import register_map
 from ..file import NWBFile, Subject
 from ..core import ScratchData
+from .utils import get_nwb_version
 
 
 @register_map(NWBFile)
 class NWBFileMap(ObjectMapper):
 
     def __init__(self, spec):
-        super(NWBFileMap, self).__init__(spec)
+        super().__init__(spec)
 
         acq_spec = self.spec.get_group('acquisition')
         self.unmap(acq_spec)
@@ -30,6 +33,7 @@ class NWBFileMap(ObjectMapper):
         self.unmap(stimulus_spec.get_group('templates'))
         self.map_spec('stimulus', stimulus_spec.get_group('presentation').get_neurodata_type('TimeSeries'))
         self.map_spec('stimulus_template', stimulus_spec.get_group('templates').get_neurodata_type('TimeSeries'))
+        self.map_spec('stimulus_template', stimulus_spec.get_group('templates').get_neurodata_type('Images'))
 
         intervals_spec = self.spec.get_group('intervals')
         self.unmap(intervals_spec)
@@ -47,13 +51,21 @@ class NWBFileMap(ObjectMapper):
         general_spec = self.spec.get_group('general')
         self.unmap(general_spec)
 
+        # map icephys metadata structures and tables
         icephys_spec = general_spec.get_group('intracellular_ephys')
         self.unmap(icephys_spec)
         self.map_spec('icephys_electrodes', icephys_spec.get_neurodata_type('IntracellularElectrode'))
         self.map_spec('sweep_table', icephys_spec.get_neurodata_type('SweepTable'))
+        self.map_spec('intracellular_recordings', icephys_spec.get_neurodata_type('IntracellularRecordingsTable'))
+        self.map_spec('icephys_simultaneous_recordings', icephys_spec.get_neurodata_type('SimultaneousRecordingsTable'))
+        self.map_spec('icephys_sequential_recordings', icephys_spec.get_neurodata_type('SequentialRecordingsTable'))
+        self.map_spec('icephys_repetitions', icephys_spec.get_neurodata_type('RepetitionsTable'))
+        self.map_spec('icephys_experimental_conditions', icephys_spec.get_neurodata_type('ExperimentalConditionsTable'))
 
-        # TODO map the filtering dataset to something or deprecate it
-        self.unmap(icephys_spec.get_dataset('filtering'))
+        # 'filtering' has been deprecated. add this mapping in the meantime
+        icephys_filtering_spec = icephys_spec.get_dataset('filtering')
+        self.unmap(icephys_filtering_spec)
+        self.map_spec('icephys_filtering', icephys_filtering_spec)
 
         ecephys_spec = general_spec.get_group('extracellular_ephys')
         self.unmap(ecephys_spec)
@@ -209,3 +221,16 @@ class SubjectMap(ObjectMapper):
             datestr = dob_builder.data
             date = dateutil_parse(datestr)
             return date
+
+    @ObjectMapper.constructor_arg("age__reference")
+    def age_reference_none(self, builder, manager):
+        age_builder = builder.get("age")
+        age_reference = None
+        if age_builder is not None:
+            age_reference = age_builder["attributes"].get("reference")
+        if age_reference is None:
+            if get_nwb_version(builder) < (2, 6, 0):
+                return "unspecified"  # this is handled specially in Subject.__init__
+            else:
+                return "birth"
+        return age_reference

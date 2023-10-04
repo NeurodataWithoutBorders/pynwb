@@ -1,7 +1,15 @@
 import numpy as np
 
-from pynwb.icephys import PatchClampSeries, CurrentClampSeries, IZeroClampSeries, CurrentClampStimulusSeries, \
-        VoltageClampSeries, VoltageClampStimulusSeries, IntracellularElectrode
+from pynwb.icephys import (
+    PatchClampSeries,
+    CurrentClampSeries,
+    IZeroClampSeries,
+    CurrentClampStimulusSeries,
+    VoltageClampSeries,
+    VoltageClampStimulusSeries,
+    IntracellularElectrode,
+    SweepTable,
+)
 from pynwb.device import Device
 from pynwb.testing import TestCase
 from pynwb.file import NWBFile  # Needed to test icephys functionality defined on NWBFile
@@ -20,7 +28,9 @@ def GetElectrode():
         location='location',
         resistance='resistance',
         filtering='filtering',
-        initial_access_resistance='initial_access_resistance')
+        initial_access_resistance='initial_access_resistance',
+        cell_id='this_cell',
+    )
     return elec
 
 
@@ -28,6 +38,17 @@ class NWBFileICEphys(TestCase):
     """Test ICEphys-specific functionality on NWBFile"""
     def setUp(self):
         self.icephys_electrode = GetElectrode()
+
+    def test_sweep_table_depractation_warn(self):
+        msg = ("Use of SweepTable is deprecated. Use the IntracellularRecordingsTable "
+               "instead. See also the  NWBFile.add_intracellular_recordings function.")
+        with self.assertWarnsWith(DeprecationWarning, msg):
+            _ = NWBFile(
+                session_description='NWBFile icephys test',
+                identifier='NWB123',  # required
+                session_start_time=datetime(2017, 4, 3, 11, tzinfo=tzlocal()),
+                ic_electrodes=[self.icephys_electrode, ],
+                sweep_table=SweepTable())
 
     def test_ic_electrodes_parameter_deprecation(self):
         # Make sure we warn when using the ic_electrodes parameter on NWBFile
@@ -107,7 +128,8 @@ class IntracellularElectrodeConstructor(TestCase):
                                       'location',
                                       'resistance',
                                       'filtering',
-                                      'initial_access_resistance')
+                                      'initial_access_resistance',
+                                      'this_cell')
         self.assertEqual(elec.name, 'test_iS')
         self.assertEqual(elec.device, device)
         self.assertEqual(elec.description, 'description')
@@ -117,6 +139,7 @@ class IntracellularElectrodeConstructor(TestCase):
         self.assertEqual(elec.resistance, 'resistance')
         self.assertEqual(elec.filtering, 'filtering')
         self.assertEqual(elec.initial_access_resistance, 'initial_access_resistance')
+        self.assertEqual(elec.cell_id, 'this_cell')
 
 
 class PatchClampSeriesConstructor(TestCase):
@@ -185,6 +208,19 @@ class PatchClampSeriesConstructor(TestCase):
             PatchClampSeries('test_pCS', list(), 'unit',
                              electrode_name, 1.0, timestamps=list(), sweep_number=1.5)
 
+    def test_data_shape(self):
+        electrode_name = GetElectrode()
+
+        with self.assertRaises(ValueError):
+            PatchClampSeries(
+                name="test_pCS",
+                data=np.ones((30, 2)),
+                unit="unit",
+                electrode=electrode_name,
+                gain=1.0,
+                rate=100_000.,
+            )
+
 
 class CurrentClampSeriesConstructor(TestCase):
 
@@ -225,6 +261,7 @@ class IZeroClampSeriesConstructor(TestCase):
         self.assertEqual(iZCS.bias_current, 0.0)
         self.assertEqual(iZCS.bridge_balance, 0.0)
         self.assertEqual(iZCS.capacitance_compensation, 0.0)
+        self.assertEqual(iZCS.stimulus_description, 'N/A')
 
     def test_unit_warning(self):
         electrode_name = GetElectrode()
@@ -233,6 +270,16 @@ class IZeroClampSeriesConstructor(TestCase):
         with self.assertWarnsWith(UserWarning, msg):
             iZCS = IZeroClampSeries('test_iZCS', list(), electrode_name, 1.0, timestamps=list(), unit='unit')
         self.assertEqual(iZCS.unit, 'volts')
+
+    def test_stim_desc_warning(self):
+        electrode_name = GetElectrode()
+
+        msg = ("Stimulus description 'desc' for IZeroClampSeries 'test_iZCS' is ignored and will be set to 'N/A' "
+               "as per NWB 2.3.0.")
+        with self.assertWarnsWith(UserWarning, msg):
+            iZCS = IZeroClampSeries('test_iZCS', list(), electrode_name, 1.0, timestamps=list(),
+                                    stimulus_description='desc')
+        self.assertEqual(iZCS.stimulus_description, 'N/A')
 
 
 class CurrentClampStimulusSeriesConstructor(TestCase):

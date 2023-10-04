@@ -1,0 +1,54 @@
+name: Deploy release
+on:
+  push:
+    tags:  # run only on new tags that follow semver MAJOR.MINOR.PATCH
+      - '[0-9]+.[0-9]+.[0-9]+'
+
+jobs:
+  deploy-release:
+    name: Deploy release from tag
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo with submodules
+        uses: actions/checkout@v3
+        with:
+          submodules: 'recursive'
+          fetch-depth: 0  # tags are required for versioneer to determine the version
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install build dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install tox
+          python -m pip list
+
+      - name: Run tox tests
+        run: |
+          tox -e py311-upgraded
+
+      - name: Build wheel and source distribution
+        run: |
+          tox -e build-py311-upgraded
+          ls -1 dist
+
+      - name: Test installation from a wheel
+        run: |
+          tox -e wheelinstall --recreate --installpkg dist/*-none-any.whl
+
+      - name: Upload wheel and source distributions to PyPI
+        run: |
+          python -m pip install twine
+          ls -1 dist
+          # twine upload --repository-url https://test.pypi.org/legacy/ -u ${{ secrets.BOT_PYPI_USER }} -p ${{ secrets.BOT_PYPI_PASSWORD }} --skip-existing dist/*
+          twine upload -u ${{ secrets.BOT_PYPI_USER }} -p ${{ secrets.BOT_PYPI_PASSWORD }} --skip-existing dist/*
+
+      - name: Publish wheel and source distributions as a GitHub release
+        run: |
+          python -m pip install "githubrelease>=1.5.9"
+          githubrelease --github-token ${{ secrets.BOT_GITHUB_TOKEN }} release NeurodataWithoutBorders/pynwb \
+            create ${{ github.ref_name }} --name ${{ github.ref_name }} \
+            --publish dist/*

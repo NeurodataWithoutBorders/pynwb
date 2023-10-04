@@ -1,34 +1,32 @@
+from hdmf.build import LinkBuilder
+
 from .core import NWBContainerMapper
 from .. import register_map
-
 from ..base import TimeSeries, ProcessingModule
-from hdmf.build import LinkBuilder
 
 
 @register_map(ProcessingModule)
 class ModuleMap(NWBContainerMapper):
 
     def __init__(self, spec):
-        super(ModuleMap, self).__init__(spec)
+        super().__init__(spec)
         containers_spec = self.spec.get_neurodata_type('NWBDataInterface')
         table_spec = self.spec.get_neurodata_type('DynamicTable')
         self.map_spec('data_interfaces', containers_spec)
         self.map_spec('data_interfaces', table_spec)
-
-    @NWBContainerMapper.constructor_arg('name')
-    def name(self, builder, manager):
-        return builder.name
 
 
 @register_map(TimeSeries)
 class TimeSeriesMap(NWBContainerMapper):
 
     def __init__(self, spec):
-        super(TimeSeriesMap, self).__init__(spec)
+        super().__init__(spec)
         data_spec = self.spec.get_dataset('data')
         self.map_spec('unit', data_spec.get_attribute('unit'))
         self.map_spec('resolution', data_spec.get_attribute('resolution'))
         self.map_spec('conversion', data_spec.get_attribute('conversion'))
+        self.map_spec('offset', data_spec.get_attribute('offset'))
+        self.map_spec('continuity', data_spec.get_attribute('continuity'))
 
         timestamps_spec = self.spec.get_dataset('timestamps')
         self.map_spec('timestamps_unit', timestamps_spec.get_attribute('unit'))
@@ -41,10 +39,6 @@ class TimeSeriesMap(NWBContainerMapper):
         # TODO map the sync group to something
         sync_spec = self.spec.get_group('sync')
         self.unmap(sync_spec)
-
-    @NWBContainerMapper.constructor_arg('name')
-    def name(self, builder, manager):
-        return builder.name
 
     @NWBContainerMapper.object_attr("timestamps")
     def timestamps_attr(self, container, manager):
@@ -71,10 +65,47 @@ class TimeSeriesMap(NWBContainerMapper):
             #
             # NOTE: it is not available when data is externally linked
             # and we haven't explicitly read that file
-            if tstamps_builder.builder.parent is not None:
-                target = tstamps_builder.builder
+            target = tstamps_builder.builder
+            if target.parent is not None:
                 return manager.construct(target.parent)
             else:
-                return tstamps_builder.builder.data
+                return target.data
         else:
             return tstamps_builder.data
+
+    @NWBContainerMapper.constructor_arg("data")
+    def data_carg(self, builder, manager):
+        # handle case where a TimeSeries is read and missing data
+        timeseries_cls = manager.get_cls(builder)
+        data_builder = builder.get('data')
+        if data_builder is None:
+            return timeseries_cls.DEFAULT_DATA
+        if isinstance(data_builder, LinkBuilder):
+            # NOTE: parent is not available when data is externally linked
+            # and we haven't explicitly read that file
+            target = data_builder.builder
+            if target.parent is not None:
+                return manager.construct(target.parent)
+            else:
+                return target.data
+        return data_builder.data
+
+    @NWBContainerMapper.constructor_arg("unit")
+    def unit_carg(self, builder, manager):
+        # handle case where a TimeSeries is read and missing unit
+        timeseries_cls = manager.get_cls(builder)
+        data_builder = builder.get('data')
+        if data_builder is None:
+            return timeseries_cls.DEFAULT_UNIT
+        if isinstance(data_builder, LinkBuilder):
+            # NOTE: parent is not available when data is externally linked
+            # and we haven't explicitly read that file
+            target = data_builder.builder
+            if target.parent is not None:
+                data_builder = manager.construct(target.parent)
+            else:
+                data_builder = target
+        unit_value = data_builder.attributes.get('unit')
+        if unit_value is None:
+            return timeseries_cls.DEFAULT_UNIT
+        return unit_value

@@ -1,9 +1,12 @@
 import numpy as np
 
-from hdmf.common import DynamicTable, VectorData
+from hdmf.common import DynamicTable, VectorData, DynamicTableRegion
 from pynwb import TimeSeries
 from pynwb.misc import Units, DecompositionSeries
 from pynwb.testing import NWBH5IOMixin, AcquisitionH5IOMixin, TestCase
+from pynwb.ecephys import ElectrodeGroup
+from pynwb.device import Device
+from pynwb.file import ElectrodeTable as get_electrode_table
 
 
 class TestUnitsIO(AcquisitionH5IOMixin, TestCase):
@@ -12,10 +15,39 @@ class TestUnitsIO(AcquisitionH5IOMixin, TestCase):
     def setUpContainer(self):
         """ Return the test Units to read/write """
         ut = Units(name='UnitsTest', description='a simple table for testing Units')
-        ut.add_unit(spike_times=[0, 1, 2], obs_intervals=[[0, 1], [2, 3]],
-                    waveform_mean=[1., 2., 3.], waveform_sd=[4., 5., 6.])
-        ut.add_unit(spike_times=[3, 4, 5], obs_intervals=[[2, 5], [6, 7]],
-                    waveform_mean=[1., 2., 3.], waveform_sd=[4., 5., 6.])
+        ut.add_unit(spike_times=[0., 1., 2.], obs_intervals=[[0., 1.], [2., 3.]],
+                    waveform_mean=[1., 2., 3.], waveform_sd=[4., 5., 6.],
+                    waveforms=[
+                        [  # elec 1
+                            [1, 2, 3],
+                            [1, 2, 3],
+                            [1, 2, 3]
+                        ], [  # elec 2
+                            [1, 2, 3],
+                            [1, 2, 3],
+                            [1, 2, 3]
+                        ]
+                    ])
+        ut.add_unit(spike_times=[3., 4., 5.], obs_intervals=[[2., 5.], [6., 7.]],
+                    waveform_mean=[1., 2., 3.], waveform_sd=[4., 5., 6.],
+                    waveforms=np.array([
+                        [     # elec 1
+                            [1, 2, 3],  # spike 1, [sample 1, sample 2, sample 3]
+                            [1, 2, 3],  # spike 2
+                            [1, 2, 3],  # spike 3
+                            [1, 2, 3]   # spike 4
+                        ], [  # elec 2
+                            [1, 2, 3],  # spike 1
+                            [1, 2, 3],  # spike 2
+                            [1, 2, 3],  # spike 3
+                            [1, 2, 3]   # spike 4
+                        ], [  # elec 3
+                            [1, 2, 3],  # spike 1
+                            [1, 2, 3],  # spike 2
+                            [1, 2, 3],  # spike 3
+                            [1, 2, 3]   # spike 4
+                        ]
+                    ]))
         ut.waveform_rate = 40000.
         ut.resolution = 1/40000
         return ut
@@ -24,19 +56,19 @@ class TestUnitsIO(AcquisitionH5IOMixin, TestCase):
         """ Test whether the Units spike times read from file are what was written """
         ut = self.roundtripContainer()
         received = ut.get_unit_spike_times(0)
-        self.assertTrue(np.array_equal(received, [0, 1, 2]))
+        np.testing.assert_array_equal(received, [0., 1., 2.])
         received = ut.get_unit_spike_times(1)
-        self.assertTrue(np.array_equal(received, [3, 4, 5]))
-        self.assertTrue(np.array_equal(ut['spike_times'][:], [[0, 1, 2], [3, 4, 5]]))
+        np.testing.assert_array_equal(received, [3., 4., 5.])
+        np.testing.assert_array_equal(ut['spike_times'][:], [[0., 1., 2.], [3., 4., 5.]])
 
     def test_get_obs_intervals(self):
         """ Test whether the Units observation intervals read from file are what was written """
         ut = self.roundtripContainer()
         received = ut.get_unit_obs_intervals(0)
-        self.assertTrue(np.array_equal(received, [[0, 1], [2, 3]]))
+        np.testing.assert_array_equal(received, [[0., 1.], [2., 3.]])
         received = ut.get_unit_obs_intervals(1)
-        self.assertTrue(np.array_equal(received, [[2, 5], [6, 7]]))
-        self.assertTrue(np.array_equal(ut['obs_intervals'][:], [[[0, 1], [2, 3]], [[2, 5], [6, 7]]]))
+        np.testing.assert_array_equal(received, [[2., 5.], [6., 7.]])
+        np.testing.assert_array_equal(ut['obs_intervals'][:], [[[0., 1.], [2., 3.]], [[2., 5.], [6., 7.]]])
 
 
 class TestUnitsFileIO(NWBH5IOMixin, TestCase):
@@ -57,9 +89,7 @@ class TestUnitsFileIO(NWBH5IOMixin, TestCase):
                                                          device=device)
         for idx in [1, 2, 3, 4]:
             nwbfile.add_electrode(id=idx,
-                                  x=1.0, y=2.0, z=3.0,
-                                  imp=float(-idx),
-                                  location='CA1', filtering='none',
+                                  location='CA1',
                                   group=electrode_group)
 
         nwbfile.add_unit(id=1, electrodes=[1], electrode_group=electrode_group)
@@ -105,3 +135,52 @@ class TestDecompositionSeriesIO(NWBH5IOMixin, TestCase):
     def getContainer(self, nwbfile):
         """ Return the test DecompositionSeries from the given NWBFile """
         return nwbfile.processing['test_mod']['LFPSpectralAnalysis']
+
+
+class TestDecompositionSeriesWithSourceChannelsIO(AcquisitionH5IOMixin, TestCase):
+
+    @staticmethod
+    def make_electrode_table(self):
+        """ Make an electrode table, electrode group, and device """
+        self.table = get_electrode_table()
+        self.dev1 = Device(name='dev1')
+        self.group = ElectrodeGroup(name='tetrode1',
+                                    description='tetrode description',
+                                    location='tetrode location',
+                                    device=self.dev1)
+        for i in range(4):
+            self.table.add_row(location='CA1', group=self.group, group_name='tetrode1')
+
+    def setUpContainer(self):
+        """ Return the test ElectricalSeries to read/write """
+        self.make_electrode_table(self)
+        region = DynamicTableRegion(name='source_channels',
+                                    data=[0, 2],
+                                    description='the first and third electrodes',
+                                    table=self.table)
+        data = np.random.randn(100, 2, 30)
+        timestamps = np.arange(100)/100
+        ds = DecompositionSeries(name='test_DS',
+                                 data=data,
+                                 source_channels=region,
+                                 timestamps=timestamps,
+                                 metric='amplitude')
+        return ds
+
+    def addContainer(self, nwbfile):
+        """ Add the test ElectricalSeries and related objects to the given NWBFile """
+        nwbfile.add_device(self.dev1)
+        nwbfile.add_electrode_group(self.group)
+        nwbfile.set_electrode_table(self.table)
+        nwbfile.add_acquisition(self.container)
+
+    def test_eg_ref(self):
+        """
+        Test that the electrode DynamicTableRegion references of the read ElectricalSeries have a group that
+        correctly resolves to ElectrodeGroup instances.
+        """
+        read = self.roundtripContainer()
+        row1 = read.source_channels[0]
+        row2 = read.source_channels[1]
+        self.assertIsInstance(row1.iloc[0]['group'], ElectrodeGroup)
+        self.assertIsInstance(row2.iloc[0]['group'], ElectrodeGroup)
