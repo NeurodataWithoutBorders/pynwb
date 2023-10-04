@@ -1,11 +1,15 @@
 # PyNWB Changelog
 
+## PyNWB 2.6.0 (Upcoming)
+
+### Enhancements and minor changes
+- For `NWBHDF5IO()`, change the default of arg `load_namespaces` from `False` to `True`. @bendichter [#1748](https://github.com/NeurodataWithoutBorders/pynwb/pull/1748)
+
 ## PyNWB 2.5.0 (August 18, 2023)
 
 ### Enhancements and minor changes
 - Add `TimeSeries.get_timestamps()`. @bendichter [#1741](https://github.com/NeurodataWithoutBorders/pynwb/pull/1741)
 - Add `TimeSeries.get_data_in_units()`. @bendichter [#1745](https://github.com/NeurodataWithoutBorders/pynwb/pull/1745)
-- For `NWBHDF5IO()`, change the default of arg `load_namespaces` from `False` to `True`. @bendichter [#1748](https://github.com/NeurodataWithoutBorders/pynwb/pull/1748)
 - Updated `ExternalResources` name change to `HERD`, along with HDMF 3.9.0 being the new minimum. @mavaylon1 [#1754](https://github.com/NeurodataWithoutBorders/pynwb/pull/1754)
 
 ### Documentation and tutorial enhancements
