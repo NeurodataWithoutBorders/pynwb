@@ -147,7 +147,14 @@ def register_class(**kwargs):
     else:
         _dec(container_cls)
 
-def get_nwbfile_version(h5py_file):
+def get_nwbfile_version(h5py_file: h5py.File):
+    """
+    Get the NWB version of the file if it is an NWB file.
+    :returns: Tuple consisting of: 1) the original version string as stored in the file and
+              2) a tuple with the parsed components of the version string, consisting of integers
+              and strings, e.g., (2, 5, 1, beta). (None, None) will be returned if the file is not a valid NWB file 
+              or the nwb_version is missing, e.g., in the case when no data has been written to the file yet.
+    """
     # Get the version string for the NWB file
     try:
         nwb_version_string = h5py_file.attrs['nwb_version']
