@@ -1,10 +1,19 @@
 # PyNWB Changelog
 
+## PyNWB 2.6.0 (October 5, 2023)
+
+### Enhancements and minor changes
+- Updated HDMF requirement to [HDMF >=3.10.0](https://github.com/hdmf-dev/hdmf/releases/tag/3.10.0)
+  which includes bug fixes and new features. @rly [#1778](https://github.com/NeurodataWithoutBorders/pynwb/pull/1778)
+
+## Bug fixes
+- Updated tests to work with the latest version of HDMF. @rly [#1778](https://github.com/NeurodataWithoutBorders/pynwb/pull/1778)
+
 ## PyNWB 2.5.0 (August 18, 2023)
 
 ### Enhancements and minor changes
-- Add `TimeSeries.get_timestamps()`. @bendichter [#1741](https://github.com/NeurodataWithoutBorders/pynwb/pull/1741)
-- Add `TimeSeries.get_data_in_units()`. @bendichter [#1745](https://github.com/NeurodataWithoutBorders/pynwb/pull/1745)
+- Added `TimeSeries.get_timestamps()`. @bendichter [#1741](https://github.com/NeurodataWithoutBorders/pynwb/pull/1741)
+- Added `TimeSeries.get_data_in_units()`. @bendichter [#1745](https://github.com/NeurodataWithoutBorders/pynwb/pull/1745)
 - Updated `ExternalResources` name change to `HERD`, along with HDMF 3.9.0 being the new minimum. @mavaylon1 [#1754](https://github.com/NeurodataWithoutBorders/pynwb/pull/1754)
 
 ### Documentation and tutorial enhancements

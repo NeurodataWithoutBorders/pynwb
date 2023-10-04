@@ -2,7 +2,8 @@ Prepare for release of PyNWB [version]
 
 ### Before merging:
 - [ ] Major and minor releases: Update package versions in `requirements.txt`, `requirements-dev.txt`,
-  `requirements-doc.txt`, `requirements-min.txt`, `environment-ros3.yml`, and `setup.py` as needed.
+  `requirements-doc.txt`, `requirements-opt.txt`, and `environment-ros3.yml` to the latest versions,
+  and update dependency ranges in `pyproject.toml` and minimums in `requirements-min.txt` as needed
 - [ ] Check legal file dates and information in `Legal.txt`, `license.txt`, `README.rst`, `docs/source/conf.py`,
   and any other locations as needed
 - [ ] Update `setup.py` as needed
@@ -11,7 +12,7 @@ Prepare for release of PyNWB [version]
 - [ ] Update changelog (set release date) in `CHANGELOG.md` and any other docs as needed
 - [ ] Run tests locally including gallery, validation, and streaming tests, and inspect all warnings and outputs
   (`python test.py -v -p -i -b -w -r > out.txt 2>&1`)
-- [ ] Test docs locally (`make clean`, `make html`)
+- [ ] Test docs locally and inspect all warnings and outputs `cd docs; make clean && make html`
 - [ ] Push changes to this PR and make sure all PRs to be included in this release have been merged
 - [ ] Check that the readthedocs build for this PR succeeds (build latest to pull the new branch, then activate and
   build docs for new branch): https://readthedocs.org/projects/pynwb/builds/
