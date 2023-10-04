@@ -221,7 +221,7 @@ def get_class(**kwargs):
 class NWBHDF5IO(_HDF5IO):
 
     @staticmethod
-    def can_read(path):
+    def can_read(path: str):
         """Determine whether a given path is readable by this class"""
         if not os.path.isfile(path):  # path is file that exists
             return False
