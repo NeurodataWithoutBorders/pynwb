@@ -79,7 +79,7 @@ class NWBH5IOMixin(metaclass=ABCMeta):
         self.assertIs(self.read_exported_nwbfile.objects[self.container.object_id], self.read_container)
         self.assertContainerEqual(self.read_container, self.container, ignore_hdmf_attrs=True)
 
-    def roundtripContainer(self, cache_spec=False):
+    def roundtripContainer(self, cache_spec=True):
         """Add the Container to an NWBFile, write it to file, read the file, and return the Container from the file.
         """
         session_description = 'a file to test writing and reading a %s' % self.container_type
@@ -116,7 +116,7 @@ class NWBH5IOMixin(metaclass=ABCMeta):
             self.reader = None
             raise e
 
-    def roundtripExportContainer(self, cache_spec=False):
+    def roundtripExportContainer(self, cache_spec=True):
         """
         Add the test Container to an NWBFile, write it to file, read the file, export the read NWBFile to another
         file, and return the test Container from the file
@@ -290,7 +290,7 @@ class NWBH5IOFlexMixin(metaclass=ABCMeta):
         self.assertIs(self.read_exported_nwbfile.objects[self.container.object_id], self.read_container)
         self.assertContainerEqual(self.read_container, self.container, ignore_hdmf_attrs=True)
 
-    def roundtripContainer(self, cache_spec=False):
+    def roundtripContainer(self, cache_spec=True):
         """Write the file, validate the file, read the file, and return the Container from the file.
         """
 
@@ -321,7 +321,7 @@ class NWBH5IOFlexMixin(metaclass=ABCMeta):
             self.reader = None
             raise e
 
-    def roundtripExportContainer(self, cache_spec=False):
+    def roundtripExportContainer(self, cache_spec=True):
         """
         Roundtrip the container, then export the read NWBFile to a new file, validate the files, and return the test
         Container from the file.
