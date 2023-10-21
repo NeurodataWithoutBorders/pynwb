@@ -163,18 +163,14 @@ class NWBH5IOMixin(metaclass=ABCMeta):
     def validate(self):
         """ Validate the created files """
         if os.path.exists(self.filename):
-            with NWBHDF5IO(self.filename, mode='r') as io:
-                errors = pynwb_validate(io)
-                if errors:
-                    for err in errors:
-                        raise Exception(err)
+            errors = pynwb_validate(paths=[self.filename])
+            if errors:
+                raise Exception("\n".join(errors))
 
         if os.path.exists(self.export_filename):
-            with NWBHDF5IO(self.filename, mode='r') as io:
-                errors = pynwb_validate(io)
-                if errors:
-                    for err in errors:
-                        raise Exception(err)
+            errors = pynwb_validate(paths=[self.export_filename])
+            if errors:
+                raise Exception("\n".join(errors))
 
 
 class AcquisitionH5IOMixin(NWBH5IOMixin):
@@ -366,13 +362,11 @@ class NWBH5IOFlexMixin(metaclass=ABCMeta):
     def validate(self):
         """Validate the created files."""
         if os.path.exists(self.filename):
-            with NWBHDF5IO(self.filename, mode='r') as io:
-                errors = pynwb_validate(io)
-                if errors:
-                    raise Exception("\n".join(errors))
+            errors = pynwb_validate(paths=[self.filename])
+            if errors:
+                raise Exception("\n".join(errors))
 
         if os.path.exists(self.export_filename):
-            with NWBHDF5IO(self.filename, mode='r') as io:
-                errors = pynwb_validate(io)
-                if errors:
-                    raise Exception("\n".join(errors))
+            errors = pynwb_validate(paths=[self.export_filename])
+            if errors:
+                raise Exception("\n".join(errors))
