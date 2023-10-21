@@ -163,12 +163,12 @@ class NWBH5IOMixin(metaclass=ABCMeta):
     def validate(self):
         """ Validate the created files """
         if os.path.exists(self.filename):
-            errors = pynwb_validate(paths=[self.filename])
+            errors, _ = pynwb_validate(paths=[self.filename])
             if errors:
                 raise Exception("\n".join(errors))
 
         if os.path.exists(self.export_filename):
-            errors = pynwb_validate(paths=[self.export_filename])
+            errors, _ = pynwb_validate(paths=[self.export_filename])
             if errors:
                 raise Exception("\n".join(errors))
 
@@ -362,11 +362,11 @@ class NWBH5IOFlexMixin(metaclass=ABCMeta):
     def validate(self):
         """Validate the created files."""
         if os.path.exists(self.filename):
-            errors = pynwb_validate(paths=[self.filename])
+            errors, _ = pynwb_validate(paths=[self.filename])
             if errors:
                 raise Exception("\n".join(errors))
 
         if os.path.exists(self.export_filename):
-            errors = pynwb_validate(paths=[self.export_filename])
+            errors, _ = pynwb_validate(paths=[self.export_filename])
             if errors:
                 raise Exception("\n".join(errors))
