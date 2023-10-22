@@ -26,8 +26,8 @@ Now you can get the url of a particular NWB file using the dandiset ID and the p
 .. note::
 
    To learn more about the dandi API see the 
-   `Dandi Python API docs <https://dandi.readthedocs.io/en/stable/modref/index.html>`_
-   
+   `DANDI Python API docs <https://dandi.readthedocs.io/en/stable/modref/index.html>`_
+
 """
 
 # sphinx_gallery_thumbnail_path = 'figures/gallery_thumbnails_streaming.png'
