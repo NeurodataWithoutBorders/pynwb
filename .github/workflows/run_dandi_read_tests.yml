@@ -47,4 +47,4 @@ jobs:
 
       - name: Run DANDI read tests
         run: |
-          pytest -rP tests/read_dandi/
+          python tests/read_dandi/test_read_dandi.py

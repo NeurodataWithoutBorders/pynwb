@@ -108,6 +108,7 @@ jobs:
       - uses: actions/checkout@v3
         with:
           submodules: 'recursive'
+          fetch-depth: 0  # tags are required for versioneer to determine the version
 
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -151,6 +152,7 @@ jobs:
       - uses: actions/checkout@v3
         with:
           submodules: 'recursive'
+          fetch-depth: 0  # tags are required for versioneer to determine the version
 
       - name: Set up Conda
         uses: conda-incubator/setup-miniconda@v2
@@ -194,9 +196,9 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { name: linux-python3.11-ros3  , python-ver: "3.11", os: ubuntu-latest }
-          - { name: windows-python3.11-ros3, python-ver: "3.11", os: windows-latest }
-          - { name: macos-python3.11-ros3  , python-ver: "3.11", os: macos-latest }
+          - { name: conda-linux-python3.11-ros3  , python-ver: "3.11", os: ubuntu-latest }
+          - { name: conda-windows-python3.11-ros3, python-ver: "3.11", os: windows-latest }
+          - { name: conda-macos-python3.11-ros3  , python-ver: "3.11", os: macos-latest }
     steps:
       - name: Cancel non-latest runs
         uses: styfle/cancel-workflow-action@0.11.0
@@ -207,6 +209,7 @@ jobs:
       - uses: actions/checkout@v3
         with:
           submodules: 'recursive'
+          fetch-depth: 0  # tags are required for versioneer to determine the version
 
       - name: Set up Conda
         uses: conda-incubator/setup-miniconda@v2
@@ -240,9 +243,9 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { name: linux-gallery-python3.11-ros3  , python-ver: "3.11", os: ubuntu-latest }
-          - { name: windows-gallery-python3.11-ros3, python-ver: "3.11", os: windows-latest }
-          - { name: macos-gallery-python3.11-ros3  , python-ver: "3.11", os: macos-latest }
+          - { name: conda-linux-gallery-python3.11-ros3  , python-ver: "3.11", os: ubuntu-latest }
+          - { name: conda-windows-gallery-python3.11-ros3, python-ver: "3.11", os: windows-latest }
+          - { name: conda-macos-gallery-python3.11-ros3  , python-ver: "3.11", os: macos-latest }
     steps:
       - name: Cancel non-latest runs
         uses: styfle/cancel-workflow-action@0.11.0
@@ -253,6 +256,7 @@ jobs:
       - uses: actions/checkout@v3
         with:
           submodules: 'recursive'
+          fetch-depth: 0  # tags are required for versioneer to determine the version
 
       - name: Set up Conda
         uses: conda-incubator/setup-miniconda@v2

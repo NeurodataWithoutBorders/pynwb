@@ -92,22 +92,10 @@ with fs.open(s3_url, "rb") as f:
 #
 # Streaming Method 2: ROS3
 # ------------------------
-# ROS3 is one of the supported methods for reading data from a remote store. ROS3 stands for "read only S3" and is a
-# driver created by the HDF5 Group that allows HDF5 to read HDF5 files stored remotely in s3 buckets. Using this method
-# requires that your HDF5 library is installed with the ROS3 driver enabled. This is not the default configuration,
-# so you will need to make sure you install the right version of ``h5py`` that has this advanced configuration enabled.
-# You can install HDF5 with the ROS3 driver from `conda-forge <https://conda-forge.org/>`_ using ``conda``. You may
-# first need to uninstall a currently installed version of ``h5py``.
-#
-# .. code-block:: bash
-#
-#    pip uninstall h5py
-#    conda install -c conda-forge "h5py>=3.2"
-#
-# Now instantiate a :py:class:`~pynwb.NWBHDF5IO` object with the S3 URL and specify the driver as "ros3". This
-# will download metadata about the file from the S3 bucket to memory. The values of datasets are accessed lazily,
-# just like when reading an NWB file stored locally. So, slicing into a dataset will require additional time to
-# download the sliced data (and only the sliced data) to memory.
+# ROS3 stands for "read only S3" and is a driver created by the HDF5 Group that allows HDF5 to read HDF5 files stored
+# remotely in s3 buckets. Using this method requires that your HDF5 library is installed with the ROS3 driver enabled.
+# With ROS3 support enabled in h5py, we can instantiate a :py:class:`~pynwb.NWBHDF5IO` object with the S3 URL and
+# specify the driver as "ros3".
 
 from pynwb import NWBHDF5IO
 
@@ -115,6 +103,24 @@ with NWBHDF5IO(s3_url, mode='r', load_namespaces=True, driver='ros3') as io:
     nwbfile = io.read()
     print(nwbfile)
     print(nwbfile.acquisition['lick_times'].time_series['lick_left_times'].data[:])
+
+##################################
+# This will download metadata about the file from the S3 bucket to memory. The values of datasets are accessed lazily,
+# just like when reading an NWB file stored locally. So, slicing into a dataset will require additional time to
+# download the sliced data (and only the sliced data) to memory.
+#
+# .. note::
+#
+#    Pre-built h5py packages on PyPI do not include this S3 support. If you want this feature, you could use packages
+#    from conda-forge, or build h5py from source against an HDF5 build with S3 support. You can install HDF5 with
+#    the ROS3 driver from `conda-forge <https://conda-forge.org/>`_ using ``conda``. You may
+#    first need to uninstall a currently installed version of ``h5py``.
+#
+#    .. code-block:: bash
+#
+#        pip uninstall h5py
+#        conda install -c conda-forge "h5py>=3.2"
+
 
 ##################################################
 # Method 3: remfile
@@ -144,14 +150,13 @@ with h5py.File(file, "r") as f:
 # Which streaming method to choose?
 # ---------------------------------
 #
-# fsspec has many advantages over ros3:
+# From a user perspective, once opened, the :py:class:`~pynwb.file.NWBFile` works the same with
+# both fsspec and ros3.  However, in general, we currently recommend using fsspec for streaming
+# NWB files because it is more performant and reliable than ros3. In particular fsspec:
 #
-# 1. fsspec is easier to install
-# 2. fsspec supports caching, which will dramatically speed up repeated requests for the
-#    same region of data
-# 3. fsspec automatically retries when s3 fails to return.
-# 4. fsspec works with other storage backends and
-# 5. fsspec works with other types of files.
-# 6. In our hands, fsspec is faster out-of-the-box.
-#
-# For these reasons, we would recommend use fsspec for most Python users.
+# 1. supports caching, which will dramatically speed up repeated requests for the
+#    same region of data,
+# 2. automatically retries when s3 fails to return, which helps avoid errors when accessing data due to
+#     intermittent errors in connections with S3,
+# 3. works also with other storage backends (e.g., GoogleDrive or Dropbox, not just S3) and file formats, and
+# 4. in our experience appears to provide faster out-of-the-box performance than the ros3 driver.
