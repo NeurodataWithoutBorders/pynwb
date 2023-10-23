@@ -109,7 +109,7 @@ How do I write a newly instantiated ``NWBFile`` to two different file paths?
 -----------------------------------------------------------------------------------------------------------------------
 PyNWB does not support writing an :py:class:`~pynwb.file.NWBFile` that was not read from a file to two different files.
 For example, if you instantiate :py:class:`~pynwb.file.NWBFile` A and write it to file path 1, you cannot also write it
-to file path 2. However, you can first write the :py:class:`~pynwb.file.NWBFile`` to file path 1, read the
+to file path 2. However, you can first write the :py:class:`~pynwb.file.NWBFile` to file path 1, read the
 :py:class:`~pynwb.file.NWBFile` from file path 1, and then export it to file path 2.
 
 .. code-block:: python
