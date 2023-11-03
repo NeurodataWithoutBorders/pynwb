@@ -167,7 +167,7 @@ class TimeSeries(NWBDataInterface):
             setattr(self, key, val)
 
         data = args_to_process['data']
-        self.fields['data'] = data
+        self.data = data
         if isinstance(data, TimeSeries):
             data.__add_link('data_link', self)
 
@@ -177,7 +177,7 @@ class TimeSeries(NWBDataInterface):
                 raise ValueError('Specifying rate and timestamps is not supported.')
             if self.starting_time is not None:
                 raise ValueError('Specifying starting_time and timestamps is not supported.')
-            self.fields['timestamps'] = timestamps
+            self.timestamps = timestamps
             self.timestamps_unit = self.__time_unit
             self.interval = 1
             if isinstance(timestamps, TimeSeries):
@@ -252,6 +252,10 @@ class TimeSeries(NWBDataInterface):
         else:
             return self.fields['data']
 
+    @data.setter
+    def data(self, val):
+        self.fields['data'] = val
+
     @property
     def data_link(self):
         return self.__get_links('data_link')
@@ -264,6 +268,10 @@ class TimeSeries(NWBDataInterface):
             return self.fields['timestamps'].timestamps
         else:
             return self.fields['timestamps']
+
+    @timestamps.setter
+    def timestamps(self, val):
+        self.fields['timestamps'] = val
 
     @property
     def timestamp_link(self):
