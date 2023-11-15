@@ -5,6 +5,7 @@ from hdmf.build import ObjectMapper
 from .. import register_map
 from ..file import NWBFile, Subject
 from ..core import ScratchData
+from .core import NWBTermSetContainerMapper
 from .utils import get_nwb_version
 
 
@@ -210,7 +211,12 @@ class NWBFileMap(ObjectMapper):
 
 
 @register_map(Subject)
-class SubjectMap(ObjectMapper):
+class SubjectMap(NWBTermSetContainerMapper):
+
+    # def __init__(self, spec):
+    #     super().__init__(spec)
+    #     termset_path_spec = self.spec.get_attribute('termset_path')
+    #     self.map_spec('termset_path', termset_path_spec)
 
     @ObjectMapper.constructor_arg('date_of_birth')
     def dateconversion(self, builder, manager):

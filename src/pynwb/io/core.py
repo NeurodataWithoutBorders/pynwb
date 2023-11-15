@@ -7,7 +7,7 @@ from hdmf.build import BuildManager
 from .. import register_map
 
 from pynwb.file import NWBFile
-from pynwb.core import NWBData, NWBContainer, ScratchData
+from pynwb.core import NWBData, NWBContainer, ScratchData, NWBTermSetContainer
 from pynwb.misc import Units
 
 
@@ -25,6 +25,14 @@ class NWBBaseTypeMapper(ObjectMapper):
 @register_map(NWBContainer)
 class NWBContainerMapper(NWBBaseTypeMapper):
     pass
+
+@register_map(NWBTermSetContainer)
+class NWBTermSetContainerMapper(ObjectMapper):
+
+    def __init__(self, spec):
+        super().__init__(spec)
+        termset_path_spec = spec.get_attribute('termset_path')
+        self.map_spec('termset_path', termset_path_spec)
 
 
 @register_map(NWBData)
