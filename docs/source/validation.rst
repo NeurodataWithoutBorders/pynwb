@@ -11,7 +11,7 @@ The validator can be invoked like so:
   python -m pynwb.validate test.nwb
 
 If the file contains no NWB extensions, then this command will validate the file ``test.nwb`` against the
-*core* NWB specification. On success, the output will is:
+*core* NWB specification. On success, the output will be:
 
 .. code-block:: text
 
