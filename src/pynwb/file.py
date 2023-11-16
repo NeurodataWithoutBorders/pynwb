@@ -109,6 +109,7 @@ class Subject(NWBContainer):
         {'name': 'strain', 'type': str, 'doc': 'The strain of the subject, e.g., "C57BL/6J"', 'default': None},
     )
     def __init__(self, **kwargs):
+        self.init_validation(kwargs)
         keys_to_set = (
             "age",
             "age__reference",
@@ -122,8 +123,10 @@ class Subject(NWBContainer):
             "strain",
         )
         args_to_set = popargs_to_dict(keys_to_set, kwargs)
-        super().__init__(name="subject", **kwargs)
-
+        kwargs['name'] = 'subject'
+        super().__init__(**kwargs)
+        # if kwargs['validate']:
+        #     breakpoint()
         # NOTE when the Subject I/O mapper (see pynwb.io.file.py) reads an age__reference value of None from an
         # NWB 2.0-2.5 file, it sets the value to "unspecified" so that when Subject.__init__ is called, the incoming
         # age__reference value is NOT replaced by the default value ("birth") specified in the docval.

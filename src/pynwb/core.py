@@ -2,11 +2,13 @@ from warnings import warn
 
 import numpy as np
 
-from hdmf import Container, Data
+import yaml
+
+from hdmf import Container, Data, TermSet, TermSetWrapper
 from hdmf.container import AbstractContainer, MultiContainerInterface as hdmf_MultiContainerInterface, Table
 from hdmf.common import DynamicTable, DynamicTableRegion  # noqa: F401
 from hdmf.common import VectorData, VectorIndex, ElementIdentifiers  # noqa: F401
-from hdmf.utils import docval, popargs
+from hdmf.utils import docval, popargs, get_docval
 from hdmf.utils import LabelledDict  # noqa: F401
 
 from . import CORE_NAMESPACE, register_class
@@ -53,6 +55,19 @@ class NWBContainer(NWBMixin, Container):
     _fieldsname = '__nwbfields__'
 
     __nwbfields__ = tuple()
+
+    def init_validation(self, kwargs):
+        # Before calling super().__init__() and before setting fields, check for termset_config.yaml.
+        # This file will be stored within nwb-schema
+        with open('src/pynwb/nwb-schema/termset_config/termset_config.yaml', 'r') as config:
+            termset_config = yaml.safe_load(config)
+            object_name = self.__class__.__name__ # the name field is not set yet
+            if object_name in termset_config:
+                for field in termset_config[object_name]:
+                    if field in kwargs: # make sure any custom fields are not handled (i.e., make an extension)
+                        termset_path = termset_config[object_name][field]
+                        termset = TermSet(term_schema_path=termset_path)
+                        kwargs[field] = TermSetWrapper(value=kwargs[field], termset=termset)
 
 
 @register_class('NWBDataInterface', CORE_NAMESPACE)
