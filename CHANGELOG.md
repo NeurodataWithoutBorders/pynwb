@@ -5,7 +5,9 @@
 ### Enhancements and minor changes
 - Add `NWBHDF5IO.can_read()`. @bendichter [#1703](https://github.com/NeurodataWithoutBorders/pynwb/pull/1703)
 - Add `pynwb.get_nwbfile_version()`. @bendichter [#1703](https://github.com/NeurodataWithoutBorders/pynwb/pull/1703)
-- Add support for `RemFile` in `NWBHDF5IO`. @bendichter [#1761](https://github.com/NeurodataWithoutBorders/pynwb/pull/1761)
+
+### Documentation and tutorial enhancements
+- Add RemFile to streaming tutorial @bendichter [#1761](https://github.com/NeurodataWithoutBorders/pynwb/pull/1761)
 
 ## PyNWB 2.5.0 (August 18, 2023)
 
