@@ -133,7 +133,6 @@ with NWBHDF5IO(s3_url, mode='r', load_namespaces=True, driver='ros3') as io:
 #
 #   pip install remfile
 #
-# Then remfile can be used similarly to fsspec
 
 import h5py
 from pynwb import NWBHDF5IO
