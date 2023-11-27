@@ -104,14 +104,14 @@ download("https://api.dandiarchive.org/api/assets/0f57f0b0-f021-42bb-8eaa-56cd48
 
 filepath = "sub-P11HMH_ses-20061101_ecephys+image.nwb"
 # Open the file in read mode "r",
-io = NWBHDF5IO(filepath, mode="r", load_namespaces=True)
+io = NWBHDF5IO(filepath, mode="r")
 nwbfile = io.read()
 nwbfile
 
 #######################################
 # :py:class:`~pynwb.NWBHDF5IO` can also be used as a context manager:
 
-with NWBHDF5IO(filepath, mode="r", load_namespaces=True) as io2:
+with NWBHDF5IO(filepath, mode="r") as io2:
     nwbfile2 = io2.read()
 
     # data accessible here
