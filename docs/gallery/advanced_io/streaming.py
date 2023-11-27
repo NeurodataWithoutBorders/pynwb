@@ -126,8 +126,8 @@ with NWBHDF5IO(s3_url, mode='r', load_namespaces=True, driver='ros3') as io:
 # Method 3: remfile
 # -----------------
 # remfile is another library that enables indexing and streaming of files in s3. remfile is simple, fast, and allows for
-# caching of data in the local filesystem. The one caveat of remfile is that it is a very new project that has not been
-# tested in a variety of use-cases. You can install remfile with pip:
+# caching of data in the local filesystem. The caveats of remfile are that it is a very new project that has not been
+# tested in a variety of use-cases and caching options are limited compared to fsspec. You can install remfile with pip:
 #
 # .. code-block:: bash
 #
