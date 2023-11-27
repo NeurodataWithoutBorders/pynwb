@@ -139,10 +139,10 @@ import h5py
 from pynwb import NWBHDF5IO
 import remfile
 
-file = remfile.File(s3_url)
+rem_file = remfile.File(s3_url)
 
-with h5py.File(file, "r") as f:
-    with NWBHDF5IO(file=file, load_namespaces=True) as io:
+with h5py.File(rem_file, "r") as h5py_file:
+    with NWBHDF5IO(file=h5py_file, load_namespaces=True) as io:
         nwbfile = io.read()
         print(nwbfile.acquisition["lick_times"].time_series["lick_left_times"].data[:])
 
