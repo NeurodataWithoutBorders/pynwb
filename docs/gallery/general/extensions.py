@@ -254,7 +254,7 @@ io.close()
 # explicitly specify this. This behavior is enabled by the *load_namespaces*
 # argument to the :py:class:`~pynwb.NWBHDF5IO` constructor.
 
-with NWBHDF5IO("cache_spec_example.nwb", mode="r", load_namespaces=True) as io:
+with NWBHDF5IO("cache_spec_example.nwb", mode="r") as io:
     nwbfile = io.read()
 
 ####################
