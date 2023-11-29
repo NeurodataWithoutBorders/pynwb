@@ -69,7 +69,7 @@ fs = CachingFileSystem(
 # next, open the file
 with fs.open(s3_url, "rb") as f:
     with h5py.File(f) as file:
-        with pynwb.NWBHDF5IO(file=file, load_namespaces=True) as io:
+        with pynwb.NWBHDF5IO(file=file) as io:
             nwbfile = io.read()
             print(nwbfile.acquisition['lick_times'].time_series['lick_left_times'].data[:])
 
@@ -99,7 +99,7 @@ with fs.open(s3_url, "rb") as f:
 
 from pynwb import NWBHDF5IO
 
-with NWBHDF5IO(s3_url, mode='r', load_namespaces=True, driver='ros3') as io:
+with NWBHDF5IO(s3_url, mode='r', driver='ros3') as io:
     nwbfile = io.read()
     print(nwbfile)
     print(nwbfile.acquisition['lick_times'].time_series['lick_left_times'].data[:])
