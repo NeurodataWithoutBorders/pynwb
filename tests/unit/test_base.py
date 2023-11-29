@@ -444,6 +444,24 @@ class TestTimeSeries(TestCase):
                 timestamps=[1, 2, 3, 4, 5]
             )
 
+    def test_file_with_starting_time_and_timestamps_in_construct_mode(self):
+        """Test that UserWarning is raised when starting_time and timestamps are both specified
+         while being in construct mode (i.e,. on data read)."""
+        obj = TimeSeries.__new__(TimeSeries,
+                                 container_source=None,
+                                 parent=None,
+                                 object_id="test",
+                                 in_construct_mode=True)
+        with self.assertWarnsWith(warn_type=UserWarning,
+                                  exc_msg='Specifying starting_time and timestamps is not supported.'):
+            obj.__init__(
+                name="test_ts",
+                data=[11, 12, 13, 14, 15],
+                unit="volts",
+                starting_time=1.0,
+                timestamps=[1, 2, 3, 4, 5]
+            )
+
 
 class TestImage(TestCase):
     def test_init(self):
