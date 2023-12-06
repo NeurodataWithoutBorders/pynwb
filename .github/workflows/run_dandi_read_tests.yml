@@ -1,7 +1,7 @@
 name: Run DANDI read tests
 on:
-  schedule:
-    - cron: '0 6 * * *'  # once per day at 1am ET
+  # schedule:
+  #   - cron: '0 6 * * *'  # once per day at 1am ET
   workflow_dispatch:
 
 jobs:
