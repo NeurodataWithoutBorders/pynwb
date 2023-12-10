@@ -75,8 +75,8 @@ def mock_ElectricalSeries(
     filtering: str = "filtering",
     nwbfile: Optional[NWBFile] = None,
     channel_conversion: Optional[np.ndarray] = None,
-    conversion: Optional[float] = None,
-    offset: Optional[float] = None,
+    conversion: float = 1.0,
+    offset: float =0.,
 ) -> ElectricalSeries:
     electrical_series = ElectricalSeries(
         name=name or name_generator("ElectricalSeries"),
