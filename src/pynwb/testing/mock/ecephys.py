@@ -73,7 +73,10 @@ def mock_ElectricalSeries(
     timestamps=None,
     electrodes: Optional[DynamicTableRegion] = None,
     filtering: str = "filtering",
-    nwbfile: Optional[NWBFile] = None
+    nwbfile: Optional[NWBFile] = None,
+    channel_conversion: Optional[np.ndarray] = None,
+    conversion: Optional[float] = None,
+    offset: Optional[float] = None,
 ) -> ElectricalSeries:
     electrical_series = ElectricalSeries(
         name=name or name_generator("ElectricalSeries"),
@@ -83,6 +86,9 @@ def mock_ElectricalSeries(
         timestamps=timestamps,
         electrodes=electrodes or mock_electrodes(nwbfile=nwbfile),
         filtering=filtering,
+        conversion=conversion,
+        offset=offset,
+        channel_conversion=channel_conversion,
     )
 
     if nwbfile is not None:
