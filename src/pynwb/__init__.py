@@ -4,7 +4,6 @@ for reading and writing data in NWB format
 import os.path
 from pathlib import Path
 from copy import deepcopy
-from warnings import warn
 import h5py
 
 from hdmf.spec import NamespaceCatalog
@@ -244,8 +243,9 @@ class NWBHDF5IO(_HDF5IO):
              'doc': 'the mode to open the HDF5 file with, one of ("w", "r", "r+", "a", "w-", "x")',
              'default': 'r'},
             {'name': 'load_namespaces', 'type': bool,
-             'doc': 'whether or not to load cached namespaces from given path - not applicable in write mode',
-             'default': False},
+             'doc': ('whether or not to load cached namespaces from given path - not applicable in write mode '
+                     'or when `manager` is not None or when `extensions` is not None'),
+             'default': True},
             {'name': 'manager', 'type': BuildManager, 'doc': 'the BuildManager to use for I/O', 'default': None},
             {'name': 'extensions', 'type': (str, TypeMap, list),
              'doc': 'a path to a namespace, a TypeMap, or a list consisting paths to namespaces and TypeMaps',
@@ -261,15 +261,10 @@ class NWBHDF5IO(_HDF5IO):
             popargs('path', 'mode', 'manager', 'extensions', 'load_namespaces',
                     'file', 'comm', 'driver', 'herd_path', kwargs)
         # Define the BuildManager to use
-        if load_namespaces:
-            if manager is not None:
-                warn("loading namespaces from file - ignoring 'manager'")
-            if extensions is not None:
-                warn("loading namespaces from file - ignoring 'extensions' argument")
-            # namespaces are not loaded when creating an NWBHDF5IO object in write mode
-            if 'w' in mode or mode == 'x':
-                raise ValueError("cannot load namespaces from file when writing to it")
+        if mode in 'wx' or manager is not None or extensions is not None:
+            load_namespaces = False
 
+        if load_namespaces:
             tm = get_type_map()
             super().load_namespaces(tm, path, file=file_obj, driver=driver)
             manager = BuildManager(tm)
