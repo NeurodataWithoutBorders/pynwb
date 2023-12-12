@@ -3,6 +3,7 @@ from dateutil.tz import tzlocal, tzutc
 import numpy as np
 from h5py import File
 from pathlib import Path
+import tempfile
 
 from pynwb import NWBFile, TimeSeries, get_manager, NWBHDF5IO, validate
 
@@ -14,6 +15,7 @@ from hdmf.spec import NamespaceCatalog
 from pynwb.spec import NWBGroupSpec, NWBDatasetSpec, NWBNamespace
 from pynwb.ecephys import ElectricalSeries, LFP
 from pynwb.testing import remove_test_file, TestCase
+from pynwb.testing.mock.file import mock_NWBFile
 
 
 class TestHDF5Writer(TestCase):
@@ -516,3 +518,18 @@ class TestNWBHDF5IO(TestCase):
         with NWBHDF5IO(pathlib_path, 'r') as io:
             read_file = io.read()
             self.assertContainerEqual(read_file, self.nwbfile)
+
+
+class TestNWBHDF5IOModes(TestCase):
+    def test_file_creation_and_deletion(self):
+        io_modes_that_create_file = ["w", "w-", "x"]
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            temp_dir = Path(temp_dir)
+            for io_mode in io_modes_that_create_file:
+                file_path = temp_dir / f"test_io_mode={io_mode}.nwb"
+
+                # Test file creation
+                nwbfile = mock_NWBFile()
+                with NWBHDF5IO(str(file_path), io_mode) as io:
+                    io.write(nwbfile)
