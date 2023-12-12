@@ -123,6 +123,19 @@ class TestHDF5Writer(TestCase):
             io.write(self.container, cache_spec=False)
         with File(self.path, 'r') as f:
             self.assertNotIn('specifications', f)
+    
+    def test_file_creation_io_modes(self):
+        io_modes_that_create_file = ["w", "w-", "x"]
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            temp_dir = Path(temp_dir)
+            for io_mode in io_modes_that_create_file:
+                file_path = temp_dir / f"test_io_mode={io_mode}.nwb"
+
+                # Test file creation
+                nwbfile = mock_NWBFile()
+                with NWBHDF5IO(str(file_path), io_mode) as io:
+                    io.write(nwbfile)
 
 
 class TestHDF5WriterWithInjectedFile(TestCase):
@@ -519,17 +532,3 @@ class TestNWBHDF5IO(TestCase):
             read_file = io.read()
             self.assertContainerEqual(read_file, self.nwbfile)
 
-
-class TestNWBHDF5IOModes(TestCase):
-    def test_file_creation_and_deletion(self):
-        io_modes_that_create_file = ["w", "w-", "x"]
-
-        with tempfile.TemporaryDirectory() as temp_dir:
-            temp_dir = Path(temp_dir)
-            for io_mode in io_modes_that_create_file:
-                file_path = temp_dir / f"test_io_mode={io_mode}.nwb"
-
-                # Test file creation
-                nwbfile = mock_NWBFile()
-                with NWBHDF5IO(str(file_path), io_mode) as io:
-                    io.write(nwbfile)
