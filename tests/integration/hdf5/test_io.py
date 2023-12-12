@@ -123,7 +123,7 @@ class TestHDF5Writer(TestCase):
             io.write(self.container, cache_spec=False)
         with File(self.path, 'r') as f:
             self.assertNotIn('specifications', f)
-    
+
     def test_file_creation_io_modes(self):
         io_modes_that_create_file = ["w", "w-", "x"]
 
@@ -531,4 +531,3 @@ class TestNWBHDF5IO(TestCase):
         with NWBHDF5IO(pathlib_path, 'r') as io:
             read_file = io.read()
             self.assertContainerEqual(read_file, self.nwbfile)
-
