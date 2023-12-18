@@ -131,9 +131,10 @@ def test_get_data_in_units():
     )
 
     data_in_units = electrical_series.get_data_in_units()
-    expected_data =  data * conversion * channel_conversion[:, np.newaxis] + offset
+    expected_data = data * conversion * channel_conversion[:, np.newaxis] + offset
 
     np.testing.assert_almost_equal(data_in_units, expected_data)
+
 
 class SpikeEventSeriesConstructor(TestCase):
 

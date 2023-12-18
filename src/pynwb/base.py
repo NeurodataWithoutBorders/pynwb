@@ -297,7 +297,7 @@ class TimeSeries(NWBDataInterface):
 
     def get_data_in_units(self):
         if "channel_conversion" in self.fields:
-            scale_factor =  self.conversion * self.channel_conversion[:, np.newaxis]
+            scale_factor = self.conversion * self.channel_conversion[:, np.newaxis]
         else:
             scale_factor = self.conversion
         return np.asarray(self.data) * scale_factor + self.offset
