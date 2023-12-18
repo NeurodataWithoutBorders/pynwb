@@ -8,7 +8,7 @@
 - Add `pynwb.get_nwbfile_version()`. @bendichter [#1703](https://github.com/NeurodataWithoutBorders/pynwb/pull/1703)
 - Updated timeseries data checks to warn instead of error when reading invalid files. @stephprince [#1793](https://github.com/NeurodataWithoutBorders/pynwb/pull/1793)
 - Expose the offset, conversion and channel conversion parameters in `mock_ElectricalSeries`. @h-mayorquin [#1796](https://github.com/NeurodataWithoutBorders/pynwb/pull/1796)
-- Enchance `get_data_in_units()` to work with objects that have a `channel_conversion` attribute like the `ElectricalSeries`  @h-mayorquin [#1806](https://github.com/NeurodataWithoutBorders/pynwb/pull/1806)
+- Enhance `get_data_in_units()` to work with objects that have a `channel_conversion` attribute like the `ElectricalSeries`  @h-mayorquin [#1806](https://github.com/NeurodataWithoutBorders/pynwb/pull/1806)
 
 ### Bug fixes
 - Fix bug where namespaces were loaded in "w-" mode. @h-mayorquin [#1795](https://github.com/NeurodataWithoutBorders/pynwb/pull/1795)
