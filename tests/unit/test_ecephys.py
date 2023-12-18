@@ -116,7 +116,6 @@ class ElectricalSeriesConstructor(TestCase):
                "but instead the first does. Data is oriented incorrectly and should be transposed."
                    ) in str(w[-1].message)
 
-
     def test_get_data_in_units(self):
 
         data = np.asarray([[1, 1, 1, 1, 1], [1, 1, 1, 1, 1]])
