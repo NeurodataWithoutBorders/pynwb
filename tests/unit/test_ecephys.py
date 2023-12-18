@@ -117,23 +117,23 @@ class ElectricalSeriesConstructor(TestCase):
                    ) in str(w[-1].message)
 
 
-def test_get_data_in_units():
+    def test_get_data_in_units(self):
 
-    data = np.asarray([[1, 1, 1, 1, 1], [1, 1, 1, 1, 1]])
-    conversion = 1.0
-    offset = 3.0
-    channel_conversion = np.asarray([2.0, 2.0])
-    electrical_series = mock_ElectricalSeries(
-        data=data,
-        conversion=conversion,
-        offset=offset,
-        channel_conversion=channel_conversion,
-    )
+        data = np.asarray([[1, 1, 1, 1, 1], [1, 1, 1, 1, 1]])
+        conversion = 1.0
+        offset = 3.0
+        channel_conversion = np.asarray([2.0, 2.0])
+        electrical_series = mock_ElectricalSeries(
+            data=data,
+            conversion=conversion,
+            offset=offset,
+            channel_conversion=channel_conversion,
+        )
 
-    data_in_units = electrical_series.get_data_in_units()
-    expected_data = data * conversion * channel_conversion[:, np.newaxis] + offset
+        data_in_units = electrical_series.get_data_in_units()
+        expected_data = data * conversion * channel_conversion[:, np.newaxis] + offset
 
-    np.testing.assert_almost_equal(data_in_units, expected_data)
+        np.testing.assert_almost_equal(data_in_units, expected_data)
 
 
 class SpikeEventSeriesConstructor(TestCase):
