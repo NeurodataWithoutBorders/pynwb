@@ -187,10 +187,12 @@ class TimeSeries(NWBDataInterface):
             if isinstance(timestamps, TimeSeries):
                 timestamps.__add_link('timestamp_link', self)
         elif self.rate is not None:
-            if self.rate <= 0:
+            if self.rate < 0:
                 self._error_on_new_warn_on_construct(
-                    error_msg='Rate must be a positive value.'
+                    error_msg='Rate must not be a negative value.'
                 )
+            elif self.rate == 0.0 and get_data_shape(data)[0] > 1:
+                warn('Timeseries has a rate of 0.0 Hz, but the length of the data is greater than 1.')
             if self.starting_time is None:  # override default if rate is provided but not starting time
                 self.starting_time = 0.0
             self.starting_time_unit = self.__time_unit
