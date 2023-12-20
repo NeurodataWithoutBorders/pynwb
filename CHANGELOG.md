@@ -11,6 +11,7 @@
 
 ### Bug fixes
 - Fix bug where namespaces were loaded in "w-" mode. @h-mayorquin [#1795](https://github.com/NeurodataWithoutBorders/pynwb/pull/1795)
+- Fix bug where pynwb version was reported as "unknown" to readthedocs @stephprince [#1810](https://github.com/NeurodataWithoutBorders/pynwb/pull/1810)
 
 ## PyNWB 2.5.0 (August 18, 2023)
 
