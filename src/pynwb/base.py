@@ -298,7 +298,11 @@ class TimeSeries(NWBDataInterface):
             return np.arange(len(self.data)) / self.rate + self.starting_time
 
     def get_data_in_units(self):
-        return np.asarray(self.data) * self.conversion + self.offset
+        if "channel_conversion" in self.fields:
+            scale_factor = self.conversion * self.channel_conversion[:, np.newaxis]
+        else:
+            scale_factor = self.conversion
+        return np.asarray(self.data) * scale_factor + self.offset
 
 
 @register_class('Image', CORE_NAMESPACE)
