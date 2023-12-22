@@ -131,7 +131,7 @@ class TestValidateCLI(TestCase):
 
     def test_validate_file_cached_ignore(self):
         """Test that validating a file with cached spec against the core namespace succeeds."""
-        result = run_coverage(["tests/back_compat/1.1.2_nwbfile.nwb", "--no-cached-namespace"]  )
+        result = run_coverage(["tests/back_compat/1.1.2_nwbfile.nwb", "--no-cached-namespace"])
 
         self.assertEqual(result.stderr.decode('utf-8'), '')
 
