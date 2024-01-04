@@ -13,7 +13,6 @@ API Documentation
    Intracellular Electrophysiology <pynwb.icephys>
    Optophysiology <pynwb.ophys>
    Optogenetics <pynwb.ogen>
-   Retinotopy <pynwb.retinotopy>
    General Imaging <pynwb.image>
    Behavior <pynwb.behavior>
    NWB Base Classes <pynwb.base>
