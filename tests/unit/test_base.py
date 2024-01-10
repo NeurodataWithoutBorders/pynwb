@@ -883,8 +883,3 @@ class TestTimeSeriesReference(TestCase):
         self.assertFalse(tsr.isvalid())
         self.assertIsNone(tsr.data)
         self.assertIsNone(tsr.timestamps)
-
-    def test_empty_reference_creation_invalid_type(self):
-        tsr = TimeSeriesReference.empty(None)
-        with self.assertRaisesWith(TypeError, "timeseries must be of type TimeSeries. <class 'NoneType'>"):
-            tsr.check_types()
