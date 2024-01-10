@@ -11,6 +11,7 @@
 - Expose `starting_time` in `mock_ElectricalSeries`. @h-mayorquin [#1805](https://github.com/NeurodataWithoutBorders/pynwb/pull/1805)
 - Enhance `get_data_in_units()` to work with objects that have a `channel_conversion` attribute like the `ElectricalSeries`. @h-mayorquin [#1806](https://github.com/NeurodataWithoutBorders/pynwb/pull/1806)
 - Refactor validation CLI tests to use `{sys.executable} -m coverage` to use the same Python version and run correctly on Debian systems. @yarikoptic [#1811](https://github.com/NeurodataWithoutBorders/pynwb/pull/1811)
+- Support `stimulus_template` as optional predefined column in `IntracellularStimuliTable` @stephprince [#1815](https://github.com/NeurodataWithoutBorders/pynwb/pull/1815)
 
 ### Bug fixes
 - Fix bug where namespaces were loaded in "w-" mode. @h-mayorquin [#1795](https://github.com/NeurodataWithoutBorders/pynwb/pull/1795)
