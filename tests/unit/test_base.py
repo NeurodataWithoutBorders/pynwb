@@ -406,10 +406,12 @@ class TestTimeSeries(TestCase):
         assert_array_equal(ts.get_data_in_units(), [1., 2., 3.])
 
     def test_non_positive_rate(self):
-        with self.assertRaisesWith(ValueError, 'Rate must be a positive value.'):
+        with self.assertRaisesWith(ValueError, 'Rate must not be a negative value.'):
             TimeSeries(name='test_ts', data=list(), unit='volts', rate=-1.0)
-        with self.assertRaisesWith(ValueError, 'Rate must be a positive value.'):
-            TimeSeries(name='test_ts1', data=list(), unit='volts', rate=0.0)
+
+        with self.assertWarnsWith(UserWarning,
+                                  'Timeseries has a rate of 0.0 Hz, but the length of the data is greater than 1.'):
+            TimeSeries(name='test_ts1', data=[1, 2, 3], unit='volts', rate=0.0)
 
     def test_file_with_non_positive_rate_in_construct_mode(self):
         """Test that UserWarning is raised when rate is 0 or negative
@@ -419,7 +421,7 @@ class TestTimeSeries(TestCase):
                                  parent=None,
                                  object_id="test",
                                  in_construct_mode=True)
-        with self.assertWarnsWith(warn_type=UserWarning, exc_msg='Rate must be a positive value.'):
+        with self.assertWarnsWith(warn_type=UserWarning, exc_msg='Rate must not be a negative value.'):
             obj.__init__(
                 name="test_ts",
                 data=list(),
