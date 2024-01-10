@@ -97,7 +97,7 @@ from pynwb import NWBHDF5IO, NWBFile
 
 # Import additional core datatypes used in the example
 from pynwb.core import DynamicTable, VectorData
-from pynwb.base import TimeSeriesReferenceVectorData
+from pynwb.base import TimeSeriesReference, TimeSeriesReferenceVectorData
 
 # Import icephys TimeSeries types used
 from pynwb.icephys import VoltageClampSeries, VoltageClampStimulusSeries
@@ -465,9 +465,9 @@ nwbfile.intracellular_recordings.add_column(
 
 nwbfile.intracellular_recordings.add_column(
     name="stimulus_template",
-    data=[(0, 5, stimulus),  # (start_index, index_count, stimulus_template) can be specified as a tuple
-          (1, 3, stimulus),
-          (-1, -1, stimulus)],
+    data=[TimeSeriesReference(0, 5, stimulus),  # (start_index, index_count, stimulus_template)
+          TimeSeriesReference(1, 3, stimulus),
+          TimeSeriesReference.empty(stimulus)],  # if there was no data for that recording, use an empty reference
     description="Column storing the reference to the stimulus template for the recording (rows).",
     category="stimuli",
     col_cls=TimeSeriesReferenceVectorData
