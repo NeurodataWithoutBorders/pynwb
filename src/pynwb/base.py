@@ -505,13 +505,12 @@ class TimeSeriesReference(NamedTuple):
 
         When missing data needs to be represented, NWB defines ``None`` for the complex data type ``(idx_start,
         count, TimeSeries)`` as (-1, -1, TimeSeries) for storage. The exact timeseries object will technically not
-        matter since the empty reference is a way of indicating a NaN value. in a 
-        :py:class:`~pynwb.base.TimeSeriesReferenceVectorData` column. 
-        
-        An example, where this functionality is used is :py:class:`~pynwb.icephys.IntracellularRecordingsTable` 
-        where only one of stimulus or response data was  recorded. In such cases, the timeseries object for the
-        empty stimulus :py:class:`~pynwb.base.TimeSeriesReference` could be set to the response series, or 
-        vice versa.
+        matter since the empty reference is a way of indicating a NaN value in a
+        :py:class:`~pynwb.base.TimeSeriesReferenceVectorData` column.
+
+        An example where this functionality is used is :py:class:`~pynwb.icephys.IntracellularRecordingsTable`
+        where only one of stimulus or response data was recorded. In such cases, the timeseries object for the
+        empty stimulus :py:class:`~pynwb.base.TimeSeriesReference` could be set to the response series, or vice versa.
 
         :returns: Returns :py:class:`~pynwb.base.TimeSeriesReference`
         """
