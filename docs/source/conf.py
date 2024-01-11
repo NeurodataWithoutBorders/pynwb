@@ -148,6 +148,7 @@ intersphinx_mapping = {
     'fsspec': ("https://filesystem-spec.readthedocs.io/en/latest/", None),
     'nwbwidgets': ("https://nwb-widgets.readthedocs.io/en/latest/", None),
     'nwb-overview': ("https://nwb-overview.readthedocs.io/en/latest/", None),
+    'zarr': ("https://zarr.readthedocs.io/en/stable/", None),
 }
 
 extlinks = {
