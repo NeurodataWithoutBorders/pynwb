@@ -501,7 +501,7 @@ class TimeSeriesReference(NamedTuple):
     @docval({'name': 'timeseries', 'type': TimeSeries, 'doc': 'the timeseries object to reference.'})
     def empty(cls, timeseries):
         """
-        Creates an empty TimeSeriesReference class to represent missing data.
+        Creates an empty TimeSeriesReference object to represent missing data.
 
         When missing data needs to be represented, NWB defines ``None`` for the complex data type ``(idx_start,
         count, TimeSeries)`` as (-1, -1, TimeSeries) for storage. The exact timeseries object will technically not
