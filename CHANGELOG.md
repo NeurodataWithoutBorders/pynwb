@@ -3,8 +3,11 @@
 ## PyNWB 2.6.0 (Upcoming)
 
 ### Enhancements and minor changes
-- Added support for NWB Schema 2.7.0.
-  - Deprecated `ImagingRetinotopy` neurodata type. @rly
+- Added support for NWB schema 2.7.0.
+  - ...
+  - ...
+  - Deprecated `ImagingRetinotopy` neurodata type. @rly [#1813](https://github.com/NeurodataWithoutBorders/pynwb/pull/1813)
+  - ...
 - For `NWBHDF5IO()`, change the default of arg `load_namespaces` from `False` to `True`. @bendichter [#1748](https://github.com/NeurodataWithoutBorders/pynwb/pull/1748)
 - Add `NWBHDF5IO.can_read()`. @bendichter [#1703](https://github.com/NeurodataWithoutBorders/pynwb/pull/1703)
 - Add `pynwb.get_nwbfile_version()`. @bendichter [#1703](https://github.com/NeurodataWithoutBorders/pynwb/pull/1703)
