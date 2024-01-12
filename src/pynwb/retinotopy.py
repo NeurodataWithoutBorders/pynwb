@@ -26,7 +26,7 @@ raise ValueError(
 #             {'name': 'bits_per_pixel', 'type': int,
 #              'doc': 'Number of bits used to represent each value. This is necessary to determine maximum '
 #                     '(white) pixel value.'},
-#             {'name': 'dimension', 'type': Iterable, 'shape': (2, ), 
+#             {'name': 'dimension', 'type': Iterable, 'shape': (2, ),
 #              'doc': 'Number of rows and columns in the image.'},
 #             {'name': 'format', 'type': Iterable, 'doc': 'Format of image. Right now only "raw" supported.'},
 #             {'name': 'field_of_view', 'type': Iterable, 'shape': (2, ), 'doc': 'Size of viewing area, in meters.'})
