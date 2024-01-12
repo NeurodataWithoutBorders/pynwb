@@ -419,6 +419,15 @@ class IntracellularRecordingsTableTests(ICEphysMetaTestBase):
                 response=self.response,
                 id=np.int64(10)
             )
+        with self.assertRaises(IndexError):
+            ir = IntracellularRecordingsTable()
+            ir.add_recording(
+                electrode=self.electrode,
+                stimulus_template=self.stimulus,
+                stimulus_template_start_index=10,
+                response=self.response,
+                id=np.int64(10)
+            )
         # Stimulus/Response index count too large
         with self.assertRaises(IndexError):
             ir = IntracellularRecordingsTable()
@@ -435,6 +444,15 @@ class IntracellularRecordingsTableTests(ICEphysMetaTestBase):
                 electrode=self.electrode,
                 stimulus=self.stimulus,
                 response_index_count=10,
+                response=self.response,
+                id=np.int64(10)
+            )
+        with self.assertRaises(IndexError):
+            ir = IntracellularRecordingsTable()
+            ir.add_recording(
+                electrode=self.electrode,
+                stimulus_template=self.stimulus,
+                stimulus_template_index_count=10,
                 response=self.response,
                 id=np.int64(10)
             )
@@ -459,6 +477,16 @@ class IntracellularRecordingsTableTests(ICEphysMetaTestBase):
                 response=self.response,
                 id=np.int64(10)
             )
+        with self.assertRaises(IndexError):
+            ir = IntracellularRecordingsTable()
+            ir.add_recording(
+                electrode=self.electrode,
+                stimulus_template=self.stimulus,
+                stimulus_template_start_index=3,
+                stimulus_template_index_count=4,
+                response=self.response,
+                id=np.int64(10)
+            )
 
     def test_add_row_no_stimulus_and_response(self):
         with self.assertRaises(ValueError):
@@ -468,6 +496,40 @@ class IntracellularRecordingsTableTests(ICEphysMetaTestBase):
                 stimulus=None,
                 response=None
             )
+
+    def test_add_row_with_stimulus_template(self):
+        ir = IntracellularRecordingsTable()
+        ir.add_recording(
+            electrode=self.electrode,
+            stimulus=self.stimulus,
+            stimulus_template=self.stimulus,
+            response=self.response,
+            id=np.int64(10)
+        )
+
+    def test_add_stimulus_template_column(self):
+        ir = IntracellularRecordingsTable()
+        ir.add_column(name='stimulus_template',
+                      description='test column',
+                      category='stimuli',
+                      col_cls=TimeSeriesReferenceVectorData)
+
+    def test_add_row_with_no_stimulus_template_when_stimulus_template_column_exists(self):
+        ir = IntracellularRecordingsTable()
+        ir.add_recording(electrode=self.electrode,
+                         stimulus=self.stimulus,
+                         response=self.response,
+                         stimulus_template=self.stimulus,
+                         id=np.int64(10))
+
+        # add row with only stimulus when stimulus template column already exists
+        ir.add_recording(electrode=self.electrode,
+                         stimulus=self.stimulus,
+                         id=np.int64(20))
+        # add row with only response when stimulus template column already exists
+        ir.add_recording(electrode=self.electrode,
+                         response=self.stimulus,
+                         id=np.int64(30))
 
     def test_add_column(self):
         ir = IntracellularRecordingsTable()

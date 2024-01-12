@@ -97,6 +97,7 @@ from pynwb import NWBHDF5IO, NWBFile
 
 # Import additional core datatypes used in the example
 from pynwb.core import DynamicTable, VectorData
+from pynwb.base import TimeSeriesReference, TimeSeriesReferenceVectorData
 
 # Import icephys TimeSeries types used
 from pynwb.icephys import VoltageClampSeries, VoltageClampStimulusSeries
@@ -456,6 +457,59 @@ nwbfile.intracellular_recordings.add_column(
     description="Just an example column on the electrodes category table",
     category="electrodes",
 )
+
+#####################################################################
+# Adding stimulus templates
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+#
+# One predefined subcategory column is the ``stimulus_template`` column in the stimuli table. This column is
+# used to store template waveforms of stimuli in addition to the actual recorded stimulus that is stored in the
+# ``stimulus`` column. The ``stimulus_template`` column contains an idealized version of the template waveform used as
+# the stimulus. This can be useful as a noiseless version of the stimulus for data analysis or to validate that the
+# recorded stimulus matches the expected waveform of the template. Similar to the ``stimulus`` and ``response``
+# columns, we can specify a relevant time range.
+
+stimulus_template = VoltageClampStimulusSeries(
+    name="ccst",
+    data=[0, 1, 2, 3, 4],
+    starting_time=0.0,
+    rate=10e3,
+    electrode=electrode,
+    gain=0.02,
+)
+nwbfile.add_stimulus_template(stimulus_template)
+
+nwbfile.intracellular_recordings.add_column(
+    name="stimulus_template",
+    data=[TimeSeriesReference(0, 5, stimulus_template),  # (start_index, index_count, stimulus_template)
+          TimeSeriesReference(1, 3, stimulus_template),
+          TimeSeriesReference.empty(stimulus_template)],  # if there was no data for that recording, use empty reference
+    description="Column storing the reference to the stimulus template for the recording (rows).",
+    category="stimuli",
+    col_cls=TimeSeriesReferenceVectorData
+)
+
+# we can also add stimulus template data as follows
+rowindex = nwbfile.add_intracellular_recording(
+    electrode=electrode,
+    stimulus=stimulus,
+    stimulus_template=stimulus_template,  # the full time range of the stimulus template will be used unless specified
+    recording_tag='A4',
+    recording_lab_data={'location': 'Isengard'},
+    electrode_metadata={'voltage_threshold': 0.14},
+    id=13,
+)
+
+#####################################################################
+# .. note:: If a stimulus template column exists but there is no stimulus template data for that recording, then
+#           :py:meth:`~pynwb.file.NWBFile.add_intracellular_recording` will internally set the stimulus template to the
+#           provided stimulus or response TimeSeries and the start_index and index_count for the missing parameter are
+#           set to -1. The missing values will be represented via masked numpy arrays.
+
+#####################################################################
+# .. note:: Since stimulus templates are often reused across many recordings, the timestamps in the templates are not
+#           usually aligned with the recording nor with the reference time of the file. The timestamps often start
+#           at 0 and are relative to the time of the application of the stimulus.
 
 #####################################################################
 # Add a simultaneous recording
