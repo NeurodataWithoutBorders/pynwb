@@ -1,3 +1,11 @@
+from pynwb.testing import TestCase
+
+
+class TestRetinotopy(TestCase):
+    def test_retinotopy_deprecated(self):
+        with self.assertRaises(ValueError):
+            import pynwb.retinotopy
+
 # import numpy as np
 
 # from pynwb.retinotopy import ImagingRetinotopy, AxisMap, RetinotopyImage, FocalDepthImage, RetinotopyMap
