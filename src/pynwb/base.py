@@ -497,6 +497,26 @@ class TimeSeriesReference(NamedTuple):
         # load the data from the timeseries
         return self.timeseries.data[self.idx_start: (self.idx_start + self.count)]
 
+    @classmethod
+    @docval({'name': 'timeseries', 'type': TimeSeries, 'doc': 'the timeseries object to reference.'})
+    def empty(cls, timeseries):
+        """
+        Creates an empty TimeSeriesReference object to represent missing data.
+
+        When missing data needs to be represented, NWB defines ``None`` for the complex data type ``(idx_start,
+        count, TimeSeries)`` as (-1, -1, TimeSeries) for storage. The exact timeseries object will technically not
+        matter since the empty reference is a way of indicating a NaN value in a
+        :py:class:`~pynwb.base.TimeSeriesReferenceVectorData` column.
+
+        An example where this functionality is used is :py:class:`~pynwb.icephys.IntracellularRecordingsTable`
+        where only one of stimulus or response data was recorded. In such cases, the timeseries object for the
+        empty stimulus :py:class:`~pynwb.base.TimeSeriesReference` could be set to the response series, or vice versa.
+
+        :returns: Returns :py:class:`~pynwb.base.TimeSeriesReference`
+        """
+
+        return cls(-1, -1, timeseries)
+
 
 @register_class('TimeSeriesReferenceVectorData', CORE_NAMESPACE)
 class TimeSeriesReferenceVectorData(VectorData):
