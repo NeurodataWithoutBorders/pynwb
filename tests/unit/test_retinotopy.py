@@ -89,7 +89,7 @@
 #             RetinotopyImage('vasculature_image', data, bits_per_pixel, dimension, format, field_of_view)
 
 #     def test_init_fov_wrong_shape(self):
-#         """Test that creating a RetinotopyImage with a field of view argument that is not 2 elements raises an error."""
+#         """Test that creating a RetinotopyImage with a field of view that is not 2 elements raises an error."""
 #         data = [[1, 1], [1, 1]]
 #         bits_per_pixel = 8
 #         dimension = [3, 4]
