@@ -3,7 +3,7 @@ from pynwb.testing import TestCase
 
 class TestRetinotopy(TestCase):
     def test_retinotopy_deprecated(self):
-        with self.assertRaises(ValueError):
+        with self.assertRaises(RuntimeError):
             import pynwb.retinotopy  # noqa: F401
 
 # import numpy as np
