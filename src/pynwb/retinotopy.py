@@ -1,4 +1,4 @@
-raise ValueError(
+raise RuntimeError(
     "The pynwb.retinotopy module is deprecated. If you are interested in using these neurodata types, "
     "please create an issue on https://github.com/NeurodataWithoutBorders/nwb-schema/issues."
 )
