@@ -132,6 +132,7 @@ def mock_OnePhotonSeries(
         conversion=conversion,
         timestamps=timestamps,
         starting_time=starting_time,
+        offset=offset,
         rate=rate,
         comments=comments,
         description=description,
@@ -162,6 +163,7 @@ def mock_TwoPhotonSeries(
     dimension=None,
     resolution=-1.0,
     conversion=1.0,
+    offset=0.0,
     timestamps=None,
     starting_time=None,
     comments="no comments",
@@ -194,6 +196,7 @@ def mock_TwoPhotonSeries(
         control=control,
         control_description=control_description,
         device=device,
+        offset=offset,
     )
 
     if nwbfile is not None:

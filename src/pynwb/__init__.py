@@ -261,7 +261,8 @@ class NWBHDF5IO(_HDF5IO):
             popargs('path', 'mode', 'manager', 'extensions', 'load_namespaces',
                     'file', 'comm', 'driver', 'herd_path', kwargs)
         # Define the BuildManager to use
-        if mode in 'wx' or manager is not None or extensions is not None:
+        io_modes_that_create_file = ['w', 'w-', 'x']
+        if mode in io_modes_that_create_file or manager is not None or extensions is not None:
             load_namespaces = False
 
         if load_namespaces:
