@@ -125,7 +125,7 @@ with NWBHDF5IO(s3_url, mode='r', driver='ros3') as io:
 #        conda install -c conda-forge "h5py>=3.2"
 #
 # Besides the extra burden of installing h5py from a non-PyPI source, one downside of this ROS3 method is that
-# this method does not support automatic retries in case the connection fails. 
+# this method does not support automatic retries in case the connection fails.
 
 
 ##################################################
