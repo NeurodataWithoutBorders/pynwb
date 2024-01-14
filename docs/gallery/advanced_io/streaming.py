@@ -131,9 +131,11 @@ with NWBHDF5IO(s3_url, mode='r', driver='ros3') as io:
 ##################################################
 # Method 3: remfile
 # -----------------
-# ``remfile`` is another library that enables indexing and streaming of files in s3. remfile is simple, fast, and
-# allows for caching of data in the local filesystem. The caveats of ``remfile`` are that it is a very new project
-# that has not been tested in a variety of use-cases and caching options are limited compared to ``fsspec``.
+# ``remfile`` is another library that enables indexing and streaming of files in s3. remfile is simple and fast,
+# especially for the initial load of the nwb file and for accessing small pieces of data. The caveats of ``remfile``
+# are that it is a very new project that has not been tested in a variety of use-cases and caching options are
+# limited compared to ``fsspec``. `remfile` is a simple, lightweight dependency with a very small codebase.
+#
 # You can install ``remfile`` with pip:
 #
 # .. code-block:: bash
@@ -159,11 +161,14 @@ with h5py.File(rem_file, "r") as h5py_file:
 # From a user perspective, once opened, the :py:class:`~pynwb.file.NWBFile` works the same with
 # fsspec, ros3, or remfile.  However, in general, we currently recommend using fsspec for streaming
 # NWB files because it is more performant and reliable than ros3 and more widely tested than remfile.
-# In particular, fsspec:
+# However, if you are experiencing long wait times for the initial file load on your network, you
+# may want to try remfile.
+#
+# Advantages of fsspec include:
 #
 # 1. supports caching, which will dramatically speed up repeated requests for the
 #    same region of data,
 # 2. automatically retries when s3 fails to return, which helps avoid errors when accessing data due to
-#     intermittent errors in connections with S3,
+#     intermittent errors in connections with S3 (remfile does this as well),
 # 3. works also with other storage backends (e.g., GoogleDrive or Dropbox, not just S3) and file formats, and
 # 4. in our experience appears to provide faster out-of-the-box performance than the ros3 driver.
