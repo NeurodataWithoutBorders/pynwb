@@ -35,7 +35,7 @@ writing large arrays without loading all data into memory and streaming data wri
 #   **1)** data is not available in-memory but arrives in subblocks as the stream progresses
 #   **2)** caching the data of a stream in-memory is often prohibitively expensive and volatile
 #   **3)** the total size of the data is often unknown ahead of time.
-#   Iterative data write allows us to address issues 1) and 2) by enabling us to save data to a 
+#   Iterative data write allows us to address issues 1) and 2) by enabling us to save data to a
 #   file incrementally as it arrives from the data stream. Issue 3) is addressed in the HDF5
 #   storage backend via support for chunking, enabling the creation of resizable arrays.
 #

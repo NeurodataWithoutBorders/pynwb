@@ -379,7 +379,7 @@ with NWBHDF5IO("test_multicontainerinterface.nwb", "r") as io:
 # -----------------------------------------------------
 #
 # Here we show how to create extensions by creating a data class for a
-# cortical surface mesh. This data type is particularly important for ECoG data, since we need to know where 
+# cortical surface mesh. This data type is particularly important for ECoG data, since we need to know where
 # each electrode is with respect to the gyri and sulci. Surface mesh objects contain two types of data:
 #
 # 1. `vertices`, which is an (n, 3) matrix of floats that represents points in 3D space
