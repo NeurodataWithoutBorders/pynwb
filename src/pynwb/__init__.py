@@ -148,7 +148,7 @@ def register_class(**kwargs):
 
 
 @docval({'name': 'h5py_file', 'type': h5py.File, 'doc': 'An NWB file'}, rtype=tuple,
-        is_method=False,=)
+        is_method=False,)
 def get_nwbfile_version(**kwargs):
     """
     Get the NWB version of the file if it is an NWB file.
