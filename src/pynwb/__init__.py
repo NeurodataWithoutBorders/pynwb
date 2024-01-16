@@ -147,15 +147,19 @@ def register_class(**kwargs):
         _dec(container_cls)
 
 
-def get_nwbfile_version(h5py_file: h5py.File):
+@docval({'name': 'h5py_file', 'type': h5py.File, 'doc': 'An NWB file'}, rtype=tuple,
+        is_method=False,=)
+def get_nwbfile_version(**kwargs):
     """
     Get the NWB version of the file if it is an NWB file.
-    :returns: Tuple consisting of: 1) the original version string as stored in the file and
-              2) a tuple with the parsed components of the version string, consisting of integers
-              and strings, e.g., (2, 5, 1, beta). (None, None) will be returned if the file is not a valid NWB file
-              or the nwb_version is missing, e.g., in the case when no data has been written to the file yet.
+
+    :Returns: Tuple consisting of: 1) the
+        original version string as stored in the file and 2) a tuple with the parsed components of the version string,
+        consisting of integers and strings, e.g., (2, 5, 1, beta). (None, None) will be returned if the file is not a
+        valid NWB file or the nwb_version is missing, e.g., in the case when no data has been written to the file yet.
     """
     # Get the version string for the NWB file
+    h5py_file = getargs('h5py_file', kwargs)
     try:
         nwb_version_string = h5py_file.attrs['nwb_version']
     #  KeyError occurs  when the file is empty (e.g., when creating a new file nothing has been written)
@@ -251,7 +255,7 @@ class NWBHDF5IO(_HDF5IO):
              'doc': 'a path to a namespace, a TypeMap, or a list consisting paths to namespaces and TypeMaps',
              'default': None},
             {'name': 'file', 'type': [h5py.File, 'S3File'], 'doc': 'a pre-existing h5py.File object', 'default': None},
-            {'name': 'comm', 'type': "Intracomm", 'doc': 'the MPI communicator to use for parallel I/O',
+            {'name': 'comm', 'type': '~mpi4py.MPI.Intracomm', 'doc': 'the MPI communicator to use for parallel I/O',
              'default': None},
             {'name': 'driver', 'type': str, 'doc': 'driver for h5py to use when opening HDF5 file', 'default': None},
             {'name': 'herd_path', 'type': str, 'doc': 'The path to the HERD',
@@ -327,7 +331,8 @@ class NWBHDF5IO(_HDF5IO):
             {'name': 'nwbfile', 'type': 'NWBFile',
              'doc': 'the NWBFile object to export. If None, then the entire contents of src_io will be exported',
              'default': None},
-            {'name': 'write_args', 'type': dict, 'doc': 'arguments to pass to :py:meth:`write_builder`',
+            {'name': 'write_args', 'type': dict,
+             'doc': 'arguments to pass to :py:meth:`~hdmf.backends.io.HDMFIO.write_builder`',
              'default': None})
     def export(self, **kwargs):
         """

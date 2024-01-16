@@ -17,7 +17,7 @@ def get_nwb_version(builder: Builder, include_prerelease=False) -> Tuple[int, ..
     if include_prerelease=True, (2, 0, 0, "b") is returned; else, (2, 0, 0) is returned.
 
     :param builder: Any builder within an NWB file.
-    :type builder: Builder
+    :type builder: :py:class:`~hdmf.build.builders.Builder`
     :param include_prerelease: Whether to include prerelease information in the returned tuple.
     :type include_prerelease: bool
     :return: The version of the NWB file, as a tuple.

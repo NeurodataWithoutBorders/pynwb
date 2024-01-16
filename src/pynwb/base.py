@@ -514,7 +514,7 @@ class TimeSeriesReferenceVectorData(VectorData):
     then this indicates an invalid link (in practice both ``idx_start`` and ``count`` must always
     either both be positive or both be negative). When selecting data via the
     :py:meth:`~pynwb.base.TimeSeriesReferenceVectorData.get` or
-    :py:meth:`~pynwb.base.TimeSeriesReferenceVectorData.__getitem__`
+    :py:meth:`~object.__getitem__`
     functions, ``(-1, -1, TimeSeries)`` values are replaced by the corresponding
     :py:class:`~pynwb.base.TimeSeriesReferenceVectorData.TIME_SERIES_REFERENCE_NONE_TYPE` tuple
     to avoid exposing NWB storage internals to the user and simplifying the use of and checking
@@ -527,11 +527,11 @@ class TimeSeriesReferenceVectorData(VectorData):
 
     TIME_SERIES_REFERENCE_TUPLE = TimeSeriesReference
     """Return type when calling :py:meth:`~pynwb.base.TimeSeriesReferenceVectorData.get` or
-    :py:meth:`~pynwb.base.TimeSeriesReferenceVectorData.__getitem__`."""
+    :py:meth:`~object.__getitem__`"""
 
     TIME_SERIES_REFERENCE_NONE_TYPE = TIME_SERIES_REFERENCE_TUPLE(None, None, None)
     """Tuple used to represent None values when calling :py:meth:`~pynwb.base.TimeSeriesReferenceVectorData.get` or
-    :py:meth:`~pynwb.base.TimeSeriesReferenceVectorData.__getitem__`. See also
+    :py:meth:`~object.__getitem__`. See also
     :py:class:`~pynwb.base.TimeSeriesReferenceVectorData.TIME_SERIES_REFERENCE_TUPLE`"""
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this VectorData', 'default': 'timeseries'},
