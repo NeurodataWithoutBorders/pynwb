@@ -123,9 +123,9 @@ class ImagingRetinotopy(NWBDataInterface):
                     'Description should be something like ["altitude", "azimuth"] or ["radius", "theta"].'},
             {'name': 'focal_depth_image', 'type': FocalDepthImage,
              'doc': 'Gray-scale image taken with same settings/parameters (e.g., focal depth, wavelength) '
-                    'as data collection. Array format: [rows][columns].'},
+                    'as data collection. Array format - [rows][columns].'},
             {'name': 'vasculature_image', 'type': RetinotopyImage,
-             'doc': 'Gray-scale anatomical image of cortical surface. Array structure: [rows][columns].'},
+             'doc': 'Gray-scale anatomical image of cortical surface. Array structure - [rows][columns].'},
             {'name': 'name', 'type': str, 'doc': 'the name of this container', 'default': 'ImagingRetinotopy'})
     def __init__(self, **kwargs):
         axis_1_phase_map, axis_1_power_map, axis_2_phase_map, axis_2_power_map, axis_descriptions, \
