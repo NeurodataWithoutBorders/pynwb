@@ -17,7 +17,8 @@
 - Fix bug where pynwb version was reported as "unknown" to readthedocs @stephprince [#1810](https://github.com/NeurodataWithoutBorders/pynwb/pull/1810)
 
 ### Documentation and tutorial enhancements
-- Add RemFile to streaming tutorial @bendichter [#1761](https://github.com/NeurodataWithoutBorders/pynwb/pull/1761)
+- Add RemFile to streaming tutorial. @bendichter [#1761](https://github.com/NeurodataWithoutBorders/pynwb/pull/1761)
+- Fix typos and improve clarify throughout tutorials. @zm711 [#1825](https://github.com/NeurodataWithoutBorders/pynwb/pull/1825)
 
 ## PyNWB 2.5.0 (August 18, 2023)
 
