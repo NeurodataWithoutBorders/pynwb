@@ -17,7 +17,7 @@ writing large arrays without loading all data into memory and streaming data wri
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 #
 # In the typical write process, datasets are created and written as a whole. In contrast,
-# iterative data write refers to the writing of the content of a dataset in an incremental,
+# iterative data write refers to the writing of the contents of a dataset in an incremental,
 # iterative fashion.
 
 ####################
@@ -32,10 +32,10 @@ writing large arrays without loading all data into memory and streaming data wri
 #   to avoid this problem by writing the data one-subblock-at-a-time, so that we only need to hold
 #   a small subset of the array in memory at any given time.
 # * **Data streaming** In the context of streaming data we are faced with several issues:
-#   **1)** data is not available in memory but arrives in subblocks as the stream progresses
+#   **1)** data is not available in-memory but arrives in subblocks as the stream progresses
 #   **2)** caching the data of a stream in-memory is often prohibitively expensive and volatile
 #   **3)** the total size of the data is often unknown ahead of time.
-#   Iterative data write allows us to address issues 1) and 2) by enabling us to save data to
+#   Iterative data write allows us to address issues 1) and 2) by enabling us to save data to a 
 #   file incrementally as it arrives from the data stream. Issue 3) is addressed in the HDF5
 #   storage backend via support for chunking, enabling the creation of resizable arrays.
 #
@@ -44,7 +44,7 @@ writing large arrays without loading all data into memory and streaming data wri
 #     data source.
 #
 # * **Sparse data arrays** In order to reduce storage size of sparse arrays a challenge is that while
-#   the data array (e.g., a matrix) may be large, only few values are set. To avoid storage overhead
+#   the data array (e.g., a matrix) may be large, only a few values are set. To avoid storage overhead
 #   for storing the full array we can employ (in HDF5) a combination of chunking, compression, and
 #   and iterative data write to significantly reduce storage cost for sparse data.
 #
@@ -161,7 +161,7 @@ def write_test_file(filename, data, close_io=True):
 #
 # Here we use a simple data generator but PyNWB does not make any assumptions about what happens
 # inside the generator. Instead of creating data programmatically, you may hence, e.g., receive
-# data from an acquisition system (or other source). We can, hence, use the same approach to write streaming data.
+# data from an acquisition system (or other source). We can use the same approach to write streaming data.
 
 ####################
 # Step 1: Define the data generator
@@ -208,7 +208,7 @@ write_test_file(filename="basic_iterwrite_example.nwb", data=data)
 ####################
 # Discussion
 # ^^^^^^^^^^
-# Note, we here actually do not know how long our timeseries will be.
+# Note, here we don't actually know how long our timeseries will be.
 
 print(
     "maxshape=%s, recommended_data_shape=%s, dtype=%s"
@@ -218,7 +218,7 @@ print(
 ####################
 # As we can see :py:class:`~hdmf.data_utils.DataChunkIterator` automatically recommends
 # in its ``maxshape`` that the first dimensions of our array should be unlimited (``None``) and the second
-# dimension be ``10`` (i.e., the length of our chunk. Since :py:class:`~hdmf.data_utils.DataChunkIterator`
+# dimension should be ``10`` (i.e., the length of our chunk. Since :py:class:`~hdmf.data_utils.DataChunkIterator`
 # has no way of knowing the minimum size of the array it automatically recommends the size of the first
 # chunk as the minimum size (i.e, ``(1, 10)``) and also infers the data type automatically from the first chunk.
 # To further customize this behavior we may also define the ``maxshape``, ``dtype``, and ``buffer_size`` when
@@ -227,8 +227,8 @@ print(
 # .. tip::
 #
 #    We here used :py:class:`~hdmf.data_utils.DataChunkIterator` to conveniently wrap our data stream.
-#    :py:class:`~hdmf.data_utils.DataChunkIterator` assumes that our generators yields in **consecutive order**
-#    **single** complete element along the **first dimension** of our a array (i.e., iterate over the first
+#    :py:class:`~hdmf.data_utils.DataChunkIterator` assumes that our generator yields in **consecutive order**
+#    a **single** complete element along the **first dimension** of our array (i.e., iterate over the first
 #    axis and yield one-element-at-a-time). This behavior is useful in many practical cases. However, if
 #    this strategy does not match our needs, then using :py:class:`~hdmf.data_utils.GenericDataChunkIterator`
 #    or implementing your own derived :py:class:`~hdmf.data_utils.AbstractDataChunkIterator` may be more
@@ -266,7 +266,7 @@ class SparseMatrixIterator(AbstractDataChunkIterator):
         """
         Return in each iteration a fully occupied data chunk of self.chunk_shape values at a random
         location within the matrix. Chunks are non-overlapping. REMEMBER: h5py does not support all
-        fancy indexing that numpy does so we need to make sure our selection can be
+        the fancy indexing that numpy does so we need to make sure our selection can be
         handled by the backend.
         """
         if self.__chunks_created < self.num_chunks:
@@ -289,7 +289,7 @@ class SparseMatrixIterator(AbstractDataChunkIterator):
     next = __next__
 
     def recommended_chunk_shape(self):
-        # Here we can optionally recommend what a good chunking should be.
+        # Here we can optionally recommend what a good chunking could be.
         return self.chunk_shape
 
     def recommended_data_shape(self):
@@ -379,7 +379,7 @@ write_test_file(
 # Now lets check out the size of our data file and compare it against the expected full size of our matrix
 import os
 
-expected_size = xsize * ysize * 8  # This is the full size of our matrix in byte
+expected_size = xsize * ysize * 8  # This is the full size of our matrix in bytes
 occupied_size = num_values * 8  # Number of non-zero values in out matrix
 file_size = os.stat(
     "basic_sparse_iterwrite_example.nwb"
@@ -420,14 +420,14 @@ print("   Reduction     :  %.2f x" % (expected_size / file_size_largechunks_comp
 #   A slight overhead (here 0.08MB) is expected because our file contains also the additional objects from
 #   the NWBFile, plus some overhead for managing all the HDF5 metadata for all objects.
 # * **3) vs 2):**  Adding compression does not yield any improvement here. This is expected, because, again we
-#   selected the chunking here in a way that we already allocated the minimum  amount of storage to represent our data
+#   selected the chunking here in a way that we already allocated the minimum amount of storage to represent our data
 #   and lossless compression of random data is not efficient.
 # * **4) vs 2):** When we increase our chunk size to ``(100,100)`` (i.e., ``100x`` larger than the chunks produced by
-#   our matrix generator) we observe an according roughly ``100x`` increase in file size. This is expected
+#   our matrix generator) we observe an accordingly roughly ``100x`` increase in file size. This is expected
 #   since our chunks now do not align perfectly with the occupied data and each occupied chunk is allocated fully.
 # * **5) vs 4):** When using compression for the larger chunks we see a significant reduction
 #   in file size (``1.14MB`` vs. ``80MB``). This is because the allocated chunks now contain in addition to the random
-#   values large areas of constant fillvalues, which compress easily.
+#   values large areas of constant fill values, which compress easily.
 #
 # **Advantages:**
 #
@@ -435,12 +435,12 @@ print("   Reduction     :  %.2f x" % (expected_size / file_size_largechunks_comp
 # * Only the data chunks in the HDF5 file that contain non-default values are ever being allocated
 # * The overall size of our file is reduced significantly
 # * Reduced I/O load
-# * On read users can use the array as usual
+# * On read, users can use the array as usual
 #
 # .. tip::
 #
-#    With great power comes great responsibility **!** I/O and storage cost will depend among others on the chunk size,
-#    compression options, and the write pattern, i.e., the number and structure of the
+#    With great power comes great responsibility **!** I/O and storage cost will depend, among other factors,
+#    on the chunk size, compression options, and the write pattern, i.e., the number and structure of the
 #    :py:class:`~hdmf.data_utils.DataChunk` objects written. For example, using ``(1,1)`` chunks and writing them
 #    one value at a time would result in poor I/O performance in most practical cases, because of the large number of
 #    chunks and large number of small I/O operations required.
@@ -471,7 +471,7 @@ print("   Reduction     :  %.2f x" % (expected_size / file_size_largechunks_comp
 #
 # When converting large data files, a typical problem is that it is often too expensive to load all the data
 # into memory. This example is very similar to the data generator example only that instead of generating
-# data on-the-fly in memory we are loading data from a file one-chunk-at-a-time in our generator.
+# data on-the-fly in-memory we are loading data from a file one-chunk-at-a-time in our generator.
 #
 
 ####################
@@ -568,7 +568,7 @@ with NWBHDF5IO("basic_sparse_iterwrite_largearray.nwb", "r") as io:
 # In practice, data from recording devices may be distributed across many files, e.g., one file per time range
 # or one file per recording channel. Using iterative data write provides an elegant solution to this problem
 # as it allows us to process large arrays one-subarray-at-a-time. To make things more interesting we'll show
-# this for the case where each recording channel (i.e, the second dimension of our ``TimeSeries``) is broken up
+# this for the case where each recording channel (i.e., the second dimension of our ``TimeSeries``) is broken up
 # across files.
 
 ####################

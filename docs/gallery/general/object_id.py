@@ -32,7 +32,7 @@ nwbfile = NWBFile(
     session_start_time=start_time,
 )
 
-# make some fake data
+# make some simulated data
 timestamps = np.linspace(0, 100, 1024)
 data = (
     np.sin(0.333 * timestamps)

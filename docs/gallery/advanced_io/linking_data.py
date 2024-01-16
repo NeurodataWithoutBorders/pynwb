@@ -221,7 +221,7 @@ timeseries_2 = nwbfile2.get_acquisition("test_timeseries2")
 # Step 2: Add the container to another NWBFile
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 # To integrate both :py:meth:`~pynwb.base.TimeSeries` into a single file we simply create a new
-# :py:meth:`~pynwb.file.NWBFile` and our existing :py:meth:`~pynwb.base.TimeSeries` to it. PyNWB's
+# :py:meth:`~pynwb.file.NWBFile` and add our existing :py:meth:`~pynwb.base.TimeSeries` to it. PyNWB's
 # :py:class:`~pynwb.NWBHDF5IO` backend then automatically detects that the TimeSeries have already
 # been written to another file and will create external links for us.
 #
