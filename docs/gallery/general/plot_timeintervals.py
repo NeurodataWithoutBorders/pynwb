@@ -9,16 +9,14 @@ invalid times during an experimental session. NWB supports annotation of time in
 :py:class:`~pynwb.epoch.TimeIntervals` type. The :py:class:`~pynwb.epoch.TimeIntervals` type is
 a :py:class:`~hdmf.common.table.DynamicTable` with the following columns:
 
-1. :py:meth:`~pynwb.epoch.TimeIntervals.start_time` and :py:meth:`~pynwb.epoch.TimeIntervals.stop_time`
-   describe the start and stop times of intervals as floating point offsets in seconds relative to the
-   :py:meth:`~pynwb.file.NWBFile.timestamps_reference_time` of the file. In addition,
-2. :py:class:`~pynwb.epoch.TimeIntervals.tags` is an optional, indexed column used to associate user-defined string
-   tags with intervals (0 or more tags per time interval)
-3. :py:class:`~pynwb.epoch.TimeIntervals.timeseries` is an optional, indexed
-   :py:class:`~pynwb.base.TimeSeriesReferenceVectorData` column to map intervals directly to ranges in select,
-   relevant :py:class:`~pynwb.base.TimeSeries` (0 or more per time interval)
+1. `start_time` and `stop_time` describe the start and stop times of intervals as floating point offsets in seconds
+   relative to the :py:meth:`~pynwb.file.NWBFile.timestamps_reference_time` of the file. In addition,
+2. `tags` is an optional, indexed column used to associate user-defined string tags with intervals (0 or more tags per
+   time interval)
+3. `timeseries` is an optional, indexed :py:class:`~pynwb.base.TimeSeriesReferenceVectorData` column to map intervals
+   directly to ranges in select, relevant :py:class:`~pynwb.base.TimeSeries` (0 or more per time interval)
 4. as a :py:class:`~hdmf.common.table.DynamicTable` user may add additional columns to
-   :py:meth:`~pynwb.epoch.TimeIntervals` via :py:class:`~hdmf.common.table.DynamicTable.add_column`
+   :py:meth:`~pynwb.epoch.TimeIntervals` via :py:meth:`~hdmf.common.table.DynamicTable.add_column`
 
 
 .. hint:: :py:meth:`~pynwb.epoch.TimeIntervals` is intended for storing general annotations of time ranges.
@@ -84,12 +82,10 @@ nwbfile.add_acquisition(rate_ts)
 # ^^^^^^
 #
 # Trials can be added to an NWB file using the methods :py:meth:`~pynwb.file.NWBFile.add_trial`
-# By default, NWBFile only requires trial :py:meth:`~pynwb.file.NWBFile.add_trial.start_time`
-# and :py:meth:`~pynwb.file.NWBFile.add_trial.end_time`. The :py:meth:`~pynwb.file.NWBFile.add_trial.tags`
-# and :py:meth:`~pynwb.file.NWBFile.add_trial.timeseries` are optional. For
-# :py:meth:`~pynwb.file.NWBFile.add_trial.timeseries` we only need to supply the :py:class:`~pynwb.base.TimeSeries`.
+# By default, NWBFile only requires trial `start_time` and `stop_time`. The `tags` and `timeseries` are optional. For
+# `timeseries` we only need to supply the :py:class:`~pynwb.base.TimeSeries`.
 # PyNWB automatically calculates the corresponding index range (described by ``idx_start`` and ``count``) for
-# the supplied  :py:class:`~pynwb.base.TimeSeries based on the given ``start_time`` and ``stop_time`` and
+# the supplied  :py:class:`~pynwb.base.TimeSeries` based on the given ``start_time`` and ``stop_time`` and
 # the :py:meth:`~pynwb.base.TimeSeries.timestamps` (or :py:class:`~pynwb.base.TimeSeries.starting_time`
 # and :py:meth:`~pynwb.base.TimeSeries.rate`) of the given :py:class:`~pynwb.base.TimeSeries`.
 #
@@ -199,7 +195,7 @@ nwbfile.add_epoch(
 #
 # To define custom, experiment-specific :py:class:`~pynwb.epoch.TimeIntervals` we can add them
 # either: 1) when creating the :py:class:`~pynwb.file.NWBFile` by defining the
-# :py:meth:`~pynwb.file.NWBFile.__init__.intervals` constructor argument or 2) via the
+# `intervals` constructor argument or 2) via the
 # :py:meth:`~pynwb.file.NWBFile.add_time_intervals` or :py:meth:`~pynwb.file.NWBFile.create_time_intervals`
 # after the :py:class:`~pynwb.file.NWBFile` has been created.
 #
@@ -286,9 +282,9 @@ example_tsr.isvalid()
 # Adding TimeSeries references to other tables
 # --------------------------------------------
 #
-# Since :py:class:`~pynwb.base.TimeSeriesReferenceVectorData` is a regular :py:class:`~hdmf.common.table.VectoData`
+# Since :py:class:`~pynwb.base.TimeSeriesReferenceVectorData` is a regular :py:class:`~hdmf.common.table.VectorData`
 # type, we can use it to add references to intervals in :py:class:`~pynwb.base.TimeSeries` to any
-# :py:class:`~hdmf.common.table.DynamicTable`. In the :py:class:`~pynwb.icephys.IntracellularRecordingTable`, e.g.,
+# :py:class:`~hdmf.common.table.DynamicTable`. In the :py:class:`~pynwb.icephys.IntracellularRecordingsTable`, e.g.,
 # it is used to reference the recording of the stimulus and response associated with a particular intracellular
 # electrophysiology recording.
 #

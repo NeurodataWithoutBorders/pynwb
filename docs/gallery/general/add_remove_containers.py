@@ -75,9 +75,9 @@ with NWBHDF5IO(filename, "r") as io:
 #   NWB datasets that have been written to disk are read as :py:class:`h5py.Dataset <h5py.Dataset>` objects.
 #   Directly modifying the data in these :py:class:`h5py.Dataset <h5py.Dataset>` objects immediately
 #   modifies the data on disk
-#   (the :py:meth:`NWBHDF5IO.write <pynwb.NWBHDF5IO.write>` method does not need to be called and the
-#   :py:class:`~pynwb.NWBHDF5IO` instance does not need to be closed). Directly modifying datasets in this way
-#   can lead to files that do not validate or cannot be opened, so exercise caution when using this method.
+#   (the :py:meth:`NWBHDF5IO.write <hdmf.backends.hdf5.h5tools.HDF5IO.write>` method does not need to be
+#   called and the :py:class:`~pynwb.NWBHDF5IO` instance does not need to be closed). Directly modifying datasets in
+#   this way can lead to files that do not validate or cannot be opened, so exercise caution when using this method.
 #   Note: only chunked datasets or datasets with ``maxshape`` set can be resized.
 #   See the `h5py chunked storage documentation <https://docs.h5py.org/en/stable/high/dataset.html#chunked-storage>`_
 #   for more details.
@@ -96,7 +96,7 @@ with NWBHDF5IO(filename, "r") as io:
 # have raw data and processed data in the same NWB file and you want to create a new NWB file with all of the
 # contents of the original file except for the raw data for sharing with collaborators.
 #
-# To remove existing containers, use the :py:class:`~hdmf.utils.LabelledDict.pop` method on any
+# To remove existing containers, use the :py:meth:`~hdmf.utils.LabelledDict.pop` method on any
 # :py:class:`~hdmf.utils.LabelledDict` object, such as ``NWBFile.acquisition``, ``NWBFile.processing``,
 # ``NWBFile.analysis``, ``NWBFile.processing``, ``NWBFile.scratch``, ``NWBFile.devices``, ``NWBFile.stimulus``,
 # ``NWBFile.stimulus_template``, ``NWBFile.electrode_groups``, ``NWBFile.imaging_planes``,
