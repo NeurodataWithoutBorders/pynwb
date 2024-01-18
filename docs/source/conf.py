@@ -149,7 +149,6 @@ intersphinx_mapping = {
     'nwbwidgets': ("https://nwb-widgets.readthedocs.io/en/latest/", None),
     'nwb-overview': ("https://nwb-overview.readthedocs.io/en/latest/", None),
     'zarr': ("https://zarr.readthedocs.io/en/stable/", None),
-    'mpi': ('https://mpi4py.readthedocs.io/en/stable/', None)
 }
 
 extlinks = {
@@ -162,6 +161,9 @@ extlinks = {
     'dandi': ('https://www.dandiarchive.org/%s', '%s'),
     "nwbinspector": ("https://nwbinspector.readthedocs.io/en/dev/%s", "%s"),
 }
+
+nitpicky = True
+nitpick_ignore = [('py:class', 'Intracomm')]
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']

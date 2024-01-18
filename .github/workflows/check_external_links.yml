@@ -32,4 +32,4 @@ jobs:
           python -m pip install .
 
       - name: Check Sphinx external links
-        run: sphinx-build -n -b linkcheck ./docs/source ./test_build
+        run: sphinx-build -b linkcheck ./docs/source ./test_build
