@@ -109,6 +109,7 @@ class Subject(NWBContainer):
         {'name': 'strain', 'type': str, 'doc': 'The strain of the subject, e.g., "C57BL/6J"', 'default': None},
     )
     def __init__(self, **kwargs):
+        self.init_validation(constructor_args=kwargs)
         keys_to_set = (
             "age",
             "age__reference",

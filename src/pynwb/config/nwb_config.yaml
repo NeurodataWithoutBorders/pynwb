@@ -1,0 +1,6 @@
+Subject:
+    namespace:
+    namespace_version:
+    fields:
+      species: src/pynwb/config/nwb_subject_termset.yaml
+      # field2: ...

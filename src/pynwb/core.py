@@ -46,6 +46,15 @@ class NWBMixin(AbstractContainer):
             raise ValueError(error_msg)
         warn(error_msg)
 
+    def get_config(self):
+        from . import nwb_config #update path
+        return nwb_config
+
+    def get_type_map(self):
+        from . import get_type_map
+        tm = get_type_map()
+        return tm
+
 
 @register_class('NWBContainer', CORE_NAMESPACE)
 class NWBContainer(NWBMixin, Container):

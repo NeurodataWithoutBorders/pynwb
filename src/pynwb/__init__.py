@@ -18,6 +18,35 @@ CORE_NAMESPACE = 'core'
 from .spec import NWBDatasetSpec, NWBGroupSpec, NWBNamespace  # noqa E402
 from .validate import validate  # noqa: F401, E402
 
+from .termset_config import NWBTermSetConfigurator
+
+
+nwb_config = NWBTermSetConfigurator(path='src/pynwb/config/nwb_config.yaml')
+
+@docval({'name': 'config_path', 'type': str, 'doc': 'Path to the configuartion file.',
+         'default': None})
+def load_termset_config(config_path: str):
+    """
+    If a user does not provide a config_path, then this method will unload any present configuration
+    and load the default curated configuration.
+
+    If a user provides a config_path, then this method will:
+    - Search the current configuation for data_types that are already present. These data_types will be
+    replaced with the new configuration.
+    - If the data_type is not present, then they will be loaded alongside the default curated configuration.
+    """
+    if config_path is None:
+        nwb_config.unload_termset_config()
+        nwb_config.load_termset_config()
+    else:
+        nwb_config.load_termset_config(config_path)
+
+def unload_termset_config():
+    """
+    Remove validation.
+    """
+    return nwb_config.unload_termset_config()
+
 
 def __get_resources():
     try:
