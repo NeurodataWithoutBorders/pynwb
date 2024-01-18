@@ -9,11 +9,11 @@ invalid times during an experimental session. NWB supports annotation of time in
 :py:class:`~pynwb.epoch.TimeIntervals` type. The :py:class:`~pynwb.epoch.TimeIntervals` type is
 a :py:class:`~hdmf.common.table.DynamicTable` with the following columns:
 
-1. `start_time` and `stop_time` describe the start and stop times of intervals as floating point offsets in seconds
+1. ``start_time`` and ``stop_time`` describe the start and stop times of intervals as floating point offsets in seconds
    relative to the :py:meth:`~pynwb.file.NWBFile.timestamps_reference_time` of the file. In addition,
-2. `tags` is an optional, indexed column used to associate user-defined string tags with intervals (0 or more tags per
+2. ``tags`` is an optional, indexed column used to associate user-defined string tags with intervals (0 or more tags per
    time interval)
-3. `timeseries` is an optional, indexed :py:class:`~pynwb.base.TimeSeriesReferenceVectorData` column to map intervals
+3. ``timeseries`` is an optional, indexed :py:class:`~pynwb.base.TimeSeriesReferenceVectorData` column to map intervals
    directly to ranges in select, relevant :py:class:`~pynwb.base.TimeSeries` (0 or more per time interval)
 4. as a :py:class:`~hdmf.common.table.DynamicTable` user may add additional columns to
    :py:meth:`~pynwb.epoch.TimeIntervals` via :py:meth:`~hdmf.common.table.DynamicTable.add_column`
@@ -82,8 +82,8 @@ nwbfile.add_acquisition(rate_ts)
 # ^^^^^^
 #
 # Trials can be added to an NWB file using the methods :py:meth:`~pynwb.file.NWBFile.add_trial`
-# By default, NWBFile only requires trial `start_time` and `stop_time`. The `tags` and `timeseries` are optional. For
-# `timeseries` we only need to supply the :py:class:`~pynwb.base.TimeSeries`.
+# By default, NWBFile only requires trial ``start_time`` and ``stop_time``. The ``tags`` and ``timeseries`` are
+# optional. For ``timeseries`` we only need to supply the :py:class:`~pynwb.base.TimeSeries`.
 # PyNWB automatically calculates the corresponding index range (described by ``idx_start`` and ``count``) for
 # the supplied  :py:class:`~pynwb.base.TimeSeries` based on the given ``start_time`` and ``stop_time`` and
 # the :py:meth:`~pynwb.base.TimeSeries.timestamps` (or :py:class:`~pynwb.base.TimeSeries.starting_time`
