@@ -190,7 +190,7 @@ nwbfile.add_acquisition(behavior_external_file)
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 #
 # :py:class:`~pynwb.image.RGBAImage` is for storing data of color image with transparency.
-# `RGBAImage.data` must be 3D where the first and second dimensions
+# ``RGBAImage.data`` must be 3D where the first and second dimensions
 # represent x and y. The third dimension has length 4 and represents the RGBA value.
 #
 
@@ -208,7 +208,7 @@ rgba_logo = RGBAImage(
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^
 #
 # :py:class:`~pynwb.image.RGBImage` is for storing data of RGB color image.
-# `RGBImage.data` must be 3D where the first and second dimensions
+# ``RGBImage.data`` must be 3D where the first and second dimensions
 # represent x and y. The third dimension has length 3 and represents the RGB value.
 #
 
@@ -224,7 +224,7 @@ rgb_logo = RGBImage(
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 #
 # :py:class:`~pynwb.image.GrayscaleImage` is for storing grayscale image data.
-# `GrayscaleImage.data` must be 2D where the first and second dimensions represent x and y.
+# ``GrayscaleImage.data`` must be 2D where the first and second dimensions represent x and y.
 #
 
 gs_logo = GrayscaleImage(

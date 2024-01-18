@@ -540,7 +540,7 @@ with NWBHDF5IO("ophys_tutorial.nwb", "r") as io:
 # Data arrays are read passively from the file.
 # Calling the data attribute on a :py:class:`~pynwb.base.TimeSeries`
 # such as a :py:class:`~pynwb.ophys.RoiResponseSeries` does not read the data
-# values, but presents an `h5py` object that can be indexed to read data.
+# values, but presents an ``h5py`` object that can be indexed to read data.
 # You can use the ``[:]`` operator to read the entire data array into memory.
 # Load and print all the data values of the :py:class:`~pynwb.ophys.RoiResponseSeries`
 # object representing the fluorescence data.
