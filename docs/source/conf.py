@@ -163,7 +163,8 @@ extlinks = {
 }
 
 nitpicky = True
-nitpick_ignore = [('py:class', 'Intracomm')]
+nitpick_ignore = [('py:class', 'Intracomm'),
+                  ('py:class', 'BaseStorageSpec')]
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
