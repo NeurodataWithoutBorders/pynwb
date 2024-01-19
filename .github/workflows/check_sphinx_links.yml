@@ -1,4 +1,4 @@
-name: Check Sphinx external links
+name: Check Sphinx links
 on:
   pull_request:
   schedule:
@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  check-external-links:
+  check-sphinx-links:
     runs-on: ubuntu-latest
     steps:
       - name: Cancel non-latest runs
@@ -31,5 +31,5 @@ jobs:
           python -m pip install -r requirements-doc.txt
           python -m pip install .
 
-      - name: Check Sphinx external links
-        run: sphinx-build -b linkcheck ./docs/source ./test_build
+      - name: Check Sphinx internal and external links
+        run: sphinx-build -W -b linkcheck ./docs/source ./test_build
