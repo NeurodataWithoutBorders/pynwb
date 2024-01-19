@@ -20,8 +20,9 @@ from .validate import validate  # noqa: F401, E402
 
 from .termset_config import NWBTermSetConfigurator
 
-
-nwb_config = NWBTermSetConfigurator(path='src/pynwb/config/nwb_config.yaml')
+CUR_DIR = os.path.dirname(os.path.realpath(__file__))
+path_to_config = os.path.join(CUR_DIR, 'config/nwb_config.yaml')
+nwb_config = NWBTermSetConfigurator(path=path_to_config)
 
 @docval({'name': 'config_path', 'type': str, 'doc': 'Path to the configuartion file.',
          'default': None})
