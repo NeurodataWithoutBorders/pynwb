@@ -12,17 +12,17 @@ from hdmf.backends.io import HDMFIO
 from hdmf.backends.hdf5 import HDF5IO as _HDF5IO
 from hdmf.build import BuildManager, TypeMap
 import hdmf.common
+from hdmf.term_set import TermSetConfigurator
 
 CORE_NAMESPACE = 'core'
 
 from .spec import NWBDatasetSpec, NWBGroupSpec, NWBNamespace  # noqa E402
 from .validate import validate  # noqa: F401, E402
 
-from .termset_config import NWBTermSetConfigurator
 
 CUR_DIR = os.path.dirname(os.path.realpath(__file__))
-path_to_config = os.path.join(CUR_DIR, 'config/nwb_config.yaml')
-nwb_config = NWBTermSetConfigurator(path=path_to_config)
+path_to_config = os.path.join(CUR_DIR, 'config/NWB_CONFIG.yaml')
+NWB_CONFIG = TermSetConfigurator(path=path_to_config)
 
 @docval({'name': 'config_path', 'type': str, 'doc': 'Path to the configuartion file.',
          'default': None})
@@ -37,16 +37,16 @@ def load_termset_config(config_path: str):
     - If the data_type is not present, then they will be loaded alongside the default curated configuration.
     """
     if config_path is None:
-        nwb_config.unload_termset_config()
-        nwb_config.load_termset_config()
+        NWB_CONFIG.unload_termset_config()
+        NWB_CONFIG.load_termset_config()
     else:
-        nwb_config.load_termset_config(config_path)
+        NWB_CONFIG.load_termset_config(config_path)
 
 def unload_termset_config():
     """
     Remove validation.
     """
-    return nwb_config.unload_termset_config()
+    return NWB_CONFIG.unload_termset_config()
 
 
 def __get_resources():

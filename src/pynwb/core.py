@@ -47,8 +47,8 @@ class NWBMixin(AbstractContainer):
         warn(error_msg)
 
     def get_config(self):
-        from . import nwb_config #update path
-        return nwb_config
+        from . import NWB_CONFIG #update path
+        return NWB_CONFIG
 
     def get_type_map(self):
         from . import get_type_map

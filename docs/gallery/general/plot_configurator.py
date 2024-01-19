@@ -1,4 +1,3 @@
-from pynwb import nwb_config
 from datetime import datetime
 from uuid import uuid4
 
