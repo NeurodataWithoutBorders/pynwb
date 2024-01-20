@@ -169,6 +169,6 @@ with h5py.File(rem_file, "r") as h5py_file:
 # 1. supports caching, which will dramatically speed up repeated requests for the
 #    same region of data,
 # 2. automatically retries when s3 fails to return, which helps avoid errors when accessing data due to
-#     intermittent errors in connections with S3 (remfile does this as well),
+#    intermittent errors in connections with S3 (remfile does this as well),
 # 3. works also with other storage backends (e.g., GoogleDrive or Dropbox, not just S3) and file formats, and
 # 4. in our experience appears to provide faster out-of-the-box performance than the ros3 driver.
