@@ -1,4 +1,6 @@
-from pynwb.resources import ExternalResources
+import warnings
+
+from pynwb.resources import HERD
 from pynwb.testing import TestCase
 
 
@@ -7,5 +9,11 @@ class TestNWBContainer(TestCase):
         """
         Test constructor
         """
-        er = ExternalResources()
-        self.assertIsInstance(er, ExternalResources)
+        with warnings.catch_warnings(record=True):
+            warnings.filterwarnings(
+                "ignore",
+                message=r"HERD is experimental .*",
+                category=UserWarning,
+            )
+            er = HERD()
+            self.assertIsInstance(er, HERD)

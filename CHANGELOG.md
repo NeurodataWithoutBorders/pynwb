@@ -1,5 +1,39 @@
 # PyNWB Changelog
 
+## PyNWB 2.6.0 (Upcoming)
+
+### Enhancements and minor changes
+- For `NWBHDF5IO()`, change the default of arg `load_namespaces` from `False` to `True`. @bendichter [#1748](https://github.com/NeurodataWithoutBorders/pynwb/pull/1748)
+- Add `NWBHDF5IO.can_read()`. @bendichter [#1703](https://github.com/NeurodataWithoutBorders/pynwb/pull/1703)
+- Add `pynwb.get_nwbfile_version()`. @bendichter [#1703](https://github.com/NeurodataWithoutBorders/pynwb/pull/1703)
+- Updated timeseries data checks to warn instead of error when reading invalid files. @stephprince [#1793](https://github.com/NeurodataWithoutBorders/pynwb/pull/1793) and [#1809](https://github.com/NeurodataWithoutBorders/pynwb/pull/1809)
+- Expose the offset, conversion and channel conversion parameters in `mock_ElectricalSeries`. @h-mayorquin [#1796](https://github.com/NeurodataWithoutBorders/pynwb/pull/1796)
+- Expose `starting_time` in `mock_ElectricalSeries`. @h-mayorquin [#1805](https://github.com/NeurodataWithoutBorders/pynwb/pull/1805)
+- Enhance `get_data_in_units()` to work with objects that have a `channel_conversion` attribute like the `ElectricalSeries`. @h-mayorquin [#1806](https://github.com/NeurodataWithoutBorders/pynwb/pull/1806)
+- Refactor validation CLI tests to use `{sys.executable} -m coverage` to use the same Python version and run correctly on Debian systems. @yarikoptic [#1811](https://github.com/NeurodataWithoutBorders/pynwb/pull/1811)
+
+### Bug fixes
+- Fix bug where namespaces were loaded in "w-" mode. @h-mayorquin [#1795](https://github.com/NeurodataWithoutBorders/pynwb/pull/1795)
+- Fix bug where pynwb version was reported as "unknown" to readthedocs @stephprince [#1810](https://github.com/NeurodataWithoutBorders/pynwb/pull/1810)
+
+### Documentation and tutorial enhancements
+- Add RemFile to streaming tutorial. @bendichter [#1761](https://github.com/NeurodataWithoutBorders/pynwb/pull/1761)
+- Fix typos and improve clarify throughout tutorials. @zm711 [#1825](https://github.com/NeurodataWithoutBorders/pynwb/pull/1825)
+
+## PyNWB 2.5.0 (August 18, 2023)
+
+### Enhancements and minor changes
+- Add `TimeSeries.get_timestamps()`. @bendichter [#1741](https://github.com/NeurodataWithoutBorders/pynwb/pull/1741)
+- Add `TimeSeries.get_data_in_units()`. @bendichter [#1745](https://github.com/NeurodataWithoutBorders/pynwb/pull/1745)
+- Updated `ExternalResources` name change to `HERD`, along with HDMF 3.9.0 being the new minimum. @mavaylon1 [#1754](https://github.com/NeurodataWithoutBorders/pynwb/pull/1754)
+
+### Documentation and tutorial enhancements
+- Updated streaming tutorial to ensure code is run on tests and clarify text. @bendichter [#1760](https://github.com/NeurodataWithoutBorders/pynwb/pull/1760) @oruebel [#1762](https://github.com/NeurodataWithoutBorders/pynwb/pull/1762)
+- Fixed minor documentation build warnings and broken links to `basic_trials` tutorial  @oruebel [#1762](https://github.com/NeurodataWithoutBorders/pynwb/pull/1762)
+
+## PyNWB 2.4.1 (July 26, 2023)
+- Stop running validation tests as part of integration tests. They cause issues in CI and can be run separately. @rly [#1740](https://github.com/NeurodataWithoutBorders/pynwb/pull/1740)
+
 ## PyNWB 2.4.0 (July 23, 2023)
 
 ### Enhancements and minor changes

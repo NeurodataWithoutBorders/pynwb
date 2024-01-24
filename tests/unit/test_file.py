@@ -527,6 +527,7 @@ class SubjectTest(TestCase):
 
 
 class TestCacheSpec(TestCase):
+    """Test whether the file can be written and read when caching the spec."""
 
     def setUp(self):
         self.path = 'unittest_cached_spec.nwb'
@@ -535,18 +536,20 @@ class TestCacheSpec(TestCase):
         remove_test_file(self.path)
 
     def test_simple(self):
-        nwbfile = NWBFile(' ', ' ',
+        nwbfile = NWBFile('sess_desc', 'identifier',
                           datetime.now(tzlocal()),
                           file_create_date=datetime.now(tzlocal()),
                           institution='University of California, San Francisco',
                           lab='Chang Lab')
         with NWBHDF5IO(self.path, 'w') as io:
             io.write(nwbfile)
-        with NWBHDF5IO(self.path, 'r', load_namespaces=True) as reader:
+        with NWBHDF5IO(self.path, 'r') as reader:
             nwbfile = reader.read()
+            assert nwbfile.session_description == "sess_desc"
 
 
 class TestNoCacheSpec(TestCase):
+    """Test whether the file can be written and read when not caching the spec."""
 
     def setUp(self):
         self.path = 'unittest_cached_spec.nwb'
@@ -555,7 +558,7 @@ class TestNoCacheSpec(TestCase):
         remove_test_file(self.path)
 
     def test_simple(self):
-        nwbfile = NWBFile(' ', ' ',
+        nwbfile = NWBFile('sess_desc', 'identifier',
                           datetime.now(tzlocal()),
                           file_create_date=datetime.now(tzlocal()),
                           institution='University of California, San Francisco',
@@ -563,9 +566,9 @@ class TestNoCacheSpec(TestCase):
         with NWBHDF5IO(self.path, 'w') as io:
             io.write(nwbfile, cache_spec=False)
 
-        with self.assertWarnsWith(UserWarning, "No cached namespaces found in %s" % self.path):
-            with NWBHDF5IO(self.path, 'r', load_namespaces=True) as reader:
-                nwbfile = reader.read()
+        with NWBHDF5IO(self.path, 'r') as reader:
+            nwbfile = reader.read()
+            assert nwbfile.session_description == "sess_desc"
 
 
 class TestTimestampsRefDefault(TestCase):
