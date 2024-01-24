@@ -287,6 +287,13 @@ class TimeSeries(NWBDataInterface):
     def __add_link(self, links_key, link):
         self.fields.setdefault(links_key, list()).append(link)
 
+    def _generate_field_html(self, key, value, level, access_code):
+        # reassign value if linked timestamp or linked data to avoid recursion error
+        if key in ['timestamp_link', 'data_link']:
+            value = {v.name: v.neurodata_type for v in value}
+
+        return super()._generate_field_html(key, value, level, access_code)
+
     @property
     def time_unit(self):
         return self.__time_unit
