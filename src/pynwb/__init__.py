@@ -12,7 +12,6 @@ from hdmf.backends.io import HDMFIO
 from hdmf.backends.hdf5 import HDF5IO as _HDF5IO
 from hdmf.build import BuildManager, TypeMap
 import hdmf.common
-from hdmf.term_set import TermSetConfigurator
 
 CORE_NAMESPACE = 'core'
 
@@ -20,27 +19,16 @@ from .spec import NWBDatasetSpec, NWBGroupSpec, NWBNamespace  # noqa E402
 from .validate import validate  # noqa: F401, E402
 
 
-CUR_DIR = os.path.dirname(os.path.realpath(__file__))
-path_to_config = os.path.join(CUR_DIR, 'config/NWB_CONFIG.yaml')
-NWB_CONFIG = TermSetConfigurator(path=path_to_config)
-
 @docval({'name': 'config_path', 'type': str, 'doc': 'Path to the configuartion file.',
          'default': None})
 def load_termset_config(config_path: str):
     """
-    If a user does not provide a config_path, then this method will unload any present configuration
-    and load the default curated configuration.
-
-    If a user provides a config_path, then this method will:
-    - Search the current configuation for data_types that are already present. These data_types will be
+    This method will:
+    - Search the current configuration for data_types that are already present. These data_types will be
     replaced with the new configuration.
     - If the data_type is not present, then they will be loaded alongside the default curated configuration.
     """
-    if config_path is None:
-        NWB_CONFIG.unload_termset_config()
-        NWB_CONFIG.load_termset_config()
-    else:
-        NWB_CONFIG.load_termset_config(config_path)
+    __TYPE_MAP.ts_config.load_termset_config(config_path)
 
 def unload_termset_config():
     """
@@ -74,10 +62,13 @@ def _get_resources():
 global __NS_CATALOG
 global __TYPE_MAP
 
+CUR_DIR = os.path.dirname(os.path.realpath(__file__))
+path_to_config = os.path.join(CUR_DIR, 'config/nwb_config.yaml')
+
 __NS_CATALOG = NamespaceCatalog(NWBGroupSpec, NWBDatasetSpec, NWBNamespace)
 
 hdmf_typemap = hdmf.common.get_type_map()
-__TYPE_MAP = TypeMap(__NS_CATALOG)
+__TYPE_MAP = TypeMap(__NS_CATALOG, config_path=path_to_config)
 __TYPE_MAP.merge(hdmf_typemap, ns_catalog=True)
 
 
@@ -170,6 +161,8 @@ def register_class(**kwargs):
 
     def _dec(cls):
         __TYPE_MAP.register_container_type(namespace, neurodata_type, cls)
+        cls.type_map = __TYPE_MAP
+        cls.namespace = namespace
         return cls
     if container_cls is None:
         return _dec
