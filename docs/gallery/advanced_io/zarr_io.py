@@ -8,9 +8,17 @@ option for large datasets because, like HDF5, it is designed to store data on di
 only load the data into memory when needed. Zarr is also a good option for parallel
 computing because it supports concurrent reads and writes.
 
+Note that the Zarr native storage formats are optimized for storage in cloud storage
+(e.g., S3). For very large files, Zarr will create many files which can lead to
+issues for traditional file system (that are not cloud object stores) due to limitations
+on the number of files per directory (this affects local disk, GDrive, Dropbox etc.).
+
 Zarr read and write is provided by the :hdmf-zarr:`hdmf-zarr` package. First, create an
 an NWBFile using PyNWB.
 """
+
+# sphinx_gallery_thumbnail_path = 'figures/gallery_thumbnail_plot_nwbzarrio.png'
+
 
 from datetime import datetime
 from dateutil.tz import tzlocal
@@ -85,5 +93,6 @@ with NWBZarrIO(path=absolute_path, mode="r") as io:
     read_nwbfile = io.read()
 
 #######################################################################################
-# For more information, see the :hdmf-zarr:`hdmf-zarr documentation<>`.
+# .. note::
+#    For more information, see the :hdmf-zarr:`hdmf-zarr documentation<>`.
 
