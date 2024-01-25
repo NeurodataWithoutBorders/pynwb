@@ -2,6 +2,7 @@ import warnings
 
 import numpy as np
 
+from pynwb.base import ProcessingModule
 from pynwb.ecephys import (
     ElectricalSeries,
     SpikeEventSeries,
@@ -17,6 +18,7 @@ from pynwb.ecephys import (
 from pynwb.device import Device
 from pynwb.file import ElectrodeTable
 from pynwb.testing import TestCase
+from pynwb.testing.mock.ecephys import mock_ElectricalSeries
 
 from hdmf.common import DynamicTableRegion
 
@@ -113,6 +115,24 @@ class ElectricalSeriesConstructor(TestCase):
                "ElectricalSeries 'test_ts1': The second dimension of data does not match the length of electrodes, "
                "but instead the first does. Data is oriented incorrectly and should be transposed."
                    ) in str(w[-1].message)
+
+    def test_get_data_in_units(self):
+
+        data = np.asarray([[1, 1, 1, 1, 1], [1, 1, 1, 1, 1]])
+        conversion = 1.0
+        offset = 3.0
+        channel_conversion = np.asarray([2.0, 2.0])
+        electrical_series = mock_ElectricalSeries(
+            data=data,
+            conversion=conversion,
+            offset=offset,
+            channel_conversion=channel_conversion,
+        )
+
+        data_in_units = electrical_series.get_data_in_units()
+        expected_data = data * conversion * channel_conversion[:, np.newaxis] + offset
+
+        np.testing.assert_almost_equal(data_in_units, expected_data)
 
 
 class SpikeEventSeriesConstructor(TestCase):
@@ -246,7 +266,11 @@ class EventWaveformConstructor(TestCase):
         table, region = self._create_table_and_region()
         sES = SpikeEventSeries('test_sES', list(range(10)), list(range(10)), region)
 
-        ew = EventWaveform(sES)
+        pm = ProcessingModule(name='test_module', description='a test module')
+        ew = EventWaveform()
+        pm.add(table)
+        pm.add(ew)
+        ew.add_spike_event_series(sES)
         self.assertEqual(ew.spike_event_series['test_sES'], sES)
         self.assertEqual(ew['test_sES'], ew.spike_event_series['test_sES'])
 
@@ -303,10 +327,25 @@ class LFPTest(TestCase):
         )
         return table, region
 
+    def test_init(self):
+        _, region = self._create_table_and_region()
+        eS = ElectricalSeries('test_eS', [0, 1, 2, 3], region, timestamps=[0.1, 0.2, 0.3, 0.4])
+        msg = (
+            "The linked table for DynamicTableRegion 'electrodes' does not share "
+            "an ancestor with the DynamicTableRegion."
+        )
+        with self.assertWarnsRegex(UserWarning, msg):
+            lfp = LFP(eS)
+        self.assertEqual(lfp.electrical_series.get('test_eS'), eS)
+        self.assertEqual(lfp['test_eS'], lfp.electrical_series.get('test_eS'))
+
     def test_add_electrical_series(self):
         lfp = LFP()
         table, region = self._create_table_and_region()
         eS = ElectricalSeries('test_eS', [0, 1, 2, 3], region, timestamps=[0.1, 0.2, 0.3, 0.4])
+        pm = ProcessingModule(name='test_module', description='a test module')
+        pm.add(table)
+        pm.add(lfp)
         lfp.add_electrical_series(eS)
         self.assertEqual(lfp.electrical_series.get('test_eS'), eS)
 
@@ -324,16 +363,24 @@ class FilteredEphysTest(TestCase):
         return table, region
 
     def test_init(self):
-        table, region = self._create_table_and_region()
+        _, region = self._create_table_and_region()
         eS = ElectricalSeries('test_eS', [0, 1, 2, 3], region, timestamps=[0.1, 0.2, 0.3, 0.4])
-        fe = FilteredEphys(eS)
+        msg = (
+            "The linked table for DynamicTableRegion 'electrodes' does not share "
+            "an ancestor with the DynamicTableRegion."
+        )
+        with self.assertWarnsRegex(UserWarning, msg):
+            fe = FilteredEphys(eS)
         self.assertEqual(fe.electrical_series.get('test_eS'), eS)
         self.assertEqual(fe['test_eS'], fe.electrical_series.get('test_eS'))
 
     def test_add_electrical_series(self):
-        fe = FilteredEphys()
         table, region = self._create_table_and_region()
         eS = ElectricalSeries('test_eS', [0, 1, 2, 3], region, timestamps=[0.1, 0.2, 0.3, 0.4])
+        pm = ProcessingModule(name='test_module', description='a test module')
+        fe = FilteredEphys()
+        pm.add(table)
+        pm.add(fe)
         fe.add_electrical_series(eS)
         self.assertEqual(fe.electrical_series.get('test_eS'), eS)
         self.assertEqual(fe['test_eS'], fe.electrical_series.get('test_eS'))

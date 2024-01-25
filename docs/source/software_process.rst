@@ -17,7 +17,7 @@ tested on all supported operating systems and python distributions. That way,
 as a contributor, you know if you introduced regressions or coding style
 inconsistencies.
 
-There are badges in the :pynwb:`README <#readme>` file which shows
+There are badges in the :pynwb:`README <blob/dev/README.rst>` file which shows
 the current condition of the dev branch.
 
 --------
@@ -25,7 +25,7 @@ Coverage
 --------
 
 Code coverage is computed and reported using the coverage_ tool. There are two coverage-related
-badges in the :pynwb:`README <#readme>` file. One shows the status of the :pynwb:`GitHub Action workflow <actions?query=workflow%3A%22Run+coverage%22>` which runs the coverage_ tool and uploads the report to
+badges in the :pynwb:`README <blob/dev/README.rst>` file. One shows the status of the :pynwb:`GitHub Action workflow <actions?query=workflow%3A%22Run+coverage%22>` which runs the coverage_ tool and uploads the report to
 codecov_, and the other badge shows the percentage coverage reported from codecov_. A detailed report can be found on
 codecov_, which shows line by line which lines are covered by the tests.
 

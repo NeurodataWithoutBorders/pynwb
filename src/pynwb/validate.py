@@ -156,6 +156,7 @@ def validate(**kwargs):
                         file=sys.stderr,
                     )
         else:
+            io_kwargs.update(load_namespaces=False)
             namespaces_to_validate = [CORE_NAMESPACE]
 
         if namespace is not None:
