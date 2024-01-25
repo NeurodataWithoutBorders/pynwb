@@ -288,9 +288,21 @@ class TimeSeries(NWBDataInterface):
         self.fields.setdefault(links_key, list()).append(link)
 
     def _generate_field_html(self, key, value, level, access_code):
+        def get_object_path(obj):
+            path = '/'.join([a.name for a in obj.get_ancestors()[::-1]])
+            return f'{path}/{obj.name}'
+
         # reassign value if linked timestamp or linked data to avoid recursion error
+        if key in ['timestamps', 'data'] and isinstance(value, TimeSeries):
+            path_to_linked_object = get_object_path(value)
+            if key == 'timestamps':
+                value = value.timestamps
+            elif key == 'data':
+                value = value.data
+            key = f'{key} (link to {path_to_linked_object})'
+
         if key in ['timestamp_link', 'data_link']:
-            value = {v.name: v.neurodata_type for v in value}
+            value = [get_object_path(v) for v in value]
 
         return super()._generate_field_html(key, value, level, access_code)
 
