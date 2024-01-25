@@ -34,8 +34,7 @@ def unload_termset_config():
     """
     Remove validation.
     """
-    return NWB_CONFIG.unload_termset_config()
-
+    return __TYPE_MAP.ts_config.unload_termset_config()
 
 def __get_resources():
     try:
