@@ -14,7 +14,7 @@ issues for traditional file systems (that are not cloud object stores) due to
 limitations on the number of files per directory (this affects local disk,
 GDrive, Dropbox etc.).
 
-Zarr read and write is provided by the :hdmf-zarr:`hdmf-zarr` package. First, create an
+Zarr read and write is provided by the :hdmf-zarr:`hdmf-zarr package<>`. First, create an
 an NWBFile using PyNWB.
 """
 
