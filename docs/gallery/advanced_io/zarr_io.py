@@ -10,7 +10,7 @@ computing because it supports concurrent reads and writes.
 
 Note that the Zarr native storage formats are optimized for storage in cloud storage
 (e.g., S3). For very large files, Zarr will create many files which can lead to
-issues for traditional file system (that are not cloud object stores) due to limitations
+issues for traditional file systems (that are not cloud object stores) due to limitations
 on the number of files per directory (this affects local disk, GDrive, Dropbox etc.).
 
 Zarr read and write is provided by the :hdmf-zarr:`hdmf-zarr` package. First, create an
