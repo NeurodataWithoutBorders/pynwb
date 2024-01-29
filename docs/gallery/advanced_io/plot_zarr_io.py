@@ -96,4 +96,3 @@ with NWBZarrIO(path=absolute_path, mode="r") as io:
 #######################################################################################
 # .. note::
 #    For more information, see the :hdmf-zarr:`hdmf-zarr documentation<>`.
-
