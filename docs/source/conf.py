@@ -149,6 +149,7 @@ intersphinx_mapping = {
     'nwbwidgets': ("https://nwb-widgets.readthedocs.io/en/latest/", None),
     'nwb-overview': ("https://nwb-overview.readthedocs.io/en/latest/", None),
     'hdmf-zarr': ("https://hdmf-zarr.readthedocs.io/en/latest/", None),
+    'numcodecs': ("https://numcodecs.readthedocs.io/en/latest/", None),
 }
 
 extlinks = {
