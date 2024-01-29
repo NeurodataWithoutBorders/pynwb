@@ -288,13 +288,29 @@ class TimeSeries(NWBDataInterface):
         self.fields.setdefault(links_key, list()).append(link)
 
     def _generate_field_html(self, key, value, level, access_code):
-        def get_object_path(obj):
-            path = '/'.join([a.name for a in obj.get_ancestors()[::-1]])
-            return f'{path}/{obj.name}'
+        def find_location_in_memory_nwbfile(current_location: str, neurodata_object) -> str:
+            """
+            Method for determining the location of a neurodata object within an in-memory NWBFile object. Adapted from
+            neuroconv package.
+            """
+            parent = neurodata_object.parent
+            if parent is None:
+                return neurodata_object.name + "/" + current_location
+            elif parent.name == 'root':
+                # Items in defined top-level places like acquisition, intervals, etc. do not act as 'containers'
+                # in that they do not set the `.parent` attribute; ask if object is in their in-memory dictionaries
+                # instead
+                for parent_field_name, parent_field_value in parent.fields.items():
+                    if isinstance(parent_field_value, dict) and neurodata_object.name in parent_field_value:
+                        return parent_field_name + "/" + neurodata_object.name + "/" + current_location
+                return neurodata_object.name + "/" + current_location
+            return find_location_in_memory_nwbfile(
+                current_location=neurodata_object.name + "/" + current_location, neurodata_object=parent
+            )
 
         # reassign value if linked timestamp or linked data to avoid recursion error
         if key in ['timestamps', 'data'] and isinstance(value, TimeSeries):
-            path_to_linked_object = get_object_path(value)
+            path_to_linked_object = find_location_in_memory_nwbfile(key, value)
             if key == 'timestamps':
                 value = value.timestamps
             elif key == 'data':
@@ -302,7 +318,8 @@ class TimeSeries(NWBDataInterface):
             key = f'{key} (link to {path_to_linked_object})'
 
         if key in ['timestamp_link', 'data_link']:
-            value = [get_object_path(v) for v in value]
+            linked_key = 'timestamps' if key == 'timestamp_link' else 'data'
+            value = [find_location_in_memory_nwbfile(linked_key, v) for v in value]
 
         return super()._generate_field_html(key, value, level, access_code)
 

@@ -465,71 +465,15 @@ class TestTimeSeries(TestCase):
             )
 
     def test_repr_html(self):
-        """ Test that html representation of linked timestamp data will occur as expected and will not cause a Recursion
-        Error
+        """ Test that html representation of linked timestamp data will occur as expected and will not cause a
+        RecursionError
         """
         data1 = [0, 1, 2, 3]
         data2 = [4, 5, 6, 7]
         timestamps = [0.0, 0.1, 0.2, 0.3]
         ts1 = TimeSeries(name="test_ts1", data=data1, unit="grams", timestamps=timestamps)
         ts2 = TimeSeries(name="test_ts2", data=data2, unit="grams", timestamps=ts1)
-        expected_output = ('\n        <style>\n            .container-fields {\n                font-family: "Open '
-                           'Sans", Arial, sans-serif;\n            }\n            .container-fields .field-value {\n  '
-                           '              color: #00788E;\n            }\n            .container-fields details > '
-                           'summary {\n                cursor: pointer;\n                display: list-item;\n        '
-                           '    }\n            .container-fields details > summary:hover {\n                color: '
-                           '#0A6EAA;\n            }\n        </style>\n        \n        <script>\n            '
-                           'function copyToClipboard(text) {\n                navigator.clipboard.writeText('
-                           'text).then(function() {\n                    console.log(\'Copied to clipboard: \' + '
-                           'text);\n                }, function(err) {\n                    console.error(\'Could not '
-                           'copy text: \', err);\n                });\n            }\n\n            '
-                           'document.addEventListener(\'DOMContentLoaded\', function() {\n                let '
-                           'fieldKeys = document.querySelectorAll(\'.container-fields .field-key\');\n                '
-                           'fieldKeys.forEach(function(fieldKey) {\n                    fieldKey.addEventListener('
-                           '\'click\', function() {\n                        let accessCode = fieldKey.getAttribute('
-                           '\'title\').replace(\'Access code: \', \'\');\n                        copyToClipboard('
-                           'accessCode);\n                    });\n                });\n            });\n        '
-                           '</script>\n        <div class=\'container-wrap\'><div class=\'container-header\'><div '
-                           'class=\'xr-obj-type\'><h3>test_ts2 (TimeSeries)</h3></div></div><div style="margin-left: '
-                           '0px;" class="container-fields"><span class="field-key" title=".resolution">resolution: '
-                           '</span><span class="field-value">-1.0</span></div><div style="margin-left: 0px;" '
-                           'class="container-fields"><span class="field-key" title=".comments">comments: </span><span '
-                           'class="field-value">no comments</span></div><div style="margin-left: 0px;" '
-                           'class="container-fields"><span class="field-key" title=".description">description: '
-                           '</span><span class="field-value">no description</span></div><div style="margin-left: '
-                           '0px;" class="container-fields"><span class="field-key" title=".conversion">conversion: '
-                           '</span><span class="field-value">1.0</span></div><div style="margin-left: 0px;" '
-                           'class="container-fields"><span class="field-key" title=".offset">offset: </span><span '
-                           'class="field-value">0.0</span></div><div style="margin-left: 0px;" '
-                           'class="container-fields"><span class="field-key" title=".unit">unit: </span><span '
-                           'class="field-value">grams</span></div><details><summary style="display: list-item; '
-                           'margin-left: 0px;" class="container-fields field-key" '
-                           'title=".data"><b>data</b></summary><div style="margin-left: 20px;" '
-                           'class="container-fields"><span class="field-key" title=".data[0]">0: </span><span '
-                           'class="field-value">4</span></div><div style="margin-left: 20px;" '
-                           'class="container-fields"><span class="field-key" title=".data[0][1]">1: </span><span '
-                           'class="field-value">5</span></div><div style="margin-left: 20px;" '
-                           'class="container-fields"><span class="field-key" title=".data[0][1][2]">2: </span><span '
-                           'class="field-value">6</span></div><div style="margin-left: 20px;" '
-                           'class="container-fields"><span class="field-key" title=".data[0][1][2][3]">3: '
-                           '</span><span class="field-value">7</span></div></details><details><summary '
-                           'style="display: list-item; margin-left: 0px;" class="container-fields field-key" '
-                           'title=".timestamps"><b>timestamps (link to /test_ts1)</b></summary><div '
-                           'style="margin-left: 20px;" class="container-fields"><span class="field-key" '
-                           'title=".timestamps[0]">0: </span><span class="field-value">0.0</span></div><div '
-                           'style="margin-left: 20px;" class="container-fields"><span class="field-key" '
-                           'title=".timestamps[0][1]">1: </span><span class="field-value">0.1</span></div><div '
-                           'style="margin-left: 20px;" class="container-fields"><span class="field-key" '
-                           'title=".timestamps[0][1][2]">2: </span><span class="field-value">0.2</span></div><div '
-                           'style="margin-left: 20px;" class="container-fields"><span class="field-key" '
-                           'title=".timestamps[0][1][2][3]">3: </span><span '
-                           'class="field-value">0.3</span></div></details><div style="margin-left: 0px;" '
-                           'class="container-fields"><span class="field-key" '
-                           'title=".timestamps_unit">timestamps_unit: </span><span '
-                           'class="field-value">seconds</span></div><div style="margin-left: 0px;" '
-                           'class="container-fields"><span class="field-key" title=".interval">interval: </span><span '
-                           'class="field-value">1</span></div></div>')
-        assert ts2._repr_html_() == expected_output
+        self.assertIn('(link to test_ts1/timestamps)', ts2._repr_html_())
 
 
 class TestImage(TestCase):
