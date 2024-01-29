@@ -10,11 +10,10 @@ computing because it supports concurrent reads and writes.
 
 Note that the Zarr native storage formats are optimized for storage in cloud storage
 (e.g., S3). For very large files, Zarr will create many files which can lead to
-issues for traditional file systems (that are not cloud object stores) due to
-limitations on the number of files per directory (this affects local disk,
-GDrive, Dropbox etc.).
+issues for traditional file system (that are not cloud object stores) due to limitations
+on the number of files per directory (this affects local disk, GDrive, Dropbox etc.).
 
-Zarr read and write is provided by the :hdmf-zarr:`hdmf-zarr package<>`. First, create an
+Zarr read and write is provided by the :hdmf-zarr:`hdmf-zarr<>` package. First, create an
 an NWBFile using PyNWB.
 """
 
@@ -41,8 +40,8 @@ nwbfile = NWBFile(
 # Like HDF5, Zarr provides options to chunk and compress datasets. To leverage these
 # features, replace all :py:class:`~hdmf.backends.hdf5.h5_utils.H5DataIO` with the analogous
 # :py:class:`~hdmf_zarr.utils.ZarrDataIO`, which takes compressors specified by the
-# `numcodecs` library. For example, to create a :py:class:`.TimeSeries`
-# with a Zarr backend, use the following:
+# :py:mod:`numcodecs` library. For example, here is an example :py:class:`.TimeSeries`
+# where the ``data`` Dataset is compressed with a Blosc-zstd compressor:
 
 from numcodecs import Blosc
 from hdmf_zarr import ZarrDataIO
@@ -55,7 +54,7 @@ data_with_zarr_data_io = ZarrDataIO(
 )
 
 #######################################################################################
-# Now add it to the `NWBFile`.
+# Now add it to the :py:class:`.NWBFile`.
 
 nwbfile.add_acquisition(
     TimeSeries(
@@ -70,7 +69,7 @@ nwbfile.add_acquisition(
 # Writing to Zarr
 # ---------------
 # To write NWB files to Zarr, replace the :py:class:`~pynwb.NWBHDF5IO` with
-# :py:class:`hdmf_zarr.nwb.NWBZarrIO` for read/write
+# :py:class:`hdmf_zarr.nwb.NWBZarrIO`.
 
 from hdmf_zarr.nwb import NWBZarrIO
 import os
@@ -81,9 +80,10 @@ with NWBZarrIO(path=path, mode="w") as io:
     io.write(nwbfile)
 
 #######################################################################################
-# The main reason for using the absolute_path here is for testing purposes to ensure
-# links and references work as expected. Otherwise, using the relative path here instead
-# is fine.
+# .. note::
+#   The main reason for using the ``absolute_path`` here is for testing purposes to
+#   ensure links and references work as expected. Otherwise, using the relative path
+#   here instead is fine.
 #
 # Reading from Zarr
 # -----------------
