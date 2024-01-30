@@ -58,6 +58,7 @@ with h5py.File("test_edit.nwb", "r+") as f:
     f["acquisition"]["synthetic_timeseries"]["data"].attrs["unit"] = "volts"
 
 
+##############################################
 # Changing the shape of dataset
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Whether it is possible to change the shape of a dataset depends on how the dataset was
