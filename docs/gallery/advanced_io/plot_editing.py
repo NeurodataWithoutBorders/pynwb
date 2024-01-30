@@ -10,6 +10,8 @@ editing and running a validation check on the file after editing it.
 
 In-place editing with h5py
 ---------------------------
+The :py:mod:`h5py` package allows for in-place editing of HDF5 files. Where possible,
+this is the recommended way to edit HDF5 files.
 
 Editing a dataset value
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -120,7 +122,7 @@ with h5py.File("test_edit2.nwb", "r+") as f:
 #
 # Replacing a dataset in h5py
 # ----------------------------
-# There are several types of dataset edits that cannot be done in-place.
+# There are several types of dataset edits that cannot be done in-place:
 #
 #     * Changing the shape of a dataset with a fixed shape
 #     * Changing the datatype of a dataset
@@ -133,11 +135,11 @@ with h5py.File("test_edit2.nwb", "r+") as f:
 # the data from the old dataset to the new dataset, and deleting the old dataset.
 
 with h5py.File("test_edit2.nwb", "r+") as f:
-    data = f["acquisition"]["synthetic_timeseries"]["data"][:]
+    data_values = f["acquisition"]["synthetic_timeseries"]["data"][:]
     del f["acquisition"]["synthetic_timeseries"]["data"]
     f["acquisition"]["synthetic_timeseries"].create_dataset(
         name="data",
-        data=data,
+        data=data_values,
         maxshape=(None, 100),
         chunks=(100, 100),
         compression="gzip",
