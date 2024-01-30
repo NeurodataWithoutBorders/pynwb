@@ -70,10 +70,6 @@ with h5py.File("test_edit.nwb", "r+") as f:
 #
 # First, let's create an NWB file with a dataset with a flexible shape:
 
-from pynwb import NWBHDF5IO, NWBFile, TimeSeries
-from datetime import datetime
-from dateutil.tz import tzlocal
-import numpy as np
 from hdmf.backends.hdf5.h5_utils import H5DataIO
 
 nwbfile = NWBFile(
