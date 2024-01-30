@@ -2,12 +2,17 @@
 Editing NWB files
 =================
 
-This tutorial demonstrates how to edit NWB files. How and whether it is possible to edit
-an NWB file depends on the storage backend and the type of edit. Here, we go through the
-common types of edits for HDF5 files. Keep in mind that any edit to an existing NWB file
-make it no longer a valid NWB file. We call this "doing surgery" on the NWB file.
-We highly recommend making a copy before editing and running a validation check on the
-file after editing it. See :ref:`validating`.
+This tutorial demonstrates how to edit NWB files manually (i.e., without using PyNWB). 
+How and whether it is possible to edit an NWB file depends on the storage backend 
+and the type of edit. Here, we go through the common types of manual edits for HDF5 files
+using  :py:mod:`h5py`. We call this "doing surgery" on the NWB file.
+
+.. warning::
+
+     Manually editing an existing NWB file can make the file invalid if you are not careful. 
+     We highly recommend making a copy before editing and running a validation check on the
+     file after editing it. See :ref:`validating`.
+
 
 In-place editing with h5py
 ---------------------------
