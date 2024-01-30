@@ -7,7 +7,7 @@ an NWB file depends on the storage backend and the type of edit. Here, we go thr
 common types of edits for HDF5 files. Keep in mind that any edit to an existing NWB file
 make it no longer a valid NWB file. We call this "doing surgery" on the NWB file.
 We highly recommend making a copy before editing and running a validation check on the
-file after editing it.
+file after editing it. See :ref:`validating`.
 
 In-place editing with h5py
 ---------------------------
@@ -69,18 +69,23 @@ with h5py.File("test_edit.nwb", "r+") as f:
 ##############################################
 # .. warning::
 #    You can edit values that will bring the file out of compliance with
-#    the NWB specification. For example:
-#
-# with h5py.File("test_edit.nwb", "r+") as f:
-#    f["acquisition"]["synthetic_timeseries"]["neurodata_type"] = "TimeSeries"
+#    the NWB specification.
 #
 # Renaming groups and datasets
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Rename groups and datasets in-place using the ``move`` method. For example, to rename
 # the ``"synthetic_timeseries"`` group:
 
-with h5py.File("test_edit2.nwb", "r+") as f:
+with h5py.File("test_edit.nwb", "r+") as f:
     f["acquisition"].move("synthetic_timeseries", "synthetic_timeseries_renamed")
+
+##############################################
+# You can use this same technique to move a group or dataset to a different location in
+# the file. For example, to move the ``"synthetic_timeseries_renamed"`` group to the
+# ``"analysis"`` group:
+
+with h5py.File("test_edit.nwb", "r+") as f:
+    f["acquisition"].move("synthetic_timeseries_renamed", "/analysis/synthetic_timeseries_renamed")
 
 ##############################################
 # Changing the shape of dataset
@@ -91,7 +96,7 @@ with h5py.File("test_edit2.nwb", "r+") as f:
 # ``maxshape`` argument of the :py:class:`~hdmf.backends.hdf5.h5_utils.H5DataIO` class
 # constructor. Using a ``None`` value for ``maxshape`` allows the dataset to be reset
 # arbitrarily long in that dimension. Chunking is required for datasets with flexible
-# shapes. Setting ``maxshape`` automatically sets chunking to ``True`, if not specified.
+# shapes. Setting ``maxshape`` automatically sets chunking to ``True``, if not specified.
 #
 # First, let's create an NWB file with a dataset with a flexible shape:
 
