@@ -110,15 +110,7 @@ with h5py.File("test_edit2.nwb", "r+") as f:
 
 ##############################################
 # This will change the shape of the dataset in-place. If you try to change the shape of
-# a dataset with a fixed shape, you will get an error:
-#
-# .. code-block:: python
-#   import h5py
-#
-#   with h5py.File("test_edit.nwb", "r+") as f:
-#       f["acquisition"]["synthetic_timeseries"]["data"].resize((200, 100))
-#
-#   ValueError: Unable to resize dataset (no object or chunk storage)
+# a dataset with a fixed shape, you will get an error.
 #
 # Replacing a dataset in h5py
 # ----------------------------
