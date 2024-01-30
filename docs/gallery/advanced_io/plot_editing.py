@@ -5,16 +5,17 @@ Editing NWB files
 This tutorial demonstrates how to edit NWB files. How and whether it is possible to edit
 an NWB file depends on the storage backend and the type of edit. Here, we go through the
 common types of edits for HDF5 files. Keep in mind that any edit to an existing NWB file
-make it no longer a valid NWB file. We highly recommend making a copy before
-editing and running a validation check on the file after editing it.
+make it no longer a valid NWB file. We call this "doing surgery" on the NWB file.
+We highly recommend making a copy before editing and running a validation check on the
+file after editing it.
 
 In-place editing with h5py
 ---------------------------
 The :py:mod:`h5py` package allows for in-place editing of HDF5 files. Where possible,
 this is the recommended way to edit HDF5 files.
 
-Editing a dataset value
-~~~~~~~~~~~~~~~~~~~~~~~
+Editing values of datasets and attributes
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 You can  change the value(s) of a dataset using :py:mod:`h5py`.
 
 First, let's create an NWB file with data:
@@ -59,6 +60,27 @@ with h5py.File("test_edit.nwb", "r+") as f:
 with h5py.File("test_edit.nwb", "r+") as f:
     f["acquisition"]["synthetic_timeseries"]["data"].attrs["unit"] = "volts"
 
+##############################################
+# This also works for attributes of groups:
+
+with h5py.File("test_edit.nwb", "r+") as f:
+    f["acquisition"]["synthetic_timeseries"].attrs["description"] = "Random values in volts"
+
+##############################################
+# .. warning::
+#    You can edit values that will bring the file out of compliance with
+#    the NWB specification. For example:
+#
+# with h5py.File("test_edit.nwb", "r+") as f:
+#    f["acquisition"]["synthetic_timeseries"]["neurodata_type"] = "TimeSeries"
+#
+# Renaming groups and datasets
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Rename groups and datasets in-place using the ``move`` method. For example, to rename
+# the ``"synthetic_timeseries"`` group:
+
+with h5py.File("test_edit2.nwb", "r+") as f:
+    f["acquisition"].move("synthetic_timeseries", "synthetic_timeseries_renamed")
 
 ##############################################
 # Changing the shape of dataset
@@ -147,3 +169,5 @@ with h5py.File("test_edit2.nwb", "r+") as f:
 #   ``h5repack`` command line tool. See the `h5repack documentation
 #   <https://support.hdfgroup.org/HDF5/doc/RM/Tools.html#Tools-Repack>`_ for more
 #   information.
+
+
