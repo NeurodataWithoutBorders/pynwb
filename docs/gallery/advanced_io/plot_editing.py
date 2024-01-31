@@ -4,10 +4,10 @@
 Editing NWB files
 =================
 
-This tutorial demonstrates how to edit NWB files in-place. For information on how to add
-or remove containers from an NWB file, see :ref:`modifying_data`. How and whether it is
-possible to edit an NWB file depends on the storage backend
-and the type of edit.
+This tutorial demonstrates how to edit NWB files in-place to make small changes to
+existing containers. To add or remove containers from an NWB file, see
+:ref:`modifying_data`. How and whether it is possible to edit an NWB file depends on the
+storage backend and the type of edit.
 
 .. warning::
 
@@ -58,45 +58,11 @@ with NWBHDF5IO("test_edit.nwb", "r+") as io:
 
 
 ##############################################
-# You can also edit the attributes of that dataset through the ``attrs`` attribute:
+# You can edit the attributes of that dataset through the ``attrs`` attribute:
 
 with NWBHDF5IO("test_edit.nwb", "r+") as io:
     nwbfile = io.read()
     nwbfile.acquisition["synthetic_timeseries"].data.attrs["unit"] = "volts"
-
-##############################################
-# Editing groups
-# --------------
-# To edit the attributes of a group, open the file and edit it using :py:mod:`h5py`:
-
-import h5py
-
-with h5py.File("test_edit.nwb", "r+") as f:
-    f["acquisition"]["synthetic_timeseries"].attrs["description"] = "Random values in volts"
-
-##############################################
-# .. warning::
-#    You can edit values that will bring the file out of compliance with the NWB
-#    specification.
-#
-# Renaming groups and datasets
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Rename groups and datasets in-place using the :py:meth:`~h5py.Group.move` method. For example, to rename
-# the ``"synthetic_timeseries"`` group:
-
-with h5py.File("test_edit.nwb", "r+") as f:
-    f["acquisition"].move("synthetic_timeseries", "synthetic_timeseries_renamed")
-
-##############################################
-# You can use this same technique to move a group or dataset to a different location in
-# the file. For example, to move the ``"synthetic_timeseries_renamed"`` group to the
-# ``"analysis"`` group:
-
-with h5py.File("test_edit.nwb", "r+") as f:
-    f["acquisition"].move(
-        "synthetic_timeseries_renamed",
-        "/analysis/synthetic_timeseries_renamed",
-    )
 
 ##############################################
 # Changing the shape of dataset
@@ -156,3 +122,36 @@ with NWBHDF5IO("test_edit2.nwb", "r+") as io:
 #   chunking, max-shape, or fill-value of a dataset. For any of these, we recommend using
 #   the :py:class:`pynwb.NWBHDF5IO.export` method to export the data to a new file. See
 #   :ref:`modifying_data` for more information.
+#
+# Editing groups
+# --------------
+# To edit the attributes of a group, open the file and edit it using :py:mod:`h5py`:
+
+import h5py
+
+with h5py.File("test_edit.nwb", "r+") as f:
+    f["acquisition"]["synthetic_timeseries"].attrs["description"] = "Random values in volts"
+
+##############################################
+# .. warning::
+#    Be careful not to edit values that will bring the file out of compliance with the
+#    NWB specification.
+#
+# Renaming groups and datasets
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Rename groups and datasets in-place using the :py:meth:`~h5py.Group.move` method. For example, to rename
+# the ``"synthetic_timeseries"`` group:
+
+with h5py.File("test_edit.nwb", "r+") as f:
+    f["acquisition"].move("synthetic_timeseries", "synthetic_timeseries_renamed")
+
+##############################################
+# You can use this same technique to move a group or dataset to a different location in
+# the file. For example, to move the ``"synthetic_timeseries_renamed"`` group to the
+# ``"analysis"`` group:
+
+with h5py.File("test_edit.nwb", "r+") as f:
+    f["acquisition"].move(
+        "synthetic_timeseries_renamed",
+        "/analysis/synthetic_timeseries_renamed",
+    )
