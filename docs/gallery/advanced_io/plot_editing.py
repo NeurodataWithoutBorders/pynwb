@@ -126,6 +126,7 @@ with NWBHDF5IO("test_edit2.nwb", "r+") as io:
 #
 # Editing groups
 # --------------
+# Editing of groups is not yet supported in PyNWB. 
 # To edit the attributes of a group, open the file and edit it using :py:mod:`h5py`:
 
 import h5py
