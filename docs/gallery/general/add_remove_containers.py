@@ -76,8 +76,7 @@ with NWBHDF5IO(filename, "r") as io:
 #   Directly modifying the data in these :py:class:`h5py.Dataset <h5py.Dataset>` objects immediately
 #   modifies the data on disk
 #   (the :py:meth:`NWBHDF5IO.write <pynwb.NWBHDF5IO.write>` method does not need to be called and the
-#   :py:class:`~pynwb.NWBHDF5IO` instance does not need to be closed). Directly modifying datasets in this way
-#   can lead to files that do not validate or cannot be opened, so exercise caution when using this method.
+#   :py:class:`~pynwb.NWBHDF5IO` instance does not need to be closed).
 #   Note: only chunked datasets or datasets with ``maxshape`` set can be resized.
 #   See the `h5py chunked storage documentation <https://docs.h5py.org/en/stable/high/dataset.html#chunked-storage>`_
 #   for more details.
