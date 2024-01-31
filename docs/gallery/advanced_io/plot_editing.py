@@ -150,8 +150,9 @@ with NWBHDF5IO("test_edit2.nwb", "r+") as io:
 # This will change the shape of the dataset in-place. If you try to change the shape of
 # a dataset with a fixed shape, you will get an error.
 #
-# There are several types of dataset edits that cannot be done in-place: changing the
-# shape of a dataset with a fixed shape, or changing the datatype, compression,
-# chunking, max-shape, or fill-value of a dataset. For any of these, we recommend using
-# the :py:class:`pynwb.NWBHDF5IO.export` method to export the data to a new file. See
-# :ref:`modifying_data` for more information.
+# .. note::
+#   There are several types of dataset edits that cannot be done in-place: changing the
+#   shape of a dataset with a fixed shape, or changing the datatype, compression,
+#   chunking, max-shape, or fill-value of a dataset. For any of these, we recommend using
+#   the :py:class:`pynwb.NWBHDF5IO.export` method to export the data to a new file. See
+#   :ref:`modifying_data` for more information.
