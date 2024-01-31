@@ -71,8 +71,8 @@ with NWBHDF5IO("test_edit.nwb", "r+") as io:
 # created. If the dataset was created with a flexible shape, then it is possible to
 # change in-place. Creating a dataset with a flexible shape is done by specifying the
 # ``maxshape`` argument of the :py:class:`~hdmf.backends.hdf5.h5_utils.H5DataIO` class
-# constructor. Using a ``None`` value for a component of the ``maxshape`` tuple allows 
-# the size of the corresponding dimension to grow, such that is can be be reset arbitrarily long 
+# constructor. Using a ``None`` value for a component of the ``maxshape`` tuple allows
+# the size of the corresponding dimension to grow, such that is can be be reset arbitrarily long
 # in that dimension. Chunking is required for datasets with flexible shapes. Setting ``maxshape``,
 # hence,  automatically sets chunking to ``True``, if not specified.
 #
@@ -105,7 +105,7 @@ with NWBHDF5IO("test_edit2.nwb", "w") as io:
 ##############################################
 # The ``None``value  in the first component of ``maxshape`` means that the
 # the first dimension of the dataset is unlimited. By setting the second dimension
-# of ``maxshape`` to ``100``, that dimension is fixed to be no larger than ``100``. 
+# of ``maxshape`` to ``100``, that dimension is fixed to be no larger than ``100``.
 # If you do not specify a``maxshape``, then the shape of the dataset will be fixed
 # to the shape that the dataset was created with. Here, you can change the shape of
 # the first dimension of this dataset.
@@ -128,7 +128,7 @@ with NWBHDF5IO("test_edit2.nwb", "r+") as io:
 #
 # Editing groups
 # --------------
-# Editing of groups is not yet supported in PyNWB. 
+# Editing of groups is not yet supported in PyNWB.
 # To edit the attributes of a group, open the file and edit it using :py:mod:`h5py`:
 
 import h5py
