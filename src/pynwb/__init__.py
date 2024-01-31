@@ -19,15 +19,26 @@ from .spec import NWBDatasetSpec, NWBGroupSpec, NWBNamespace  # noqa E402
 from .validate import validate  # noqa: F401, E402
 
 
-@docval({'name': 'config_path', 'type': str, 'doc': 'Path to the configuartion file.',
-         'default': None})
-def load_termset_config(config_path: str):
+CUR_DIR = os.path.dirname(os.path.realpath(__file__))
+path_to_config = os.path.join(CUR_DIR, 'config/nwb_config.yaml')
+
+
+def get_loaded_config():
+    if __TYPE_MAP.ts_config.config is None:
+        msg = "No configuration is loaded."
+        raise ValueError(msg)
+    else:
+        return __TYPE_MAP.ts_config.config
+
+def load_termset_config(config_path: str = None):
     """
     This method will:
     - Search the current configuration for data_types that are already present. These data_types will be
     replaced with the new configuration.
     - If the data_type is not present, then they will be loaded alongside the default curated configuration.
     """
+    if config_path is None:
+        config_path = path_to_config
     __TYPE_MAP.ts_config.load_termset_config(config_path)
 
 def unload_termset_config():
@@ -61,13 +72,10 @@ def _get_resources():
 global __NS_CATALOG
 global __TYPE_MAP
 
-CUR_DIR = os.path.dirname(os.path.realpath(__file__))
-path_to_config = os.path.join(CUR_DIR, 'config/nwb_config.yaml')
-
 __NS_CATALOG = NamespaceCatalog(NWBGroupSpec, NWBDatasetSpec, NWBNamespace)
 
 hdmf_typemap = hdmf.common.get_type_map()
-__TYPE_MAP = TypeMap(__NS_CATALOG, config_path=path_to_config)
+__TYPE_MAP = TypeMap(__NS_CATALOG)
 __TYPE_MAP.merge(hdmf_typemap, ns_catalog=True)
 
 

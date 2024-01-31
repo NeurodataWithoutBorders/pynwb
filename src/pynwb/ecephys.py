@@ -35,7 +35,7 @@ class ElectrodeGroup(NWBContainer):
                              % str(args_to_set['position']))
         for key, val in args_to_set.items():
             setattr(self, key, val)
-
+        # breakpoint()
 
 @register_class('ElectricalSeries', CORE_NAMESPACE)
 class ElectricalSeries(TimeSeries):

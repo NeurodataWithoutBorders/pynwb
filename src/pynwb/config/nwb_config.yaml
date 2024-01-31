@@ -1,7 +1,14 @@
 namespaces:
   core:
-    version: TBD
+    version: 2.7.0-alpha
     data_types:
       Subject:
-        species: src/pynwb/config/nwb_subject_termset.yaml
-        field2: '...'
+        species: nwb_subject_termset.yaml
+      NWBFile:
+        experimenter: experimenter_termset.yaml
+        # electrodes:
+        #   location: location_termset.yaml
+      ElectrodeGroup:
+        location: location_termset.yaml
+
+
