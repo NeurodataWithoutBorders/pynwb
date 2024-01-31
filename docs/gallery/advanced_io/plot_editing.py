@@ -71,9 +71,10 @@ with NWBHDF5IO("test_edit.nwb", "r+") as io:
 # created. If the dataset was created with a flexible shape, then it is possible to
 # change in-place. Creating a dataset with a flexible shape is done by specifying the
 # ``maxshape`` argument of the :py:class:`~hdmf.backends.hdf5.h5_utils.H5DataIO` class
-# constructor. Using a ``None`` value for ``maxshape`` allows the dataset to be reset
-# arbitrarily long in that dimension. Chunking is required for datasets with flexible
-# shapes. Setting ``maxshape`` automatically sets chunking to ``True``, if not specified.
+# constructor. Using a ``None`` value for a component of the ``maxshape`` tuple allows 
+# the size of the corresponding dimension to grow, such that is can be be reset arbitrarily long 
+# in that dimension. Chunking is required for datasets with flexible shapes. Setting ``maxshape``,
+# hence,  automatically sets chunking to ``True``, if not specified.
 #
 # First, let's create an NWB file with a dataset with a flexible shape:
 
