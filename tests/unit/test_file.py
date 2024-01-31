@@ -11,7 +11,6 @@ from pynwb.epoch import TimeIntervals
 from pynwb.ecephys import ElectricalSeries
 from pynwb.testing import TestCase, remove_test_file
 
-unload_termset_config()
 
 class NWBFileTest(TestCase):
     def setUp(self):

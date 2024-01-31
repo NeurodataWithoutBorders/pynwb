@@ -32,10 +32,7 @@ def get_loaded_config():
 
 def load_termset_config(config_path: str = None):
     """
-    This method will:
-    - Search the current configuration for data_types that are already present. These data_types will be
-    replaced with the new configuration.
-    - If the data_type is not present, then they will be loaded alongside the default curated configuration.
+    This method will either load the default config or the config provided by the path.
     """
     if config_path is None:
         config_path = path_to_config
