@@ -1,21 +1,23 @@
 """
+.. _editing:
+
 Editing NWB files
 =================
 
-This tutorial demonstrates how to edit NWB files manually (i.e., without using PyNWB). 
-How and whether it is possible to edit an NWB file depends on the storage backend 
-and the type of edit. Here, we go through the common types of manual edits for HDF5 files
-using  :py:mod:`h5py`. We call this "doing surgery" on the NWB file.
+This tutorial demonstrates how to edit NWB files in-place. For information on how to add
+or remove containers from an NWB file, see :ref:`modifying_data`. How and whether it is
+possible to edit an NWB file depends on the storage backend
+and the type of edit.
 
 .. warning::
 
-     Manually editing an existing NWB file can make the file invalid if you are not careful. 
-     We highly recommend making a copy before editing and running a validation check on the
-     file after editing it. See :ref:`validating`.
+     Manually editing an existing NWB file can make the file invalid if you are not
+     careful. We highly recommend making a copy before editing and running a validation
+     check on the file after editing it. See :ref:`validating`.
 
 
-Editing datasets in place
---------------------------
+Editing datasets
+----------------
 When reading an HDF5 NWB file, PyNWB exposes :py:class:`h5py.Dataset` objects, which can
 be edited in place. For this to work, you must open the file in read/write mode
 (``"r+"`` or ``"a"``).
@@ -48,9 +50,6 @@ with NWBHDF5IO("test_edit.nwb", "w") as io:
     io.write(nwbfile)
 
 ##############################################
-# Editing values of datasets
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~
-#
 # Now, let's edit the values of the dataset
 
 with NWBHDF5IO("test_edit.nwb", "r+") as io:
@@ -66,8 +65,9 @@ with NWBHDF5IO("test_edit.nwb", "r+") as io:
     nwbfile.acquisition["synthetic_timeseries"].data.attrs["unit"] = "volts"
 
 ##############################################
-# If you want to edit the attributes of a group, you will need to open the file and edit
-# it using :py:mod:`h5py`:
+# Editing groups
+# --------------
+# To edit the attributes of a group, open the file and edit it using :py:mod:`h5py`:
 
 import h5py
 
@@ -76,12 +76,12 @@ with h5py.File("test_edit.nwb", "r+") as f:
 
 ##############################################
 # .. warning::
-#    You can edit values that will bring the file out of compliance with
-#    the NWB specification.
+#    You can edit values that will bring the file out of compliance with the NWB
+#    specification.
 #
 # Renaming groups and datasets
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Rename groups and datasets in-place using the ``move`` method. For example, to rename
+# Rename groups and datasets in-place using the :py:meth:`~h5py.Group.move` method. For example, to rename
 # the ``"synthetic_timeseries"`` group:
 
 with h5py.File("test_edit.nwb", "r+") as f:
@@ -93,7 +93,10 @@ with h5py.File("test_edit.nwb", "r+") as f:
 # ``"analysis"`` group:
 
 with h5py.File("test_edit.nwb", "r+") as f:
-    f["acquisition"].move("synthetic_timeseries_renamed", "/analysis/synthetic_timeseries_renamed")
+    f["acquisition"].move(
+        "synthetic_timeseries_renamed",
+        "/analysis/synthetic_timeseries_renamed",
+    )
 
 ##############################################
 # Changing the shape of dataset
@@ -141,46 +144,14 @@ with NWBHDF5IO("test_edit2.nwb", "w") as io:
 
 with NWBHDF5IO("test_edit2.nwb", "r+") as io:
     nwbfile = io.read()
-    nwbfile.acquisition["synthetic_timeseries"].resize((200, 100))
+    nwbfile.acquisition["synthetic_timeseries"].data.resize((200, 100))
 
 ##############################################
 # This will change the shape of the dataset in-place. If you try to change the shape of
 # a dataset with a fixed shape, you will get an error.
 #
-# Replacing a dataset using h5py
-# ------------------------------
-# There are several types of dataset edits that cannot be done in-place:
-#
-#     * Changing the shape of a dataset with a fixed shape
-#     * Changing the datatype of a dataset
-#     * Changing the compression of a dataset
-#     * Changing the chunking of a dataset
-#     * Changing the max-shape of a dataset
-#     * Changing the fill-value of a dataset
-#
-# For any of these, you will need to create a new dataset with the new shape, copying
-# the data from the old dataset to the new dataset, and deleting the old dataset.
-
-with h5py.File("test_edit2.nwb", "r+") as f:
-    data_values = f["acquisition"]["synthetic_timeseries"]["data"][:]
-    del f["acquisition"]["synthetic_timeseries"]["data"]
-    f["acquisition"]["synthetic_timeseries"].create_dataset(
-        name="data",
-        data=data_values,
-        maxshape=(None, 100),
-        chunks=(100, 100),
-        compression="gzip",
-        compression_opts=3,
-        fillvalue=0.0,
-        dtype=np.float64,
-    )
-
-##############################################
-# .. note::
-#   Because of the way HDF5 works, the ``del`` action will not actually free up any
-#   space in the HDF5 file. To free up space in the file, you will need to run the
-#   ``h5repack`` command line tool. See the `h5repack documentation
-#   <https://support.hdfgroup.org/HDF5/doc/RM/Tools.html#Tools-Repack>`_ for more
-#   information.
-
-
+# There are several types of dataset edits that cannot be done in-place: changing the
+# shape of a dataset with a fixed shape, or changing the datatype, compression,
+# chunking, max-shape, or fill-value of a dataset. For any of these, we recommend using
+# the :py:class:`pynwb.NWBHDF5IO.export` method to export the data to a new file. See
+# :ref:`modifying_data` for more information.
