@@ -185,4 +185,4 @@ with NWBHDF5IO(filename, mode="r") as read_io:
 # For more information about the export functionality, see :ref:`export`
 # and the PyNWB documentation for :py:meth:`NWBHDF5IO.export <pynwb.NWBHDF5IO.export>`.
 #
-# For more options about editing a file in place, see :ref:`editing`.
+# For more information about editing a file in place, see :ref:`editing`.
