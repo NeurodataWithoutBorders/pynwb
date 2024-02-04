@@ -3,6 +3,7 @@ import pandas as pd
 
 from datetime import datetime, timedelta
 from dateutil.tz import tzlocal, tzutc
+from hdmf.common import DynamicTable
 
 from pynwb import NWBFile, TimeSeries, NWBHDF5IO
 from pynwb.base import Image, Images
@@ -148,6 +149,15 @@ class NWBFileTest(TestCase):
         self.nwbfile.add_stimulus(TimeSeries('test_ts', [0, 1, 2, 3, 4, 5],
                                              'grams', timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5]))
         self.assertEqual(len(self.nwbfile.stimulus), 1)
+
+    def test_add_stimulus_dynamic_table(self):
+        dt = DynamicTable(
+            name='test_dynamic_table',
+            description='a test dynamic table',
+        )
+        self.nwbfile.add_stimulus(dt)
+        self.assertEqual(len(self.nwbfile.stimulus), 1)
+        self.assertIs(self.nwbfile.stimulus['test_dynamic_table'], dt)
 
     def test_add_stimulus_template(self):
         self.nwbfile.add_stimulus_template(TimeSeries('test_ts', [0, 1, 2, 3, 4, 5],

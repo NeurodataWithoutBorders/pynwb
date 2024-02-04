@@ -177,7 +177,7 @@ class NWBFile(MultiContainerInterface, HERDManager):
         {
             'attr': 'stimulus',
             'add': '_add_stimulus_internal',
-            'type': TimeSeries,
+            'type': (TimeSeries, DynamicTable, NWBDataInterface),
             'get': 'get_stimulus'
         },
         {
@@ -356,7 +356,8 @@ class NWBFile(MultiContainerInterface, HERDManager):
             {'name': 'analysis', 'type': (list, tuple),
              'doc': 'result of analysis', 'default': None},
             {'name': 'stimulus', 'type': (list, tuple),
-             'doc': 'Stimulus TimeSeries objects belonging to this NWBFile', 'default': None},
+             'doc': 'Stimulus TimeSeries, DynamicTable, or NWBDataInterface objects belonging to this NWBFile',
+             'default': None},
             {'name': 'stimulus_template', 'type': (list, tuple),
              'doc': 'Stimulus template TimeSeries objects belonging to this NWBFile', 'default': None},
             {'name': 'epochs', 'type': TimeIntervals,
@@ -856,14 +857,22 @@ class NWBFile(MultiContainerInterface, HERDManager):
         if use_sweep_table:
             self._update_sweep_table(nwbdata)
 
-    @docval({'name': 'timeseries', 'type': TimeSeries},
-            {'name': 'use_sweep_table', 'type': bool, 'default': False, 'doc': 'Use the deprecated SweepTable'})
+    @docval({'name': 'nwbdata', 'type': (TimeSeries, DynamicTable, NWBDataInterface), 'default': None,
+             'doc': 'The stimulus presentation data to add to this NWBFile.'},
+            {'name': 'use_sweep_table', 'type': bool, 'default': False, 'doc': 'Use the deprecated SweepTable'},
+            {'name': 'timeseries', 'type': TimeSeries, 'default': None,
+             'doc': 'The "timeseries" keyword argument is deprecated. Use the "nwbdata" argument instead.'},)
     def add_stimulus(self, **kwargs):
-        timeseries = popargs('timeseries', kwargs)
-        self._add_stimulus_internal(timeseries)
+        nwbdata, timeseries = popargs('nwbdata', 'timeseries', kwargs)
+        if timeseries is not None:
+            warn("The 'timeseries' keyword argument is deprecated. Use the 'nwbdata' argument instead.",
+                 DeprecationWarning)
+            if nwbdata is not None:
+                nwbdata = timeseries
+        self._add_stimulus_internal(nwbdata)
         use_sweep_table = popargs('use_sweep_table', kwargs)
         if use_sweep_table:
-            self._update_sweep_table(timeseries)
+            self._update_sweep_table(nwbdata)
 
     @docval({'name': 'timeseries', 'type': (TimeSeries, Images)},
             {'name': 'use_sweep_table', 'type': bool, 'default': False, 'doc': 'Use the deprecated SweepTable'})
