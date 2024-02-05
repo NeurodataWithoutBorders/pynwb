@@ -857,22 +857,27 @@ class NWBFile(MultiContainerInterface, HERDManager):
         if use_sweep_table:
             self._update_sweep_table(nwbdata)
 
-    @docval({'name': 'nwbdata', 'type': (TimeSeries, DynamicTable, NWBDataInterface), 'default': None,
+    @docval({'name': 'stimulus', 'type': (TimeSeries, DynamicTable, NWBDataInterface), 'default': None,
              'doc': 'The stimulus presentation data to add to this NWBFile.'},
             {'name': 'use_sweep_table', 'type': bool, 'default': False, 'doc': 'Use the deprecated SweepTable'},
             {'name': 'timeseries', 'type': TimeSeries, 'default': None,
              'doc': 'The "timeseries" keyword argument is deprecated. Use the "nwbdata" argument instead.'},)
     def add_stimulus(self, **kwargs):
-        nwbdata, timeseries = popargs('nwbdata', 'timeseries', kwargs)
+        stimulus, timeseries = popargs('stimulus', 'timeseries', kwargs)
+        if stimulus is None and timeseries is None:
+            raise ValueError(
+                "The 'stimulus' keyword argument is required. The 'timeseries' keyword argument can be "
+                "provided for backwards compatibility but is deprecated in favor of 'stimulus'."
+            )
         if timeseries is not None:
-            warn("The 'timeseries' keyword argument is deprecated. Use the 'nwbdata' argument instead.",
+            warn("The 'timeseries' keyword argument is deprecated. Use the 'stimulus' argument instead.",
                  DeprecationWarning)
-            if nwbdata is not None:
-                nwbdata = timeseries
-        self._add_stimulus_internal(nwbdata)
+            if stimulus is None:
+                stimulus = timeseries
+        self._add_stimulus_internal(stimulus)
         use_sweep_table = popargs('use_sweep_table', kwargs)
         if use_sweep_table:
-            self._update_sweep_table(nwbdata)
+            self._update_sweep_table(stimulus)
 
     @docval({'name': 'timeseries', 'type': (TimeSeries, Images)},
             {'name': 'use_sweep_table', 'type': bool, 'default': False, 'doc': 'Use the deprecated SweepTable'})
