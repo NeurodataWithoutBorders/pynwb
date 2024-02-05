@@ -69,7 +69,7 @@ fs = CachingFileSystem(
 # next, open the file
 with fs.open(s3_url, "rb") as f:
     with h5py.File(f) as file:
-        with pynwb.NWBHDF5IO(file=file, load_namespaces=True) as io:
+        with pynwb.NWBHDF5IO(file=file) as io:
             nwbfile = io.read()
             print(nwbfile.acquisition['lick_times'].time_series['lick_left_times'].data[:])
 
@@ -90,6 +90,9 @@ with fs.open(s3_url, "rb") as f:
 # `fsspec documentation on known implementations <https://filesystem-spec.readthedocs.io/en/latest/api.html?highlight=S3#other-known-implementations>`_
 # for a full updated list of supported store formats.
 #
+# One downside of this fsspec method is that fsspec is not optimized for reading HDF5 files, and so streaming data
+# using this method can be slow. A faster alternative is ``remfile`` described below.
+#
 # Streaming Method 2: ROS3
 # ------------------------
 # ROS3 stands for "read only S3" and is a driver created by the HDF5 Group that allows HDF5 to read HDF5 files stored
@@ -99,7 +102,7 @@ with fs.open(s3_url, "rb") as f:
 
 from pynwb import NWBHDF5IO
 
-with NWBHDF5IO(s3_url, mode='r', load_namespaces=True, driver='ros3') as io:
+with NWBHDF5IO(s3_url, mode='r', driver='ros3') as io:
     nwbfile = io.read()
     print(nwbfile)
     print(nwbfile.acquisition['lick_times'].time_series['lick_left_times'].data[:])
@@ -120,19 +123,52 @@ with NWBHDF5IO(s3_url, mode='r', load_namespaces=True, driver='ros3') as io:
 #
 #        pip uninstall h5py
 #        conda install -c conda-forge "h5py>=3.2"
+#
+# Besides the extra burden of installing h5py from a non-PyPI source, one downside of this ROS3 method is that
+# this method does not support automatic retries in case the connection fails.
 
+
+##################################################
+# Method 3: remfile
+# -----------------
+# ``remfile`` is another library that enables indexing and streaming of files in s3. remfile is simple and fast,
+# especially for the initial load of the nwb file and for accessing small pieces of data. The caveats of ``remfile``
+# are that it is a very new project that has not been tested in a variety of use-cases and caching options are
+# limited compared to ``fsspec``. `remfile` is a simple, lightweight dependency with a very small codebase.
+#
+# You can install ``remfile`` with pip:
+#
+# .. code-block:: bash
+#
+#   pip install remfile
+#
+
+import h5py
+from pynwb import NWBHDF5IO
+import remfile
+
+rem_file = remfile.File(s3_url)
+
+with h5py.File(rem_file, "r") as h5py_file:
+    with NWBHDF5IO(file=h5py_file, load_namespaces=True) as io:
+        nwbfile = io.read()
+        print(nwbfile.acquisition["lick_times"].time_series["lick_left_times"].data[:])
 
 ##################################################
 # Which streaming method to choose?
 # ---------------------------------
 #
 # From a user perspective, once opened, the :py:class:`~pynwb.file.NWBFile` works the same with
-# both fsspec and ros3.  However, in general, we currently recommend using fsspec for streaming
-# NWB files because it is more performant and reliable than ros3. In particular fsspec:
+# fsspec, ros3, or remfile.  However, in general, we currently recommend using fsspec for streaming
+# NWB files because it is more performant and reliable than ros3 and more widely tested than remfile.
+# However, if you are experiencing long wait times for the initial file load on your network, you
+# may want to try remfile.
+#
+# Advantages of fsspec include:
 #
 # 1. supports caching, which will dramatically speed up repeated requests for the
 #    same region of data,
 # 2. automatically retries when s3 fails to return, which helps avoid errors when accessing data due to
-#     intermittent errors in connections with S3,
+#    intermittent errors in connections with S3 (remfile does this as well),
 # 3. works also with other storage backends (e.g., GoogleDrive or Dropbox, not just S3) and file formats, and
 # 4. in our experience appears to provide faster out-of-the-box performance than the ros3 driver.

@@ -82,7 +82,6 @@ class TestImportStructure(TestCase):
             "spec",
             "testing",
             "validate",
-            "warn",
         ]
         for member in expected_structure:
             self.assertIn(member=member, container=current_structure)
