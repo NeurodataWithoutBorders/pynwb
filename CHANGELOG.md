@@ -11,6 +11,7 @@
 - Expose `starting_time` in `mock_ElectricalSeries`. @h-mayorquin [#1805](https://github.com/NeurodataWithoutBorders/pynwb/pull/1805)
 - Enhance `get_data_in_units()` to work with objects that have a `channel_conversion` attribute like the `ElectricalSeries`. @h-mayorquin [#1806](https://github.com/NeurodataWithoutBorders/pynwb/pull/1806)
 - Refactor validation CLI tests to use `{sys.executable} -m coverage` to use the same Python version and run correctly on Debian systems. @yarikoptic [#1811](https://github.com/NeurodataWithoutBorders/pynwb/pull/1811)
+- Fixed tests to address newly caught validation errors. @rly [#1839](https://github.com/NeurodataWithoutBorders/pynwb/pull/1839)
 
 ### Bug fixes
 - Fix bug where namespaces were loaded in "w-" mode. @h-mayorquin [#1795](https://github.com/NeurodataWithoutBorders/pynwb/pull/1795)
@@ -19,6 +20,7 @@
 ### Documentation and tutorial enhancements
 - Add RemFile to streaming tutorial. @bendichter [#1761](https://github.com/NeurodataWithoutBorders/pynwb/pull/1761)
 - Fix typos and improve clarify throughout tutorials. @zm711 [#1825](https://github.com/NeurodataWithoutBorders/pynwb/pull/1825)
+- Add Zarr IO tutorial @bendichter [#1834](https://github.com/NeurodataWithoutBorders/pynwb/pull/1834)
 
 ## PyNWB 2.5.0 (August 18, 2023)
 

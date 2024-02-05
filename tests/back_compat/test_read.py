@@ -29,6 +29,12 @@ class TestReadOldVersions(TestCase):
                                "- expected an array of shape '[None]', got non-array data 'one publication'")],
         '1.0.3_str_pub.nwb': [("root/general/related_publications (general/related_publications): incorrect shape "
                                "- expected an array of shape '[None]', got non-array data 'one publication'")],
+        '1.5.1_timeseries_no_data.nwb': [("TimeSeries/data/data (acquisition/test_timeseries/data): argument missing")],
+        '1.5.1_timeseries_no_unit.nwb': [("TimeSeries/data/unit (acquisition/test_timeseries/data): argument missing")],
+        '1.5.1_imageseries_no_data.nwb': [("ImageSeries/data/data (acquisition/test_imageseries/data): "
+                                           "argument missing")],
+        '1.5.1_imageseries_no_unit.nwb': [("ImageSeries/data/unit (acquisition/test_imageseries/data): "
+                                           "argument missing")],
     }
 
     def get_io(self, path):
