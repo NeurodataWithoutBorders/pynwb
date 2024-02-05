@@ -177,7 +177,7 @@ class NWBFile(MultiContainerInterface, HERDManager):
         {
             'attr': 'stimulus',
             'add': '_add_stimulus_internal',
-            'type': (TimeSeries, DynamicTable, NWBDataInterface),
+            'type': (NWBDataInterface, DynamicTable),
             'get': 'get_stimulus'
         },
         {

@@ -31,9 +31,11 @@ class NWBFileMap(ObjectMapper):
         self.unmap(stimulus_spec)
         self.unmap(stimulus_spec.get_group('presentation'))
         self.unmap(stimulus_spec.get_group('templates'))
-        self.map_spec('stimulus', stimulus_spec.get_group('presentation').get_neurodata_type('TimeSeries'))
-        self.map_spec('stimulus', stimulus_spec.get_group('presentation').get_neurodata_type('DynamicTable'))
+        # map "stimulus" to NWBDataInterface and DynamicTable and unmap the spec for TimeSeries because it is
+        # included in the mapping to NWBDataInterface
+        self.unmap(stimulus_spec.get_group('presentation').get_neurodata_type('TimeSeries'))
         self.map_spec('stimulus', stimulus_spec.get_group('presentation').get_neurodata_type('NWBDataInterface'))
+        self.map_spec('stimulus', stimulus_spec.get_group('presentation').get_neurodata_type('DynamicTable'))
         self.map_spec('stimulus_template', stimulus_spec.get_group('templates').get_neurodata_type('TimeSeries'))
         self.map_spec('stimulus_template', stimulus_spec.get_group('templates').get_neurodata_type('Images'))
 
