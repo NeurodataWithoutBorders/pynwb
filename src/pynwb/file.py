@@ -867,11 +867,13 @@ class NWBFile(MultiContainerInterface, HERDManager):
         if stimulus is None and timeseries is None:
             raise ValueError(
                 "The 'stimulus' keyword argument is required. The 'timeseries' keyword argument can be "
-                "provided for backwards compatibility but is deprecated in favor of 'stimulus'."
+                "provided for backwards compatibility but is deprecated in favor of 'stimulus' and will be "
+                "removed in PyNWB 3.0."
             )
+        # TODO remove this support in PyNWB 3.0
         if timeseries is not None:
-            warn("The 'timeseries' keyword argument is deprecated. Use the 'stimulus' argument instead.",
-                 DeprecationWarning)
+            warn("The 'timeseries' keyword argument is deprecated and will be removed in PyNWB 3.0. "
+                 "Use the 'stimulus' argument instead.", DeprecationWarning)
             if stimulus is None:
                 stimulus = timeseries
         self._add_stimulus_internal(stimulus)
