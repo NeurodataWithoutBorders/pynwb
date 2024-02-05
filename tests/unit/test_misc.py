@@ -33,7 +33,13 @@ class DecompositionSeriesConstructor(TestCase):
                                 timestamps=[1., 2., 3.])
         bands = DynamicTable(name='bands', description='band info for LFPSpectralAnalysis', columns=[
             VectorData(name='band_name', description='name of bands', data=['alpha', 'beta', 'gamma']),
-            VectorData(name='band_limits', description='low and high cutoffs in Hz', data=np.ones((3, 2)))
+            VectorData(name='band_limits', description='low and high cutoffs in Hz', data=np.ones((3, 2))),
+            VectorData(name='band_mean', description='mean gaussian filters in Hz', data=np.ones((3,))),
+            VectorData(
+                name='band_stdev',
+                description='standard deviation of gaussian filters in Hz',
+                data=np.ones((3,))
+            ),
         ])
         spec_anal = DecompositionSeries(name='LFPSpectralAnalysis',
                                         description='my description',
@@ -49,6 +55,8 @@ class DecompositionSeriesConstructor(TestCase):
         np.testing.assert_equal(spec_anal.timestamps, [1., 2., 3.])
         self.assertEqual(spec_anal.bands['band_name'].data, ['alpha', 'beta', 'gamma'])
         np.testing.assert_equal(spec_anal.bands['band_limits'].data, np.ones((3, 2)))
+        np.testing.assert_equal(spec_anal.bands['band_mean'].data, np.ones((3,)))
+        np.testing.assert_equal(spec_anal.bands['band_stdev'].data, np.ones((3,)))
         self.assertEqual(spec_anal.source_timeseries, timeseries)
         self.assertEqual(spec_anal.metric, 'amplitude')
 

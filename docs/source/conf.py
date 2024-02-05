@@ -149,6 +149,8 @@ intersphinx_mapping = {
     'nwbwidgets': ("https://nwb-widgets.readthedocs.io/en/latest/", None),
     'nwb-overview': ("https://nwb-overview.readthedocs.io/en/latest/", None),
     'zarr': ("https://zarr.readthedocs.io/en/stable/", None),
+    'hdmf-zarr': ("https://hdmf-zarr.readthedocs.io/en/latest/", None),
+    'numcodecs': ("https://numcodecs.readthedocs.io/en/latest/", None),
 }
 
 extlinks = {
@@ -160,6 +162,7 @@ extlinks = {
     'hdmf-docs': ('https://hdmf.readthedocs.io/en/stable/%s', '%s'),
     'dandi': ('https://www.dandiarchive.org/%s', '%s'),
     "nwbinspector": ("https://nwbinspector.readthedocs.io/en/dev/%s", "%s"),
+    'hdmf-zarr': ('https://hdmf-zarr.readthedocs.io/en/latest/%s', '%s'),
 }
 
 nitpicky = True
