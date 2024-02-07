@@ -405,6 +405,65 @@ class TestTimeSeries(TestCase):
         ts = mock_TimeSeries(data=[1., 2., 3.])
         assert_array_equal(ts.get_data_in_units(), [1., 2., 3.])
 
+    def test_non_positive_rate(self):
+        with self.assertRaisesWith(ValueError, 'Rate must not be a negative value.'):
+            TimeSeries(name='test_ts', data=list(), unit='volts', rate=-1.0)
+
+        with self.assertWarnsWith(UserWarning,
+                                  'Timeseries has a rate of 0.0 Hz, but the length of the data is greater than 1.'):
+            TimeSeries(name='test_ts1', data=[1, 2, 3], unit='volts', rate=0.0)
+
+    def test_file_with_non_positive_rate_in_construct_mode(self):
+        """Test that UserWarning is raised when rate is 0 or negative
+         while being in construct mode (i.e,. on data read)."""
+        obj = TimeSeries.__new__(TimeSeries,
+                                 container_source=None,
+                                 parent=None,
+                                 object_id="test",
+                                 in_construct_mode=True)
+        with self.assertWarnsWith(warn_type=UserWarning, exc_msg='Rate must not be a negative value.'):
+            obj.__init__(
+                name="test_ts",
+                data=list(),
+                unit="volts",
+                rate=-1.0
+            )
+
+    def test_file_with_rate_and_timestamps_in_construct_mode(self):
+        """Test that UserWarning is raised when rate and timestamps are both specified
+         while being in construct mode (i.e,. on data read)."""
+        obj = TimeSeries.__new__(TimeSeries,
+                                 container_source=None,
+                                 parent=None,
+                                 object_id="test",
+                                 in_construct_mode=True)
+        with self.assertWarnsWith(warn_type=UserWarning, exc_msg='Specifying rate and timestamps is not supported.'):
+            obj.__init__(
+                name="test_ts",
+                data=[11, 12, 13, 14, 15],
+                unit="volts",
+                rate=1.0,
+                timestamps=[1, 2, 3, 4, 5]
+            )
+
+    def test_file_with_starting_time_and_timestamps_in_construct_mode(self):
+        """Test that UserWarning is raised when starting_time and timestamps are both specified
+         while being in construct mode (i.e,. on data read)."""
+        obj = TimeSeries.__new__(TimeSeries,
+                                 container_source=None,
+                                 parent=None,
+                                 object_id="test",
+                                 in_construct_mode=True)
+        with self.assertWarnsWith(warn_type=UserWarning,
+                                  exc_msg='Specifying starting_time and timestamps is not supported.'):
+            obj.__init__(
+                name="test_ts",
+                data=[11, 12, 13, 14, 15],
+                unit="volts",
+                starting_time=1.0,
+                timestamps=[1, 2, 3, 4, 5]
+            )
+
 
 class TestImage(TestCase):
     def test_init(self):
