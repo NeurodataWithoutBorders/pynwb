@@ -16,3 +16,6 @@ dependencies:
   - fsspec==2023.6.0
   - requests==2.28.1
   - aiohttp==3.8.3
+  - pip
+  - pip:
+    - remfile==0.1.9

@@ -148,6 +148,8 @@ intersphinx_mapping = {
     'fsspec': ("https://filesystem-spec.readthedocs.io/en/latest/", None),
     'nwbwidgets': ("https://nwb-widgets.readthedocs.io/en/latest/", None),
     'nwb-overview': ("https://nwb-overview.readthedocs.io/en/latest/", None),
+    'hdmf-zarr': ("https://hdmf-zarr.readthedocs.io/en/latest/", None),
+    'numcodecs': ("https://numcodecs.readthedocs.io/en/latest/", None),
 }
 
 extlinks = {
@@ -159,6 +161,7 @@ extlinks = {
     'hdmf-docs': ('https://hdmf.readthedocs.io/en/stable/%s', '%s'),
     'dandi': ('https://www.dandiarchive.org/%s', '%s'),
     "nwbinspector": ("https://nwbinspector.readthedocs.io/en/dev/%s", "%s"),
+    'hdmf-zarr': ('https://hdmf-zarr.readthedocs.io/en/latest/%s', '%s'),
 }
 
 # Add any paths that contain templates here, relative to this directory.
