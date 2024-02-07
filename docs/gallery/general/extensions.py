@@ -100,7 +100,7 @@ ns_builder.export(ns_path)
 # Using extensions
 # -----------------------------------------------------
 #
-# After an extension has been created, it can be used by downstream codes for reading and writing data.
+# After an extension has been created, it can be used by downstream code for reading and writing data.
 # There are two main mechanisms for reading and writing extension data with PyNWB.
 # The first involves defining new :py:class:`~pynwb.core.NWBContainer` classes that are then mapped
 # to the neurodata types in the extension.
@@ -167,7 +167,7 @@ AutoTetrodeSeries = get_class("TetrodeSeries", "mylab")
 # By default, extensions are cached to file so that your NWB file will carry the extensions needed to read the file
 # with it.
 #
-# To demonstrate this, first we will make some fake data using our extensions.
+# To demonstrate this, first we will make some simulated data using our extensions.
 
 from datetime import datetime
 
@@ -248,16 +248,11 @@ io.close()
 # .. note::
 #
 #     For more information on writing NWB files, see :ref:`basic_writing`.
-
-####################
-# By default, PyNWB does not use the namespaces cached in a file--you must
-# explicitly specify this. This behavior is enabled by the *load_namespaces*
-# argument to the :py:class:`~pynwb.NWBHDF5IO` constructor.
-
-with NWBHDF5IO("cache_spec_example.nwb", mode="r", load_namespaces=True) as io:
-    nwbfile = io.read()
-
-####################
+#
+# By default, if a namespace is not already loaded, PyNWB loads the namespace cached in
+# the file. To disable this, set ``load_namespaces=False`` in the
+# :py:class:`~pynwb.NWBHDF5IO` constructor.
+#
 # .. _MultiContainerInterface:
 #
 # Creating and using a custom MultiContainerInterface
@@ -375,17 +370,17 @@ with NWBHDF5IO("test_multicontainerinterface.nwb", "r") as io:
     nwb = io.read()
     print(nwb.get_processing_module()["potato_sack"].get_potato("big_potato").weight)
 # note: you can call get_processing_module() with or without the module name as
-# an argument. however, if there is more than one module, the name is required.
-# here, there is more than one potato, so the name of the potato is required as
-# an argument to get get_potato
+# an argument. However, if there is more than one module, the name is required.
+# Here, there is more than one potato, so the name of the potato is required as
+# an argument to get_potato
 
 ####################
 # Example: Cortical Surface Mesh
 # -----------------------------------------------------
 #
 # Here we show how to create extensions by creating a data class for a
-# cortical surface mesh. This data type is particularly important for ECoG data, we need to know where each electrode is
-# with respect to the gyri and sulci. Surface mesh objects contain two types of data:
+# cortical surface mesh. This data type is particularly important for ECoG data, since we need to know where
+# each electrode is with respect to the gyri and sulci. Surface mesh objects contain two types of data:
 #
 # 1. `vertices`, which is an (n, 3) matrix of floats that represents points in 3D space
 #
