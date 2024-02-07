@@ -50,18 +50,22 @@ class TestTimeSeriesLinking(TestCase):
         ''' Test that data get linked to in TimeSeries '''
         tsa = TimeSeries(name='a', data=np.linspace(0, 1, 1000), timestamps=np.arange(1000.), unit='m')
         tsb = TimeSeries(name='b', data=tsa, timestamps=np.arange(1000.), unit='m')
+        tsc = TimeSeries(name='c', data=tsb, timestamps=np.arange(1000.), unit='m')
         nwbfile = NWBFile(identifier='foo',
                           session_start_time=datetime(2017, 5, 1, 12, 0, 0, tzinfo=tzlocal()),
                           session_description='bar')
         nwbfile.add_acquisition(tsa)
         nwbfile.add_acquisition(tsb)
+        nwbfile.add_acquisition(tsc)
         with NWBHDF5IO(self.path, 'w') as io:
             io.write(nwbfile)
         with NWBHDF5IO(self.path, 'r') as io:
             nwbfile = io.read()
         tsa = nwbfile.acquisition['a']
         tsb = nwbfile.acquisition['b']
+        tsc = nwbfile.acquisition['c']
         self.assertIs(tsa.data, tsb.data)
+        self.assertIs(tsa.data, tsc.data)
 
 
 class TestImagesIO(AcquisitionH5IOMixin, TestCase):
