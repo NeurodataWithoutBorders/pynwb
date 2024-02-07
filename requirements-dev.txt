@@ -2,13 +2,14 @@
 # compute coverage, and create test environments. note that depending on the version of python installed, different
 # versions of requirements may be installed due to package incompatibilities.
 #
-black==23.9.1
+black==23.10.1
 codespell==2.2.6
 coverage==7.3.2
 flake8==6.1.0
 flake8-debugger==4.1.2
 flake8-print==5.0.0
 isort==5.12.0
-pytest==7.4.2
+pre-commit==3.5.0
+pytest==7.4.3
 pytest-cov==4.1.0
 tox==4.11.3

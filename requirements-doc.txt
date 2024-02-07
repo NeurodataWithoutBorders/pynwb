@@ -11,4 +11,5 @@ sphinx-copybutton
 dataframe_image   # used to render large dataframe as image in the sphinx gallery to improve html display
 lxml  # used by dataframe_image when using the matplotlib backend
 hdf5plugin
-dandi>=0.46.6
+dandi>=0.59.1
+hdmf-zarr
