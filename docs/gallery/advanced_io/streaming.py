@@ -25,7 +25,7 @@ Now you can get the url of a particular NWB file using the dandiset ID and the p
 
 .. note::
 
-   To learn more about the dandi API see the 
+   To learn more about the dandi API see the
    `DANDI Python API docs <https://dandi.readthedocs.io/en/stable/modref/index.html>`_
 
 """
