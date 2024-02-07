@@ -174,15 +174,25 @@ class TimeSeries(NWBDataInterface):
         timestamps = args_to_process['timestamps']
         if timestamps is not None:
             if self.rate is not None:
-                raise ValueError('Specifying rate and timestamps is not supported.')
+                self._error_on_new_warn_on_construct(
+                    error_msg='Specifying rate and timestamps is not supported.'
+                )
             if self.starting_time is not None:
-                raise ValueError('Specifying starting_time and timestamps is not supported.')
+                self._error_on_new_warn_on_construct(
+                    error_msg='Specifying starting_time and timestamps is not supported.'
+                )
             self.fields['timestamps'] = timestamps
             self.timestamps_unit = self.__time_unit
             self.interval = 1
             if isinstance(timestamps, TimeSeries):
                 timestamps.__add_link('timestamp_link', self)
         elif self.rate is not None:
+            if self.rate < 0:
+                self._error_on_new_warn_on_construct(
+                    error_msg='Rate must not be a negative value.'
+                )
+            elif self.rate == 0.0 and get_data_shape(data)[0] > 1:
+                warn('Timeseries has a rate of 0.0 Hz, but the length of the data is greater than 1.')
             if self.starting_time is None:  # override default if rate is provided but not starting time
                 self.starting_time = 0.0
             self.starting_time_unit = self.__time_unit
@@ -288,7 +298,11 @@ class TimeSeries(NWBDataInterface):
             return np.arange(len(self.data)) / self.rate + self.starting_time
 
     def get_data_in_units(self):
-        return np.asarray(self.data) * self.conversion + self.offset
+        if "channel_conversion" in self.fields:
+            scale_factor = self.conversion * self.channel_conversion[:, np.newaxis]
+        else:
+            scale_factor = self.conversion
+        return np.asarray(self.data) * scale_factor + self.offset
 
 
 @register_class('Image', CORE_NAMESPACE)

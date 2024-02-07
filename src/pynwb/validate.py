@@ -120,7 +120,11 @@ def _get_cached_namespaces_to_validate(
     is_method=False,
 )
 def validate(**kwargs):
-    """Validate NWB file(s) against a namespace or its cached namespaces."""
+    """Validate NWB file(s) against a namespace or its cached namespaces.
+
+    NOTE: If an io object is provided and no namespace name is specified, then the file will be validated
+    against the core namespace, even if use_cached_namespaces is True.
+    """
     from . import NWBHDF5IO  # TODO: modularize to avoid circular import
 
     io, paths, use_cached_namespaces, namespace, verbose, driver = getargs(
@@ -156,6 +160,7 @@ def validate(**kwargs):
                         file=sys.stderr,
                     )
         else:
+            io_kwargs.update(load_namespaces=False)
             namespaces_to_validate = [CORE_NAMESPACE]
 
         if namespace is not None:

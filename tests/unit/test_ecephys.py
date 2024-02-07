@@ -18,6 +18,7 @@ from pynwb.ecephys import (
 from pynwb.device import Device
 from pynwb.file import ElectrodeTable
 from pynwb.testing import TestCase
+from pynwb.testing.mock.ecephys import mock_ElectricalSeries
 
 from hdmf.common import DynamicTableRegion
 
@@ -114,6 +115,24 @@ class ElectricalSeriesConstructor(TestCase):
                "ElectricalSeries 'test_ts1': The second dimension of data does not match the length of electrodes, "
                "but instead the first does. Data is oriented incorrectly and should be transposed."
                    ) in str(w[-1].message)
+
+    def test_get_data_in_units(self):
+
+        data = np.asarray([[1, 1, 1, 1, 1], [1, 1, 1, 1, 1]])
+        conversion = 1.0
+        offset = 3.0
+        channel_conversion = np.asarray([2.0, 2.0])
+        electrical_series = mock_ElectricalSeries(
+            data=data,
+            conversion=conversion,
+            offset=offset,
+            channel_conversion=channel_conversion,
+        )
+
+        data_in_units = electrical_series.get_data_in_units()
+        expected_data = data * conversion * channel_conversion[:, np.newaxis] + offset
+
+        np.testing.assert_almost_equal(data_in_units, expected_data)
 
 
 class SpikeEventSeriesConstructor(TestCase):
