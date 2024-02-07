@@ -381,7 +381,6 @@ from . import image  # noqa: F401,E402
 from . import misc  # noqa: F401,E402
 from . import ogen  # noqa: F401,E402
 from . import ophys  # noqa: F401,E402
-from . import retinotopy  # noqa: F401,E402
 from . import legacy  # noqa: F401,E402
 from hdmf.data_utils import DataChunkIterator  # noqa: F401,E402
 from hdmf.backends.hdf5 import H5DataIO  # noqa: F401,E402
