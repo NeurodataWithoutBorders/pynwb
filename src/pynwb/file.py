@@ -613,7 +613,7 @@ class NWBFile(MultiContainerInterface, HERDManager):
     def add_epoch_column(self, **kwargs):
         """
         Add a column to the epoch table.
-        See :py:meth:`~pynwb.core.TimeIntervals.add_column` for more details
+        See :py:meth:`~hdmf.common.table.DynamicTable.add_column` for more details
         """
         self.__check_epochs()
         self.epoch_tags.update(kwargs.pop('tags', list()))
@@ -784,7 +784,7 @@ class NWBFile(MultiContainerInterface, HERDManager):
     def add_trial(self, **kwargs):
         """
         Add a trial to the trial table.
-        See :py:meth:`~hdmf.common.table.DynamicTable.add_interval` for more details.
+        See :py:meth:`~pynwb.epoch.TimeIntervals.add_interval` for more details.
 
         Required fields are *start_time*, *stop_time*, and any columns that have
         been added (through calls to `add_trial_columns`).

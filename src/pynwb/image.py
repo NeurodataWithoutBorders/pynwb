@@ -46,7 +46,7 @@ class ImageSeries(TimeSeries):
                      'is specified. If unit (and data) are not specified, then unit will be set to "unknown".'),
              'default': None},
             {'name': 'format', 'type': str,
-             'doc': 'Format of image. Three types: 1) Image format; tiff, png, jpg, etc. 2) external 3) raw.',
+             'doc': 'Format of image. Three types - 1) Image format; tiff, png, jpg, etc. 2) external 3) raw.',
              'default': None},
             {'name': 'external_file', 'type': ('array_data', 'data'),
              'doc': 'Path or URL to one or more external file(s). Field only present if format=external. '

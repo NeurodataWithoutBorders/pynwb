@@ -24,7 +24,7 @@ objects which provide functionality for creating and retrieving:
  * :ref:`modules_overview`, i.e., objects for storing and grouping analyses, and
  * experiment metadata and other metadata related to data provenance.
 
-The following sections describe the :py:class:`~pynwb.base.TimeSeries` and :py:class:`~pynwb.base.ProcessingModules`
+The following sections describe the :py:class:`~pynwb.base.TimeSeries` and :py:class:`~pynwb.base.ProcessingModule`
 classes in further detail.
 
 .. _timeseries_overview:
@@ -568,7 +568,7 @@ nwbfile.add_trial(start_time=6.0, stop_time=10.0, correct=False)
 
 ####################
 # :py:class:`~hdmf.common.table.DynamicTable` and its subclasses can be converted to a pandas
-# :py:class:`~pandas.DataFrame` for convenient analysis using :py:meth:`.DynamicTable.to_dataframe`.
+# :py:class:`~pandas.DataFrame` for convenient analysis using :py:meth:`~hdmf.common.table.DynamicTable.to_dataframe`.
 
 nwbfile.trials.to_dataframe()
 

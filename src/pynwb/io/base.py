@@ -73,6 +73,19 @@ class TimeSeriesMap(NWBContainerMapper):
         else:
             return tstamps_builder.data
 
+    @NWBContainerMapper.object_attr("data")
+    def data_attr(self, container, manager):
+        ret = container.fields.get('data')
+        if isinstance(ret, TimeSeries):
+            owner = ret
+            curr = owner.fields.get('data')
+            while isinstance(curr, TimeSeries):
+                owner = curr
+                curr = owner.fields.get('data')
+            data_builder = manager.build(owner)
+            ret = LinkBuilder(data_builder['data'], 'data')
+        return ret
+
     @NWBContainerMapper.constructor_arg("data")
     def data_carg(self, builder, manager):
         # handle case where a TimeSeries is read and missing data
@@ -105,7 +118,10 @@ class TimeSeriesMap(NWBContainerMapper):
                 data_builder = manager.construct(target.parent)
             else:
                 data_builder = target
-        unit_value = data_builder.attributes.get('unit')
+        if isinstance(data_builder, TimeSeries):  # Data linked in another timeseries
+            unit_value = data_builder.unit
+        else:  # DatasetBuilder owned by this timeseries
+            unit_value = data_builder.attributes.get('unit')
         if unit_value is None:
             return timeseries_cls.DEFAULT_UNIT
         return unit_value

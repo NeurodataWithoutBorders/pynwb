@@ -351,7 +351,7 @@ rowindex = nwbfile.add_intracellular_recording(
 #####################################################################
 # .. note:: Since :py:meth:`~pynwb.file.NWBFile.add_intracellular_recording` can automatically add
 #          the objects to the NWBFile we do not need to separately call
-#          :py:meth:`~pynwb.file.NWBFile.add_stimulus` and :py:meth:`~pynwb.file.NWBFile.add_acquistion`
+#          :py:meth:`~pynwb.file.NWBFile.add_stimulus` and :py:meth:`~pynwb.file.NWBFile.add_acquisition`
 #          to add our stimulus and response, but it is still fine to do so.
 #
 # .. note:: The ``id`` parameter in the call is optional and if the ``id`` is omitted then PyNWB will
@@ -549,8 +549,7 @@ print(icephys_simultaneous_recordings.colnames)
 # .. note:: The same process applies to all our other tables as well. We can use the
 #         corresponding :py:meth:`~pynwb.file.NWBFile.get_intracellular_recordings`,
 #         :py:meth:`~pynwb.file.NWBFile.get_icephys_sequential_recordings`,
-#         :py:meth:`~pynwb.file.NWBFile.get_icephys_repetitions`, and
-#         :py:meth:`~pynwb.file.NWBFile.get_icephys_conditions` functions instead.
+#         :py:meth:`~pynwb.file.NWBFile.get_icephys_repetitions` functions instead.
 #         In general, we can always use the get functions instead of accessing the property
 #         of the file.
 #
@@ -561,7 +560,7 @@ print(icephys_simultaneous_recordings.colnames)
 #
 # Add a single simultaneous recording consisting of a set of intracellular recordings.
 # Again, setting the id for a simultaneous recording is optional. The recordings
-# argument of the :py:meth:`~pynwb.file.NWBFile.add_simultaneous_recording` function
+# argument of the :py:meth:`~pynwb.file.NWBFile.add_icephys_simultaneous_recording` function
 # here is simply a list of ints with the indices of the corresponding rows in
 # the :py:class:`~pynwb.icephys.IntracellularRecordingsTable`
 #
@@ -618,7 +617,7 @@ nwbfile.icephys_simultaneous_recordings.add_column(
 # Add a single sequential recording consisting of a set of simultaneous recordings.
 # Again, setting the id for a sequential recording is optional. Also this table is
 # optional and will be created automatically by NWBFile. The ``simultaneous_recordings``
-# argument of the :py:meth:`~pynwb.file.NWBFile.add_sequential_recording` function
+# argument of the :py:meth:`~pynwb.file.NWBFile.add_icephys_sequential_recording` function
 # here is simply a list of ints with the indices of the corresponding rows in
 # the :py:class:`~pynwb.icephys.SimultaneousRecordingsTable`.
 
@@ -633,7 +632,7 @@ rowindex = nwbfile.add_icephys_sequential_recording(
 # Add a single repetition consisting of a set of sequential recordings. Again, setting
 # the id for a repetition is optional. Also this table is optional and will be created
 # automatically by NWBFile. The ``sequential_recordings argument`` of the
-# :py:meth:`~pynwb.file.NWBFile.add_sequential_recording` function here is simply
+# :py:meth:`~pynwb.file.NWBFile.add_icephys_repetition` function here is simply
 # a list of ints with the indices of the corresponding rows in
 # the :py:class:`~pynwb.icephys.SequentialRecordingsTable`.
 
@@ -646,7 +645,7 @@ rowindex = nwbfile.add_icephys_repetition(sequential_recordings=[0], id=17)
 # Add a single experimental condition consisting of a set of repetitions. Again,
 # setting the id for a condition is optional. Also this table is optional and
 # will be created automatically by NWBFile. The ``repetitions`` argument of
-# the :py:meth:`~pynwb.file.NWBFile.add_icephys_condition` function again is
+# the :py:meth:`~pynwb.file.NWBFile.add_icephys_experimental_condition` function again is
 # simply a list of ints with the indices of the correspondingto rows in the
 # :py:class:`~pynwb.icephys.RepetitionsTable`.
 

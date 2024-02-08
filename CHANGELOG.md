@@ -11,6 +11,7 @@
 - For `NWBHDF5IO()`, change the default of arg `load_namespaces` from `False` to `True`. @bendichter [#1748](https://github.com/NeurodataWithoutBorders/pynwb/pull/1748)
 - Add `NWBHDF5IO.can_read()`. @bendichter [#1703](https://github.com/NeurodataWithoutBorders/pynwb/pull/1703)
 - Add `pynwb.get_nwbfile_version()`. @bendichter [#1703](https://github.com/NeurodataWithoutBorders/pynwb/pull/1703)
+- Fix usage of the `validate` function in the `pynwb.testing.testh5io` classes and cache the spec by default in those classes. @rly [#1782](https://github.com/NeurodataWithoutBorders/pynwb/pull/1782)
 - Updated timeseries data checks to warn instead of error when reading invalid files. @stephprince [#1793](https://github.com/NeurodataWithoutBorders/pynwb/pull/1793) and [#1809](https://github.com/NeurodataWithoutBorders/pynwb/pull/1809)
 - Expose the offset, conversion and channel conversion parameters in `mock_ElectricalSeries`. @h-mayorquin [#1796](https://github.com/NeurodataWithoutBorders/pynwb/pull/1796)
 - Expose `starting_time` in `mock_ElectricalSeries`. @h-mayorquin [#1805](https://github.com/NeurodataWithoutBorders/pynwb/pull/1805)
@@ -21,17 +22,19 @@
 ### Bug fixes
 - Fix bug where namespaces were loaded in "w-" mode. @h-mayorquin [#1795](https://github.com/NeurodataWithoutBorders/pynwb/pull/1795)
 - Fix bug where pynwb version was reported as "unknown" to readthedocs @stephprince [#1810](https://github.com/NeurodataWithoutBorders/pynwb/pull/1810)
+- Fixed bug to allow linking of `TimeSeries.data` by setting the `data` constructor argument to another `TimeSeries`. @oruebel [#1766](https://github.com/NeurodataWithoutBorders/pynwb/pull/1766)
 
 ### Documentation and tutorial enhancements
 - Add RemFile to streaming tutorial. @bendichter [#1761](https://github.com/NeurodataWithoutBorders/pynwb/pull/1761)
 - Fix typos and improve clarify throughout tutorials. @zm711 [#1825](https://github.com/NeurodataWithoutBorders/pynwb/pull/1825)
+- Fix internal links in docstrings and tutorials. @stephprince [#1827](https://github.com/NeurodataWithoutBorders/pynwb/pull/1827)
 - Add Zarr IO tutorial @bendichter [#1834](https://github.com/NeurodataWithoutBorders/pynwb/pull/1834)
 
 ## PyNWB 2.5.0 (August 18, 2023)
 
 ### Enhancements and minor changes
-- Add `TimeSeries.get_timestamps()`. @bendichter [#1741](https://github.com/NeurodataWithoutBorders/pynwb/pull/1741)
-- Add `TimeSeries.get_data_in_units()`. @bendichter [#1745](https://github.com/NeurodataWithoutBorders/pynwb/pull/1745)
+- Added `TimeSeries.get_timestamps()`. @bendichter [#1741](https://github.com/NeurodataWithoutBorders/pynwb/pull/1741)
+- Added `TimeSeries.get_data_in_units()`. @bendichter [#1745](https://github.com/NeurodataWithoutBorders/pynwb/pull/1745)
 - Updated `ExternalResources` name change to `HERD`, along with HDMF 3.9.0 being the new minimum. @mavaylon1 [#1754](https://github.com/NeurodataWithoutBorders/pynwb/pull/1754)
 
 ### Documentation and tutorial enhancements
@@ -44,15 +47,15 @@
 ## PyNWB 2.4.0 (July 23, 2023)
 
 ### Enhancements and minor changes
-- Add support for `ExternalResources`. @mavaylon1 [#1684](https://github.com/NeurodataWithoutBorders/pynwb/pull/1684)
-- Update links for making a release. @mavaylon1 [#1720](https://github.com/NeurodataWithoutBorders/pynwb/pull/1720)
+- Added support for `ExternalResources`. @mavaylon1 [#1684](https://github.com/NeurodataWithoutBorders/pynwb/pull/1684)
+- Updated links for making a release. @mavaylon1 [#1720](https://github.com/NeurodataWithoutBorders/pynwb/pull/1720)
 
 ### Bug fixes
 - Fixed sphinx-gallery setting to correctly display index in the docs with sphinx-gallery>=0.11. @oruebel [#1733](https://github.com/NeurodataWithoutBorders/pynwb/pull/1733)
 
 ### Documentation and tutorial enhancements
 - Added thumbnail for Optogentics tutorial. @oruebel [#1729](https://github.com/NeurodataWithoutBorders/pynwb/pull/1729)
-- Update and fix errors in tutorials. @bendichter @oruebel
+- Updated and fixed errors in tutorials. @bendichter @oruebel
 
 ## PyNWB 2.3.3 (June 26, 2023)
 
