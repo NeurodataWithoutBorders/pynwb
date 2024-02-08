@@ -78,7 +78,7 @@ with NWBHDF5IO(filename, "r") as io:
 # have raw data and processed data in the same NWB file and you want to create a new NWB file with all the contents of
 # the original file except for the raw data for sharing with collaborators.
 #
-# To remove existing containers, use the :py:class:`~hdmf.utils.LabelledDict.pop` method on any
+# To remove existing containers, use the :py:meth:`~hdmf.utils.LabelledDict.pop` method on any
 # :py:class:`~hdmf.utils.LabelledDict` object, such as ``NWBFile.acquisition``, ``NWBFile.processing``,
 # ``NWBFile.analysis``, ``NWBFile.processing``, ``NWBFile.scratch``, ``NWBFile.devices``, ``NWBFile.stimulus``,
 # ``NWBFile.stimulus_template``, ``NWBFile.electrode_groups``, ``NWBFile.imaging_planes``,

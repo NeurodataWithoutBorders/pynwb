@@ -22,6 +22,7 @@
 ### Documentation and tutorial enhancements
 - Add RemFile to streaming tutorial. @bendichter [#1761](https://github.com/NeurodataWithoutBorders/pynwb/pull/1761)
 - Fix typos and improve clarify throughout tutorials. @zm711 [#1825](https://github.com/NeurodataWithoutBorders/pynwb/pull/1825)
+- Fix internal links in docstrings and tutorials. @stephprince [#1827](https://github.com/NeurodataWithoutBorders/pynwb/pull/1827)
 - Add Zarr IO tutorial @bendichter [#1834](https://github.com/NeurodataWithoutBorders/pynwb/pull/1834)
 
 ## PyNWB 2.5.0 (August 18, 2023)
