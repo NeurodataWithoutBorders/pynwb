@@ -265,7 +265,7 @@ class DecompositionSeries(TimeSeries):
              'shape': (None, None, None)},
             *get_docval(TimeSeries.__init__, 'description'),
             {'name': 'metric', 'type': str,  # required
-             'doc': "metric of analysis. recommended: 'phase', 'amplitude', 'power'"},
+             'doc': "metric of analysis. recommended - 'phase', 'amplitude', 'power'"},
             {'name': 'unit', 'type': str, 'doc': 'SI unit of measurement', 'default': 'no unit'},
             {'name': 'bands', 'type': DynamicTable,
              'doc': 'a table for describing the frequency bands that the signal was decomposed into', 'default': None},
