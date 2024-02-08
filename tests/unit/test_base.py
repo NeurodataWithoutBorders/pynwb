@@ -473,7 +473,10 @@ class TestTimeSeries(TestCase):
         timestamps = [0.0, 0.1, 0.2, 0.3]
         ts1 = TimeSeries(name="test_ts1", data=data1, unit="grams", timestamps=timestamps)
         ts2 = TimeSeries(name="test_ts2", data=data2, unit="grams", timestamps=ts1)
-        self.assertIn('(link to test_ts1/timestamps)', ts2._repr_html_())
+        pm = ProcessingModule(name="processing", description="a test processing module")
+        pm.add(ts1)
+        pm.add(ts2)
+        self.assertIn('(link to processing/test_ts1/timestamps)', pm._repr_html_())
 
 
 class TestImage(TestCase):
