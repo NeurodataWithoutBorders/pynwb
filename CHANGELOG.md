@@ -18,6 +18,7 @@
 - Fix bug where namespaces were loaded in "w-" mode. @h-mayorquin [#1795](https://github.com/NeurodataWithoutBorders/pynwb/pull/1795)
 - Fix bug where pynwb version was reported as "unknown" to readthedocs @stephprince [#1810](https://github.com/NeurodataWithoutBorders/pynwb/pull/1810)
 - Fixed bug to allow linking of `TimeSeries.data` by setting the `data` constructor argument to another `TimeSeries`. @oruebel [#1766](https://github.com/NeurodataWithoutBorders/pynwb/pull/1766)
+- Fix recursion error in html representation generation in jupyter notebooks. @stephprince [#1831](https://github.com/NeurodataWithoutBorders/pynwb/pull/1831)
 
 ### Documentation and tutorial enhancements
 - Add RemFile to streaming tutorial. @bendichter [#1761](https://github.com/NeurodataWithoutBorders/pynwb/pull/1761)
