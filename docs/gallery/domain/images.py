@@ -105,7 +105,7 @@ optical_series = OpticalSeries(
     description="The images presented to the subject as stimuli",
 )
 
-nwbfile.add_stimulus(timeseries=optical_series)
+nwbfile.add_stimulus(stimulus=optical_series)
 
 ####################
 # ImageSeries: Storing series of images as acquisition

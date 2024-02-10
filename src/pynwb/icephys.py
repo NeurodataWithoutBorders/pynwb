@@ -415,6 +415,12 @@ class IntracellularStimuliTable(DynamicTable):
          'index': False,
          'table': False,
          'class': TimeSeriesReferenceVectorData},
+        {'name': 'stimulus_template',
+         'description': 'Column storing the reference to the stimulus template for the recording (rows)',
+         'required': False,
+         'index': False,
+         'table': False,
+         'class': TimeSeriesReferenceVectorData},
     )
 
     @docval(*get_docval(DynamicTable.__init__, 'id', 'columns', 'colnames'))
@@ -518,6 +524,13 @@ class IntracellularRecordingsTable(AlignedDynamicTable):
         {'name': 'stimulus', 'type': TimeSeries,
          'doc': 'The TimeSeries (usually a PatchClampSeries) with the stimulus',
          'default': None},
+        {'name': 'stimulus_template_start_index', 'type': int, 'doc': 'Start index of the stimulus template',
+         'default': None},
+        {'name': 'stimulus_template_index_count', 'type': int, 'doc': 'Stop index of the stimulus template',
+         'default': None},
+        {'name': 'stimulus_template', 'type': TimeSeries,
+         'doc': 'The TimeSeries (usually a PatchClampSeries) with the stimulus template waveforms',
+         'default': None},
         {'name': 'response_start_index', 'type': int, 'doc': 'Start index of the response', 'default': None},
         {'name': 'response_index_count', 'type': int, 'doc': 'Stop index of the response', 'default': None},
         {'name': 'response', 'type': TimeSeries,
@@ -553,6 +566,11 @@ class IntracellularRecordingsTable(AlignedDynamicTable):
                                                                        'response',
                                                                        kwargs)
         electrode = popargs('electrode', kwargs)
+        stimulus_template_start_index, stimulus_template_index_count, stimulus_template = popargs(
+            'stimulus_template_start_index',
+            'stimulus_template_index_count',
+            'stimulus_template',
+            kwargs)
 
         # if electrode is not provided, take from stimulus or response object
         if electrode is None:
@@ -572,6 +590,15 @@ class IntracellularRecordingsTable(AlignedDynamicTable):
         response_start_index, response_index_count = self.__compute_index(response_start_index,
                                                                           response_index_count,
                                                                           response, 'response')
+        stimulus_template_start_index, stimulus_template_index_count = self.__compute_index(
+            stimulus_template_start_index,
+            stimulus_template_index_count,
+            stimulus_template, 'stimulus_template')
+
+        # if stimulus template is already a column in the stimuli table, but stimulus_template was None
+        if 'stimulus_template' in self.category_tables['stimuli'].colnames and stimulus_template is None:
+            stimulus_template = stimulus if stimulus is not None else response  # set to stimulus if it was provided
+
         # If either stimulus or response are None, then set them to the same TimeSeries to keep the I/O happy
         response = response if response is not None else stimulus
         stimulus_provided_is_not_none = stimulus is not None  # Store if stimulus is None for error checks later
@@ -612,6 +639,9 @@ class IntracellularRecordingsTable(AlignedDynamicTable):
             stimuli = {}
         stimuli['stimulus'] = TimeSeriesReferenceVectorData.TIME_SERIES_REFERENCE_TUPLE(
             stimulus_start_index, stimulus_index_count, stimulus)
+        if stimulus_template is not None:
+            stimuli['stimulus_template'] = TimeSeriesReferenceVectorData.TIME_SERIES_REFERENCE_TUPLE(
+                stimulus_template_start_index, stimulus_template_index_count, stimulus_template)
 
         # Compile the responses table data
         responses = copy(popargs('response_metadata', kwargs))

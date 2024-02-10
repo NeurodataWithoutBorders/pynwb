@@ -78,7 +78,6 @@ class TestImportStructure(TestCase):
             "popargs",
             "register_class",
             "register_map",
-            "retinotopy",
             "spec",
             "testing",
             "validate",
