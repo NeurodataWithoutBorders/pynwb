@@ -209,6 +209,13 @@ release = '{}'.format(get_versions()['version'])
 # directories to ignore when looking for source files.
 exclude_patterns = ['_build', 'test.py']
 
+# This value contains a list of modules to be mocked up. This is useful
+# when some external dependencies are not met at build time and break the
+# building process.
+autodoc_mock_imports = [
+    'pynwb.retinotopy',
+]
+
 # The reST default role (used for this markup: `text`) to use for all documents.
 # default_role = None
 
