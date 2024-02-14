@@ -209,12 +209,12 @@ release = '{}'.format(get_versions()['version'])
 # directories to ignore when looking for source files.
 exclude_patterns = ['_build', 'test.py']
 
-# This value contains a list of modules to be mocked up. This is useful
-# when some external dependencies are not met at build time and break the
-# building process.
-autodoc_mock_imports = [
-    'pynwb.retinotopy',
-]
+# # This value contains a list of modules to be mocked up. This is useful
+# # when some external dependencies are not met at build time and break the
+# # building process.
+# autodoc_mock_imports = [
+#     'pynwb.retinotopy',
+# ]
 
 # The reST default role (used for this markup: `text`) to use for all documents.
 # default_role = None
@@ -411,6 +411,10 @@ latex_logo = 'figures/logo_pynwb_with_margin.png'
 # see http://www.sphinx-doc.org/en/master/extdev/appapi.html
 #
 
+apidoc_exclude = [
+    "../../src/pynwb/retinotopy.py",
+]
+
 def run_apidoc(_):
     from sphinx.ext.apidoc import main as apidoc_main
     import os
@@ -418,7 +422,7 @@ def run_apidoc(_):
     out_dir = os.path.dirname(__file__)
     src_dir = os.path.join(out_dir, '../../src')
     sys.path.append(src_dir)
-    apidoc_main(['-f', '-e', '--no-toc', '-o', out_dir, src_dir])
+    apidoc_main(['-f', '-e', '--no-toc', '-o', out_dir, src_dir, *apidoc_exclude])
 
 
 from abc import abstractproperty
