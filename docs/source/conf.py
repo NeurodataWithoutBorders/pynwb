@@ -207,7 +207,13 @@ release = '{}'.format(get_versions()['version'])
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
-exclude_patterns = ['_build', 'test.py']
+exclude_patterns = ['_build', 'test.py', "../../src/pynwb/retinotopy.py",]
+
+# List of patterns, relative to source directory, of modules to be
+# excluded by apidoc when generating rst files.
+apidoc_exclude = [
+    "../../src/pynwb/retinotopy.py",
+]
 
 # # This value contains a list of modules to be mocked up. This is useful
 # # when some external dependencies are not met at build time and break the
@@ -410,11 +416,6 @@ latex_logo = 'figures/logo_pynwb_with_margin.png'
 #
 # see http://www.sphinx-doc.org/en/master/extdev/appapi.html
 #
-
-# paths to modules to be excluded by apidoc when generating rst files
-apidoc_exclude = [
-    "../../src/pynwb/retinotopy",
-]
 
 def run_apidoc(_):
     from sphinx.ext.apidoc import main as apidoc_main
