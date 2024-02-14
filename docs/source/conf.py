@@ -411,8 +411,9 @@ latex_logo = 'figures/logo_pynwb_with_margin.png'
 # see http://www.sphinx-doc.org/en/master/extdev/appapi.html
 #
 
+# paths to modules to be excluded by apidoc when generating rst files
 apidoc_exclude = [
-    "../../src/pynwb/retinotopy.py",
+    "../../src/pynwb/retinotopy",
 ]
 
 def run_apidoc(_):
