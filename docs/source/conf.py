@@ -209,6 +209,12 @@ release = '{}'.format(get_versions()['version'])
 # directories to ignore when looking for source files.
 exclude_patterns = ['_build', 'test.py']
 
+# List of patterns, relative to source directory, of modules to be
+# excluded by apidoc when generating rst files.
+apidoc_exclude = [
+    "../../src/pynwb/retinotopy.py",
+]
+
 # The reST default role (used for this markup: `text`) to use for all documents.
 # default_role = None
 
@@ -411,7 +417,8 @@ def run_apidoc(_):
     out_dir = os.path.dirname(__file__)
     src_dir = os.path.join(out_dir, '../../src')
     sys.path.append(src_dir)
-    apidoc_main(['-f', '-e', '--no-toc', '-o', out_dir, src_dir])
+    apidoc_exclude_abs = [os.path.join(out_dir, f) for f in apidoc_exclude]
+    apidoc_main(['-f', '-e', '--no-toc', '-o', out_dir, src_dir, *apidoc_exclude_abs])
 
 
 from abc import abstractproperty
