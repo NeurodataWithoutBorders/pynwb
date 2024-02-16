@@ -276,7 +276,7 @@ def clean_up_tests():
         "processed_data.nwb",
         "raw_data.nwb",
         "scratch_analysis.nwb",
-        # "sub-P11HMH_ses-20061101_ecephys+image.nwb",  # TODO cannot delete this file on windows for some reason
+        "sub-P11HMH_ses-20061101_ecephys+image.nwb",
         "test_edit.nwb",
         "test_edit2.nwb",
         "test_cortical_surface.nwb",
