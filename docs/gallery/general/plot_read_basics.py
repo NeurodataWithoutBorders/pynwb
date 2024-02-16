@@ -283,3 +283,10 @@ for time in stim_on_times_landscapes.iloc[:3]:
 # object and accessing its attributes, but it may be useful to explore the data in a
 # more interactive, visual way. See :ref:`analysistools-explore` for an updated list of programs for
 # exploring NWB files.
+
+####################
+# Close the open NWB file
+# -----------------------
+# It is good practice, especially on Windows, to close any files that you have opened.
+
+io.close()
