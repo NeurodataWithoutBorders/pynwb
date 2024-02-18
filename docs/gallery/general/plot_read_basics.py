@@ -73,7 +73,8 @@ from pynwb import NWBHDF5IO
 #
 # Downloading data programmatically
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-# Alternatively, you can download data using the `dandi` Python module.
+# Alternatively, you can download data using the :py:func:`~dandi.download.download` Python function from the
+# ``dandi`` library.
 
 from dandi.download import download
 
@@ -97,7 +98,7 @@ download("https://api.dandiarchive.org/api/assets/0f57f0b0-f021-42bb-8eaa-56cd48
 #
 # Reading and writing NWB data is carried out using the :py:class:`~pynwb.NWBHDF5IO` class.
 # :py:class:`~pynwb.NWBHDF5IO` reads NWB data that is in the `HDF5 <https://www.hdfgroup.org/solutions/hdf5/>`_
-# storage format, a popular, hierarchical format for storing large-scale scientific data.
+# storage format, a popular hierarchical format for storing large-scale scientific data.
 #
 # The first argument to the constructor of :py:class:`~pynwb.NWBHDF5IO` is the ``file_path``. Use the ``read`` method to
 # read the data into a :py:class:`~pynwb.file.NWBFile` object.
@@ -122,7 +123,7 @@ with NWBHDF5IO(filepath, mode="r") as io2:
 # The advantage of using a context manager is that the file is closed automatically when the context finishes
 # successfully or if there is an error. Be aware that if you use this method, closing the context (unindenting the code)
 # will automatically close the :py:class:`~pynwb.NWBHDF5IO` object and the corresponding h5py File object. The data not
-# already read from the NWB file will then be inaccessible, so any code that reads data must be placed within the
+# already read from the NWB file will then be inaccessible. Any code that reads data must be placed within the
 # context.
 #
 # Access stimulus data
@@ -174,6 +175,25 @@ image = stimulus_presentation.data[frame_index]
 # Reverse the last dimension because the data were stored in BGR instead of RGB
 image = image[..., ::-1]
 plt.imshow(image, aspect="auto")
+
+####################
+# Accessing the time of each frame
+# --------------------------------
+# The :py:class:`~pynwb.image.OpticalSeries` class is a subclass of :py:class:`~pynwb.base.TimeSeries`. The time of
+# each frame is stored in the ``timestamps`` attribute. The time of each frame is stored in seconds relative to the
+# start of the recording.
+
+frame_time = stimulus_presentation.timestamps[frame_index]
+
+####################
+# :py:class:`~pynwb.base.TimeSeries` sample times can also be represented with a ``starting_time`` and ``rate``
+# attribute instead of ``timestamps``. This is useful when the time of each frame is regularly spaced. In this case, the
+# time of each frame can be calculated using the formula: ``starting_time + frame_index / rate``. You can also
+# use the :py:meth:`~pynwb.base.TimeSeries.get_timestamps()` convenience method to get the timestamps vector for any
+# :py:class:`~pynwb.base.TimeSeries`. If the ``timestamps`` are stored, they will be returned. If not, they are
+# calculated using the ``starting_time`` and ``rate``.
+
+timestamps = stimulus_presentation.get_timestamps()
 
 ####################
 # Access single unit data

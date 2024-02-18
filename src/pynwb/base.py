@@ -328,6 +328,10 @@ class TimeSeries(NWBDataInterface):
         return self.__time_unit
 
     def get_timestamps(self):
+        """
+        Return the timestamps of this TimeSeries. If timestamps are not set, calculate them from the rate and
+        starting_time
+        """
         if self.fields.get('timestamps'):
             return self.timestamps
         else:
