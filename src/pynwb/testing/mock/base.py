@@ -15,7 +15,7 @@ def mock_TimeSeries(
     conversion: float = 1.0,
     timestamps=None,
     starting_time: Optional[float] = None,
-    rate: Optional[float] = 10.0,
+    rate: Optional[float] = None,
     comments: str = "no comments",
     description: str = "no description",
     control=None,
@@ -24,6 +24,8 @@ def mock_TimeSeries(
     nwbfile: Optional[NWBFile] = None,
     offset=0.,
 ) -> TimeSeries:
+    if timestamps is None and rate is None:
+        rate = 10.0  # Hz
     time_series = TimeSeries(
         name=name or name_generator("TimeSeries"),
         data=data if data is not None else np.array([1, 2, 3, 4]),
