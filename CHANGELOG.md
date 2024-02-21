@@ -1,6 +1,6 @@
 # PyNWB Changelog
 
-## PyNWB 2.6.0 (Upcoming)
+## PyNWB 2.6.0 (February 21, 2024)
 
 ### Enhancements and minor changes
 - For `NWBHDF5IO()`, change the default of arg `load_namespaces` from `False` to `True`. @bendichter [#1748](https://github.com/NeurodataWithoutBorders/pynwb/pull/1748)
