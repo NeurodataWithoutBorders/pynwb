@@ -83,22 +83,18 @@ editable mode.
 
    $ git clone --recurse-submodules https://github.com/NeurodataWithoutBorders/pynwb.git
    $ cd pynwb
-   $ pip install -r requirements.txt
+   $ pip install -r requirements.txt -r requirements-dev.txt -r requirements-doc.txt
    $ pip install -e .
 
 
 Run tests
 ---------
 
-For running the tests, it is required to install the development requirements. Again, first activate your
+For running the tests, it is required to install the development requirements above. Again, first activate your
 virtualenv or conda environment.
 
 .. code::
 
-   $ git clone --recurse-submodules https://github.com/NeurodataWithoutBorders/pynwb.git
-   $ cd pynwb
-   $ pip install -r requirements.txt -r requirements-dev.txt
-   $ pip install -e .
    $ tox
 
 For debugging it can be useful to keep the intermediate NWB files created by
