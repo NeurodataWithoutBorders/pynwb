@@ -90,6 +90,17 @@ def test_mock(mock_function):
     mock_function()
 
 
+def test_mock_TimeSeries_w_timestamps():
+    ts = mock_TimeSeries(timestamps=[0, 1, 2, 3])
+    assert ts.timestamps is not None
+    assert len(ts.timestamps) == 4
+
+
+def test_mock_TimeSeries_w_no_time():
+    ts = mock_TimeSeries()
+    assert ts.rate == 10.0
+
+
 @pytest.mark.parametrize("mock_function", mock_functions)
 def test_mock_write(mock_function, tmp_path):
     if mock_function is mock_NWBFile:
