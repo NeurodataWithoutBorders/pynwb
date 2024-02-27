@@ -58,7 +58,7 @@ jobs:
 
       - name: Run unit tests and generate coverage report
         run: |
-          python -m coverage run test.py --pynwb
+          python -m coverage run test.py --pynwb # TODO: update this to hdmf standard
           python -m coverage xml  # codecov uploader requires xml format
           python -m coverage report -m
 
