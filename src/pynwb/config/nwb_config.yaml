@@ -6,7 +6,6 @@ namespaces:
         species: nwb_subject_termset.yaml
       NWBFile:
         experimenter: experimenter_termset.yaml
+        electrodes: TBD
       ElectrodeGroup:
         location: location_termset.yaml
-
-

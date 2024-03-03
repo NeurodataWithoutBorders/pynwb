@@ -11,9 +11,9 @@ from pynwb.epoch import TimeIntervals
 from pynwb.file import Subject
 from pynwb import unload_termset_config, load_termset_config
 
-
+load_termset_config()
 session_start_time = datetime(2018, 4, 25, 2, 30, 3, tzinfo=tz.gettz("US/Pacific"))
-terms = TermSet(term_schema_path='/Users/mavaylon/Research/NWB/hdmf2/hdmf/docs/gallery/example_term_set.yaml')
+terms = TermSet(term_schema_path='/Users/mavaylon/Research/NWB/hdmf/docs/gallery/example_term_set.yaml')
 #
 nwbfile = NWBFile(
     session_description="Mouse exploring an open field",  # required

@@ -1,0 +1,7 @@
+{
+    "conversion": 1.0,
+    "offset": 0.0,
+    "resolution": -1.0,
+    "unit": "m",
+    "zarr_dtype": "float64"
+}
