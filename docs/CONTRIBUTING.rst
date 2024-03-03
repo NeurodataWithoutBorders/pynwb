@@ -115,7 +115,7 @@ Projects are currently used mainly on the NeurodataWithoutBorders organization l
 
 .. _sec-styleguides:
 
-Styleguides
+Style Guides
 -----------
 
 Git Commit Message Styleguide
@@ -145,7 +145,23 @@ Format Specification Styleguide
 Python Code Styleguide
 ^^^^^^^^^^^^^^^^^^^^^^
 
-Python coding style is checked via ``flake8`` for automatic checking of PEP8 style during pull requests.
+Before you create a Pull Request, make sure you are following the HDMF style guide.
+To check whether your code conforms to the HDMF style guide, simply run the ruff_ tool in the project's root
+directory. ``ruff`` will also sort imports automatically and check against additional code style rules.
+
+We also use ``ruff`` to sort python imports automatically and double-check that the codebase
+conforms to PEP8 standards, while using the codespell_ tool to check spelling.
+
+``ruff`` and ``codespell`` are installed when you follow the developer installation instructions. See
+:ref:`install_developers`.
+
+.. _ruff: https://beta.ruff.rs/docs/
+.. _codespell: https://github.com/codespell-project/codespell
+
+.. code::
+
+   $ ruff check .
+   $ codespell
 
 Endorsement
 -----------
