@@ -41,8 +41,7 @@ class ElectrodeGroup(NWBContainer):
                     position_dtype_valid = False
             if position_dtype_valid:  # If we have list of element, then check that the elements are of length 3
                 try:
-                    if len(args_to_set['position'][0]) != 3:
-                        position_dtype_valid = False
+                    position_dtype_valid = all([len(pos) == 3 for pos in args_to_set['position']])
                 except TypeError:  # len not supported by first_position
                     position_dtype_valid = False
             if not position_dtype_valid:

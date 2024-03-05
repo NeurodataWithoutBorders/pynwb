@@ -223,6 +223,12 @@ class ElectrodeGroupConstructor(TestCase):
                            location='electrode location',
                            device=dev1,
                            position=np.array([(1., 2.)], dtype=np.dtype([('x', float), ('y', float)])))
+        with self.assertRaises(ValueError):
+            ElectrodeGroup(name='elec1',
+                           description='electrode description',
+                           location='electrode location',
+                           device=dev1,
+                           position=[(1, 2, 3), (4, 5)])
 
 
 class EventDetectionConstructor(TestCase):
