@@ -5,7 +5,6 @@
 ### Bug fixes
 - Fixed bug in how `ElectrodeGroup.__init__` validates its `position` argument. @oruebel [#1770](https://github.com/NeurodataWithoutBorders/pynwb/pull/1770)
 
-
 ## PyNWB 2.6.0 (February 21, 2024)
 
 ### Enhancements and minor changes
@@ -31,7 +30,6 @@
 - Fix typos and improve clarify throughout tutorials. @zm711 [#1825](https://github.com/NeurodataWithoutBorders/pynwb/pull/1825)
 - Fix internal links in docstrings and tutorials. @stephprince [#1827](https://github.com/NeurodataWithoutBorders/pynwb/pull/1827)
 - Add Zarr IO tutorial @bendichter [#1834](https://github.com/NeurodataWithoutBorders/pynwb/pull/1834)
-
 
 ## PyNWB 2.5.0 (August 18, 2023)
 
