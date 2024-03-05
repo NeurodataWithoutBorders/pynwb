@@ -10,7 +10,7 @@ object ID. Every NWB container object has an object ID that is a UUID_ string, s
 unique and used widely across computing platforms as if they are unique.
 
 The object ID of an NWB container object can be accessed using the
-:py:meth:`~hdmf.container.AbstractContainer.object_id` method.
+:py:attr:`~hdmf.container.AbstractContainer.object_id` method.
 
 .. _UUID: https://en.wikipedia.org/wiki/Universally_unique_identifier
 

@@ -35,7 +35,7 @@ If you use PyNWB in your research, please use the following citation:
 Using RRID
 ----------
 
-* ResourceID: `SCR_017452 <https://scicrunch.org/browse/resources/SCR_017452>`_
+* ResourceID: `SCR_017452 <https://scicrunch.org/resolver/SCR_017452>`_
 * Proper Citation: **(PyNWB, RRID:SCR_017452)**
 
 

@@ -4,6 +4,7 @@ from pynwb.validate import _get_cached_namespaces_to_validate
 from pynwb.testing import TestCase
 import urllib.request
 import h5py
+import warnings
 
 
 class TestRos3Streaming(TestCase):
@@ -28,16 +29,28 @@ class TestRos3Streaming(TestCase):
 
     def test_read(self):
         s3_path = 'https://dandiarchive.s3.amazonaws.com/ros3test.nwb'
-        with NWBHDF5IO(s3_path, mode='r', driver='ros3') as io:
-            nwbfile = io.read()
-            test_data = nwbfile.acquisition['ts_name'].data[:]
-            self.assertEqual(len(test_data), 3)
+        with warnings.catch_warnings():
+            warnings.filterwarnings(
+                "ignore",
+                message=r"Ignoring cached namespace .*",
+                category=UserWarning,
+            )
+            with NWBHDF5IO(s3_path, mode='r', driver='ros3') as io:
+                nwbfile = io.read()
+                test_data = nwbfile.acquisition['ts_name'].data[:]
+                self.assertEqual(len(test_data), 3)
 
     def test_dandi_read(self):
-        with NWBHDF5IO(path=self.s3_test_path, mode='r', driver='ros3') as io:
-            nwbfile = io.read()
-            test_data = nwbfile.acquisition['TestData'].data[:]
-            self.assertEqual(len(test_data), 3)
+        with warnings.catch_warnings():
+            warnings.filterwarnings(
+                "ignore",
+                message=r"Ignoring cached namespace .*",
+                category=UserWarning,
+            )
+            with NWBHDF5IO(path=self.s3_test_path, mode='r', driver='ros3') as io:
+                nwbfile = io.read()
+                test_data = nwbfile.acquisition['TestData'].data[:]
+                self.assertEqual(len(test_data), 3)
 
     def test_dandi_get_cached_namespaces(self):
         expected_namespaces = ["core"]

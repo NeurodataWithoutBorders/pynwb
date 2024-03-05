@@ -57,15 +57,15 @@ class ImagingPlane(NWBContainer):
              'doc': 'Rate images are acquired, in Hz. If the corresponding TimeSeries is present, the rate should be '
                     'stored there instead.', 'default': None},
             {'name': 'manifold', 'type': 'array_data',
-             'doc': ('DEPRECATED: Physical position of each pixel. size=("height", "width", "xyz"). '
+             'doc': ('DEPRECATED - Physical position of each pixel. size=("height", "width", "xyz"). '
                      'Deprecated in favor of origin_coords and grid_spacing.'),
              'default': None},
             {'name': 'conversion', 'type': float,
-             'doc': ('DEPRECATED: Multiplier to get from stored values to specified unit (e.g., 1e-3 for millimeters) '
+             'doc': ('DEPRECATED - Multiplier to get from stored values to specified unit (e.g., 1e-3 for millimeters) '
                      'Deprecated in favor of origin_coords and grid_spacing.'),
              'default': 1.0},
             {'name': 'unit', 'type': str,
-             'doc': 'DEPRECATED: Base unit that coordinates are stored in (e.g., Meters). '
+             'doc': 'DEPRECATED - Base unit that coordinates are stored in (e.g., Meters). '
                     'Deprecated in favor of origin_coords_unit and grid_spacing_unit.',
              'default': 'meters'},
             {'name': 'reference_frame', 'type': str,

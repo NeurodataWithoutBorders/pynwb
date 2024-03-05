@@ -34,7 +34,7 @@ nwbfile = NWBFile(
 
 
 ####################
-# Normally if we create a :py:class:`~pynwb.file.TimeSeries` we would do
+# Normally if we create a :py:class:`~pynwb.base.TimeSeries` we would do
 
 import numpy as np
 

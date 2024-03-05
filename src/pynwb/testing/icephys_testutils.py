@@ -60,10 +60,10 @@ def create_icephys_testfile(filename=None, add_custom_columns=True, randomize_da
     :param randomize_data: Randomize data values in the stimulus and response
     :type randomize_data: bool
 
-    :returns: ICEphysFile NWBFile object created for writing. NOTE: If filename is provided then
+    :returns: NWBFile object with icephys data created for writing. NOTE: If filename is provided then
               the file is written to disk, but the function does not read the file back. If
               you want to use the file from disk then you will need to read it with NWBHDF5IO.
-    :rtype: ICEphysFile
+    :rtype: NWBFile
     """
     nwbfile = NWBFile(
             session_description='my first synthetic recording',

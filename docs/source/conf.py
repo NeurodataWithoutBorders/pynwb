@@ -148,6 +148,9 @@ intersphinx_mapping = {
     'fsspec': ("https://filesystem-spec.readthedocs.io/en/latest/", None),
     'nwbwidgets': ("https://nwb-widgets.readthedocs.io/en/latest/", None),
     'nwb-overview': ("https://nwb-overview.readthedocs.io/en/latest/", None),
+    'zarr': ("https://zarr.readthedocs.io/en/stable/", None),
+    'hdmf-zarr': ("https://hdmf-zarr.readthedocs.io/en/latest/", None),
+    'numcodecs': ("https://numcodecs.readthedocs.io/en/latest/", None),
 }
 
 extlinks = {
@@ -159,7 +162,12 @@ extlinks = {
     'hdmf-docs': ('https://hdmf.readthedocs.io/en/stable/%s', '%s'),
     'dandi': ('https://www.dandiarchive.org/%s', '%s'),
     "nwbinspector": ("https://nwbinspector.readthedocs.io/en/dev/%s", "%s"),
+    'hdmf-zarr': ('https://hdmf-zarr.readthedocs.io/en/latest/%s', '%s'),
 }
+
+nitpicky = True
+nitpick_ignore = [('py:class', 'Intracomm'),
+                  ('py:class', 'BaseStorageSpec')]
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -176,7 +184,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'PyNWB'
-copyright = u'2017-2023, Neurodata Without Borders'
+copyright = u'2017-2024, Neurodata Without Borders'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the

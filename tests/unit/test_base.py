@@ -464,6 +464,20 @@ class TestTimeSeries(TestCase):
                 timestamps=[1, 2, 3, 4, 5]
             )
 
+    def test_repr_html(self):
+        """ Test that html representation of linked timestamp data will occur as expected and will not cause a
+        RecursionError
+        """
+        data1 = [0, 1, 2, 3]
+        data2 = [4, 5, 6, 7]
+        timestamps = [0.0, 0.1, 0.2, 0.3]
+        ts1 = TimeSeries(name="test_ts1", data=data1, unit="grams", timestamps=timestamps)
+        ts2 = TimeSeries(name="test_ts2", data=data2, unit="grams", timestamps=ts1)
+        pm = ProcessingModule(name="processing", description="a test processing module")
+        pm.add(ts1)
+        pm.add(ts2)
+        self.assertIn('(link to processing/test_ts1/timestamps)', pm._repr_html_())
+
 
 class TestImage(TestCase):
     def test_init(self):
