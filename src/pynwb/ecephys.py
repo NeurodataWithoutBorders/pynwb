@@ -28,7 +28,7 @@ class ElectrodeGroup(NWBContainer):
             {'name': 'position', 'type': 'array_data',
              'doc': 'Compound dataset with stereotaxic position of this electrode group (x, y, z). '
                     'Each element of the data array must have three elements or the dtype of the '
-                    'array must be `(float, float, float)', 'default': None})
+                    'array must be ``(float, float, float)``', 'default': None})
     def __init__(self, **kwargs):
         args_to_set = popargs_to_dict(('description', 'location', 'device', 'position'), kwargs)
         super().__init__(**kwargs)
