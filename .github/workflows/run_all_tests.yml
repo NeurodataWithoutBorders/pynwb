@@ -26,23 +26,26 @@ jobs:
           - { name: linux-python3.9              , test-tox-env: py39            , build-tox-env: build-py39            , python-ver: "3.9" , os: ubuntu-latest }
           - { name: linux-python3.10             , test-tox-env: py310           , build-tox-env: build-py310           , python-ver: "3.10", os: ubuntu-latest }
           - { name: linux-python3.11             , test-tox-env: py311           , build-tox-env: build-py311           , python-ver: "3.11", os: ubuntu-latest }
-          - { name: linux-python3.11-optional    , test-tox-env: py311-optional  , build-tox-env: build-py311-optional  , python-ver: "3.11", os: ubuntu-latest }
-          - { name: linux-python3.11-upgraded    , test-tox-env: py311-upgraded  , build-tox-env: build-py311-upgraded  , python-ver: "3.11", os: ubuntu-latest }
-          - { name: linux-python3.11-prerelease  , test-tox-env: py311-prerelease, build-tox-env: build-py311-prerelease, python-ver: "3.11", os: ubuntu-latest }
+          - { name: linux-python3.12             , test-tox-env: py312           , build-tox-env: build-py312           , python-ver: "3.12", os: ubuntu-latest }
+          - { name: linux-python3.12-optional    , test-tox-env: py312-optional  , build-tox-env: build-py312-optional  , python-ver: "3.12", os: ubuntu-latest }
+          - { name: linux-python3.12-upgraded    , test-tox-env: py312-upgraded  , build-tox-env: build-py312-upgraded  , python-ver: "3.12", os: ubuntu-latest }
+          - { name: linux-python3.12-prerelease  , test-tox-env: py312-prerelease, build-tox-env: build-py312-prerelease, python-ver: "3.12", os: ubuntu-latest }
           - { name: windows-python3.8-minimum    , test-tox-env: py38-minimum    , build-tox-env: build-py38-minimum    , python-ver: "3.8" , os: windows-latest }
           - { name: windows-python3.9            , test-tox-env: py39            , build-tox-env: build-py39            , python-ver: "3.9" , os: windows-latest }
           - { name: windows-python3.10           , test-tox-env: py310           , build-tox-env: build-py310           , python-ver: "3.10", os: windows-latest }
           - { name: windows-python3.11           , test-tox-env: py311           , build-tox-env: build-py311           , python-ver: "3.11", os: windows-latest }
-          - { name: windows-python3.11-optional  , test-tox-env: py311-optional  , build-tox-env: build-py311-optional  , python-ver: "3.11", os: windows-latest }
-          - { name: windows-python3.11-upgraded  , test-tox-env: py311-upgraded  , build-tox-env: build-py311-upgraded  , python-ver: "3.11", os: windows-latest }
-          - { name: windows-python3.11-prerelease, test-tox-env: py311-prerelease, build-tox-env: build-py311-prerelease, python-ver: "3.11", os: windows-latest }
+          - { name: windows-python3.12           , test-tox-env: py312           , build-tox-env: build-py312           , python-ver: "3.12", os: windows-latest }
+          - { name: windows-python3.12-optional  , test-tox-env: py312-optional  , build-tox-env: build-py312-optional  , python-ver: "3.12", os: windows-latest }
+          - { name: windows-python3.12-upgraded  , test-tox-env: py312-upgraded  , build-tox-env: build-py312-upgraded  , python-ver: "3.12", os: windows-latest }
+          - { name: windows-python3.12-prerelease, test-tox-env: py312-prerelease, build-tox-env: build-py312-prerelease, python-ver: "3.12", os: windows-latest }
           - { name: macos-python3.8-minimum      , test-tox-env: py38-minimum    , build-tox-env: build-py38-minimum    , python-ver: "3.8" , os: macos-latest }
           - { name: macos-python3.9              , test-tox-env: py39            , build-tox-env: build-py39            , python-ver: "3.9" , os: macos-latest }
           - { name: macos-python3.10             , test-tox-env: py310           , build-tox-env: build-py310           , python-ver: "3.10", os: macos-latest }
           - { name: macos-python3.11             , test-tox-env: py311           , build-tox-env: build-py311           , python-ver: "3.11", os: macos-latest }
-          - { name: macos-python3.11-optional    , test-tox-env: py311-optional  , build-tox-env: build-py311-optional  , python-ver: "3.11", os: macos-latest }
-          - { name: macos-python3.11-upgraded    , test-tox-env: py311-upgraded  , build-tox-env: build-py311-upgraded  , python-ver: "3.11", os: macos-latest }
-          - { name: macos-python3.11-prerelease  , test-tox-env: py311-prerelease, build-tox-env: build-py311-prerelease, python-ver: "3.11", os: macos-latest }
+          - { name: macos-python3.12             , test-tox-env: py312           , build-tox-env: build-py312           , python-ver: "3.12", os: macos-latest }
+          - { name: macos-python3.12-optional    , test-tox-env: py312-optional  , build-tox-env: build-py312-optional  , python-ver: "3.12", os: macos-latest }
+          - { name: macos-python3.12-upgraded    , test-tox-env: py312-upgraded  , build-tox-env: build-py312-upgraded  , python-ver: "3.12", os: macos-latest }
+          - { name: macos-python3.12-prerelease  , test-tox-env: py312-prerelease, build-tox-env: build-py312-prerelease, python-ver: "3.12", os: macos-latest }
     steps:
       - name: Cancel non-latest runs
         uses: styfle/cancel-workflow-action@0.11.0
@@ -90,14 +93,14 @@ jobs:
       matrix:
         include:
           - { name: linux-gallery-python3.8-minimum      , test-tox-env: gallery-py38-minimum    , python-ver: "3.8" , os: ubuntu-latest }
-          - { name: linux-gallery-python3.11-upgraded    , test-tox-env: gallery-py311-upgraded  , python-ver: "3.11", os: ubuntu-latest }
-          - { name: linux-gallery-python3.11-prerelease  , test-tox-env: gallery-py311-prerelease, python-ver: "3.11", os: ubuntu-latest }
+          - { name: linux-gallery-python3.12-upgraded    , test-tox-env: gallery-py312-upgraded  , python-ver: "3.12", os: ubuntu-latest }
+          - { name: linux-gallery-python3.12-prerelease  , test-tox-env: gallery-py312-prerelease, python-ver: "3.12", os: ubuntu-latest }
           - { name: windows-gallery-python3.8-minimum    , test-tox-env: gallery-py38-minimum    , python-ver: "3.8" , os: windows-latest }
-          - { name: windows-gallery-python3.11-upgraded  , test-tox-env: gallery-py311-upgraded  , python-ver: "3.11", os: windows-latest }
-          - { name: windows-gallery-python3.11-prerelease, test-tox-env: gallery-py311-prerelease, python-ver: "3.11", os: windows-latest }
+          - { name: windows-gallery-python3.12-upgraded  , test-tox-env: gallery-py312-upgraded  , python-ver: "3.12", os: windows-latest }
+          - { name: windows-gallery-python3.12-prerelease, test-tox-env: gallery-py312-prerelease, python-ver: "3.12", os: windows-latest }
           - { name: macos-gallery-python3.8-minimum      , test-tox-env: gallery-py38-minimum    , python-ver: "3.8" , os: macos-latest }
-          - { name: macos-gallery-python3.11-upgraded    , test-tox-env: gallery-py311-upgraded  , python-ver: "3.11", os: macos-latest }
-          - { name: macos-gallery-python3.11-prerelease  , test-tox-env: gallery-py311-prerelease, python-ver: "3.11", os: macos-latest }
+          - { name: macos-gallery-python3.12-upgraded    , test-tox-env: gallery-py312-upgraded  , python-ver: "3.12", os: macos-latest }
+          - { name: macos-gallery-python3.12-prerelease  , test-tox-env: gallery-py312-prerelease, python-ver: "3.12", os: macos-latest }
     steps:
       - name: Cancel non-latest runs
         uses: styfle/cancel-workflow-action@0.11.0
@@ -139,9 +142,10 @@ jobs:
           - { name: conda-linux-python3.9            , test-tox-env: py39            , build-tox-env: build-py39            , python-ver: "3.9" , os: ubuntu-latest }
           - { name: conda-linux-python3.10           , test-tox-env: py310           , build-tox-env: build-py310           , python-ver: "3.10", os: ubuntu-latest }
           - { name: conda-linux-python3.11           , test-tox-env: py311           , build-tox-env: build-py311           , python-ver: "3.11", os: ubuntu-latest }
-          - { name: conda-linux-python3.11-optional  , test-tox-env: py311-optional  , build-tox-env: build-py311-optional  , python-ver: "3.11", os: ubuntu-latest }
-          - { name: conda-linux-python3.11-upgraded  , test-tox-env: py311-upgraded  , build-tox-env: build-py311-upgraded  , python-ver: "3.11", os: ubuntu-latest }
-          - { name: conda-linux-python3.11-prerelease, test-tox-env: py311-prerelease, build-tox-env: build-py311-prerelease, python-ver: "3.11", os: ubuntu-latest }
+          - { name: conda-linux-python3.12           , test-tox-env: py312           , build-tox-env: build-py312           , python-ver: "3.12", os: ubuntu-latest }
+          - { name: conda-linux-python3.12-optional  , test-tox-env: py312-optional  , build-tox-env: build-py312-optional  , python-ver: "3.12", os: ubuntu-latest }
+          - { name: conda-linux-python3.12-upgraded  , test-tox-env: py312-upgraded  , build-tox-env: build-py312-upgraded  , python-ver: "3.12", os: ubuntu-latest }
+          - { name: conda-linux-python3.12-prerelease, test-tox-env: py312-prerelease, build-tox-env: build-py312-prerelease, python-ver: "3.12", os: ubuntu-latest }
     steps:
       - name: Cancel non-latest runs
         uses: styfle/cancel-workflow-action@0.11.0
@@ -196,9 +200,9 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { name: conda-linux-python3.11-ros3  , python-ver: "3.11", os: ubuntu-latest }
-          - { name: conda-windows-python3.11-ros3, python-ver: "3.11", os: windows-latest }
-          - { name: conda-macos-python3.11-ros3  , python-ver: "3.11", os: macos-latest }
+          - { name: conda-linux-python3.12-ros3  , python-ver: "3.12", os: ubuntu-latest }
+          - { name: conda-windows-python3.12-ros3, python-ver: "3.12", os: windows-latest }
+          - { name: conda-macos-python3.12-ros3  , python-ver: "3.12", os: macos-latest }
     steps:
       - name: Cancel non-latest runs
         uses: styfle/cancel-workflow-action@0.11.0
@@ -243,9 +247,9 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { name: conda-linux-gallery-python3.11-ros3  , python-ver: "3.11", os: ubuntu-latest }
-          - { name: conda-windows-gallery-python3.11-ros3, python-ver: "3.11", os: windows-latest }
-          - { name: conda-macos-gallery-python3.11-ros3  , python-ver: "3.11", os: macos-latest }
+          - { name: conda-linux-gallery-python3.12-ros3  , python-ver: "3.12", os: ubuntu-latest }
+          - { name: conda-windows-gallery-python3.12-ros3, python-ver: "3.12", os: windows-latest }
+          - { name: conda-macos-gallery-python3.12-ros3  , python-ver: "3.12", os: macos-latest }
     steps:
       - name: Cancel non-latest runs
         uses: styfle/cancel-workflow-action@0.11.0
