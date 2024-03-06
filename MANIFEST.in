@@ -1,5 +1,5 @@
 include license.txt Legal.txt src/pynwb/_due.py
 include requirements.txt requirements-dev.txt requirements-doc.txt requirements-min.txt environment-ros3.yml
-include tox.ini
+include test.py tox.ini
 
 graft tests
