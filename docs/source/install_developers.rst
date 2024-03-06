@@ -90,13 +90,19 @@ editable mode.
 Run tests
 ---------
 
-You can run the full test suite by running:
+For running the tests, it is required to install the development requirements. Again, first activate your
+virtualenv or conda environment.
 
-.. code:: bash
+.. code::
+   $ git clone --recurse-submodules https://github.com/NeurodataWithoutBorders/pynwb.git
+   $ cd pynwb
+   $ pip install -r requirements.txt -r requirements-dev.txt
+   $ pip install -e .
+   $ tox
 
-    pytest
-
-This will run all the tests and compute the test coverage. The coverage report can be found in ``/htmlcov``.
+For debugging it can be useful to keep the intermediate NWB files created by
+the tests. To keep these files create the environment variables
+``CLEAN_NWB``/``CLEAN_HDMF`` and set them to ``1``.
 
 
 FAQ
