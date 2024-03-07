@@ -21,6 +21,7 @@ classifiers = [
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.12",
         "License :: OSI Approved :: BSD License",
         "Development Status :: 5 - Production/Stable",
         "Intended Audience :: Developers",
@@ -62,7 +63,7 @@ packages = ["src/pynwb"]
 addopts = "--cov --cov-report html" # generates coverage report in html format without showing anything on the terminal.
 
 [tool.codespell]
-skip = "htmlcov,.git,.mypy_cache,.pytest_cache,.coverage,*.pdf,*.svg,venvs,.tox,nwb-schema"
+skip = "htmlcov,.git,.mypy_cache,.pytest_cache,.coverage,*.pdf,*.svg,venvs,.tox,nwb-schema,./docs/_build/*,*.ipynb"
 ignore-words-list = "datas"
 
 [tool.coverage.run]
@@ -97,7 +98,7 @@ line-length = 120
 [tool.ruff.per-file-ignores]
 "docs/gallery/*" = ["E402", "T201"]
 "src/*/__init__.py" = ["F401"]
-"test_gallery.py" = ["T201"]
+# "test_gallery.py" = ["T201"] # Uncomment when test_gallery.py is created
 
 [tool.ruff.mccabe]
 max-complexity = 17
