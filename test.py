@@ -68,11 +68,11 @@ def run_test_suite(directory, description="", verbose=True):
 
 
 def _import_from_file(script):
-    # import imp was replaced due to python 3.12 dropping the module.
-    # this will be removed/changed when pytest is integrated.
-    # from importlib.machinery import SourceFileLoader 
-    # return SourceFileLoader(script, os.path.basename(script))
-    pass
+    modname = os.path.basename(script)
+    spec = importlib.util.spec_from_file_location(os.path.basename(script), script)
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[modname] = module
+    spec.loader.exec_module(module)
 
 
 warning_re = re.compile("Parent module '[a-zA-Z0-9]+' not found while handling absolute import")
