@@ -13,7 +13,7 @@ dependencies:
   - python-dateutil==2.8.2
   - setuptools
   - pytest==7.4.3 # This is for the upcoming pytest update
-  - dandi==0.59.0  # NOTE: dandi does not support osx-arm64
+  - dandi==0.60.0  # NOTE: dandi does not support osx-arm64
   - fsspec==2024.2.0
   - requests==2.31.0
   - aiohttp==3.9.3
