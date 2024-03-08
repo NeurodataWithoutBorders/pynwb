@@ -11,6 +11,7 @@ from subprocess import run, PIPE, STDOUT
 import sys
 import traceback
 import unittest
+import importlib.util
 
 flags = {
     'pynwb': 2,
