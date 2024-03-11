@@ -68,6 +68,8 @@ jobs:
           flags: unit
           files: coverage.xml
           fail_ci_if_error: true
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
       - name: Run integration tests and generate coverage report
         run: |
