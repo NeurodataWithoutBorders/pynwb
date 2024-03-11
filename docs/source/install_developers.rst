@@ -79,12 +79,12 @@ After you have created and activated a virtual environment, clone the PyNWB git 
 package requirements using the `pip <https://pip.pypa.io/en/stable/>`_ Python package manager, and install PyNWB in
 editable mode.
 
-.. code::
+.. code:: bash
 
-   $ git clone --recurse-submodules https://github.com/NeurodataWithoutBorders/pynwb.git
-   $ cd pynwb
-   $ pip install -r requirements.txt -r requirements-dev.txt
-   $ pip install -e .
+    git clone --recurse-submodules https://github.com/NeurodataWithoutBorders/pynwb.git
+    cd pynwb
+    pip install -r requirements.txt -r requirements-dev.txt
+    pip install -e .
 
 
 Run tests
@@ -93,12 +93,13 @@ Run tests
 For running the tests, it is required to install the development requirements. Again, first activate your
 virtualenv or conda environment.
 
-.. code::
-   $ git clone --recurse-submodules https://github.com/NeurodataWithoutBorders/pynwb.git
-   $ cd pynwb
-   $ pip install -r requirements.txt -r requirements-dev.txt
-   $ pip install -e .
-   $ tox
+.. code:: bash
+
+    git clone --recurse-submodules https://github.com/NeurodataWithoutBorders/pynwb.git
+    cd pynwb
+    pip install -r requirements.txt -r requirements-dev.txt
+    pip install -e .
+    tox
 
 For debugging it can be useful to keep the intermediate NWB files created by
 the tests. To keep these files create the environment variables
