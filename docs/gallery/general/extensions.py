@@ -327,7 +327,7 @@ class Potato(NWBContainer):
 @register_class("PotatoSack", name)
 class PotatoSack(MultiContainerInterface):
     __clsconf__ = {
-        "attr": "potatos",
+        "attr": "potatoes",
         "type": Potato,
         "add": "add_potato",
         "get": "get_potato",
@@ -345,7 +345,7 @@ from dateutil.tz import tzlocal
 from pynwb import NWBHDF5IO, NWBFile
 
 # You can add potatoes to a potato sack in different ways
-potato_sack = PotatoSack(potatos=Potato(name="potato1", age=2.3, weight=3.0))
+potato_sack = PotatoSack(potateos=Potato(name="potato1", age=2.3, weight=3.0))
 potato_sack.add_potato(Potato("potato2", 3.0, 4.0))
 potato_sack.create_potato("big_potato", 10.0, 20.0)
 
