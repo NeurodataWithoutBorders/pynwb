@@ -64,7 +64,7 @@ addopts = "--cov --cov-report html" # generates coverage report in html format w
 
 [tool.codespell]
 skip = "htmlcov,.git,.mypy_cache,.pytest_cache,.coverage,*.pdf,*.svg,venvs,.tox,nwb-schema,./docs/_build/*,*.ipynb"
-ignore-words-list = "datas"
+ignore-words-list = "optin,potatos"
 
 [tool.coverage.run]
 branch = true
