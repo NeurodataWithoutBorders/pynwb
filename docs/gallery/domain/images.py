@@ -13,7 +13,8 @@ related to the experiment. This tutorial focuses in particular on the usage of:
 
 * :py:class:`~pynwb.image.OpticalSeries` for series of images that were presented as stimulus
 * :py:class:`~pynwb.image.ImageSeries`, for series of images (movie segments);
-* :py:class:`~pynwb.image.GrayscaleImage`, :py:class:`~pynwb.image.RGBImage`, :py:class:`~pynwb.image.RGBAImage`, for static images;
+* :py:class:`~pynwb.image.GrayscaleImage`, :py:class:`~pynwb.image.RGBImage`,
+  :py:class:`~pynwb.image.RGBAImage`, for static images;
 
 The following examples will reference variables that may not be defined within the block they are used in. For
 clarity, we define them here:
@@ -136,19 +137,23 @@ nwbfile.add_acquisition(behavior_images)
 # External Files
 # ^^^^^^^^^^^^^^
 #
-# External files (e.g. video files of the behaving animal) can be added to the :py:class:`~pynwb.file.NWBFile` by creating
-# an :py:class:`~pynwb.image.ImageSeries` object using the :py:attr:`~pynwb.image.ImageSeries.external_file` attribute that specifies the
-# path to the external file(s) on disk. The file(s) path must be relative to the path of the NWB file.
+# External files (e.g. video files of the behaving animal) can be added to the :py:class:`~pynwb.file.NWBFile`
+# by creating an :py:class:`~pynwb.image.ImageSeries` object using the 
+# :py:attr:`~pynwb.image.ImageSeries.external_file` attribute that specifies
+# the path to the external file(s) on disk.
+# The file(s) path must be relative to the path of the NWB file.
 # Either ``external_file`` or ``data`` must be specified, but not both.
 #
-# If the sampling rate is constant, use :py:attr:`~pynwb.base.TimeSeries.rate` and :py:attr:`~pynwb.base.TimeSeries.starting_time` to specify time.
-# For irregularly sampled recordings, use :py:attr:`~pynwb.base.TimeSeries.timestamps` to specify time for each sample image.
+# If the sampling rate is constant, use :py:attr:`~pynwb.base.TimeSeries.rate` and 
+# :py:attr:`~pynwb.base.TimeSeries.starting_time` to specify time.
+# For irregularly sampled recordings, use :py:attr:`~pynwb.base.TimeSeries.timestamps` to specify time for each sample
+# image.
 #
 # Each external image may contain one or more consecutive frames of the full :py:class:`~pynwb.image.ImageSeries`.
 # The :py:attr:`~pynwb.image.ImageSeries.starting_frame` attribute serves as an index to indicate which frame
 # each file contains.
-# For example, if the ``external_file`` dataset has three paths to files and the first and the second file have 2 frames,
-# and the third file has 3 frames, then this attribute will have values `[0, 2, 4]`.
+# For example, if the ``external_file`` dataset has three paths to files and the first and the second file have 2 
+# frames, and the third file has 3 frames, then this attribute will have values `[0, 2, 4]`.
 
 external_file = [
     os.path.relpath(movie_path, nwbfile_path) for movie_path in moviefiles_path
