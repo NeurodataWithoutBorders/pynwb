@@ -58,9 +58,9 @@ version-file = "src/pynwb/_version.py"
 [tool.hatch.build.targets.wheel]
 packages = ["src/pynwb"]
 
-[tool.pytest.ini_options]
-# Addopts creates a shortcut for pytest. For example below, running `pytest` will actually run `pytest --cov --cov-report html`.
-addopts = "--cov --cov-report html" # generates coverage report in html format without showing anything on the terminal.
+# [tool.pytest.ini_options] # TODO: uncomment when pytest is integrated
+# # Addopts creates a shortcut for pytest. For example below, running `pytest` will actually run `pytest --cov --cov-report html`.
+# addopts = "--cov --cov-report html" # generates coverage report in html format without showing anything on the terminal.
 
 [tool.codespell]
 skip = "htmlcov,.git,.mypy_cache,.pytest_cache,.coverage,*.pdf,*.svg,venvs,.tox,nwb-schema,./docs/_build/*,*.ipynb"
