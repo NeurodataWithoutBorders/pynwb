@@ -102,6 +102,7 @@ line-length = 120
 "src/*/__init__.py" = ["F401"]
 "src/pynwb/_version.py" = ["T201"]
 "src/pynwb/validate.py" = ["T201"]
+"scripts" = ["T201"]
 
 # "test_gallery.py" = ["T201"] # Uncomment when test_gallery.py is created
 
