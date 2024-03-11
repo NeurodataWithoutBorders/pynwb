@@ -491,15 +491,15 @@ class IntracellularRecordingsTable(AlignedDynamicTable):
             if required_dynamic_table_missing:
                 if required_dynamic_table_given[2] < 0:
                     dynamic_table_arg.append(IntracellularResponsesTable)
-                    if not dynamic_table_arg[-1].name in categories_arg:
+                    if dynamic_table_arg[-1].name not in categories_arg:
                         categories_arg.insert(0, dynamic_table_arg[-1].name)
                 if required_dynamic_table_given[1] < 0:
                     dynamic_table_arg.append(IntracellularStimuliTable())
-                    if not dynamic_table_arg[-1].name in categories_arg:
+                    if dynamic_table_arg[-1].name not in categories_arg:
                         categories_arg.insert(0, dynamic_table_arg[-1].name)
                 if required_dynamic_table_given[0] < 0:
                     dynamic_table_arg.append(IntracellularElectrodesTable())
-                    if not dynamic_table_arg[-1].name in categories_arg:
+                    if dynamic_table_arg[-1].name not in categories_arg:
                         categories_arg.insert(0, dynamic_table_arg[-1].name)
             kwargs['category_tables'] = dynamic_table_arg
             kwargs['categories'] = categories_arg
