@@ -116,7 +116,7 @@ Projects are currently used mainly on the NeurodataWithoutBorders organization l
 .. _sec-styleguides:
 
 Style Guides
------------
+------------
 
 Git Commit Message Styleguide
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
