@@ -145,8 +145,8 @@ Format Specification Styleguide
 Python Code Styleguide
 ^^^^^^^^^^^^^^^^^^^^^^
 
-Before you create a Pull Request, make sure you are following the HDMF style guide.
-To check whether your code conforms to the HDMF style guide, simply run the ruff_ tool in the project's root
+Before you create a Pull Request, make sure you are following the PyNWB style guide.
+To check whether your code conforms to the PyNWB style guide, simply run the ruff_ tool in the project's root
 directory. ``ruff`` will also sort imports automatically and check against additional code style rules.
 
 We also use ``ruff`` to sort python imports automatically and double-check that the codebase
