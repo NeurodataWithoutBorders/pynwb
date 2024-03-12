@@ -28,11 +28,11 @@ jobs:
 
       - name: Run tox tests
         run: |
-          tox -e py311-upgraded
+          tox -e py312-upgraded
 
       - name: Build wheel and source distribution
         run: |
-          tox -e build-py311-upgraded
+          tox -e build-py312-upgraded
           ls -1 dist
 
       - name: Test installation from a wheel
