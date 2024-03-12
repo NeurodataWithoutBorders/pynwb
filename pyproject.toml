@@ -72,6 +72,7 @@ source = ["src/"]
 omit = [
     "src/pynwb/_due.py",
     "src/pynwb/testing/*",
+    "src/pynwb/legacy/*"
 ]
 
 [tool.coverage.report]
