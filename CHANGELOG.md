@@ -1,5 +1,10 @@
 # PyNWB Changelog
 
+## PyNWB 2.6.1 (Upcoming)
+
+### Enhancements and minor changes
+- Added support for python 3.12 and upgraded dependency versions. This also includes infrastructure updates for developers. @mavaylon1 [#1853](https://github.com/NeurodataWithoutBorders/pynwb/pull/1853)
+
 ## PyNWB 2.6.0 (February 21, 2024)
 
 ### Enhancements and minor changes
