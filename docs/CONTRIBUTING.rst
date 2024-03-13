@@ -118,7 +118,7 @@ Projects are currently used mainly on the NeurodataWithoutBorders organization l
 Style Guides
 ------------
 
-Git Commit Message Styleguide
+Git Commit Message Style Guide
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 * Use the present tense ("Add feature" not "Added feature")
@@ -127,7 +127,7 @@ Git Commit Message Styleguide
 * If a commit fixes an issues, then include "Fix #X" where X is the number of the issue.
 * Reference relevant issues and pull requests liberally after the first line.
 
-Documentation Styleguide
+Documentation Style Guide
 ^^^^^^^^^^^^^^^^^^^^^^^^
 
 All documentations is written in reStructuredText (RST) using Sphinx.
@@ -137,12 +137,12 @@ Did you fix whitespace, format code, or make a purely cosmetic patch in source c
 
 Source code changes that are purely cosmetic in nature and do not add anything substantial to the stability, functionality, or testability will generally not be accepted unless they have been approved beforehand. One of the main reasons is that there are a lot of hidden costs in addition to writing the code itself, and with the limited resources of the project, we need to optimize developer time. E.g,. someone needs to test and review PRs, backporting of bug fixes gets harder, it creates noise and pollutes the git repo and many other cost factors.
 
-Format Specification Styleguide
+Format Specification Style Guide
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 **Coming soon**
 
-Python Code Styleguide
+Python Code Style Guide
 ^^^^^^^^^^^^^^^^^^^^^^
 
 Before you create a Pull Request, make sure you are following the PyNWB style guide.
