@@ -5,6 +5,7 @@ from datetime import datetime, timedelta
 from dateutil.tz import tzlocal, tzutc
 
 from hdmf.common import VectorData
+from hdmf.utils import docval, get_docval, popargs 
 from pynwb import NWBFile, TimeSeries, NWBHDF5IO
 from pynwb.base import Image, Images
 from pynwb.file import Subject, ElectrodeTable, _add_missing_timezone
