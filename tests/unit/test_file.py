@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 from dateutil.tz import tzlocal, tzutc
 
 from hdmf.common import VectorData
-from hdmf.utils import docval, get_docval, popargs 
+from hdmf.utils import docval, get_docval, popargs
 from pynwb import NWBFile, TimeSeries, NWBHDF5IO
 from pynwb.base import Image, Images
 from pynwb.file import Subject, ElectrodeTable, _add_missing_timezone
@@ -226,7 +226,7 @@ class NWBFileTest(TestCase):
 
     def test_add_trial_column_custom_class(self):
         class SubVectorData(VectorData):
-            __fields__ = ('extra_kwarg')
+            __fields__ = ('extra_kwarg', )
 
             @docval(
                 *get_docval(VectorData.__init__, "name", "description", "data"),
