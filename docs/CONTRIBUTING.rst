@@ -119,7 +119,7 @@ Style Guides
 ------------
 
 Git Commit Message Style Guide
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 * Use the present tense ("Add feature" not "Added feature")
 * The first line should be short and descriptive.
@@ -128,7 +128,7 @@ Git Commit Message Style Guide
 * Reference relevant issues and pull requests liberally after the first line.
 
 Documentation Style Guide
-^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^
 
 All documentations is written in reStructuredText (RST) using Sphinx.
 
@@ -138,12 +138,12 @@ Did you fix whitespace, format code, or make a purely cosmetic patch in source c
 Source code changes that are purely cosmetic in nature and do not add anything substantial to the stability, functionality, or testability will generally not be accepted unless they have been approved beforehand. One of the main reasons is that there are a lot of hidden costs in addition to writing the code itself, and with the limited resources of the project, we need to optimize developer time. E.g,. someone needs to test and review PRs, backporting of bug fixes gets harder, it creates noise and pollutes the git repo and many other cost factors.
 
 Format Specification Style Guide
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 **Coming soon**
 
 Python Code Style Guide
-^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^
 
 Before you create a Pull Request, make sure you are following the PyNWB style guide.
 To check whether your code conforms to the PyNWB style guide, simply run the ruff_ tool in the project's root
