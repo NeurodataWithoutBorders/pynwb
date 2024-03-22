@@ -1,5 +1,10 @@
 # PyNWB Changelog
 
+## PyNWB 2.6.1 (March 22, 2024)
+
+### Bug fixes
+- Fix bug with reading file with linked `TimeSeriesReferenceVectorData` @rly [#1865](https://github.com/NeurodataWithoutBorders/pynwb/pull/1865)
+
 ## PyNWB 2.6.0 (February 21, 2024)
 
 ### Enhancements and minor changes
