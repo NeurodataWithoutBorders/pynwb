@@ -19,6 +19,31 @@ from .spec import NWBDatasetSpec, NWBGroupSpec, NWBNamespace  # noqa E402
 from .validate import validate  # noqa: F401, E402
 
 
+CUR_DIR = os.path.dirname(os.path.realpath(__file__))
+path_to_config = os.path.join(CUR_DIR, 'config/nwb_config.yaml')
+
+
+def get_loaded_config():
+    if __TYPE_MAP.ts_config.config is None:
+        msg = "No configuration is loaded."
+        raise ValueError(msg)
+    else:
+        return __TYPE_MAP.ts_config.config
+
+def load_termset_config(config_path: str = None):
+    """
+    This method will either load the default config or the config provided by the path.
+    """
+    if config_path is None:
+        config_path = path_to_config
+    __TYPE_MAP.ts_config.load_termset_config(config_path)
+
+def unload_termset_config():
+    """
+    Remove validation.
+    """
+    return __TYPE_MAP.ts_config.unload_termset_config()
+
 def __get_resources():
     try:
         from importlib.resources import files
@@ -140,6 +165,8 @@ def register_class(**kwargs):
 
     def _dec(cls):
         __TYPE_MAP.register_container_type(namespace, neurodata_type, cls)
+        cls.type_map = __TYPE_MAP
+        cls.namespace = namespace
         return cls
     if container_cls is None:
         return _dec

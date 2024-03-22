@@ -1,0 +1,16 @@
+id: termset/location_example
+name: Locations
+version: 0.0.1
+prefixes:
+  NCI: http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#
+imports:
+  - linkml:types
+default_range: string
+
+enums:
+  Brain Location:
+    permissible_values:
+      Amygdala:
+        description: A cluster of nuclei located deep and medially within each temporal lobe of the brain.
+        meaning: NCI:C12440
+      

@@ -1,0 +1,19 @@
+id: termset/experimenter_example
+name: Experimenter
+version: 0.0.1
+prefixes:
+  ORC: https://orcid.org/
+imports:
+  - linkml:types
+default_range: string
+
+enums:
+  Experimenters:
+    permissible_values:
+      Oliver Rübel:
+        description: He who must not be named.
+        meaning: ORC:0000-0001-9902-1984
+      Ryan Ly:
+        description: The chosen one. 
+        meaning: ORC:0000-0001-9238-0642
+      

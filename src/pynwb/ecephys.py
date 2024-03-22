@@ -36,7 +36,6 @@ class ElectrodeGroup(NWBContainer):
         for key, val in args_to_set.items():
             setattr(self, key, val)
 
-
 @register_class('ElectricalSeries', CORE_NAMESPACE)
 class ElectricalSeries(TimeSeries):
     """
