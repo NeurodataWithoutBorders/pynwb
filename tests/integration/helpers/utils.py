@@ -6,6 +6,7 @@ from pynwb.spec import NWBNamespaceBuilder, export_spec
 
 NAMESPACE_NAME = "test_core"
 
+
 def create_test_extension(specs, container_classes, mappers=None):
     ns_builder = NWBNamespaceBuilder(
         name=NAMESPACE_NAME,
