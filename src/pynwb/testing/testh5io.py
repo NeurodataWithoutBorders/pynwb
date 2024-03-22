@@ -4,7 +4,7 @@ import os
 from abc import ABCMeta, abstractmethod
 import warnings
 
-from pynwb import NWBFile, NWBHDF5IO, validate as pynwb_validate
+from pynwb import NWBFile, NWBHDF5IO, get_manager, validate as pynwb_validate
 from .utils import remove_test_file
 from hdmf.backends.warnings import BrokenLinkWarning
 from hdmf.build.warnings import MissingRequiredBuildWarning
@@ -247,7 +247,11 @@ class NWBH5IOFlexMixin(metaclass=ABCMeta):
         remove_test_file(self.filename)
         remove_test_file(self.export_filename)
 
-    def getContainerType() -> str:
+    def get_manager(self):
+        return get_manager()  # get the pynwb manager unless overridden
+
+    @abstractmethod
+    def getContainerType(self) -> str:
         """Return the name of the type of Container being tested, for test ID purposes."""
         raise NotImplementedError('Cannot run test unless getContainerType is implemented.')
 
@@ -296,13 +300,13 @@ class NWBH5IOFlexMixin(metaclass=ABCMeta):
 
         # catch all warnings
         with warnings.catch_warnings(record=True) as ws:
-            with NWBHDF5IO(self.filename, mode='w') as write_io:
+            with NWBHDF5IO(self.filename, mode='w', manager=self.get_manager()) as write_io:
                 write_io.write(self.nwbfile, cache_spec=cache_spec)
 
             self.validate()
 
             # this is not closed until tearDown() or an exception from self.getContainer below
-            self.reader = NWBHDF5IO(self.filename, mode='r')
+            self.reader = NWBHDF5IO(self.filename, mode='r', manager=self.get_manager())
             self.read_nwbfile = self.reader.read()
 
         # parse warnings and raise exceptions for certain types of warnings
@@ -340,7 +344,7 @@ class NWBH5IOFlexMixin(metaclass=ABCMeta):
             self.validate()
 
             # this is not closed until tearDown() or an exception from self.getContainer below
-            self.export_reader = NWBHDF5IO(self.export_filename, mode='r')
+            self.export_reader = NWBHDF5IO(self.export_filename, mode='r', manager=self.get_manager())
             self.read_exported_nwbfile = self.export_reader.read()
 
         # parse warnings and raise exceptions for certain types of warnings
