@@ -5,6 +5,7 @@ from pynwb.testing import TestCase
 from pynwb.testing.mock.file import mock_NWBFile
 from pynwb.testing.mock.base import mock_TimeSeries
 
+
 class TestFileCopy(TestCase):
 
     def setUp(self):
