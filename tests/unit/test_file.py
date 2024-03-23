@@ -4,6 +4,8 @@ import pandas as pd
 from datetime import datetime, timedelta
 from dateutil.tz import tzlocal, tzutc
 
+from hdmf.common import VectorData
+from hdmf.utils import docval, get_docval, popargs
 from pynwb import NWBFile, TimeSeries, NWBHDF5IO
 from pynwb.base import Image, Images
 from pynwb.file import Subject, ElectrodeTable, _add_missing_timezone
@@ -221,6 +223,27 @@ class NWBFileTest(TestCase):
     def test_add_trial_column(self):
         self.nwbfile.add_trial_column('trial_type', 'the type of trial')
         self.assertEqual(self.nwbfile.trials.colnames, ('start_time', 'stop_time', 'trial_type'))
+
+    def test_add_trial_column_custom_class(self):
+        class SubVectorData(VectorData):
+            __fields__ = ('extra_kwarg', )
+
+            @docval(
+                *get_docval(VectorData.__init__, "name", "description", "data"),
+                {'name': 'extra_kwarg', 'type': 'str', 'doc': 'An extra kwarg.'},
+            )
+            def __init__(self, **kwargs):
+                extra_kwarg = popargs('extra_kwarg', kwargs)
+                super().__init__(**kwargs)
+                self.extra_kwarg = extra_kwarg
+
+        self.nwbfile.add_trial_column(
+            name="test",
+            description="test",
+            col_cls=SubVectorData,
+            extra_kwarg="test_extra_kwarg"
+        )
+        self.assertEqual(self.nwbfile.trials["test"].extra_kwarg, "test_extra_kwarg")
 
     def test_add_trial(self):
         self.nwbfile.add_trial(start_time=10.0, stop_time=20.0)

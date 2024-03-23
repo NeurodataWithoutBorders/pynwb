@@ -1,9 +1,11 @@
 # PyNWB Changelog
 
-## PyNWB 2.7.0 (Upcoming)
+## PyNWB 2.6.1 (March 25, 2024)
 
 ### Bug fixes
 - Fixed bug in how `ElectrodeGroup.__init__` validates its `position` argument. @oruebel [#1770](https://github.com/NeurodataWithoutBorders/pynwb/pull/1770)
+- Fix bug with reading file with linked `TimeSeriesReferenceVectorData` @rly [#1865](https://github.com/NeurodataWithoutBorders/pynwb/pull/1865)
+- Fix bug where extra keyword arguments could not be passed to `NWBFile.add_{x}_column`` for use in custom `VectorData`` classes. @rly [#1861](https://github.com/NeurodataWithoutBorders/pynwb/pull/1861)
 
 ## PyNWB 2.6.0 (February 21, 2024)
 
