@@ -4,4 +4,3 @@ hdmf==3.12.2
 numpy==1.18
 pandas==1.1.5
 python-dateutil==2.7.3
-setuptools

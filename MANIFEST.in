@@ -1,4 +1,4 @@
-include license.txt Legal.txt versioneer.py src/pynwb/_version.py src/pynwb/_due.py
+include license.txt Legal.txt src/pynwb/_due.py
 include requirements.txt requirements-dev.txt requirements-doc.txt requirements-min.txt environment-ros3.yml
 include test.py tox.ini
 
