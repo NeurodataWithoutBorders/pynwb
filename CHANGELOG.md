@@ -1,9 +1,13 @@
 # PyNWB Changelog
 
-## PyNWB 2.6.1 (Upcoming)
+## PyNWB 2.7.0 (Upcoming)
 
 ### Enhancements and minor changes
 - Added support for python 3.12 and upgraded dependency versions. This also includes infrastructure updates for developers. @mavaylon1 [#1853](https://github.com/NeurodataWithoutBorders/pynwb/pull/1853)
+
+### Bug fixes
+- Fix bug with reading file with linked `TimeSeriesReferenceVectorData` @rly [#1865](https://github.com/NeurodataWithoutBorders/pynwb/pull/1865)
+- Fix bug where extra keyword arguments could not be passed to `NWBFile.add_{x}_column`` for use in custom `VectorData`` classes. @rly [#1861](https://github.com/NeurodataWithoutBorders/pynwb/pull/1861)
 
 ## PyNWB 2.6.0 (February 21, 2024)
 
