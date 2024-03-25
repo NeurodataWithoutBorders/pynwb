@@ -29,8 +29,8 @@ Overall Health
 .. image:: https://github.com/NeurodataWithoutBorders/pynwb/actions/workflows/ruff.yml/badge.svg
     :target: https://github.com/NeurodataWithoutBorders/pynwb/actions/workflows/ruff.yml
 
-.. image:: https://github.com/NeurodataWithoutBorders/pynwb/actions/workflows/check_external_links.yml/badge.svg
-    :target: https://github.com/NeurodataWithoutBorders/pynwb/actions/workflows/check_external_links.yml
+.. image:: https://github.com/NeurodataWithoutBorders/pynwb/actions/workflows/check_sphinx_links.yml/badge.svg
+    :target: https://github.com/NeurodataWithoutBorders/pynwb/actions/workflows/check_sphinx_links.yml
 
 .. image:: https://github.com/NeurodataWithoutBorders/pynwb/actions/workflows/run_inspector_tests.yml/badge.svg
     :target: https://github.com/NeurodataWithoutBorders/pynwb/actions/workflows/run_inspector_tests.yml
