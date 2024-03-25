@@ -4,6 +4,7 @@
 
 ### Enhancements and minor changes
 - Added support for python 3.12 and upgraded dependency versions. This also includes infrastructure updates for developers. @mavaylon1 [#1853](https://github.com/NeurodataWithoutBorders/pynwb/pull/1853)
+- Added `bounds` to `SpatialSeries` as an optional field to set (unenforced) boundary range, i.e.,  (min, max), for each dimension of ``data``. @mavaylon1 [#1866](https://github.com/NeurodataWithoutBorders/pynwb/pull/1866)
 
 ### Bug fixes
 - Fix bug with reading file with linked `TimeSeriesReferenceVectorData` @rly [#1865](https://github.com/NeurodataWithoutBorders/pynwb/pull/1865)
