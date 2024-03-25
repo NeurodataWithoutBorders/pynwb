@@ -27,7 +27,7 @@ class SpatialSeries(TimeSeries):
              'doc': ('The data values. Can be 1D or 2D. The first dimension must be time. If 2D, there can be 1, 2, '
                      'or 3 columns, which represent x, y, and z.')},
             {'name': 'bounds', 'type': list, 'shape': ((None, ), (None, None), (None, None, None)), 'default': None,
-             'doc': 'The boundary range (min, max) for each dimension of data. The units are the same as the units for the data.'},
+             'doc': 'The boundary range (min, max) for each dimension of data.'},
             {'name': 'reference_frame', 'type': str,   # required
              'doc': 'description defining what the zero-position is'},
             {'name': 'unit', 'type': str, 'doc': 'The base unit of measurement (should be SI unit)',
