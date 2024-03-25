@@ -79,12 +79,12 @@ After you have created and activated a virtual environment, clone the PyNWB git 
 package requirements using the `pip <https://pip.pypa.io/en/stable/>`_ Python package manager, and install PyNWB in
 editable mode.
 
-.. code::
+.. code:: bash
 
-   $ git clone --recurse-submodules https://github.com/NeurodataWithoutBorders/pynwb.git
-   $ cd pynwb
-   $ pip install -r requirements.txt
-   $ pip install -e .
+    git clone --recurse-submodules https://github.com/NeurodataWithoutBorders/pynwb.git
+    cd pynwb
+    pip install -r requirements.txt -r requirements-dev.txt
+    pip install -e .
 
 
 Run tests
@@ -93,29 +93,17 @@ Run tests
 For running the tests, it is required to install the development requirements. Again, first activate your
 virtualenv or conda environment.
 
-.. code::
+.. code:: bash
 
-   $ git clone --recurse-submodules https://github.com/NeurodataWithoutBorders/pynwb.git
-   $ cd pynwb
-   $ pip install -r requirements.txt -r requirements-dev.txt
-   $ pip install -e .
-   $ tox
+    git clone --recurse-submodules https://github.com/NeurodataWithoutBorders/pynwb.git
+    cd pynwb
+    pip install -r requirements.txt -r requirements-dev.txt
+    pip install -e .
+    tox
 
 For debugging it can be useful to keep the intermediate NWB files created by
 the tests. To keep these files create the environment variables
 ``CLEAN_NWB``/``CLEAN_HDMF`` and set them to ``1``.
-
-
-Following PyNWB Style Guide
----------------------------
-
-Before you create a Pull Request, make sure you are following PyNWB style guide
-(`PEP8 <https://www.python.org/dev/peps/pep-0008/>`_). To do that simply run
-the following command in the project's root directory.
-
-.. code::
-
-   $ flake8
 
 
 FAQ

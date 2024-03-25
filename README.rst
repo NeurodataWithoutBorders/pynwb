@@ -13,35 +13,21 @@ Latest Release
 .. image:: https://anaconda.org/conda-forge/pynwb/badges/version.svg
      :target: https://anaconda.org/conda-forge/pynwb
 
-Code Coverage
-==============
-
-.. image:: https://github.com/NeurodataWithoutBorders/pynwb/workflows/Run%20coverage/badge.svg
-    :target: https://github.com/NeurodataWithoutBorders/pynwb/actions?query=workflow%3A%22Run+coverage%22
-
-Overall test coverage
-
-.. image:: https://codecov.io/gh/NeurodataWithoutBorders/pynwb/branch/dev/graph/badge.svg
-    :target: https://codecov.io/gh/NeurodataWithoutBorders/pynwb
-
-Unit test coverage
-
-.. image:: https://codecov.io/gh/NeurodataWithoutBorders/pynwb/branch/dev/graph/badge.svg?flag=unit
-    :target: https://codecov.io/gh/NeurodataWithoutBorders/pynwb
-
-Integration test coverage
-
-.. image:: https://codecov.io/gh/NeurodataWithoutBorders/pynwb/branch/dev/graph/badge.svg?flag=integration
-    :target: https://codecov.io/gh/NeurodataWithoutBorders/pynwb
 
 Overall Health
 ==============
 
+.. image:: https://github.com/NeurodataWithoutBorders/pynwb/actions/workflows/run_coverage.yml/badge.svg
+    :target: https://github.com/NeurodataWithoutBorders/pynwb/actions/workflows/run_coverage.yml
+
 .. image:: https://github.com/NeurodataWithoutBorders/pynwb/actions/workflows/run_tests.yml/badge.svg
     :target: https://github.com/NeurodataWithoutBorders/pynwb/actions/workflows/run_tests.yml
 
-.. image:: https://github.com/NeurodataWithoutBorders/pynwb/actions/workflows/run_flake8.yml/badge.svg
-    :target: https://github.com/NeurodataWithoutBorders/pynwb/actions/workflows/run_flake8.yml
+.. image:: https://github.com/NeurodataWithoutBorders/pynwb/actions/workflows/codespell.yml/badge.svg
+    :target: https://github.com/NeurodataWithoutBorders/pynwb/actions/workflows/codespell.yml
+
+.. image:: https://github.com/NeurodataWithoutBorders/pynwb/actions/workflows/ruff.yml/badge.svg
+    :target: https://github.com/NeurodataWithoutBorders/pynwb/actions/workflows/ruff.yml
 
 .. image:: https://github.com/NeurodataWithoutBorders/pynwb/actions/workflows/check_external_links.yml/badge.svg
     :target: https://github.com/NeurodataWithoutBorders/pynwb/actions/workflows/check_external_links.yml

@@ -1,3 +1,4 @@
+from hdmf.build import LinkBuilder
 from hdmf.common.table import VectorData
 from hdmf.common.io.table import DynamicTableMap
 
@@ -8,13 +9,18 @@ from pynwb.base import TimeSeriesReferenceVectorData
 
 @register_map(TimeIntervals)
 class TimeIntervalsMap(DynamicTableMap):
-    pass
 
     @DynamicTableMap.constructor_arg('columns')
     def columns_carg(self, builder, manager):
         # handle the case when a TimeIntervals is read with a non-TimeSeriesReferenceVectorData "timeseries" column
         # this is the case for NWB schema v2.4 and earlier, where the timeseries column was a regular VectorData.
         timeseries_builder = builder.get('timeseries')
+
+        # handle the case when the TimeIntervals has a "timeseries" column that is a link (e.g., it exists in
+        # a different file that was shallow copied to this file).
+        if isinstance(timeseries_builder, LinkBuilder):
+            timeseries_builder = timeseries_builder.builder
+
         # if we have a timeseries column and the type is VectorData instead of TimeSeriesReferenceVectorData
         if (timeseries_builder is not None and
                 timeseries_builder.attributes['neurodata_type'] != 'TimeSeriesReferenceVectorData'):

@@ -2,10 +2,10 @@ Prepare for release of PyNWB [version]
 
 ### Before merging:
 - [ ] Major and minor releases: Update package versions in `requirements.txt`, `requirements-dev.txt`,
-  `requirements-doc.txt`, `requirements-min.txt`, `environment-ros3.yml`, and `setup.py` as needed.
+  `requirements-doc.txt`, `requirements-min.txt`, and `environment-ros3.yml` as needed.
 - [ ] Check legal file dates and information in `Legal.txt`, `license.txt`, `README.rst`, `docs/source/conf.py`,
   and any other locations as needed
-- [ ] Update `setup.py` as needed
+- [ ] Update `pyproject.toml` as needed
 - [ ] Update `README.rst` as needed
 - [ ] Update `src/pynwb/nwb-schema` submodule as needed. Check the version number and commit SHA manually
 - [ ] Update changelog (set release date) in `CHANGELOG.md` and any other docs as needed
