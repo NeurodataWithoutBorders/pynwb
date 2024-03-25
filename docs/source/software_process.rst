@@ -42,7 +42,6 @@ running PyNWB. As a library, upper bound version constraints create more harm th
 
 If some of the packages are outdated, see :ref:`update_requirements_files`.
 
-.. _pyproject.toml: https://github.com/NeurodataWithoutBorders/pynwb/blob/dev/pyproject.toml
 .. _blog post: https://iscinumpy.dev/post/bound-version-constraints/
 
 --------------------
