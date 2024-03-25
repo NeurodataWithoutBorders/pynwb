@@ -36,7 +36,7 @@ codecov_, which shows line by line which lines are covered by the tests.
 Installation Requirements
 -------------------------
 
-:pynwb:`setup.py <blob/dev/setup.py>` contains a list of package dependencies and their version ranges allowed for
+:pynwb:`pyproject.toml <blob/dev/pyproject.toml>` contains a list of package dependencies and their version ranges allowed for
 running PyNWB. As a library, upper bound version constraints create more harm than good in the long term (see this
 `blog post`_) so we avoid setting upper bounds on requirements.
 
