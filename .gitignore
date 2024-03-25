@@ -74,3 +74,6 @@ tests/coverage/htmlcov
 
 # macos
 .DS_Store
+
+# Version
+_version.py
