@@ -93,7 +93,6 @@ exclude = [
   "docs/source/conf.py",
   "src/pynwb/_due.py",
   "test.py" # remove when pytest comes along
-  "
 ]
 line-length = 120
 
