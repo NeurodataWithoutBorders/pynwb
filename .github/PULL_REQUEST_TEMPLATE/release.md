@@ -30,5 +30,5 @@ Prepare for release of PyNWB [version]
 4. Either monitor [conda-forge/pynwb-feedstock](https://github.com/conda-forge/pynwb-feedstock) for the
    regro-cf-autotick-bot bot to create a PR updating the version of HDMF to the latest PyPI release, usually within
    24 hours of release, or manually create a PR updating `recipe/meta.yaml` with the latest version number
-   and SHA256 retrieved from PyPI > HDMF > Download Files > View hashes for the `.tar.gz` file. Re-render and update
+   and SHA256 retrieved from PyPI > PyNWB > Download Files > View hashes for the `.tar.gz` file. Re-render and update
    dependencies as needed.
