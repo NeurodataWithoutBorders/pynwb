@@ -3,6 +3,7 @@ import pandas as pd
 
 from datetime import datetime, timedelta
 from dateutil.tz import tzlocal, tzutc
+from hdmf.common import DynamicTable
 
 from hdmf.common import VectorData
 from hdmf.utils import docval, get_docval, popargs
@@ -150,6 +151,43 @@ class NWBFileTest(TestCase):
         self.nwbfile.add_stimulus(TimeSeries('test_ts', [0, 1, 2, 3, 4, 5],
                                              'grams', timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5]))
         self.assertEqual(len(self.nwbfile.stimulus), 1)
+
+    def test_add_stimulus_timeseries_arg(self):
+        """Test nwbfile.add_stimulus using the deprecated 'timeseries' keyword argument"""
+        msg = (
+            "The 'timeseries' keyword argument is deprecated and will be removed in PyNWB 3.0. "
+            "Use the 'stimulus' argument instead."
+        )
+        with self.assertWarnsWith(DeprecationWarning, msg):
+            self.nwbfile.add_stimulus(
+                timeseries=TimeSeries(
+                    name='test_ts',
+                    data=[0, 1, 2, 3, 4, 5],
+                    unit='grams',
+                    timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5]
+                )
+            )
+        self.assertEqual(len(self.nwbfile.stimulus), 1)
+
+    def test_add_stimulus_no_stimulus_arg(self):
+        """Test nwbfile.add_stimulus using the deprecated 'timeseries' keyword argument"""
+        msg = (
+            "The 'stimulus' keyword argument is required. The 'timeseries' keyword argument can be "
+            "provided for backwards compatibility but is deprecated in favor of 'stimulus' and will be "
+            "removed in PyNWB 3.0."
+        )
+        with self.assertRaisesWith(ValueError, msg):
+            self.nwbfile.add_stimulus(None)
+        self.assertEqual(len(self.nwbfile.stimulus), 0)
+
+    def test_add_stimulus_dynamic_table(self):
+        dt = DynamicTable(
+            name='test_dynamic_table',
+            description='a test dynamic table',
+        )
+        self.nwbfile.add_stimulus(dt)
+        self.assertEqual(len(self.nwbfile.stimulus), 1)
+        self.assertIs(self.nwbfile.stimulus['test_dynamic_table'], dt)
 
     def test_add_stimulus_template(self):
         self.nwbfile.add_stimulus_template(TimeSeries('test_ts', [0, 1, 2, 3, 4, 5],

@@ -3,6 +3,11 @@
 ## PyNWB 2.7.0 (Upcoming)
 
 ### Enhancements and minor changes
+- Added support for NWB schema 2.7.0. See [2.7.0 release notes](https://nwb-schema.readthedocs.io/en/latest/format_release_notes.html) for details
+  - Deprecated `ImagingRetinotopy` neurodata type. @rly [#1813](https://github.com/NeurodataWithoutBorders/pynwb/pull/1813)
+  - Modified `OptogeneticSeries` to allow 2D data, primarily in extensions of `OptogeneticSeries`. @rly [#1812](https://github.com/NeurodataWithoutBorders/pynwb/pull/1812)
+  - Support `stimulus_template` as optional predefined column in `IntracellularStimuliTable`. @stephprince [#1815](https://github.com/NeurodataWithoutBorders/pynwb/pull/1815)
+  - Support `NWBDataInterface` and `DynamicTable` in `NWBFile.stimulus`. @rly [#1842](https://github.com/NeurodataWithoutBorders/pynwb/pull/1842)
 - Added support for python 3.12 and upgraded dependency versions. This also includes infrastructure updates for developers. @mavaylon1 [#1853](https://github.com/NeurodataWithoutBorders/pynwb/pull/1853)
 
 ### Bug fixes

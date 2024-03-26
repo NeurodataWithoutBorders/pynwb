@@ -7,6 +7,7 @@ import inspect
 import logging
 import os.path
 import os
+import shutil
 from subprocess import run, PIPE, STDOUT
 import sys
 import traceback
@@ -279,6 +280,9 @@ def clean_up_tests():
         "processed_data.nwb",
         "raw_data.nwb",
         "scratch_analysis.nwb",
+        "sub-P11HMH_ses-20061101_ecephys+image.nwb",
+        "test_edit.nwb",
+        "test_edit2.nwb",
         "test_cortical_surface.nwb",
         "test_icephys_file.nwb",
         "test_multicontainerinterface.extensions.yaml",
@@ -289,6 +293,8 @@ def clean_up_tests():
         for name in glob.glob(f):
             if os.path.exists(name):
                 os.remove(name)
+
+    shutil.rmtree("zarr_tutorial.nwb.zarr")
 
 
 def main():
