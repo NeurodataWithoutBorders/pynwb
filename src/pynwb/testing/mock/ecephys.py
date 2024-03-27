@@ -119,3 +119,32 @@ def mock_SpikeEventSeries(
         nwbfile.add_acquisition(spike_event_series)
 
     return spike_event_series
+
+
+from pynwb.misc import Units
+import numpy as np 
+
+
+def mock_Units(num_units: int = 10, max_spikes: int = 10, seed: Optional[int] = None):
+
+    units_table = Units()
+    units_table.add_column(
+        name="unit_name", description="a readable identifier for the unit"
+    )
+
+    if seed is None:
+        seed = np.pi
+    rng = np.random.default_rng(seed=seed)
+
+    times = rng.random(size=(num_units, max_spikes)).cumsum(axis=1)
+    spikes_per_unit = rng.integers(1, max_spikes, size=num_units)
+
+    spike_times = []
+    for unit_index in range(num_units):
+
+        # Not all units have the same number of spikes
+        spike_times = times[unit_index, : spikes_per_unit[unit_index]]
+        unit_name = f"unit_{unit_index}"
+        units_table.add_unit(spike_times=spike_times, unit_name=unit_name)
+
+    return units_table
