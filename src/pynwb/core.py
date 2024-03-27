@@ -54,6 +54,12 @@ class NWBContainer(NWBMixin, Container):
 
     __nwbfields__ = tuple()
 
+@register_class('NWBTermSetContainer', CORE_NAMESPACE)
+class NWBTermSetContainer(NWBContainer):
+    def __init__(self, **kwargs):
+        termset_path = popargs('termset_path', kwargs)
+        super().__init__(**kwargs)
+        self.termset_path = termset_path
 
 @register_class('NWBDataInterface', CORE_NAMESPACE)
 class NWBDataInterface(NWBContainer):

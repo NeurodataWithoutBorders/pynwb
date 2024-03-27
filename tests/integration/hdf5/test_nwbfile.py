@@ -499,7 +499,6 @@ class TestElectrodes(NWBH5IOMixin, TestCase):
             group=self.group,
             group_name='tetrode1'
         )
-
         self.container = nwbfile.electrodes  # override self.container which has the placeholder
 
     def getContainer(self, nwbfile):

@@ -107,6 +107,7 @@ class Subject(NWBContainer):
         {'name': 'date_of_birth', 'type': datetime, 'default': None,
          'doc': 'The datetime of the date of birth. May be supplied instead of age.'},
         {'name': 'strain', 'type': str, 'doc': 'The strain of the subject, e.g., "C57BL/6J"', 'default': None},
+        {'name': 'termset_path', 'type':str, 'doc': 'The path to the the TermSet', 'default': '...'}
     )
     def __init__(self, **kwargs):
         keys_to_set = (
@@ -121,8 +122,11 @@ class Subject(NWBContainer):
             "date_of_birth",
             "strain",
         )
+        termset_path = popargs('termset_path', kwargs)
         args_to_set = popargs_to_dict(keys_to_set, kwargs)
         super().__init__(name="subject", **kwargs)
+
+        self.termset_path = termset_path
 
         # NOTE when the Subject I/O mapper (see pynwb.io.file.py) reads an age__reference value of None from an
         # NWB 2.0-2.5 file, it sets the value to "unspecified" so that when Subject.__init__ is called, the incoming
