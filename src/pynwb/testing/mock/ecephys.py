@@ -133,7 +133,7 @@ def mock_Units(num_units: int = 10, max_spikes: int = 10, seed: Optional[int] = 
     )
 
     if seed is None:
-        seed = np.pi
+        seed = 0
     rng = np.random.default_rng(seed=seed)
 
     times = rng.random(size=(num_units, max_spikes)).cumsum(axis=1)
