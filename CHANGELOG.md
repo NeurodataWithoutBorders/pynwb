@@ -11,6 +11,7 @@
 - Added support for python 3.12 and upgraded dependency versions. This also includes infrastructure updates for developers. @mavaylon1 [#1853](https://github.com/NeurodataWithoutBorders/pynwb/pull/1853)
 
 ### Bug fixes
+- Fixed bug in how `ElectrodeGroup.__init__` validates its `position` argument. @oruebel [#1770](https://github.com/NeurodataWithoutBorders/pynwb/pull/1770)
 - Fix bug with reading file with linked `TimeSeriesReferenceVectorData` @rly [#1865](https://github.com/NeurodataWithoutBorders/pynwb/pull/1865)
 - Fix bug where extra keyword arguments could not be passed to `NWBFile.add_{x}_column`` for use in custom `VectorData`` classes. @rly [#1861](https://github.com/NeurodataWithoutBorders/pynwb/pull/1861)
 
