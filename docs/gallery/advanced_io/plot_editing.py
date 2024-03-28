@@ -103,7 +103,7 @@ with NWBHDF5IO("test_edit2.nwb", "w") as io:
     io.write(nwbfile)
 
 ##############################################
-# The ``None``value  in the first component of ``maxshape`` means that the
+# The ``None`` value  in the first component of ``maxshape`` means that the
 # the first dimension of the dataset is unlimited. By setting the second dimension
 # of ``maxshape`` to ``100``, that dimension is fixed to be no larger than ``100``.
 # If you do not specify a``maxshape``, then the shape of the dataset will be fixed
