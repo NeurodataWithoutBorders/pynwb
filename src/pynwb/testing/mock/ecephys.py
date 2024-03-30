@@ -9,6 +9,7 @@ from ...file import ElectrodeTable, NWBFile
 from ...ecephys import ElectricalSeries, ElectrodeGroup, SpikeEventSeries
 from .device import mock_Device
 from .utils import name_generator
+from ...misc import Units
 
 
 def mock_ElectrodeGroup(
@@ -121,11 +122,7 @@ def mock_SpikeEventSeries(
     return spike_event_series
 
 
-from pynwb.misc import Units
-import numpy as np 
-
-
-def mock_Units(num_units: int = 10, max_spikes: int = 10, seed: Optional[int] = None):
+def mock_Units(num_units: int = 10, max_spikes_per_unit: int = 10, seed: Optional[int] = None):
 
     units_table = Units()
     units_table.add_column(
@@ -136,8 +133,8 @@ def mock_Units(num_units: int = 10, max_spikes: int = 10, seed: Optional[int] = 
         seed = 0
     rng = np.random.default_rng(seed=seed)
 
-    times = rng.random(size=(num_units, max_spikes)).cumsum(axis=1)
-    spikes_per_unit = rng.integers(1, max_spikes, size=num_units)
+    times = rng.random(size=(num_units, max_spikes_per_unit)).cumsum(axis=1)
+    spikes_per_unit = rng.integers(1, max_spikes_per_unit, size=num_units)
 
     spike_times = []
     for unit_index in range(num_units):
