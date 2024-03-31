@@ -328,12 +328,31 @@ class TimeSeries(NWBDataInterface):
         return self.__time_unit
 
     def get_timestamps(self):
+        """
+        Get the timestamps of this TimeSeries. If timestamps are not stored in this TimeSeries, generate timestamps.
+        """
         if self.fields.get('timestamps'):
             return self.timestamps
         else:
             return np.arange(len(self.data)) / self.rate + self.starting_time
 
     def get_data_in_units(self):
+        """
+        Get the data of this TimeSeries in the specified unit of measurement, applying the conversion factor and offset:
+
+        .. math::
+            out = data * conversion + offset
+
+        If the field 'channel_conversion' is present, the conversion factor is applied to each channel separately:
+
+        .. math::
+            out_{channel} = data * conversion_{channel} + offset
+
+        Returns
+        -------
+        np.ndarray
+
+        """
         if "channel_conversion" in self.fields:
             scale_factor = self.conversion * self.channel_conversion[:, np.newaxis]
         else:
