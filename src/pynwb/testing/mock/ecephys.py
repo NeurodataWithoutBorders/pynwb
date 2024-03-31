@@ -122,12 +122,15 @@ def mock_SpikeEventSeries(
     return spike_event_series
 
 
-def mock_Units(num_units: int = 10, max_spikes_per_unit: int = 10, seed: Optional[int] = None, nwbfile: NWBFile):
+def mock_Units(
+    num_units: int = 10,
+    max_spikes_per_unit: int = 10,
+    seed: Optional[int] = None,
+    nwbfile: Optional[NWBFile] = None,
+) -> Units:
 
     units_table = Units()
-    units_table.add_column(
-        name="unit_name", description="a readable identifier for the unit"
-    )
+    units_table.add_column(name="unit_name", description="a readable identifier for the unit")
 
     if seed is None:
         seed = 0
@@ -140,10 +143,10 @@ def mock_Units(num_units: int = 10, max_spikes_per_unit: int = 10, seed: Optiona
     for unit_index in range(num_units):
 
         # Not all units have the same number of spikes
-        spike_times = times[unit_index, :spikes_per_unit[unit_index]]
+        spike_times = times[unit_index, : spikes_per_unit[unit_index]]
         unit_name = f"unit_{unit_index}"
         units_table.add_unit(spike_times=spike_times, unit_name=unit_name)
-        
+
     if nwbfile is not None:
         nwbfile.units = units_table
 
