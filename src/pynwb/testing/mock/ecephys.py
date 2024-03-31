@@ -125,15 +125,13 @@ def mock_SpikeEventSeries(
 def mock_Units(
     num_units: int = 10,
     max_spikes_per_unit: int = 10,
-    seed: Optional[int] = None,
+    seed: int = 0,
     nwbfile: Optional[NWBFile] = None,
 ) -> Units:
 
     units_table = Units()
     units_table.add_column(name="unit_name", description="a readable identifier for the unit")
 
-    if seed is None:
-        seed = 0
     rng = np.random.default_rng(seed=seed)
 
     times = rng.random(size=(num_units, max_spikes_per_unit)).cumsum(axis=1)
