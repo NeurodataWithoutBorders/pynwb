@@ -140,7 +140,7 @@ def mock_Units(num_units: int = 10, max_spikes_per_unit: int = 10, seed: Optiona
     for unit_index in range(num_units):
 
         # Not all units have the same number of spikes
-        spike_times = times[unit_index, : spikes_per_unit[unit_index]]
+        spike_times = times[unit_index, :spikes_per_unit[unit_index]]
         unit_name = f"unit_{unit_index}"
         units_table.add_unit(spike_times=spike_times, unit_name=unit_name)
         
