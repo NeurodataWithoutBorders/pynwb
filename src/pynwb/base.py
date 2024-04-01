@@ -353,7 +353,7 @@ class TimeSeries(NWBDataInterface):
 
         Returns
         -------
-        np.array
+        :class:`numpy.ndarray`
 
         """
         if "channel_conversion" in self.fields:
