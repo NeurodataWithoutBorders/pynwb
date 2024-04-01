@@ -35,6 +35,7 @@ from pynwb.testing.mock.ecephys import (
     mock_ElectrodeTable,
     mock_ElectricalSeries,
     mock_SpikeEventSeries,
+    mock_Units,
 )
 
 from pynwb.testing.mock.icephys import (
@@ -82,6 +83,7 @@ mock_functions = [
     mock_IntracellularElectrode,
     mock_CurrentClampStimulusSeries,
     mock_IntracellularRecordingsTable,
+    mock_Units,
 ]
 
 
@@ -119,3 +121,4 @@ def test_name_generator():
 
     assert name_generator("TimeSeries") == "TimeSeries"
     assert name_generator("TimeSeries") == "TimeSeries2"
+
