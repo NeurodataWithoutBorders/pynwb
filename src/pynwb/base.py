@@ -343,14 +343,17 @@ class TimeSeries(NWBDataInterface):
         .. math::
             out = data * conversion + offset
 
-        If the field 'channel_conversion' is present, the conversion factor is applied to each channel separately:
+        If the field 'channel_conversion' is present, the conversion factor for each channel is additionally applied 
+        to each channel:
 
         .. math::
-            out_{channel} = data * conversion_{channel} + offset
+            out_{channel} = data * conversion * conversion_{channel} + offset
+
+        NOTE: This will read the entire dataset into memory.
 
         Returns
         -------
-        np.ndarray
+        np.array
 
         """
         if "channel_conversion" in self.fields:
