@@ -5,13 +5,12 @@ from hdmf.term_set import TermSetWrapper, TermSet
 import numpy as np
 from dateutil import tz
 
-from pynwb import NWBHDF5IO, NWBFile, TimeSeries
+from pynwb import NWBHDF5IO, NWBFile
 from pynwb.behavior import Position, SpatialSeries
-from pynwb.epoch import TimeIntervals
 from pynwb.file import Subject
-from pynwb import unload_termset_config, load_termset_config
+from pynwb import unload_type_config, load_type_config
 
-load_termset_config()
+load_type_config()
 session_start_time = datetime(2018, 4, 25, 2, 30, 3, tzinfo=tz.gettz("US/Pacific"))
 terms = TermSet(term_schema_path='/Users/mavaylon/Research/NWB/hdmf/docs/gallery/example_term_set.yaml')
 #
@@ -68,8 +67,8 @@ for ishank in range(nshanks):
 breakpoint()
 # # nwbfile.subject = subject
 # # breakpoint()
-# unload_termset_config()
-# load_termset_config()
+# unload_type_config()
+# load_type_config()
 #
 # nwbfile = NWBFile(
 #     session_description="Mouse exploring an open field",  # required

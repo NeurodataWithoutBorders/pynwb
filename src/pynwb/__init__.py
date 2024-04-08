@@ -37,7 +37,7 @@ def unload_type_config():
     """
     Remove validation.
     """
-    hdmf.common.unload_termset_config()
+    hdmf.common.unload_type_config()
 
 def __get_resources():
     try:

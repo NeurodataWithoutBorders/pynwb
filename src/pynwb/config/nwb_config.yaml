@@ -8,6 +8,6 @@ namespaces:
       NWBFile:
         experimenter:
           termset: experimenter_termset.yaml
-      ElectrodeGroup:
-        location:
-          termset: location_termset.yaml
+      # ElectrodeGroup: This will return when electrode table is redefined
+      #   location:
+      #     termset: location_termset.yaml
