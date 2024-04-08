@@ -22,27 +22,22 @@ from .validate import validate  # noqa: F401, E402
 CUR_DIR = os.path.dirname(os.path.realpath(__file__))
 path_to_config = os.path.join(CUR_DIR, 'config/nwb_config.yaml')
 
+def get_loaded_type_config():
+    return hdmf.common.get_loaded_type_config()
 
-def get_loaded_config():
-    if __TYPE_MAP.ts_config.config is None:
-        msg = "No configuration is loaded."
-        raise ValueError(msg)
-    else:
-        return __TYPE_MAP.ts_config.config
-
-def load_termset_config(config_path: str = None):
+def load_type_config(config_path: str = None):
     """
     This method will either load the default config or the config provided by the path.
     """
     if config_path is None:
         config_path = path_to_config
-    __TYPE_MAP.ts_config.load_termset_config(config_path)
+    hdmf.common.load_type_config(config_path)
 
-def unload_termset_config():
+def unload_type_config():
     """
     Remove validation.
     """
-    return __TYPE_MAP.ts_config.unload_termset_config()
+    hdmf.common.unload_termset_config()
 
 def __get_resources():
     try:

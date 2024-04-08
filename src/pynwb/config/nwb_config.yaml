@@ -3,9 +3,11 @@ namespaces:
     version: 2.7.0-alpha
     data_types:
       Subject:
-        species: nwb_subject_termset.yaml
+        species:
+          termset: nwb_subject_termset.yaml
       NWBFile:
-        experimenter: experimenter_termset.yaml
-        electrodes: TBD
+        experimenter:
+          termset: experimenter_termset.yaml
       ElectrodeGroup:
-        location: location_termset.yaml
+        location:
+          termset: location_termset.yaml
