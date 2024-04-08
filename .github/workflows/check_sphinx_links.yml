@@ -1,4 +1,4 @@
-name: Check Sphinx external links
+name: Check Sphinx links
 on:
   pull_request:
   schedule:
@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  check-external-links:
+  check-sphinx-links:
     runs-on: ubuntu-latest
     steps:
       - name: Cancel non-latest runs
@@ -15,15 +15,15 @@ jobs:
           all_but_latest: true
           access_token: ${{ github.token }}
 
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: 'recursive'
           fetch-depth: 0  # tags are required for versioneer to determine the version
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: '3.12'
 
       - name: Install Sphinx dependencies and package
         run: |
@@ -31,5 +31,5 @@ jobs:
           python -m pip install -r requirements-doc.txt
           python -m pip install .
 
-      - name: Check Sphinx external links
-        run: sphinx-build -b linkcheck ./docs/source ./test_build
+      - name: Check Sphinx internal and external links
+        run: sphinx-build -W -b linkcheck ./docs/source ./test_build

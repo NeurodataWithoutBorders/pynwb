@@ -12,12 +12,6 @@ in PyNWB for creating  Neurodata Extensions (NDX).
     For a more in-depth, step-by-step guide on how to create, document, and publish NWB extensions, we highly
     recommend visiting the :nwb_overview:`extension tutorial <extensions_tutorial/extensions_tutorial_home.html>`
     on the :nwb_overview:`nwb overview <>` website.
-
-.. seealso::
-
-   For more information on available tools for creating extensions, see
-   :nwb_overview:`here <core_tools/core_tools_home.html#svg-version-1-1-width-1-5em-height-1-5em-class-sd-octicon-sd-octicon-diff-added-viewbox-0-0-16-16-aria-hidden-true-path-fill-rule-evenodd-d-m13-25-2-5h2-75a-25-25-0-00-25-25v10-5c0-138-112-25-25-25h10-5a-25-25-0-00-25-25v2-75a-25-25-0-00-25-25zm2-75-1h10-5c-966-0-1-75-784-1-75-1-75v10-5a1-75-1-75-0-0113-25-15h2-75a1-75-1-75-0-011-13-25v2-75c1-1-784-1-784-1-2-75-1zm8-4a-75-75-0-01-75-75v2-5h2-5a-75-75-0-010-1-5h-2-5v2-5a-75-75-0-01-1-5-0v-2-5h-2-5a-75-75-0-010-1-5h2-5v-2-5a-75-75-0-018-4z-path-svg-extending-nwb>`.
-
 """
 
 ####################

@@ -7,10 +7,12 @@ import inspect
 import logging
 import os.path
 import os
+import shutil
 from subprocess import run, PIPE, STDOUT
 import sys
 import traceback
 import unittest
+import importlib.util
 
 flags = {
     'pynwb': 2,
@@ -68,8 +70,11 @@ def run_test_suite(directory, description="", verbose=True):
 
 
 def _import_from_file(script):
-    import imp
-    return imp.load_source(os.path.basename(script), script)
+    modname = os.path.basename(script)
+    spec = importlib.util.spec_from_file_location(os.path.basename(script), script)
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[modname] = module
+    spec.loader.exec_module(module)
 
 
 warning_re = re.compile("Parent module '[a-zA-Z0-9]+' not found while handling absolute import")
@@ -275,6 +280,9 @@ def clean_up_tests():
         "processed_data.nwb",
         "raw_data.nwb",
         "scratch_analysis.nwb",
+        "sub-P11HMH_ses-20061101_ecephys+image.nwb",
+        "test_edit.nwb",
+        "test_edit2.nwb",
         "test_cortical_surface.nwb",
         "test_icephys_file.nwb",
         "test_multicontainerinterface.extensions.yaml",
@@ -285,6 +293,8 @@ def clean_up_tests():
         for name in glob.glob(f):
             if os.path.exists(name):
                 os.remove(name)
+
+    shutil.rmtree("zarr_tutorial.nwb.zarr")
 
 
 def main():

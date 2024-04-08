@@ -540,7 +540,7 @@ with NWBHDF5IO("ophys_tutorial.nwb", "r") as io:
 # Data arrays are read passively from the file.
 # Calling the data attribute on a :py:class:`~pynwb.base.TimeSeries`
 # such as a :py:class:`~pynwb.ophys.RoiResponseSeries` does not read the data
-# values, but presents an :py:class:`~h5py` object that can be indexed to read data.
+# values, but presents an ``h5py`` object that can be indexed to read data.
 # You can use the ``[:]`` operator to read the entire data array into memory.
 # Load and print all the data values of the :py:class:`~pynwb.ophys.RoiResponseSeries`
 # object representing the fluorescence data.
@@ -558,7 +558,7 @@ with NWBHDF5IO("ophys_tutorial.nwb", "r") as io:
 #
 # It is often preferable to read only a portion of the data. To do this, index
 # or slice into the data attribute just like if you were indexing or slicing a
-# :py:class:`~numpy` array.
+# :py:mod:`numpy` array.
 #
 # The following code prints elements ``0:10`` in the first dimension (time)
 # and ``0:3`` (ROIs) in the second dimension from the fluorescence data we have written.

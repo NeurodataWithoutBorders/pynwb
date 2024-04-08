@@ -24,7 +24,7 @@ objects which provide functionality for creating and retrieving:
  * :ref:`modules_overview`, i.e., objects for storing and grouping analyses, and
  * experiment metadata and other metadata related to data provenance.
 
-The following sections describe the :py:class:`~pynwb.base.TimeSeries` and :py:class:`~pynwb.base.ProcessingModules`
+The following sections describe the :py:class:`~pynwb.base.TimeSeries` and :py:class:`~pynwb.base.ProcessingModule`
 classes in further detail.
 
 .. _timeseries_overview:
@@ -108,8 +108,7 @@ More commonly, you will be creating instances of classes that extend this class.
       :py:class:`~pynwb.ophys.ImageSegmentation`,
       :py:class:`~pynwb.ophys.MotionCorrection`.
 
-    * **Others:** :py:class:`~pynwb.retinotopy.ImagingRetinotopy`,
-      :py:class:`~pynwb.base.Images`.
+    * **Others:** :py:class:`~pynwb.base.Images`.
 
     * **TimeSeries:** Any :ref:`timeseries_overview` is also a subclass of :py:class:`~pynwb.core.NWBDataInterface`
       and can be used anywhere :py:class:`~pynwb.core.NWBDataInterface` is allowed.
@@ -372,7 +371,7 @@ position_obj
 # Processing modules can be thought of as folders within the file for storing the related processed data.
 #
 # .. tip:: Use the NWB schema module names as processing module names where appropriate.
-#    These are: ``"behavior"``, ``"ecephys"``, ``"icephys"``, ``"ophys"``, ``"ogen"``, ``"retinotopy"``, and ``"misc"``.
+#    These are: ``"behavior"``, ``"ecephys"``, ``"icephys"``, ``"ophys"``, ``"ogen"``, and ``"misc"``.
 #
 # Let's assume that the subject's position was computed from a video tracking algorithm,
 # so it would be classified as processed data.
@@ -569,7 +568,7 @@ nwbfile.add_trial(start_time=6.0, stop_time=10.0, correct=False)
 
 ####################
 # :py:class:`~hdmf.common.table.DynamicTable` and its subclasses can be converted to a pandas
-# :py:class:`~pandas.DataFrame` for convenient analysis using :py:meth:`.DynamicTable.to_dataframe`.
+# :py:class:`~pandas.DataFrame` for convenient analysis using :py:meth:`~hdmf.common.table.DynamicTable.to_dataframe`.
 
 nwbfile.trials.to_dataframe()
 

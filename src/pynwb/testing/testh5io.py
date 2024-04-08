@@ -4,7 +4,7 @@ import os
 from abc import ABCMeta, abstractmethod
 import warnings
 
-from pynwb import NWBFile, NWBHDF5IO, validate as pynwb_validate
+from pynwb import NWBFile, NWBHDF5IO, get_manager, validate as pynwb_validate
 from .utils import remove_test_file
 from hdmf.backends.warnings import BrokenLinkWarning
 from hdmf.build.warnings import MissingRequiredBuildWarning
@@ -79,7 +79,7 @@ class NWBH5IOMixin(metaclass=ABCMeta):
         self.assertIs(self.read_exported_nwbfile.objects[self.container.object_id], self.read_container)
         self.assertContainerEqual(self.read_container, self.container, ignore_hdmf_attrs=True)
 
-    def roundtripContainer(self, cache_spec=False):
+    def roundtripContainer(self, cache_spec=True):
         """Add the Container to an NWBFile, write it to file, read the file, and return the Container from the file.
         """
         session_description = 'a file to test writing and reading a %s' % self.container_type
@@ -116,7 +116,7 @@ class NWBH5IOMixin(metaclass=ABCMeta):
             self.reader = None
             raise e
 
-    def roundtripExportContainer(self, cache_spec=False):
+    def roundtripExportContainer(self, cache_spec=True):
         """
         Add the test Container to an NWBFile, write it to file, read the file, export the read NWBFile to another
         file, and return the test Container from the file
@@ -163,18 +163,14 @@ class NWBH5IOMixin(metaclass=ABCMeta):
     def validate(self):
         """ Validate the created files """
         if os.path.exists(self.filename):
-            with NWBHDF5IO(self.filename, mode='r') as io:
-                errors = pynwb_validate(io)
-                if errors:
-                    for err in errors:
-                        raise Exception(err)
+            errors, _ = pynwb_validate(paths=[self.filename])
+            if errors:
+                raise Exception("\n".join(errors))
 
         if os.path.exists(self.export_filename):
-            with NWBHDF5IO(self.filename, mode='r') as io:
-                errors = pynwb_validate(io)
-                if errors:
-                    for err in errors:
-                        raise Exception(err)
+            errors, _ = pynwb_validate(paths=[self.export_filename])
+            if errors:
+                raise Exception("\n".join(errors))
 
 
 class AcquisitionH5IOMixin(NWBH5IOMixin):
@@ -251,7 +247,11 @@ class NWBH5IOFlexMixin(metaclass=ABCMeta):
         remove_test_file(self.filename)
         remove_test_file(self.export_filename)
 
-    def getContainerType() -> str:
+    def get_manager(self):
+        return get_manager()  # get the pynwb manager unless overridden
+
+    @abstractmethod
+    def getContainerType(self) -> str:
         """Return the name of the type of Container being tested, for test ID purposes."""
         raise NotImplementedError('Cannot run test unless getContainerType is implemented.')
 
@@ -294,19 +294,19 @@ class NWBH5IOFlexMixin(metaclass=ABCMeta):
         self.assertIs(self.read_exported_nwbfile.objects[self.container.object_id], self.read_container)
         self.assertContainerEqual(self.read_container, self.container, ignore_hdmf_attrs=True)
 
-    def roundtripContainer(self, cache_spec=False):
+    def roundtripContainer(self, cache_spec=True):
         """Write the file, validate the file, read the file, and return the Container from the file.
         """
 
         # catch all warnings
         with warnings.catch_warnings(record=True) as ws:
-            with NWBHDF5IO(self.filename, mode='w') as write_io:
+            with NWBHDF5IO(self.filename, mode='w', manager=self.get_manager()) as write_io:
                 write_io.write(self.nwbfile, cache_spec=cache_spec)
 
             self.validate()
 
             # this is not closed until tearDown() or an exception from self.getContainer below
-            self.reader = NWBHDF5IO(self.filename, mode='r')
+            self.reader = NWBHDF5IO(self.filename, mode='r', manager=self.get_manager())
             self.read_nwbfile = self.reader.read()
 
         # parse warnings and raise exceptions for certain types of warnings
@@ -325,7 +325,7 @@ class NWBH5IOFlexMixin(metaclass=ABCMeta):
             self.reader = None
             raise e
 
-    def roundtripExportContainer(self, cache_spec=False):
+    def roundtripExportContainer(self, cache_spec=True):
         """
         Roundtrip the container, then export the read NWBFile to a new file, validate the files, and return the test
         Container from the file.
@@ -344,7 +344,7 @@ class NWBH5IOFlexMixin(metaclass=ABCMeta):
             self.validate()
 
             # this is not closed until tearDown() or an exception from self.getContainer below
-            self.export_reader = NWBHDF5IO(self.export_filename, mode='r')
+            self.export_reader = NWBHDF5IO(self.export_filename, mode='r', manager=self.get_manager())
             self.read_exported_nwbfile = self.export_reader.read()
 
         # parse warnings and raise exceptions for certain types of warnings
@@ -366,13 +366,11 @@ class NWBH5IOFlexMixin(metaclass=ABCMeta):
     def validate(self):
         """Validate the created files."""
         if os.path.exists(self.filename):
-            with NWBHDF5IO(self.filename, mode='r') as io:
-                errors = pynwb_validate(io)
-                if errors:
-                    raise Exception("\n".join(errors))
+            errors, _ = pynwb_validate(paths=[self.filename])
+            if errors:
+                raise Exception("\n".join(errors))
 
         if os.path.exists(self.export_filename):
-            with NWBHDF5IO(self.filename, mode='r') as io:
-                errors = pynwb_validate(io)
-                if errors:
-                    raise Exception("\n".join(errors))
+            errors, _ = pynwb_validate(paths=[self.export_filename])
+            if errors:
+                raise Exception("\n".join(errors))

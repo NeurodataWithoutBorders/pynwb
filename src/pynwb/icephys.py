@@ -48,7 +48,7 @@ class IntracellularElectrode(NWBContainer):
             {'name': 'seal', 'type': str, 'doc': 'Information about seal used for recording.', 'default': None},
             {'name': 'location', 'type': str,
              'doc': 'Area, layer, comments on estimation, stereotaxis coordinates (if in vivo, etc).', 'default': None},
-            {'name': 'resistance', 'type': str, 'doc': 'Electrode resistance, unit: Ohm.', 'default': None},
+            {'name': 'resistance', 'type': str, 'doc': 'Electrode resistance, unit - Ohm.', 'default': None},
             {'name': 'filtering', 'type': str, 'doc': 'Electrode specific filtering.', 'default': None},
             {'name': 'initial_access_resistance', 'type': str, 'doc': 'Initial access resistance.', 'default': None},
             {'name': 'cell_id', 'type': str, 'doc': 'Unique ID of cell.', 'default': None}
@@ -164,11 +164,11 @@ class CurrentClampSeries(PatchClampSeries):
                      'capacitance_compensation')
 
     @docval(*get_docval(PatchClampSeries.__init__, 'name', 'data', 'electrode'),  # required
-            {'name': 'gain', 'type': float, 'doc': 'Units: Volt/Volt'},
+            {'name': 'gain', 'type': float, 'doc': 'Units - Volt/Volt'},
             *get_docval(PatchClampSeries.__init__, 'stimulus_description'),
-            {'name': 'bias_current', 'type': float, 'doc': 'Unit: Amp', 'default': None},
-            {'name': 'bridge_balance', 'type': float, 'doc': 'Unit: Ohm', 'default': None},
-            {'name': 'capacitance_compensation', 'type': float, 'doc': 'Unit: Farad', 'default': None},
+            {'name': 'bias_current', 'type': float, 'doc': 'Unit - Amp', 'default': None},
+            {'name': 'bridge_balance', 'type': float, 'doc': 'Unit - Ohm', 'default': None},
+            {'name': 'capacitance_compensation', 'type': float, 'doc': 'Unit - Farad', 'default': None},
             *get_docval(PatchClampSeries.__init__, 'resolution', 'conversion', 'timestamps', 'starting_time', 'rate',
                         'comments', 'description', 'control', 'control_description', 'sweep_number', 'offset'),
             {'name': 'unit', 'type': str, 'doc': "The base unit of measurement (must be 'volts')",
@@ -267,15 +267,15 @@ class VoltageClampSeries(PatchClampSeries):
                      'whole_cell_series_resistance_comp')
 
     @docval(*get_docval(PatchClampSeries.__init__, 'name', 'data', 'electrode'),  # required
-            {'name': 'gain', 'type': float, 'doc': 'Units: Volt/Amp'},  # required
+            {'name': 'gain', 'type': float, 'doc': 'Units - Volt/Amp'},  # required
             *get_docval(PatchClampSeries.__init__, 'stimulus_description'),
-            {'name': 'capacitance_fast', 'type': float, 'doc': 'Unit: Farad', 'default': None},
-            {'name': 'capacitance_slow', 'type': float, 'doc': 'Unit: Farad', 'default': None},
-            {'name': 'resistance_comp_bandwidth', 'type': float, 'doc': 'Unit: Hz', 'default': None},
-            {'name': 'resistance_comp_correction', 'type': float, 'doc': 'Unit: percent', 'default': None},
-            {'name': 'resistance_comp_prediction', 'type': float, 'doc': 'Unit: percent', 'default': None},
-            {'name': 'whole_cell_capacitance_comp', 'type': float, 'doc': 'Unit: Farad', 'default': None},
-            {'name': 'whole_cell_series_resistance_comp', 'type': float, 'doc': 'Unit: Ohm', 'default': None},
+            {'name': 'capacitance_fast', 'type': float, 'doc': 'Unit - Farad', 'default': None},
+            {'name': 'capacitance_slow', 'type': float, 'doc': 'Unit - Farad', 'default': None},
+            {'name': 'resistance_comp_bandwidth', 'type': float, 'doc': 'Unit - Hz', 'default': None},
+            {'name': 'resistance_comp_correction', 'type': float, 'doc': 'Unit - percent', 'default': None},
+            {'name': 'resistance_comp_prediction', 'type': float, 'doc': 'Unit - percent', 'default': None},
+            {'name': 'whole_cell_capacitance_comp', 'type': float, 'doc': 'Unit - Farad', 'default': None},
+            {'name': 'whole_cell_series_resistance_comp', 'type': float, 'doc': 'Unit - Ohm', 'default': None},
             *get_docval(PatchClampSeries.__init__, 'resolution', 'conversion', 'timestamps', 'starting_time', 'rate',
                         'comments', 'description', 'control', 'control_description', 'sweep_number', 'offset'),
             {'name': 'unit', 'type': str, 'doc': "The base unit of measurement (must be 'amperes')",
@@ -415,6 +415,12 @@ class IntracellularStimuliTable(DynamicTable):
          'index': False,
          'table': False,
          'class': TimeSeriesReferenceVectorData},
+        {'name': 'stimulus_template',
+         'description': 'Column storing the reference to the stimulus template for the recording (rows)',
+         'required': False,
+         'index': False,
+         'table': False,
+         'class': TimeSeriesReferenceVectorData},
     )
 
     @docval(*get_docval(DynamicTable.__init__, 'id', 'columns', 'colnames'))
@@ -491,15 +497,15 @@ class IntracellularRecordingsTable(AlignedDynamicTable):
             if required_dynamic_table_missing:
                 if required_dynamic_table_given[2] < 0:
                     dynamic_table_arg.append(IntracellularResponsesTable)
-                    if not dynamic_table_arg[-1].name in categories_arg:
+                    if dynamic_table_arg[-1].name not in categories_arg:
                         categories_arg.insert(0, dynamic_table_arg[-1].name)
                 if required_dynamic_table_given[1] < 0:
                     dynamic_table_arg.append(IntracellularStimuliTable())
-                    if not dynamic_table_arg[-1].name in categories_arg:
+                    if dynamic_table_arg[-1].name not in categories_arg:
                         categories_arg.insert(0, dynamic_table_arg[-1].name)
                 if required_dynamic_table_given[0] < 0:
                     dynamic_table_arg.append(IntracellularElectrodesTable())
-                    if not dynamic_table_arg[-1].name in categories_arg:
+                    if dynamic_table_arg[-1].name not in categories_arg:
                         categories_arg.insert(0, dynamic_table_arg[-1].name)
             kwargs['category_tables'] = dynamic_table_arg
             kwargs['categories'] = categories_arg
@@ -517,6 +523,13 @@ class IntracellularRecordingsTable(AlignedDynamicTable):
         {'name': 'stimulus_index_count', 'type': int, 'doc': 'Stop index of the stimulus', 'default': None},
         {'name': 'stimulus', 'type': TimeSeries,
          'doc': 'The TimeSeries (usually a PatchClampSeries) with the stimulus',
+         'default': None},
+        {'name': 'stimulus_template_start_index', 'type': int, 'doc': 'Start index of the stimulus template',
+         'default': None},
+        {'name': 'stimulus_template_index_count', 'type': int, 'doc': 'Stop index of the stimulus template',
+         'default': None},
+        {'name': 'stimulus_template', 'type': TimeSeries,
+         'doc': 'The TimeSeries (usually a PatchClampSeries) with the stimulus template waveforms',
          'default': None},
         {'name': 'response_start_index', 'type': int, 'doc': 'Start index of the response', 'default': None},
         {'name': 'response_index_count', 'type': int, 'doc': 'Stop index of the response', 'default': None},
@@ -553,6 +566,11 @@ class IntracellularRecordingsTable(AlignedDynamicTable):
                                                                        'response',
                                                                        kwargs)
         electrode = popargs('electrode', kwargs)
+        stimulus_template_start_index, stimulus_template_index_count, stimulus_template = popargs(
+            'stimulus_template_start_index',
+            'stimulus_template_index_count',
+            'stimulus_template',
+            kwargs)
 
         # if electrode is not provided, take from stimulus or response object
         if electrode is None:
@@ -572,6 +590,15 @@ class IntracellularRecordingsTable(AlignedDynamicTable):
         response_start_index, response_index_count = self.__compute_index(response_start_index,
                                                                           response_index_count,
                                                                           response, 'response')
+        stimulus_template_start_index, stimulus_template_index_count = self.__compute_index(
+            stimulus_template_start_index,
+            stimulus_template_index_count,
+            stimulus_template, 'stimulus_template')
+
+        # if stimulus template is already a column in the stimuli table, but stimulus_template was None
+        if 'stimulus_template' in self.category_tables['stimuli'].colnames and stimulus_template is None:
+            stimulus_template = stimulus if stimulus is not None else response  # set to stimulus if it was provided
+
         # If either stimulus or response are None, then set them to the same TimeSeries to keep the I/O happy
         response = response if response is not None else stimulus
         stimulus_provided_is_not_none = stimulus is not None  # Store if stimulus is None for error checks later
@@ -612,6 +639,9 @@ class IntracellularRecordingsTable(AlignedDynamicTable):
             stimuli = {}
         stimuli['stimulus'] = TimeSeriesReferenceVectorData.TIME_SERIES_REFERENCE_TUPLE(
             stimulus_start_index, stimulus_index_count, stimulus)
+        if stimulus_template is not None:
+            stimuli['stimulus_template'] = TimeSeriesReferenceVectorData.TIME_SERIES_REFERENCE_TUPLE(
+                stimulus_template_start_index, stimulus_template_index_count, stimulus_template)
 
         # Compile the responses table data
         responses = copy(popargs('response_metadata', kwargs))

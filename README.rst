@@ -13,38 +13,24 @@ Latest Release
 .. image:: https://anaconda.org/conda-forge/pynwb/badges/version.svg
      :target: https://anaconda.org/conda-forge/pynwb
 
-Code Coverage
-==============
-
-.. image:: https://github.com/NeurodataWithoutBorders/pynwb/workflows/Run%20coverage/badge.svg
-    :target: https://github.com/NeurodataWithoutBorders/pynwb/actions?query=workflow%3A%22Run+coverage%22
-
-Overall test coverage
-
-.. image:: https://codecov.io/gh/NeurodataWithoutBorders/pynwb/branch/dev/graph/badge.svg
-    :target: https://codecov.io/gh/NeurodataWithoutBorders/pynwb
-
-Unit test coverage
-
-.. image:: https://codecov.io/gh/NeurodataWithoutBorders/pynwb/branch/dev/graph/badge.svg?flag=unit
-    :target: https://codecov.io/gh/NeurodataWithoutBorders/pynwb
-
-Integration test coverage
-
-.. image:: https://codecov.io/gh/NeurodataWithoutBorders/pynwb/branch/dev/graph/badge.svg?flag=integration
-    :target: https://codecov.io/gh/NeurodataWithoutBorders/pynwb
 
 Overall Health
 ==============
 
+.. image:: https://github.com/NeurodataWithoutBorders/pynwb/actions/workflows/run_coverage.yml/badge.svg
+    :target: https://github.com/NeurodataWithoutBorders/pynwb/actions/workflows/run_coverage.yml
+
 .. image:: https://github.com/NeurodataWithoutBorders/pynwb/actions/workflows/run_tests.yml/badge.svg
     :target: https://github.com/NeurodataWithoutBorders/pynwb/actions/workflows/run_tests.yml
 
-.. image:: https://github.com/NeurodataWithoutBorders/pynwb/actions/workflows/run_flake8.yml/badge.svg
-    :target: https://github.com/NeurodataWithoutBorders/pynwb/actions/workflows/run_flake8.yml
+.. image:: https://github.com/NeurodataWithoutBorders/pynwb/actions/workflows/codespell.yml/badge.svg
+    :target: https://github.com/NeurodataWithoutBorders/pynwb/actions/workflows/codespell.yml
 
-.. image:: https://github.com/NeurodataWithoutBorders/pynwb/actions/workflows/check_external_links.yml/badge.svg
-    :target: https://github.com/NeurodataWithoutBorders/pynwb/actions/workflows/check_external_links.yml
+.. image:: https://github.com/NeurodataWithoutBorders/pynwb/actions/workflows/ruff.yml/badge.svg
+    :target: https://github.com/NeurodataWithoutBorders/pynwb/actions/workflows/ruff.yml
+
+.. image:: https://github.com/NeurodataWithoutBorders/pynwb/actions/workflows/check_sphinx_links.yml/badge.svg
+    :target: https://github.com/NeurodataWithoutBorders/pynwb/actions/workflows/check_sphinx_links.yml
 
 .. image:: https://github.com/NeurodataWithoutBorders/pynwb/actions/workflows/run_inspector_tests.yml/badge.svg
     :target: https://github.com/NeurodataWithoutBorders/pynwb/actions/workflows/run_inspector_tests.yml
@@ -108,7 +94,7 @@ Citing NWB
 LICENSE
 =======
 
-"pynwb" Copyright (c) 2017-2023, The Regents of the University of California, through Lawrence Berkeley National Laboratory (subject to receipt of any required approvals from the U.S. Dept. of Energy).  All rights reserved.
+"pynwb" Copyright (c) 2017-2024, The Regents of the University of California, through Lawrence Berkeley National Laboratory (subject to receipt of any required approvals from the U.S. Dept. of Energy).  All rights reserved.
 Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
 
 (1) Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
@@ -124,7 +110,7 @@ You are under no obligation whatsoever to provide any bug fixes, patches, or upg
 COPYRIGHT
 =========
 
-"pynwb" Copyright (c) 2017-2023, The Regents of the University of California, through Lawrence Berkeley National Laboratory (subject to receipt of any required approvals from the U.S. Dept. of Energy).  All rights reserved.
+"pynwb" Copyright (c) 2017-2024, The Regents of the University of California, through Lawrence Berkeley National Laboratory (subject to receipt of any required approvals from the U.S. Dept. of Energy).  All rights reserved.
 If you have questions about your rights to use or distribute this software, please contact Berkeley Lab's Innovation & Partnerships Office at IPO@lbl.gov.
 
 NOTICE.  This Software was developed under funding from the U.S. Department of Energy and the U.S. Government consequently retains certain rights. As such, the U.S. Government has been granted for itself and others acting on its behalf a paid-up, nonexclusive, irrevocable, worldwide license in the Software to reproduce, distribute copies to the public, prepare derivative works, and perform publicly and display publicly, and to permit other to do so.

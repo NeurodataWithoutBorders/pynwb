@@ -35,6 +35,7 @@ from pynwb.testing.mock.ecephys import (
     mock_ElectrodeTable,
     mock_ElectricalSeries,
     mock_SpikeEventSeries,
+    mock_Units,
 )
 
 from pynwb.testing.mock.icephys import (
@@ -82,12 +83,24 @@ mock_functions = [
     mock_IntracellularElectrode,
     mock_CurrentClampStimulusSeries,
     mock_IntracellularRecordingsTable,
+    mock_Units,
 ]
 
 
 @pytest.mark.parametrize("mock_function", mock_functions)
 def test_mock(mock_function):
     mock_function()
+
+
+def test_mock_TimeSeries_w_timestamps():
+    ts = mock_TimeSeries(timestamps=[0, 1, 2, 3])
+    assert ts.timestamps is not None
+    assert len(ts.timestamps) == 4
+
+
+def test_mock_TimeSeries_w_no_time():
+    ts = mock_TimeSeries()
+    assert ts.rate == 10.0
 
 
 @pytest.mark.parametrize("mock_function", mock_functions)
@@ -108,3 +121,4 @@ def test_name_generator():
 
     assert name_generator("TimeSeries") == "TimeSeries"
     assert name_generator("TimeSeries") == "TimeSeries2"
+
