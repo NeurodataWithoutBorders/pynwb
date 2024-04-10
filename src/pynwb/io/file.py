@@ -1,4 +1,4 @@
-from dateutil.parser import parse as dateutil_parse
+import datetime
 
 from hdmf.build import ObjectMapper
 
@@ -6,6 +6,21 @@ from .. import register_map
 from ..file import NWBFile, Subject
 from ..core import ScratchData
 from .utils import get_nwb_version
+
+
+def parse_datetime(datestr):
+    """Parse an ISO 8601 date string into a datetime object or a date object.
+
+    If the date string does not contain a time component, then parse into a date object.
+    """
+    if datestr is None:
+        return None
+    if isinstance(datestr, bytes):
+        datestr = datestr.decode("utf-8")
+    dt = datetime.datetime.fromisoformat(datestr)
+    if "T" not in datestr:
+        dt = dt.date()
+    return dt
 
 
 @register_map(NWBFile)
@@ -157,19 +172,19 @@ class NWBFileMap(ObjectMapper):
     @ObjectMapper.constructor_arg('session_start_time')
     def dateconversion(self, builder, manager):
         datestr = builder.get('session_start_time').data
-        date = dateutil_parse(datestr)
-        return date
+        dt = parse_datetime(datestr)
+        return dt
 
     @ObjectMapper.constructor_arg('timestamps_reference_time')
     def dateconversion_trt(self, builder, manager):
         datestr = builder.get('timestamps_reference_time').data
-        date = dateutil_parse(datestr)
-        return date
+        dt = parse_datetime(datestr)
+        return dt
 
     @ObjectMapper.constructor_arg('file_create_date')
     def dateconversion_list(self, builder, manager):
         datestr = builder.get('file_create_date').data
-        dates = list(map(dateutil_parse, datestr))
+        dates = list(map(parse_datetime, datestr))
         return dates
 
     @ObjectMapper.constructor_arg('file_name')
@@ -223,8 +238,8 @@ class SubjectMap(ObjectMapper):
             return
         else:
             datestr = dob_builder.data
-            date = dateutil_parse(datestr)
-            return date
+            dt = parse_datetime(datestr)
+            return dt
 
     @ObjectMapper.constructor_arg("age__reference")
     def age_reference_none(self, builder, manager):
