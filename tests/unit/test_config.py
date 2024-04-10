@@ -1,12 +1,10 @@
-import os
-import numpy as np
 from dateutil import tz
 from datetime import datetime
 from uuid import uuid4
 
-from hdmf.term_set import TermSet, TermSetWrapper
+from hdmf.term_set import TermSetWrapper
 
-from pynwb import NWBHDF5IO, NWBFile,get_loaded_type_config, load_type_config, unload_type_config
+from pynwb import NWBFile,get_loaded_type_config, load_type_config, unload_type_config
 from pynwb.file import Subject
 from pynwb.testing import TestCase
 
