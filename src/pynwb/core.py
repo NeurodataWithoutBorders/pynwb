@@ -10,6 +10,7 @@ from hdmf.utils import docval, popargs
 from hdmf.utils import LabelledDict  # noqa: F401
 
 from . import CORE_NAMESPACE, register_class
+from pynwb import get_type_map
 
 
 def _not_parent(arg):
@@ -45,6 +46,17 @@ class NWBMixin(AbstractContainer):
         if not self._in_construct_mode:
             raise ValueError(error_msg)
         warn(error_msg)
+
+    def _get_type_map(self):
+        return get_type_map()
+
+    @property
+    def data_type(self):
+        """
+        Return the spec data type associated with this container, i.e., the neurodata_type.
+        """
+        _type = getattr(self, self._data_type_attr)
+        return _type
 
 
 @register_class('NWBContainer', CORE_NAMESPACE)

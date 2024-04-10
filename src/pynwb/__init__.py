@@ -23,7 +23,11 @@ CUR_DIR = os.path.dirname(os.path.realpath(__file__))
 path_to_config = os.path.join(CUR_DIR, 'config/nwb_config.yaml')
 
 def get_loaded_type_config():
-    return hdmf.common.get_loaded_type_config()
+    if __TYPE_MAP.type_config.config is None:
+        msg = "No configuration is loaded."
+        raise ValueError(msg)
+    else:
+        return __TYPE_MAP.type_config.config
 
 def load_type_config(config_path: str = None):
     """
@@ -31,13 +35,13 @@ def load_type_config(config_path: str = None):
     """
     if config_path is None:
         config_path = path_to_config
-    hdmf.common.load_type_config(config_path)
+    __TYPE_MAP.type_config.load_type_config(config_path)
 
 def unload_type_config():
     """
     Remove validation.
     """
-    hdmf.common.unload_type_config()
+    return __TYPE_MAP.type_config.unload_type_config()
 
 def __get_resources():
     try:

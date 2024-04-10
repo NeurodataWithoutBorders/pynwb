@@ -4,9 +4,10 @@ from dateutil import tz
 from datetime import datetime
 from uuid import uuid4
 
+from hdmf.term_set import TermSet, TermSetWrapper
+
 from pynwb import NWBHDF5IO, NWBFile,get_loaded_type_config, load_type_config, unload_type_config
 from pynwb.file import Subject
-from pynwb import unload_type_config, load_type_config
 from pynwb.testing import TestCase
 
 try:
@@ -26,7 +27,11 @@ class TestPyNWBTypeConfig(TestCase):
         unload_type_config()
 
     def test_get_loaded_type_config(self):
-        pass
+        config = get_loaded_type_config()
+        self.assertEqual(config,
+        {'namespaces': {'core': {'version': '2.7.0-alpha',
+        'data_types': {'Subject': {'species': {'termset': 'nwb_subject_termset.yaml'}},
+                       'NWBFile': {'experimenter': {'termset': 'experimenter_termset.yaml'}}}}}})
 
     def test_default_config(self):
         session_start_time = datetime(2018, 4, 25, 2, 30, 3, tzinfo=tz.gettz("US/Pacific"))
@@ -51,3 +56,5 @@ class TestPyNWBTypeConfig(TestCase):
             sex="M",
         )
         nwbfile.subject = subject
+
+        self.assertIsInstance(nwbfile.subject.species, TermSetWrapper)
