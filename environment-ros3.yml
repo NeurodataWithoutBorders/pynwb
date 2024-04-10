@@ -5,12 +5,12 @@ channels:
   - defaults
 dependencies:
   - python==3.12
-  - h5py==3.11.0
+  - h5py==3.10.0
   - hdmf==3.13.0
   - matplotlib==3.8.0
   - numpy==1.26.4
   - pandas==2.2.1
-  - python-dateutil==2.9.0.post0
+  - python-dateutil==2.8.2
   - setuptools
   - pytest==7.4.3 # This is for the upcoming pytest update
   - dandi==0.60.0  # NOTE: dandi does not support osx-arm64
