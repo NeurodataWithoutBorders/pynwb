@@ -1,4 +1,4 @@
-from datetime import datetime, date, time
+from datetime import datetime, date
 from dateutil.tz import tzlocal, tzutc
 import pandas as pd
 import numpy as np
@@ -152,7 +152,7 @@ class TestNWBFileIO(NWBH5IOMixin, TestCase):
         return nwbfile
 
 
-class TestNWBFileNoTimeRoundTrip(TestNWBFileIO):
+class TestNWBFileNoTimezoneRoundTrip(TestNWBFileIO):
     """ Test that an NWBFile with no timezone information can be written to and read from file """
 
     def build_nwbfile(self):

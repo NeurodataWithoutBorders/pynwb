@@ -141,8 +141,6 @@ class Subject(NWBContainer):
         if isinstance(args_to_set["age"], timedelta):
             args_to_set["age"] = pd.Timedelta(args_to_set["age"]).isoformat()
 
-        date_of_birth = args_to_set['date_of_birth']
-
         for key, val in args_to_set.items():
             setattr(self, key, val)
 
@@ -306,7 +304,8 @@ class NWBFile(MultiContainerInterface, HERDManager):
     @docval({'name': 'session_description', 'type': str,
              'doc': 'a description of the session where this data was generated'},
             {'name': 'identifier', 'type': str, 'doc': 'a unique text identifier for the file'},
-            {'name': 'session_start_time', 'type': (datetime, date), 'doc': 'the start date and time of the recording session'},
+            {'name': 'session_start_time', 'type': (datetime, date),
+             'doc': 'the start date and time of the recording session'},
             {'name': 'file_create_date', 'type': ('array_data', datetime, date),
              'doc': 'the date and time the file was created and subsequent modifications made', 'default': None},
             {'name': 'timestamps_reference_time', 'type': (datetime, date),
@@ -463,9 +462,6 @@ class NWBFile(MultiContainerInterface, HERDManager):
         args_to_set = popargs_to_dict(keys_to_set, kwargs)
         kwargs['name'] = 'root'
         super().__init__(**kwargs)
-
-        # add timezone to session_start_time if missing
-        session_start_time = args_to_set['session_start_time']
 
         # set timestamps_reference_time to session_start_time if not provided
         timestamps_reference_time = args_to_set['timestamps_reference_time']
