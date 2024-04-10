@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 
-from datetime import datetime, timedelta
+from datetime import datetime, date, timedelta
 from dateutil.tz import tzlocal, tzutc
 from hdmf.common import DynamicTable
 
@@ -502,6 +502,22 @@ Fields:
                                related_publications=('pub1', 'pub2'))
         self.assertTupleEqual(self.nwbfile.related_publications, ('pub1', 'pub2'))
 
+    def test_session_start_time_no_timezone(self):
+        self.nwbfile = NWBFile(
+            session_description='a test session description for a test NWBFile',
+            identifier='FILE123',
+            session_start_time=datetime(2024, 4, 10, 0, 21),
+        )
+        self.assertIsNone(self.nwbfile.session_start_time.tzinfo)
+
+    def test_session_start_time_no_time(self):
+        self.nwbfile = NWBFile(
+            session_description='a test session description for a test NWBFile',
+            identifier='FILE123',
+            session_start_time=date(2024, 4, 10),
+        )
+        self.assertEqual(self.nwbfile.session_start_time, date(2024, 4, 10))
+
 
 class SubjectTest(TestCase):
     def setUp(self):
@@ -585,6 +601,35 @@ class SubjectTest(TestCase):
         )
 
         self.assertEqual(subject.age, "P1DT3H46M39S")
+
+    def test_dob_no_timezone(self):
+        self.subject = Subject(
+            age='P90D',
+            age__reference="birth",
+            description='An unfortunate rat',
+            genotype='WT',
+            sex='M',
+            species='Rattus norvegicus',
+            subject_id='RAT123',
+            weight='2 kg',
+            date_of_birth=datetime(2024, 4, 10, 0, 21),
+            strain='my_strain',
+        )
+
+    def test_dob_no_time(self):
+        self.subject = Subject(
+            age='P90D',
+            age__reference="birth",
+            description='An unfortunate rat',
+            genotype='WT',
+            sex='M',
+            species='Rattus norvegicus',
+            subject_id='RAT123',
+            weight='2 kg',
+            date_of_birth=date(2024, 4, 10),
+            strain='my_strain',
+        )
+
 
 
 class TestCacheSpec(TestCase):
