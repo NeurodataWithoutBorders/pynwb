@@ -12,6 +12,9 @@ def parse_datetime(datestr):
     """Parse an ISO 8601 date string into a datetime object or a date object.
 
     If the date string does not contain a time component, then parse into a date object.
+
+    :param datestr: str
+    :return: datetime.datetime or datetime.date
     """
     if datestr is None:
         return None
