@@ -27,10 +27,64 @@ def _validate_helper(io: HDMFIO, namespace: str = CORE_NAMESPACE) -> list:
     builder = io.read_builder()
     validator = ValidatorMap(io.manager.namespace_catalog.get_namespace(name=namespace))
     return validator.validate(builder)
+ 
+def _check_namespaces_to_validate(io = None, path = None, use_cached_namespaces = False, namespace = None, verbose = False, driver = None):
+    status = 0
+    namespaces_to_validate = []
+    namespace_message = "PyNWB namespace information"
+    io_kwargs = dict(path=path, mode="r", driver=driver)
 
+    if use_cached_namespaces:
+        if io is not None:
+            cached_namespaces, manager, namespace_dependencies = _get_cached_namespaces_to_validate(io=io)
+        else:
+            cached_namespaces, manager, namespace_dependencies = _get_cached_namespaces_to_validate(
+                path=path, driver=driver
+            )
+        io_kwargs.update(manager=manager)
+
+        if any(cached_namespaces):
+            namespaces_to_validate = cached_namespaces
+            namespace_message = "cached namespace information"
+        else:
+            namespaces_to_validate = [CORE_NAMESPACE]
+            if verbose:
+                print(
+                    f"The file {path} has no cached namespace information. Falling back to {namespace_message}.",
+                    file=sys.stderr,
+                )
+    else:
+        io_kwargs.update(load_namespaces=False)
+        namespaces_to_validate = [CORE_NAMESPACE]
+
+    if namespace is not None:
+        if namespace in namespaces_to_validate:
+            namespaces_to_validate = [namespace]
+        elif use_cached_namespaces and namespace in namespace_dependencies:  # validating against a dependency
+            for namespace_dependency in namespace_dependencies:
+                if namespace in namespace_dependencies[namespace_dependency]:
+                    status = 1
+                    print(
+                        f"The namespace '{namespace}' is included by the namespace "
+                        f"'{namespace_dependency}'. Please validate against that namespace instead.",
+                        file=sys.stderr,
+                    )
+        else:
+            status = 1
+            print(
+                f"The namespace '{namespace}' could not be found in {namespace_message} as only "
+                f"{namespaces_to_validate} is present.",
+                file=sys.stderr,
+            )
+
+    return status, namespaces_to_validate, io_kwargs, namespace_message
 
 def _get_cached_namespaces_to_validate(
+<<<<<<< HEAD
     path: str, driver: Optional[str] = None, aws_region: Optional[str] = None,
+=======
+    path: Optional[str] = None, driver: Optional[str] = None, io: Optional[HDMFIO] = None
+>>>>>>> 3e6dee50 (reconcile io path validator differences)
 ) -> Tuple[List[str], BuildManager, Dict[str, str]]:
     """
     Determine the most specific namespace(s) that are cached in the given NWBFile that can be used for validation.
@@ -58,12 +112,13 @@ def _get_cached_namespaces_to_validate(
     catalog = NamespaceCatalog(
         group_spec_cls=NWBGroupSpec, dataset_spec_cls=NWBDatasetSpec, spec_namespace_cls=NWBNamespace
     )
-    namespace_dependencies = NWBHDF5IO.load_namespaces(
-        namespace_catalog=catalog,
-        path=path,
-        driver=driver,
-        aws_region=aws_region
-    )
+
+    if io is not None:
+        # do I want to load these here if it's already an io object? Or just somehow get the dependencies?
+        #namespace_dependencies = io.manager.namespace_catalog._NamespaceCatalog__namespaces these are not dependencies
+        namespace_dependencies = io.load_namespaces(namespace_catalog=catalog, file=io._HDF5IO__file, aws_region=aws_region)
+    else:
+        namespace_dependencies = NWBHDF5IO.load_namespaces(namespace_catalog=catalog, path=path, driver=driver, aws_region=aws_region)
 
     # Determine which namespaces are the most specific (i.e. extensions) and validate against those
     candidate_namespaces = set(namespace_dependencies.keys())
@@ -138,56 +193,17 @@ def validate(**kwargs):
     assert io != paths, "Both 'io' and 'paths' were specified! Please choose only one."
 
     if io is not None:
-        validation_errors = _validate_helper(io=io, namespace=namespace or CORE_NAMESPACE)
+        status, namespaces_to_validate, io_kwargs, namespace_message = _check_namespaces_to_validate(io, paths, use_cached_namespaces, namespace, verbose, driver)
+        for validation_namespace in namespaces_to_validate:
+            if verbose:
+                print(f"Validating against {namespace_message} using namespace '{validation_namespace}'.")
+            validation_errors = _validate_helper(io=io, namespace=validation_namespace)
         return validation_errors
 
     status = 0
     validation_errors = list()
     for path in paths:
-        namespaces_to_validate = []
-        namespace_message = "PyNWB namespace information"
-        io_kwargs = dict(path=path, mode="r", driver=driver)
-
-        if use_cached_namespaces:
-            cached_namespaces, manager, namespace_dependencies = _get_cached_namespaces_to_validate(
-                path=path, driver=driver
-            )
-            io_kwargs.update(manager=manager)
-
-            if any(cached_namespaces):
-                namespaces_to_validate = cached_namespaces
-                namespace_message = "cached namespace information"
-            else:
-                namespaces_to_validate = [CORE_NAMESPACE]
-                if verbose:
-                    print(
-                        f"The file {path} has no cached namespace information. Falling back to {namespace_message}.",
-                        file=sys.stderr,
-                    )
-        else:
-            io_kwargs.update(load_namespaces=False)
-            namespaces_to_validate = [CORE_NAMESPACE]
-
-        if namespace is not None:
-            if namespace in namespaces_to_validate:
-                namespaces_to_validate = [namespace]
-            elif use_cached_namespaces and namespace in namespace_dependencies:  # validating against a dependency
-                for namespace_dependency in namespace_dependencies:
-                    if namespace in namespace_dependencies[namespace_dependency]:
-                        status = 1
-                        print(
-                            f"The namespace '{namespace}' is included by the namespace "
-                            f"'{namespace_dependency}'. Please validate against that namespace instead.",
-                            file=sys.stderr,
-                        )
-            else:
-                status = 1
-                print(
-                    f"The namespace '{namespace}' could not be found in {namespace_message} as only "
-                    f"{namespaces_to_validate} is present.",
-                    file=sys.stderr,
-                )
-
+        status, namespaces_to_validate, io_kwargs, namespace_message =  _check_namespaces_to_validate(io, path, use_cached_namespaces, namespace, verbose, driver)
         if status == 1:
             continue
 
@@ -227,7 +243,6 @@ def validate_cli():
     )
     parser.set_defaults(no_cached_namespace=False)
     args = parser.parse_args()
-    status = 0
 
     if args.list_namespaces:
         for path in args.paths:
