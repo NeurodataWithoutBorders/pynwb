@@ -32,32 +32,32 @@ group = ElectrodeGroup( name='foo',
 # location_col = VectorData(name='location', description='foo', data=['brain area'])
 # group_col = VectorData(name='groups', description='foo', data=[group])
 
-# table = ElectrodesTable()
-# nwbfile.electrodes = table
-# nwbfile.add_electrode(group=group, location='brain')
+table = ElectrodesTable()
+nwbfile.electrodes = table
+nwbfile.add_electrode(group=group, location='brain')
 # breakpoint()
 # nwbfile.add_electrode_column(name="label", description="label of electrode")
 
-nshanks = 4
-nchannels_per_shank = 3
-electrode_counter = 0
-#
-for ishank in range(nshanks):
-    # create an electrode group for this shank
-    electrode_group = nwbfile.create_electrode_group(
-        name="shank{}".format(ishank),
-        description="electrode group for shank {}".format(ishank),
-        device=device,
-        location="brain area",
-    )
-    # add electrodes to the electrode table
-    for ielec in range(nchannels_per_shank):
-        nwbfile.add_electrode(
-            group=electrode_group,
-            label="shank{}elec{}".format(ishank, ielec),
-            location="brain area",
-        )
-        electrode_counter += 1
+# nshanks = 4
+# nchannels_per_shank = 3
+# electrode_counter = 0
+# #
+# for ishank in range(nshanks):
+#     # create an electrode group for this shank
+#     electrode_group = nwbfile.create_electrode_group(
+#         name="shank{}".format(ishank),
+#         description="electrode group for shank {}".format(ishank),
+#         device=device,
+#         location="brain area",
+#     )
+#     # add electrodes to the electrode table
+#     for ielec in range(nchannels_per_shank):
+#         nwbfile.add_electrode(
+#             group=electrode_group,
+#             label="shank{}elec{}".format(ishank, ielec),
+#             location="brain area",
+#         )
+#         electrode_counter += 1
 # breakpoint()
 with NWBHDF5IO("ecephys_tutorial.nwb", "w") as io:
     io.write(nwbfile)
