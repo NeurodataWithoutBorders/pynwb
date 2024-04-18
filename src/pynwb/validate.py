@@ -111,7 +111,7 @@ def _get_cached_namespaces_to_validate(
 
     if io is not None:
         # do I want to load these here if it's already an io object? Or just somehow get the dependencies?
-        #namespace_dependencies = io.manager.namespace_catalog._NamespaceCatalog__namespaces these are not dependencies
+        #namespace_dependencies = io.manager.namespace_catalog._NamespaceCatalog__namespaces # these are not dependencies
         namespace_dependencies = io.load_namespaces(namespace_catalog=catalog, file=io._HDF5IO__file)
     else:
         namespace_dependencies = NWBHDF5IO.load_namespaces(namespace_catalog=catalog, path=path, driver=driver)
@@ -188,16 +188,16 @@ def validate(**kwargs):
     )
     assert io != paths, "Both 'io' and 'paths' were specified! Please choose only one."
 
+    status = 0
+    validation_errors = list()
     if io is not None:
         status, namespaces_to_validate, io_kwargs, namespace_message = _check_namespaces_to_validate(io, paths, use_cached_namespaces, namespace, verbose, driver)
         for validation_namespace in namespaces_to_validate:
             if verbose:
                 print(f"Validating against {namespace_message} using namespace '{validation_namespace}'.")
-            validation_errors = _validate_helper(io=io, namespace=validation_namespace)
-        return validation_errors
+            validation_errors += _validate_helper(io=io, namespace=validation_namespace)
+        return validation_errors, status
 
-    status = 0
-    validation_errors = list()
     for path in paths:
         status, namespaces_to_validate, io_kwargs, namespace_message =  _check_namespaces_to_validate(io, path, use_cached_namespaces, namespace, verbose, driver)
         if status == 1:
