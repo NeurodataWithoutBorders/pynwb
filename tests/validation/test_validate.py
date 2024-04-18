@@ -334,3 +334,24 @@ class TestValidateFunction(TestCase):
                     )
                     self.assertEqual(fake_out.getvalue(),
                                      "Validating against cached namespace information using namespace 'core'.\n")
+
+    def test_validate_io_and_path_same(self):
+        """Test that validating a file with an io object and a path return the same results."""
+        path = 'tests/back_compat/1.1.2_nwbfile.nwb'
+        with patch("sys.stderr", new=StringIO()) as fake_err:
+            with patch("sys.stdout", new=StringIO()) as fake_out:
+                with self.get_io(path=path) as io:
+                    results_io, status_io = validate(io=io, namespace="hdmf-common", verbose=True)
+                    fake_err_io = fake_err.getvalue()
+                    fake_out_io = fake_out.getvalue()
+
+        with patch("sys.stderr", new=StringIO()) as fake_err:
+            with patch("sys.stdout", new=StringIO()) as v:
+                results_path, status_path = validate(paths=[path], namespace="hdmf-common", verbose=True)
+                fake_err_path = fake_err.getvalue()
+                fake_out_path = fake_out.getvalue()
+
+        self.assertEqual(results_io, results_path)
+        self.assertEqual(status_io, status_path)
+        self.assertEqual(fake_err_io, fake_err_path)
+        self.assertEqual(fake_out_io, fake_out_path)
