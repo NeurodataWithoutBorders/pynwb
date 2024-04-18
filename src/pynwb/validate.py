@@ -80,11 +80,7 @@ def _check_namespaces_to_validate(io = None, path = None, use_cached_namespaces 
     return status, namespaces_to_validate, io_kwargs, namespace_message
 
 def _get_cached_namespaces_to_validate(
-<<<<<<< HEAD
-    path: str, driver: Optional[str] = None, aws_region: Optional[str] = None,
-=======
-    path: Optional[str] = None, driver: Optional[str] = None, io: Optional[HDMFIO] = None
->>>>>>> 3e6dee50 (reconcile io path validator differences)
+    path: Optional[str] = None, driver: Optional[str] = None, aws_region: Optional[str] = None, io: Optional[HDMFIO] = None
 ) -> Tuple[List[str], BuildManager, Dict[str, str]]:
     """
     Determine the most specific namespace(s) that are cached in the given NWBFile that can be used for validation.
@@ -115,7 +111,7 @@ def _get_cached_namespaces_to_validate(
 
     if io is not None:
         # do I want to load these here if it's already an io object? Or just somehow get the dependencies?
-        #namespace_dependencies = io.manager.namespace_catalog._NamespaceCatalog__namespaces these are not dependencies
+        #namespace_dependencies = io.manager.namespace_catalog._NamespaceCatalog__namespaces
         namespace_dependencies = io.load_namespaces(namespace_catalog=catalog, file=io._HDF5IO__file, aws_region=aws_region)
     else:
         namespace_dependencies = NWBHDF5IO.load_namespaces(namespace_catalog=catalog, path=path, driver=driver, aws_region=aws_region)
@@ -192,16 +188,16 @@ def validate(**kwargs):
     )
     assert io != paths, "Both 'io' and 'paths' were specified! Please choose only one."
 
+    status = 0
+    validation_errors = list()
     if io is not None:
         status, namespaces_to_validate, io_kwargs, namespace_message = _check_namespaces_to_validate(io, paths, use_cached_namespaces, namespace, verbose, driver)
         for validation_namespace in namespaces_to_validate:
             if verbose:
                 print(f"Validating against {namespace_message} using namespace '{validation_namespace}'.")
-            validation_errors = _validate_helper(io=io, namespace=validation_namespace)
-        return validation_errors
+            validation_errors += _validate_helper(io=io, namespace=validation_namespace)
+        return validation_errors, status
 
-    status = 0
-    validation_errors = list()
     for path in paths:
         status, namespaces_to_validate, io_kwargs, namespace_message =  _check_namespaces_to_validate(io, path, use_cached_namespaces, namespace, verbose, driver)
         if status == 1:
