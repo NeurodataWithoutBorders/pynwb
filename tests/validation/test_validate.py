@@ -194,41 +194,63 @@ class TestValidateFunction(TestCase):
     def test_validate_io_no_cache(self):
         """Test that validating a file with no cached spec against the core namespace succeeds."""
         with self.get_io('tests/back_compat/1.0.2_nwbfile.nwb') as io:
-            errors = validate(io)
+            errors, _ = validate(io)
             self.assertEqual(errors, [])
 
     def test_validate_io_no_cache_bad_ns(self):
         """Test that validating a file with no cached spec against a specified, unknown namespace fails."""
-        with self.get_io('tests/back_compat/1.0.2_nwbfile.nwb') as io:
-            with self.assertRaisesWith(KeyError, "\"'notfound' not a namespace\""):
-                validate(io, 'notfound')
+        with patch("sys.stderr", new=StringIO()) as fake_err:
+            with patch("sys.stdout", new=StringIO()) as fake_out:
+                with self.get_io('tests/back_compat/1.0.2_nwbfile.nwb') as io:
+                    results, status = validate(io=io, namespace='notfound')
+                    self.assertEqual(results, [])
+                    self.assertEqual(status, 1)
+                    stderr_regex = (
+                        r"The namespace 'notfound' could not be found in PyNWB namespace information as only "
+                        r"\['core'\] is present.\n"
+                    )
+                self.assertRegex(fake_err.getvalue(), stderr_regex)
+                self.assertEqual(fake_out.getvalue(), "")
 
     def test_validate_io_cached(self):
         """Test that validating a file with cached spec against its cached namespace succeeds."""
         with self.get_io('tests/back_compat/1.1.2_nwbfile.nwb') as io:
-            errors = validate(io)
+            errors, _ = validate(io)
             self.assertEqual(errors, [])
 
     def test_validate_io_cached_extension(self):
         """Test that validating a file with cached spec against its cached namespaces succeeds."""
         with self.get_io('tests/back_compat/2.1.0_nwbfile_with_extension.nwb') as io:
-            errors = validate(io)
+            errors, _ = validate(io)
             self.assertEqual(errors, [])
 
     def test_validate_io_cached_extension_pass_ns(self):
         """Test that validating a file with cached extension spec against the extension namespace succeeds."""
         with self.get_io('tests/back_compat/2.1.0_nwbfile_with_extension.nwb') as io:
-            errors = validate(io, 'ndx-testextension')
+            errors, _ = validate(io, 'ndx-testextension')
             self.assertEqual(errors, [])
 
     def test_validate_io_cached_core_with_io(self):
         """
-        For back-compatability, test that validating a file with cached extension spec against the core
-        namespace succeeds when using the `io` + `namespace` keywords.
+        Test that validating a file with cached extension spec against the core
+        namespace succeeds rases an error when using the `io` + `namespace` keywords.
         """
-        with self.get_io(path='tests/back_compat/2.1.0_nwbfile_with_extension.nwb') as io:
-            results = validate(io=io, namespace="core")
-            self.assertEqual(results, [])
+        with patch("sys.stderr", new=StringIO()) as fake_err:
+            with patch("sys.stdout", new=StringIO()) as fake_out:
+                with self.get_io(path='tests/back_compat/2.1.0_nwbfile_with_extension.nwb') as io:
+                    results, status = validate(io=io, namespace="core", verbose=True)
+                    self.assertEqual(results, [])
+                    self.assertEqual(status, 1)
+                    self.assertEqual(
+                        fake_err.getvalue(),
+                        (
+                            "The namespace 'core' is included by the namespace 'ndx-testextension'. "
+                            "Please validate against that namespace instead.\n"
+                        )
+                    )
+                    self.assertEqual(fake_out.getvalue(),
+                                     "Validating against cached namespace information using "
+                                      "namespace 'ndx-testextension'.\n")
 
     def test_validate_file_cached_extension(self):
         """
@@ -282,14 +304,33 @@ class TestValidateFunction(TestCase):
 
     def test_validate_io_cached_bad_ns(self):
         """Test that validating a file with cached spec against a specified, unknown namespace fails."""
-        with self.get_io('tests/back_compat/1.1.2_nwbfile.nwb') as io:
-            with self.assertRaisesWith(KeyError, "\"'notfound' not a namespace\""):
-                validate(io, 'notfound')
+        with patch("sys.stderr", new=StringIO()) as fake_err:
+            with patch("sys.stdout", new=StringIO()) as fake_out:
+                with self.get_io('tests/back_compat/1.1.2_nwbfile.nwb') as io:
+                    results, status = validate(io=io, namespace='notfound')
+                    self.assertEqual(results, [])
+                    self.assertEqual(status, 1)
+                    stderr_regex = (
+                        r"The namespace 'notfound' could not be found in cached namespace information as only "
+                        r"\['core'\] is present.\n"
+                    )
+                self.assertRegex(fake_err.getvalue(), stderr_regex)
+                self.assertEqual(fake_out.getvalue(), "")
 
     def test_validate_io_cached_hdmf_common(self):
         """Test that validating a file with cached spec against the hdmf-common namespace fails."""
-        with self.get_io('tests/back_compat/1.1.2_nwbfile.nwb') as io:
-            # TODO this error should not be different from the error when using the validate script above
-            msg = "builder must have data type defined with attribute 'data_type'"
-            with self.assertRaisesWith(ValueError, msg):
-                validate(io, 'hdmf-common')
+        with patch("sys.stderr", new=StringIO()) as fake_err:
+            with patch("sys.stdout", new=StringIO()) as fake_out:
+                with self.get_io(path='tests/back_compat/1.1.2_nwbfile.nwb') as io:
+                    results, status = validate(io=io, namespace="hdmf-common", verbose=True)
+                    self.assertEqual(results, [])
+                    self.assertEqual(status, 1)
+                    self.assertEqual(
+                        fake_err.getvalue(),
+                        (
+                            "The namespace 'hdmf-common' is included by the namespace 'core'. "
+                            "Please validate against that namespace instead.\n"
+                        )
+                    )
+                    self.assertEqual(fake_out.getvalue(),
+                                     "Validating against cached namespace information using namespace 'core'.\n")
