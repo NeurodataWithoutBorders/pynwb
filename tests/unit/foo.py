@@ -34,6 +34,7 @@ group = ElectrodeGroup( name='foo',
 
 table = ElectrodesTable()
 nwbfile.electrodes = table
+nwbfile.add_electrode_group(group)
 nwbfile.add_electrode(group=group, location='brain')
 # breakpoint()
 # nwbfile.add_electrode_column(name="label", description="label of electrode")
@@ -61,4 +62,6 @@ nwbfile.add_electrode(group=group, location='brain')
 # breakpoint()
 with NWBHDF5IO("ecephys_tutorial.nwb", "w") as io:
     io.write(nwbfile)
+with NWBHDF5IO("ecephys_tutorial.nwb", "r") as io:
+    read_nwbfile = io.read()
 breakpoint()

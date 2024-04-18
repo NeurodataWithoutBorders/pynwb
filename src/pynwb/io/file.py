@@ -34,7 +34,6 @@ class NWBFileMap(ObjectMapper):
         # map "stimulus" to NWBDataInterface and DynamicTable and unmap the spec for TimeSeries because it is
         # included in the mapping to NWBDataInterface
         self.unmap(stimulus_spec.get_group('presentation').get_neurodata_type('TimeSeries'))
-        # breakpoint()
         self.map_spec('stimulus', stimulus_spec.get_group('presentation').get_neurodata_type('NWBDataInterface'))
         self.map_spec('stimulus', stimulus_spec.get_group('presentation').get_neurodata_type('DynamicTable'))
         self.map_spec('stimulus_template', stimulus_spec.get_group('templates').get_neurodata_type('TimeSeries'))
@@ -74,7 +73,6 @@ class NWBFileMap(ObjectMapper):
 
         ecephys_spec = general_spec.get_group('extracellular_ephys')
         self.unmap(ecephys_spec)
-        # breakpoint()
         self.map_spec('electrodes', ecephys_spec.get_group('electrodes'))
         self.map_spec('electrode_groups', ecephys_spec.get_neurodata_type('ElectrodeGroup'))
 
