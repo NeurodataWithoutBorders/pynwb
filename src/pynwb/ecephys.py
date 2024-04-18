@@ -1,9 +1,9 @@
 import warnings
 from collections.abc import Iterable
 
-from hdmf.common import DynamicTableRegion
+from hdmf.common import DynamicTableRegion, DynamicTable, VectorData
 from hdmf.data_utils import DataChunkIterator, assertEqualShape
-from hdmf.utils import docval, popargs, get_docval, popargs_to_dict, get_data_shape
+from hdmf.utils import docval, popargs, getargs, get_docval, popargs_to_dict, get_data_shape
 
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries
@@ -35,6 +35,47 @@ class ElectrodeGroup(NWBContainer):
                              % str(args_to_set['position']))
         for key, val in args_to_set.items():
             setattr(self, key, val)
+
+
+@register_class('ElectrodesTable', CORE_NAMESPACE)
+class ElectrodesTable(DynamicTable):
+    """TODO"""
+
+    __columns__ = (
+        {'name': 'location', 'description': 'TODO', 'required': True},
+        {'name': 'group', 'description': 'TODO', 'required': True})
+
+    @docval({'name': 'group_name', 'type': VectorData, 'doc':'TODO', 'default': None},
+            {'name': 'x', 'type': float, 'doc':'TODO', 'default': None},
+            {'name': 'y', 'type': float, 'doc':'TODO', 'default': None},
+            {'name': 'z', 'type': float, 'doc':'TODO', 'default': None},
+            {'name': 'imp', 'type': float, 'doc':'TODO', 'default': None},
+            {'name': 'filtering', 'type': str, 'doc':'TODO', 'default': None},
+            {'name': 'rel_x', 'type': float, 'doc':'TODO', 'default': None},
+            {'name': 'rel_y', 'type': float, 'doc':'TODO', 'default': None},
+            {'name': 'rel_z', 'type': float, 'doc':'TODO', 'default': None},
+            {'name': 'reference', 'type': VectorData, 'doc':'TODO', 'default': None},)
+    def __init__(self, **kwargs):
+        kwargs['name'] = 'electrodes'
+        kwargs['description'] = 'metadata about extracellular electrodes'
+
+        # optional fields
+        keys_to_set = (
+            'group_name',
+            'x',
+            'y',
+            'z',
+            'imp',
+            'filtering',
+            'rel_x',
+            'rel_y',
+            'rel_z',
+            'reference')
+        args_to_set = popargs_to_dict(keys_to_set, kwargs)
+        for key, val in args_to_set.items():
+            setattr(self, key, val)
+
+        super().__init__(**kwargs)
 
 
 @register_class('ElectricalSeries', CORE_NAMESPACE)
