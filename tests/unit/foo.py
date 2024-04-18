@@ -60,8 +60,8 @@ nwbfile.add_electrode(group=group, location='brain')
 #         )
 #         electrode_counter += 1
 # breakpoint()
-with NWBHDF5IO("ecephys_tutorial.nwb", "w") as io:
-    io.write(nwbfile)
-with NWBHDF5IO("ecephys_tutorial.nwb", "r") as io:
-    read_nwbfile = io.read()
+# with NWBHDF5IO("ecephys_tutorial.nwb", "w") as io:
+#     io.write(nwbfile)
+io= NWBHDF5IO("/Users/mavaylon/Research/NWB/pynwb/tests/back_compat/2.6.0_DynamicTableElectrodes.nwb", "r")
+read_nwbfile = io.read()
 breakpoint()
