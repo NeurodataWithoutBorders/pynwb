@@ -28,7 +28,12 @@ def _validate_helper(io: HDMFIO, namespace: str = CORE_NAMESPACE) -> list:
     validator = ValidatorMap(io.manager.namespace_catalog.get_namespace(name=namespace))
     return validator.validate(builder)
  
-def _check_namespaces_to_validate(io = None, path = None, use_cached_namespaces = False, namespace = None, verbose = False, driver = None):
+def _check_namespaces_to_validate(io = None,
+                                  path = None,
+                                  use_cached_namespaces = False,
+                                  namespace = None,
+                                  verbose = False,
+                                  driver = None):
     status = 0
     namespaces_to_validate = []
     namespace_message = "PyNWB namespace information"
@@ -110,8 +115,6 @@ def _get_cached_namespaces_to_validate(
     )
 
     if io is not None:
-        # do I want to load these here if it's already an io object? Or just somehow get the dependencies?
-        #namespace_dependencies = io.manager.namespace_catalog._NamespaceCatalog__namespaces
         namespace_dependencies = io.load_namespaces(namespace_catalog=catalog, file=io._HDF5IO__file, aws_region=aws_region)
     else:
         namespace_dependencies = NWBHDF5IO.load_namespaces(namespace_catalog=catalog, path=path, driver=driver, aws_region=aws_region)
@@ -177,9 +180,6 @@ def _get_cached_namespaces_to_validate(
 )
 def validate(**kwargs):
     """Validate NWB file(s) against a namespace or its cached namespaces.
-
-    NOTE: If an io object is provided and no namespace name is specified, then the file will be validated
-    against the core namespace, even if use_cached_namespaces is True.
     """
     from . import NWBHDF5IO  # TODO: modularize to avoid circular import
 
@@ -191,7 +191,11 @@ def validate(**kwargs):
     status = 0
     validation_errors = list()
     if io is not None:
-        status, namespaces_to_validate, io_kwargs, namespace_message = _check_namespaces_to_validate(io, paths, use_cached_namespaces, namespace, verbose, driver)
+        (status,
+         namespaces_to_validate,
+         io_kwargs,
+         namespace_message) = _check_namespaces_to_validate(io, paths, use_cached_namespaces, namespace, verbose,
+                                                            driver)
         for validation_namespace in namespaces_to_validate:
             if verbose:
                 print(f"Validating against {namespace_message} using namespace '{validation_namespace}'.")
@@ -199,7 +203,11 @@ def validate(**kwargs):
         return validation_errors, status
 
     for path in paths:
-        status, namespaces_to_validate, io_kwargs, namespace_message =  _check_namespaces_to_validate(io, path, use_cached_namespaces, namespace, verbose, driver)
+        (status,
+         namespaces_to_validate,
+         io_kwargs,
+         namespace_message) =  _check_namespaces_to_validate(io, path, use_cached_namespaces, namespace, verbose,
+                                                             driver)
         if status == 1:
             continue
 
@@ -239,6 +247,7 @@ def validate_cli():
     )
     parser.set_defaults(no_cached_namespace=False)
     args = parser.parse_args()
+    status = 0
 
     if args.list_namespaces:
         for path in args.paths:
