@@ -250,7 +250,7 @@ class TestValidateFunction(TestCase):
                     )
                     self.assertEqual(fake_out.getvalue(),
                                      "Validating against cached namespace information using "
-                                      "namespace 'ndx-testextension'.\n")
+                                     "'['core', 'hdmf-common', 'ndx-testextension']'.\n")
 
     def test_validate_file_cached_extension(self):
         """
@@ -312,7 +312,7 @@ class TestValidateFunction(TestCase):
                     self.assertEqual(status, 1)
                     stderr_regex = (
                         r"The namespace 'notfound' could not be found in cached namespace information as only "
-                        r"\['core'\] is present.\n"
+                        r"\['core', 'hdmf-common'\] is present.\n"
                     )
                 self.assertRegex(fake_err.getvalue(), stderr_regex)
                 self.assertEqual(fake_out.getvalue(), "")
@@ -333,7 +333,7 @@ class TestValidateFunction(TestCase):
                         )
                     )
                     self.assertEqual(fake_out.getvalue(),
-                                     "Validating against cached namespace information using namespace 'core'.\n")
+                                     "Validating against cached namespace information using '['core', 'hdmf-common']'.\n")
 
     def test_validate_io_and_path_same(self):
         """Test that validating a file with an io object and a path return the same results."""

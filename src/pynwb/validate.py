@@ -64,9 +64,7 @@ def _check_namespaces_to_validate(io = None,
         namespaces_to_validate = [CORE_NAMESPACE]
 
     if namespace is not None:
-        if namespace in namespaces_to_validate:
-            namespaces_to_validate = [namespace]
-        elif use_cached_namespaces and namespace in namespace_dependencies:  # validating against a dependency
+        if use_cached_namespaces and namespace in namespace_dependencies:  # validating against a dependency
             for namespace_dependency in namespace_dependencies:
                 if namespace in namespace_dependencies[namespace_dependency]:
                     status = 1
@@ -75,6 +73,8 @@ def _check_namespaces_to_validate(io = None,
                         f"'{namespace_dependency}'. Please validate against that namespace instead.",
                         file=sys.stderr,
                     )
+        elif namespace in namespaces_to_validate:
+            namespaces_to_validate = [namespace]
         else:
             status = 1
             print(
