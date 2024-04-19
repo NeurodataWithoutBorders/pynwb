@@ -23,9 +23,10 @@ def _print_errors(validation_errors: list):
         print(" - no errors found.")
 
 
-def _validate_helper(io: HDMFIO, namespace: str = CORE_NAMESPACE) -> list:
+def _validate_helper(io: HDMFIO, namespaces: list = [CORE_NAMESPACE]) -> list:
     builder = io.read_builder()
-    validator = ValidatorMap(io.manager.namespace_catalog.get_namespace(name=namespace))
+    namespaces = [io.manager.namespace_catalog.get_namespace(name=ns) for ns in namespaces]
+    validator = ValidatorMap(namespaces)
     return validator.validate(builder)
  
 def _check_namespaces_to_validate(io = None,
@@ -121,8 +122,6 @@ def _get_cached_namespaces_to_validate(
 
     # Determine which namespaces are the most specific (i.e. extensions) and validate against those
     candidate_namespaces = set(namespace_dependencies.keys())
-    for namespace_dependency in namespace_dependencies:
-        candidate_namespaces -= namespace_dependencies[namespace_dependency].keys()
 
     # TODO: remove this workaround for issue https://github.com/NeurodataWithoutBorders/pynwb/issues/1357
     candidate_namespaces.discard("hdmf-experimental")  # remove validation of hdmf-experimental for now
@@ -196,10 +195,9 @@ def validate(**kwargs):
          io_kwargs,
          namespace_message) = _check_namespaces_to_validate(io, paths, use_cached_namespaces, namespace, verbose,
                                                             driver)
-        for validation_namespace in namespaces_to_validate:
-            if verbose:
-                print(f"Validating against {namespace_message} using namespace '{validation_namespace}'.")
-            validation_errors += _validate_helper(io=io, namespace=validation_namespace)
+        if verbose:
+            print(f"Validating against {namespace_message} using '{namespaces_to_validate}'.")
+        validation_errors += _validate_helper(io=io, namespaces=namespaces_to_validate)
         return validation_errors, status
 
     for path in paths:
@@ -212,10 +210,9 @@ def validate(**kwargs):
             continue
 
         with NWBHDF5IO(**io_kwargs) as io:
-            for validation_namespace in namespaces_to_validate:
-                if verbose:
-                    print(f"Validating {path} against {namespace_message} using namespace '{validation_namespace}'.")
-                validation_errors += _validate_helper(io=io, namespace=validation_namespace)
+            if verbose:
+                print(f"Validating {path} against {namespace_message} using '{namespaces_to_validate}'.")
+            validation_errors += _validate_helper(io=io, namespaces=namespaces_to_validate)
     return validation_errors, status
 
 
