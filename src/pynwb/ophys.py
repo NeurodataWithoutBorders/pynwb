@@ -46,7 +46,7 @@ class ImagingPlane(NWBContainer):
                      'reference_frame',
                      'grid_spacing',
                      'grid_spacing_unit',
-                     'origin_coords'
+                     'origin_coords',
                      'origin_coords_unit'
                      )
 
