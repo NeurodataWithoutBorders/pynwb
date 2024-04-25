@@ -69,9 +69,9 @@ def mock_electrodes(
 def mock_ElectricalSeries(
     name: Optional[str] = None,
     description: str = "description",
-    data=None,
-    rate: float = 30000.0,
-    timestamps=None,
+    data: Optional[np.ndarray] = None,
+    rate: Optional[float] = None,
+    timestamps: Optional[np.ndarray] = None,
     starting_time: Optional[float] = None,
     electrodes: Optional[DynamicTableRegion] = None,
     filtering: str = "filtering",
@@ -80,6 +80,10 @@ def mock_ElectricalSeries(
     conversion: float = 1.0,
     offset: float = 0.,
 ) -> ElectricalSeries:
+    
+    # Set a default rate if timestamps are not provided
+    rate = 30_000.0 if (timestamps is None and rate is None) else rate
+
     electrical_series = ElectricalSeries(
         name=name or name_generator("ElectricalSeries"),
         description=description,
