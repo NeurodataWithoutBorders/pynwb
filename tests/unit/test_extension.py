@@ -2,7 +2,6 @@ import os
 import random
 import string
 from datetime import datetime
-from dateutil.tz import tzlocal
 from tempfile import gettempdir
 
 from hdmf.spec import RefSpec
@@ -108,7 +107,7 @@ class TestExtension(TestCase):
                 super().__init__(**kwargs)
                 self.test_attr = test_attr
 
-        nwbfile = NWBFile("a file with header data", "NB123A",  datetime(2017, 5, 1, 12, 0, 0, tzinfo=tzlocal()))
+        nwbfile = NWBFile("a file with header data", "NB123A",  datetime(2017, 5, 1, 12, 0, 0))
 
         nwbfile.add_lab_meta_data(MyTestMetaData(name='test_name', test_attr=5.))
 
@@ -128,7 +127,7 @@ class TestExtension(TestCase):
 
         MyTestMetaData = get_class('MyTestMetaData', self.prefix)
 
-        nwbfile = NWBFile("a file with header data", "NB123A", datetime(2017, 5, 1, 12, 0, 0, tzinfo=tzlocal()))
+        nwbfile = NWBFile("a file with header data", "NB123A", datetime(2017, 5, 1, 12, 0, 0))
 
         nwbfile.add_lab_meta_data(MyTestMetaData(name='test_name', test_attr=5.))
 

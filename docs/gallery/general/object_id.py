@@ -16,16 +16,14 @@ The object ID of an NWB container object can be accessed using the
 
 """
 
-from datetime import datetime
-
-import numpy as np
-from dateutil.tz import tzlocal
-
 # sphinx_gallery_thumbnail_path = 'figures/gallery_thumbnails_objectid.png'
+
+from datetime import datetime
+import numpy as np
 from pynwb import NWBFile, TimeSeries
 
 # set up the NWBFile
-start_time = datetime(2019, 4, 3, 11, tzinfo=tzlocal())
+start_time = datetime(2019, 4, 3, hour=11, minute=0)
 nwbfile = NWBFile(
     session_description="demonstrate NWB object IDs",
     identifier="NWB456",
