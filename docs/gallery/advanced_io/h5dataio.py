@@ -19,19 +19,15 @@ from PyNWB.
 #
 
 from datetime import datetime
-
-from dateutil.tz import tzlocal
-
 from pynwb import NWBFile
 
-start_time = datetime(2017, 4, 3, 11, tzinfo=tzlocal())
+start_time = datetime(2017, 4, 3, hour=11, minute=0)
 
 nwbfile = NWBFile(
     session_description="demonstrate advanced HDF5 I/O features",
     identifier="NWB123",
     session_start_time=start_time,
 )
-
 
 ####################
 # Normally if we create a :py:class:`~pynwb.base.TimeSeries` we would do

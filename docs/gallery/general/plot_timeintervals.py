@@ -36,18 +36,15 @@ a :py:class:`~hdmf.common.table.DynamicTable` with the following columns:
 
 # sphinx_gallery_thumbnail_path = 'figures/gallery_thumbnails_timeintervals.png'
 from datetime import datetime
-from uuid import uuid4
-
 import numpy as np
-from dateutil.tz import tzlocal
-
 from pynwb import NWBFile, TimeSeries
+from uuid import uuid4
 
 # create the NWBFile
 nwbfile = NWBFile(
     session_description="my first synthetic recording",  # required
     identifier=str(uuid4()),  # required
-    session_start_time=datetime(2017, 4, 3, 11, tzinfo=tzlocal()),  # required
+    session_start_time=datetime(2017, 4, 3, hour=11),  # required
     experimenter="Baggins, Bilbo",  # optional
     lab="Bag End Laboratory",  # optional
     institution="University of Middle Earth at the Shire",  # optional

@@ -110,12 +110,8 @@ writing large arrays without loading all data into memory and streaming data wri
 
 # sphinx_gallery_thumbnail_path = 'figures/gallery_thumbnails_iterative_write.png'
 from datetime import datetime
-from uuid import uuid4
-
-from dateutil.tz import tzlocal
-
 from pynwb import NWBHDF5IO, NWBFile, TimeSeries
-
+from uuid import uuid4
 
 def write_test_file(filename, data, close_io=True):
     """
@@ -129,7 +125,7 @@ def write_test_file(filename, data, close_io=True):
     """
 
     # Create a test NWBfile
-    start_time = datetime(2017, 4, 3, 11, tzinfo=tzlocal())
+    start_time = datetime(2017, 4, 3, hour=11, minute=30)
     nwbfile = NWBFile(
         session_description="demonstrate iterative write",
         identifier=str(uuid4()),
