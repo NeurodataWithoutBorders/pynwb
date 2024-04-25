@@ -165,7 +165,7 @@ from pynwb.file import Subject
 #     Use keyword arguments when constructing :py:class:`~pynwb.file.NWBFile` objects.
 #
 
-session_start_time = datetime(2018, 4, 25, 2, 30, 3, tzinfo=tz.gettz("US/Pacific"))
+session_start_time = datetime(2018, 4, 25, hour=2, minute=30, second=3, tzinfo=tz.gettz("US/Pacific"))
 
 nwbfile = NWBFile(
     session_description="Mouse exploring an open field",  # required

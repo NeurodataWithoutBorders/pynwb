@@ -14,7 +14,6 @@ from pynwb.device import Device
 from pynwb.testing import TestCase
 from pynwb.file import NWBFile  # Needed to test icephys functionality defined on NWBFile
 from datetime import datetime
-from dateutil.tz import tzlocal
 
 
 def GetElectrode():
@@ -46,7 +45,7 @@ class NWBFileICEphys(TestCase):
             _ = NWBFile(
                 session_description='NWBFile icephys test',
                 identifier='NWB123',  # required
-                session_start_time=datetime(2017, 4, 3, 11, tzinfo=tzlocal()),
+                session_start_time=datetime(2017, 4, 3, 11),
                 ic_electrodes=[self.icephys_electrode, ],
                 sweep_table=SweepTable())
 
@@ -57,14 +56,14 @@ class NWBFileICEphys(TestCase):
             _ = NWBFile(
                 session_description='NWBFile icephys test',
                 identifier='NWB123',  # required
-                session_start_time=datetime(2017, 4, 3, 11, tzinfo=tzlocal()),
+                session_start_time=datetime(2017, 4, 3, 11),
                 ic_electrodes=[self.icephys_electrode, ])
 
     def test_icephys_electrodes_parameter(self):
         nwbfile = NWBFile(
                 session_description='NWBFile icephys test',
                 identifier='NWB123',  # required
-                session_start_time=datetime(2017, 4, 3, 11, tzinfo=tzlocal()),
+                session_start_time=datetime(2017, 4, 3, 11),
                 icephys_electrodes=[self.icephys_electrode, ])
         self.assertEqual(nwbfile.get_icephys_electrode('test_iS'), self.icephys_electrode)
 
@@ -73,7 +72,7 @@ class NWBFileICEphys(TestCase):
         nwbfile = NWBFile(
                 session_description='NWBFile icephys test',
                 identifier='NWB123',  # required
-                session_start_time=datetime(2017, 4, 3, 11, tzinfo=tzlocal()))
+                session_start_time=datetime(2017, 4, 3, 11))
 
         msg = "NWBFile.add_ic_electrode has been replaced by NWBFile.add_icephys_electrode."
         with self.assertWarnsWith(DeprecationWarning, msg):
@@ -83,7 +82,7 @@ class NWBFileICEphys(TestCase):
         nwbfile = NWBFile(
             session_description='NWBFile icephys test',
             identifier='NWB123',  # required
-            session_start_time=datetime(2017, 4, 3, 11, tzinfo=tzlocal()),
+            session_start_time=datetime(2017, 4, 3, 11),
             icephys_electrodes=[self.icephys_electrode, ])
         # make sure NWBFile.ic_electrodes property warns
 
@@ -100,7 +99,7 @@ class NWBFileICEphys(TestCase):
         nwbfile = NWBFile(
             session_description='NWBFile icephys test',
             identifier='NWB123',  # required
-            session_start_time=datetime(2017, 4, 3, 11, tzinfo=tzlocal()))
+            session_start_time=datetime(2017, 4, 3, 11))
         device = Device(name='device_name')
         msg = "NWBFile.create_ic_electrode has been replaced by NWBFile.create_icephys_electrode."
         with self.assertWarnsWith(DeprecationWarning, msg):
