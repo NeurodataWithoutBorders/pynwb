@@ -19,9 +19,10 @@ class NWBFileTest(TestCase):
     def setUp(self):
         self.start = datetime(2017, 5, 1, 12, 0, 0, tzinfo=tzlocal())
         self.ref_time = datetime(1979, 1, 1, 0, tzinfo=tzutc())
+        # try some dates with/without timezone and time
         self.create = [datetime(2017, 5, 1, 12, tzinfo=tzlocal()),
-                       datetime(2017, 5, 2, 13, 0, 0, 1, tzinfo=tzutc()),
-                       datetime(2017, 5, 2, 14, tzinfo=tzutc())]
+                       datetime(2017, 5, 2, 13),
+                       datetime(2017, 5, 2)]
         self.path = 'nwbfile_test.h5'
         self.nwbfile = NWBFile(session_description='a test session description for a test NWBFile',
                                identifier='FILE123',
@@ -533,7 +534,7 @@ class SubjectTest(TestCase):
             date_of_birth=datetime(2017, 5, 1, 12, tzinfo=tzlocal()),
             strain='my_strain',
         )
-        self.start = datetime(2017, 5, 1, 12, tzinfo=tzlocal())
+        self.start = datetime(2017, 5, 1, 12)
         self.path = 'nwbfile_test.h5'
         self.nwbfile = NWBFile(
             'a test session description for a test NWBFile',

@@ -15,7 +15,7 @@ class TestScratchData(TestCase):
         self.nwbfile = NWBFile(
             session_description='a file to test writing and reading scratch data',
             identifier='TEST_scratch',
-            session_start_time=datetime(2017, 5, 1, 12, 0, 0, tzinfo=tzlocal())
+            session_start_time=datetime(2017, 5, 1, 12, 0, 0)
         )
 
     def test_constructor_list(self):

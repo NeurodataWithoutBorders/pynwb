@@ -19,7 +19,7 @@ class TestTimeSeriesModular(TestCase):
         self.link_filename = os.path.join(os.getcwd(), 'test_time_series_modular_link.nwb')
 
         # Make the data container file write
-        self.start_time = datetime(1971, 1, 1, 12, tzinfo=tzutc())
+        self.start_time = datetime(1971, 1, 1, 12)
         self.data = np.arange(2000).reshape((1000, 2))
         self.timestamps = np.linspace(0, 1, 1000)
         # The container before roundtrip

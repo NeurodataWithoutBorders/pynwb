@@ -67,7 +67,7 @@ class TimeIntervalsTest(TestCase):
         self.assertEqual(obtained.loc[2, 'foo'], df.loc[2, 'foo'])
 
     def test_no_tags(self):
-        nwbfile = NWBFile("a file with header data", "NB123A", datetime(1970, 1, 1, tzinfo=tz.tzutc()))
+        nwbfile = NWBFile("a file with header data", "NB123A", datetime(1970, 1, 1))
         df = self.get_dataframe()
         for i, row in df.iterrows():
             nwbfile.add_epoch(start_time=row['start_time'], stop_time=row['stop_time'])

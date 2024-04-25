@@ -16,8 +16,6 @@ def parse_datetime(datestr):
     :param datestr: str
     :return: datetime.datetime or datetime.date
     """
-    if datestr is None:
-        return None
     if isinstance(datestr, bytes):
         datestr = datestr.decode("utf-8")
     dt = datetime.datetime.fromisoformat(datestr)

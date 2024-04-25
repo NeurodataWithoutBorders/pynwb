@@ -21,7 +21,12 @@ class TestNWBFileHDF5IO(TestCase):
         """ Set up an NWBFile object with an acquisition TimeSeries, analysis TimeSeries, and a processing module """
         self.start_time = datetime(1970, 1, 1, 12, tzinfo=tzutc())
         self.ref_time = datetime(1979, 1, 1, 0, tzinfo=tzutc())
-        self.create_date = datetime(2017, 4, 15, 12, tzinfo=tzlocal())
+        # try some dates with/without timezone and time
+        self.create_date = [
+            datetime(2017, 5, 1, 12, tzinfo=tzlocal()),
+            datetime(2017, 5, 2, 13),
+            datetime(2017, 5, 2),
+        ]
         self.manager = get_manager()
         self.filename = 'test_nwbfileio.h5'
         self.nwbfile = NWBFile(session_description='a test NWB File',
@@ -315,6 +320,30 @@ class TestSubjectDOBNoDateSetIO(NWBH5IOMixin, TestCase):
             subject_id="RAT123",
             weight="2 kg",
             date_of_birth=date(2024, 4, 9),
+            strain="my_strain",
+        )
+
+    def addContainer(self, nwbfile):
+        """ Add the test Subject to the given NWBFile """
+        nwbfile.subject = self.container
+
+    def getContainer(self, nwbfile):
+        """ Return the test Subject from the given NWBFile """
+        return nwbfile.subject
+
+
+class TestSubjectMinimalSetIO(NWBH5IOMixin, TestCase):
+
+    def setUpContainer(self):
+        """ Return the test Subject """
+        return Subject(
+            age="P90D",
+            description="An unfortunate rat",
+            genotype="WT",
+            sex="M",
+            species="Rattus norvegicus",
+            subject_id="RAT123",
+            weight="2 kg",
             strain="my_strain",
         )
 
