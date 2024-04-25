@@ -14,7 +14,7 @@ from pynwb.ecephys import (
     FeatureExtraction,
 )
 from pynwb.device import Device
-from pynwb.file import ElectrodeTable as get_electrode_table
+from pynwb.ecephys import ElectrodesTable as get_electrode_table
 from pynwb.testing import NWBH5IOMixin, AcquisitionH5IOMixin, NWBH5IOFlexMixin, TestCase
 
 

@@ -14,9 +14,9 @@ from pynwb.ecephys import (
     FilteredEphys,
     FeatureExtraction,
     ElectrodeGroup,
+    ElectrodesTable
 )
 from pynwb.device import Device
-from pynwb.file import ElectrodeTable
 from pynwb.testing import TestCase
 from pynwb.testing.mock.ecephys import mock_ElectricalSeries
 

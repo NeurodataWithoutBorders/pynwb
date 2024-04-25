@@ -5,8 +5,8 @@ import numpy as np
 from hdmf.common.table import DynamicTableRegion, DynamicTable
 
 from ...device import Device
-from ...file import ElectrodeTable, NWBFile
-from ...ecephys import ElectricalSeries, ElectrodeGroup, SpikeEventSeries
+from ...file import NWBFile
+from ...ecephys import ElectricalSeries, ElectrodeGroup, SpikeEventSeries, ElectrodesTable
 from .device import mock_Device
 from .utils import name_generator
 from ...misc import Units

@@ -820,7 +820,7 @@ class NWBFile(MultiContainerInterface, HERDManager):
         self.__check_invalid_times()
         self.invalid_times.add_interval(**kwargs)
 
-    @docval({'name': 'electrode_table', 'type': DynamicTable, 'doc': 'the ElectrodesTable for this file'})
+    @docval({'name': 'electrode_table', 'type': ElectrodesTable, 'doc': 'the ElectrodesTable for this file'})
     def set_electrode_table(self, **kwargs):
         """
         Set the electrode table of this NWBFile to an existing ElectrodesTable
