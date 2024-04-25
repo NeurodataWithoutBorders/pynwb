@@ -14,7 +14,6 @@ from pynwb.device import Device
 from pynwb.testing import TestCase
 from pynwb.file import NWBFile  # Needed to test icephys functionality defined on NWBFile
 from datetime import datetime
-from dateutil.tz import tzlocal
 
 
 def GetElectrode():

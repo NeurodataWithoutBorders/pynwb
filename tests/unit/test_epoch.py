@@ -1,7 +1,6 @@
 import numpy as np
 import pandas as pd
 from datetime import datetime
-from dateutil import tz
 
 from pynwb.epoch import TimeIntervals
 from pynwb import TimeSeries, NWBFile

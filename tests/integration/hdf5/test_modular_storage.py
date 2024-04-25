@@ -1,7 +1,6 @@
 import os
 import gc
 from datetime import datetime
-from dateutil.tz import tzutc
 import numpy as np
 
 from hdmf.backends.hdf5 import HDF5IO

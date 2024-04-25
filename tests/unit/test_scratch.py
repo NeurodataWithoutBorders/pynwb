@@ -1,5 +1,4 @@
 from datetime import datetime
-from dateutil.tz import tzlocal
 import numpy as np
 from numpy.testing import assert_array_equal
 import pandas as pd

@@ -2,7 +2,6 @@ import os
 import random
 import string
 from datetime import datetime
-from dateutil.tz import tzlocal
 from tempfile import gettempdir
 
 from hdmf.spec import RefSpec

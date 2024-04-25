@@ -1,6 +1,5 @@
 import numpy as np
 from datetime import datetime
-from dateutil.tz import tzlocal
 
 from pynwb import TimeSeries, NWBFile, NWBHDF5IO
 from pynwb.base import Images, Image, ImageReferences

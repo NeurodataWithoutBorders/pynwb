@@ -1,5 +1,4 @@
 from datetime import datetime
-from dateutil.tz import tzlocal, tzutc
 import os
 from abc import ABCMeta, abstractmethod
 import warnings

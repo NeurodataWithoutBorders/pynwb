@@ -1,7 +1,6 @@
 from typing import Optional
 from uuid import uuid4
 from datetime import datetime
-from dateutil.tz import tzlocal
 
 from ...file import NWBFile, Subject
 from .utils import name_generator
