@@ -1,6 +1,5 @@
 import numpy as np
 from datetime import datetime
-from dateutil.tz import tzlocal
 
 from pynwb import TimeSeries, NWBFile, NWBHDF5IO
 from pynwb.base import Images, Image, ImageReferences
@@ -34,7 +33,7 @@ class TestTimeSeriesLinking(TestCase):
         tsa = TimeSeries(name='a', data=np.linspace(0, 1, 1000), timestamps=np.arange(1000.), unit='m')
         tsb = TimeSeries(name='b', data=np.linspace(0, 1, 1000), timestamps=tsa, unit='m')
         nwbfile = NWBFile(identifier='foo',
-                          session_start_time=datetime(2017, 5, 1, 12, 0, 0, tzinfo=tzlocal()),
+                          session_start_time=datetime(2017, 5, 1, 12, 0, 0),
                           session_description='bar')
         nwbfile.add_acquisition(tsa)
         nwbfile.add_acquisition(tsb)
@@ -52,7 +51,7 @@ class TestTimeSeriesLinking(TestCase):
         tsb = TimeSeries(name='b', data=tsa, timestamps=np.arange(1000.), unit='m')
         tsc = TimeSeries(name='c', data=tsb, timestamps=np.arange(1000.), unit='m')
         nwbfile = NWBFile(identifier='foo',
-                          session_start_time=datetime(2017, 5, 1, 12, 0, 0, tzinfo=tzlocal()),
+                          session_start_time=datetime(2017, 5, 1, 12, 0, 0),
                           session_description='bar')
         nwbfile.add_acquisition(tsa)
         nwbfile.add_acquisition(tsb)
