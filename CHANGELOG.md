@@ -10,6 +10,8 @@
   - Support `NWBDataInterface` and `DynamicTable` in `NWBFile.stimulus`. @rly [#1842](https://github.com/NeurodataWithoutBorders/pynwb/pull/1842)
 - Added support for python 3.12 and upgraded dependency versions. This also includes infrastructure updates for developers. @mavaylon1 [#1853](https://github.com/NeurodataWithoutBorders/pynwb/pull/1853)
 - Added `mock_Units` for generating Units tables.  @h-mayorquin [#1875](https://github.com/NeurodataWithoutBorders/pynwb/pull/1875)
+- Allow datetimes without a timezone and without a time. @rly [#1886](https://github.com/NeurodataWithoutBorders/pynwb/pull/1886)
+- No longer automatically set the timezone to the local timezone when not provided. [#1886](https://github.com/NeurodataWithoutBorders/pynwb/pull/1886)
 
 ### Bug fixes
 - Fix bug with reading file with linked `TimeSeriesReferenceVectorData` @rly [#1865](https://github.com/NeurodataWithoutBorders/pynwb/pull/1865)
