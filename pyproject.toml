@@ -64,7 +64,7 @@ ignore-words-list = "optin,potatos"
 
 [tool.coverage.run]
 branch = true
-source = ["src"]
+source = ["pynwb"]
 
 [tool.coverage.report]
 exclude_lines = [
