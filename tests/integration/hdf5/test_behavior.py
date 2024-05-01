@@ -1,7 +1,7 @@
 import numpy as np
 
 from pynwb.behavior import SpatialSeries
-from pynwb.testing import AcquisitionH5IOMixin, TestCase, remove_test_file
+from pynwb.testing import AcquisitionH5IOMixin, TestCase
 
 
 class TestTimeSeriesIO(AcquisitionH5IOMixin, TestCase):
