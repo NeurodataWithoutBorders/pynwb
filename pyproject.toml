@@ -1,0 +1,107 @@
+[build-system]
+requires = ["hatchling", "hatch-vcs"] # hatchling for build | hatch-vcs for versioning
+build-backend = "hatchling.build" # the build backend used
+
+[project]
+name = "pynwb"
+authors = [
+  { name="Andrew Tritt", email="ajtritt@lbl.gov" },
+  { name="Ryan Ly", email="rly@lbl.gov" },
+  { name="Oliver Ruebel", email="oruebel@lbl.gov" },
+  { name="Ben Dichter", email="ben.dichter@gmail.com" },
+  { name="Matthew Avaylon", email="mavaylon@lbl.gov" }
+]
+description= "Package for working with Neurodata stored in the NWB format."
+readme = "README.rst"
+requires-python = ">=3.8"
+license = {text = "BSD-3-Clause"}
+classifiers = [
+        "Programming Language :: Python",
+        "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.12",
+        "License :: OSI Approved :: BSD License",
+        "Development Status :: 5 - Production/Stable",
+        "Intended Audience :: Developers",
+        "Intended Audience :: Science/Research",
+        "Operating System :: Microsoft :: Windows",
+        "Operating System :: MacOS",
+        "Operating System :: Unix",
+        "Topic :: Scientific/Engineering :: Medical Science Apps."
+]
+dependencies = [
+    "h5py>=2.10",
+    "hdmf>=3.12.2",
+    "numpy>=1.18, <2.0", # pin below 2.0 until HDMF supports numpy 2.0
+    "pandas>=1.1.5",
+    "python-dateutil>=2.7.3",
+]
+dynamic = ["version"] # the build backend will compute the version dynamically from git tag (or a __version__)
+
+[project.optional-dependencies]
+# Add optional dependencies here
+
+[project.urls]
+"Homepage" = "https://github.com/NeurodataWithoutBorders/pynwb"
+"Bug Tracker" = "https://github.com/NeurodataWithoutBorders/pynwb/issues"
+
+[tool.hatch.version]
+source = "vcs"
+
+[tool.hatch.build.hooks.vcs]
+# this file is created/updated when the package is installed and used in
+# src/pynwb/__init__.py to set `__version__` (from _version.py).
+version-file = "src/pynwb/_version.py"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/pynwb"]
+
+[tool.codespell]
+skip = "htmlcov,.git,.mypy_cache,.pytest_cache,.coverage,*.pdf,*.svg,venvs,.tox,nwb-schema,./docs/_build/*,*.ipynb"
+ignore-words-list = "optin,potatos"
+
+[tool.coverage.run]
+branch = true
+source = ["pynwb"]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "@abstract"
+]
+omit = [
+    "*/pynwb/_due.py",
+    "*/pynwb/testing/*",
+    "*/pynwb/legacy/*"
+]
+
+[tool.ruff]
+select = ["E", "F", "T100", "T201", "T203"]
+exclude = [
+  ".git",
+  ".tox",
+  "__pycache__",
+  "build/",
+  "dist/",
+  "src/nwb-schema",
+  "docs/source/conf.py",
+  "src/pynwb/_due.py",
+  "test.py" # remove when pytest comes along
+]
+line-length = 120
+
+[tool.ruff.per-file-ignores]
+"tests/read_dandi/*" = ["T201"]
+"docs/gallery/*" = ["E402", "T201"]
+"src/*/__init__.py" = ["F401"]
+"src/pynwb/_version.py" = ["T201"]
+"src/pynwb/validate.py" = ["T201"]
+"scripts/*" = ["T201"]
+
+# "test_gallery.py" = ["T201"] # Uncomment when test_gallery.py is created
+
+[tool.ruff.mccabe]
+max-complexity = 17
+

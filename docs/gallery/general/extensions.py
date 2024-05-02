@@ -12,12 +12,6 @@ in PyNWB for creating  Neurodata Extensions (NDX).
     For a more in-depth, step-by-step guide on how to create, document, and publish NWB extensions, we highly
     recommend visiting the :nwb_overview:`extension tutorial <extensions_tutorial/extensions_tutorial_home.html>`
     on the :nwb_overview:`nwb overview <>` website.
-
-.. seealso::
-
-   For more information on available tools for creating extensions, see
-   :nwb_overview:`here <core_tools/core_tools_home.html#svg-version-1-1-width-1-5em-height-1-5em-class-sd-octicon-sd-octicon-diff-added-viewbox-0-0-16-16-aria-hidden-true-path-fill-rule-evenodd-d-m13-25-2-5h2-75a-25-25-0-00-25-25v10-5c0-138-112-25-25-25h10-5a-25-25-0-00-25-25v2-75a-25-25-0-00-25-25zm2-75-1h10-5c-966-0-1-75-784-1-75-1-75v10-5a1-75-1-75-0-0113-25-15h2-75a1-75-1-75-0-011-13-25v2-75c1-1-784-1-784-1-2-75-1zm8-4a-75-75-0-01-75-75v2-5h2-5a-75-75-0-010-1-5h-2-5v2-5a-75-75-0-01-1-5-0v-2-5h-2-5a-75-75-0-010-1-5h2-5v-2-5a-75-75-0-018-4z-path-svg-extending-nwb>`.
-
 """
 
 ####################
@@ -170,16 +164,15 @@ AutoTetrodeSeries = get_class("TetrodeSeries", "mylab")
 # To demonstrate this, first we will make some simulated data using our extensions.
 
 from datetime import datetime
-
-from dateutil.tz import tzlocal
-
 from pynwb import NWBFile
+from uuid import uuid4
 
-start_time = datetime(2017, 4, 3, 11, tzinfo=tzlocal())
-create_date = datetime(2017, 4, 15, 12, tzinfo=tzlocal())
+session_start_time = datetime(2017, 4, 3, hour=11, minute=0)
 
 nwbfile = NWBFile(
-    "demonstrate caching", "NWB456", start_time, file_create_date=create_date
+    session_description="demonstrate caching",
+    identifier=str(uuid4()),
+    session_start_time=session_start_time,
 )
 
 device = nwbfile.create_device(name="trodes_rig123")
@@ -339,9 +332,6 @@ class PotatoSack(MultiContainerInterface):
 # Then use the objects (again, this would often be done in a different file).
 
 from datetime import datetime
-
-from dateutil.tz import tzlocal
-
 from pynwb import NWBHDF5IO, NWBFile
 
 # You can add potatoes to a potato sack in different ways
@@ -349,8 +339,11 @@ potato_sack = PotatoSack(potatos=Potato(name="potato1", age=2.3, weight=3.0))
 potato_sack.add_potato(Potato("potato2", 3.0, 4.0))
 potato_sack.create_potato("big_potato", 10.0, 20.0)
 
+session_start_time = datetime(2017, 4, 3, hour=12, minute=0)
 nwbfile = NWBFile(
-    "a file with metadata", "NB123A", datetime(2018, 6, 1, tzinfo=tzlocal())
+    session_description="a file with metadata",
+    identifier=str(uuid4()),
+    session_start_time = session_start_time,
 )
 
 pmod = nwbfile.create_processing_module("module_name", "desc")

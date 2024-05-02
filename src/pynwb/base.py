@@ -328,12 +328,34 @@ class TimeSeries(NWBDataInterface):
         return self.__time_unit
 
     def get_timestamps(self):
+        """
+        Get the timestamps of this TimeSeries. If timestamps are not stored in this TimeSeries, generate timestamps.
+        """
         if self.fields.get('timestamps'):
             return self.timestamps
         else:
             return np.arange(len(self.data)) / self.rate + self.starting_time
 
     def get_data_in_units(self):
+        """
+        Get the data of this TimeSeries in the specified unit of measurement, applying the conversion factor and offset:
+
+        .. math::
+            out = data * conversion + offset
+
+        If the field 'channel_conversion' is present, the conversion factor for each channel is additionally applied 
+        to each channel:
+
+        .. math::
+            out_{channel} = data * conversion * conversion_{channel} + offset
+
+        NOTE: This will read the entire dataset into memory.
+
+        Returns
+        -------
+        :class:`numpy.ndarray`
+
+        """
         if "channel_conversion" in self.fields:
             scale_factor = self.conversion * self.channel_conversion[:, np.newaxis]
         else:
@@ -532,6 +554,26 @@ class TimeSeriesReference(NamedTuple):
             return None
         # load the data from the timeseries
         return self.timeseries.data[self.idx_start: (self.idx_start + self.count)]
+
+    @classmethod
+    @docval({'name': 'timeseries', 'type': TimeSeries, 'doc': 'the timeseries object to reference.'})
+    def empty(cls, timeseries):
+        """
+        Creates an empty TimeSeriesReference object to represent missing data.
+
+        When missing data needs to be represented, NWB defines ``None`` for the complex data type ``(idx_start,
+        count, TimeSeries)`` as (-1, -1, TimeSeries) for storage. The exact timeseries object will technically not
+        matter since the empty reference is a way of indicating a NaN value in a
+        :py:class:`~pynwb.base.TimeSeriesReferenceVectorData` column.
+
+        An example where this functionality is used is :py:class:`~pynwb.icephys.IntracellularRecordingsTable`
+        where only one of stimulus or response data was recorded. In such cases, the timeseries object for the
+        empty stimulus :py:class:`~pynwb.base.TimeSeriesReference` could be set to the response series, or vice versa.
+
+        :returns: Returns :py:class:`~pynwb.base.TimeSeriesReference`
+        """
+
+        return cls(-1, -1, timeseries)
 
 
 @register_class('TimeSeriesReferenceVectorData', CORE_NAMESPACE)

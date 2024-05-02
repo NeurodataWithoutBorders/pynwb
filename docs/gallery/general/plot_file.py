@@ -108,8 +108,7 @@ More commonly, you will be creating instances of classes that extend this class.
       :py:class:`~pynwb.ophys.ImageSegmentation`,
       :py:class:`~pynwb.ophys.MotionCorrection`.
 
-    * **Others:** :py:class:`~pynwb.retinotopy.ImagingRetinotopy`,
-      :py:class:`~pynwb.base.Images`.
+    * **Others:** :py:class:`~pynwb.base.Images`.
 
     * **TimeSeries:** Any :ref:`timeseries_overview` is also a subclass of :py:class:`~pynwb.core.NWBDataInterface`
       and can be used anywhere :py:class:`~pynwb.core.NWBDataInterface` is allowed.
@@ -166,7 +165,7 @@ from pynwb.file import Subject
 #     Use keyword arguments when constructing :py:class:`~pynwb.file.NWBFile` objects.
 #
 
-session_start_time = datetime(2018, 4, 25, 2, 30, 3, tzinfo=tz.gettz("US/Pacific"))
+session_start_time = datetime(2018, 4, 25, hour=2, minute=30, second=3, tzinfo=tz.gettz("US/Pacific"))
 
 nwbfile = NWBFile(
     session_description="Mouse exploring an open field",  # required
@@ -372,7 +371,7 @@ position_obj
 # Processing modules can be thought of as folders within the file for storing the related processed data.
 #
 # .. tip:: Use the NWB schema module names as processing module names where appropriate.
-#    These are: ``"behavior"``, ``"ecephys"``, ``"icephys"``, ``"ophys"``, ``"ogen"``, ``"retinotopy"``, and ``"misc"``.
+#    These are: ``"behavior"``, ``"ecephys"``, ``"icephys"``, ``"ophys"``, ``"ogen"``, and ``"misc"``.
 #
 # Let's assume that the subject's position was computed from a video tracking algorithm,
 # so it would be classified as processed data.

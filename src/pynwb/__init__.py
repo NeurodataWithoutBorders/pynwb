@@ -386,13 +386,19 @@ from . import image  # noqa: F401,E402
 from . import misc  # noqa: F401,E402
 from . import ogen  # noqa: F401,E402
 from . import ophys  # noqa: F401,E402
-from . import retinotopy  # noqa: F401,E402
 from . import legacy  # noqa: F401,E402
 from hdmf.data_utils import DataChunkIterator  # noqa: F401,E402
 from hdmf.backends.hdf5 import H5DataIO  # noqa: F401,E402
 
-from . import _version    # noqa: F401,E402
-__version__ = _version.get_versions()['version']
+try:
+    # see https://effigies.gitlab.io/posts/python-packaging-2023/
+    from ._version import __version__
+except ImportError:  # pragma: no cover
+    # this is a relatively slower method for getting the version string
+    from importlib.metadata import version  # noqa: E402
+
+    __version__ = version("pynwb")
+    del version
 
 from ._due import due, BibTeX  # noqa: E402
 due.cite(
