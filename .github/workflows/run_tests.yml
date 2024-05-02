@@ -200,7 +200,7 @@ jobs:
       - name: Install run dependencies
         run: |
           pip install -r requirements-dev.txt
-          pip install -e .
+          pip install .
           conda info
           conda list
           pip list
@@ -245,7 +245,7 @@ jobs:
       - name: Install run dependencies
         run: |
           pip install matplotlib
-          pip install -e .
+          pip install .
           pip list
 
       - name: Conda reporting
