@@ -4,7 +4,7 @@ from pynwb.behavior import SpatialSeries
 from pynwb.testing import AcquisitionH5IOMixin, TestCase
 
 
-class TestTimeSeriesIO(AcquisitionH5IOMixin, TestCase):
+class TestSpatialSeriesIO(AcquisitionH5IOMixin, TestCase):
 
     def setUpContainer(self):
         """ Return the test TimeSeries to read/write """
