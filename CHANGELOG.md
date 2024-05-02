@@ -1,6 +1,6 @@
 # PyNWB Changelog
 
-## PyNWB 2.7.0 (April 10, 2024)
+## PyNWB 2.7.0 (May 2, 2024)
 
 ### Enhancements and minor changes
 - Added support for NWB schema 2.7.0. See [2.7.0 release notes](https://nwb-schema.readthedocs.io/en/latest/format_release_notes.html) for details
