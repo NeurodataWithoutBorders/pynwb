@@ -129,7 +129,7 @@ def mock_Units(
     nwbfile: Optional[NWBFile] = None,
 ) -> Units:
 
-    units_table = Units()
+    units_table = Units(name="units")  # This is for nwbfile.units= mock_Units() to work
     units_table.add_column(name="unit_name", description="a readable identifier for the unit")
 
     rng = np.random.default_rng(seed=seed)
