@@ -198,7 +198,7 @@ jobs:
         include:
           - { name: conda-linux-python3.12-ros3  , python-ver: "3.12", os: ubuntu-latest }
           - { name: conda-windows-python3.12-ros3, python-ver: "3.12", os: windows-latest }
-          - { name: conda-macos-python3.12-ros3  , python-ver: "3.12", os: macos-latest }
+          - { name: conda-macos-python3.12-ros3  , python-ver: "3.12", os: macos-13 } # This is due to DANDI not supporting osx-arm64. Will support macos-latest when this changes. 
     steps:
       - name: Cancel non-latest runs
         uses: styfle/cancel-workflow-action@0.11.0
@@ -224,7 +224,7 @@ jobs:
       - name: Install run dependencies
         run: |
           pip install -r requirements-dev.txt
-          pip install -e .
+          pip install .
           conda info
           conda list
           pip list
@@ -245,7 +245,7 @@ jobs:
         include:
           - { name: conda-linux-gallery-python3.12-ros3  , python-ver: "3.12", os: ubuntu-latest }
           - { name: conda-windows-gallery-python3.12-ros3, python-ver: "3.12", os: windows-latest }
-          - { name: conda-macos-gallery-python3.12-ros3  , python-ver: "3.12", os: macos-latest }
+          - { name: conda-macos-gallery-python3.12-ros3  , python-ver: "3.12", os: macos-13 } # This is due to DANDI not supporting osx-arm64. Will support macos-latest when this changes. 
     steps:
       - name: Cancel non-latest runs
         uses: styfle/cancel-workflow-action@0.11.0
@@ -271,7 +271,7 @@ jobs:
       - name: Install run dependencies
         run: |
           pip install matplotlib
-          pip install -e .
+          pip install .
           pip list
 
       - name: Conda reporting
