@@ -8,7 +8,7 @@
   - Modified `OptogeneticSeries` to allow 2D data, primarily in extensions of `OptogeneticSeries`. @rly [#1812](https://github.com/NeurodataWithoutBorders/pynwb/pull/1812)
   - Support `stimulus_template` as optional predefined column in `IntracellularStimuliTable`. @stephprince [#1815](https://github.com/NeurodataWithoutBorders/pynwb/pull/1815)
   - Support `NWBDataInterface` and `DynamicTable` in `NWBFile.stimulus`. @rly [#1842](https://github.com/NeurodataWithoutBorders/pynwb/pull/1842)
-- Set rate default value inside `mock_ElectricalSeries` to avoid having to set `rate=None` explitctly when passing timestamps. @h-mayorquin [#1894](https://github.com/NeurodataWithoutBorders/pynwb/pull/1894)
+- Set rate default value inside `mock_ElectricalSeries` to avoid having to set `rate=None` explicitly when passing timestamps. @h-mayorquin [#1894](https://github.com/NeurodataWithoutBorders/pynwb/pull/1894)
 - Added support for python 3.12 and upgraded dependency versions. This also includes infrastructure updates for developers. @mavaylon1 [#1853](https://github.com/NeurodataWithoutBorders/pynwb/pull/1853)
 - Added `mock_Units` for generating Units tables.  @h-mayorquin [#1875](https://github.com/NeurodataWithoutBorders/pynwb/pull/1875) and [#1883](https://github.com/NeurodataWithoutBorders/pynwb/pull/1883)
 
