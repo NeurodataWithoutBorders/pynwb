@@ -53,20 +53,20 @@ jobs:
 
       - name: Install package
         run: |
-          python -m pip install -e .  # must install in editable mode for coverage to find sources
+          python -m pip install .
           python -m pip list
 
       - name: Run unit tests and generate coverage report
         run: |
           python -m coverage run test.py --pynwb
           python -m coverage xml  # codecov uploader requires xml format
-          python -m coverage report -m
+          python -m coverage report
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
         with:
           flags: unit
-          files: coverage.xml
+          file: coverage.xml
           fail_ci_if_error: true
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
@@ -77,13 +77,13 @@ jobs:
           # validation CLI tests generate separate .coverage files that need to be merged
           python -m coverage combine
           python -m coverage xml  # codecov uploader requires xml format
-          python -m coverage report -m
+          python -m coverage report
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
         with:
           flags: integration
-          files: coverage.xml
+          file: coverage.xml
           fail_ci_if_error: true
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
