@@ -55,8 +55,20 @@ source = "vcs"
 # src/pynwb/__init__.py to set `__version__` (from _version.py).
 version-file = "src/pynwb/_version.py"
 
+[tool.hatch.build.targets.sdist]
+exclude = [
+    ".git*",
+    ".codespellrc",
+    ".readthedocs.yaml",
+]
+
 [tool.hatch.build.targets.wheel]
 packages = ["src/pynwb"]
+exclude = [
+    ".git*",
+    ".codespellrc",
+    ".readthedocs.yaml",
+]
 
 [tool.codespell]
 skip = "htmlcov,.git,.mypy_cache,.pytest_cache,.coverage,*.pdf,*.svg,venvs,.tox,nwb-schema,./docs/_build/*,*.ipynb"
