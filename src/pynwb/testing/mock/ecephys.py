@@ -69,9 +69,9 @@ def mock_electrodes(
 def mock_ElectricalSeries(
     name: Optional[str] = None,
     description: str = "description",
-    data: Optional[np.ndarray] = None,
+    data=None,
     rate: Optional[float] = None,
-    timestamps: Optional[np.ndarray] = None,
+    timestamps=None,
     starting_time: Optional[float] = None,
     electrodes: Optional[DynamicTableRegion] = None,
     filtering: str = "filtering",
