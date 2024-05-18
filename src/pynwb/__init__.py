@@ -266,7 +266,7 @@ class NWBHDF5IO(_HDF5IO):
 
         if load_namespaces:
             tm = get_type_map()
-            super().load_namespaces(tm, path, file=file_obj, driver=driver)
+            super().load_namespaces(tm, path, file=file_obj, driver=driver, aws_region=aws_region)
             manager = BuildManager(tm)
 
             # XXX: Leaving this here in case we want to revert to this strategy for
