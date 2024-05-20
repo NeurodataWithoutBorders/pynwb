@@ -9,31 +9,36 @@ order to more easily validate terms within datasets or attributes.
 Introduction
 -------------
 Users do not directly interact with the :py:class:`~hdmf.term_set.TypeConfigurator` class.
-Instead, users wil create a configuration YAML file that outlines the fields from which structures
-they want to be targeted. After creating the configuration file, users will need to load the
-configuration with the <load> method. With the configuration loaded, every instance of the neurodata
+Instead, users wil create a configuration YAML file that outlines the fields (within a neurodata type)
+they want to be validated. After creating the configuration file, users will need to load the
+configuration with the :py:func:`~pynwb.load_type_config` method.
+With the configuration loaded, every instance of the neurodata
 types defined in the configuration file will have the respective fields wrapped with a
-<TermSetWrapper>. This automatic wrapping is what provides the term validation for the the field value.
+:py:class:`~hdmf.term_set.TermSetWrapper`.
+This automatic wrapping is what provides the term validation for the the field value.
 If a user wants to have greater control on which instances have validated fields, the user cannot use the
-configurator, bur rather proceed with manually wrapping with a <TermSetWrapper>.
+configurator, bur rather proceed with manually wrapping with a
+:py:class:`~hdmf.term_set.TermSetWrapper`.
 
-To unload a configuration, simply call <unload>. We also provide a helper method to see the configuration
-that has been loaded: <get>
+To unload a configuration, simply call :py:func:`~pynwb.unload_type_config`.
+We also provide a helper method to see the configuration that has been loaded:
+:py:func:`~pynwb.get_loaded_type_config`
 
 
 How to make a Configuration File
 --------------------------------
 Before taking advantage of the all the wonders that comes with using a configuration file,
 the user needs to create one following some simple guidelines. To follow along with an example,
-please refer to <>. The configuration files is built on the foundation of the YAML syntax. The
+please refer to ``nwb_config.yaml`` under ``src/config``. 
+The configuration files is built on the foundation of the YAML syntax. The
 user will construct a series of nested dictioanries to encompass all the necessary information.
 
 1. The user needs to define all the relevant namespaces. Recall that each neurodata type exists within
    a namespace, whether that is the core namespace in PyNWB or a namespace in an extension. As namespaces grow,
    we also require a version to be recorded in the configuration file to ensure proper functionality.
 2. Within a namespace dictionary, the user will have a list of data types the want to use.
-3. Each data type will have a list of fields associated with a <TermSet>. The user can use the same or
-   unique TermSet instances for each field.
+3. Each data type will have a list of fields associated with a :py:class:`~hdmf.term_set.TermSet`.
+   The user can use the same or unique TermSet instances for each field.
 """
 try:
     import linkml_runtime  # noqa: F401
@@ -48,8 +53,10 @@ from hdmf.term_set import TermSet, TermSetWrapper
 # It is important to remember that with the configuration loaded, the fields
 # are wrapped automatically, meaning the user should proceed with creating
 # the instances normally, i.e., without wrapping directly. In this example,
-# we load the the NWB curated configuration file that associates a <Termset>
-# for the species field in Subject.
+# we load the the NWB curated configuration file that associates a
+# :py:class:`~hdmf.term_set.TermSet` for the species field in Subject.
+# The NWB configuration file is the default when you call
+# :py:func:`~pynwb.load_type_config`.
 
 load_type_config()
 
