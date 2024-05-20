@@ -1,95 +1,94 @@
-# from datetime import datetime
-# from uuid import uuid4
-# from hdmf.term_set import TermSetWrapper, TermSet
-#
-# import numpy as np
-# from dateutil import tz
-#
-# from pynwb import NWBHDF5IO, NWBFile
-# from pynwb.behavior import Position, SpatialSeries
-# from pynwb.file import Subject
-# from pynwb import unload_type_config, load_type_config
-#
-# load_type_config()
-# session_start_time = datetime(2018, 4, 25, 2, 30, 3, tzinfo=tz.gettz("US/Pacific"))
-# terms = TermSet(term_schema_path='/Users/mavaylon/Research/NWB/hdmf/docs/gallery/example_term_set.yaml')
-# #
-# nwbfile = NWBFile(
-#     session_description="Mouse exploring an open field",  # required
-#     identifier=str(uuid4()),  # required
-#     session_start_time=session_start_time,  # required
-#     session_id="session_1234",  # optional
-#     experimenter=[
-#         "Ryan Ly",
-#     ],  # optional
-#     lab="Bag End Laboratory",  # optional
-#     institution="University of My Institution",  # optional
-#     experiment_description="I went on an adventure to reclaim vast treasures.",  # optional
-#     related_publications="DOI:10.1016/j.neuron.2016.12.011",  # optional
-# )
-# subject = Subject(
-#     subject_id="01",
-#     age="One shouldn't ask",
-#     description="A human.",
-#     species="Homo sapiens",
-#     sex="M",
-# )
-#
-# nwbfile.subject = subject
-#
-# device = nwbfile.create_device(
-#     name="array", description="the best array", manufacturer="Probe Company 9000"
-# )
-#
-# nwbfile.add_electrode_column(name="label", description="label of electrode")
-#
-# nshanks = 4
-# nchannels_per_shank = 3
-# electrode_counter = 0
-#
-# for ishank in range(nshanks):
-#     # create an electrode group for this shank
-#     electrode_group = nwbfile.create_electrode_group(
-#         name="shank{}".format(ishank),
-#         description="electrode group for shank {}".format(ishank),
-#         device=device,
-#         location='Amygdala'
-#     )
-#     # add electrodes to the electrode table
-#     for ielec in range(nchannels_per_shank):
-#         nwbfile.add_electrode(
-#             group=electrode_group,
-#             label="shank{}elec{}".format(ishank, ielec),
-#             location='Amygdala'
-#         )
-#         electrode_counter += 1
-#
-# breakpoint()
-# # # nwbfile.subject = subject
-# # # breakpoint()
-# # unload_type_config()
-# # load_type_config()
-# #
-# # nwbfile = NWBFile(
-# #     session_description="Mouse exploring an open field",  # required
-# #     identifier=str(uuid4()),  # required
-# #     session_start_time=session_start_time,  # required
-# #     session_id="session_1234",  # optional
-# #     experimenter=[
-# #         "Ryan Ly",
-# #     ],  # optional
-# #     lab="Bag End Laboratory",  # optional
-# #     institution="University of My Institution",  # optional
-# #     experiment_description="I went on an adventure to reclaim vast treasures.",  # optional
-# #     related_publications="DOI:10.1016/j.neuron.2016.12.011",  # optional
-# # )
-# #
-# #
-# # subject = Subject(
-# #     subject_id="001",
-# #     age="P90D",
-# #     description="mouse 5",
-# #     species="Mus musculus",
-# #     sex="M",
-# # )
-# # breakpoint()
+"""
+TypeConfigurator
+=======
+
+This is a user guide for how to take advantage of the
+:py:class:`~hdmf.term_set.TypeConfigurator` class by creating configuration files in
+order to more easily validate terms within datasets or attributes.
+
+Introduction
+-------------
+Users do not directly interact with the :py:class:`~hdmf.term_set.TypeConfigurator` class.
+Instead, users wil create a configuration YAML file that outlines the fields from which structures
+they want to be targeted. After creating the configuration file, users will need to load the
+configuration with the <load> method. With the configuration loaded, every instance of the neurodata
+types defined in the configuration file will have the respective fields wrapped with a
+<TermSetWrapper>. This automatic wrapping is what provides the term validation for the the field value.
+If a user wants to have greater control on which instances have validated fields, the user cannot use the
+configurator, bur rather proceed with manually wrapping with a <TermSetWrapper>.
+
+To unload a configuration, simply call <unload>. We also provide a helper method to see the configuration
+that has been loaded: <get>
+
+
+How to make a Configuration File
+--------------------------------
+Before taking advantage of the all the wonders that comes with using a configuration file,
+the user needs to create one following some simple guidelines. To follow along with an example,
+please refer to <>. The configuration files is built on the foundation of the YAML syntax. The
+user will construct a series of nested dictioanries to encompass all the necessary information.
+
+1. The user needs to define all the relevant namespaces. Recall that each neurodata type exists within
+   a namespace, whether that is the core namespace in PyNWB or a namespace in an extension. As namespaces grow,
+   we also require a version to be recorded in the configuration file to ensure proper functionality.
+2. Within a namespace dictionary, the user will have a list of data types the want to use.
+3. Each data type will have a list of fields associated with a <TermSet>. The user can use the same or
+   unique TermSet instances for each field.
+"""
+try:
+    import linkml_runtime  # noqa: F401
+except ImportError as e:
+    raise ImportError("Please install linkml-runtime to run this example: pip install linkml-runtime") from e
+from hdmf.term_set import TermSet, TermSetWrapper
+
+# How to use a Configuration file
+# -------------------------------
+# As mentioned prior, the first step after creating a configuration file is
+# to load the file.
+# It is important to remember that with the configuration loaded, the fields
+# are wrapped automatically, meaning the user should proceed with creating
+# the instances normally, i.e., without wrapping directly. In this example,
+# we load the the NWB curated configuration file that associates a <Termset>
+# for the species field in Subject.
+
+load_type_config()
+
+session_start_time = datetime(2018, 4, 25, hour=2, minute=30, second=3, tzinfo=tz.gettz("US/Pacific"))
+
+nwbfile = NWBFile(
+    session_description="Mouse exploring an open field",  # required
+    identifier=str(uuid4()),  # required
+    session_start_time=session_start_time,  # required
+    session_id="session_1234",  # optional
+    experimenter=[
+        "Baggins, Bilbo",
+    ],  # optional
+    lab="Bag End Laboratory",  # optional
+    institution="University of My Institution",  # optional
+    experiment_description="I went on an adventure to reclaim vast treasures.",  # optional
+    related_publications="DOI:10.1016/j.neuron.2016.12.011",  # optional
+)
+
+subject = Subject(
+    subject_id="001",
+    age="P90D",
+    description="mouse 5",
+    species="Mus musculus",
+    sex="M",
+)
+
+nwbfile.subject = subject
+subject
+
+####################################
+# How to see the Configuration file
+# ---------------------------------
+# Users can retrieve the loaded configuration.
+config = get_loaded_type_config()
+
+######################################
+# How to unload the Configuration file
+# ------------------------------------
+# In order to toggle off the automatic validation, the user simple needs to unload
+# the configuration.
+unload_type_config()

@@ -12,6 +12,10 @@ from hdmf.backends.io import HDMFIO
 from hdmf.backends.hdf5 import HDF5IO as _HDF5IO
 from hdmf.build import BuildManager, TypeMap
 import hdmf.common
+from hdmf.common import load_type_config as hdmf_load_type_config
+from hdmf.common import get_loaded_type_config as hdmf_get_loaded_type_config
+from hdmf.common import unload_type_config as hdmf_unload_type_config
+
 
 CORE_NAMESPACE = 'core'
 
@@ -22,26 +26,33 @@ from .validate import validate  # noqa: F401, E402
 CUR_DIR = os.path.dirname(os.path.realpath(__file__))
 path_to_config = os.path.join(CUR_DIR, 'config/nwb_config.yaml')
 
-def get_loaded_type_config():
-    if __TYPE_MAP.type_config.config is None:
-        msg = "No configuration is loaded."
-        raise ValueError(msg)
-    else:
-        return __TYPE_MAP.type_config.config
-
-def load_type_config(config_path: str = None):
+@docval({'name': 'config_path', 'type': str, 'doc': 'Path to the configuration file.',
+         'default': None},
+        {'name': 'type_map', 'type': TypeMap, 'doc': 'The TypeMap.', 'default': None},
+        is_method=False)
+def load_type_config(**kwargs):
     """
     This method will either load the default config or the config provided by the path.
     """
-    if config_path is None:
-        config_path = path_to_config
-    __TYPE_MAP.type_config.load_type_config(config_path)
+    config_path = kwargs['config_path'] or path_to_config
+    type_map = kwargs['type_map'] or get_type_map()
 
-def unload_type_config():
+    hdmf_load_type_config(config_path=config_path, type_map=get_type_map())
+
+@docval({'name': 'type_map', 'type': TypeMap, 'doc': 'The TypeMap.', 'default': None},
+        is_method=False)
+def get_loaded_type_config(**kwargs):
+    type_map = kwargs['type_map'] or get_type_map()
+    return hdmf_get_loaded_type_config(type_map=type_map)
+
+@docval({'name': 'type_map', 'type': TypeMap, 'doc': 'The TypeMap.', 'default': None},
+        is_method=False)
+def unload_type_config(**kwargs):
     """
     Remove validation.
     """
-    return __TYPE_MAP.type_config.unload_type_config()
+    type_map = kwargs['type_map'] or get_type_map()
+    hdmf_unload_type_config(type_map=type_map)
 
 def __get_resources():
     try:
