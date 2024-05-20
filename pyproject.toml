@@ -34,7 +34,7 @@ classifiers = [
 dependencies = [
     "h5py>=2.10",
     "hdmf>=3.12.2",
-    "numpy>=1.18", # match the version used in hdmf
+    "numpy>=1.18, <2.0", # pin below 2.0 until HDMF supports numpy 2.0
     "pandas>=1.1.5",
     "python-dateutil>=2.7.3",
 ]
@@ -58,27 +58,23 @@ version-file = "src/pynwb/_version.py"
 [tool.hatch.build.targets.wheel]
 packages = ["src/pynwb"]
 
-# [tool.pytest.ini_options] # TODO: uncomment when pytest is integrated
-# # Addopts creates a shortcut for pytest. For example below, running `pytest` will actually run `pytest --cov --cov-report html`.
-# addopts = "--cov --cov-report html" # generates coverage report in html format without showing anything on the terminal.
-
 [tool.codespell]
 skip = "htmlcov,.git,.mypy_cache,.pytest_cache,.coverage,*.pdf,*.svg,venvs,.tox,nwb-schema,./docs/_build/*,*.ipynb"
 ignore-words-list = "optin,potatos"
 
 [tool.coverage.run]
 branch = true
-source = ["src/"]
-omit = [
-    "src/pynwb/_due.py",
-    "src/pynwb/testing/*",
-    "src/pynwb/legacy/*"
-]
+source = ["pynwb"]
 
 [tool.coverage.report]
 exclude_lines = [
     "pragma: no cover",
     "@abstract"
+]
+omit = [
+    "*/pynwb/_due.py",
+    "*/pynwb/testing/*",
+    "*/pynwb/legacy/*"
 ]
 
 [tool.ruff]

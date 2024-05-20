@@ -164,16 +164,15 @@ AutoTetrodeSeries = get_class("TetrodeSeries", "mylab")
 # To demonstrate this, first we will make some simulated data using our extensions.
 
 from datetime import datetime
-
-from dateutil.tz import tzlocal
-
 from pynwb import NWBFile
+from uuid import uuid4
 
-start_time = datetime(2017, 4, 3, 11, tzinfo=tzlocal())
-create_date = datetime(2017, 4, 15, 12, tzinfo=tzlocal())
+session_start_time = datetime(2017, 4, 3, hour=11, minute=0)
 
 nwbfile = NWBFile(
-    "demonstrate caching", "NWB456", start_time, file_create_date=create_date
+    session_description="demonstrate caching",
+    identifier=str(uuid4()),
+    session_start_time=session_start_time,
 )
 
 device = nwbfile.create_device(name="trodes_rig123")
@@ -333,9 +332,6 @@ class PotatoSack(MultiContainerInterface):
 # Then use the objects (again, this would often be done in a different file).
 
 from datetime import datetime
-
-from dateutil.tz import tzlocal
-
 from pynwb import NWBHDF5IO, NWBFile
 
 # You can add potatoes to a potato sack in different ways
@@ -343,8 +339,11 @@ potato_sack = PotatoSack(potatos=Potato(name="potato1", age=2.3, weight=3.0))
 potato_sack.add_potato(Potato("potato2", 3.0, 4.0))
 potato_sack.create_potato("big_potato", 10.0, 20.0)
 
+session_start_time = datetime(2017, 4, 3, hour=12, minute=0)
 nwbfile = NWBFile(
-    "a file with metadata", "NB123A", datetime(2018, 6, 1, tzinfo=tzlocal())
+    session_description="a file with metadata",
+    identifier=str(uuid4()),
+    session_start_time = session_start_time,
 )
 
 pmod = nwbfile.create_processing_module("module_name", "desc")

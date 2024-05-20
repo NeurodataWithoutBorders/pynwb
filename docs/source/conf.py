@@ -168,6 +168,8 @@ nitpicky = True
 nitpick_ignore = [('py:class', 'Intracomm'),
                   ('py:class', 'BaseStorageSpec')]
 
+suppress_warnings = ["config.cache"]
+
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
 

@@ -70,7 +70,7 @@ def mock_ElectricalSeries(
     name: Optional[str] = None,
     description: str = "description",
     data=None,
-    rate: float = 30000.0,
+    rate: Optional[float] = None,
     timestamps=None,
     starting_time: Optional[float] = None,
     electrodes: Optional[DynamicTableRegion] = None,
@@ -80,6 +80,10 @@ def mock_ElectricalSeries(
     conversion: float = 1.0,
     offset: float = 0.,
 ) -> ElectricalSeries:
+    
+    # Set a default rate if timestamps are not provided
+    rate = 30_000.0 if (timestamps is None and rate is None) else rate
+
     electrical_series = ElectricalSeries(
         name=name or name_generator("ElectricalSeries"),
         description=description,
@@ -129,7 +133,7 @@ def mock_Units(
     nwbfile: Optional[NWBFile] = None,
 ) -> Units:
 
-    units_table = Units()
+    units_table = Units(name="units")  # This is for nwbfile.units= mock_Units() to work
     units_table.add_column(name="unit_name", description="a readable identifier for the unit")
 
     rng = np.random.default_rng(seed=seed)

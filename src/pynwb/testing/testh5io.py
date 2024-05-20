@@ -1,5 +1,4 @@
 from datetime import datetime
-from dateutil.tz import tzlocal, tzutc
 import os
 from abc import ABCMeta, abstractmethod
 import warnings
@@ -33,8 +32,8 @@ class NWBH5IOMixin(metaclass=ABCMeta):
 
     def setUp(self):
         self.container = self.setUpContainer()
-        self.start_time = datetime(1971, 1, 1, 12, tzinfo=tzutc())
-        self.create_date = datetime(2018, 4, 15, 12, tzinfo=tzlocal())
+        self.start_time = datetime(1971, 1, 1, 12)
+        self.create_date = datetime(2018, 4, 15, 12)
         self.container_type = self.container.__class__.__name__
         self.filename = 'test_%s.nwb' % self.container_type
         self.export_filename = 'test_export_%s.nwb' % self.container_type
@@ -226,7 +225,7 @@ class NWBH5IOFlexMixin(metaclass=ABCMeta):
         container_type = self.getContainerType().replace(" ", "_")
         session_description = 'A file to test writing and reading a %s' % container_type
         identifier = 'TEST_%s' % container_type
-        session_start_time = datetime(1971, 1, 1, 12, tzinfo=tzutc())
+        session_start_time = datetime(1971, 1, 1, 12)
         self.nwbfile = NWBFile(
             session_description=session_description,
             identifier=identifier,
