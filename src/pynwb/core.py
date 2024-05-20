@@ -55,6 +55,7 @@ class NWBMixin(AbstractContainer):
         """
         Return the spec data type associated with this container, i.e., the neurodata_type.
         """
+        # we need this function here to use the correct _data_type_attr.
         _type = getattr(self, self._data_type_attr)
         return _type
 

@@ -164,8 +164,6 @@ def register_class(**kwargs):
 
     def _dec(cls):
         __TYPE_MAP.register_container_type(namespace, neurodata_type, cls)
-        cls.type_map = __TYPE_MAP
-        cls.namespace = namespace
         return cls
     if container_cls is None:
         return _dec
