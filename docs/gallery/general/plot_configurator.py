@@ -29,7 +29,7 @@ How to make a Configuration File
 --------------------------------
 Before taking advantage of the all the wonders that comes with using a configuration file,
 the user needs to create one following some simple guidelines. To follow along with an example,
-please refer to ``nwb_config.yaml`` under ``src/config``. 
+please refer to ``nwb_config.yaml`` under ``src/config``.
 The configuration files is built on the foundation of the YAML syntax. The
 user will construct a series of nested dictioanries to encompass all the necessary information.
 
@@ -44,7 +44,14 @@ try:
     import linkml_runtime  # noqa: F401
 except ImportError as e:
     raise ImportError("Please install linkml-runtime to run this example: pip install linkml-runtime") from e
-from hdmf.term_set import TermSet, TermSetWrapper
+
+from dateutil import tz
+from datetime import datetime
+from uuid import uuid4
+import os
+
+from pynwb import NWBFile, get_loaded_type_config, load_type_config, unload_type_config
+from pynwb.file import Subject
 
 # How to use a Configuration file
 # -------------------------------
@@ -53,12 +60,13 @@ from hdmf.term_set import TermSet, TermSetWrapper
 # It is important to remember that with the configuration loaded, the fields
 # are wrapped automatically, meaning the user should proceed with creating
 # the instances normally, i.e., without wrapping directly. In this example,
-# we load the the NWB curated configuration file that associates a
-# :py:class:`~hdmf.term_set.TermSet` for the species field in Subject.
-# The NWB configuration file is the default when you call
-# :py:func:`~pynwb.load_type_config`.
+# we load the a configuration file that associates a
+# :py:class:`~hdmf.term_set.TermSet` for the ``species`` field in
+# :py:class:`~pynwb.file.Subject`.
 
-load_type_config()
+dir_path = os.path.dirname(os.path.abspath(__file__))
+yaml_file = os.path.join(dir_path, 'nwb_gallery_config.yaml')
+load_type_config(config_path=yaml_file)
 
 session_start_time = datetime(2018, 4, 25, hour=2, minute=30, second=3, tzinfo=tz.gettz("US/Pacific"))
 
@@ -68,7 +76,7 @@ nwbfile = NWBFile(
     session_start_time=session_start_time,  # required
     session_id="session_1234",  # optional
     experimenter=[
-        "Baggins, Bilbo",
+        "Bilbo Baggins",
     ],  # optional
     lab="Bag End Laboratory",  # optional
     institution="University of My Institution",  # optional

@@ -5,9 +5,3 @@ namespaces:
       Subject:
         species:
           termset: nwb_subject_termset.yaml
-      NWBFile:
-        experimenter:
-          termset: experimenter_termset.yaml
-      # ElectrodeGroup: This will return when electrode table is redefined
-      #   location:
-      #     termset: location_termset.yaml

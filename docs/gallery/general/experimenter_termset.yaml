@@ -10,10 +10,8 @@ default_range: string
 enums:
   Experimenters:
     permissible_values:
-      Oliver Rübel:
+      Bilbo Baggins:
         description: He who must not be named.
-        meaning: ORC:0000-0001-9902-1984
-      Ryan Ly:
-        description: The chosen one. 
-        meaning: ORC:0000-0001-9238-0642
+        meaning: ORC:111
+
       
