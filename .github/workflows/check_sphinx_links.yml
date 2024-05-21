@@ -28,7 +28,7 @@ jobs:
       - name: Install Sphinx dependencies and package
         run: |
           python -m pip install --upgrade pip
-          python -m pip install -r requirements-doc.txt
+          python -m pip install -r requirements-doc.txt -r requirements-opt.txt
           python -m pip install .
 
       - name: Check Sphinx internal and external links
