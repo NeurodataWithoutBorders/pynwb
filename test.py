@@ -104,11 +104,11 @@ def run_example_tests():
                 examples_scripts.append(os.path.join(root, f))
     try:
         __run_example_tests_helper(examples_scripts)
-    except (ImportError, ValueError) as e:
-                if "linkml" in str(e):
-                    pass  # this is OK because linkml is not always installed
-                else:
-                    raise e
+    except (ImportError, ValueError, ModuleNotFoundError) as e:
+        if "linkml" in str(e):
+            pass  # this is OK because linkml is not always installed
+        else:
+            raise e
 
 
 def run_example_ros3_tests():
