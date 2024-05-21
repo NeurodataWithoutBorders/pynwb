@@ -93,7 +93,6 @@ subject = Subject(
 )
 
 nwbfile.subject = subject
-subject
 
 ####################################
 # How to see the Configuration file
