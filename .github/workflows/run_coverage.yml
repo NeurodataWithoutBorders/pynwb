@@ -11,7 +11,7 @@ on:
 
 jobs:
   run-coverage:
-    name: ${{ matrix.os }}
+    name: ${{ matrix.os }}, opt reqs ${{ matrix.opt_req }}
     runs-on: ${{ matrix.os }}
     # TODO handle forks
     # run pipeline on either a push event or a PR event on a fork
