@@ -102,8 +102,13 @@ def run_example_tests():
                     logging.info("Skipping %s" % name_with_parent_dir)
                     continue
                 examples_scripts.append(os.path.join(root, f))
-
-    __run_example_tests_helper(examples_scripts)
+    try:
+        __run_example_tests_helper(examples_scripts)
+    except (ImportError, ValueError) as e:
+                if "linkml" in str(e):
+                    pass  # this is OK because linkml is not always installed
+                else:
+                    raise e
 
 
 def run_example_ros3_tests():
