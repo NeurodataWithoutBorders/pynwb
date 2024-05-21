@@ -64,7 +64,7 @@ from pynwb.file import Subject
 # :py:class:`~hdmf.term_set.TermSet` for the ``species`` field in
 # :py:class:`~pynwb.file.Subject`.
 
-dir_path = os.path.dirname(os.path.abspath(__file__))
+dir_path = os.path.dirname(os.path.abspath("__file__"))
 yaml_file = os.path.join(dir_path, 'nwb_gallery_config.yaml')
 load_type_config(config_path=yaml_file)
 
