@@ -6,7 +6,7 @@ channels:
 dependencies:
   - python==3.12
   - h5py==3.11.0
-  - hdmf==3.13.0
+  - hdmf==3.14.0
   - matplotlib==3.8.0
   - numpy==1.26.4
   - pandas==2.2.1
