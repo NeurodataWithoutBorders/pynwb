@@ -30,7 +30,7 @@ How to make a Configuration File
 Before taking advantage of the all the wonders that comes with using a configuration file,
 the user needs to create one following some simple guidelines. To follow along with an example,
 please refer to ``nwb_config.yaml`` under ``src/config``.
-The configuration files is built on the foundation of the YAML syntax. The
+The configuration file uses YAML syntax. The
 user will construct a series of nested dictionaries to encompass all the necessary information.
 
 1. The user needs to define all the relevant namespaces. Recall that each neurodata type exists within
