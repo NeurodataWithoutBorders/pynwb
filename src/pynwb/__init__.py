@@ -37,7 +37,7 @@ def load_type_config(**kwargs):
     config_path = kwargs['config_path'] or path_to_config
     type_map = kwargs['type_map'] or get_type_map()
 
-    hdmf_load_type_config(config_path=config_path, type_map=get_type_map())
+    hdmf_load_type_config(config_path=config_path, type_map=type_map)
 
 @docval({'name': 'type_map', 'type': TypeMap, 'doc': 'The TypeMap.', 'default': None},
         is_method=False)
