@@ -36,7 +36,7 @@ user will construct a series of nested dictionaries to encompass all the necessa
 1. The user needs to define all the relevant namespaces. Recall that each neurodata type exists within
    a namespace, whether that is the core namespace in PyNWB or a namespace in an extension. As namespaces grow,
    we also require a version to be recorded in the configuration file to ensure proper functionality.
-2. Within a namespace dictionary, the user will have a list of data types the want to use.
+2. Within a namespace dictionary, the user will have a list of data types they want to configure.
 3. Each data type will have a list of fields associated with a :py:class:`~hdmf.term_set.TermSet`.
    The user can use the same or unique TermSet instances for each field.
 """
