@@ -9,7 +9,7 @@ order to more easily validate terms within datasets or attributes.
 Introduction
 -------------
 Users do not directly interact with the :py:class:`~hdmf.term_set.TypeConfigurator` class.
-Instead, users wil create a configuration YAML file that outlines the fields (within a neurodata type)
+Instead, users will create a configuration YAML file that outlines the fields (within a neurodata type)
 they want to be validated. After creating the configuration file, users will need to load the
 configuration with the :py:func:`~pynwb.load_type_config` method.
 With the configuration loaded, every instance of the neurodata
@@ -31,7 +31,7 @@ Before taking advantage of the all the wonders that comes with using a configura
 the user needs to create one following some simple guidelines. To follow along with an example,
 please refer to ``nwb_config.yaml`` under ``src/config``.
 The configuration files is built on the foundation of the YAML syntax. The
-user will construct a series of nested dictioanries to encompass all the necessary information.
+user will construct a series of nested dictionaries to encompass all the necessary information.
 
 1. The user needs to define all the relevant namespaces. Recall that each neurodata type exists within
    a namespace, whether that is the core namespace in PyNWB or a namespace in an extension. As namespaces grow,
