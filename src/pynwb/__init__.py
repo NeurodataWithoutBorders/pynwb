@@ -285,16 +285,11 @@ class NWBHDF5IO(_HDF5IO):
             {'name': 'extensions', 'type': (str, TypeMap, list),
              'doc': 'a path to a namespace, a TypeMap, or a list consisting paths to namespaces and TypeMaps',
              'default': None},
-            {'name': 'file', 'type': [h5py.File, 'S3File'], 'doc': 'a pre-existing h5py.File object', 'default': None},
-            {'name': 'comm', 'type': 'Intracomm', 'doc': 'the MPI communicator to use for parallel I/O',
-             'default': None},
-            {'name': 'driver', 'type': str, 'doc': 'driver for h5py to use when opening HDF5 file', 'default': None},
-            {'name': 'herd_path', 'type': str, 'doc': 'The path to the HERD',
-             'default': None},)
+            *get_docval(_HDF5IO.__init__, "file", "comm", "driver", "aws_region", "herd_path"),)
     def __init__(self, **kwargs):
-        path, mode, manager, extensions, load_namespaces, file_obj, comm, driver, herd_path =\
+        path, mode, manager, extensions, load_namespaces, file_obj, comm, driver, aws_region, herd_path =\
             popargs('path', 'mode', 'manager', 'extensions', 'load_namespaces',
-                    'file', 'comm', 'driver', 'herd_path', kwargs)
+                    'file', 'comm', 'driver', 'aws_region', 'herd_path', kwargs)
         # Define the BuildManager to use
         io_modes_that_create_file = ['w', 'w-', 'x']
         if mode in io_modes_that_create_file or manager is not None or extensions is not None:
@@ -302,7 +297,7 @@ class NWBHDF5IO(_HDF5IO):
 
         if load_namespaces:
             tm = get_type_map()
-            super().load_namespaces(tm, path, file=file_obj, driver=driver)
+            super().load_namespaces(tm, path, file=file_obj, driver=driver, aws_region=aws_region)
             manager = BuildManager(tm)
 
             # XXX: Leaving this here in case we want to revert to this strategy for
@@ -320,7 +315,7 @@ class NWBHDF5IO(_HDF5IO):
                 manager = get_manager()
         # Open the file
         super().__init__(path, manager=manager, mode=mode, file=file_obj, comm=comm,
-                         driver=driver, herd_path=herd_path)
+                         driver=driver, aws_region=aws_region, herd_path=herd_path)
 
     @property
     def nwb_version(self):

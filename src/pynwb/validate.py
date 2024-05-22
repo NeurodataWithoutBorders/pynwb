@@ -30,7 +30,7 @@ def _validate_helper(io: HDMFIO, namespace: str = CORE_NAMESPACE) -> list:
 
 
 def _get_cached_namespaces_to_validate(
-    path: str, driver: Optional[str] = None
+    path: str, driver: Optional[str] = None, aws_region: Optional[str] = None,
 ) -> Tuple[List[str], BuildManager, Dict[str, str]]:
     """
     Determine the most specific namespace(s) that are cached in the given NWBFile that can be used for validation.
@@ -58,7 +58,12 @@ def _get_cached_namespaces_to_validate(
     catalog = NamespaceCatalog(
         group_spec_cls=NWBGroupSpec, dataset_spec_cls=NWBDatasetSpec, spec_namespace_cls=NWBNamespace
     )
-    namespace_dependencies = NWBHDF5IO.load_namespaces(namespace_catalog=catalog, path=path, driver=driver)
+    namespace_dependencies = NWBHDF5IO.load_namespaces(
+        namespace_catalog=catalog,
+        path=path,
+        driver=driver,
+        aws_region=aws_region
+    )
 
     # Determine which namespaces are the most specific (i.e. extensions) and validate against those
     candidate_namespaces = set(namespace_dependencies.keys())
