@@ -20,7 +20,7 @@ class SpatialSeries(TimeSeries):
     tracking camera. The unit of data will indicate how to interpret SpatialSeries values.
     """
 
-    __nwbfields__ = ('reference_frame',)
+    __nwbfields__ = ('bounds', 'reference_frame',)
 
     @docval(*get_docval(TimeSeries.__init__, 'name'),  # required
             {'name': 'data', 'type': ('array_data', 'data', TimeSeries), 'shape': ((None, ), (None, None)), # required
