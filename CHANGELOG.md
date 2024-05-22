@@ -1,5 +1,10 @@
 # PyNWB Changelog
 
+## PyNWB 2.8.0 (Upcoming)
+
+### Enhancements and minor changes
+- Set rate default value inside `mock_ElectricalSeries` to avoid having to set `rate=None` explicitly when passing timestamps. @h-mayorquin [#1894](https://github.com/NeurodataWithoutBorders/pynwb/pull/1894)
+
 ## PyNWB 2.7.0 (May 2, 2024)
 
 ### Enhancements and minor changes
