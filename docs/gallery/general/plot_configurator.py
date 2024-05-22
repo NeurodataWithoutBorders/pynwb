@@ -30,7 +30,8 @@ We also provide a helper method to see the configuration that has been loaded:
 
 How to make a Configuration File
 --------------------------------
-To see an example of a configuration file, please refer to ``nwb_config.yaml`` under ``src/config``.
+To see an example of a configuration file, please refer to
+`<https://github.com/NeurodataWithoutBorders/pynwb/tree/dev/src/pynwb/config/nwb_config.yaml>`_.
 The configuration file uses YAML syntax. The
 user will construct a series of nested dictionaries to encompass all the necessary information.
 
