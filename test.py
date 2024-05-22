@@ -136,6 +136,11 @@ def __run_example_tests_helper(examples_scripts):
                         ws.append(w)
             for w in ws:
                 warnings.showwarning(w.message, w.category, w.filename, w.lineno, w.line)
+        except (ImportError, ValueError, ModuleNotFoundError) as e:
+            if "linkml" in str(e):
+                pass  # this is OK because linkml is not always installed
+            else:
+                raise e
         except Exception:
             print(traceback.format_exc())
             FAILURES += 1

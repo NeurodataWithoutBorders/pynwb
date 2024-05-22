@@ -12,12 +12,43 @@ from hdmf.backends.io import HDMFIO
 from hdmf.backends.hdf5 import HDF5IO as _HDF5IO
 from hdmf.build import BuildManager, TypeMap
 import hdmf.common
+from hdmf.common import load_type_config as hdmf_load_type_config
+from hdmf.common import get_loaded_type_config as hdmf_get_loaded_type_config
+from hdmf.common import unload_type_config as hdmf_unload_type_config
+
 
 CORE_NAMESPACE = 'core'
 
 from .spec import NWBDatasetSpec, NWBGroupSpec, NWBNamespace  # noqa E402
 from .validate import validate  # noqa: F401, E402
 
+
+@docval({'name': 'config_path', 'type': str, 'doc': 'Path to the configuration file.'},
+        {'name': 'type_map', 'type': TypeMap, 'doc': 'The TypeMap.', 'default': None},
+        is_method=False)
+def load_type_config(**kwargs):
+    """
+    This method will either load the default config or the config provided by the path.
+    """
+    config_path = kwargs['config_path']
+    type_map = kwargs['type_map'] or get_type_map()
+
+    hdmf_load_type_config(config_path=config_path, type_map=type_map)
+
+@docval({'name': 'type_map', 'type': TypeMap, 'doc': 'The TypeMap.', 'default': None},
+        is_method=False)
+def get_loaded_type_config(**kwargs):
+    type_map = kwargs['type_map'] or get_type_map()
+    return hdmf_get_loaded_type_config(type_map=type_map)
+
+@docval({'name': 'type_map', 'type': TypeMap, 'doc': 'The TypeMap.', 'default': None},
+        is_method=False)
+def unload_type_config(**kwargs):
+    """
+    Remove validation.
+    """
+    type_map = kwargs['type_map'] or get_type_map()
+    hdmf_unload_type_config(type_map=type_map)
 
 def __get_resources():
     try:
