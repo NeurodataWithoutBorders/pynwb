@@ -58,7 +58,7 @@ version-file = "src/pynwb/_version.py"
 [tool.hatch.build.targets.sdist]
 exclude = [
     ".git*",
-    ".codespellrc",
+    ".codecov.yml",
     ".readthedocs.yaml",
 ]
 
@@ -66,7 +66,7 @@ exclude = [
 packages = ["src/pynwb"]
 exclude = [
     ".git*",
-    ".codespellrc",
+    ".codecov.yml",
     ".readthedocs.yaml",
 ]
 
