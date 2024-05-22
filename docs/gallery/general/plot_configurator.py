@@ -1,22 +1,27 @@
 """
 How to Configure Term Validations
-=======
+=================================
 
-This is a user guide for how to take curate and take advantage of configuration files in
+This is a user guide for how to curate and take advantage of configuration files in
 order to more easily validate terms within datasets or attributes.
 
 Introduction
 -------------
 Users will create a configuration YAML file that outlines the fields (within a neurodata type)
-they want to be validated. After creating the configuration file, users will need to load the
-configuration with the :py:func:`~pynwb.load_type_config` method.
+they want to be validated against a set of allowed terms. 
+After creating the configuration file, users will need to load the
+configuration file with the :py:func:`~pynwb.load_type_config` method.
 With the configuration loaded, every instance of the neurodata
 types defined in the configuration file will have the respective fields wrapped with a
 :py:class:`~hdmf.term_set.TermSetWrapper`.
-This automatic wrapping is what provides the term validation for the the field value.
-If a user wants to have greater control on which instances have validated fields, the user cannot use the
-configurator, bur rather proceed with manually wrapping with a
-:py:class:`~hdmf.term_set.TermSetWrapper`.
+This automatic wrapping is what provides the term validation for the field value.
+For greater control on which datasets and attributes are validated
+against which sets of allowed terms, use the 
+:py:class:`~hdmf.term_set.TermSetWrapper` on individual datasets and attributes instead.
+You can follow the 
+`TermSet tutorial in the HDMF documentation 
+<https://hdmf.readthedocs.io/en/stable/tutorials/plot_term_set.html#sphx-glr-tutorials-plot-term-set-py>`_
+for more information.
 
 To unload a configuration, simply call :py:func:`~pynwb.unload_type_config`.
 We also provide a helper method to see the configuration that has been loaded:
@@ -25,9 +30,7 @@ We also provide a helper method to see the configuration that has been loaded:
 
 How to make a Configuration File
 --------------------------------
-Before taking advantage of the all the wonders that comes with using a configuration file,
-the user needs to create one following some simple guidelines. To follow along with an example,
-please refer to ``nwb_config.yaml`` under ``src/config``.
+To see an example of a configuration file, please refer to ``nwb_config.yaml`` under ``src/config``.
 The configuration file uses YAML syntax. The
 user will construct a series of nested dictionaries to encompass all the necessary information.
 
@@ -98,12 +101,12 @@ nwbfile.subject = subject
 ####################################
 # How to see the Configuration file
 # ---------------------------------
-# Users can retrieve the loaded configuration.
+# Call :py:class:`~pynwb.get_loaded_type_config` to get a dictionary containing the
+# current configuration.
 config = get_loaded_type_config()
 
 ######################################
 # How to unload the Configuration file
 # ------------------------------------
-# In order to toggle off the automatic validation, the user simple needs to unload
-# the configuration.
+# Call :py:class:`~pynwb.unload_type_config` to toggle off the automatic validation.
 unload_type_config()
