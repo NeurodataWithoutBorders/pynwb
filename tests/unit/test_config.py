@@ -1,6 +1,7 @@
 from dateutil import tz
 from datetime import datetime
 from uuid import uuid4
+import os
 
 from hdmf.term_set import TermSetWrapper
 
@@ -19,7 +20,9 @@ class TestPyNWBTypeConfig(TestCase):
     def setUp(self):
         if not REQUIREMENTS_INSTALLED:
             self.skipTest("optional LinkML module is not installed")
-        load_type_config()
+        CUR_DIR = os.path.dirname(os.path.realpath(__file__))    
+        path_to_config = os.path.join(CUR_DIR, 'test_config/test_nwb_config.yaml')
+        load_type_config(config_path=path_to_config)
 
     def tearDown(self):
         unload_type_config()

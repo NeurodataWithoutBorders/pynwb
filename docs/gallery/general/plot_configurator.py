@@ -1,15 +1,13 @@
 """
-TypeConfigurator
+How to Configure Term Validations
 =======
 
-This is a user guide for how to take advantage of the
-:py:class:`~hdmf.term_set.TypeConfigurator` class by creating configuration files in
+This is a user guide for how to take curate and take advantage of configuration files in
 order to more easily validate terms within datasets or attributes.
 
 Introduction
 -------------
-Users do not directly interact with the :py:class:`~hdmf.term_set.TypeConfigurator` class.
-Instead, users will create a configuration YAML file that outlines the fields (within a neurodata type)
+Users will create a configuration YAML file that outlines the fields (within a neurodata type)
 they want to be validated. After creating the configuration file, users will need to load the
 configuration with the :py:func:`~pynwb.load_type_config` method.
 With the configuration loaded, every instance of the neurodata
@@ -56,13 +54,16 @@ from pynwb.file import Subject
 # How to use a Configuration file
 # -------------------------------
 # As mentioned prior, the first step after creating a configuration file is
-# to load the file.
+# to load the file. In this configuration file, we have defined two fields
+# we want to always be validated: ``experimenter`` and ``species``. Each of these
+# are from a different neurodata type, :py:class:`~pynwb.file.NWBFile` and
+# :py:class:`~pynwb.file.Subject` respectively, and each
+# have a unique associated :py:class:`~hdmf.term_set.TermSet`.
 # It is important to remember that with the configuration loaded, the fields
 # are wrapped automatically, meaning the user should proceed with creating
-# the instances normally, i.e., without wrapping directly. In this example,
-# we load the a configuration file that associates a
-# :py:class:`~hdmf.term_set.TermSet` for the ``species`` field in
-# :py:class:`~pynwb.file.Subject`.
+# the instances normally, i.e., without wrapping directly. Once instantiated,
+# the value of the fields are wrapped and then validated to see if it is a
+# permissible value in their respective :py:class:`~hdmf.term_set.TermSet`.
 
 dir_path = os.path.dirname(os.path.abspath("__file__"))
 yaml_file = os.path.join(dir_path, 'nwb_gallery_config.yaml')

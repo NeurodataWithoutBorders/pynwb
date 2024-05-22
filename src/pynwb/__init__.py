@@ -23,18 +23,14 @@ from .spec import NWBDatasetSpec, NWBGroupSpec, NWBNamespace  # noqa E402
 from .validate import validate  # noqa: F401, E402
 
 
-CUR_DIR = os.path.dirname(os.path.realpath(__file__))
-path_to_config = os.path.join(CUR_DIR, 'config/nwb_config.yaml')
-
-@docval({'name': 'config_path', 'type': str, 'doc': 'Path to the configuration file.',
-         'default': None},
+@docval({'name': 'config_path', 'type': str, 'doc': 'Path to the configuration file.'},
         {'name': 'type_map', 'type': TypeMap, 'doc': 'The TypeMap.', 'default': None},
         is_method=False)
 def load_type_config(**kwargs):
     """
     This method will either load the default config or the config provided by the path.
     """
-    config_path = kwargs['config_path'] or path_to_config
+    config_path = kwargs['config_path']
     type_map = kwargs['type_map'] or get_type_map()
 
     hdmf_load_type_config(config_path=config_path, type_map=type_map)
