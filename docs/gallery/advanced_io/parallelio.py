@@ -32,7 +32,7 @@ HDF5 installed in a MPI configuration.
 #     from datetime import datetime
 #     from hdmf.backends.hdf5.h5_utils import H5DataIO
 #
-#     start_time = datetime(2018, 4, 25, hour=2, minute=30, second=3)
+#     start_time = datetime(2018, 4, 25, 2, 30, 3, tzinfo=tz.gettz("US/Pacific"))
 #     fname = "test_parallel_pynwb.nwb"
 #     rank = MPI.COMM_WORLD.rank  # The process ID (integer 0-3 for 4-process run)
 #
