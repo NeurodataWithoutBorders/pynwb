@@ -1,6 +1,6 @@
 # PyNWB Changelog
 
-## PyNWB 2.7.1 (May 28, 2024)
+## PyNWB 2.8.0 (May 28, 2024)
 
 ### Enhancements and minor changes
 - Set rate default value inside `mock_ElectricalSeries` to avoid having to set `rate=None` explicitly when passing timestamps. @h-mayorquin [#1894](https://github.com/NeurodataWithoutBorders/pynwb/pull/1894)
@@ -8,7 +8,7 @@
 - Exposed `aws_region` to `NWBHDF5IO`. @rly [#1903](https://github.com/NeurodataWithoutBorders/pynwb/pull/1903)
 
 ### Bug fixes
-- Revert changes in PyNWB 2.7.0 that allow datetimes without a timezone and without a time while issues with DANDI upload are resolved. @rly ... 
+- Revert changes in PyNWB 2.7.0 that allow datetimes without a timezone and without a time while issues with DANDI upload are resolved. @rly [#1908](https://github.com/NeurodataWithoutBorders/pynwb/pull/1908)
 
 ## PyNWB 2.7.0 (May 2, 2024)
 
