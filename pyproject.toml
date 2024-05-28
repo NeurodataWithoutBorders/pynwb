@@ -72,7 +72,7 @@ exclude = [
 
 [tool.codespell]
 skip = "htmlcov,.git,.mypy_cache,.pytest_cache,.coverage,*.pdf,*.svg,venvs,.tox,nwb-schema,./docs/_build/*,*.ipynb"
-ignore-words-list = "optin,potatos"
+ignore-words-list = "optin,potatos,assertin"
 
 [tool.coverage.run]
 branch = true
