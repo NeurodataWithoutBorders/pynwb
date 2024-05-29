@@ -330,7 +330,7 @@
 
 ### Tutorial enhancements:
 - Added new tutorial for intracellular electrophysiology to describe the use of the new metadata tables
-  and declared the previous tutoral using ``SweepTable`` as deprecated.  @oruebel (#1349)
+  and declared the previous tutorial using ``SweepTable`` as deprecated.  @oruebel (#1349)
 - Added new tutorial for querying intracellular electrophysiology metadata
   (``docs/gallery/domain/plot_icephys_pandas.py``). @oruebel (#1349, #1383)
 - Added thumbnails for tutorials to improve presentation of online docs.  @oruebel (#1349)
