@@ -16,7 +16,7 @@ main steps:
 It is recommended to cover :ref:`basics` before this tutorial.
 
 .. note:: It is recommended to check if your source data is supported by
-  `NeuroConv Extracellular Electrophysiology Gallery <https://neuroconv.readthedocs.io/en/main/conversion_examples_gallery/conversion_example_gallery.html#extracellular-electrophysiology>`_.
+  `NeuroConv Extracellular Electrophysiology Gallery <https://neuroconv.readthedocs.io/en/main/conversion_examples_gallery/#extracellular-electrophysiology>`_.
   If it is supported, it is recommended to use NeuroConv to convert your data.
 
 The following examples will reference variables that may not be defined within the block they are used in. For
