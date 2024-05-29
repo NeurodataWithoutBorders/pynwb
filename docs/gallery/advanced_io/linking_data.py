@@ -51,12 +51,15 @@ We then show how we can integrate these files into a single NWBFile.
 # sphinx_gallery_thumbnail_path = 'figures/gallery_thumbnails_linking_data.png'
 
 from datetime import datetime
-import numpy as np
-from pynwb import NWBHDF5IO, NWBFile, TimeSeries
 from uuid import uuid4
 
+import numpy as np
+from dateutil.tz import tzlocal
+
+from pynwb import NWBHDF5IO, NWBFile, TimeSeries
+
 # Create the base data
-start_time = datetime(2017, 4, 3, hour=11, minute=0)
+start_time = datetime(2017, 4, 3, 11, tzinfo=tzlocal())
 data = np.arange(1000).reshape((100, 10))
 timestamps = np.arange(100)
 filename1 = "external1_example.nwb"
