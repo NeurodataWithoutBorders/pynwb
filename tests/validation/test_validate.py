@@ -230,26 +230,6 @@ class TestValidateFunction(TestCase):
             errors, _ = validate(io, 'ndx-testextension')
             self.assertEqual(errors, [])
 
-    def test_validate_io_cached_core_with_io(self):
-        """
-        Test that validating a file with cached extension spec against the core
-        namespace succeeds rases an error when using the `io` + `namespace` keywords.
-        """
-        with patch("sys.stderr", new=StringIO()) as fake_err:
-            with patch("sys.stdout", new=StringIO()) as fake_out:
-                with self.get_io(path='tests/back_compat/2.1.0_nwbfile_with_extension.nwb') as io:
-                    results, status = validate(io=io, namespace="core", verbose=True)
-                    self.assertEqual(results, [])
-                    self.assertEqual(status, 1)
-                    self.assertEqual(
-                        fake_err.getvalue(),
-                        (
-                            "The namespace 'core' is included by the namespace 'ndx-testextension'. "
-                            "Please validate against that namespace instead.\n"
-                        )
-                    )
-                    self.assertEqual(fake_out.getvalue(),"")
-
     def test_validate_file_cached_extension(self):
         """
         Test that validating a file with cached extension spec against the core
@@ -300,20 +280,6 @@ class TestValidateFunction(TestCase):
                 self.assertRegex(fake_err.getvalue(), stderr_regex)
                 self.assertEqual(fake_out.getvalue(), "")
 
-    def test_validate_io_cached_bad_ns(self):
-        """Test that validating a file with cached spec against a specified, unknown namespace fails."""
-        with patch("sys.stderr", new=StringIO()) as fake_err:
-            with patch("sys.stdout", new=StringIO()) as fake_out:
-                with self.get_io('tests/back_compat/1.1.2_nwbfile.nwb') as io:
-                    results, status = validate(io=io, namespace='notfound')
-                    self.assertEqual(results, [])
-                    self.assertEqual(status, 1)
-                    stderr_regex = (
-                        r"The namespace 'notfound' could not be found in cached namespace information as only "
-                        r"\['core'\] is present.\n"
-                    )
-                self.assertRegex(fake_err.getvalue(), stderr_regex)
-                self.assertEqual(fake_out.getvalue(), "")
 
     def test_validate_io_cached_hdmf_common(self):
         """Test that validating a file with cached spec against the hdmf-common namespace fails."""
@@ -334,21 +300,35 @@ class TestValidateFunction(TestCase):
 
     def test_validate_io_and_path_same(self):
         """Test that validating a file with an io object and a path return the same results."""
-        path = 'tests/back_compat/1.1.2_nwbfile.nwb'
-        with patch("sys.stderr", new=StringIO()) as fake_err:
-            with patch("sys.stdout", new=StringIO()) as fake_out:
-                with self.get_io(path=path) as io:
-                    results_io, status_io = validate(io=io, namespace="hdmf-common", verbose=True)
-                    fake_err_io = fake_err.getvalue()
-                    fake_out_io = fake_out.getvalue()
+        tests = [('tests/back_compat/1.0.2_nwbfile.nwb', None),
+                 ('tests/back_compat/1.0.2_nwbfile.nwb', 'notfound'),
+                 ('tests/back_compat/1.1.2_nwbfile.nwb', None),
+                 ('tests/back_compat/1.1.2_nwbfile.nwb', 'core'),
+                 ('tests/back_compat/1.1.2_nwbfile.nwb', 'notfound'),
+                 ('tests/back_compat/1.1.2_nwbfile.nwb', 'hdmf-common'),
+                 ('tests/back_compat/2.1.0_nwbfile_with_extension.nwb', None),
+                 ('tests/back_compat/2.1.0_nwbfile_with_extension.nwb', 'core'),
+                 ('tests/back_compat/2.1.0_nwbfile_with_extension.nwb', 'ndx-testextension'),]
+        
+        for path, ns in tests:
+            with patch("sys.stderr", new=StringIO()) as fake_err:
+                with patch("sys.stdout", new=StringIO()) as fake_out:
+                    with self.get_io(path=path) as io:
+                        results_io, status_io = validate(io=io, namespace=ns, verbose=True)
+                        fake_err_io = fake_err.getvalue()
+                        fake_out_io = fake_out.getvalue()
 
-        with patch("sys.stderr", new=StringIO()) as fake_err:
-            with patch("sys.stdout", new=StringIO()) as fake_out:
-                results_path, status_path = validate(paths=[path], namespace="hdmf-common", verbose=True)
-                fake_err_path = fake_err.getvalue()
-                fake_out_path = fake_out.getvalue()
+            with patch("sys.stderr", new=StringIO()) as fake_err:
+                with patch("sys.stdout", new=StringIO()) as fake_out:
+                    results_path, status_path = validate(paths=[path], namespace=ns, verbose=True)
+                    fake_err_path = fake_err.getvalue()
+                    fake_out_path = fake_out.getvalue()
 
-        self.assertEqual(results_io, results_path)
-        self.assertEqual(status_io, status_path)
-        self.assertEqual(fake_err_io, fake_err_path)
-        self.assertEqual(fake_out_io, fake_out_path)
+            # remove path from error messages since it will not be included in io outputs
+            fake_err_path = fake_err_path.replace(f'{path} ', '')
+            fake_out_path = fake_out_path.replace(f'{path} ', '')
+
+            self.assertEqual(results_io, results_path)
+            self.assertEqual(status_io, status_path)
+            self.assertEqual(fake_err_io, fake_err_path)
+            self.assertEqual(fake_out_io, fake_out_path)
