@@ -248,9 +248,7 @@ class TestValidateFunction(TestCase):
                             "Please validate against that namespace instead.\n"
                         )
                     )
-                    self.assertEqual(fake_out.getvalue(),
-                                     "Validating against cached namespace information using "
-                                      "namespace 'ndx-testextension'.\n")
+                    self.assertEqual(fake_out.getvalue(),"")
 
     def test_validate_file_cached_extension(self):
         """
@@ -332,8 +330,7 @@ class TestValidateFunction(TestCase):
                             "Please validate against that namespace instead.\n"
                         )
                     )
-                    self.assertEqual(fake_out.getvalue(),
-                                     "Validating against cached namespace information using namespace 'core'.\n")
+                    self.assertEqual(fake_out.getvalue(), "")
 
     def test_validate_io_and_path_same(self):
         """Test that validating a file with an io object and a path return the same results."""
@@ -346,7 +343,7 @@ class TestValidateFunction(TestCase):
                     fake_out_io = fake_out.getvalue()
 
         with patch("sys.stderr", new=StringIO()) as fake_err:
-            with patch("sys.stdout", new=StringIO()) as v:
+            with patch("sys.stdout", new=StringIO()) as fake_out:
                 results_path, status_path = validate(paths=[path], namespace="hdmf-common", verbose=True)
                 fake_err_path = fake_err.getvalue()
                 fake_out_path = fake_out.getvalue()
