@@ -192,7 +192,7 @@ class TestTimeSeriesModular(TestCase):
         for fn in filenames:
             if os.path.exists(fn):
                 with NWBHDF5IO(fn, mode='r') as io:
-                    errors = pynwb_validate(io)
+                    errors, _ = pynwb_validate(io)
                     if errors:
                         for err in errors:
                             raise Exception(err)
