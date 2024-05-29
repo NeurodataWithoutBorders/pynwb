@@ -112,7 +112,7 @@ def _check_namespaces_to_validate(io: Optional[HDMFIO] = None,
             namespaces_to_validate = [CORE_NAMESPACE]
             if verbose:
                 print(
-                    f"The file {path} has no cached namespace information. Falling back to {namespace_message}.",
+                    f"The file {f'{path} ' if path is not None else ''}has no cached namespace information. Falling back to {namespace_message}.",
                     file=sys.stderr,
                 )
     else:
