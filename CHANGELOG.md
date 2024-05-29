@@ -8,7 +8,7 @@
 - Exposed `aws_region` to `NWBHDF5IO`. @rly [#1903](https://github.com/NeurodataWithoutBorders/pynwb/pull/1903)
 
 ### Bug fixes
-- Revert changes in PyNWB 2.7.0 that allow datetimes without a timezone and without a time while issues with DANDI upload are resolved. @rly [#1908](https://github.com/NeurodataWithoutBorders/pynwb/pull/1908)
+- Revert changes in PyNWB 2.7.0 that allow datetimes without a timezone and without a time while issues with DANDI upload of NWB files missing timezone are resolved. @rly [#1908](https://github.com/NeurodataWithoutBorders/pynwb/pull/1908)
 
 ## PyNWB 2.7.0 (May 2, 2024)
 
