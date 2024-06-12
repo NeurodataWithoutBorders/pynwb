@@ -105,7 +105,7 @@ More commonly, you will be creating instances of classes that extend this class.
     * **Optical physiology:** :py:class:`~pynwb.ophys.DfOverF`,
       :py:class:`~pynwb.ophys.Fluorescence`,
       :py:class:`~pynwb.ophys.ImageSegmentation`,
-      :py:class:`~pynwb.ophys.MotionCorrection`,
+      :py:class:`~pynwb.ophys.MotionCorrection`.
 
     * **Others:** :py:class:`~pynwb.base.Images`.
 
