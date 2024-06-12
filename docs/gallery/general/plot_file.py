@@ -7,9 +7,7 @@ NWB File Basics
 This example will focus on the basics of working with an :py:class:`~pynwb.file.NWBFile` object,
 including writing and reading of an NWB file, and giving you an introduction to the basic data types.
 Before we dive into code showing how to use an :py:class:`~pynwb.file.NWBFile`, we first provide
-a brief overview of the basic concepts of NWB. If you are already familiar with the concepts of
-:ref:`timeseries_overview` and :ref:`modules_overview`, then feel free to skip the :ref:`basics_background`
-part and go directly to :ref:`basics_nwbfile`.
+a brief overview of the basic concepts of NWB.
 
 .. _basics_background:
 
@@ -20,8 +18,8 @@ In the `NWB Format <https://nwb-schema.readthedocs.io>`_, each experiment sessio
 represented by a separate NWB file. NWB files are represented in PyNWB by :py:class:`~pynwb.file.NWBFile`
 objects which provide functionality for creating and retrieving:
 
- * :ref:`timeseries_overview` datasets, i.e., objects for storing time series data
- * :ref:`modules_overview`, i.e., objects for storing and grouping analyses, and
+ * :ref:`timeseries_overview` datasets -- objects for storing time series data
+ * :ref:`modules_overview` -- objects for storing and grouping analyses, and
  * experiment metadata and other metadata related to data provenance.
 
 The following sections describe the :py:class:`~pynwb.base.TimeSeries` and :py:class:`~pynwb.base.ProcessingModule`
@@ -58,17 +56,18 @@ serves as the base class for all other :py:class:`~pynwb.base.TimeSeries` types,
     * **Optical physiology and imaging:** :py:class:`~pynwb.image.ImageSeries` is the base type
       for image recordings and is further refined by the
       :py:class:`~pynwb.image.ImageMaskSeries`,
-      :py:class:`~pynwb.image.OpticalSeries`, and
+      :py:class:`~pynwb.image.OpticalSeries`,
+      :py:class:`~pynwb.ophys.OnePhotonSeries`, and
       :py:class:`~pynwb.ophys.TwoPhotonSeries` types.
       Other related time series types are:
-      :py:class:`~pynwb.image.IndexSeries` and
+      :py:class:`~pynwb.image.IndexSeries`,
       :py:class:`~pynwb.ophys.RoiResponseSeries`.
 
-    * **Others** :py:class:`~pynwb.ogen.OptogeneticSeries`,
+    * **Others:** :py:class:`~pynwb.ogen.OptogeneticSeries`,
       :py:class:`~pynwb.behavior.SpatialSeries`,
       :py:class:`~pynwb.misc.DecompositionSeries`,
       :py:class:`~pynwb.misc.AnnotationSeries`,
-      :py:class:`~pynwb.misc.AbstractFeatureSeries`, and
+      :py:class:`~pynwb.misc.AbstractFeatureSeries`,
       :py:class:`~pynwb.misc.IntervalSeries`.
 
 
@@ -78,7 +77,7 @@ Processing Modules
 ^^^^^^^^^^^^^^^^^^
 
 Processing modules are objects that group together common analyses done during processing of data.
-Processing module objects are unique collections of analysis results. To standardize the storage of
+ To standardize the storage of
 common analyses, NWB provides the concept of an :py:class:`~pynwb.core.NWBDataInterface`, where the output of
 common analyses are represented as objects that extend the :py:class:`~pynwb.core.NWBDataInterface` class.
 In most cases, you will not need to interact with the :py:class:`~pynwb.core.NWBDataInterface` class directly.
@@ -87,7 +86,7 @@ More commonly, you will be creating instances of classes that extend this class.
 
 .. seealso::
 
-    For your reference, NWB defines the following main analysis :py:class:`~pynwb.core.NWBDataInterface` subtypes:
+    For your reference, NWB defines the following main processing/analysis data types:
 
     * **Behavior:** :py:class:`~pynwb.behavior.BehavioralEpochs`,
       :py:class:`~pynwb.behavior.BehavioralEvents`,
@@ -106,17 +105,11 @@ More commonly, you will be creating instances of classes that extend this class.
     * **Optical physiology:** :py:class:`~pynwb.ophys.DfOverF`,
       :py:class:`~pynwb.ophys.Fluorescence`,
       :py:class:`~pynwb.ophys.ImageSegmentation`,
-      :py:class:`~pynwb.ophys.MotionCorrection`.
+      :py:class:`~pynwb.ophys.MotionCorrection`,
 
     * **Others:** :py:class:`~pynwb.base.Images`.
 
-    * **TimeSeries:** Any :ref:`timeseries_overview` is also a subclass of :py:class:`~pynwb.core.NWBDataInterface`
-      and can be used anywhere :py:class:`~pynwb.core.NWBDataInterface` is allowed.
-
-.. note::
-
-    In addition to :py:class:`~pynwb.core.NWBContainer`, which functions as a common base type for Group objects,
-    :py:class:`~pynwb.core.NWBData` provides a common base for the specification of datasets in the NWB format.
+    * **TimeSeries:** Any :py:class:`~pynwb.base.TimeSeries` can be used to store processing/analysis data.
 
 NWB organizes data into different groups depending on the type of data. Groups can be thought of
 as folders within the file. Here are some of the groups within an :py:class:`~pynwb.file.NWBFile` and the types of
@@ -142,7 +135,6 @@ from dateutil import tz
 
 from pynwb import NWBHDF5IO, NWBFile, TimeSeries
 from pynwb.behavior import Position, SpatialSeries
-from pynwb.epoch import TimeIntervals
 from pynwb.file import Subject
 
 ####################
@@ -221,7 +213,7 @@ nwbfile
 # * **sex**: Single letter abbreviation, e.g., ``"F"`` (female), ``"M"`` (male), ``"U"`` (unknown), and ``"O"`` (other)
 #
 # Add the subject information to the :py:class:`~pynwb.file.NWBFile`
-# by setting the ``subject`` field to the new :py:class:`~pynwb.file.Subject` object.
+# by setting the ``subject`` field to a new :py:class:`~pynwb.file.Subject` object.
 
 subject = Subject(
     subject_id="001",
@@ -251,7 +243,7 @@ subject
 #   :align: center
 #
 # For instance, we can store a :py:class:`~pynwb.base.TimeSeries` data where recording started
-# ``0.0`` seconds after ``start_time`` and sampled every second:
+# ``0.0`` seconds after ``start_time`` and sampled every second (1 Hz):
 
 data = list(range(100, 200, 10))
 time_series_with_rate = TimeSeries(
@@ -278,7 +270,7 @@ time_series_with_timestamps
 ####################
 # :py:class:`~pynwb.base.TimeSeries` objects can be added directly to :py:class:`~pynwb.file.NWBFile` using:
 #
-# * :py:meth:`.NWBFile.add_acquisition` to  add *acquisition* data (raw, acquired data that should never change),
+# * :py:meth:`.NWBFile.add_acquisition` to add *acquisition* data (raw, acquired data that should never change),
 # * :py:meth:`.NWBFile.add_stimulus` to add *stimulus* data, or
 # * :py:meth:`.NWBFile.add_stimulus_template` to store *stimulus templates*.
 #
@@ -409,108 +401,6 @@ behavior_module
 nwbfile.processing["behavior"]
 
 ####################
-# .. _basic_writing:
-#
-# Writing an NWB file
-# -------------------
-#
-# NWB I/O is carried out using the :py:class:`~pynwb.NWBHDF5IO` class [#]_. This class is responsible
-# for mapping an :py:class:`~pynwb.file.NWBFile` object into HDF5 according to the NWB schema.
-#
-# To write an :py:class:`~pynwb.file.NWBFile`, use the :py:meth:`~hdmf.backends.io.HDMFIO.write` method.
-
-io = NWBHDF5IO("basics_tutorial.nwb", mode="w")
-io.write(nwbfile)
-io.close()
-
-####################
-# You can also use :py:meth:`~pynwb.NWBHDF5IO` as a context manager:
-
-with NWBHDF5IO("basics_tutorial.nwb", "w") as io:
-    io.write(nwbfile)
-
-####################
-# .. _basic_reading:
-#
-# Reading an NWB file
-# -------------------
-#
-# As with writing, reading is also carried out using the :py:class:`~pynwb.NWBHDF5IO` class.
-# To read the NWB file we just wrote, use another :py:class:`~pynwb.NWBHDF5IO` object,
-# and use the :py:meth:`~pynwb.NWBHDF5IO.read` method to retrieve an
-# :py:class:`~pynwb.file.NWBFile` object.
-#
-# Data arrays are read passively from the file.
-# Accessing the ``data`` attribute of the :py:class:`~pynwb.base.TimeSeries` object
-# does not read the data values, but presents an HDF5 object that can be indexed to read data.
-# You can use the ``[:]`` operator to read the entire data array into memory.
-
-with NWBHDF5IO("basics_tutorial.nwb", "r") as io:
-    read_nwbfile = io.read()
-    print(read_nwbfile.acquisition["test_timeseries"])
-    print(read_nwbfile.acquisition["test_timeseries"].data[:])
-
-####################
-# It is often preferable to read only a portion of the data.
-# To do this, index or slice into the ``data`` attribute just like you
-# index or slice a numpy array.
-
-with NWBHDF5IO("basics_tutorial.nwb", "r") as io:
-    read_nwbfile = io.read()
-    print(read_nwbfile.acquisition["test_timeseries"].data[:2])
-
-####################
-# .. note::
-#     If you use :py:class:`~pynwb.NWBHDF5IO` as a context manager during read,
-#     be aware that the :py:class:`~pynwb.NWBHDF5IO` gets closed and when the
-#     context completes and the data will not be available outside of the
-#     context manager [#]_.
-
-####################
-# Accessing data
-# ^^^^^^^^^^^^^^^
-#
-# We can also access the :py:class:`~pynwb.behavior.SpatialSeries` data by referencing the names
-# of the objects in the hierarchy that contain it. We can access a processing module by indexing
-# ``nwbfile.processing`` with the name of the processing module, ``"behavior"``.
-#
-# Then, we can access the :py:class:`~pynwb.behavior.Position` object inside of the ``"behavior"``
-# processing module by indexing it with the name of the :py:class:`~pynwb.behavior.Position` object,
-# ``"Position"``.
-#
-# Finally, we can access the :py:class:`~pynwb.behavior.SpatialSeries` object inside of the
-# :py:class:`~pynwb.behavior.Position` object by indexing it with the name of the
-# :py:class:`~pynwb.behavior.SpatialSeries` object, ``"SpatialSeries"``.
-
-with NWBHDF5IO("basics_tutorial.nwb", "r") as io:
-    read_nwbfile = io.read()
-    print(read_nwbfile.processing["behavior"])
-    print(read_nwbfile.processing["behavior"]["Position"])
-    print(read_nwbfile.processing["behavior"]["Position"]["SpatialSeries"])
-
-####################
-# .. _reuse_timestamps:
-#
-# Reusing timestamps
-# ------------------
-#
-# When working with multi-modal data, it can be convenient and efficient to store timestamps once and associate multiple
-# data with the single timestamps instance. PyNWB enables this by letting you reuse timestamps across
-# :py:class:`~pynwb.base.TimeSeries` objects. To reuse a :py:class:`~pynwb.base.TimeSeries` timestamps in a new
-# :py:class:`~pynwb.base.TimeSeries`, pass the existing :py:class:`~pynwb.base.TimeSeries` as the new
-# :py:class:`~pynwb.base.TimeSeries`, pass the existing :py:class:`~pynwb.base.TimeSeries` as the new
-# :py:class:`~pynwb.base.TimeSeries` timestamps:
-
-data = list(range(101, 201, 10))
-reuse_ts = TimeSeries(
-    name="reusing_timeseries",
-    data=data,
-    unit="SIunit",
-    timestamps=time_series_with_timestamps,
-)
-
-
-####################
 # Time Intervals
 # --------------
 #
@@ -573,60 +463,83 @@ nwbfile.add_trial(start_time=6.0, stop_time=10.0, correct=False)
 nwbfile.trials.to_dataframe()
 
 ####################
-# .. _basic_epochs:
+# .. _basic_writing:
 #
-# Epochs
-# ^^^^^^
+# Writing an NWB file
+# -------------------
 #
-# Like trials, epochs can be added to an NWB file using the methods
-# :py:meth:`.NWBFile.add_epoch_column` and :py:meth:`.NWBFile.add_epoch`.
-# The third argument is one or more tags for labeling the epoch, and the fourth argument is a
-# list of all the :py:class:`~pynwb.base.TimeSeries` that the epoch applies
-# to.
+# Writing of an NWB file is carried out using the :py:class:`~pynwb.NWBHDF5IO` class [#]_.
+#
+# To write an :py:class:`~pynwb.file.NWBFile`, use the :py:meth:`~hdmf.backends.io.HDMFIO.write` method.
 
-nwbfile.add_epoch(
-    start_time=2.0,
-    stop_time=4.0,
-    tags=["first", "example"],
-    timeseries=[time_series_with_timestamps],
-)
-
-nwbfile.add_epoch(
-    start_time=6.0,
-    stop_time=8.0,
-    tags=["second", "example"],
-    timeseries=[time_series_with_timestamps],
-)
-
-nwbfile.epochs.to_dataframe()
+io = NWBHDF5IO("basics_tutorial.nwb", mode="w")
+io.write(nwbfile)
+io.close()
 
 ####################
-# Other time intervals
-# ^^^^^^^^^^^^^^^^^^^^
-# These :py:class:`~pynwb.epoch.TimeIntervals` objects are stored in ``NWBFile.intervals``. In addition to the default
-# ``epochs`` and ``trials``, you can also add your own with custom names.
-
-sleep_stages = TimeIntervals(
-    name="sleep_stages",
-    description="intervals for each sleep stage as determined by EEG",
-)
-
-sleep_stages.add_column(name="stage", description="stage of sleep")
-sleep_stages.add_column(name="confidence", description="confidence in stage (0-1)")
-
-sleep_stages.add_row(start_time=0.3, stop_time=0.5, stage=1, confidence=0.5)
-sleep_stages.add_row(start_time=0.7, stop_time=0.9, stage=2, confidence=0.99)
-sleep_stages.add_row(start_time=1.3, stop_time=3.0, stage=3, confidence=0.7)
-
-nwbfile.add_time_intervals(sleep_stages)
-
-sleep_stages.to_dataframe()
-
-####################
-# Now we overwrite the file with all of the data
+# You can also use :py:meth:`~pynwb.NWBHDF5IO` as a context manager:
 
 with NWBHDF5IO("basics_tutorial.nwb", "w") as io:
     io.write(nwbfile)
+
+####################
+# .. _basic_reading:
+#
+# Reading an NWB file
+# -------------------
+#
+# As with writing, reading is also carried out using the :py:class:`~pynwb.NWBHDF5IO` class.
+# To read the NWB file we just wrote, create another :py:class:`~pynwb.NWBHDF5IO` object with the mode set to ``"r"``,
+# and use the :py:meth:`~pynwb.NWBHDF5IO.read` method to retrieve an
+# :py:class:`~pynwb.file.NWBFile` object.
+#
+# Data arrays are read passively from the file.
+# Accessing the ``data`` attribute of the :py:class:`~pynwb.base.TimeSeries` object
+# does not read the data values, but presents an HDF5 object that can be indexed to read data.
+# You can use the ``[:]`` operator to read the entire data array into memory.
+
+with NWBHDF5IO("basics_tutorial.nwb", "r") as io:
+    read_nwbfile = io.read()
+    print(read_nwbfile.acquisition["test_timeseries"])
+    print(read_nwbfile.acquisition["test_timeseries"].data[:])
+
+####################
+# It is often preferable to read only a portion of the data.
+# To do this, index or slice into the ``data`` attribute just like you
+# index or slice a numpy array.
+
+with NWBHDF5IO("basics_tutorial.nwb", "r") as io:
+    read_nwbfile = io.read()
+    print(read_nwbfile.acquisition["test_timeseries"].data[:2])
+
+####################
+# .. note::
+#     If you use :py:class:`~pynwb.NWBHDF5IO` as a context manager during read,
+#     be aware that the :py:class:`~pynwb.NWBHDF5IO` gets closed and when the
+#     context completes and the data will not be available outside of the
+#     context manager [#]_.
+
+####################
+# Accessing data
+# ^^^^^^^^^^^^^^^
+#
+# We can also access the :py:class:`~pynwb.behavior.SpatialSeries` data by referencing the names
+# of the objects in the hierarchy that contain it. We can access a processing module by indexing
+# ``nwbfile.processing`` with the name of the processing module, ``"behavior"``.
+#
+# Then, we can access the :py:class:`~pynwb.behavior.Position` object inside of the ``"behavior"``
+# processing module by indexing it with the name of the :py:class:`~pynwb.behavior.Position` object,
+# ``"Position"``.
+#
+# Finally, we can access the :py:class:`~pynwb.behavior.SpatialSeries` object inside of the
+# :py:class:`~pynwb.behavior.Position` object by indexing it with the name of the
+# :py:class:`~pynwb.behavior.SpatialSeries` object, ``"SpatialSeries"``.
+
+with NWBHDF5IO("basics_tutorial.nwb", "r") as io:
+    read_nwbfile = io.read()
+    print(read_nwbfile.processing["behavior"])
+    print(read_nwbfile.processing["behavior"]["Position"])
+    print(read_nwbfile.processing["behavior"]["Position"]["SpatialSeries"])
 
 ####################
 # .. _basic_appending:
@@ -637,7 +550,6 @@ with NWBHDF5IO("basics_tutorial.nwb", "w") as io:
 # To append to a file, read it with :py:class:`~pynwb.NWBHDF5IO` and set the ``mode`` argument to ``'a'``.
 # After you have read the file, you can add [#]_ new data to it using the standard write/add functionality demonstrated
 # above. Let's see how this works by adding another :py:class:`~pynwb.base.TimeSeries` to acquisition.
-
 
 io = NWBHDF5IO("basics_tutorial.nwb", mode="a")
 nwbfile = io.read()
