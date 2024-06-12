@@ -170,7 +170,8 @@ nwbfile = NWBFile(
     lab="Bag End Laboratory",  # optional
     institution="University of My Institution",  # optional
     experiment_description="I went on an adventure to reclaim vast treasures.",  # optional
-    related_publications="DOI:10.1016/j.neuron.2016.12.011",  # optional
+    keywords=["behavior", "exploration", "wanderlust"],  # optional
+    related_publications="doi:10.1016/j.neuron.2016.12.011",  # optional
 )
 nwbfile
 
@@ -245,9 +246,10 @@ subject
 # For instance, we can store a :py:class:`~pynwb.base.TimeSeries` data where recording started
 # ``0.0`` seconds after ``start_time`` and sampled every second (1 Hz):
 
-data = list(range(100, 200, 10))
+data = np.arange(100, 200, 10)
 time_series_with_rate = TimeSeries(
     name="test_timeseries",
+    description="an example time series",
     data=data,
     unit="m",
     starting_time=0.0,
@@ -258,9 +260,10 @@ time_series_with_rate
 ####################
 # For irregularly sampled recordings, we need to provide the ``timestamps`` for the ``data``:
 
-timestamps = list(range(10))
+timestamps = np.arange(10.)
 time_series_with_timestamps = TimeSeries(
     name="test_timeseries",
+    description="an example time series",
     data=data,
     unit="m",
     timestamps=timestamps,
@@ -554,10 +557,13 @@ with NWBHDF5IO("basics_tutorial.nwb", "r") as io:
 io = NWBHDF5IO("basics_tutorial.nwb", mode="a")
 nwbfile = io.read()
 
+data = np.arange(100, 200, 10)
+timestamps = np.arange(10.)
 new_time_series = TimeSeries(
     name="new_time_series",
-    data=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-    timestamps=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+    description="a new time series",
+    data=data,
+    timestamps=timestamps,
     unit="n.a.",
 )
 nwbfile.add_acquisition(new_time_series)
