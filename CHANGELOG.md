@@ -1,5 +1,11 @@
 # PyNWB Changelog
 
+## PyNWB 2.8.1 (Upcoming)
+
+### Documentation and tutorial enhancements
+- Simplified the introduction to NWB tutorial. @rly [#1914](https://github.com/NeurodataWithoutBorders/pynwb/pull/1914)
+
+
 ## PyNWB 2.8.0 (May 28, 2024)
 
 ### Enhancements and minor changes
