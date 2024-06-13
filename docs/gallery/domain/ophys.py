@@ -59,7 +59,8 @@ nwbfile = NWBFile(
     lab="Bag End Laboratory",
     institution="University of Middle Earth at the Shire",
     experiment_description="I went on an adventure to reclaim vast treasures.",
-    session_id="LONELYMTN001",
+    keywords=["ecephys", "exploration", "wanderlust"],
+    related_publications="doi:10.1016/j.neuron.2016.12.011",
 )
 
 ####################
@@ -86,7 +87,6 @@ nwbfile = NWBFile(
 #
 # Create a :py:class:`~pynwb.device.Device` named ``"Microscope"`` in the :py:class:`~pynwb.file.NWBFile` object. Then
 # create an  :py:class:`~pynwb.ophys.OpticalChannel` named ``"OpticalChannel"``.
-
 
 device = nwbfile.create_device(
     name="Microscope",
@@ -123,30 +123,15 @@ imaging_plane = nwbfile.create_imaging_plane(
 # -----------------
 # Now that we have our :py:class:`~pynwb.ophys.ImagingPlane`, we can create a
 # :py:class:`~pynwb.ophys.OnePhotonSeries` object to store raw one-photon imaging data.
-# Here, we have two options. The first option is to supply the raw image data to PyNWB,
-# using the data argument. The second option is to provide a path to the image files.
-# These two options have trade-offs, so it is worth considering how you want to store
-# this data.
 
-# using internal data. this data will be stored inside the NWB file
-one_p_series1 = OnePhotonSeries(
-    name="OnePhotonSeries_internal",
+# the image data will be stored inside the NWB file
+one_p_series = OnePhotonSeries(
+    name="OnePhotonSeries",
+    description="Raw 1p data",
     data=np.ones((1000, 100, 100)),
     imaging_plane=imaging_plane,
     rate=1.0,
     unit="normalized amplitude",
-)
-
-# using external data. only the file paths will be stored inside the NWB file
-one_p_series2 = OnePhotonSeries(
-    name="OnePhotonSeries_external",
-    dimension=[100, 100],
-    external_file=["images.tiff"],
-    imaging_plane=imaging_plane,
-    starting_frame=[0],
-    format="external",
-    starting_time=0.0,
-    rate=1.0,
 )
 
 ####################
@@ -154,8 +139,7 @@ one_p_series2 = OnePhotonSeries(
 # :py:class:`~pynwb.ophys.OnePhotonSeries` objects to the :py:class:`~pynwb.file.NWBFile`
 # as acquired data.
 
-nwbfile.add_acquisition(one_p_series1)
-nwbfile.add_acquisition(one_p_series2)
+nwbfile.add_acquisition(one_p_series)
 
 ####################
 # Two-photon Series
@@ -178,29 +162,17 @@ nwbfile.add_acquisition(one_p_series2)
 #     :align: center
 #
 
-# using internal data. this data will be stored inside the NWB file
-two_p_series1 = TwoPhotonSeries(
-    name="TwoPhotonSeries1",
+# the image data will be stored inside the NWB file
+two_p_series = TwoPhotonSeries(
+    name="TwoPhotonSeries",
+    description="Raw 2p data",
     data=np.ones((1000, 100, 100)),
     imaging_plane=imaging_plane,
     rate=1.0,
     unit="normalized amplitude",
 )
 
-# using external data. only the file paths will be stored inside the NWB file
-two_p_series2 = TwoPhotonSeries(
-    name="TwoPhotonSeries2",
-    dimension=[100, 100],
-    external_file=["images.tiff"],
-    imaging_plane=imaging_plane,
-    starting_frame=[0],
-    format="external",
-    starting_time=0.0,
-    rate=1.0,
-)
-
-nwbfile.add_acquisition(two_p_series1)
-nwbfile.add_acquisition(two_p_series2)
+nwbfile.add_acquisition(two_p_series)
 
 ####################
 # Motion Correction (optional)
@@ -212,6 +184,7 @@ nwbfile.add_acquisition(two_p_series2)
 
 corrected = ImageSeries(
     name="corrected",  # this must be named "corrected"
+    description="A motion corrected image stack",
     data=np.ones((1000, 100, 100)),
     unit="na",
     format="raw",
@@ -221,6 +194,7 @@ corrected = ImageSeries(
 
 xy_translation = TimeSeries(
     name="xy_translation",
+    description="x,y translation in pixels",
     data=np.ones((1000, 2)),
     unit="pixels",
     starting_time=0.0,
@@ -229,7 +203,7 @@ xy_translation = TimeSeries(
 
 corrected_image_stack = CorrectedImageStack(
     corrected=corrected,
-    original=one_p_series1,
+    original=one_p_series,
     xy_translation=xy_translation,
 )
 
@@ -239,7 +213,6 @@ motion_correction = MotionCorrection(corrected_image_stacks=[corrected_image_sta
 # We will create a :py:class:`~pynwb.base.ProcessingModule` named "ophys" to store optical
 # physiology data and add the motion correction data to the :py:class:`~pynwb.file.NWBFile`.
 #
-
 
 ophys_module = nwbfile.create_processing_module(
     name="ophys", description="optical physiology processed data"
@@ -295,14 +268,13 @@ ophys_module.add(motion_correction)
 # Then we will add the :py:class:`~pynwb.ophys.ImageSegmentation` object
 # to the previously created :py:class:`~pynwb.base.ProcessingModule`.
 
-
 img_seg = ImageSegmentation()
 
 ps = img_seg.create_plane_segmentation(
     name="PlaneSegmentation",
     description="output from segmenting my favorite imaging plane",
     imaging_plane=imaging_plane,
-    reference_images=one_p_series1,  # optional
+    reference_images=one_p_series,  # optional
 )
 
 ophys_module.add(img_seg)
@@ -348,7 +320,7 @@ ps2 = img_seg.create_plane_segmentation(
     name="PlaneSegmentation2",
     description="output from segmenting my favorite imaging plane",
     imaging_plane=imaging_plane,
-    reference_images=one_p_series1,  # optional
+    reference_images=one_p_series,  # optional
 )
 
 for _ in range(30):
@@ -382,7 +354,7 @@ ps3 = img_seg.create_plane_segmentation(
     name="PlaneSegmentation3",
     description="output from segmenting my favorite imaging plane",
     imaging_plane=imaging_plane,
-    reference_images=one_p_series1,  # optional
+    reference_images=one_p_series,  # optional
 )
 
 from itertools import product
@@ -453,9 +425,9 @@ rt_region = ps.create_roi_table_region(
 # Then we create a :py:class:`~pynwb.ophys.RoiResponseSeries` object to store fluorescence
 # data for those two ROIs.
 
-
 roi_resp_series = RoiResponseSeries(
     name="RoiResponseSeries",
+    description="Fluorescence responses for two ROIs",
     data=np.ones((50, 2)),  # 50 samples, 2 ROIs
     rois=rt_region,
     unit="lumens",
@@ -484,7 +456,6 @@ roi_resp_series = RoiResponseSeries(
 #     :alt: fluorescence UML diagram
 #     :align: center
 
-
 fl = Fluorescence(roi_response_series=roi_resp_series)
 ophys_module.add(fl)
 
@@ -502,7 +473,6 @@ ophys_module.add(fl)
 # Once we have finished adding all of our data to our
 # :py:class:`~pynwb.file.NWBFile`, make sure to write the file.
 # IO operations are carried out using :py:class:`~pynwb.NWBHDF5IO`.
-
 
 with NWBHDF5IO("ophys_tutorial.nwb", "w") as io:
     io.write(nwbfile)
@@ -525,10 +495,9 @@ with NWBHDF5IO("ophys_tutorial.nwb", "w") as io:
 # with the name of the :py:class:`~pynwb.ophys.RoiResponseSeries` object,
 # which we named ``"RoiResponseSeries"``.
 
-
 with NWBHDF5IO("ophys_tutorial.nwb", "r") as io:
     read_nwbfile = io.read()
-    print(read_nwbfile.acquisition["TwoPhotonSeries1"])
+    print(read_nwbfile.acquisition["TwoPhotonSeries"])
     print(read_nwbfile.processing["ophys"])
     print(read_nwbfile.processing["ophys"]["Fluorescence"])
     print(read_nwbfile.processing["ophys"]["Fluorescence"]["RoiResponseSeries"])
@@ -545,11 +514,10 @@ with NWBHDF5IO("ophys_tutorial.nwb", "r") as io:
 # Load and print all the data values of the :py:class:`~pynwb.ophys.RoiResponseSeries`
 # object representing the fluorescence data.
 
-
 with NWBHDF5IO("ophys_tutorial.nwb", "r") as io:
     read_nwbfile = io.read()
 
-    print(read_nwbfile.acquisition["TwoPhotonSeries1"])
+    print(read_nwbfile.acquisition["TwoPhotonSeries"])
     print(read_nwbfile.processing["ophys"]["Fluorescence"]["RoiResponseSeries"].data[:])
 
 ####################

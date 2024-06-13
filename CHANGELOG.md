@@ -4,6 +4,7 @@
 
 ### Documentation and tutorial enhancements
 - Simplified the introduction to NWB tutorial. @rly [#1914](https://github.com/NeurodataWithoutBorders/pynwb/pull/1914)
+- Simplified the ecephys and ophys tutorials. [#1915](https://github.com/NeurodataWithoutBorders/pynwb/pull/1915)
 
 
 ## PyNWB 2.8.0 (May 28, 2024)
