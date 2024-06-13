@@ -76,13 +76,8 @@ serves as the base class for all other :py:class:`~pynwb.base.TimeSeries` types,
 Processing Modules
 ^^^^^^^^^^^^^^^^^^
 
-Processing modules are objects that group together common analyses done during processing of data.
- To standardize the storage of
-common analyses, NWB provides the concept of an :py:class:`~pynwb.core.NWBDataInterface`, where the output of
-common analyses are represented as objects that extend the :py:class:`~pynwb.core.NWBDataInterface` class.
-In most cases, you will not need to interact with the :py:class:`~pynwb.core.NWBDataInterface` class directly.
-More commonly, you will be creating instances of classes that extend this class.
-
+Processing modules are objects that group together common analyses done during processing of data. They
+often hold data of different processing/analysis data types.
 
 .. seealso::
 
@@ -168,7 +163,7 @@ nwbfile = NWBFile(
         "Baggins, Bilbo",
     ],  # optional
     lab="Bag End Laboratory",  # optional
-    institution="University of My Institution",  # optional
+    institution="University of Middle Earth at the Shire",  # optional
     experiment_description="I went on an adventure to reclaim vast treasures.",  # optional
     keywords=["behavior", "exploration", "wanderlust"],  # optional
     related_publications="doi:10.1016/j.neuron.2016.12.011",  # optional
