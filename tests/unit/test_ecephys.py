@@ -132,7 +132,7 @@ class ElectricalSeriesConstructor(TestCase):
 
         data_in_units = electrical_series.get_data_in_units()
 
-        for channel_index in range(len(channel_conversion)):
+        for channel_index in range(channels):
             np.testing.assert_almost_equal(
                 data_in_units[:, channel_index],
                 np.ones(samples) * conversion * channel_conversion[channel_index] + offset
