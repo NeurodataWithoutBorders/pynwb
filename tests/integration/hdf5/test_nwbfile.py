@@ -42,6 +42,7 @@ class TestNWBFileHDF5IO(TestCase):
                                session_id='007',
                                slices='noslices',
                                source_script='nosources',
+                               was_generated_by=[('nosoftware', '0.0.0')],
                                surgery='nosurgery',
                                virus='novirus',
                                source_script_file_name='nofilename')
@@ -128,6 +129,7 @@ class TestNWBFileIO(NWBH5IOMixin, TestCase):
                                  virus='a virus',
                                  source_script='noscript',
                                  source_script_file_name='nofilename',
+                                 was_generated_by=[('nosoftware', '0.0.0')],
                                  stimulus_notes='test stimulus notes',
                                  data_collection='test data collection notes',
                                  keywords=('these', 'are', 'keywords'))
@@ -175,6 +177,32 @@ class TestExperimentersSetterRoundtrip(TestNWBFileIO):
                                session_start_time=self.start_time)
         self.nwbfile.experimenter = ('experimenter1', 'experimenter2')
 
+
+class TestWasGeneratedByConstructorRoundtrip(TestNWBFileIO):
+    """ Test that a list of software packages / versions in a constructor is written to and read from file """
+
+    def build_nwbfile(self):
+        description = 'test nwbfile was_generated_by'
+        identifier = 'TEST_was_generated_by'
+        self.nwbfile = NWBFile(session_description=description,
+                               identifier=identifier,
+                               session_start_time=self.start_time,
+                               was_generated_by=[('software1', '0.1.0'),
+                                                 ('software2', '0.2.0'),
+                                                 ('software3', '0.3.0')],)
+
+class TestWasGeneratedBySetterRoundtrip(TestNWBFileIO):
+    """ Test that a single tuple of software versions packages in a setter is written to and read from file """
+
+    def build_nwbfile(self):
+        description = 'test nwbfile was_generated_by'
+        identifier = 'TEST_was_generated_by'
+        self.nwbfile = NWBFile(session_description=description,
+                               identifier=identifier,
+                               session_start_time=self.start_time)
+        self.nwbfile.was_generated_by = [('software1', '0.1.0'),
+                                         ('software2', '0.2.0'),
+                                         ('software3', '0.3.0')]
 
 class TestPublicationsConstructorRoundtrip(TestNWBFileIO):
     """ Test that a list of multiple publications in a constructor is written to and read from file """

@@ -42,6 +42,7 @@ class NWBFileTest(TestCase):
                                virus='a virus',
                                source_script='noscript',
                                source_script_file_name='nofilename',
+                               was_generated_by=[('nosoftware', '0.0.0')],
                                stimulus_notes='test stimulus notes',
                                data_collection='test data collection notes',
                                keywords=('these', 'are', 'keywords'))
@@ -61,6 +62,7 @@ class NWBFileTest(TestCase):
         self.assertEqual(self.nwbfile.related_publications, ('my pubs',))
         self.assertEqual(self.nwbfile.source_script, 'noscript')
         self.assertEqual(self.nwbfile.source_script_file_name, 'nofilename')
+        self.assertEqual(self.nwbfile.was_generated_by, [('nosoftware', '0.0.0')])
         self.assertEqual(self.nwbfile.keywords, ('these', 'are', 'keywords'))
         self.assertEqual(self.nwbfile.timestamps_reference_time, self.ref_time)
 
