@@ -33,7 +33,7 @@ from pynwb import NWBHDF5IO, NWBFile, TimeSeries
 nwbfile = NWBFile(
     session_description="demonstrate adding to an NWB file",
     identifier="NWB123",
-    session_start_time=datetime.datetime.now(),
+    session_start_time=datetime.datetime.now(datetime.timezone.utc),
 )
 
 filename = "nwbfile.nwb"
@@ -91,7 +91,7 @@ with NWBHDF5IO(filename, "r") as io:
 nwbfile = NWBFile(
     session_description="demonstrate export of an NWB file",
     identifier="NWB123",
-    session_start_time=datetime.datetime.now(),
+    session_start_time=datetime.datetime.now(datetime.timezone.utc),
 )
 data1 = list(range(100, 200, 10))
 timestamps1 = np.arange(10, dtype=float)

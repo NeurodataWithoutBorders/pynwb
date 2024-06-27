@@ -245,7 +245,7 @@ class TestAppend(TestCase):
     def setUp(self):
         self.nwbfile = NWBFile(session_description='hi',
                                identifier='hi',
-                               session_start_time=datetime(1970, 1, 1, 12))
+                               session_start_time=datetime(1970, 1, 1, 12, tzinfo=tzutc()))
         self.path = "test_append.nwb"
 
     def tearDown(self):
@@ -312,7 +312,7 @@ class TestH5DataIO(TestCase):
     def setUp(self):
         self.nwbfile = NWBFile(session_description='a',
                                identifier='b',
-                               session_start_time=datetime(1970, 1, 1, 12))
+                               session_start_time=datetime(1970, 1, 1, 12, tzinfo=tzutc()))
         self.path = "test_pynwb_io_hdf5_h5dataIO.h5"
 
     def tearDown(self):
