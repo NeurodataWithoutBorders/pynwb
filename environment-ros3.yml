@@ -13,11 +13,11 @@ dependencies:
   - python-dateutil==2.9.0
   - setuptools
   - pytest==7.4.3  # pin to pytest < 8 because of incompatibilities to be addressed
-  - fsspec==2024.6.2
+  - fsspec==2024.6.0
   - requests==2.32.3
   - aiohttp==3.9.5
   - pip
   - pip:
     - remfile==0.1.13
-    - dandi==0.62.2  # NOTE: dandi is not available on conda for osx-arm64
+    - dandi==0.62.1  # NOTE: dandi is not available on conda for osx-arm64
 
