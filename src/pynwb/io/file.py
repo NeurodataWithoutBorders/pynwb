@@ -97,7 +97,7 @@ class NWBFileMap(ObjectMapper):
                             'session_id',
                             'slices',
                             'source_script',
-                            'generated_by',
+                            'was_generated_by',
                             'stimulus',
                             'surgery',
                             'virus']
@@ -211,15 +211,6 @@ class NWBFileMap(ObjectMapper):
         ret = None
         if isinstance(container.related_publications, str):
             ret = (container.related_publications,)
-        return ret
-
-    @ObjectMapper.constructor_arg('generated_by')
-    def generated_by_carg(self, builder, manager):
-        ret = None
-        generated_by_bldr = builder['general'].get('generated_by')
-        if generated_by_bldr is not None:
-            if isinstance(generated_by_bldr.data, tuple):
-                ret = [generated_by_bldr.data]
         return ret
 
 
