@@ -6,17 +6,18 @@ channels:
 dependencies:
   - python==3.12
   - h5py==3.11.0
-  - hdmf==3.14.0
+  - hdmf==3.14.1
   - matplotlib==3.8.0
   - numpy==1.26.4
   - pandas==2.2.2
   - python-dateutil==2.9.0
   - setuptools
-  - pytest==7.4.3 # This is for the upcoming pytest update
-  - dandi==0.60.0  # NOTE: dandi does not support osx-arm64
-  - fsspec==2024.2.0
-  - requests==2.31.0
-  - aiohttp==3.9.3
+  - pytest==7.4.3  # pin to pytest < 8 because of incompatibilities to be addressed
+  - fsspec==2024.6.0
+  - requests==2.32.3
+  - aiohttp==3.9.5
   - pip
   - pip:
-    - remfile==0.1.11
+    - remfile==0.1.13
+    - dandi==0.62.1  # NOTE: dandi is not available on conda for osx-arm64
+
