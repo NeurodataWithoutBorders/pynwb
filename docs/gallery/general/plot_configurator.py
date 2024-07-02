@@ -69,8 +69,8 @@ from pynwb.file import Subject
 # the value of the fields are wrapped and then validated to see if it is a
 # permissible value in their respective :py:class:`~hdmf.term_set.TermSet`.
 
-dir_path = os.path.dirname(os.path.abspath(__file__))
-yaml_file = os.path.join(dir_path, 'nwb_gallery_config.yaml')
+dir_path = os.getcwd()
+yaml_file = os.path.join(dir_path, 'docs/gallery/general/nwb_gallery_config.yaml')
 load_type_config(config_path=yaml_file)
 
 session_start_time = datetime(2018, 4, 25, hour=2, minute=30, second=3, tzinfo=tz.gettz("US/Pacific"))
