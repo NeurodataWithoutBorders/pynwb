@@ -55,6 +55,7 @@ import os
 from pynwb import NWBFile, get_loaded_type_config, load_type_config, unload_type_config
 from pynwb.file import Subject
 
+####################################
 # How to use a Configuration file
 # -------------------------------
 # As mentioned prior, the first step after creating a configuration file is
