@@ -75,8 +75,6 @@ For example, ``https://github.com/NeurodataWithoutBorders/pynwb/compare/dev...re
 
 
 
-4. After the pull request has been reviewed and merged, pull changes to your local repository for the next steps.
-
 
 -------------------------------------
 Publish release on PyPI: Step-by-step
@@ -165,7 +163,7 @@ Publish release on PyPI: Step-by-step
       python -c "import pynwb; print(pynwb.__version__)"
 
 
-10. Cleanup
+12. Cleanup
 
   On bash/zsh:
 
