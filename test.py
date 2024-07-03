@@ -74,7 +74,10 @@ def _import_from_file(script):
     spec = importlib.util.spec_from_file_location(os.path.basename(script), script)
     module = importlib.util.module_from_spec(spec)
     sys.modules[modname] = module
+    cwd = os.getcwd()
+    os.chdir(os.path.dirname(script))
     spec.loader.exec_module(module)
+    os.chdir(cwd)
 
 
 warning_re = re.compile("Parent module '[a-zA-Z0-9]+' not found while handling absolute import")
@@ -255,51 +258,51 @@ def run_integration_tests(verbose=True):
 def clean_up_tests():
     # remove files generated from running example files
     files_to_remove = [
-        "advanced_io_example.nwb",
-        "basic_alternative_custom_write.nwb",
-        "basic_iterwrite_example.nwb",
-        "basic_sparse_iterwrite_*.nwb",
-        "basic_sparse_iterwrite_*.npy",
-        "basics_tutorial.nwb",
-        "behavioral_tutorial.nwb",
-        "brain_observatory.nwb",
-        "cache_spec_example.nwb",
-        "ecephys_tutorial.nwb",
-        "ecog.extensions.yaml",
-        "ecog.namespace.yaml",
-        "ex_test_icephys_file.nwb",
-        "example_timeintervals_file.nwb",
-        "exported_nwbfile.nwb",
-        "external_linkcontainer_example.nwb",
-        "external_linkdataset_example.nwb",
-        "external1_example.nwb",
-        "external2_example.nwb",
-        "icephys_example.nwb",
-        "icephys_pandas_testfile.nwb",
-        "images_tutorial.nwb",
-        "manifest.json",
-        "mylab.extensions.yaml",
-        "mylab.namespace.yaml",
-        "nwbfile.nwb",
-        "ophys_tutorial.nwb",
-        "processed_data.nwb",
-        "raw_data.nwb",
-        "scratch_analysis.nwb",
-        "sub-P11HMH_ses-20061101_ecephys+image.nwb",
-        "test_edit.nwb",
-        "test_edit2.nwb",
-        "test_cortical_surface.nwb",
-        "test_icephys_file.nwb",
-        "test_multicontainerinterface.extensions.yaml",
-        "test_multicontainerinterface.namespace.yaml",
-        "test_multicontainerinterface.nwb",
+        "docs/gallery/advanced_io/advanced_io_example.nwb",
+        "docs/gallery/advanced_io/basic_alternative_custom_write.nwb",
+        "docs/gallery/advanced_io/basic_iterwrite_example.nwb",
+        "docs/gallery/advanced_io/basic_sparse_iterwrite_*.nwb",
+        "docs/gallery/advanced_io/basic_sparse_iterwrite_*.npy",
+        "docs/gallery/general/basics_tutorial.nwb",
+        "docs/gallery/domain/behavioral_tutorial.nwb",
+        "docs/gallery/advanced_io/brain_observatory.nwb",
+        "docs/gallery/general/cache_spec_example.nwb",
+        "docs/gallery/domain/ecephys_tutorial.nwb",
+        "docs/gallery/general/ecog.extensions.yaml",
+        "docs/gallery/general/ecog.namespace.yaml",
+        "docs/gallery/domain/ex_test_icephys_file.nwb",
+        "docs/gallery/general/example_timeintervals_file.nwb",
+        "docs/gallery/general/exported_nwbfile.nwb",
+        "docs/gallery/advanced_io/external_linkcontainer_example.nwb",
+        "docs/gallery/advanced_io/external_linkdataset_example.nwb",
+        "docs/gallery/advanced_io/external1_example.nwb",
+        "docs/gallery/advanced_io/external2_example.nwb",
+        "docs/gallery/domain/icephys_example.nwb",
+        "docs/gallery/domain/icephys_pandas_testfile.nwb",
+        "docs/gallery/domain/images_tutorial.nwb",
+        "docs/gallery/general/manifest.json",
+        "docs/gallery/advanced_io/mylab.extensions.yaml",
+        "docs/gallery/advanced_io/mylab.namespace.yaml",
+        "docs/gallery/general/nwbfile.nwb",
+        "docs/gallery/domain/ophys_tutorial.nwb",
+        "docs/gallery/general/processed_data.nwb",
+        "docs/gallery/general/raw_data.nwb",
+        "docs/gallery/general/scratch_analysis.nwb",
+        "docs/gallery/general/sub-P11HMH_ses-20061101_ecephys+image.nwb",
+        "docs/gallery/advanced_io/test_edit.nwb",
+        "docs/gallery/advanced_io/test_edit2.nwb",
+        "docs/gallery/general/test_cortical_surface.nwb",
+        "docs/gallery/domain/test_icephys_file.nwb",
+        "docs/gallery/general/test_multicontainerinterface.extensions.yaml",
+        "docs/gallery/general/test_multicontainerinterface.namespace.yaml",
+        "docs/gallery/general/test_multicontainerinterface.nwb",
     ]
     for f in files_to_remove:
         for name in glob.glob(f):
             if os.path.exists(name):
                 os.remove(name)
 
-    shutil.rmtree("zarr_tutorial.nwb.zarr")
+    shutil.rmtree("docs/gallery/advanced_io/zarr_tutorial.nwb.zarr")
 
 
 def main():
