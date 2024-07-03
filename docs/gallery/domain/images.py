@@ -199,7 +199,7 @@ nwbfile.add_acquisition(behavior_external_file)
 # represent x and y. The third dimension has length 4 and represents the RGBA value.
 #
 
-img = Image.open("logo_pynwb.png")  # an example image
+img = Image.open("docs/source/figures/logo_pynwb.png")  # an example image
 
 rgba_logo = RGBAImage(
     name="pynwb_RGBA_logo",
