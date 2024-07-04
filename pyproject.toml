@@ -9,7 +9,8 @@ authors = [
   { name="Ryan Ly", email="rly@lbl.gov" },
   { name="Oliver Ruebel", email="oruebel@lbl.gov" },
   { name="Ben Dichter", email="ben.dichter@gmail.com" },
-  { name="Matthew Avaylon", email="mavaylon@lbl.gov" }
+  { name="Matthew Avaylon", email="mavaylon@lbl.gov" },
+  { name="Stephanie Prince", email="smprince@lbl.gov" },
 ]
 description= "Package for working with Neurodata stored in the NWB format."
 readme = "README.rst"

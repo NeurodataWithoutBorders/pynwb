@@ -118,7 +118,7 @@ class ElectricalSeriesConstructor(TestCase):
 
     def test_get_data_in_units(self):
         samples = 100
-        channels = 2
+        channels = 5
         conversion = 10.0
         offset = 3.0
         channel_conversion = np.random.rand(channels)
