@@ -38,8 +38,19 @@ class NWBDatasetSpecTests(TestCase):
             ret = NWBDatasetSpec.build_const_args(dataset_spec_dict)
             assert ret == dict(name=name, dtype="float", doc="doc")
 
+            dataset_spec_dict = dict(name=name, dtype="float", value=0.0, doc="doc")
+            obj = NWBDatasetSpec.build_spec(dataset_spec_dict)
+            assert obj.name == name
+            assert obj.dtype == "float"
+            assert obj.doc == "doc"
+            assert getattr(obj, "value") is None
+
         dataset_spec_dict = dict(name="warnme", dtype="float", value=0.0, doc="doc")
         msg = "Unexpected keys ['value'] in spec {'name': 'warnme', 'dtype': 'float32, 'value': 0.0, 'doc': 'doc.'}"
+        ret = dataset_spec_dict
         with self.assertWarnsWith(UserWarning, msg):
-            ret = NWBDatasetSpec.build_const_args(dataset_spec_dict)
-            assert ret == dict(name="warnme", dtype="float", value=0.0, doc="doc")
+            obj = NWBDatasetSpec.build_spec(dataset_spec_dict)
+            assert obj.name == name
+            assert obj.dtype == "float"
+            assert obj.doc == "doc"
+            assert getattr(obj, "value") is None
