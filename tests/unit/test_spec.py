@@ -42,4 +42,4 @@ class NWBDatasetSpecTests(TestCase):
         msg = "Unexpected keys ['value'] in spec {'name': 'warnme', 'dtype': 'float32, 'value': 0.0, 'doc': 'doc.'}"
         with self.assertWarnsWith(UserWarning, msg):
             ret = NWBDatasetSpec.build_const_args(dataset_spec_dict)
-            assert ret == dict(name="warnme", dtype="float", doc="doc")
+            assert ret == dict(name="warnme", dtype="float", value=0.0, doc="doc")
