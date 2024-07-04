@@ -141,6 +141,19 @@ class NWBDatasetSpec(BaseStorageOverride, DatasetSpec):
             kwargs['data_type_inc'] = 'NWBData'
         super().__init__(**kwargs)
 
+    @classmethod
+    def build_const_args(cls, spec_dict):
+        ''' Build constructor arguments for this Spec class from a dictionary '''
+        # a fixed value is present in some NWB dataset specs but was never supported in the HDMF API
+        # and will be deprecated in the HDMF schema language 3.0, so remove it from the input dict
+        # to prevent the warning of unexpected keys in spec
+        if (
+            "value" in spec_dict and
+            spec_dict.get("name") in ("bias_current", "bridge_balance", "capacitance_compensation")
+        ):
+            spec_dict.pop("value")
+        super().build_const_args(spec_dict)
+
 
 _group_docval = __swap_inc_def(GroupSpec)
 
