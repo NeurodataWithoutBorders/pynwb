@@ -32,6 +32,7 @@ class NWBRefSpecTests(TestCase):
 class NWBDatasetSpecTests(TestCase):
 
     def test_special_value_skip(self):
+        """Test whether value is removed from constructor kwargs for an exception DatasetSpec."""
         remove_value_names = ["bias_current", "bridge_balance", "capacitance_compensation"]
         for name in remove_value_names:
             dataset_spec_dict = dict(name=name, dtype="float", value=0.0, doc="doc")
@@ -45,6 +46,8 @@ class NWBDatasetSpecTests(TestCase):
             assert obj.doc == "doc"
             assert not hasattr(obj, "value")
 
+    def test_extra_value_warn(self):
+        """Test whether warning appears when adding "value" to a non-exception DatasetSpec."""
         dataset_spec_dict = dict(name="warnme", dtype="float", value=0.0, doc="doc")
         ret = NWBDatasetSpec.build_const_args(dataset_spec_dict)
         assert ret == dataset_spec_dict
