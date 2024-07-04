@@ -152,7 +152,7 @@ class NWBDatasetSpec(BaseStorageOverride, DatasetSpec):
             spec_dict.get("name") in ("bias_current", "bridge_balance", "capacitance_compensation")
         ):
             spec_dict.pop("value")
-        super().build_const_args(spec_dict)
+        return super().build_const_args(spec_dict)
 
 
 _group_docval = __swap_inc_def(GroupSpec)
