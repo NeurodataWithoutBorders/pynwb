@@ -1,16 +1,19 @@
 # PyNWB Changelog
 
+## PyNWB 2.8.2 (Upcoming)
+
+### Documentation and tutorial enhancements
+- Added pre-release pull request instructions to release process documentation @stephprince [#1928](https://github.com/NeurodataWithoutBorders/pynwb/pull/1928)
+
 ## PyNWB 2.8.1 (July 3, 2024)
 
 ### Documentation and tutorial enhancements
 - Simplified the introduction to NWB tutorial. @rly [#1914](https://github.com/NeurodataWithoutBorders/pynwb/pull/1914)
 - Simplified the ecephys and ophys tutorials. [#1915](https://github.com/NeurodataWithoutBorders/pynwb/pull/1915)
 - Add comments to `src/pynwb/io/file.py` to improve developer documentation. @rly [#1925](https://github.com/NeurodataWithoutBorders/pynwb/pull/1925)
-- Added pre-release pull request instructions to release process documentation @stephprince [#1928](https://github.com/NeurodataWithoutBorders/pynwb/pull/1928)
 
 ### Bug fixes
 - Fixed use of `channel_conversion` in `TimeSeries` `get_data_in_units`. @rohanshah [1923](https://github.com/NeurodataWithoutBorders/pynwb/pull/1923)
-
 
 ## PyNWB 2.8.0 (May 28, 2024)
 
