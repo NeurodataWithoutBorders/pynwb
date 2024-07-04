@@ -43,7 +43,7 @@ class NWBDatasetSpecTests(TestCase):
             assert obj.name == name
             assert obj.dtype == "float"
             assert obj.doc == "doc"
-            assert getattr(obj, "value") is None
+            assert not hasattr(obj, "value")
 
         dataset_spec_dict = dict(name="warnme", dtype="float", value=0.0, doc="doc")
         msg = "Unexpected keys ['value'] in spec {'name': 'warnme', 'dtype': 'float32, 'value': 0.0, 'doc': 'doc.'}"
@@ -53,4 +53,4 @@ class NWBDatasetSpecTests(TestCase):
             assert obj.name == name
             assert obj.dtype == "float"
             assert obj.doc == "doc"
-            assert getattr(obj, "value") is None
+            assert not hasattr(obj, "value")
