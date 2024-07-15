@@ -554,7 +554,7 @@ class TestNWBHDF5IO(TestCase):
         # write the example file
         with NWBHDF5IO(self.path, 'w') as io:
             io.write(self.nwbfile)
-        # remove the version attribute
+        # set the version attribute <2.0
         with File(self.path, mode='a') as io:
             io.attrs['nwb_version'] = "1.0.5"
         self.assertFalse(NWBHDF5IO.can_read(self.path))
