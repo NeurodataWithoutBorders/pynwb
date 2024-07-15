@@ -269,7 +269,11 @@ class NWBHDF5IO(_HDF5IO):
             return False
         try:
             with h5py.File(path, "r") as file:   # path is HDF5 file
-                return get_nwbfile_version(file)[1][0] >= 2    # Major version of NWB >= 2
+                version_info = get_nwbfile_version(file)
+                if version_info[0] is None:
+                    return False
+                else:
+                    return version_info[1][0] >= 2    # Major version of NWB >= 2
         except IOError:
             return False
 
