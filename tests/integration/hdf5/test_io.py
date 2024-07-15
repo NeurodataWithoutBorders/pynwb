@@ -550,7 +550,7 @@ class TestNWBHDF5IO(TestCase):
         # assert can_read returns False
         self.assertFalse(NWBHDF5IO.can_read(self.path))
 
-    def can_read_file_old_version(self):
+    def test_can_read_file_old_version(self):
         # write the example file
         with NWBHDF5IO(self.path, 'w') as io:
             io.write(self.nwbfile)
