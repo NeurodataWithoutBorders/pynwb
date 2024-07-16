@@ -9,7 +9,8 @@ authors = [
   { name="Ryan Ly", email="rly@lbl.gov" },
   { name="Oliver Ruebel", email="oruebel@lbl.gov" },
   { name="Ben Dichter", email="ben.dichter@gmail.com" },
-  { name="Matthew Avaylon", email="mavaylon@lbl.gov" }
+  { name="Matthew Avaylon", email="mavaylon@lbl.gov" },
+  { name="Stephanie Prince", email="smprince@lbl.gov" },
 ]
 description= "Package for working with Neurodata stored in the NWB format."
 readme = "README.rst"
@@ -33,7 +34,7 @@ classifiers = [
 ]
 dependencies = [
     "h5py>=2.10",
-    "hdmf>=3.12.2",
+    "hdmf>=3.14.0",
     "numpy>=1.18, <2.0", # pin below 2.0 until HDMF supports numpy 2.0
     "pandas>=1.1.5",
     "python-dateutil>=2.7.3",
@@ -55,12 +56,24 @@ source = "vcs"
 # src/pynwb/__init__.py to set `__version__` (from _version.py).
 version-file = "src/pynwb/_version.py"
 
+[tool.hatch.build.targets.sdist]
+exclude = [
+    ".git*",
+    ".codecov.yml",
+    ".readthedocs.yaml",
+]
+
 [tool.hatch.build.targets.wheel]
 packages = ["src/pynwb"]
+exclude = [
+    ".git*",
+    ".codecov.yml",
+    ".readthedocs.yaml",
+]
 
 [tool.codespell]
 skip = "htmlcov,.git,.mypy_cache,.pytest_cache,.coverage,*.pdf,*.svg,venvs,.tox,nwb-schema,./docs/_build/*,*.ipynb"
-ignore-words-list = "optin,potatos"
+ignore-words-list = "optin,potatos,assertin"
 
 [tool.coverage.run]
 branch = true

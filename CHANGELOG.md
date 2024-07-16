@@ -1,6 +1,31 @@
 # PyNWB Changelog
 
-## PyNWB 2.7.0 (Upcoming)
+## PyNWB 2.8.2 (Upcoming)
+
+### Documentation and tutorial enhancements
+- Added pre-release pull request instructions to release process documentation @stephprince [#1928](https://github.com/NeurodataWithoutBorders/pynwb/pull/1928)
+
+## PyNWB 2.8.1 (July 3, 2024)
+
+### Documentation and tutorial enhancements
+- Simplified the introduction to NWB tutorial. @rly [#1914](https://github.com/NeurodataWithoutBorders/pynwb/pull/1914)
+- Simplified the ecephys and ophys tutorials. [#1915](https://github.com/NeurodataWithoutBorders/pynwb/pull/1915)
+- Add comments to `src/pynwb/io/file.py` to improve developer documentation. @rly [#1925](https://github.com/NeurodataWithoutBorders/pynwb/pull/1925)
+
+### Bug fixes
+- Fixed use of `channel_conversion` in `TimeSeries` `get_data_in_units`. @rohanshah [1923](https://github.com/NeurodataWithoutBorders/pynwb/pull/1923)
+
+## PyNWB 2.8.0 (May 28, 2024)
+
+### Enhancements and minor changes
+- Set rate default value inside `mock_ElectricalSeries` to avoid having to set `rate=None` explicitly when passing timestamps. @h-mayorquin [#1894](https://github.com/NeurodataWithoutBorders/pynwb/pull/1894)
+- Integrate validation through the `TypeConfigurator`. @mavaylon1 [#1829](https://github.com/NeurodataWithoutBorders/pynwb/pull/1829)
+- Exposed `aws_region` to `NWBHDF5IO`. @rly [#1903](https://github.com/NeurodataWithoutBorders/pynwb/pull/1903)
+
+### Bug fixes
+- Revert changes in PyNWB 2.7.0 that allow datetimes without a timezone and without a time while issues with DANDI upload of NWB files missing timezone are resolved. @rly [#1908](https://github.com/NeurodataWithoutBorders/pynwb/pull/1908)
+
+## PyNWB 2.7.0 (May 2, 2024)
 
 ### Enhancements and minor changes
 - Added `bounds` field to `SpatialSeries` to set optional boundary range (min, max) for each dimension of data. @mavaylon1 [#1869](https://github.com/NeurodataWithoutBorders/pynwb/pull/1869/files)
@@ -321,7 +346,7 @@
 
 ### Tutorial enhancements:
 - Added new tutorial for intracellular electrophysiology to describe the use of the new metadata tables
-  and declared the previous tutoral using ``SweepTable`` as deprecated.  @oruebel (#1349)
+  and declared the previous tutorial using ``SweepTable`` as deprecated.  @oruebel (#1349)
 - Added new tutorial for querying intracellular electrophysiology metadata
   (``docs/gallery/domain/plot_icephys_pandas.py``). @oruebel (#1349, #1383)
 - Added thumbnails for tutorials to improve presentation of online docs.  @oruebel (#1349)

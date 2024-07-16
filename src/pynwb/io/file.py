@@ -1,4 +1,4 @@
-import datetime
+from dateutil.parser import parse as dateutil_parse
 
 from hdmf.build import ObjectMapper
 
@@ -6,22 +6,6 @@ from .. import register_map
 from ..file import NWBFile, Subject
 from ..core import ScratchData
 from .utils import get_nwb_version
-
-
-def parse_datetime(datestr):
-    """Parse an ISO 8601 date string into a datetime object or a date object.
-
-    If the date string does not contain a time component, then parse into a date object.
-
-    :param datestr: str
-    :return: datetime.datetime or datetime.date
-    """
-    if isinstance(datestr, bytes):
-        datestr = datestr.decode("utf-8")
-    dt = datetime.datetime.fromisoformat(datestr)
-    if "T" not in datestr:
-        dt = dt.date()
-    return dt
 
 
 @register_map(NWBFile)
@@ -143,6 +127,15 @@ class NWBFileMap(ObjectMapper):
 
     @ObjectMapper.object_attr('scratch_datas')
     def scratch_datas(self, container, manager):
+        """Set the value for the 'scratch_datas' spec on NWBFile to a list of ScratchData objects.
+
+        Used when writing (building) the NWBFile container to a file.
+
+        The 'scratch' group can contain both groups and datasets. This mapping function
+        is used when writing the value for the 'scratch_datas' spec (ScratchData type
+        -- see __init__ above). The value is set to a list of all ScratchData
+        objects in the 'scratch' field of the NWBFile container.
+        """
         scratch = container.scratch
         ret = list()
         for s in scratch.values():
@@ -152,6 +145,15 @@ class NWBFileMap(ObjectMapper):
 
     @ObjectMapper.object_attr('scratch_containers')
     def scratch_containers(self, container, manager):
+        """Set the value for the 'scratch_containers' spec on NWBFile to a list of non-ScratchData objects.
+
+        Used when writing (building) the NWBFile container to a file.
+
+        The 'scratch' group can contain both groups and datasets. This mapping function
+        is used when writing the value for the 'scratch_containers' spec (NWBContainers
+        and DynamicTable type -- see __init__ above). The value is set to a list of all non-ScratchData
+        objects in the 'scratch' field of the NWBFile container.
+        """
         scratch = container.scratch
         ret = list()
         for s in scratch.values():
@@ -161,6 +163,14 @@ class NWBFileMap(ObjectMapper):
 
     @ObjectMapper.constructor_arg('scratch')
     def scratch(self, builder, manager):
+        """Set the constructor arg for 'scratch' to a tuple of objects.
+
+        Used when constructing the NWBFile container from a written file.
+
+        The 'scratch' group can contain both groups and datasets. This mapping function
+        is used to construct the contained groups and datasets and put them into a single
+        field 'scratch' on the NWBFile container for user convenience.
+        """
         scratch = builder.get('scratch')
         ret = list()
         if scratch is not None:
@@ -172,28 +182,54 @@ class NWBFileMap(ObjectMapper):
 
     @ObjectMapper.constructor_arg('session_start_time')
     def dateconversion(self, builder, manager):
+        """Set the constructor arg for 'session_start_time' to a datetime object.
+
+        Used when constructing the NWBFile container from a written file.
+
+        Dates are read into builders as strings and are parsed into datetime objects
+        for user convenience and consistency with how they are written.
+        """
         datestr = builder.get('session_start_time').data
-        dt = parse_datetime(datestr)
-        return dt
+        date = dateutil_parse(datestr)
+        return date
 
     @ObjectMapper.constructor_arg('timestamps_reference_time')
     def dateconversion_trt(self, builder, manager):
+        """Set the constructor arg for 'timestamps_reference_time' to a datetime object.
+
+        Used when constructing the NWBFile container from a written file.
+
+        Dates are read into builders as strings and are parsed into datetime objects
+        for user convenience and consistency with how they are written.
+        """
         datestr = builder.get('timestamps_reference_time').data
-        dt = parse_datetime(datestr)
-        return dt
+        date = dateutil_parse(datestr)
+        return date
 
     @ObjectMapper.constructor_arg('file_create_date')
     def dateconversion_list(self, builder, manager):
-        datestr = builder.get('file_create_date').data
-        dates = list(map(parse_datetime, datestr))
-        return dates
+        """Set the constructor arg for 'file_create_date' to a datetime object.
 
-    @ObjectMapper.constructor_arg('file_name')
-    def name(self, builder, manager):
-        return builder.name
+        Used when constructing the NWBFile container from a written file.
+
+        Dates are read into builders as strings and are parsed into datetime objects
+        for user convenience and consistency with how they are written.
+        """
+        datestr = builder.get('file_create_date').data
+        dates = list(map(dateutil_parse, datestr))
+        return dates
 
     @ObjectMapper.constructor_arg('experimenter')
     def experimenter_carg(self, builder, manager):
+        """Set the constructor arg for 'experimenter' to a tuple if the builder value is a string.
+
+        Used when constructing the NWBFile container from a written file.
+
+        In early versions of the NWB 2 schema, 'experimenter' was specified as a string.
+        Then it was changed to be a 1-D array of strings. This mapping function is necessary
+        to allow reading of both data where 'experimenter' was specified as a string and data
+        where 'experimenter' was specified as an array.
+        """
         ret = None
         exp_bldr = builder['general'].get('experimenter')
         if exp_bldr is not None:
@@ -205,6 +241,14 @@ class NWBFileMap(ObjectMapper):
 
     @ObjectMapper.object_attr('experimenter')
     def experimenter_obj_attr(self, container, manager):
+        """Change the value for the field 'experimenter' on NWBFile to a tuple if it is a string.
+
+        Used when writing (building) the NWBFile container to a file.
+
+        In early versions of the NWB 2 schema, 'experimenter' was specified as a string.
+        Then it was changed to be a 1-D array of strings. This mapping function is necessary
+        for writing a valid 'experimenter' array if it is a string in the NWBFile container.
+        """
         ret = None
         if isinstance(container.experimenter, str):
             ret = (container.experimenter,)
@@ -212,6 +256,15 @@ class NWBFileMap(ObjectMapper):
 
     @ObjectMapper.constructor_arg('related_publications')
     def publications_carg(self, builder, manager):
+        """Set the constructor arg for 'related_publications' to a tuple if the builder value is a string.
+
+        Used when constructing the NWBFile container from a written file.
+
+        In early versions of the NWB 2 schema, 'related_publications' was specified as a string.
+        Then it was changed to be a 1-D array of strings. This mapping function is necessary
+        to allow reading of both data where 'related_publications' was specified as a string and data
+        where 'related_publications' was specified as an array.
+        """
         ret = None
         pubs_bldr = builder['general'].get('related_publications')
         if pubs_bldr is not None:
@@ -223,6 +276,14 @@ class NWBFileMap(ObjectMapper):
 
     @ObjectMapper.object_attr('related_publications')
     def publication_obj_attr(self, container, manager):
+        """Change the value for the field 'related_publications' on NWBFile to a tuple if it is a string.
+
+        Used when writing (building) the NWBFile container to a file.
+
+        In early versions of the NWB 2 schema, 'related_publications' was specified as a string.
+        Then it was changed to be a 1-D array of strings. This mapping function is necessary
+        for writing a valid 'related_publications' array if it is a string in the NWBFile container.
+        """
         ret = None
         if isinstance(container.related_publications, str):
             ret = (container.related_publications,)
@@ -234,16 +295,35 @@ class SubjectMap(ObjectMapper):
 
     @ObjectMapper.constructor_arg('date_of_birth')
     def dateconversion(self, builder, manager):
+        """Set the constructor arg for 'date_of_birth' to a datetime object.
+
+        Used when constructing the Subject container from a written file.
+
+        Dates are read into builders as strings and are parsed into datetime objects
+        for user convenience and consistency with how they are written.
+        """
         dob_builder = builder.get('date_of_birth')
         if dob_builder is None:
             return
         else:
             datestr = dob_builder.data
-            dt = parse_datetime(datestr)
-            return dt
+            date = dateutil_parse(datestr)
+            return date
 
     @ObjectMapper.constructor_arg("age__reference")
     def age_reference_none(self, builder, manager):
+        """Set the constructor arg for 'age__reference' to "unspecified" for NWB files < 2.6, else "birth".
+
+        Used when constructing the Subject container from a written file.
+
+        NWB schema 2.6.0 introduced a new optional attribute 'reference' on the 'age' dataset with a default
+        value of "birth". When data written with NWB versions < 2.6 are read, 'age__reference' is set to
+        "unspecified" in the Subject constructor. "unspecified" is a special non-None placeholder value
+        that is handled specially in Subject.__init__ to distinguish it from no value being provided by the
+        user. When data written with NWB versions >= 2.6 are read, 'age__reference' is set to the default
+        value, "birth", in the Subject constructor (this is not strictly necessary because Subject.__init__
+        has default value "birth" for 'age__reference').
+        """
         age_builder = builder.get("age")
         age_reference = None
         if age_builder is not None:

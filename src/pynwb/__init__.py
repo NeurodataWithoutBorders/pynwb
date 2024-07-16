@@ -12,12 +12,43 @@ from hdmf.backends.io import HDMFIO
 from hdmf.backends.hdf5 import HDF5IO as _HDF5IO
 from hdmf.build import BuildManager, TypeMap
 import hdmf.common
+from hdmf.common import load_type_config as hdmf_load_type_config
+from hdmf.common import get_loaded_type_config as hdmf_get_loaded_type_config
+from hdmf.common import unload_type_config as hdmf_unload_type_config
+
 
 CORE_NAMESPACE = 'core'
 
 from .spec import NWBDatasetSpec, NWBGroupSpec, NWBNamespace  # noqa E402
 from .validate import validate  # noqa: F401, E402
 
+
+@docval({'name': 'config_path', 'type': str, 'doc': 'Path to the configuration file.'},
+        {'name': 'type_map', 'type': TypeMap, 'doc': 'The TypeMap.', 'default': None},
+        is_method=False)
+def load_type_config(**kwargs):
+    """
+    This method will either load the default config or the config provided by the path.
+    """
+    config_path = kwargs['config_path']
+    type_map = kwargs['type_map'] or get_type_map()
+
+    hdmf_load_type_config(config_path=config_path, type_map=type_map)
+
+@docval({'name': 'type_map', 'type': TypeMap, 'doc': 'The TypeMap.', 'default': None},
+        is_method=False)
+def get_loaded_type_config(**kwargs):
+    type_map = kwargs['type_map'] or get_type_map()
+    return hdmf_get_loaded_type_config(type_map=type_map)
+
+@docval({'name': 'type_map', 'type': TypeMap, 'doc': 'The TypeMap.', 'default': None},
+        is_method=False)
+def unload_type_config(**kwargs):
+    """
+    Remove validation.
+    """
+    type_map = kwargs['type_map'] or get_type_map()
+    hdmf_unload_type_config(type_map=type_map)
 
 def __get_resources():
     try:
@@ -254,16 +285,11 @@ class NWBHDF5IO(_HDF5IO):
             {'name': 'extensions', 'type': (str, TypeMap, list),
              'doc': 'a path to a namespace, a TypeMap, or a list consisting paths to namespaces and TypeMaps',
              'default': None},
-            {'name': 'file', 'type': [h5py.File, 'S3File'], 'doc': 'a pre-existing h5py.File object', 'default': None},
-            {'name': 'comm', 'type': 'Intracomm', 'doc': 'the MPI communicator to use for parallel I/O',
-             'default': None},
-            {'name': 'driver', 'type': str, 'doc': 'driver for h5py to use when opening HDF5 file', 'default': None},
-            {'name': 'herd_path', 'type': str, 'doc': 'The path to the HERD',
-             'default': None},)
+            *get_docval(_HDF5IO.__init__, "file", "comm", "driver", "aws_region", "herd_path"),)
     def __init__(self, **kwargs):
-        path, mode, manager, extensions, load_namespaces, file_obj, comm, driver, herd_path =\
+        path, mode, manager, extensions, load_namespaces, file_obj, comm, driver, aws_region, herd_path =\
             popargs('path', 'mode', 'manager', 'extensions', 'load_namespaces',
-                    'file', 'comm', 'driver', 'herd_path', kwargs)
+                    'file', 'comm', 'driver', 'aws_region', 'herd_path', kwargs)
         # Define the BuildManager to use
         io_modes_that_create_file = ['w', 'w-', 'x']
         if mode in io_modes_that_create_file or manager is not None or extensions is not None:
@@ -271,7 +297,7 @@ class NWBHDF5IO(_HDF5IO):
 
         if load_namespaces:
             tm = get_type_map()
-            super().load_namespaces(tm, path, file=file_obj, driver=driver)
+            super().load_namespaces(tm, path, file=file_obj, driver=driver, aws_region=aws_region)
             manager = BuildManager(tm)
 
             # XXX: Leaving this here in case we want to revert to this strategy for
@@ -289,7 +315,7 @@ class NWBHDF5IO(_HDF5IO):
                 manager = get_manager()
         # Open the file
         super().__init__(path, manager=manager, mode=mode, file=file_obj, comm=comm,
-                         driver=driver, herd_path=herd_path)
+                         driver=driver, aws_region=aws_region, herd_path=herd_path)
 
     @property
     def nwb_version(self):
