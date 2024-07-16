@@ -5,6 +5,9 @@
 ### Documentation and tutorial enhancements
 - Added pre-release pull request instructions to release process documentation @stephprince [#1928](https://github.com/NeurodataWithoutBorders/pynwb/pull/1928)
 
+### Bug fixes
+- Fixed bug in how `ElectrodeGroup.__init__` validates its `position` argument. @oruebel [#1770](https://github.com/NeurodataWithoutBorders/pynwb/pull/1770)
+
 ## PyNWB 2.8.1 (July 3, 2024)
 
 ### Documentation and tutorial enhancements
@@ -42,7 +45,6 @@
 - Updated testing to not install in editable mode and not run `coverage` by default. [#1897](https://github.com/NeurodataWithoutBorders/pynwb/pull/1897)
 
 ### Bug fixes
-- Fixed bug in how `ElectrodeGroup.__init__` validates its `position` argument. @oruebel [#1770](https://github.com/NeurodataWithoutBorders/pynwb/pull/1770)
 - Fix bug with reading file with linked `TimeSeriesReferenceVectorData` @rly [#1865](https://github.com/NeurodataWithoutBorders/pynwb/pull/1865)
 - Fix bug where extra keyword arguments could not be passed to `NWBFile.add_{x}_column` for use in custom `VectorData` classes. @rly [#1861](https://github.com/NeurodataWithoutBorders/pynwb/pull/1861)
 
