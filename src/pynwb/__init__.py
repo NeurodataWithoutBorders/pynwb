@@ -158,6 +158,10 @@ def load_namespaces(**kwargs):
     namespace_path = getargs('namespace_path', kwargs)
     return __TYPE_MAP.load_namespaces(namespace_path)
 
+def available_namespaces():
+    """Returns all namespaces registered in the namespace catalog"""
+    return __NS_CATALOG.namespaces
+
 
 def _git_cmd(*args) -> subprocess.CompletedProcess:
     """
@@ -183,9 +187,7 @@ def _clone_submodules():
                 'Exception while initializing submodules, got:\n'
                 'stdout:\n' + ('-'*20) + res.stdout + "\nstderr:\n" + ('-'*20) + res.stderr)
     else:  # pragma: no cover
-        raise RuntimeError("'core' is not a registered namespace, and pynwb doesn't seem to be installed"
-                           "from a cloned repository so the submodules can't be initialized. "
-                           "Something has gone terribly wrong. maybe try reinstalling???")
+        raise RuntimeError("Package is not installed from a git repository, can't clone submodules")
 
 
 def _load_core_namespace(final:bool=False):
@@ -234,19 +236,20 @@ def _load_core_namespace(final:bool=False):
     else:
         try:
             _clone_submodules()
-        except (FileNotFoundError, OSError):  # pragma: no cover
-            raise RuntimeError(
-                "'core' is not a registered namespace. If you installed PyNWB locally using a git clone, you need to "
-                "use the --recurse_submodules flag when cloning. See developer installation instructions here: "
-                "https://pynwb.readthedocs.io/en/stable/install_developers.html#install-from-git-repository"
-            )
+        except (FileNotFoundError, OSError, RuntimeError) as e:  # pragma: no cover
+            if 'core' not in available_namespaces():
+                warnings.warn(
+                    "'core' is not a registered namespace. If you installed PyNWB locally using a git clone, "
+                    "you need to use the --recurse_submodules flag when cloning. "
+                    "See developer installation instructions here: "
+                    "https://pynwb.readthedocs.io/en/stable/install_developers.html#install-from-git-repository\n"
+                    f"Got exception: \n{e}"
+                )
         if not final:
             _load_core_namespace(final=True)
 _load_core_namespace()
 
-def available_namespaces():
-    """Returns all namespaces registered in the namespace catalog"""
-    return __NS_CATALOG.namespaces
+
 
 
 # a function to register a container classes with the global map
