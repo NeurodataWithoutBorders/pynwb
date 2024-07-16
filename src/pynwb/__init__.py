@@ -74,11 +74,13 @@ def __get_resources() -> dict:
     __core_ns_file_name = 'nwb.namespace.yaml'
     __schema_dir = 'nwb-schema/core'
     cached_core_typemap = __location_of_this_file / 'core_typemap.pkl'
+    cached_core_nscatalog = __location_of_this_file / 'core_nscatalog.pkl'
     cached_version_indicator = __location_of_this_file / '.core_typemap_version'
 
     ret = dict()
     ret['namespace_path'] = str(__location_of_this_file / __schema_dir / __core_ns_file_name)
     ret['cached_typemap_path'] = str(cached_core_typemap)
+    ret['cached_nscatalog_path'] = str(cached_core_nscatalog)
     ret['cached_version_indicator'] = str(cached_version_indicator)
     return ret
 
@@ -178,11 +180,11 @@ def _clone_submodules():
             'NWB core schema not found in cloned installation, initializing submodules...',
             stacklevel=1)
         res = _git_cmd('submodule', 'update', '--init', '--recursive')
-        if not res.returncode == 0:
+        if not res.returncode == 0:  # pragma: no cover
             raise RuntimeError(
                 'Exception while initializing submodules, got:\n'
                 'stdout:\n' + ('-'*20) + res.stdout + "\nstderr:\n" + ('-'*20) + res.stderr)
-    else:
+    else:  # pragma: no cover
         raise RuntimeError("'core' is not a registered namespace, and pynwb doesn't seem to be installed"
                            "from a cloned repository so the submodules can't be initialized. "
                            "Something has gone terribly wrong. maybe try reinstalling???")
@@ -212,17 +214,22 @@ def _load_core_namespace(final:bool=False):
             cached_version = f.read().strip()
         if cached_version != __version__:
             Path(__resources['cached_typemap_path']).unlink(missing_ok=True)
+            Path(__resources['cached_nscatalog_path']).unlink(missing_ok=True)
 
     # load pickled typemap if we have one
     if os.path.exists(__resources['cached_typemap_path']):
         with open(__resources['cached_typemap_path'], 'rb') as f:
             __TYPE_MAP = pickle.load(f)
+        with open(__resources['cached_nscatalog_path'], 'rb') as f:
+            __NS_CATALOG = pickle.load(f)
 
     # otherwise make a new one and cache it
     elif os.path.exists(__resources['namespace_path']):
         load_namespaces(__resources['namespace_path'])
         with open(__resources['cached_typemap_path'], 'wb') as f:
             pickle.dump(__TYPE_MAP, f, protocol=pickle.HIGHEST_PROTOCOL)
+        with open(__resources['cached_nscatalog_path'], 'wb') as f:
+            pickle.dump(__NS_CATALOG, f, protocol=pickle.HIGHEST_PROTOCOL)
         with open(__resources['cached_version_indicator'], 'w') as f:
             f.write(__version__)
 
@@ -231,7 +238,7 @@ def _load_core_namespace(final:bool=False):
     else:
         try:
             _clone_submodules()
-        except (FileNotFoundError, OSError):
+        except (FileNotFoundError, OSError):  # pragma: no cover
             raise RuntimeError(
                 "'core' is not a registered namespace. If you installed PyNWB locally using a git clone, you need to "
                 "use the --recurse_submodules flag when cloning. See developer installation instructions here: "
