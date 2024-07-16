@@ -362,8 +362,6 @@ class NWBFile(MultiContainerInterface, HERDManager):
              'doc': 'Stimulus template TimeSeries objects belonging to this NWBFile', 'default': None},
             {'name': 'epochs', 'type': TimeIntervals,
              'doc': 'Epoch objects belonging to this NWBFile', 'default': None},
-            {'name': 'epoch_tags', 'type': (tuple, list, set),
-             'doc': 'A sorted list of tags used across all epochs', 'default': set()},
             {'name': 'trials', 'type': TimeIntervals,
              'doc': 'A table containing trial data', 'default': None},
             {'name': 'invalid_times', 'type': TimeIntervals,
@@ -426,7 +424,6 @@ class NWBFile(MultiContainerInterface, HERDManager):
             'stimulus_template',
             'keywords',
             'processing',
-            'epoch_tags',
             'electrodes',
             'electrode_groups',
             'devices',
@@ -526,6 +523,9 @@ class NWBFile(MultiContainerInterface, HERDManager):
         for key, val in args_to_set.items():
             setattr(self, key, val)
 
+        # set epoch_tags to set() on initialization
+        self.fields['epoch_tags'] = self.epoch_tags
+
         self.__obj = None
 
     def all_children(self):
@@ -554,6 +554,10 @@ class NWBFile(MultiContainerInterface, HERDManager):
     def modules(self):
         warn("NWBFile.modules has been replaced by NWBFile.processing.", DeprecationWarning)
         return self.processing
+
+    @property
+    def epoch_tags(self):
+        return set(self.epochs.tags[:]) if self.epochs is not None else set()
 
     @property
     def ec_electrode_groups(self):
@@ -616,7 +620,7 @@ class NWBFile(MultiContainerInterface, HERDManager):
         See :py:meth:`~hdmf.common.table.DynamicTable.add_column` for more details
         """
         self.__check_epochs()
-        self.epoch_tags.update(kwargs.pop('tags', list()))
+        self.fields['epoch_tags'].update(kwargs.pop('tags', list()))
         self.epochs.add_column(**kwargs)
 
     def add_epoch_metadata_column(self, *args, **kwargs):
@@ -639,7 +643,7 @@ class NWBFile(MultiContainerInterface, HERDManager):
         """
         self.__check_epochs()
         if kwargs['tags'] is not None:
-            self.epoch_tags.update(kwargs['tags'])
+            self.fields['epoch_tags'].update(kwargs['tags'])
         self.epochs.add_interval(**kwargs)
 
     def __check_electrodes(self):
