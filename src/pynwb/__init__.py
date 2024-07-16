@@ -98,6 +98,9 @@ hdmf_typemap = hdmf.common.get_type_map()
 __TYPE_MAP = TypeMap(__NS_CATALOG)
 __TYPE_MAP.merge(hdmf_typemap, ns_catalog=True)
 
+# load the core namespace, i.e. base NWB specification
+__resources = __get_resources()
+
 
 @docval({'name': 'extensions', 'type': (str, TypeMap, list),
          'doc': 'a path to a namespace, a TypeMap, or a list consisting of paths to namespaces and TypeMaps',
@@ -200,8 +203,7 @@ def _load_core_namespace(final:bool=False):
     """
     global __NS_CATALOG
     global __TYPE_MAP
-    # load the core namespace, i.e. base NWB specification
-    __resources = __get_resources()
+    global __resources
 
     # if we have a version indicator file and it doesn't match the current version,
     # scrap the cached typemap
