@@ -58,3 +58,19 @@ class TestPyNWBSubmoduleClone(TestCase):
 
         # we should also get the namespaces correctly too
         assert 'core' in pynwb.available_namespaces()
+
+
+class TestPyNWBImportCache(TestCase):
+    def setUp(self) -> None:
+        self.typemap_cache = Path(files('pynwb') / 'core_typemap.pkl')
+
+    def test_cache_exists(self):
+        assert self.typemap_cache.exists()
+
+    def test_typemap_ns_match(self):
+        """
+        The global __NS_CATALOG and the one contained within the global __TYPE_MAP
+        should be the same object after importing
+        """
+        import pynwb
+        assert id(pynwb.__TYPE_MAP.namespace_catalog) == id(pynwb.__NS_CATALOG)

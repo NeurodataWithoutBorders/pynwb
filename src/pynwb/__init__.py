@@ -74,13 +74,11 @@ def __get_resources() -> dict:
     __core_ns_file_name = 'nwb.namespace.yaml'
     __schema_dir = 'nwb-schema/core'
     cached_core_typemap = __location_of_this_file / 'core_typemap.pkl'
-    cached_core_nscatalog = __location_of_this_file / 'core_nscatalog.pkl'
     cached_version_indicator = __location_of_this_file / '.core_typemap_version'
 
     ret = dict()
     ret['namespace_path'] = str(__location_of_this_file / __schema_dir / __core_ns_file_name)
     ret['cached_typemap_path'] = str(cached_core_typemap)
-    ret['cached_nscatalog_path'] = str(cached_core_nscatalog)
     ret['cached_version_indicator'] = str(cached_version_indicator)
     return ret
 
@@ -214,22 +212,20 @@ def _load_core_namespace(final:bool=False):
             cached_version = f.read().strip()
         if cached_version != __version__:
             Path(__resources['cached_typemap_path']).unlink(missing_ok=True)
-            Path(__resources['cached_nscatalog_path']).unlink(missing_ok=True)
 
     # load pickled typemap if we have one
     if os.path.exists(__resources['cached_typemap_path']):
         with open(__resources['cached_typemap_path'], 'rb') as f:
-            __TYPE_MAP = pickle.load(f)
-        with open(__resources['cached_nscatalog_path'], 'rb') as f:
-            __NS_CATALOG = pickle.load(f)
+            __TYPE_MAP = pickle.load(f)  # type: TypeMap
+        # __NS_CATALOG is contained by __TYPE_MAP and they should be linked,
+        # so we restore the global one from the cached __TYPE_MAP
+        __NS_CATALOG = __TYPE_MAP.namespace_catalog
 
     # otherwise make a new one and cache it
     elif os.path.exists(__resources['namespace_path']):
         load_namespaces(__resources['namespace_path'])
         with open(__resources['cached_typemap_path'], 'wb') as f:
             pickle.dump(__TYPE_MAP, f, protocol=pickle.HIGHEST_PROTOCOL)
-        with open(__resources['cached_nscatalog_path'], 'wb') as f:
-            pickle.dump(__NS_CATALOG, f, protocol=pickle.HIGHEST_PROTOCOL)
         with open(__resources['cached_version_indicator'], 'w') as f:
             f.write(__version__)
 
