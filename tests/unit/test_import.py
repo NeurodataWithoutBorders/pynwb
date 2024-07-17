@@ -17,10 +17,10 @@ from pynwb.testing import TestCase
 class TestPyNWBSubmoduleClone(TestCase):
     def setUp(self):
         # move the existing cloned submodules to a temporary directory
-        self.tmp_dir = tempfile.TemporaryDirectory()
+        self.tmp_dir = Path(tempfile.mkdtemp()) / 'nwb-schema'
         self.repo_dir: Path = files('pynwb') / 'nwb-schema'
         if self.repo_dir.exists():
-            self.repo_dir.rename(self.tmp_dir.name)
+            self.repo_dir.rename(self.tmp_dir)
 
         # remove cache files if they exist
         self.typemap_cache = Path(files('pynwb') / 'core_typemap.pkl')
@@ -29,9 +29,11 @@ class TestPyNWBSubmoduleClone(TestCase):
 
     def tearDown(self) -> None:
         # move the old repository back
-        if self.repo_dir.exists():
+
+        if self.repo_dir.exists() and self.tmp_dir.exists():
             shutil.rmtree(self.repo_dir)
-            (Path(self.tmp_dir.name) / 'nwb-schema').rename(self.repo_dir)
+            self.tmp_dir.rename(self.repo_dir)
+            shutil.rmtree(self.tmp_dir.parent)
 
     def test_clone_on_import(self):
         """
