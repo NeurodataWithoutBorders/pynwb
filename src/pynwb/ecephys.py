@@ -32,21 +32,21 @@ class ElectrodeGroup(NWBContainer):
     def __init__(self, **kwargs):
         args_to_set = popargs_to_dict(('description', 'location', 'device', 'position'), kwargs)
         super().__init__(**kwargs)
+
         # position is a compound dataset, i.e., this must be an array with a compound data type of three floats
-        # or each element in the list must at least have three entries
+        # or is a list/tuple of three entries or a list with a single element with three entries
         if args_to_set['position'] is not None and len(args_to_set['position']) > 0:
-            position_dtype_valid = True
-            if hasattr(args_to_set['position'], 'dtype'):  # If we have a dtype, then check that it is valid
-                if len(args_to_set['position'].dtype) != 3:
-                    position_dtype_valid = False
-            if position_dtype_valid:  # If we have list of element, then check that the elements are of length 3
-                try:
-                    position_dtype_valid = all([len(pos) == 3 for pos in args_to_set['position']])
-                except TypeError:  # len not supported by first_position
-                    position_dtype_valid = False
-            if not position_dtype_valid:
-                raise ValueError('ElectrodeGroup position dataset must have three components (x, y, z) '
-                                 'for each array element, but received: %s' % str(args_to_set['position']))
+            # If we have a dtype, then check that it is valid length
+            is_valid_dtype = not hasattr(args_to_set['position'], 'dtype') or len(args_to_set['position'].dtype) == 3
+
+            # check data is a valid shape
+            is_valid_shape = len(args_to_set['position']) == 3 or \
+                     (len(args_to_set['position']) == 1 and len(args_to_set['position'][0]) == 3)
+
+            if not is_valid_dtype or not is_valid_shape:
+                raise ValueError('ElectrodeGroup position dataset must have three components (x, y, z) or [(x, y, z)] '
+                                 'but received: %s' % str(args_to_set['position']))
+
         for key, val in args_to_set.items():
             setattr(self, key, val)
 

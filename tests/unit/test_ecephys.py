@@ -214,12 +214,6 @@ class ElectrodeGroupConstructor(TestCase):
                            description='electrode description',
                            location='electrode location',
                            device=dev1,
-                           position=(1, 2, 3))
-        with self.assertRaises(ValueError):
-            ElectrodeGroup(name='elec1',
-                           description='electrode description',
-                           location='electrode location',
-                           device=dev1,
                            position=[(1, 2), ])
         with self.assertRaises(ValueError):
             ElectrodeGroup(name='elec1',
