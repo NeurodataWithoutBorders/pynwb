@@ -20,7 +20,7 @@ class TestPyNWBSubmoduleClone(TestCase):
         self.tmp_dir = tempfile.TemporaryDirectory()
         self.repo_dir: Path = files('pynwb') / 'nwb-schema'
         if self.repo_dir.exists():
-            shutil.move(self.repo_dir, self.tmp_dir.name)
+            self.repo_dir.rename(self.tmp_dir.name)
 
         # remove cache files if they exist
         self.typemap_cache = Path(files('pynwb') / 'core_typemap.pkl')
@@ -31,7 +31,7 @@ class TestPyNWBSubmoduleClone(TestCase):
         # move the old repository back
         if self.repo_dir.exists():
             shutil.rmtree(self.repo_dir)
-            shutil.move(Path(self.tmp_dir.name) / 'nwb-schema', self.repo_dir)
+            (Path(self.tmp_dir.name) / 'nwb-schema').rename(self.repo_dir)
 
     def test_clone_on_import(self):
         """
