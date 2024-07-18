@@ -4,6 +4,7 @@ for reading and writing data in NWB format
 import os.path
 from pathlib import Path
 from copy import deepcopy
+from warnings import warn
 import h5py
 
 from hdmf.spec import NamespaceCatalog
@@ -269,7 +270,15 @@ class NWBHDF5IO(_HDF5IO):
             return False
         try:
             with h5py.File(path, "r") as file:   # path is HDF5 file
-                return get_nwbfile_version(file)[1][0] >= 2    # Major version of NWB >= 2
+                version_info = get_nwbfile_version(file)
+                if version_info[0] is None:
+                    warn("Cannot read because missing NWB version in the HDF5 file. The file is not a valid NWB file.")
+                    return False
+                elif version_info[1][0] < 2:    # Major versions of NWB < 2 not supported
+                    warn("Cannot read because PyNWB supports NWB files version 2 and above.")
+                    return False
+                else:
+                    return True
         except IOError:
             return False
 

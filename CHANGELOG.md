@@ -5,6 +5,9 @@
 ### Documentation and tutorial enhancements
 - Added pre-release pull request instructions to release process documentation @stephprince [#1928](https://github.com/NeurodataWithoutBorders/pynwb/pull/1928)
 
+### Bug fixes
+- Fixed `can_read` method to return False if no nwbfile version can be found @stephprince [#1934](https://github.com/NeurodataWithoutBorders/pynwb/pull/1934)
+
 ## PyNWB 2.8.1 (July 3, 2024)
 
 ### Documentation and tutorial enhancements
