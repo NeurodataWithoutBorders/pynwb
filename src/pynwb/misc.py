@@ -137,7 +137,7 @@ class Units(DynamicTable):
         'resolution'
     )
 
-    __waveforms_desc = (
+    __add_unit_waveforms_desc = (
         """
         Individual waveforms for each spike. If the dataset is three-dimensional, the third dimension
         shows the response from different electrodes that all observe this unit simultaneously. In this
@@ -148,20 +148,21 @@ class Units(DynamicTable):
         Example usage::
 
             waveforms_list = [
-                [  # unit 1
-                    np.array([  # electrode 1
-                        [1, 2, 3, 4, 5],  # spike time 1 [sample 1, sample 2, ...]
-                        [2, 3, 4, 5, 6],  # spike time 2
-                    ]),
-                    np.array([  # electrode 2
-                        [3, 4, 5, 6, 7],  # spike time 1 [sample 1, sample 2, ...]
-                    ]),
-                ],
-                [  # unit 2
-                    np.array([  # electrode 1
+                np.array([  # unit 1
+                    [  # electrode 1
+                        [1, 2, 3, 4, 5],  # spike 1 [sample 1, sample 2, ...]
+                        [2, 3, 4, 5, 6],  # spike 2
+                    ],
+                    [  # electrode 2
+                        [3, 4, 5, 6, 7],  # spike 1 [sample 1, sample 2, ...]
+                        [2, 3, 4, 5, 6],  # spike 2
+                    ],
+                ]),
+                np.array([  # unit 2
+                    [  # electrode 1
                         [10, 20, 30, 40, 50],  # spike time 1 [sample 1, sample 2, ...]
-                    ]),
-                ],
+                    ],
+                ]),
             ]
             electrodes_list = [[1, 2], [3]]
             for unit_id in range(2):
@@ -182,7 +183,7 @@ class Units(DynamicTable):
         {'name': 'electrode_group', 'description': 'the electrode group that each spike unit came from'},
         {'name': 'waveform_mean', 'description': 'the spike waveform mean for each spike unit'},
         {'name': 'waveform_sd', 'description': 'the spike waveform standard deviation for each spike unit'},
-        {'name': 'waveforms', 'description': __waveforms_desc, 'index': 2}
+        {'name': 'waveforms', 'description': 'individual waveforms for each spike', 'index': 2}
     )
 
     @docval({'name': 'name', 'type': str, 'doc': 'Name of this Units interface', 'default': 'Units'},
@@ -226,7 +227,7 @@ class Units(DynamicTable):
              'default': None},
             {'name': 'waveform_sd', 'type': 'array_data', 'default': None,
              'doc': 'the spike waveform standard deviation for each unit. Shape is (time,) or (time, electrodes)'},
-            {'name': 'waveforms', 'type': 'array_data', 'default': None, 'doc': __waveforms_desc,
+            {'name': 'waveforms', 'type': 'array_data', 'default': None, 'doc': __add_unit_waveforms_desc,
              'shape': ((None, None), (None, None, None))},
             {'name': 'id', 'type': int, 'default': None, 'doc': 'the id for each unit'},
             allow_extra=True)
