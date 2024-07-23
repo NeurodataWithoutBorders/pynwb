@@ -288,8 +288,7 @@ nwbfile.units.to_dataframe()
 # :py:class:`~pynwb.ecephys.ElectricalSeries` objects as :ref:`acquisition <basic_timeseries>` data, and use
 # the :py:class:`~pynwb.ecephys.EventDetection` class for identifying the spike events in your raw traces.
 # If you do not want to store the raw voltage traces and only the waveform 'snippets' surrounding spike events,
-# you should use the :py:class:`~pynwb.ecephys.EventWaveform` class, which can store one or more
-# :py:class:`~pynwb.ecephys.SpikeEventSeries` objects.
+# you should store the snippets with :py:class:`~pynwb.ecephys.SpikeEventSeries` objects.
 #
 # The results of spike sorting (or clustering) should be stored in the top-level :py:class:`~pynwb.misc.Units` table.
 # Note that it is not required to store spike waveforms in order to store spike events or mean waveforms--if you only
