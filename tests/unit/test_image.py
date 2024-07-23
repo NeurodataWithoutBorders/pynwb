@@ -375,16 +375,10 @@ class ImageMaskSeriesConstructor(TestCase):
                          external_file=['external_file'], starting_frame=[0], format='external',
                          timestamps=[1., .2])
 
-        ims = ImageMaskSeries(name='test_ims', unit='unit',
+        with self.assertRaises(ValueError):
+            ImageMaskSeries(name='test_ims', unit='unit',
                               masked_imageseries=iS, external_file=['external_file'], starting_frame=[0],
                               format='external', timestamps=[1., 2.])
-        self.assertEqual(ims.name, 'test_ims')
-        self.assertEqual(ims.unit, 'unit')
-        self.assertIs(ims.masked_imageseries, iS)
-        self.assertEqual(ims.external_file, ['external_file'])
-        self.assertEqual(ims.starting_frame, [0])
-        self.assertEqual(ims.format, 'external')
-
 
 class OpticalSeriesConstructor(TestCase):
 
