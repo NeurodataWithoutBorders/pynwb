@@ -11,7 +11,8 @@ Image data can be a collection of individual images or movie segments (as a movi
 about the subject, the environment, the presented stimuli, or other parts
 related to the experiment. This tutorial focuses in particular on the usage of:
 
-* :py:class:`~pynwb.image.OpticalSeries` for series of images that were presented as stimulus
+* :py:class:`~pynwb.image.OpticalSeries` and :py:class:`~pynwb.misc.AbstractFeatureSeries` for series of images that
+  were presented as stimulus
 * :py:class:`~pynwb.image.ImageSeries`, for series of images (movie segments);
 * :py:class:`~pynwb.image.GrayscaleImage`, :py:class:`~pynwb.image.RGBImage`,
   :py:class:`~pynwb.image.RGBAImage`, for static images;
