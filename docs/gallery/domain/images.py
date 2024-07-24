@@ -134,7 +134,7 @@ abstract_feature_series = AbstractFeatureSeries(
 nwbfile.add_stimulus(abstract_feature_series)
 
 ####################
-# Like all :py:class:`~pynwb.base.TimeSeries`, :py:class:`~pynwb.base.AbstractFeatureSeries` specify timing using
+# Like all :py:class:`~pynwb.base.TimeSeries`, :py:class:`~pynwb.misc.AbstractFeatureSeries` specify timing using
 # either the ``rate`` and ``starting_time`` attributes or the ``timestamps`` attribute.
 #
 # ImageSeries: Storing series of images as acquisition
