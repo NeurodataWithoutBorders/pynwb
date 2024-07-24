@@ -114,7 +114,7 @@ nwbfile.add_stimulus(stimulus=optical_series)
 # While it is usually recommended to store the entire image data as an :py:class:`~pynwb.image.OpticalSeries`, sometimes
 # it is useful to store features of the visual stimuli instead of or in addition to the raw image data. For example,
 # you may want to store the mean luminance of the image, the contrast, or the spatial frequency. This can be done using
-# an instance of :py:class:`~pynwb.base.AbstractFeatureSeries`. This class is a general container for storing time
+# an instance of :py:class:`~pynwb.misc.AbstractFeatureSeries`. This class is a general container for storing time
 # series of features that are derived from the raw image data.
 
 # Create some fake feature data
