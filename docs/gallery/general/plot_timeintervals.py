@@ -92,7 +92,8 @@ nwbfile.add_acquisition(rate_ts)
 # Additional columns can be added using :py:meth:`~pynwb.file.NWBFile.add_trial_column`. This method takes a name
 # for the column and a description of what the column stores. You do not need to supply data
 # type, as this will inferred. Once all columns have been added, trial data can be populated using
-# :py:meth:`~pynwb.file.NWBFile.add_trial`.
+# :py:meth:`~pynwb.file.NWBFile.add_trial`. Note that if you add a custom column, you must
+# have add at least one row to write the table to a file.
 #
 # Lets add an additional column and some trial data with tags and timeseries references.
 
