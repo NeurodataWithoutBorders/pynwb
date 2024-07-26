@@ -3,10 +3,11 @@
 ## PyNWB 2.8.2 (Upcoming)
 
 ### Documentation and tutorial enhancements
-- Added pre-release pull request instructions to release process documentation @stephprince [#1928](https://github.com/NeurodataWithoutBorders/pynwb/pull/1928)
+- Added pre-release pull request instructions to release process documentation. @stephprince [#1928](https://github.com/NeurodataWithoutBorders/pynwb/pull/1928)
+- Improve docs for specifying waveforms in the Units table. @rly [#1936](https://github.com/NeurodataWithoutBorders/pynwb/pull/1936)
 
 ### Bug fixes
-- Fixed `can_read` method to return False if no nwbfile version can be found @stephprince [#1934](https://github.com/NeurodataWithoutBorders/pynwb/pull/1934)
+- Fixed `can_read` method to return False if no nwbfile version can be found. @stephprince [#1934](https://github.com/NeurodataWithoutBorders/pynwb/pull/1934)
 - Changed `epoch_tags` to be a NWBFile property instead of constructor argument. @stephprince [#1935](https://github.com/NeurodataWithoutBorders/pynwb/pull/1935)
 
 ## PyNWB 2.8.1 (July 3, 2024)
