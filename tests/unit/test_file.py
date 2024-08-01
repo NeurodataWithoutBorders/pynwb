@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 
-from datetime import datetime, date, timedelta
+from datetime import datetime, timedelta
 from dateutil.tz import tzlocal, tzutc
 from hdmf.common import DynamicTable
 
@@ -10,9 +10,6 @@ from hdmf.utils import docval, get_docval, popargs
 from pynwb import NWBFile, TimeSeries, NWBHDF5IO
 from pynwb.base import Image, Images
 from pynwb.file import Subject, _add_missing_timezone
-# =======
-# from pynwb.file import Subject, ElectrodeTable
-# >>>>>>> dev
 from pynwb.epoch import TimeIntervals
 from pynwb.ecephys import ElectricalSeries, ElectrodesTable
 from pynwb.testing import TestCase, remove_test_file
@@ -22,10 +19,9 @@ class NWBFileTest(TestCase):
     def setUp(self):
         self.start = datetime(2017, 5, 1, 12, 0, 0, tzinfo=tzlocal())
         self.ref_time = datetime(1979, 1, 1, 0, tzinfo=tzutc())
-        # try some dates with/without timezone and time
         self.create = [datetime(2017, 5, 1, 12, tzinfo=tzlocal()),
-                       datetime(2017, 5, 2, 13),
-                       datetime(2017, 5, 2)]
+                       datetime(2017, 5, 2, 13, 0, 0, 1, tzinfo=tzutc()),
+                       datetime(2017, 5, 2, 14, tzinfo=tzutc())]
         self.path = 'nwbfile_test.h5'
         self.nwbfile = NWBFile(session_description='a test session description for a test NWBFile',
                                identifier='FILE123',
@@ -145,6 +141,18 @@ class NWBFileTest(TestCase):
         self.nwbfile.add_epoch(0.0, 1.0, tags2, ts)
         tags = self.nwbfile.epoch_tags
         self.assertEqual(set(expected_tags), set(tags))
+
+    def test_epoch_tags_single_string(self):
+        tags1 = 't1'
+        tags2 = 't2'
+        expected_tags = set([tags1, tags2])
+        self.nwbfile.add_epoch(0.0, 1.0, tags=tags1)
+        self.nwbfile.add_epoch(1.0, 2.0, tags=tags2)
+        tags = self.nwbfile.epoch_tags
+        self.assertEqual(expected_tags, tags)
+
+    def test_epoch_tags_no_table(self):
+        self.assertEqual(set(), self.nwbfile.epoch_tags)
 
     def test_add_acquisition(self):
         self.nwbfile.add_acquisition(TimeSeries('test_ts', [0, 1, 2, 3, 4, 5],
@@ -506,22 +514,6 @@ Fields:
                                related_publications=('pub1', 'pub2'))
         self.assertTupleEqual(self.nwbfile.related_publications, ('pub1', 'pub2'))
 
-    def test_session_start_time_no_timezone(self):
-        self.nwbfile = NWBFile(
-            session_description='a test session description for a test NWBFile',
-            identifier='FILE123',
-            session_start_time=datetime(2024, 4, 10, 0, 21),
-        )
-        self.assertIsNone(self.nwbfile.session_start_time.tzinfo)
-
-    def test_session_start_time_no_time(self):
-        self.nwbfile = NWBFile(
-            session_description='a test session description for a test NWBFile',
-            identifier='FILE123',
-            session_start_time=date(2024, 4, 10),
-        )
-        self.assertEqual(self.nwbfile.session_start_time, date(2024, 4, 10))
-
 
 class SubjectTest(TestCase):
     def setUp(self):
@@ -537,7 +529,7 @@ class SubjectTest(TestCase):
             date_of_birth=datetime(2017, 5, 1, 12, tzinfo=tzlocal()),
             strain='my_strain',
         )
-        self.start = datetime(2017, 5, 1, 12)
+        self.start = datetime(2017, 5, 1, 12, tzinfo=tzlocal())
         self.path = 'nwbfile_test.h5'
         self.nwbfile = NWBFile(
             'a test session description for a test NWBFile',
@@ -606,35 +598,6 @@ class SubjectTest(TestCase):
 
         self.assertEqual(subject.age, "P1DT3H46M39S")
 
-    def test_dob_no_timezone(self):
-        self.subject = Subject(
-            age='P90D',
-            age__reference="birth",
-            description='An unfortunate rat',
-            genotype='WT',
-            sex='M',
-            species='Rattus norvegicus',
-            subject_id='RAT123',
-            weight='2 kg',
-            date_of_birth=datetime(2024, 4, 10, 0, 21),
-            strain='my_strain',
-        )
-
-    def test_dob_no_time(self):
-        self.subject = Subject(
-            age='P90D',
-            age__reference="birth",
-            description='An unfortunate rat',
-            genotype='WT',
-            sex='M',
-            species='Rattus norvegicus',
-            subject_id='RAT123',
-            weight='2 kg',
-            date_of_birth=date(2024, 4, 10),
-            strain='my_strain',
-        )
-
-
 
 class TestCacheSpec(TestCase):
     """Test whether the file can be written and read when caching the spec."""
@@ -692,3 +655,22 @@ class TestTimestampsRefDefault(TestCase):
         # 'timestamps_reference_time' should default to 'session_start_time'
         self.assertEqual(self.nwbfile.timestamps_reference_time, self.start_time)
 
+
+class TestTimestampsRefAware(TestCase):
+    def setUp(self):
+        self.start_time = datetime(2017, 5, 1, 12, 0, 0, tzinfo=tzlocal())
+        self.ref_time_notz = datetime(1979, 1, 1, 0, 0, 0)
+
+    def test_reftime_tzaware(self):
+        with self.assertRaises(ValueError):
+            # 'timestamps_reference_time' must be a timezone-aware datetime
+            NWBFile('test session description',
+                    'TEST124',
+                    self.start_time,
+                    timestamps_reference_time=self.ref_time_notz)
+
+
+class TestTimezone(TestCase):
+    def test_raise_warning__add_missing_timezone(self):
+        with self.assertWarnsWith(UserWarning, "Date is missing timezone information. Updating to local timezone."):
+            _add_missing_timezone(datetime(2017, 5, 1, 12))

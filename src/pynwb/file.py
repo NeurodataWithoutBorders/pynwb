@@ -1,4 +1,4 @@
-from datetime import datetime, date, timedelta
+from datetime import datetime, timedelta
 from dateutil.tz import tzlocal
 from collections.abc import Iterable
 from warnings import warn
@@ -104,8 +104,8 @@ class Subject(NWBContainer):
          'doc': ('The weight of the subject, including units. Using kilograms is recommended. e.g., "0.02 kg". '
                  'If a float is provided, then the weight will be stored as "[value] kg".'),
          'default': None},
-        {'name': 'date_of_birth', 'type': (datetime, date), 'default': None,
-         'doc': 'The date of birth, which may include time and timezone. May be supplied instead of age.'},
+        {'name': 'date_of_birth', 'type': datetime, 'default': None,
+         'doc': 'The datetime of the date of birth. May be supplied instead of age.'},
         {'name': 'strain', 'type': str, 'doc': 'The strain of the subject, e.g., "C57BL/6J"', 'default': None},
     )
     def __init__(self, **kwargs):
@@ -140,6 +140,10 @@ class Subject(NWBContainer):
 
         if isinstance(args_to_set["age"], timedelta):
             args_to_set["age"] = pd.Timedelta(args_to_set["age"]).isoformat()
+
+        date_of_birth = args_to_set['date_of_birth']
+        if date_of_birth and date_of_birth.tzinfo is None:
+            args_to_set['date_of_birth'] = _add_missing_timezone(date_of_birth)
 
         for key, val in args_to_set.items():
             setattr(self, key, val)
@@ -269,7 +273,6 @@ class NWBFile(MultiContainerInterface, HERDManager):
                      {'name': 'subject', 'child': True, 'required_name': 'subject'},
                      {'name': 'sweep_table', 'child': True, 'required_name': 'sweep_table'},
                      {'name': 'invalid_times', 'child': True, 'required_name': 'invalid_times'},
-                     'epoch_tags',
                      # icephys_filtering is temporary. /intracellular_ephys/filtering dataset will be deprecated
                      {'name': 'icephys_filtering', 'settable': False},
                      {'name': 'intracellular_recordings', 'child': True,
@@ -304,11 +307,10 @@ class NWBFile(MultiContainerInterface, HERDManager):
     @docval({'name': 'session_description', 'type': str,
              'doc': 'a description of the session where this data was generated'},
             {'name': 'identifier', 'type': str, 'doc': 'a unique text identifier for the file'},
-            {'name': 'session_start_time', 'type': (datetime, date),
-             'doc': 'the start date and time of the recording session'},
-            {'name': 'file_create_date', 'type': ('array_data', datetime, date),
+            {'name': 'session_start_time', 'type': datetime, 'doc': 'the start date and time of the recording session'},
+            {'name': 'file_create_date', 'type': ('array_data', datetime),
              'doc': 'the date and time the file was created and subsequent modifications made', 'default': None},
-            {'name': 'timestamps_reference_time', 'type': (datetime, date),
+            {'name': 'timestamps_reference_time', 'type': datetime,
              'doc': 'date and time corresponding to time zero of all timestamps; defaults to value '
                     'of session_start_time', 'default': None},
             {'name': 'experimenter', 'type': (tuple, list, str),
@@ -359,8 +361,6 @@ class NWBFile(MultiContainerInterface, HERDManager):
              'doc': 'Stimulus template TimeSeries objects belonging to this NWBFile', 'default': None},
             {'name': 'epochs', 'type': TimeIntervals,
              'doc': 'Epoch objects belonging to this NWBFile', 'default': None},
-            {'name': 'epoch_tags', 'type': (tuple, list, set),
-             'doc': 'A sorted list of tags used across all epochs', 'default': set()},
             {'name': 'trials', 'type': TimeIntervals,
              'doc': 'A table containing trial data', 'default': None},
             {'name': 'invalid_times', 'type': TimeIntervals,
@@ -423,7 +423,6 @@ class NWBFile(MultiContainerInterface, HERDManager):
             'stimulus_template',
             'keywords',
             'processing',
-            'epoch_tags',
             'electrodes',
             'electrode_groups',
             'devices',
@@ -463,18 +462,26 @@ class NWBFile(MultiContainerInterface, HERDManager):
         kwargs['name'] = 'root'
         super().__init__(**kwargs)
 
+        # add timezone to session_start_time if missing
+        session_start_time = args_to_set['session_start_time']
+        if session_start_time.tzinfo is None:
+            args_to_set['session_start_time'] = _add_missing_timezone(session_start_time)
+
         # set timestamps_reference_time to session_start_time if not provided
+        # if provided, ensure that it has a timezone
         timestamps_reference_time = args_to_set['timestamps_reference_time']
         if timestamps_reference_time is None:
             args_to_set['timestamps_reference_time'] = args_to_set['session_start_time']
+        elif timestamps_reference_time.tzinfo is None:
+            raise ValueError("'timestamps_reference_time' must be a timezone-aware datetime object.")
 
         # convert file_create_date to list and add timezone if missing
         file_create_date = args_to_set['file_create_date']
         if file_create_date is None:
             file_create_date = datetime.now(tzlocal())
-        if isinstance(file_create_date, (datetime, date)):
+        if isinstance(file_create_date, datetime):
             file_create_date = [file_create_date]
-        args_to_set['file_create_date'] = file_create_date
+        args_to_set['file_create_date'] = list(map(_add_missing_timezone, file_create_date))
 
         # backwards-compatibility code for ic_electrodes / icephys_electrodes
         icephys_electrodes = args_to_set['icephys_electrodes']
@@ -545,6 +552,10 @@ class NWBFile(MultiContainerInterface, HERDManager):
         return self.processing
 
     @property
+    def epoch_tags(self):
+        return set(self.epochs.tags[:]) if self.epochs is not None else set()
+
+    @property
     def ec_electrode_groups(self):
         warn("NWBFile.ec_electrode_groups has been replaced by NWBFile.electrode_groups.", DeprecationWarning)
         return self.electrode_groups
@@ -605,7 +616,6 @@ class NWBFile(MultiContainerInterface, HERDManager):
         See :py:meth:`~hdmf.common.table.DynamicTable.add_column` for more details
         """
         self.__check_epochs()
-        self.epoch_tags.update(kwargs.pop('tags', list()))
         self.epochs.add_column(**kwargs)
 
     def add_epoch_metadata_column(self, *args, **kwargs):
@@ -627,8 +637,6 @@ class NWBFile(MultiContainerInterface, HERDManager):
         enclosure versus sleeping between explorations)
         """
         self.__check_epochs()
-        if kwargs['tags'] is not None:
-            self.epoch_tags.update(kwargs['tags'])
         self.epochs.add_interval(**kwargs)
 
     def __check_electrodes(self):
@@ -1142,6 +1150,18 @@ class NWBFile(MultiContainerInterface, HERDManager):
                 kwargs[dt] = [v.copy() if isinstance(v, DynamicTable) else v for v in kwargs[dt]]
 
         return NWBFile(**kwargs)
+
+
+def _add_missing_timezone(date):
+    """
+    Add local timezone information on a datetime object if it is missing.
+    """
+    if not isinstance(date, datetime):
+        raise ValueError("require datetime object")
+    if date.tzinfo is None:
+        warn("Date is missing timezone information. Updating to local timezone.", stacklevel=2)
+        return date.replace(tzinfo=tzlocal())
+    return date
 
 
 def _tablefunc(table_name, description, columns):

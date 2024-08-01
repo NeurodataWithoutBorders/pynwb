@@ -36,15 +36,18 @@ a :py:class:`~hdmf.common.table.DynamicTable` with the following columns:
 
 # sphinx_gallery_thumbnail_path = 'figures/gallery_thumbnails_timeintervals.png'
 from datetime import datetime
-import numpy as np
-from pynwb import NWBFile, TimeSeries
 from uuid import uuid4
+
+import numpy as np
+from dateutil.tz import tzlocal
+
+from pynwb import NWBFile, TimeSeries
 
 # create the NWBFile
 nwbfile = NWBFile(
     session_description="my first synthetic recording",  # required
     identifier=str(uuid4()),  # required
-    session_start_time=datetime(2017, 4, 3, hour=11),  # required
+    session_start_time=datetime(2017, 4, 3, 11, tzinfo=tzlocal()),  # required
     experimenter="Baggins, Bilbo",  # optional
     lab="Bag End Laboratory",  # optional
     institution="University of Middle Earth at the Shire",  # optional
@@ -89,7 +92,8 @@ nwbfile.add_acquisition(rate_ts)
 # Additional columns can be added using :py:meth:`~pynwb.file.NWBFile.add_trial_column`. This method takes a name
 # for the column and a description of what the column stores. You do not need to supply data
 # type, as this will inferred. Once all columns have been added, trial data can be populated using
-# :py:meth:`~pynwb.file.NWBFile.add_trial`.
+# :py:meth:`~pynwb.file.NWBFile.add_trial`. Note that if you add a custom column, you must
+# add at least one row to write the table to a file.
 #
 # Lets add an additional column and some trial data with tags and timeseries references.
 

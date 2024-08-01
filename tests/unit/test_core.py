@@ -35,6 +35,11 @@ class TestNWBContainer(TestCase):
         self.assertEqual(obj.prop1, "test1")
         self.assertEqual(obj.prop2, "test2")
 
+    def test_get_data_type(self):
+        obj = NWBContainer("obj1")
+        dt = obj.data_type
+        self.assertEqual(dt, 'NWBContainer')
+
 
 class MyNWBData(NWBData):
 
@@ -129,10 +134,6 @@ Fields:
   acquisition: {
     name1 <class 'pynwb\.base\.TimeSeries'>,
     name2 <class 'pynwb\.base\.TimeSeries'>
-  }
-  epoch_tags: {
-    tag1,
-    tag2
   }
   epochs: epochs <class 'pynwb.epoch.TimeIntervals'>
   file_create_date: \[datetime.datetime\(.*\)\]

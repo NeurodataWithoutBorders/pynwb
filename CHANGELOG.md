@@ -1,17 +1,49 @@
 # PyNWB Changelog
 
-## PyNWB 2.7.0 (Upcoming)
+## PyNWB 2.8.2 (Upcoming)
+
+### Documentation and tutorial enhancements
+- Added pre-release pull request instructions to release process documentation @stephprince [#1928](https://github.com/NeurodataWithoutBorders/pynwb/pull/1928)
+
+### Bug fixes
+- Fixed `can_read` method to return False if no nwbfile version can be found @stephprince [#1934](https://github.com/NeurodataWithoutBorders/pynwb/pull/1934)
+- Changed `epoch_tags` to be a NWBFile property instead of constructor argument. @stephprince [#1935](https://github.com/NeurodataWithoutBorders/pynwb/pull/1935)
+
+## PyNWB 2.8.1 (July 3, 2024)
+
+### Documentation and tutorial enhancements
+- Simplified the introduction to NWB tutorial. @rly [#1914](https://github.com/NeurodataWithoutBorders/pynwb/pull/1914)
+- Simplified the ecephys and ophys tutorials. [#1915](https://github.com/NeurodataWithoutBorders/pynwb/pull/1915)
+- Add comments to `src/pynwb/io/file.py` to improve developer documentation. @rly [#1925](https://github.com/NeurodataWithoutBorders/pynwb/pull/1925)
+
+### Bug fixes
+- Fixed use of `channel_conversion` in `TimeSeries` `get_data_in_units`. @rohanshah [1923](https://github.com/NeurodataWithoutBorders/pynwb/pull/1923)
+
+## PyNWB 2.8.0 (May 28, 2024)
 
 ### Enhancements and minor changes
+- Set rate default value inside `mock_ElectricalSeries` to avoid having to set `rate=None` explicitly when passing timestamps. @h-mayorquin [#1894](https://github.com/NeurodataWithoutBorders/pynwb/pull/1894)
+- Integrate validation through the `TypeConfigurator`. @mavaylon1 [#1829](https://github.com/NeurodataWithoutBorders/pynwb/pull/1829)
+- Exposed `aws_region` to `NWBHDF5IO`. @rly [#1903](https://github.com/NeurodataWithoutBorders/pynwb/pull/1903)
+
+### Bug fixes
+- Revert changes in PyNWB 2.7.0 that allow datetimes without a timezone and without a time while issues with DANDI upload of NWB files missing timezone are resolved. @rly [#1908](https://github.com/NeurodataWithoutBorders/pynwb/pull/1908)
+
+## PyNWB 2.7.0 (May 2, 2024)
+
+### Enhancements and minor changes
+- Added `bounds` field to `SpatialSeries` to set optional boundary range (min, max) for each dimension of data. @mavaylon1 [#1869](https://github.com/NeurodataWithoutBorders/pynwb/pull/1869/files)
 - Added support for NWB schema 2.7.0. See [2.7.0 release notes](https://nwb-schema.readthedocs.io/en/latest/format_release_notes.html) for details
-  - Deprecated `ImagingRetinotopy` neurodata type. @rly [#1813](https://github.com/NeurodataWithoutBorders/pynwb/pull/1813)
-  - Modified `OptogeneticSeries` to allow 2D data, primarily in extensions of `OptogeneticSeries`. @rly [#1812](https://github.com/NeurodataWithoutBorders/pynwb/pull/1812)
-  - Support `stimulus_template` as optional predefined column in `IntracellularStimuliTable`. @stephprince [#1815](https://github.com/NeurodataWithoutBorders/pynwb/pull/1815)
-  - Support `NWBDataInterface` and `DynamicTable` in `NWBFile.stimulus`. @rly [#1842](https://github.com/NeurodataWithoutBorders/pynwb/pull/1842)
+- Deprecated `ImagingRetinotopy` neurodata type. @rly [#1813](https://github.com/NeurodataWithoutBorders/pynwb/pull/1813)
+- Modified `OptogeneticSeries` to allow 2D data, primarily in extensions of `OptogeneticSeries`. @rly [#1812](https://github.com/NeurodataWithoutBorders/pynwb/pull/1812)
+- Support `stimulus_template` as optional predefined column in `IntracellularStimuliTable`. @stephprince [#1815](https://github.com/NeurodataWithoutBorders/pynwb/pull/1815)
+- Support `NWBDataInterface` and `DynamicTable` in `NWBFile.stimulus`. @rly [#1842](https://github.com/NeurodataWithoutBorders/pynwb/pull/1842)
 - Added support for python 3.12 and upgraded dependency versions. This also includes infrastructure updates for developers. @mavaylon1 [#1853](https://github.com/NeurodataWithoutBorders/pynwb/pull/1853)
+- Added `grid_spacing`, `grid_spacing_unit`, `origin_coords`, `origin_coords_unit` to `ImagingPlane` fields. @h-mayorquin [#1892](https://github.com/NeurodataWithoutBorders/pynwb/pull/1892)
 - Added `mock_Units` for generating Units tables. @h-mayorquin [#1875](https://github.com/NeurodataWithoutBorders/pynwb/pull/1875) and [#1883](https://github.com/NeurodataWithoutBorders/pynwb/pull/1883)
 - Allow datetimes without a timezone and without a time. @rly [#1886](https://github.com/NeurodataWithoutBorders/pynwb/pull/1886)
 - No longer automatically set the timezone to the local timezone when not provided. [#1886](https://github.com/NeurodataWithoutBorders/pynwb/pull/1886)
+- Updated testing to not install in editable mode and not run `coverage` by default. [#1897](https://github.com/NeurodataWithoutBorders/pynwb/pull/1897)
 
 ### Bug fixes
 - Fix bug with reading file with linked `TimeSeriesReferenceVectorData` @rly [#1865](https://github.com/NeurodataWithoutBorders/pynwb/pull/1865)
@@ -317,7 +349,7 @@
 
 ### Tutorial enhancements:
 - Added new tutorial for intracellular electrophysiology to describe the use of the new metadata tables
-  and declared the previous tutoral using ``SweepTable`` as deprecated.  @oruebel (#1349)
+  and declared the previous tutorial using ``SweepTable`` as deprecated.  @oruebel (#1349)
 - Added new tutorial for querying intracellular electrophysiology metadata
   (``docs/gallery/domain/plot_icephys_pandas.py``). @oruebel (#1349, #1383)
 - Added thumbnails for tutorials to improve presentation of online docs.  @oruebel (#1349)

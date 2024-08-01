@@ -1,4 +1,4 @@
-from datetime import datetime, date
+from datetime import datetime
 from dateutil.tz import tzlocal, tzutc
 import pandas as pd
 import numpy as np
@@ -21,12 +21,7 @@ class TestNWBFileHDF5IO(TestCase):
         """ Set up an NWBFile object with an acquisition TimeSeries, analysis TimeSeries, and a processing module """
         self.start_time = datetime(1970, 1, 1, 12, tzinfo=tzutc())
         self.ref_time = datetime(1979, 1, 1, 0, tzinfo=tzutc())
-        # try some dates with/without timezone and time
-        self.create_date = [
-            datetime(2017, 5, 1, 12, tzinfo=tzlocal()),
-            datetime(2017, 5, 2, 13),
-            datetime(2017, 5, 2),
-        ]
+        self.create_date = datetime(2017, 4, 15, 12, tzinfo=tzlocal())
         self.manager = get_manager()
         self.filename = 'test_nwbfileio.h5'
         self.nwbfile = NWBFile(session_description='a test NWB File',
@@ -157,61 +152,16 @@ class TestNWBFileIO(NWBH5IOMixin, TestCase):
         return nwbfile
 
 
-class TestNWBFileNoTimezoneRoundTrip(TestNWBFileIO):
-    """ Test that an NWBFile with no timezone information can be written to and read from file """
-
-    def build_nwbfile(self):
-        description = 'test nwbfile no time'
-        identifier = 'TEST_no_time'
-        start_time = datetime(2024, 4, 10, 0, 21)
-
-        self.container = NWBFile(
-            session_description=description,
-            identifier=identifier,
-            session_start_time=start_time
-        )
-
-    def roundtripContainer(self, cache_spec=False):
-        self.read_nwbfile = super().roundtripContainer(cache_spec=cache_spec)
-        self.assertEqual(self.read_nwbfile.session_start_time, self.container.session_start_time)
-        self.assertIsNone(self.read_nwbfile.session_start_time.tzinfo)
-        return self.read_nwbfile
-
-
-class TestNWBFileNoTimeRoundTrip(TestNWBFileIO):
-    """ Test that an NWBFile with no time information can be written to and read from file """
-
-    def build_nwbfile(self):
-        description = 'test nwbfile no time'
-        identifier = 'TEST_no_time'
-        start_time = date(2024, 4, 9)
-
-        self.container = NWBFile(
-            session_description=description,
-            identifier=identifier,
-            session_start_time=start_time
-        )
-
-    def roundtripContainer(self, cache_spec=False):
-        self.read_nwbfile = super().roundtripContainer(cache_spec=cache_spec)
-        self.assertEqual(self.read_nwbfile.session_start_time, self.container.session_start_time)
-        self.assertIsInstance(self.read_nwbfile.session_start_time, date)
-        self.assertNotIsInstance(self.read_nwbfile.session_start_time, datetime)
-        return self.read_nwbfile
-
-
 class TestExperimentersConstructorRoundtrip(TestNWBFileIO):
     """ Test that a list of multiple experimenters in a constructor is written to and read from file """
 
     def build_nwbfile(self):
         description = 'test nwbfile experimenter'
         identifier = 'TEST_experimenter'
-        self.container = NWBFile(
-            session_description=description,
-            identifier=identifier,
-            session_start_time=self.start_time,
-            experimenter=('experimenter1', 'experimenter2')
-        )
+        self.nwbfile = NWBFile(session_description=description,
+                               identifier=identifier,
+                               session_start_time=self.start_time,
+                               experimenter=('experimenter1', 'experimenter2'))
 
 
 class TestExperimentersSetterRoundtrip(TestNWBFileIO):
@@ -220,12 +170,10 @@ class TestExperimentersSetterRoundtrip(TestNWBFileIO):
     def build_nwbfile(self):
         description = 'test nwbfile experimenter'
         identifier = 'TEST_experimenter'
-        self.container = NWBFile(
-            session_description=description,
-            identifier=identifier,
-            session_start_time=self.start_time
-        )
-        self.container.experimenter = ('experimenter1', 'experimenter2')
+        self.nwbfile = NWBFile(session_description=description,
+                               identifier=identifier,
+                               session_start_time=self.start_time)
+        self.nwbfile.experimenter = ('experimenter1', 'experimenter2')
 
 
 class TestPublicationsConstructorRoundtrip(TestNWBFileIO):
@@ -234,12 +182,10 @@ class TestPublicationsConstructorRoundtrip(TestNWBFileIO):
     def build_nwbfile(self):
         description = 'test nwbfile publications'
         identifier = 'TEST_publications'
-        self.container = NWBFile(
-            session_description=description,
-            identifier=identifier,
-            session_start_time=self.start_time,
-            related_publications=('pub1', 'pub2')
-        )
+        self.nwbfile = NWBFile(session_description=description,
+                               identifier=identifier,
+                               session_start_time=self.start_time,
+                               related_publications=('pub1', 'pub2'))
 
 
 class TestPublicationsSetterRoundtrip(TestNWBFileIO):
@@ -248,12 +194,10 @@ class TestPublicationsSetterRoundtrip(TestNWBFileIO):
     def build_nwbfile(self):
         description = 'test nwbfile publications'
         identifier = 'TEST_publications'
-        self.container = NWBFile(
-            session_description=description,
-            identifier=identifier,
-            session_start_time=self.start_time
-        )
-        self.container.related_publications = ('pub1', 'pub2')
+        self.nwbfile = NWBFile(session_description=description,
+                               identifier=identifier,
+                               session_start_time=self.start_time)
+        self.nwbfile.related_publications = ('pub1', 'pub2')
 
 
 class TestSubjectIO(NWBH5IOMixin, TestCase):
@@ -295,55 +239,6 @@ class TestSubjectAgeReferenceNotSetIO(NWBH5IOMixin, TestCase):
             subject_id="RAT123",
             weight="2 kg",
             date_of_birth=datetime(1970, 1, 1, 12, tzinfo=tzutc()),
-            strain="my_strain",
-        )
-
-    def addContainer(self, nwbfile):
-        """ Add the test Subject to the given NWBFile """
-        nwbfile.subject = self.container
-
-    def getContainer(self, nwbfile):
-        """ Return the test Subject from the given NWBFile """
-        return nwbfile.subject
-
-
-class TestSubjectDOBNoDateSetIO(NWBH5IOMixin, TestCase):
-
-    def setUpContainer(self):
-        """ Return the test Subject """
-        return Subject(
-            age="P90D",
-            description="An unfortunate rat",
-            genotype="WT",
-            sex="M",
-            species="Rattus norvegicus",
-            subject_id="RAT123",
-            weight="2 kg",
-            date_of_birth=date(2024, 4, 9),
-            strain="my_strain",
-        )
-
-    def addContainer(self, nwbfile):
-        """ Add the test Subject to the given NWBFile """
-        nwbfile.subject = self.container
-
-    def getContainer(self, nwbfile):
-        """ Return the test Subject from the given NWBFile """
-        return nwbfile.subject
-
-
-class TestSubjectMinimalSetIO(NWBH5IOMixin, TestCase):
-
-    def setUpContainer(self):
-        """ Return the test Subject """
-        return Subject(
-            age="P90D",
-            description="An unfortunate rat",
-            genotype="WT",
-            sex="M",
-            species="Rattus norvegicus",
-            subject_id="RAT123",
-            weight="2 kg",
             strain="my_strain",
         )
 
