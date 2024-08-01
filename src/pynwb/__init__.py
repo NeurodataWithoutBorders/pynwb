@@ -77,33 +77,8 @@ global __NS_CATALOG
 global __TYPE_MAP
 
 __NS_CATALOG = NamespaceCatalog(NWBGroupSpec, NWBDatasetSpec, NWBNamespace)
-
-class NWBTypeMap(TypeMap):
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-
-    def __copy__(self):
-        ret = NWBTypeMap(namespaces=copy(self._TypeMap__ns_catalog),
-                         mapper_cls=self._TypeMap__default_mapper_cls,
-                         type_config=self.type_config)
-        ret.merge(self)
-        return ret
-
-    def modify_builder(self, builder):
-        try:
-            ndtype = builder['neurodata_type']
-        except KeyError:
-            ndtype = 'Not Group'
-        # remap ElectrodesTable from a DynamicTable named electrodes
-        if ndtype == 'DynamicTable' and builder.name == 'electrodes':
-            builder.set_attribute(name='namespace', value='core')
-            builder.set_attribute(name='neurodata_type', value='ElectrodesTable')
-            return builder
-        else:
-            return None
-
 hdmf_typemap = hdmf.common.get_type_map()
-__TYPE_MAP = NWBTypeMap(namespaces=__NS_CATALOG)
+__TYPE_MAP = TypeMap(namespaces=__NS_CATALOG)
 __TYPE_MAP.merge(hdmf_typemap, ns_catalog=True)
 
 @docval({'name': 'extensions', 'type': (str, TypeMap, list),
