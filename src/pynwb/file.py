@@ -188,9 +188,9 @@ class NWBFile(MultiContainerInterface, HERDManager):
         },
         {
             'attr': 'processing',
-            'add': 'add_processing_module',
+            'add': '_add_processing_module_internal',
             'type': ProcessingModule,
-            'create': 'create_processing_module',
+            'create': '_create_processing_module_internal',
             'get': 'get_processing_module'
         },
         {
@@ -522,6 +522,18 @@ class NWBFile(MultiContainerInterface, HERDManager):
         for key, val in args_to_set.items():
             setattr(self, key, val)
 
+        # add default processing modules
+        # NOTE: these will always appear when printing this object but the NWBFile object mapper in io/file.py
+        # prevents the writing of *empty* processing modules
+        if "ecephys" not in self.processing:
+            self.create_processing_module(name="ecephys", description="Processed extracellular electrophysiology data")
+        if "icephys" not in self.processing:
+            self.create_processing_module(name="icephys", description="Processed intracellular electrophysiology data")
+        if "ophys" not in self.processing:
+            self.create_processing_module(name="ophys", description="Processed optical physiology data")
+        if "behavior" not in self.processing:
+            self.create_processing_module(name="behavior", description="Processed behavior data")
+
         self.__obj = None
 
     def all_children(self):
@@ -550,6 +562,42 @@ class NWBFile(MultiContainerInterface, HERDManager):
     def modules(self):
         warn("NWBFile.modules has been replaced by NWBFile.processing.", DeprecationWarning)
         return self.processing
+
+    @docval(*get_docval(ProcessingModule.__init__),
+            doc="Create a ProcessingModule object and add it to this NWBFile",
+            returns="the ProcessingModule object that was created",
+            rtype=ProcessingModule)
+    def create_processing_module(self, **kwargs):
+        name = kwargs.get("name")
+        if name in self.processing:
+            msg = (f"Cannot create processing module with the name '{name}' because one already exists. "
+                   "This will become an error in a future version of PyNWB.")
+            warn(msg)
+            return None
+        return self._create_processing_module_internal(**kwargs)
+
+    @docval(
+        {'name': "processing", 'type': (list, tuple, dict, ProcessingModule),
+        'doc': 'one or multiple ProcessingModule objects to add to this NWBFile'},
+        doc="Add one or multiple ProcessingModule objects to this NWBFile"
+    )
+    def add_processing_module(self, **kwargs):
+        container = kwargs.get("processing")
+        if isinstance(container, ProcessingModule):
+            containers = [container]
+        elif isinstance(container, dict):
+            containers = container.values()
+        else:
+            containers = container
+        new_containers = []
+        for tmp in containers:
+            if tmp.name in self.processing:
+                msg = (f"Cannot add processing module with the name '{tmp.name}' because one already exists. "
+                        "This will become an error in a future version of PyNWB.")
+                warn(msg)
+            else:
+                new_containers.append(tmp)
+        return self._add_processing_module_internal(processing=new_containers)
 
     @property
     def epoch_tags(self):
