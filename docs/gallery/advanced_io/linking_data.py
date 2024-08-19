@@ -42,7 +42,7 @@ NWBContainers as well.
 
 
 Creating test data
----------------------------
+^^^^^^^^^^^^^^^^^^
 
 In the following we are creating two :py:meth:`~pynwb.base.TimeSeries` each written to a separate file.
 We then show how we can integrate these files into a single NWBFile.
@@ -105,12 +105,12 @@ with NWBHDF5IO(filename2, "w") as io:
 
 #####################
 # Linking to select datasets
-# --------------------------
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^
 #
 
 ####################
 # Step 1: Create the new NWBFile
-# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # Create the first file
 nwbfile4 = NWBFile(
@@ -122,7 +122,7 @@ nwbfile4 = NWBFile(
 
 ####################
 # Step 2: Get the dataset you want to link to
-# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Now let's open our test files and retrieve our timeseries.
 #
 
@@ -134,7 +134,7 @@ timeseries_1_data = timeseries_1.data
 
 ####################
 # Step 3: Create the object you want to link to the data
-# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
 # To link to the dataset we can simply assign the data object (here `` timeseries_1.data``) to a new ``TimeSeries``
 
@@ -167,7 +167,7 @@ nwbfile4.add_acquisition(test_ts5)
 
 ####################
 # Step 4: Write the data
-# ^^^^^^^^^^^^^^^^^^^^^^^
+# ~~~~~~~~~~~~~~~~~~~~~~~~
 #
 with NWBHDF5IO(filename4, "w") as io4:
     # Use link_data=True to specify default behavior to link rather than copy data
@@ -185,7 +185,7 @@ io1.close()
 
 ####################
 # Linking to whole Containers
-# ---------------------------
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 #
 # Appending to files and linking is made possible by passing around the same
 # :py:class:`~hdmf.build.manager.BuildManager`. You can get a manager to pass around
@@ -203,7 +203,7 @@ manager = get_manager()
 
 ####################
 # Step 1: Get the container object you want to link to
-# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Now let's open our test files and retrieve our timeseries.
 #
 
@@ -219,7 +219,7 @@ timeseries_2 = nwbfile2.get_acquisition("test_timeseries2")
 
 ####################
 # Step 2: Add the container to another NWBFile
-# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # To integrate both :py:meth:`~pynwb.base.TimeSeries` into a single file we simply create a new
 # :py:meth:`~pynwb.file.NWBFile` and add our existing :py:meth:`~pynwb.base.TimeSeries` to it. PyNWB's
 # :py:class:`~pynwb.NWBHDF5IO` backend then automatically detects that the TimeSeries have already
@@ -247,7 +247,7 @@ io2.close()
 # ------------------------------
 #
 # Using the :py:func:`~pynwb.file.NWBFile.copy` method allows us to easily create a shallow copy
-# of a whole NWB:N file with links to all data in the original file. For example, we may want to
+# of a whole NWB file with links to all data in the original file. For example, we may want to
 # store processed data in a new file separate from the raw data, while still being able to access
 # the raw data. See the :ref:`scratch` tutorial for a detailed example.
 #
@@ -259,5 +259,96 @@ io2.close()
 # External links are convenient but to share data we may want to hand a single file with all the
 # data to our collaborator rather than having to collect all relevant files. To do this,
 # :py:class:`~hdmf.backends.hdf5.h5tools.HDF5IO` (and in turn :py:class:`~pynwb.NWBHDF5IO`)
-# provide the convenience function :py:meth:`~hdmf.backends.hdf5.h5tools.HDF5IO.copy_file`,
-# which copies an HDF5 file and resolves all external links.
+# provide the convenience function :py:meth:`~hdmf.backends.hdf5.h5tools.HDF5IO.export`,
+# which can copy the file and resolves all external links.
+
+
+####################
+# Automatically split large data across multiple HDF5 files
+# -------------------------------------------------------------------
+#
+# For extremely large datasets it can be useful to split data across multiple files, e.g., in cases where
+# the file stystem does not allow for large files.. While we can
+# achieve this by writing different components (e.g., `TimeSeries`) to different files as described above,
+# this option does not allow splitting data from single datasets. An alternative option is to use the
+# `family` driver in `h5py` to automatically split the NWB file into a collection of many HDF5 files.
+# The `family` driver store the file on disk as a series of fixed-length chunks (each in its own file)
+#
+
+####################
+# Step 1: Create the `NWBFile` as usual
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+from pynwb import NWBFile
+from pynwb.base import TimeSeries
+from datetime import datetime
+import numpy as np
+
+# Create an NWBFile object
+nwbfile = NWBFile(description='example file family',
+                  identifier=str(uuid4()),
+                  session_start_time=datetime.now().astimezone())
+
+# Create some example data
+data = np.random.rand(500000)  # Example large dataset
+timestamps = np.arange(500000) / 1000.0  # Example timestamps in seconds
+
+# Create a TimeSeries object
+time_series = TimeSeries(name='example_timeseries',
+                         data=data,
+                         unit='mV',
+                         timestamps=timestamps)
+
+# Add the TimeSeries to the NWBFile
+nwbfile.add_acquisition(time_series)
+
+####################
+# Step 2: Open the new file with the `family` driver and write
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+# Here we need to open the file with `h5py` first to set up the driver, and then we can use
+# that file with :py:class:`pynwb.NWBHDF5IO`. This is required, because :py:class:`pynwb.NWBHDF5IO`
+# currently does not support passing the `memb_size` option required by the `family` driver.
+
+import h5py
+from pynwb import  NWBHDF5IO
+
+# Define the size of the individual files, determining the number of files to create
+# chunk_size = 1 * 1024**3  # 1GB per file
+chunk_size = 1024 * 1024 # 1MB for testing
+
+# Create the HDF5 file using the family driver
+with h5py.File('family_nwb_file_%d.h5', 'w', driver='family', memb_size=chunk_size) as f:
+
+    # Use NWBHDF5IO to write the NWBFile to the HDF5 file
+    with NWBHDF5IO(file=f, mode='w') as io:
+        io.write(nwbfile)
+
+####################
+# Step 3: Read a file written with the `family` driver
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+#
+
+
+# Open the HDF5 file using the family driver
+with h5py.File('family_nwb_file_%d.h5', 'r', driver='family', memb_size=chunk_size) as f:
+    # Use NWBHDF5IO to read the NWBFile from the HDF5 file
+    with NWBHDF5IO(file=f, manager=None, mode='r') as io:
+        nwbfile = io.read()
+        print(nwbfile)
+
+
+####################
+# .. note::
+#
+#    The filename you provide when using the `family` driver must contain a printf-style integer format code
+#    (e.g.`%d`), which will be replaced by the file sequence number.
+#
+# .. note::
+#
+#    The `memb_size` parameter must be set on both write and read. As such, reading the file requires
+#    the user to know the `memb_size` that was used for reading.
+#
+# .. note::
+#
+#    The DANDI archive may not support NWB files that are split in this fashion.
+
