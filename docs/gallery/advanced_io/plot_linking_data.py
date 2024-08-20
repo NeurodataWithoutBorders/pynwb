@@ -268,8 +268,8 @@ io2.close()
 # -------------------------------------------------------------------
 #
 # For extremely large datasets it can be useful to split data across multiple files, e.g., in cases where
-# the file stystem does not allow for large files. While we can
-# achieve this by writing different components (e.g., :py:meth:`~pynwb.base.TimeSeries`) to different files as described above,
+# the file stystem does not allow for large files. While we can achieve this by writing different
+# components (e.g., :py:meth:`~pynwb.base.TimeSeries`)  to different files as described above,
 # this option does not allow splitting data from single datasets. An alternative option is to use the
 # ``family`` driver in ``h5py`` to automatically split the NWB file into a collection of many HDF5 files.
 # The ``family`` driver stores the file on disk as a series of fixed-length chunks (each in its own file).
