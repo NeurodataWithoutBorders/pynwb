@@ -364,7 +364,7 @@ with h5py.File(name=filename_pattern, mode='r', driver='family', memb_size=chunk
 ####################
 # .. note::
 #
-#    The filename you provide when using the `family` driver must contain a printf-style integer format code
+#    The filename you provide when using the ``family`` driver must contain a printf-style integer format code
 #    (e.g.`%d`), which will be replaced by the file sequence number.
 #
 # .. note::
