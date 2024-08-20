@@ -378,9 +378,9 @@ with h5py.File(name=filename_pattern, mode='r', driver='family', memb_size=chunk
 #
 # .. note::
 #
-#    Other file drivers, e.g., `split` or `multi` could be used in a similar fashion.
+#    Other file drivers, e.g., ``split`` or ``multi`` could be used in a similar fashion.
 #    However, not all HDF5 drivers are supported by the the high-level API of
-#    `h5py` and as such may require a bit more complex setup via the the
-#    low-level HDF5 API in `h5py`.
+#    ``h5py`` and as such may require a bit more complex setup via the the
+#    low-level HDF5 API in ``h5py``.
 #
 
