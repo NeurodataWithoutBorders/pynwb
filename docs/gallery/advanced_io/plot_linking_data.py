@@ -348,7 +348,7 @@ with h5py.File(name=filename_pattern, mode='w', driver='family', memb_size=chunk
 #    iteratively directly as part of the `io.write` call instead of manually afterward.
 
 ####################
-# Step 3: Read a file written with the `family` driver
+# Step 3: Read a file written with the family driver
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 #
 
