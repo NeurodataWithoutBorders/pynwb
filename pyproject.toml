@@ -91,7 +91,7 @@ omit = [
 ]
 
 [tool.ruff]
-select = ["E", "F", "T100", "T201", "T203"]
+lint.select = ["E", "F", "T100", "T201", "T203"]
 exclude = [
   ".git",
   ".tox",
@@ -105,7 +105,7 @@ exclude = [
 ]
 line-length = 120
 
-[tool.ruff.per-file-ignores]
+[tool.ruff.lint.per-file-ignores]
 "tests/read_dandi/*" = ["T201"]
 "docs/gallery/*" = ["E402", "T201"]
 "src/*/__init__.py" = ["F401"]
@@ -115,6 +115,6 @@ line-length = 120
 
 # "test_gallery.py" = ["T201"] # Uncomment when test_gallery.py is created
 
-[tool.ruff.mccabe]
+[tool.ruff.lint.mccabe]
 max-complexity = 17
 
