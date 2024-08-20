@@ -13,7 +13,7 @@ NBWContainer classes (e.g., :py:class:`~pynwb.base.TimeSeries`) support the inte
 HDF5 files with NWB data files via external links. To make things more concrete, let's look at the following use
 case. We want to simultaneously record multiple data streams during data acquisition. Using the concept of external
 links allows us to save each data stream to an external HDF5 files during data acquisition and to
-afterwards link the data into a single NWB file. In this case, each recording becomes represented by a
+afterward link the data into a single NWB file. In this case, each recording becomes represented by a
 separate file-system object that can be set as read-only once the experiment is done.  In the following
 we are using :py:meth:`~pynwb.base.TimeSeries` as an example, but the same approach works for other
 NWBContainers as well.
@@ -61,7 +61,7 @@ from pynwb import NWBHDF5IO, NWBFile, TimeSeries
 # Create the base data
 start_time = datetime(2017, 4, 3, 11, tzinfo=tzlocal())
 data = np.arange(1000).reshape((100, 10))
-timestamps = np.arange(100)
+timestamps = np.arange(100, dtype=float)
 filename1 = "external1_example.nwb"
 filename2 = "external2_example.nwb"
 filename3 = "external_linkcontainer_example.nwb"
@@ -268,12 +268,15 @@ io2.close()
 # -------------------------------------------------------------------
 #
 # For extremely large datasets it can be useful to split data across multiple files, e.g., in cases where
-# the file stystem does not allow for large files.. While we can
+# the file stystem does not allow for large files. While we can
 # achieve this by writing different components (e.g., `TimeSeries`) to different files as described above,
 # this option does not allow splitting data from single datasets. An alternative option is to use the
 # `family` driver in `h5py` to automatically split the NWB file into a collection of many HDF5 files.
-# The `family` driver store the file on disk as a series of fixed-length chunks (each in its own file)
-#
+# The `family` driver store the file on disk as a series of fixed-length chunks (each in its own file).
+# In practice, to write very large arrays, we can combine this approach with :ref:`iterative_write` to
+# avoid having to load all data into memory. In the example shown here we use a manual approach to
+# iterative write by using :py:class:`hdmf.backends.hdf5.H5DataIO` to create an empty dataset and
+# then filling in the data afterward.
 
 ####################
 # Step 1: Create the `NWBFile` as usual
@@ -282,22 +285,27 @@ io2.close()
 from pynwb import NWBFile
 from pynwb.base import TimeSeries
 from datetime import datetime
+from hdmf.backends.hdf5 import H5DataIO
 import numpy as np
 
 # Create an NWBFile object
-nwbfile = NWBFile(description='example file family',
+nwbfile = NWBFile(session_description='example file family',
                   identifier=str(uuid4()),
                   session_start_time=datetime.now().astimezone())
 
-# Create some example data
-data = np.random.rand(500000)  # Example large dataset
-timestamps = np.arange(500000) / 1000.0  # Example timestamps in seconds
+# Create the data as an empty dataset so that we can write to it later
+data = H5DataIO(maxshape=(None, 10),  # make the first dimension expandable
+                dtype=np.float32,     # create the data as float32
+                shape=(0, 10),        # initial data shape to initialize as empty dataset
+                chunks=(1000, 10)
+                )
 
 # Create a TimeSeries object
 time_series = TimeSeries(name='example_timeseries',
                          data=data,
-                         unit='mV',
-                         timestamps=timestamps)
+                         starting_time=0.0,
+                         rate=1.0,
+                         unit='mV')
 
 # Add the TimeSeries to the NWBFile
 nwbfile.add_acquisition(time_series)
@@ -314,14 +322,30 @@ from pynwb import  NWBHDF5IO
 
 # Define the size of the individual files, determining the number of files to create
 # chunk_size = 1 * 1024**3  # 1GB per file
-chunk_size = 1024 * 1024 # 1MB for testing
+chunk_size = 1024**2  # 1MB just for testing
+
+# filename pattern
+filename_pattern = 'family_nwb_file_%d.nwb'
 
 # Create the HDF5 file using the family driver
-with h5py.File('family_nwb_file_%d.h5', 'w', driver='family', memb_size=chunk_size) as f:
+with h5py.File(name=filename_pattern, mode='w', driver='family', memb_size=chunk_size) as f:
 
     # Use NWBHDF5IO to write the NWBFile to the HDF5 file
     with NWBHDF5IO(file=f, mode='w') as io:
         io.write(nwbfile)
+
+        # Write new data iteratively to the file
+        for i in range(10):
+            start_index = i * 1000
+            stop_index = start_index + 1000
+            data.dataset.resize((stop_index, 10))          # Resize the dataset
+            data.dataset[start_index: stop_index , :] = i  # Set the additional values
+
+####################
+# .. note::
+#
+#    Alternatively, we could have also used the :ref:`iterative_write` features to write the data
+#    iteratively directly as part of the `io.write` call instead of manually afterward.
 
 ####################
 # Step 3: Read a file written with the `family` driver
@@ -330,7 +354,7 @@ with h5py.File('family_nwb_file_%d.h5', 'w', driver='family', memb_size=chunk_si
 
 
 # Open the HDF5 file using the family driver
-with h5py.File('family_nwb_file_%d.h5', 'r', driver='family', memb_size=chunk_size) as f:
+with h5py.File(name=filename_pattern, mode='r', driver='family', memb_size=chunk_size) as f:
     # Use NWBHDF5IO to read the NWBFile from the HDF5 file
     with NWBHDF5IO(file=f, manager=None, mode='r') as io:
         nwbfile = io.read()
