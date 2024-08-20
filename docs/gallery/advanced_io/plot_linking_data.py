@@ -272,7 +272,7 @@ io2.close()
 # achieve this by writing different components (e.g., `TimeSeries`) to different files as described above,
 # this option does not allow splitting data from single datasets. An alternative option is to use the
 # `family` driver in `h5py` to automatically split the NWB file into a collection of many HDF5 files.
-# The `family` driver store the file on disk as a series of fixed-length chunks (each in its own file).
+# The `family` driver stores the file on disk as a series of fixed-length chunks (each in its own file).
 # In practice, to write very large arrays, we can combine this approach with :ref:`iterative_write` to
 # avoid having to load all data into memory. In the example shown here we use a manual approach to
 # iterative write by using :py:class:`hdmf.backends.hdf5.H5DataIO` to create an empty dataset and
