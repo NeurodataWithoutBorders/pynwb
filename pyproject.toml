@@ -100,6 +100,7 @@ exclude = [
   "dist/",
   "src/nwb-schema",
   "docs/source/conf.py",
+  "docs/notebooks/*",
   "src/pynwb/_due.py",
   "test.py" # remove when pytest comes along
 ]
@@ -108,7 +109,6 @@ line-length = 120
 [tool.ruff.lint.per-file-ignores]
 "tests/read_dandi/*" = ["T201"]
 "docs/gallery/*" = ["E402", "T201"]
-"docs/notebooks/*" = ["E402", "T201"]
 "src/*/__init__.py" = ["F401"]
 "src/pynwb/_version.py" = ["T201"]
 "src/pynwb/validate.py" = ["T201"]
