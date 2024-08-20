@@ -264,7 +264,7 @@ io2.close()
 
 
 ####################
-# Automatically split large data across multiple HDF5 files
+# Automatically splitting large data across multiple HDF5 files
 # -------------------------------------------------------------------
 #
 # For extremely large datasets it can be useful to split data across multiple files, e.g., in cases where
