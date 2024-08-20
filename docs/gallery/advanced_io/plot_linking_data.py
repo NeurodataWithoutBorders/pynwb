@@ -279,7 +279,7 @@ io2.close()
 # then filling in the data afterward.
 
 ####################
-# Step 1: Create the `NWBFile` as usual
+# Step 1: Create the NWBFile as usual
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 from pynwb import NWBFile
