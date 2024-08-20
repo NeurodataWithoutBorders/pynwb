@@ -275,7 +275,7 @@ io2.close()
 # The `family` driver stores the file on disk as a series of fixed-length chunks (each in its own file).
 # In practice, to write very large arrays, we can combine this approach with :ref:`iterative_write` to
 # avoid having to load all data into memory. In the example shown here we use a manual approach to
-# iterative write by using :py:class:`hdmf.backends.hdf5.H5DataIO` to create an empty dataset and
+# iterative write by using :py:class:`~hdmf.backends.hdf5.h5_utils.H5DataIO` to create an empty dataset and
 # then filling in the data afterward.
 
 ####################
