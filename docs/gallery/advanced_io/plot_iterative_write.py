@@ -19,7 +19,7 @@ writing large arrays without loading all data into memory and streaming data wri
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 #
 # In the typical write process, datasets are created and written as a whole. In contrast,
-# iterative data write refers to the writing of the contents of a dataset in an incremental, f
+# iterative data write refers to the writing of the contents of a dataset in an incremental,
 # iterative fashion.
 
 ####################
