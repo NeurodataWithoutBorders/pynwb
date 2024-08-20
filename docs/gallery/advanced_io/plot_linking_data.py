@@ -372,7 +372,7 @@ with h5py.File(name=filename_pattern, mode='r', driver='family', memb_size=chunk
 #    The ``memb_size`` parameter must be set on both write and read. As such, reading the file requires
 #    the user to know the ``memb_size`` that was used for writing.
 #
-# .. note::
+# .. warning::
 #
 #    The DANDI archive may not support NWB files that are split in this fashion.
 #
