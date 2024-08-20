@@ -369,8 +369,8 @@ with h5py.File(name=filename_pattern, mode='r', driver='family', memb_size=chunk
 #
 # .. note::
 #
-#    The `memb_size` parameter must be set on both write and read. As such, reading the file requires
-#    the user to know the `memb_size` that was used for writing.
+#    The ``memb_size`` parameter must be set on both write and read. As such, reading the file requires
+#    the user to know the ``memb_size`` that was used for writing.
 #
 # .. note::
 #
