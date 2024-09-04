@@ -60,7 +60,6 @@ See also this `h5repack tutorial <https://support.hdfgroup.org/HDF5/Tutor/cmdtoo
 How do I create a copy of an NWB file with different controls over how links are treated and whether copies are deep or shallow?
 ---------------------------------------------------------------------------------------------------------------------------------
 Use the `h5copy <https://support.hdfgroup.org/HDF5/doc/RM/Tools.html#Tools-Copy>`_ command line tool from the HDF5 Group.
-See also this `h5copy tutorial <https://support.hdfgroup.org/HDF5/Tutor/cmdtooledit.html#copy>`_.
 
 
 How do I generate new object IDs for a newly exported NWB file?
@@ -102,7 +101,7 @@ For example:
            # the written file will contain no links to external datasets
 
 You can also the `h5copy <https://support.hdfgroup.org/HDF5/doc/RM/Tools.html#Tools-Copy>`_ command line tool \
-from the HDF5 Group. See also this `h5copy tutorial <https://support.hdfgroup.org/HDF5/Tutor/cmdtooledit.html#copy>`_.
+from the HDF5 Group.
 
 
 How do I write a newly instantiated ``NWBFile`` to two different file paths?
