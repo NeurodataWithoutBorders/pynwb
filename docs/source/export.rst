@@ -53,7 +53,7 @@ on the :py:class:`~pynwb.file.NWBFile` before exporting.
 
 How do I create a copy of an NWB file with different data layouts (e.g., applying compression)?
 ---------------------------------------------------------------------------------------------------------
-Use the h5repack <https://docs.hdfgroup.org/hdf5/v1_14/_view_tools_edit.html>`_ command line tool from the HDF5 Group.
+Use the `h5repack <https://docs.hdfgroup.org/hdf5/v1_14/_view_tools_edit.html>`_ command line tool from the HDF5 Group.
 
 
 How do I create a copy of an NWB file with different controls over how links are treated and whether copies are deep or shallow?
