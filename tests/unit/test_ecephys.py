@@ -182,12 +182,23 @@ class ElectrodeGroupConstructor(TestCase):
                                description='electrode description',
                                location='electrode location',
                                device=dev1,
-                               position=[(1, 2, 3), ])
+                               position=(1, 2, 3))
         self.assertEqual(group.name, 'elec1')
         self.assertEqual(group.description, 'electrode description')
         self.assertEqual(group.location, 'electrode location')
         self.assertEqual(group.device, dev1)
-        self.assertEqual(group.position, [(1, 2, 3), ])
+        self.assertEqual(group.position.tolist(), (1, 2, 3))
+
+    def test_init_position_array(self):
+        position = np.array((1, 2, 3), dtype=np.dtype([('x', float), ('y', float), ('z', float)]))
+        dev1 = Device('dev1')
+        group = ElectrodeGroup('elec1', 'electrode description', 'electrode location', dev1,
+                               position)
+        self.assertEqual(group.name, 'elec1')
+        self.assertEqual(group.description, 'electrode description')
+        self.assertEqual(group.location, 'electrode location')
+        self.assertEqual(group.device, dev1)
+        self.assertEqual(group.position, position)
 
     def test_init_position_none(self):
         dev1 = Device('dev1')
@@ -226,7 +237,7 @@ class ElectrodeGroupConstructor(TestCase):
                            description='electrode description',
                            location='electrode location',
                            device=dev1,
-                           position=[(1, 2, 3), (4, 5)])
+                           position=[(1, 2, 3), (4, 5, 6), (7, 8, 9)])
 
 
 class EventDetectionConstructor(TestCase):

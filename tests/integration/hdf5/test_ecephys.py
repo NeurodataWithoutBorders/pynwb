@@ -27,7 +27,7 @@ class TestElectrodeGroupIO(NWBH5IOMixin, TestCase):
                             description='a test ElectrodeGroup',
                             location='a nonexistent place',
                             device=self.dev1,
-                            position=[(1., 2., 3.), ])
+                            position=(1., 2., 3.))
         return eg
 
     def addContainer(self, nwbfile):
