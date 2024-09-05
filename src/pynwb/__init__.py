@@ -368,7 +368,9 @@ class NWBHDF5IO(_HDF5IO):
              'default': None},
             {'name': 'write_args', 'type': dict,
              'doc': 'arguments to pass to :py:meth:`~hdmf.backends.io.HDMFIO.write_builder`',
-             'default': None})
+             'default': None},
+            {'name': 'cache_spec', 'type': bool, 'doc': 'whether to cache the specification to file',
+             'default': True})
     def export(self, **kwargs):
         """
         Export an NWB file to a new NWB file using the HDF5 backend.
