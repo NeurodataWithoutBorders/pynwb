@@ -12,6 +12,7 @@
 ### Bug fixes
 - Fixed `can_read` method to return False if no nwbfile version can be found @stephprince [#1934](https://github.com/NeurodataWithoutBorders/pynwb/pull/1934)
 - Changed `epoch_tags` to be a NWBFile property instead of constructor argument. @stephprince [#1935](https://github.com/NeurodataWithoutBorders/pynwb/pull/1935)
+- Exposed option to not cache the spec in `NWBHDF5IO.export`. @rly [#1959](https://github.com/NeurodataWithoutBorders/pynwb/pull/1959)
 
 ## PyNWB 2.8.1 (July 3, 2024)
 
