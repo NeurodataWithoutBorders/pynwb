@@ -2,6 +2,9 @@
 
 ## PyNWB 2.8.2 (Upcoming)
 
+### Enhancements and minor changes
+- Added support for numpy 2.0. @mavaylon1 [#1956](https://github.com/NeurodataWithoutBorders/pynwb/pull/1956)
+
 ### Documentation and tutorial enhancements
 - Added pre-release pull request instructions to release process documentation @stephprince [#1928](https://github.com/NeurodataWithoutBorders/pynwb/pull/1928)
 - Added section on how to use the `family` driver in `h5py` for splitting data across multiple files @oruebel [#1949](https://github.com/NeurodataWithoutBorders/pynwb/pull/1949)
