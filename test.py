@@ -179,7 +179,9 @@ def validate_nwbs():
                     if comp.returncode != 0:
                         return []
 
-                    return comp.stdout.split()
+                    output_lines = comp.stdout.split('\n')
+                    filtered_output = [line for line in output_lines if not re.search(r'warning', line, re.IGNORECASE) and line != '']
+                    return filtered_output
 
                 namespaces = get_namespaces(nwb)
 
