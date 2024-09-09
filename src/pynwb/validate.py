@@ -39,14 +39,18 @@ def get_cached_namespaces_to_validate(
     -------
     The following example illustrates how we can use this function to validate against namespaces
     cached in a file. This is useful, e.g., when a file was created using an extension
-    >>> from pynwb import validate
-    >>> from pynwb.validate import get_cached_namespaces_to_validate
-    >>> path = "my_nwb_file.nwb"
-    >>> validate_namespaces, manager, cached_namespaces = get_cached_namespaces_to_validate(path)
-    >>> with NWBHDF5IO(path, "r", manager=manager) as reader:
-    >>>     errors = []
-    >>>     for ns in validate_namespaces:
-    >>>         errors += validate(io=reader, namespace=ns)
+
+    .. code-block:: python
+
+        from pynwb import validate
+        from pynwb.validate import get_cached_namespaces_to_validate
+        path = "my_nwb_file.nwb"
+        validate_namespaces, manager, cached_namespaces = get_cached_namespaces_to_validate(path)
+        with NWBHDF5IO(path, "r", manager=manager) as reader:
+            errors = []
+            for ns in validate_namespaces:
+                errors += validate(io=reader, namespace=ns)
+
     :param path: Path for the NWB file
     :return: Tuple with:
       - List of strings with the most specific namespace(s) to use for validation.
