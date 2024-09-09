@@ -29,7 +29,7 @@ def _validate_helper(io: HDMFIO, namespace: str = CORE_NAMESPACE) -> list:
     return validator.validate(builder)
 
 
-def _get_cached_namespaces_to_validate(
+def get_cached_namespaces_to_validate(
     path: str, driver: Optional[str] = None, aws_region: Optional[str] = None,
 ) -> Tuple[List[str], BuildManager, Dict[str, str]]:
     """
@@ -39,14 +39,18 @@ def _get_cached_namespaces_to_validate(
     -------
     The following example illustrates how we can use this function to validate against namespaces
     cached in a file. This is useful, e.g., when a file was created using an extension
-    >>> from pynwb import validate
-    >>> from pynwb.validate import _get_cached_namespaces_to_validate
-    >>> path = "my_nwb_file.nwb"
-    >>> validate_namespaces, manager, cached_namespaces = _get_cached_namespaces_to_validate(path)
-    >>> with NWBHDF5IO(path, "r", manager=manager) as reader:
-    >>>     errors = []
-    >>>     for ns in validate_namespaces:
-    >>>         errors += validate(io=reader, namespace=ns)
+
+    .. code-block:: python
+
+        from pynwb import validate
+        from pynwb.validate import get_cached_namespaces_to_validate
+        path = "my_nwb_file.nwb"
+        validate_namespaces, manager, cached_namespaces = get_cached_namespaces_to_validate(path)
+        with NWBHDF5IO(path, "r", manager=manager) as reader:
+            errors = []
+            for ns in validate_namespaces:
+                errors += validate(io=reader, namespace=ns)
+
     :param path: Path for the NWB file
     :return: Tuple with:
       - List of strings with the most specific namespace(s) to use for validation.
@@ -149,7 +153,7 @@ def validate(**kwargs):
         io_kwargs = dict(path=path, mode="r", driver=driver)
 
         if use_cached_namespaces:
-            cached_namespaces, manager, namespace_dependencies = _get_cached_namespaces_to_validate(
+            cached_namespaces, manager, namespace_dependencies = get_cached_namespaces_to_validate(
                 path=path, driver=driver
             )
             io_kwargs.update(manager=manager)
@@ -231,7 +235,7 @@ def validate_cli():
 
     if args.list_namespaces:
         for path in args.paths:
-            cached_namespaces, _, _ = _get_cached_namespaces_to_validate(path=path)
+            cached_namespaces, _, _ = get_cached_namespaces_to_validate(path=path)
             print("\n".join(cached_namespaces))
     else:
         validation_errors, validation_status = validate(
