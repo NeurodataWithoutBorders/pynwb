@@ -3,6 +3,7 @@ import warnings
 import re
 import argparse
 import glob
+import h5py
 import inspect
 import logging
 import os.path
@@ -152,6 +153,9 @@ def validate_nwbs():
     logging.info('running validation tests on NWB files')
     examples_nwbs = glob.glob('*.nwb')
 
+    # exclude files downloaded from dandi, validation of those files is handled by dandisets-health-status checks
+    examples_nwbs = [x for x in examples_nwbs if not x.startswith('sub-')]
+
     import pynwb
     from pynwb.validate import get_cached_namespaces_to_validate
 
@@ -162,15 +166,34 @@ def validate_nwbs():
             ws = list()
             with warnings.catch_warnings(record=True) as tmp:
                 logging.info("Validating with pynwb.validate method.")
-                with pynwb.NWBHDF5IO(nwb, mode='r') as io:
-                    errors = pynwb.validate(io)
-                    TOTAL += 1
+                is_family_nwb_file = False
+                try:
+                    with pynwb.NWBHDF5IO(nwb, mode='r') as io:
+                        errors = pynwb.validate(io)
+                except OSError as e:
+                    # if the file was created with the family driver, need to use the family driver to open it
+                    if 'family driver should be used' in str(e):
+                        is_family_nwb_file = True
+                        match = re.search(r'(\d+)', nwb)
+                        filename_pattern = nwb[:match.start()] + '%d' + nwb[match.end():]  # infer the filename pattern
+                        memb_size = 1024**2  # note: the memb_size must be the same as the one used to create the file
+                        with h5py.File(filename_pattern, mode='r', driver='family', memb_size=memb_size) as f:
+                            with pynwb.NWBHDF5IO(file=f, manager=None, mode='r') as io:
+                                errors = pynwb.validate(io)
+                    else:
+                        raise e
 
-                    if errors:
-                        FAILURES += 1
-                        ERRORS += 1
-                        for err in errors:
-                            print("Error: %s" % err)
+                TOTAL += 1
+
+                if errors:
+                    FAILURES += 1
+                    ERRORS += 1
+                    for err in errors:
+                        print("Error: %s" % err)
+
+                # if file was created with family driver, skip pynwb.validate CLI because not yet supported
+                if is_family_nwb_file:
+                    continue
 
                 namespaces, _, _ = get_cached_namespaces_to_validate(nwb)
 
