@@ -153,6 +153,7 @@ def validate_nwbs():
     examples_nwbs = glob.glob('*.nwb')
 
     import pynwb
+    from pynwb.validate import get_cached_namespaces_to_validate
 
     for nwb in examples_nwbs:
         try:
@@ -171,19 +172,7 @@ def validate_nwbs():
                         for err in errors:
                             print("Error: %s" % err)
 
-                def get_namespaces(nwbfile):
-                    comp = run(["python", "-m", "pynwb.validate",
-                               "--list-namespaces", nwbfile],
-                               stdout=PIPE, stderr=STDOUT, universal_newlines=True, timeout=30)
-
-                    if comp.returncode != 0:
-                        return []
-
-                    output_lines = comp.stdout.split('\n')
-                    filtered_output = [line for line in output_lines if not re.search(r'warning', line, re.IGNORECASE) and line != '']
-                    return filtered_output
-
-                namespaces = get_namespaces(nwb)
+                namespaces, _, _ = get_cached_namespaces_to_validate(nwb)
 
                 if len(namespaces) == 0:
                     FAILURES += 1
