@@ -289,7 +289,7 @@ class TestAppend(TestCase):
             np.testing.assert_equal(nwb.acquisition['timeseries2'].data[:], ts2.data)
             self.assertIs(nwb.processing['test_proc_mod']['LFP'].electrical_series['test_es'].electrodes,
                           nwb.acquisition['timeseries2'].electrodes)
-            errors = validate(io)
+            errors, _ = validate(io)
             self.assertEqual(len(errors), 0, errors)
 
     def test_electrode_id_uniqueness(self):

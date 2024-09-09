@@ -60,7 +60,7 @@ class TestReadOldVersions(TestCase):
                 with warnings.catch_warnings(record=True) as warnings_on_read:
                     warnings.simplefilter("always")
                     with self.get_io(f) as io:
-                        errors = validate(io)
+                        errors, _ = validate(io)
                         io.read()
                         for w in warnings_on_read:
                             if f.name in self.expected_warnings:
