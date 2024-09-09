@@ -1,6 +1,6 @@
 # PyNWB Changelog
 
-## PyNWB 2.8.2 (September 5, 2024)
+## PyNWB 2.8.2 (September 9, 2024)
 
 ### Enhancements and minor changes
 - Added support for numpy 2.0. @mavaylon1 [#1956](https://github.com/NeurodataWithoutBorders/pynwb/pull/1956)
