@@ -214,6 +214,9 @@ def _load_core_namespace(final:bool=False):
             cached_version = f.read().strip()
         if cached_version != __version__:
             Path(__resources['cached_typemap_path']).unlink(missing_ok=True)
+    else:
+        # remove any cached typemap, forcing re-creation
+        Path(__resources['cached_typemap_path']).unlink(missing_ok=True)
 
     # load pickled typemap if we have one
     if os.path.exists(__resources['cached_typemap_path']):
