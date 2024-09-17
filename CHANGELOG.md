@@ -1,5 +1,10 @@
 # PyNWB Changelog
 
+## PyNWB 2.8.3 (Upcoming)
+
+### Performance
+- Cache global type map to speed import 3X. @sneakers-the-rat [#1931](https://github.com/NeurodataWithoutBorders/pynwb/pull/1931)
+
 ## PyNWB 2.8.2 (September 9, 2024)
 
 ### Enhancements and minor changes
@@ -14,9 +19,6 @@
 - Fixed `can_read` method to return False if no nwbfile version can be found @stephprince [#1934](https://github.com/NeurodataWithoutBorders/pynwb/pull/1934)
 - Changed `epoch_tags` to be a NWBFile property instead of constructor argument. @stephprince [#1935](https://github.com/NeurodataWithoutBorders/pynwb/pull/1935)
 - Exposed option to not cache the spec in `NWBHDF5IO.export`. @rly [#1959](https://github.com/NeurodataWithoutBorders/pynwb/pull/1959)
-
-### Performance
-- Cache global type map to speed import 3x. [#1931](https://github.com/NeurodataWithoutBorders/pynwb/pull/1931)
 
 ## PyNWB 2.8.1 (July 3, 2024)
 
