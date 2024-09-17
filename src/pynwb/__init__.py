@@ -86,6 +86,8 @@ def __get_resources() -> dict:
 
 def _get_resources():
     # LEGACY: Needed to support legacy implementation.
+    # TODO: Remove this in PyNWB 3.0.
+    warn("The function '_get_resources' is deprecated and will be removed in a future release.", DeprecationWarning)
     return __get_resources()
 
 
