@@ -163,7 +163,7 @@ def available_namespaces():
     return __TYPE_MAP.namespace_catalog.namespaces
 
 
-def _git_cmd(*args) -> subprocess.CompletedProcess:
+def __git_cmd(*args) -> subprocess.CompletedProcess:
     """
     Call git with the package as the directory regardless of cwd.
 
@@ -176,12 +176,12 @@ def _git_cmd(*args) -> subprocess.CompletedProcess:
     return result
 
 
-def _clone_submodules():
-    if _git_cmd('rev-parse').returncode == 0:
+def __clone_submodules():
+    if __git_cmd('rev-parse').returncode == 0:
         warnings.warn(
             'NWB core schema not found in cloned installation, initializing submodules...',
             stacklevel=1)
-        res = _git_cmd('submodule', 'update', '--init', '--recursive')
+        res = __git_cmd('submodule', 'update', '--init', '--recursive')
         if not res.returncode == 0:  # pragma: no cover
             raise RuntimeError(
                 'Exception while initializing submodules, got:\n'
@@ -190,7 +190,7 @@ def _clone_submodules():
         raise RuntimeError("Package is not installed from a git repository, can't clone submodules")
 
 
-def _load_core_namespace(final:bool=False):
+def __load_core_namespace(final:bool=False):
     """
     Load the core namespace into __TYPE_MAP,
     either by loading a pickled version or creating one anew and pickling it.
@@ -234,7 +234,7 @@ def _load_core_namespace(final:bool=False):
     # afterwards trying to load the namespace again
     else:
         try:
-            _clone_submodules()
+            __clone_submodules()
         except (FileNotFoundError, OSError, RuntimeError) as e:  # pragma: no cover
             if 'core' not in available_namespaces():
                 warnings.warn(
@@ -245,10 +245,8 @@ def _load_core_namespace(final:bool=False):
                     f"Got exception: \n{e}"
                 )
         if not final:
-            _load_core_namespace(final=True)
-_load_core_namespace()
-
-
+            __load_core_namespace(final=True)
+__load_core_namespace()
 
 
 # a function to register a container classes with the global map
