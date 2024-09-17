@@ -89,14 +89,13 @@ def _get_resources():
     return __get_resources()
 
 
-# a global namespace catalog
-global __NS_CATALOG
+# a global type map
 global __TYPE_MAP
 
-__NS_CATALOG = NamespaceCatalog(NWBGroupSpec, NWBDatasetSpec, NWBNamespace)
+__ns_catalog = NamespaceCatalog(NWBGroupSpec, NWBDatasetSpec, NWBNamespace)
 
 hdmf_typemap = hdmf.common.get_type_map()
-__TYPE_MAP = TypeMap(__NS_CATALOG)
+__TYPE_MAP = TypeMap(__ns_catalog)
 __TYPE_MAP.merge(hdmf_typemap, ns_catalog=True)
 
 # load the core namespace, i.e. base NWB specification
@@ -161,7 +160,7 @@ def load_namespaces(**kwargs):
 
 def available_namespaces():
     """Returns all namespaces registered in the namespace catalog"""
-    return __NS_CATALOG.namespaces
+    return __TYPE_MAP.namespace_catalog.namespaces
 
 
 def _git_cmd(*args) -> subprocess.CompletedProcess:
@@ -204,7 +203,6 @@ def _load_core_namespace(final:bool=False):
             but it shouldn't go into an infinite loop.
             If final is ``True``, don't recurse.
     """
-    global __NS_CATALOG
     global __TYPE_MAP
     global __resources
 
@@ -223,9 +221,6 @@ def _load_core_namespace(final:bool=False):
     if os.path.exists(__resources['cached_typemap_path']):
         with open(__resources['cached_typemap_path'], 'rb') as f:
             __TYPE_MAP = pickle.load(f)  # type: TypeMap
-        # __NS_CATALOG is contained by __TYPE_MAP and they should be linked,
-        # so we restore the global one from the cached __TYPE_MAP
-        __NS_CATALOG = __TYPE_MAP.namespace_catalog
 
     # otherwise make a new one and cache it
     elif os.path.exists(__resources['namespace_path']):
