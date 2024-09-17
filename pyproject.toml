@@ -34,8 +34,8 @@ classifiers = [
 ]
 dependencies = [
     "h5py>=2.10",
-    "hdmf>=3.14.0",
-    "numpy>=1.18, <2.0", # pin below 2.0 until HDMF supports numpy 2.0
+    "hdmf>=3.14.3",
+    "numpy>=1.18",
     "pandas>=1.1.5",
     "python-dateutil>=2.7.3",
 ]
@@ -91,7 +91,7 @@ omit = [
 ]
 
 [tool.ruff]
-select = ["E", "F", "T100", "T201", "T203"]
+lint.select = ["E", "F", "T100", "T201", "T203"]
 exclude = [
   ".git",
   ".tox",
@@ -100,12 +100,13 @@ exclude = [
   "dist/",
   "src/pynwb/nwb-schema",
   "docs/source/conf.py",
+  "docs/notebooks/*",
   "src/pynwb/_due.py",
   "test.py" # remove when pytest comes along
 ]
 line-length = 120
 
-[tool.ruff.per-file-ignores]
+[tool.ruff.lint.per-file-ignores]
 "tests/read_dandi/*" = ["T201"]
 "docs/gallery/*" = ["E402", "T201"]
 "src/*/__init__.py" = ["F401"]
@@ -115,6 +116,6 @@ line-length = 120
 
 # "test_gallery.py" = ["T201"] # Uncomment when test_gallery.py is created
 
-[tool.ruff.mccabe]
+[tool.ruff.lint.mccabe]
 max-complexity = 17
 
