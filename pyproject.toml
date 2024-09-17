@@ -98,7 +98,7 @@ exclude = [
   "__pycache__",
   "build/",
   "dist/",
-  "src/nwb-schema",
+  "src/pynwb/nwb-schema",
   "docs/source/conf.py",
   "docs/notebooks/*",
   "src/pynwb/_due.py",
