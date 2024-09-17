@@ -2,7 +2,6 @@
 for reading and writing data in NWB format
 '''
 import os.path
-import warnings
 from pathlib import Path
 from copy import deepcopy
 import subprocess
@@ -180,7 +179,7 @@ def __git_cmd(*args) -> subprocess.CompletedProcess:
 
 def __clone_submodules():
     if __git_cmd('rev-parse').returncode == 0:
-        warnings.warn(
+        warn(
             'NWB core schema not found in cloned installation, initializing submodules...',
             stacklevel=1)
         res = __git_cmd('submodule', 'update', '--init', '--recursive')
@@ -239,7 +238,7 @@ def __load_core_namespace(final:bool=False):
             __clone_submodules()
         except (FileNotFoundError, OSError, RuntimeError) as e:  # pragma: no cover
             if 'core' not in available_namespaces():
-                warnings.warn(
+                warn(
                     "'core' is not a registered namespace. If you installed PyNWB locally using a git clone, "
                     "you need to use the --recurse_submodules flag when cloning. "
                     "See developer installation instructions here: "
