@@ -1,14 +1,34 @@
 # PyNWB Changelog
 
-## PyNWB 2.8.1 (Upcoming)
+## PyNWB 2.8.3 (Upcoming)
+
+### Performance
+- Cache global type map to speed import 3X. @sneakers-the-rat [#1931](https://github.com/NeurodataWithoutBorders/pynwb/pull/1931)
+
+## PyNWB 2.8.2 (September 9, 2024)
+
+### Enhancements and minor changes
+- Added support for numpy 2.0. @mavaylon1 [#1956](https://github.com/NeurodataWithoutBorders/pynwb/pull/1956)
+- Make `get_cached_namespaces_to_validate` a public function @stephprince [#1961](https://github.com/NeurodataWithoutBorders/pynwb/pull/1961)
+
+### Documentation and tutorial enhancements
+- Added pre-release pull request instructions to release process documentation @stephprince [#1928](https://github.com/NeurodataWithoutBorders/pynwb/pull/1928)
+- Added section on how to use the `family` driver in `h5py` for splitting data across multiple files @oruebel [#1949](https://github.com/NeurodataWithoutBorders/pynwb/pull/1949)
+
+### Bug fixes
+- Fixed `can_read` method to return False if no nwbfile version can be found @stephprince [#1934](https://github.com/NeurodataWithoutBorders/pynwb/pull/1934)
+- Changed `epoch_tags` to be a NWBFile property instead of constructor argument. @stephprince [#1935](https://github.com/NeurodataWithoutBorders/pynwb/pull/1935)
+- Exposed option to not cache the spec in `NWBHDF5IO.export`. @rly [#1959](https://github.com/NeurodataWithoutBorders/pynwb/pull/1959)
+
+## PyNWB 2.8.1 (July 3, 2024)
 
 ### Documentation and tutorial enhancements
 - Simplified the introduction to NWB tutorial. @rly [#1914](https://github.com/NeurodataWithoutBorders/pynwb/pull/1914)
 - Simplified the ecephys and ophys tutorials. [#1915](https://github.com/NeurodataWithoutBorders/pynwb/pull/1915)
+- Add comments to `src/pynwb/io/file.py` to improve developer documentation. @rly [#1925](https://github.com/NeurodataWithoutBorders/pynwb/pull/1925)
 
 ### Bug fixes
 - Fixed use of `channel_conversion` in `TimeSeries` `get_data_in_units`. @rohanshah [1923](https://github.com/NeurodataWithoutBorders/pynwb/pull/1923)
-
 
 ## PyNWB 2.8.0 (May 28, 2024)
 

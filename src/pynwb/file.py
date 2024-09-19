@@ -274,7 +274,6 @@ class NWBFile(MultiContainerInterface, HERDManager):
                      {'name': 'subject', 'child': True, 'required_name': 'subject'},
                      {'name': 'sweep_table', 'child': True, 'required_name': 'sweep_table'},
                      {'name': 'invalid_times', 'child': True, 'required_name': 'invalid_times'},
-                     'epoch_tags',
                      # icephys_filtering is temporary. /intracellular_ephys/filtering dataset will be deprecated
                      {'name': 'icephys_filtering', 'settable': False},
                      {'name': 'intracellular_recordings', 'child': True,
@@ -365,8 +364,6 @@ class NWBFile(MultiContainerInterface, HERDManager):
              'doc': 'Stimulus template TimeSeries objects belonging to this NWBFile', 'default': None},
             {'name': 'epochs', 'type': TimeIntervals,
              'doc': 'Epoch objects belonging to this NWBFile', 'default': None},
-            {'name': 'epoch_tags', 'type': (tuple, list, set),
-             'doc': 'A sorted list of tags used across all epochs', 'default': set()},
             {'name': 'trials', 'type': TimeIntervals,
              'doc': 'A table containing trial data', 'default': None},
             {'name': 'invalid_times', 'type': TimeIntervals,
@@ -429,7 +426,6 @@ class NWBFile(MultiContainerInterface, HERDManager):
             'stimulus_template',
             'keywords',
             'processing',
-            'epoch_tags',
             'electrodes',
             'electrode_groups',
             'devices',
@@ -560,6 +556,10 @@ class NWBFile(MultiContainerInterface, HERDManager):
         return self.processing
 
     @property
+    def epoch_tags(self):
+        return set(self.epochs.tags[:]) if self.epochs is not None else set()
+
+    @property
     def ec_electrode_groups(self):
         warn("NWBFile.ec_electrode_groups has been replaced by NWBFile.electrode_groups.", DeprecationWarning)
         return self.electrode_groups
@@ -620,7 +620,6 @@ class NWBFile(MultiContainerInterface, HERDManager):
         See :py:meth:`~hdmf.common.table.DynamicTable.add_column` for more details
         """
         self.__check_epochs()
-        self.epoch_tags.update(kwargs.pop('tags', list()))
         self.epochs.add_column(**kwargs)
 
     def add_epoch_metadata_column(self, *args, **kwargs):
@@ -642,8 +641,6 @@ class NWBFile(MultiContainerInterface, HERDManager):
         enclosure versus sleeping between explorations)
         """
         self.__check_epochs()
-        if kwargs['tags'] is not None:
-            self.epoch_tags.update(kwargs['tags'])
         self.epochs.add_interval(**kwargs)
 
     def __check_electrodes(self):

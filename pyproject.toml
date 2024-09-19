@@ -9,7 +9,8 @@ authors = [
   { name="Ryan Ly", email="rly@lbl.gov" },
   { name="Oliver Ruebel", email="oruebel@lbl.gov" },
   { name="Ben Dichter", email="ben.dichter@gmail.com" },
-  { name="Matthew Avaylon", email="mavaylon@lbl.gov" }
+  { name="Matthew Avaylon", email="mavaylon@lbl.gov" },
+  { name="Stephanie Prince", email="smprince@lbl.gov" },
 ]
 description= "Package for working with Neurodata stored in the NWB format."
 readme = "README.rst"
@@ -33,8 +34,8 @@ classifiers = [
 ]
 dependencies = [
     "h5py>=2.10",
-    "hdmf>=3.14.0",
-    "numpy>=1.18, <2.0", # pin below 2.0 until HDMF supports numpy 2.0
+    "hdmf>=3.14.3",
+    "numpy>=1.18",
     "pandas>=1.1.5",
     "python-dateutil>=2.7.3",
 ]
@@ -90,21 +91,22 @@ omit = [
 ]
 
 [tool.ruff]
-select = ["E", "F", "T100", "T201", "T203"]
+lint.select = ["E", "F", "T100", "T201", "T203"]
 exclude = [
   ".git",
   ".tox",
   "__pycache__",
   "build/",
   "dist/",
-  "src/nwb-schema",
+  "src/pynwb/nwb-schema",
   "docs/source/conf.py",
+  "docs/notebooks/*",
   "src/pynwb/_due.py",
   "test.py" # remove when pytest comes along
 ]
 line-length = 120
 
-[tool.ruff.per-file-ignores]
+[tool.ruff.lint.per-file-ignores]
 "tests/read_dandi/*" = ["T201"]
 "docs/gallery/*" = ["E402", "T201"]
 "src/*/__init__.py" = ["F401"]
@@ -114,6 +116,6 @@ line-length = 120
 
 # "test_gallery.py" = ["T201"] # Uncomment when test_gallery.py is created
 
-[tool.ruff.mccabe]
+[tool.ruff.lint.mccabe]
 max-complexity = 17
 

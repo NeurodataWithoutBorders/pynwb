@@ -531,3 +531,41 @@ class TestNWBHDF5IO(TestCase):
         with NWBHDF5IO(pathlib_path, 'r') as io:
             read_file = io.read()
             self.assertContainerEqual(read_file, self.nwbfile)
+
+    def test_can_read_current_nwb_file(self):
+        with NWBHDF5IO(self.path, 'w') as io:
+            io.write(self.nwbfile)
+        self.assertTrue(NWBHDF5IO.can_read(self.path))
+
+    def test_can_read_file_does_not_exits(self):
+        self.assertFalse(NWBHDF5IO.can_read('not_a_file.nwb'))
+
+    def test_can_read_file_no_version(self):
+        # write the example file
+        with NWBHDF5IO(self.path, 'w') as io:
+            io.write(self.nwbfile)
+        # remove the version attribute
+        with File(self.path, mode='a') as io:
+            del io.attrs['nwb_version']
+
+        # assert can_read returns False and warning raised
+        warn_msg = "Cannot read because missing NWB version in the HDF5 file. The file is not a valid NWB file."
+        with self.assertWarnsWith(UserWarning, warn_msg):
+            self.assertFalse(NWBHDF5IO.can_read(self.path))
+
+    def test_can_read_file_old_version(self):
+        # write the example file
+        with NWBHDF5IO(self.path, 'w') as io:
+            io.write(self.nwbfile)
+        # set the version attribute <2.0
+        with File(self.path, mode='a') as io:
+            io.attrs['nwb_version'] = "1.0.5"
+
+        # assert can_read returns False and warning raised
+        warn_msg = "Cannot read because PyNWB supports NWB files version 2 and above."
+        with self.assertWarnsWith(UserWarning, warn_msg):
+            self.assertFalse(NWBHDF5IO.can_read(self.path))
+
+    def test_can_read_file_invalid_hdf5_file(self):
+        # current file is not an HDF5 file
+        self.assertFalse(NWBHDF5IO.can_read(__file__))

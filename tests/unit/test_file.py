@@ -144,6 +144,18 @@ class NWBFileTest(TestCase):
         tags = self.nwbfile.epoch_tags
         self.assertEqual(set(expected_tags), set(tags))
 
+    def test_epoch_tags_single_string(self):
+        tags1 = 't1'
+        tags2 = 't2'
+        expected_tags = set([tags1, tags2])
+        self.nwbfile.add_epoch(0.0, 1.0, tags=tags1)
+        self.nwbfile.add_epoch(1.0, 2.0, tags=tags2)
+        tags = self.nwbfile.epoch_tags
+        self.assertEqual(expected_tags, tags)
+
+    def test_epoch_tags_no_table(self):
+        self.assertEqual(set(), self.nwbfile.epoch_tags)
+
     def test_add_acquisition(self):
         self.nwbfile.add_acquisition(TimeSeries('test_ts', [0, 1, 2, 3, 4, 5],
                                                 'grams', timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5]))

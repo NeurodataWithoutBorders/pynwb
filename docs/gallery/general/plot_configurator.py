@@ -55,6 +55,7 @@ import os
 from pynwb import NWBFile, get_loaded_type_config, load_type_config, unload_type_config
 from pynwb.file import Subject
 
+####################################
 # How to use a Configuration file
 # -------------------------------
 # As mentioned prior, the first step after creating a configuration file is
@@ -69,7 +70,10 @@ from pynwb.file import Subject
 # the value of the fields are wrapped and then validated to see if it is a
 # permissible value in their respective :py:class:`~hdmf.term_set.TermSet`.
 
-dir_path = os.path.dirname(os.path.abspath("__file__"))
+try:
+    dir_path = os.path.dirname(os.path.abspath(__file__))  # when running as a .py
+except NameError:
+    dir_path = os.path.dirname(os.path.abspath("__file__"))  # when running as a script or notebook
 yaml_file = os.path.join(dir_path, 'nwb_gallery_config.yaml')
 load_type_config(config_path=yaml_file)
 
