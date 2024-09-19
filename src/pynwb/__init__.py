@@ -4,6 +4,9 @@ for reading and writing data in NWB format
 import os.path
 from pathlib import Path
 from copy import deepcopy
+import subprocess
+import pickle
+from warnings import warn
 import h5py
 
 from hdmf.spec import NamespaceCatalog
@@ -21,6 +24,16 @@ CORE_NAMESPACE = 'core'
 
 from .spec import NWBDatasetSpec, NWBGroupSpec, NWBNamespace  # noqa E402
 from .validate import validate  # noqa: F401, E402
+
+try:
+    # see https://effigies.gitlab.io/posts/python-packaging-2023/
+    from ._version import __version__
+except ImportError:  # pragma: no cover
+    # this is a relatively slower method for getting the version string
+    from importlib.metadata import version  # noqa: E402
+
+    __version__ = version("pynwb")
+    del version
 
 
 @docval({'name': 'config_path', 'type': str, 'doc': 'Path to the configuration file.'},
@@ -50,7 +63,7 @@ def unload_type_config(**kwargs):
     type_map = kwargs['type_map'] or get_type_map()
     hdmf_unload_type_config(type_map=type_map)
 
-def __get_resources():
+def __get_resources() -> dict:
     try:
         from importlib.resources import files
     except ImportError:
@@ -60,26 +73,34 @@ def __get_resources():
     __location_of_this_file = files(__name__)
     __core_ns_file_name = 'nwb.namespace.yaml'
     __schema_dir = 'nwb-schema/core'
+    cached_core_typemap = __location_of_this_file / 'core_typemap.pkl'
+    cached_version_indicator = __location_of_this_file / '.core_typemap_version'
 
     ret = dict()
     ret['namespace_path'] = str(__location_of_this_file / __schema_dir / __core_ns_file_name)
+    ret['cached_typemap_path'] = str(cached_core_typemap)
+    ret['cached_version_indicator'] = str(cached_version_indicator)
     return ret
 
 
 def _get_resources():
     # LEGACY: Needed to support legacy implementation.
+    # TODO: Remove this in PyNWB 3.0.
+    warn("The function '_get_resources' is deprecated and will be removed in a future release.", DeprecationWarning)
     return __get_resources()
 
 
-# a global namespace catalog
-global __NS_CATALOG
+# a global type map
 global __TYPE_MAP
 
-__NS_CATALOG = NamespaceCatalog(NWBGroupSpec, NWBDatasetSpec, NWBNamespace)
+__ns_catalog = NamespaceCatalog(NWBGroupSpec, NWBDatasetSpec, NWBNamespace)
 
 hdmf_typemap = hdmf.common.get_type_map()
-__TYPE_MAP = TypeMap(__NS_CATALOG)
+__TYPE_MAP = TypeMap(__ns_catalog)
 __TYPE_MAP.merge(hdmf_typemap, ns_catalog=True)
+
+# load the core namespace, i.e. base NWB specification
+__resources = __get_resources()
 
 
 @docval({'name': 'extensions', 'type': (str, TypeMap, list),
@@ -138,22 +159,95 @@ def load_namespaces(**kwargs):
     namespace_path = getargs('namespace_path', kwargs)
     return __TYPE_MAP.load_namespaces(namespace_path)
 
-
-# load the core namespace, i.e. base NWB specification
-__resources = __get_resources()
-if os.path.exists(__resources['namespace_path']):
-    load_namespaces(__resources['namespace_path'])
-else:
-    raise RuntimeError(
-        "'core' is not a registered namespace. If you installed PyNWB locally using a git clone, you need to "
-        "use the --recurse_submodules flag when cloning. See developer installation instructions here: "
-        "https://pynwb.readthedocs.io/en/stable/install_developers.html#install-from-git-repository"
-    )
-
-
 def available_namespaces():
     """Returns all namespaces registered in the namespace catalog"""
-    return __NS_CATALOG.namespaces
+    return __TYPE_MAP.namespace_catalog.namespaces
+
+
+def __git_cmd(*args) -> subprocess.CompletedProcess:
+    """
+    Call git with the package as the directory regardless of cwd.
+
+    Since any folder within a git repo works, don't try to ascend to the top, since
+    if we're *not* actually in a git repo we're only guaranteed to know about
+    the inner `pynwb` directory.
+    """
+    parent_dir = str(Path(__file__).parent)
+    result = subprocess.run(["git", "-C", parent_dir, *args], capture_output=True)
+    return result
+
+
+def __clone_submodules():
+    if __git_cmd('rev-parse').returncode == 0:
+        warn(
+            'NWB core schema not found in cloned installation, initializing submodules...',
+            stacklevel=1)
+        res = __git_cmd('submodule', 'update', '--init', '--recursive')
+        if not res.returncode == 0:  # pragma: no cover
+            raise RuntimeError(
+                'Exception while initializing submodules, got:\n'
+                'stdout:\n' + ('-'*20) + res.stdout + "\nstderr:\n" + ('-'*20) + res.stderr)
+    else:  # pragma: no cover
+        raise RuntimeError("Package is not installed from a git repository, can't clone submodules")
+
+
+def __load_core_namespace(final:bool=False):
+    """
+    Load the core namespace into __TYPE_MAP,
+    either by loading a pickled version or creating one anew and pickling it.
+
+    We keep a dotfile next to it that tracks what version of pynwb created it,
+    so that we invalidate it when the code changes.
+
+    Args:
+        final (bool): This function tries again if the submodules aren't cloned,
+            but it shouldn't go into an infinite loop.
+            If final is ``True``, don't recurse.
+    """
+    global __TYPE_MAP
+    global __resources
+
+    # if we have a version indicator file and it doesn't match the current version,
+    # scrap the cached typemap
+    if os.path.exists(__resources['cached_version_indicator']):
+        with open(__resources['cached_version_indicator'], 'r') as f:
+            cached_version = f.read().strip()
+        if cached_version != __version__:
+            Path(__resources['cached_typemap_path']).unlink(missing_ok=True)
+    else:
+        # remove any cached typemap, forcing re-creation
+        Path(__resources['cached_typemap_path']).unlink(missing_ok=True)
+
+    # load pickled typemap if we have one
+    if os.path.exists(__resources['cached_typemap_path']):
+        with open(__resources['cached_typemap_path'], 'rb') as f:
+            __TYPE_MAP = pickle.load(f)  # type: TypeMap
+
+    # otherwise make a new one and cache it
+    elif os.path.exists(__resources['namespace_path']):
+        load_namespaces(__resources['namespace_path'])
+        with open(__resources['cached_typemap_path'], 'wb') as f:
+            pickle.dump(__TYPE_MAP, f, protocol=pickle.HIGHEST_PROTOCOL)
+        with open(__resources['cached_version_indicator'], 'w') as f:
+            f.write(__version__)
+
+    # otherwise, we don't have the schema and try and initialize from submodules,
+    # afterwards trying to load the namespace again
+    else:
+        try:
+            __clone_submodules()
+        except (FileNotFoundError, OSError, RuntimeError) as e:  # pragma: no cover
+            if 'core' not in available_namespaces():
+                warn(
+                    "'core' is not a registered namespace. If you installed PyNWB locally using a git clone, "
+                    "you need to use the --recurse_submodules flag when cloning. "
+                    "See developer installation instructions here: "
+                    "https://pynwb.readthedocs.io/en/stable/install_developers.html#install-from-git-repository\n"
+                    f"Got exception: \n{e}"
+                )
+        if not final:
+            __load_core_namespace(final=True)
+__load_core_namespace()
 
 
 # a function to register a container classes with the global map
@@ -269,7 +363,15 @@ class NWBHDF5IO(_HDF5IO):
             return False
         try:
             with h5py.File(path, "r") as file:   # path is HDF5 file
-                return get_nwbfile_version(file)[1][0] >= 2    # Major version of NWB >= 2
+                version_info = get_nwbfile_version(file)
+                if version_info[0] is None:
+                    warn("Cannot read because missing NWB version in the HDF5 file. The file is not a valid NWB file.")
+                    return False
+                elif version_info[1][0] < 2:    # Major versions of NWB < 2 not supported
+                    warn("Cannot read because PyNWB supports NWB files version 2 and above.")
+                    return False
+                else:
+                    return True
         except IOError:
             return False
 
@@ -359,7 +461,9 @@ class NWBHDF5IO(_HDF5IO):
              'default': None},
             {'name': 'write_args', 'type': dict,
              'doc': 'arguments to pass to :py:meth:`~hdmf.backends.io.HDMFIO.write_builder`',
-             'default': None})
+             'default': None},
+            {'name': 'cache_spec', 'type': bool, 'doc': 'whether to cache the specification to file',
+             'default': True})
     def export(self, **kwargs):
         """
         Export an NWB file to a new NWB file using the HDF5 backend.
@@ -416,15 +520,7 @@ from . import legacy  # noqa: F401,E402
 from hdmf.data_utils import DataChunkIterator  # noqa: F401,E402
 from hdmf.backends.hdf5 import H5DataIO  # noqa: F401,E402
 
-try:
-    # see https://effigies.gitlab.io/posts/python-packaging-2023/
-    from ._version import __version__
-except ImportError:  # pragma: no cover
-    # this is a relatively slower method for getting the version string
-    from importlib.metadata import version  # noqa: E402
 
-    __version__ = version("pynwb")
-    del version
 
 from ._due import due, BibTeX  # noqa: E402
 due.cite(

@@ -1,6 +1,6 @@
 from pynwb import NWBHDF5IO
 from pynwb import validate
-from pynwb.validate import _get_cached_namespaces_to_validate
+from pynwb.validate import get_cached_namespaces_to_validate
 from pynwb.testing import TestCase
 import urllib.request
 import h5py
@@ -85,7 +85,7 @@ class TestRos3Streaming(TestCase):
                 )
             }
         }
-        found_namespaces, _, found_namespace_dependencies = _get_cached_namespaces_to_validate(
+        found_namespaces, _, found_namespace_dependencies = get_cached_namespaces_to_validate(
             path=self.s3_test_path, driver="ros3"
         )
 

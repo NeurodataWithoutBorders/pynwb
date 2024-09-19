@@ -20,25 +20,6 @@ Prerequisites
 
 * You have a `GPG signing key`_.
 
-* Dependency versions in ``requirements.txt``, ``requirements-dev.txt``, ``requirements-opt.txt``,
-  ``requirements-doc.txt``, and ``requirements-min.txt`` are up-to-date.
-
-* Legal information and copyright dates in ``Legal.txt``, ``license.txt``, ``README.rst``,
-  ``docs/source/conf.py``, and any other files are up-to-date.
-
-* Package information in ``setup.py`` is up-to-date.
-
-* ``README.rst`` information is up-to-date.
-
-* The ``nwb-schema`` submodule is up-to-date. The version number should be checked manually in case syncing the
-  git submodule does not work as expected.
-
-* Documentation reflects any new features and changes in PyNWB functionality.
-
-* Documentation builds locally.
-
-* Documentation builds on the `ReadTheDocs project`_ on the "dev" build.
-
 * Release notes have been prepared.
 
 * An appropriate new version number has been selected.
@@ -55,6 +36,44 @@ Commands to evaluate starts with a dollar sign. For example::
   Hello
 
 means that ``echo "Hello"`` should be copied and evaluated in the terminal.
+
+-----------------------------------------------------
+Make pre-release pull request on GitHub: Step-by-step
+-----------------------------------------------------
+
+1. Create a new branch locally or on GitHub. Update the ``CHANGELOG.md`` with the release date.
+
+  .. code::
+
+    $ git checkout -b release-X.Y.Z
+
+
+2. Create a pull request for the new release branch, then append the URL with: "&template=release.md".
+For example, ``https://github.com/NeurodataWithoutBorders/pynwb/compare/dev...release-X.Y.Z?quick_pull=1&template=release.md``
+
+
+3. Follow the checklist in the template. The checklist covers the following steps in more detail:
+
+  * Make sure all PRs to be included in this release have been merged to ``dev``.
+
+  * Update package versions in ``requirements.txt``, ``requirements-dev.txt``, ``requirements-opt.txt``,
+    ``requirements-doc.txt``, ``requirements-min.txt``, ``environment-ros3.yml``, and ``pyproject.toml``.
+
+  * Check legal information and copyright dates in ``Legal.txt``, ``license.txt``, ``README.rst``,
+    ``docs/source/conf.py``.
+
+  * Update ``pyproject.toml`` and ``README.rst`` as needed.
+
+  * Update ``src/pynwb/nwb-schema`` submodule as needed. Check the version number manually to make sure
+    we are using the latest release.
+
+  * Update documentation to reflect new features and changes in PyNWB functionality.
+
+  * Run tests locally, inspect all warnings and outputs, and try to remove all warnings.
+
+  * Test documentation builds locally and on the `ReadTheDocs project`_ on the "dev" build.
+
+
 
 
 -------------------------------------
@@ -144,7 +163,7 @@ Publish release on PyPI: Step-by-step
       python -c "import pynwb; print(pynwb.__version__)"
 
 
-10. Cleanup
+12. Cleanup
 
   On bash/zsh:
 

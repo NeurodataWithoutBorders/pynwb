@@ -13,4 +13,7 @@ lxml  # used by dataframe_image when using the matplotlib backend
 hdf5plugin
 dandi>=0.46.6
 hdmf-zarr
-zarr<2.18.0  # limited until hdmf-zarr 0.8.0 is released to resolve issues with zarr>=2.18.0
+zarr<3  # limited to zarr<3 until hdmf-zarr resolves issues with zarr 3.0
+linkml-runtime==1.7.4; python_version >= "3.9"
+schemasheets==0.2.1; python_version >= "3.9"
+oaklib==0.5.32; python_version >= "3.9"
