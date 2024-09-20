@@ -161,7 +161,8 @@ class EventDetection(NWBDataInterface):
 @register_class('EventWaveform', CORE_NAMESPACE)
 class EventWaveform(MultiContainerInterface):
     """
-    DEPRECATED. Spike data for spike events detected in raw data
+    DEPRECATED as of NWB 2.8.0 and PyNWB 3.0.0.
+    Spike data for spike events detected in raw data
     stored in this NWBFile, or events detect at acquisition
     """
 
@@ -174,10 +175,11 @@ class EventWaveform(MultiContainerInterface):
     }
 
     def __init__(self, **kwargs):
-        raise ValueError(
-            "This neurodata type is deprecated. If you are interested in using it, "
-            "please create an issue on https://github.com/NeurodataWithoutBorders/nwb-schema/issues."
-        )
+        if not self._in_construct_mode:
+            raise ValueError(
+                "The EventWaveform neurodata type is deprecated. If you are interested in using it, "
+                "please create an issue on https://github.com/NeurodataWithoutBorders/nwb-schema/issues."
+            )
 
 
 @register_class('Clustering', CORE_NAMESPACE)
