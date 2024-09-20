@@ -97,6 +97,7 @@ class NWBFileMap(ObjectMapper):
                             'session_id',
                             'slices',
                             'source_script',
+                            'was_generated_by',
                             'stimulus',
                             'surgery',
                             'virus']
