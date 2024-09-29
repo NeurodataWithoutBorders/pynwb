@@ -54,7 +54,8 @@ class ElectrodesTable(DynamicTable):
             {'name': 'rel_x', 'type': float, 'doc':'TODO', 'default': None},
             {'name': 'rel_y', 'type': float, 'doc':'TODO', 'default': None},
             {'name': 'rel_z', 'type': float, 'doc':'TODO', 'default': None},
-            {'name': 'reference', 'type': VectorData, 'doc':'TODO', 'default': None},)
+            {'name': 'reference', 'type': VectorData, 'doc':'TODO', 'default': None},
+            *get_docval(DynamicTable.__init__, 'id', 'columns', 'colnames'))
     def __init__(self, **kwargs):
         kwargs['name'] = 'electrodes'
         kwargs['description'] = 'metadata about extracellular electrodes'

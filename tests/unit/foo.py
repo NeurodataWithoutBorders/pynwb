@@ -36,7 +36,7 @@ table = ElectrodesTable()
 nwbfile.electrodes = table
 nwbfile.add_electrode_group(group)
 nwbfile.add_electrode(group=group, location='brain')
-# breakpoint()
+breakpoint()
 # nwbfile.add_electrode_column(name="label", description="label of electrode")
 
 # nshanks = 4
@@ -66,5 +66,4 @@ nwbfile.add_electrode(group=group, location='brain')
 io= NWBHDF5IO("/Users/mavaylon/Research/NWB/pynwb/tests/back_compat/2.6.0_DynamicTableElectrodes.nwb", "r")
 # io= NWBHDF5IO(new, 'r')
 read_nwbfile = io.read()
-
 breakpoint()
