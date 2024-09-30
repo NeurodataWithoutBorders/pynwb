@@ -36,7 +36,7 @@ table = ElectrodesTable()
 nwbfile.electrodes = table
 nwbfile.add_electrode_group(group)
 nwbfile.add_electrode(group=group, location='brain')
-breakpoint()
+# breakpoint()
 # nwbfile.add_electrode_column(name="label", description="label of electrode")
 
 # nshanks = 4
