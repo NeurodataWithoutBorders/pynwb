@@ -1,5 +1,11 @@
 # PyNWB Changelog
 
+## PyNWB 3.0.0 (Upcoming)
+
+### Enhancements and minor changes
+- Added support for NWB schema 2.8.0:
+  - Fixed support for `data__bounds` field to `SpatialSeries` to set optional boundary range (min, max) for each dimension of data. Removed `SpatialSeries.bounds` field that was not functional. @rly [#1907](https://github.com/NeurodataWithoutBorders/pynwb/pull/1907)
+
 ## PyNWB 2.8.3 (Upcoming)
 
 ### Performance
@@ -43,7 +49,7 @@
 ## PyNWB 2.7.0 (May 2, 2024)
 
 ### Enhancements and minor changes
-- Added `bounds` field to `SpatialSeries` to set optional boundary range (min, max) for each dimension of data. @mavaylon1 [#1869](https://github.com/NeurodataWithoutBorders/pynwb/pull/1869/files)
+- Added `bounds` field to `SpatialSeries` to set optional boundary range (min, max) for each dimension of data. @mavaylon1 [#1869](https://github.com/NeurodataWithoutBorders/pynwb/pull/1869)
 - Added support for NWB schema 2.7.0. See [2.7.0 release notes](https://nwb-schema.readthedocs.io/en/latest/format_release_notes.html) for details
 - Deprecated `ImagingRetinotopy` neurodata type. @rly [#1813](https://github.com/NeurodataWithoutBorders/pynwb/pull/1813)
 - Modified `OptogeneticSeries` to allow 2D data, primarily in extensions of `OptogeneticSeries`. @rly [#1812](https://github.com/NeurodataWithoutBorders/pynwb/pull/1812)
