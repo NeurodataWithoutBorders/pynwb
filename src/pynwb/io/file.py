@@ -195,7 +195,6 @@ class NWBFileMap(ObjectMapper):
         else:
             return None
 
-
     @ObjectMapper.constructor_arg('session_start_time')
     def dateconversion(self, builder, manager):
         """Set the constructor arg for 'session_start_time' to a datetime object.

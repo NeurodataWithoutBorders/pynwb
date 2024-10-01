@@ -698,8 +698,8 @@ class NWBFile(MultiContainerInterface, HERDManager):
             raise ValueError("The 'location' argument is required when creating an electrode.")
         if not kwargs['group']:
             raise ValueError("The 'group' argument is required when creating an electrode.")
-        # if d.get('group_name', None) is None:
-        #     d['group_name'] = d['group'].name
+        if d.get('group_name', None) is None:
+            d['group_name'] = d['group'].name
 
         new_cols = [('x', 'the x coordinate of the position (+x is posterior)'),
                     ('y', 'the y coordinate of the position (+y is inferior)'),
@@ -1174,16 +1174,6 @@ def _tablefunc(table_name, description, columns):
         else:
             raise ValueError("Elements of 'columns' must be str or tuple")
     return t
-
-
-# def ElectrodesTable(name='electrodes',
-#                    description='metadata about extracellular electrodes'):
-#     return _tablefunc(name, description,
-#                       [('location', 'the location of channel within the subject e.g. brain region'),
-#                        ('group', 'a reference to the ElectrodeGroup this electrode is a part of'),
-#                        ('group_name', 'the name of the ElectrodeGroup this electrode is a part of')
-#                        ]
-#                       )
 
 
 def TrialTable(name='trials', description='metadata about experimental trials'):
