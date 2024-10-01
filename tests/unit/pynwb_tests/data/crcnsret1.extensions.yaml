@@ -1,0 +1,25 @@
+groups:
+- attributes:
+  - doc: int
+    dtype: meister x
+    name: x
+    required: false
+  - doc: int
+    dtype: meister y
+    name: y
+    required: false
+  - doc: int
+    dtype: meister dx
+    name: dx
+    required: false
+  - doc: int
+    dtype: meister dy
+    name: dy
+    required: false
+  - doc: float
+    dtype: meister pixel size
+    name: pixel_size
+    required: false
+  doc: A custom ImageSeries to add MeisterLab custom metadata
+  neurodata_type_def: MeisterImageSeries
+  neurodata_type_inc: ImageSeries
