@@ -43,17 +43,17 @@ class ElectrodesTable(DynamicTable):
 
     __columns__ = (
         {'name': 'location', 'description': 'TODO', 'required': True},
-        {'name': 'group', 'description': 'TODO', 'required': True})
+        {'name': 'group', 'description': 'TODO', 'required': True},
+        {'name': 'group_name', 'description': 'TODO', 'required': False })
 
-    @docval({'name': 'group_name', 'type': VectorData, 'doc':'TODO', 'default': None},
-            {'name': 'x', 'type': float, 'doc':'TODO', 'default': None},
-            {'name': 'y', 'type': float, 'doc':'TODO', 'default': None},
-            {'name': 'z', 'type': float, 'doc':'TODO', 'default': None},
-            {'name': 'imp', 'type': float, 'doc':'TODO', 'default': None},
-            {'name': 'filtering', 'type': str, 'doc':'TODO', 'default': None},
-            {'name': 'rel_x', 'type': float, 'doc':'TODO', 'default': None},
-            {'name': 'rel_y', 'type': float, 'doc':'TODO', 'default': None},
-            {'name': 'rel_z', 'type': float, 'doc':'TODO', 'default': None},
+    @docval({'name': 'x', 'type': VectorData, 'doc':'TODO', 'default': None},
+            {'name': 'y', 'type': VectorData, 'doc':'TODO', 'default': None},
+            {'name': 'z', 'type': VectorData, 'doc':'TODO', 'default': None},
+            {'name': 'imp', 'type': VectorData, 'doc':'TODO', 'default': None},
+            {'name': 'filtering', 'type': VectorData, 'doc':'TODO', 'default': None},
+            {'name': 'rel_x', 'type': VectorData, 'doc':'TODO', 'default': None},
+            {'name': 'rel_y', 'type': VectorData, 'doc':'TODO', 'default': None},
+            {'name': 'rel_z', 'type': VectorData, 'doc':'TODO', 'default': None},
             {'name': 'reference', 'type': VectorData, 'doc':'TODO', 'default': None},
             *get_docval(DynamicTable.__init__, 'id', 'columns', 'colnames'))
     def __init__(self, **kwargs):
@@ -62,7 +62,6 @@ class ElectrodesTable(DynamicTable):
 
         # optional fields
         keys_to_set = (
-            'group_name',
             'x',
             'y',
             'z',
@@ -77,6 +76,14 @@ class ElectrodesTable(DynamicTable):
             setattr(self, key, val)
 
         super().__init__(**kwargs)
+
+    def copy(self):
+        """
+        Return a copy of this DynamicTable.
+        This is useful for linking.
+        """
+        kwargs = dict(id=self.id, columns=self.columns, colnames=self.colnames)
+        return self.__class__(**kwargs)
 
 
 @register_class('ElectricalSeries', CORE_NAMESPACE)

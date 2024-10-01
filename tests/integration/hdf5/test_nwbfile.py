@@ -508,6 +508,7 @@ class TestElectrodes(NWBH5IOMixin, TestCase):
 
     def test_roundtrip(self):
         super().test_roundtrip()
+
         # When comparing the pandas dataframes for the row we drop the 'group' column since the
         # ElectrodeGroup object after reading will naturally have a different address
         pd.testing.assert_frame_equal(self.read_container[0].drop('group', axis=1),

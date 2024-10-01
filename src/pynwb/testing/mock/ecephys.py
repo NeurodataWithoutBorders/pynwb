@@ -35,10 +35,10 @@ def mock_ElectrodeGroup(
     return electrode_group
 
 
-def mock_ElectrodeTable(
+def mock_ElectrodesTable(
         n_rows: int = 5, group: Optional[ElectrodeGroup] = None, nwbfile: Optional[NWBFile] = None
 ) -> DynamicTable:
-    electrodes_table = ElectrodeTable()
+    electrodes_table = ElectrodesTable()
     group = group if group is not None else mock_ElectrodeGroup(nwbfile=nwbfile)
     for i in range(n_rows):
         electrodes_table.add_row(
@@ -57,7 +57,7 @@ def mock_electrodes(
         n_electrodes: int = 5, table: Optional[DynamicTable] = None, nwbfile: Optional[NWBFile] = None
 ) -> DynamicTableRegion:
 
-    table = table or mock_ElectrodeTable(n_rows=5, nwbfile=nwbfile)
+    table = table or mock_ElectrodesTable(n_rows=5, nwbfile=nwbfile)
     return DynamicTableRegion(
         name="electrodes",
         data=list(range(n_electrodes)),
@@ -80,7 +80,7 @@ def mock_ElectricalSeries(
     conversion: float = 1.0,
     offset: float = 0.,
 ) -> ElectricalSeries:
-    
+
     # Set a default rate if timestamps are not provided
     rate = 30_000.0 if (timestamps is None and rate is None) else rate
 

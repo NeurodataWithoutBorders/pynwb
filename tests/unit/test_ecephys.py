@@ -24,7 +24,7 @@ from hdmf.common import DynamicTableRegion
 
 
 def make_electrode_table():
-    table = ElectrodeTable()
+    table = ElectrodesTable()
     dev1 = Device('dev1')
     group = ElectrodeGroup('tetrode1', 'tetrode description', 'tetrode location', dev1)
     table.add_row(location='CA1', group=group, group_name='tetrode1')

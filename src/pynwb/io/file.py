@@ -182,15 +182,15 @@ class NWBFileMap(ObjectMapper):
 
     @ObjectMapper.constructor_arg('electrodes')
     def electrodes(self, builder, manager):
-        electrodes_builder = builder['general']['extracellular_ephys']['electrodes']
-
+        try:
+            electrodes_builder = builder['general']['extracellular_ephys']['electrodes']
+        except KeyError:
+            electrodes_builder = None
         if (electrodes_builder is not None and electrodes_builder.attributes['neurodata_type'] != 'ElectrodesTable'):
             electrodes_builder.attributes['neurodata_type'] = 'ElectrodesTable'
             electrodes_builder.attributes['namespace'] = 'core'
 
             new_container =  manager.construct(electrodes_builder, True)
-            # mapper = manager.get_map(electrodes_builder)
-            breakpoint()
             return new_container
         else:
             return None
