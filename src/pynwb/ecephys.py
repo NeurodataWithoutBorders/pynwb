@@ -3,7 +3,7 @@ from collections.abc import Iterable
 
 from hdmf.common import DynamicTableRegion, DynamicTable, VectorData
 from hdmf.data_utils import DataChunkIterator, assertEqualShape
-from hdmf.utils import docval, popargs, getargs, get_docval, popargs_to_dict, get_data_shape
+from hdmf.utils import docval, popargs, get_docval, popargs_to_dict, get_data_shape
 
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries
@@ -39,22 +39,27 @@ class ElectrodeGroup(NWBContainer):
 
 @register_class('ElectrodesTable', CORE_NAMESPACE)
 class ElectrodesTable(DynamicTable):
-    """TODO"""
+    """A table of all electrodes (i.e. channels) used for recording. Introduced in NWB 3.0.0. Replaces the "electrodes"
+    table (neurodata_type_inc DynamicTable, no neurodata_type_def) that is part of NWBFile."""
 
     __columns__ = (
-        {'name': 'location', 'description': 'TODO', 'required': True},
-        {'name': 'group', 'description': 'TODO', 'required': True},
-        {'name': 'group_name', 'description': 'TODO', 'required': False })
+        {'name': 'location', 'description': 'Location of the electrode (channel).', 'required': True},
+        {'name': 'group', 'description': 'Reference to the ElectrodeGroup.', 'required': True},
+        {'name': 'group_name', 'description': 'Name of the ElectrodeGroup.', 'required': False })
 
-    @docval({'name': 'x', 'type': VectorData, 'doc':'TODO', 'default': None},
-            {'name': 'y', 'type': VectorData, 'doc':'TODO', 'default': None},
-            {'name': 'z', 'type': VectorData, 'doc':'TODO', 'default': None},
-            {'name': 'imp', 'type': VectorData, 'doc':'TODO', 'default': None},
-            {'name': 'filtering', 'type': VectorData, 'doc':'TODO', 'default': None},
-            {'name': 'rel_x', 'type': VectorData, 'doc':'TODO', 'default': None},
-            {'name': 'rel_y', 'type': VectorData, 'doc':'TODO', 'default': None},
-            {'name': 'rel_z', 'type': VectorData, 'doc':'TODO', 'default': None},
-            {'name': 'reference', 'type': VectorData, 'doc':'TODO', 'default': None},
+    @docval({'name': 'x', 'type': VectorData, 'doc':'x coordinate of the channel location in the brain',
+             'default': None},
+            {'name': 'y', 'type': VectorData, 'doc':'y coordinate of the channel location in the brain',
+             'default': None},
+            {'name': 'z', 'type': VectorData, 'doc':'z coordinate of the channel location in the brain',
+             'default': None},
+            {'name': 'imp', 'type': VectorData, 'doc':'Impedance of the channel, in ohms.', 'default': None},
+            {'name': 'filtering', 'type': VectorData, 'doc':'Description of hardware filtering.', 'default': None},
+            {'name': 'rel_x', 'type': VectorData, 'doc':'x coordinate in electrode group', 'default': None},
+            {'name': 'rel_y', 'type': VectorData, 'doc':'xy coordinate in electrode group', 'default': None},
+            {'name': 'rel_z', 'type': VectorData, 'doc':'z coordinate in electrode group', 'default': None},
+            {'name': 'reference', 'type': VectorData, 'default': None,
+             'doc':'Description of the reference electrode and/or reference scheme used for this electrode'},
             *get_docval(DynamicTable.__init__, 'id', 'columns', 'colnames'))
     def __init__(self, **kwargs):
         kwargs['name'] = 'electrodes'
@@ -79,7 +84,7 @@ class ElectrodesTable(DynamicTable):
 
     def copy(self):
         """
-        Return a copy of this DynamicTable.
+        Return a copy of this ElectrodesTable.
         This is useful for linking.
         """
         kwargs = dict(id=self.id, columns=self.columns, colnames=self.colnames)
