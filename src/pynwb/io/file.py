@@ -185,6 +185,9 @@ class NWBFileMap(ObjectMapper):
         try:
             electrodes_builder = builder['general']['extracellular_ephys']['electrodes']
         except KeyError:
+            # Note: This is here because the ObjectMapper pulls argname from docval and checks to see
+            # if there is an override even if the file doesn't have what is looking for. In this case,
+            # electrodes for NWBFile.
             electrodes_builder = None
         if (electrodes_builder is not None and electrodes_builder.attributes['neurodata_type'] != 'ElectrodesTable'):
             electrodes_builder.attributes['neurodata_type'] = 'ElectrodesTable'
