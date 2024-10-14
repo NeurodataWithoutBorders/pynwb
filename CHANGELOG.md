@@ -5,6 +5,9 @@
 ### Performance
 - Cache global type map to speed import 3X. @sneakers-the-rat [#1931](https://github.com/NeurodataWithoutBorders/pynwb/pull/1931)
 
+### Bug fixes
+- Fixed bug in how `ElectrodeGroup.__init__` validates its `position` argument. @oruebel [#1770](https://github.com/NeurodataWithoutBorders/pynwb/pull/1770)
+
 ## PyNWB 2.8.2 (September 9, 2024)
 
 ### Enhancements and minor changes
