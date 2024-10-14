@@ -53,12 +53,12 @@ on the :py:class:`~pynwb.file.NWBFile` before exporting.
 
 How do I create a copy of an NWB file with different data layouts (e.g., applying compression)?
 ---------------------------------------------------------------------------------------------------------
-Use the `h5repack <https://docs.hdfgroup.org/hdf5/v1_14/_view_tools_edit.html>`_ command line tool from the HDF5 Group.
+Use the `h5repack <https://support.hdfgroup.org/documentation/hdf5/latest/_view_tools_edit.html#secViewToolsEditChange>`_ command line tool from the HDF5 Group.
 
 
 How do I create a copy of an NWB file with different controls over how links are treated and whether copies are deep or shallow?
 ---------------------------------------------------------------------------------------------------------------------------------
-Use the `h5copy <https://docs.hdfgroup.org/hdf5/v1_14/_view_tools_edit.html>`_ command line tool from the HDF5 Group.
+Use the `h5copy <https://support.hdfgroup.org/documentation/hdf5/latest/_view_tools_edit.html#secViewToolsEditCopy>`_ command line tool from the HDF5 Group.
 
 
 How do I generate new object IDs for a newly exported NWB file?
@@ -99,7 +99,7 @@ For example:
            export_io.export(src_io=read_io, nwbfile=nwbfile, write_args={'link_data': False})  # copy linked datasets
            # the written file will contain no links to external datasets
 
-You can also the `h5copy <https://docs.hdfgroup.org/hdf5/v1_14/_view_tools_edit.html>`_ command line tool \
+You can also the `h5copy <https://support.hdfgroup.org/documentation/hdf5/latest/_view_tools_edit.html#secViewToolsEditCopy>`_ command line tool \
 from the HDF5 Group.
 
 
