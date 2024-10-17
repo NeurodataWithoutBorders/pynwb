@@ -21,7 +21,7 @@ class TestTimeIntervalsIO(NWBH5IOMixin, TestCase):
 
     def setUpContainer(self):
         """ Return placeholder epochs object. Tested epochs are added directly to the NWBFile in addContainer """
-        return TimeIntervals('epochs')
+        return TimeIntervals(name='epochs')
 
     def addContainer(self, nwbfile):
         """ Add the test epochs to the given NWBFile """
@@ -62,7 +62,8 @@ class TestTimeIntervalsIO(NWBH5IOMixin, TestCase):
     def test_legacy_format(self):
         description = 'a file to test writing and reading a %s' % self.container_type
         identifier = 'TEST_%s' % self.container_type
-        nwbfile = NWBFile(description, identifier, self.start_time, file_create_date=self.create_date)
+        nwbfile = NWBFile(session_description=description, identifier=identifier, 
+                          session_start_time=self.start_time, file_create_date=self.create_date)
         self.addContainer(nwbfile)
 
         # write the file
