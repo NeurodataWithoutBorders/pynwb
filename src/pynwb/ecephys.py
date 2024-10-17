@@ -4,7 +4,7 @@ from collections.abc import Iterable
 
 from hdmf.common import DynamicTableRegion
 from hdmf.data_utils import DataChunkIterator, assertEqualShape
-from hdmf.utils import docval, popargs, get_docval, popargs_to_dict, get_data_shape
+from hdmf.utils import docval, popargs, get_docval, popargs_to_dict, get_data_shape, AllowPositional
 
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries
@@ -29,7 +29,8 @@ class ElectrodeGroup(NWBContainer):
             {'name': 'position', 'type': 'array_data',
              'doc': 'Compound dataset with stereotaxic position of this electrode group (x, y, z). '
                     'The data array must have three elements or the dtype of the '
-                    'array must be ``(float, float, float)``', 'default': None})
+                    'array must be ``(float, float, float)``', 'default': None},
+            allow_positional=AllowPositional.WARNING,)
     def __init__(self, **kwargs):
         args_to_set = popargs_to_dict(('description', 'location', 'device', 'position'), kwargs)
         super().__init__(**kwargs)
@@ -91,7 +92,8 @@ class ElectricalSeries(TimeSeries):
              "filter is unknown, then this value could be 'Low-pass filter at 300 Hz'. If a non-standard filter "
              "type is used, provide as much detail about the filter properties as possible.", 'default': None},
             *get_docval(TimeSeries.__init__, 'resolution', 'conversion', 'timestamps', 'starting_time', 'rate',
-                        'comments', 'description', 'control', 'control_description', 'offset'))
+                        'comments', 'description', 'control', 'control_description', 'offset'),
+            allow_positional=AllowPositional.WARNING,)
     def __init__(self, **kwargs):
         args_to_set = popargs_to_dict(('electrodes', 'channel_conversion', 'filtering'), kwargs)
 
@@ -134,7 +136,8 @@ class SpikeEventSeries(ElectricalSeries):
              'doc': 'Timestamps for samples stored in data'},
             *get_docval(ElectricalSeries.__init__, 'electrodes'),  # required
             *get_docval(ElectricalSeries.__init__, 'resolution', 'conversion', 'comments', 'description', 'control',
-                        'control_description', 'offset'))
+                        'control_description', 'offset'),
+            allow_positional=AllowPositional.WARNING,)
     def __init__(self, **kwargs):
         data = kwargs['data']
         timestamps = kwargs['timestamps']
@@ -169,7 +172,8 @@ class EventDetection(NWBDataInterface):
                     '(e.g., .25msec before action potential peak, zero-crossing time, etc). '
                     'The index points to each event from the raw data'},
             {'name': 'times', 'type': ('array_data', 'data'), 'doc': 'Timestamps of events, in Seconds'},
-            {'name': 'name', 'type': str, 'doc': 'the name of this container', 'default': 'EventDetection'})
+            {'name': 'name', 'type': str, 'doc': 'the name of this container', 'default': 'EventDetection'},
+            allow_positional=AllowPositional.WARNING,)
     def __init__(self, **kwargs):
         args_to_set = popargs_to_dict(('detection_method', 'source_electricalseries', 'source_idx', 'times'), kwargs)
         super().__init__(**kwargs)
@@ -320,7 +324,8 @@ class FeatureExtraction(NWBDataInterface):
              'doc': 'The times of events that features correspond to'},
             {'name': 'features', 'type': ('array_data', 'data'), 'shape': (None, None, None),
              'doc': 'Features for each channel'},
-            {'name': 'name', 'type': str, 'doc': 'the name of this container', 'default': 'FeatureExtraction'})
+            {'name': 'name', 'type': str, 'doc': 'the name of this container', 'default': 'FeatureExtraction'},
+            allow_positional=AllowPositional.WARNING,)
     def __init__(self, **kwargs):
         # get the inputs
         electrodes, description, times, features = popargs(

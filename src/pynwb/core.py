@@ -6,7 +6,7 @@ from hdmf import Container, Data
 from hdmf.container import AbstractContainer, MultiContainerInterface as hdmf_MultiContainerInterface, Table
 from hdmf.common import DynamicTable, DynamicTableRegion  # noqa: F401
 from hdmf.common import VectorData, VectorIndex, ElementIdentifiers  # noqa: F401
-from hdmf.utils import docval, popargs
+from hdmf.utils import docval, popargs, AllowPositional
 from hdmf.utils import LabelledDict  # noqa: F401
 
 from . import CORE_NAMESPACE, register_class
@@ -78,7 +78,8 @@ class NWBDataInterface(NWBContainer):
 class NWBData(NWBMixin, Data):
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this container'},
-            {'name': 'data', 'type': ('scalar_data', 'array_data', 'data', Data), 'doc': 'the source of the data'})
+            {'name': 'data', 'type': ('scalar_data', 'array_data', 'data', Data), 'doc': 'the source of the data'},
+            allow_positional=AllowPositional.WARNING,)
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.__data = kwargs['data']
@@ -123,7 +124,8 @@ class ScratchData(NWBData):
             {'name': 'data', 'type': ('scalar_data', 'array_data', 'data', Data), 'doc': 'the source of the data'},
             {'name': 'notes', 'type': str,
              'doc': 'notes about the data. This argument will be deprecated. Use description instead', 'default': ''},
-            {'name': 'description', 'type': str, 'doc': 'notes about the data', 'default': None})
+            {'name': 'description', 'type': str, 'doc': 'notes about the data', 'default': None},
+            allow_positional=AllowPositional.WARNING,)
     def __init__(self, **kwargs):
         notes, description = popargs('notes', 'description', kwargs)
         super().__init__(**kwargs)

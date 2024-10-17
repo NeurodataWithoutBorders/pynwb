@@ -10,6 +10,7 @@ from hdmf.utils import (
     popargs_to_dict,
     get_docval,
     get_data_shape,
+    AllowPositional,
 )
 
 from . import register_class, CORE_NAMESPACE
@@ -61,7 +62,8 @@ class ImageSeries(TimeSeries):
             *get_docval(TimeSeries.__init__, 'resolution', 'conversion', 'timestamps', 'starting_time', 'rate',
                         'comments', 'description', 'control', 'control_description', 'offset'),
             {'name': 'device', 'type': Device,
-             'doc': 'Device used to capture the images/video.', 'default': None},)
+             'doc': 'Device used to capture the images/video.', 'default': None},
+             allow_positional=AllowPositional.WARNING,)
     def __init__(self, **kwargs):
         keys_to_set = ('bits_per_pixel', 'dimension', 'external_file', 'starting_frame', 'format', 'device')
         args_to_set = popargs_to_dict(keys_to_set, kwargs)
@@ -251,6 +253,7 @@ class IndexSeries(TimeSeries):
             'control_description',
             'offset',
         ),
+        allow_positional=AllowPositional.WARNING,
     )
     def __init__(self, **kwargs):
         indexed_timeseries, indexed_images = popargs('indexed_timeseries', 'indexed_images', kwargs)
@@ -297,7 +300,8 @@ class ImageMaskSeries(ImageSeries):
             {'name': 'device', 'type': Device,
              'doc': ('Device used to capture the mask data. This field will likely not be needed. '
                      'The device used to capture the masked ImageSeries data should be stored in the ImageSeries.'),
-             'default': None},)
+             'default': None},
+            allow_positional=AllowPositional.WARNING,)
     def __init__(self, **kwargs):
         masked_imageseries = popargs('masked_imageseries', kwargs)
         super().__init__(**kwargs)
@@ -333,7 +337,8 @@ class OpticalSeries(ImageSeries):
              'default': None},
             *get_docval(ImageSeries.__init__, 'unit', 'format', 'external_file', 'starting_frame', 'bits_per_pixel',
                         'dimension', 'resolution', 'conversion', 'timestamps', 'starting_time', 'rate', 'comments',
-                        'description', 'control', 'control_description', 'device', 'offset'))
+                        'description', 'control', 'control_description', 'device', 'offset'),
+            allow_positional=AllowPositional.WARNING,)
     def __init__(self, **kwargs):
         distance, field_of_view, orientation = popargs('distance', 'field_of_view', 'orientation', kwargs)
         super().__init__(**kwargs)
@@ -349,7 +354,8 @@ class GrayscaleImage(Image):
             {'name': 'data', 'type': ('array_data', 'data'),
              'doc': 'Data of grayscale image. Must be 2D where the dimensions represent x and y.',
              'shape': (None, None)},
-            *get_docval(Image.__init__, 'resolution', 'description'))
+            *get_docval(Image.__init__, 'resolution', 'description'),
+            allow_positional=AllowPositional.WARNING,)
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
@@ -362,7 +368,8 @@ class RGBImage(Image):
              'doc': 'Data of color image. Must be 3D where the first and second dimensions represent x and y. '
                     'The third dimension has length 3 and represents the RGB value.',
              'shape': (None, None, 3)},
-            *get_docval(Image.__init__, 'resolution', 'description'))
+            *get_docval(Image.__init__, 'resolution', 'description'),
+            allow_positional=AllowPositional.WARNING,)
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
@@ -375,6 +382,7 @@ class RGBAImage(Image):
              'doc': 'Data of color image with transparency. Must be 3D where the first and second dimensions '
                     'represent x and y. The third dimension has length 4 and represents the RGBA value.',
              'shape': (None, None, 4)},
-            *get_docval(Image.__init__, 'resolution', 'description'))
+            *get_docval(Image.__init__, 'resolution', 'description'),
+            allow_positional=AllowPositional.WARNING,)
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
