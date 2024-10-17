@@ -2,6 +2,9 @@
 
 ## PyNWB 2.8.3 (Upcoming)
 
+### Enhancements
+- Formally defined and renamed `ElectrodeTable` as the `ElectrodesTable` neurodata_type. @mavaylon1 [#1890](https://github.com/NeurodataWithoutBorders/pynwb/pull/1890)
+
 ### Performance
 - Cache global type map to speed import 3X. @sneakers-the-rat [#1931](https://github.com/NeurodataWithoutBorders/pynwb/pull/1931)
 

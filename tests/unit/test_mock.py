@@ -32,7 +32,7 @@ from pynwb.testing.mock.behavior import (
 
 from pynwb.testing.mock.ecephys import (
     mock_ElectrodeGroup,
-    mock_ElectrodeTable,
+    mock_ElectrodesTable,
     mock_ElectricalSeries,
     mock_SpikeEventSeries,
     mock_Units,
@@ -70,7 +70,7 @@ mock_functions = [
     mock_CompassDirection,
     mock_SpatialSeries,
     mock_ElectrodeGroup,
-    mock_ElectrodeTable,
+    mock_ElectrodesTable,
     mock_ElectricalSeries,
     mock_SpikeEventSeries,
     mock_Subject,
@@ -121,4 +121,3 @@ def test_name_generator():
 
     assert name_generator("TimeSeries") == "TimeSeries"
     assert name_generator("TimeSeries") == "TimeSeries2"
-

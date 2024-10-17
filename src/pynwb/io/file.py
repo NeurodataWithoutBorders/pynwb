@@ -180,6 +180,24 @@ class NWBFileMap(ObjectMapper):
                 ret.append(manager.construct(d))
         return tuple(ret) if len(ret) > 0 else None
 
+    @ObjectMapper.constructor_arg('electrodes')
+    def electrodes(self, builder, manager):
+        try:
+            electrodes_builder = builder['general']['extracellular_ephys']['electrodes']
+        except KeyError:
+            # Note: This is here because the ObjectMapper pulls argname from docval and checks to see
+            # if there is an override even if the file doesn't have what is looking for. In this case,
+            # electrodes for NWBFile.
+            electrodes_builder = None
+        if (electrodes_builder is not None and electrodes_builder.attributes['neurodata_type'] != 'ElectrodesTable'):
+            electrodes_builder.attributes['neurodata_type'] = 'ElectrodesTable'
+            electrodes_builder.attributes['namespace'] = 'core'
+
+            new_container =  manager.construct(electrodes_builder, True)
+            return new_container
+        else:
+            return None
+
     @ObjectMapper.constructor_arg('session_start_time')
     def dateconversion(self, builder, manager):
         """Set the constructor arg for 'session_start_time' to a datetime object.

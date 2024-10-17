@@ -9,9 +9,9 @@ from hdmf.common import VectorData
 from hdmf.utils import docval, get_docval, popargs
 from pynwb import NWBFile, TimeSeries, NWBHDF5IO
 from pynwb.base import Image, Images
-from pynwb.file import Subject, ElectrodeTable, _add_missing_timezone
+from pynwb.file import Subject, _add_missing_timezone
 from pynwb.epoch import TimeIntervals
-from pynwb.ecephys import ElectricalSeries
+from pynwb.ecephys import ElectricalSeries, ElectrodesTable
 from pynwb.testing import TestCase, remove_test_file
 
 
@@ -245,7 +245,7 @@ class NWBFileTest(TestCase):
             self.nwbfile.get_acquisition("TEST_TS")
 
     def test_set_electrode_table(self):
-        table = ElectrodeTable()
+        table = ElectrodesTable()
         dev1 = self.nwbfile.create_device('dev1')
         group = self.nwbfile.create_electrode_group('tetrode1', 'tetrode description', 'tetrode location', dev1)
 
