@@ -1,5 +1,11 @@
 # PyNWB Changelog
 
+## PyNWB 3.0.0 (Upcoming)
+
+### Breaking changes
+
+### Enhancements and minor changes
+
 ## PyNWB 2.8.3 (Upcoming)
 
 ### Performance
