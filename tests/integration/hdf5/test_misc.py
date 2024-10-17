@@ -75,7 +75,7 @@ class TestUnitsFileIO(NWBH5IOMixin, TestCase):
 
     def setUpContainer(self):
         """ Return placeholder Units object. Tested units are added directly to the NWBFile in addContainer """
-        return Units('placeholder')  # this will get ignored
+        return Units(name='placeholder')  # this will get ignored
 
     def addContainer(self, nwbfile):
         """ Add units to the given NWBFile """

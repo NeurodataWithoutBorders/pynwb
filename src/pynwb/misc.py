@@ -4,7 +4,7 @@ from bisect import bisect_left, bisect_right
 
 import numpy as np
 
-from hdmf.utils import docval, getargs, popargs, popargs_to_dict, get_docval
+from hdmf.utils import docval, getargs, popargs, popargs_to_dict, get_docval, AllowPositional
 
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries
@@ -25,7 +25,8 @@ class AnnotationSeries(TimeSeries):
             {'name': 'data', 'type': ('array_data', 'data', TimeSeries), 'shape': (None,),
              'doc': 'The annotations over time. Must be 1D.',
              'default': list()},
-            *get_docval(TimeSeries.__init__, 'timestamps', 'comments', 'description'))
+            *get_docval(TimeSeries.__init__, 'timestamps', 'comments', 'description'),
+            allow_positional=AllowPositional.WARNING,)
     def __init__(self, **kwargs):
         name, data, timestamps = popargs('name', 'data', 'timestamps', kwargs)
         super().__init__(name=name, data=data, unit='n/a', resolution=-1.0, timestamps=timestamps, **kwargs)
@@ -63,7 +64,8 @@ class AbstractFeatureSeries(TimeSeries):
                      'dimension represents features'),
              'default': list()},
             *get_docval(TimeSeries.__init__, 'resolution', 'conversion', 'timestamps', 'starting_time', 'rate',
-                        'comments', 'description', 'control', 'control_description', 'offset'))
+                        'comments', 'description', 'control', 'control_description', 'offset'),
+            allow_positional=AllowPositional.WARNING,)
     def __init__(self, **kwargs):
         name, data, features, feature_units = popargs('name', 'data',
                                                               'features', 'feature_units', kwargs)
@@ -100,7 +102,8 @@ class IntervalSeries(TimeSeries):
              'doc': ('The data values. Must be 1D, where the first dimension must be time. Values are >0 if '
                      'interval started, <0 if interval ended.'),
              'default': list()},
-            *get_docval(TimeSeries.__init__, 'timestamps', 'comments', 'description', 'control', 'control_description'))
+            *get_docval(TimeSeries.__init__, 'timestamps', 'comments', 'description', 'control', 'control_description'),
+            allow_positional=AllowPositional.WARNING,)
     def __init__(self, **kwargs):
         name, data, timestamps = popargs('name', 'data', 'timestamps', kwargs)
         self.__interval_timestamps = timestamps
@@ -164,7 +167,8 @@ class Units(DynamicTable):
             {'name': 'waveform_unit', 'type': str,
              'doc': 'Unit of measurement of the waveform means', 'default': 'volts'},
             {'name': 'resolution', 'type': float,
-             'doc': 'The smallest possible difference between two spike times', 'default': None}
+             'doc': 'The smallest possible difference between two spike times', 'default': None},
+            allow_positional=AllowPositional.WARNING,
             )
     def __init__(self, **kwargs):
         args_to_set = popargs_to_dict(("waveform_rate", "waveform_unit", "resolution"), kwargs)
@@ -198,7 +202,7 @@ class Units(DynamicTable):
             {'name': 'waveforms', 'type': 'array_data', 'default': None, 'doc': waveforms_desc,
              'shape': ((None, None), (None, None, None))},
             {'name': 'id', 'type': int, 'default': None, 'doc': 'the id for each unit'},
-            allow_extra=True)
+            allow_extra=True,)
     def add_unit(self, **kwargs):
         """
         Add a unit to this table
@@ -277,7 +281,8 @@ class DecompositionSeries(TimeSeries):
                      'similar to ElectricalSeries.electrodes.'),
              'default': None},
             *get_docval(TimeSeries.__init__, 'resolution', 'conversion', 'timestamps', 'starting_time', 'rate',
-                        'comments', 'control', 'control_description', 'offset'))
+                        'comments', 'control', 'control_description', 'offset'),
+            allow_positional=AllowPositional.WARNING,)
     def __init__(self, **kwargs):
         metric, source_timeseries, bands, source_channels = popargs('metric', 'source_timeseries', 'bands',
                                                                     'source_channels', kwargs)

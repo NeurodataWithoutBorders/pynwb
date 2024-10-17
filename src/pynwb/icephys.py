@@ -4,7 +4,7 @@ from copy import copy
 import numpy as np
 
 from hdmf.common import DynamicTable, AlignedDynamicTable
-from hdmf.utils import docval, popargs, popargs_to_dict, get_docval, getargs
+from hdmf.utils import docval, popargs, popargs_to_dict, get_docval, getargs, AllowPositional
 
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries, TimeSeriesReferenceVectorData
@@ -51,7 +51,8 @@ class IntracellularElectrode(NWBContainer):
             {'name': 'resistance', 'type': str, 'doc': 'Electrode resistance, unit - Ohm.', 'default': None},
             {'name': 'filtering', 'type': str, 'doc': 'Electrode specific filtering.', 'default': None},
             {'name': 'initial_access_resistance', 'type': str, 'doc': 'Initial access resistance.', 'default': None},
-            {'name': 'cell_id', 'type': str, 'doc': 'Unique ID of cell.', 'default': None}
+            {'name': 'cell_id', 'type': str, 'doc': 'Unique ID of cell.', 'default': None},
+            allow_positional=AllowPositional.WARNING,
             )
     def __init__(self, **kwargs):
         keys_to_set = (
@@ -134,12 +135,13 @@ class PatchClampSeries(TimeSeries):
             'doc': 'Sweep number, allows for grouping different PatchClampSeries '
                    'together via the sweep_table',
             'default': None,
-        }
+        },
+        allow_positional=AllowPositional.WARNING,
     )
     def __init__(self, **kwargs):
-        name, data, unit, stimulus_description = popargs('name', 'data', 'unit', 'stimulus_description', kwargs)
-        electrode, gain, sweep_number = popargs('electrode', 'gain', 'sweep_number', kwargs)
-        super().__init__(name, data, unit, **kwargs)
+        electrode, gain, stimulus_description, sweep_number = popargs('electrode', 'gain', 'stimulus_description', 
+                                                                      'sweep_number', kwargs)
+        super().__init__(**kwargs)
         self.electrode = electrode
         self.gain = gain
         self.stimulus_description = stimulus_description
@@ -172,13 +174,14 @@ class CurrentClampSeries(PatchClampSeries):
             *get_docval(PatchClampSeries.__init__, 'resolution', 'conversion', 'timestamps', 'starting_time', 'rate',
                         'comments', 'description', 'control', 'control_description', 'sweep_number', 'offset'),
             {'name': 'unit', 'type': str, 'doc': "The base unit of measurement (must be 'volts')",
-             'default': 'volts'})
+             'default': 'volts'},
+             allow_positional=AllowPositional.WARNING,)
     def __init__(self, **kwargs):
-        name, data, unit, electrode, gain = popargs('name', 'data', 'unit', 'electrode', 'gain', kwargs)
+        name, unit = popargs('name', 'unit', kwargs)
         unit = ensure_unit(self, name, unit, 'volts', '2.1.0')
         bias_current, bridge_balance, capacitance_compensation = popargs(
             'bias_current', 'bridge_balance', 'capacitance_compensation', kwargs)
-        super().__init__(name, data, unit, electrode, gain, **kwargs)
+        super().__init__(name=name, unit=unit, **kwargs)
         self.bias_current = bias_current
         self.bridge_balance = bridge_balance
         self.capacitance_compensation = capacitance_compensation
@@ -205,14 +208,15 @@ class IZeroClampSeries(CurrentClampSeries):
                         'starting_time', 'rate', 'comments', 'description', 'control', 'control_description',
                         'sweep_number', 'offset'),
             {'name': 'unit', 'type': str, 'doc': "The base unit of measurement (must be 'volts')",
-             'default': 'volts'})
+             'default': 'volts'},
+             allow_positional=AllowPositional.WARNING,)
     def __init__(self, **kwargs):
-        name, data, electrode, gain = popargs('name', 'data', 'electrode', 'gain', kwargs)
+        name, stimulus_description = popargs('name', 'stimulus_description', kwargs)
         bias_current, bridge_balance, capacitance_compensation = (0.0, 0.0, 0.0)
-        stimulus_description = popargs('stimulus_description', kwargs)
         stimulus_description = self._ensure_stimulus_description(name, stimulus_description, 'N/A', '2.3.0')
         kwargs['stimulus_description'] = stimulus_description
-        super().__init__(name, data, electrode, gain, bias_current, bridge_balance, capacitance_compensation,
+        super().__init__(name=name, bias_current=bias_current, bridge_balance=bridge_balance, 
+                         capacitance_compensation=capacitance_compensation,
                          **kwargs)
 
     def _ensure_stimulus_description(self, name, current_stim_desc, stim_desc, nwb_version):
@@ -243,11 +247,12 @@ class CurrentClampStimulusSeries(PatchClampSeries):
                         'starting_time', 'rate', 'comments', 'description', 'control', 'control_description',
                         'sweep_number', 'offset'),
             {'name': 'unit', 'type': str, 'doc': "The base unit of measurement (must be 'amperes')",
-             'default': 'amperes'})
+             'default': 'amperes'},
+             allow_positional=AllowPositional.WARNING,)
     def __init__(self, **kwargs):
-        name, data, unit, electrode, gain = popargs('name', 'data', 'unit', 'electrode', 'gain', kwargs)
+        name, unit = popargs('name', 'unit', kwargs)
         unit = ensure_unit(self, name, unit, 'amperes', '2.1.0')
-        super().__init__(name, data, unit, electrode, gain, **kwargs)
+        super().__init__(name=name, unit=unit, **kwargs)
 
 
 @register_class('VoltageClampSeries', CORE_NAMESPACE)
@@ -279,16 +284,17 @@ class VoltageClampSeries(PatchClampSeries):
             *get_docval(PatchClampSeries.__init__, 'resolution', 'conversion', 'timestamps', 'starting_time', 'rate',
                         'comments', 'description', 'control', 'control_description', 'sweep_number', 'offset'),
             {'name': 'unit', 'type': str, 'doc': "The base unit of measurement (must be 'amperes')",
-             'default': 'amperes'})
+             'default': 'amperes'},
+             allow_positional=AllowPositional.WARNING,)
     def __init__(self, **kwargs):
-        name, data, unit, electrode, gain = popargs('name', 'data', 'unit', 'electrode', 'gain', kwargs)
-        unit = ensure_unit(self, name, unit, 'amperes', '2.1.0')
-        capacitance_fast, capacitance_slow, resistance_comp_bandwidth, resistance_comp_correction, \
+        name, unit, capacitance_fast, capacitance_slow, resistance_comp_bandwidth, resistance_comp_correction, \
             resistance_comp_prediction, whole_cell_capacitance_comp, whole_cell_series_resistance_comp = popargs(
-                'capacitance_fast', 'capacitance_slow', 'resistance_comp_bandwidth',
+                'name', 'unit', 'capacitance_fast', 'capacitance_slow', 'resistance_comp_bandwidth',
                 'resistance_comp_correction', 'resistance_comp_prediction', 'whole_cell_capacitance_comp',
                 'whole_cell_series_resistance_comp', kwargs)
-        super().__init__(name, data, unit, electrode, gain, **kwargs)
+        unit = ensure_unit(self, name, unit, 'amperes', '2.1.0')
+        
+        super().__init__(name=name, unit=unit, **kwargs)
         self.capacitance_fast = capacitance_fast
         self.capacitance_slow = capacitance_slow
         self.resistance_comp_bandwidth = resistance_comp_bandwidth
@@ -312,11 +318,12 @@ class VoltageClampStimulusSeries(PatchClampSeries):
                         'starting_time', 'rate', 'comments', 'description', 'control', 'control_description',
                         'sweep_number', 'offset'),
             {'name': 'unit', 'type': str, 'doc': "The base unit of measurement (must be 'volts')",
-             'default': 'volts'})
+             'default': 'volts'},
+             allow_positional=AllowPositional.WARNING,)
     def __init__(self, **kwargs):
-        name, data, unit, electrode, gain = popargs('name', 'data', 'unit', 'electrode', 'gain', kwargs)
+        name, unit = popargs('name', 'unit', kwargs)
         unit = ensure_unit(self, name, unit, 'volts', '2.1.0')
-        super().__init__(name, data, unit, electrode, gain, **kwargs)
+        super().__init__(name=name, unit=unit, **kwargs)
 
 
 @register_class('SweepTable', CORE_NAMESPACE)
@@ -394,7 +401,8 @@ class IntracellularElectrodesTable(DynamicTable):
          'table': False},
     )
 
-    @docval(*get_docval(DynamicTable.__init__, 'id', 'columns', 'colnames'))
+    @docval(*get_docval(DynamicTable.__init__, 'id', 'columns', 'colnames'),
+            allow_positional=AllowPositional.WARNING,)
     def __init__(self, **kwargs):
         # Define defaultb name and description settings
         kwargs['name'] = 'electrodes'
@@ -423,7 +431,8 @@ class IntracellularStimuliTable(DynamicTable):
          'class': TimeSeriesReferenceVectorData},
     )
 
-    @docval(*get_docval(DynamicTable.__init__, 'id', 'columns', 'colnames'))
+    @docval(*get_docval(DynamicTable.__init__, 'id', 'columns', 'colnames'),
+            allow_positional=AllowPositional.WARNING,)
     def __init__(self, **kwargs):
         # Define defaultb name and description settings
         kwargs['name'] = 'stimuli'
@@ -446,7 +455,8 @@ class IntracellularResponsesTable(DynamicTable):
          'class': TimeSeriesReferenceVectorData},
     )
 
-    @docval(*get_docval(DynamicTable.__init__, 'id', 'columns', 'colnames'))
+    @docval(*get_docval(DynamicTable.__init__, 'id', 'columns', 'colnames'),
+            allow_positional=AllowPositional.WARNING,)
     def __init__(self, **kwargs):
         # Define defaultb name and description settings
         kwargs['name'] = 'responses'
@@ -462,7 +472,8 @@ class IntracellularRecordingsTable(AlignedDynamicTable):
     a single simultaneous_recording. Each row in the table represents a single recording consisting
     typically of a stimulus and a corresponding response.
     """
-    @docval(*get_docval(AlignedDynamicTable.__init__, 'id', 'columns', 'colnames', 'category_tables', 'categories'))
+    @docval(*get_docval(AlignedDynamicTable.__init__, 'id', 'columns', 'colnames', 'category_tables', 'categories'),
+            allow_positional=AllowPositional.WARNING,)
     def __init__(self, **kwargs):
         kwargs['name'] = 'intracellular_recordings'
         kwargs['description'] = ('A table to group together a stimulus and response from a single electrode '
@@ -747,7 +758,8 @@ class SimultaneousRecordingsTable(DynamicTable):
                     'reading the Container from file as the table attribute is already populated in this case '
                     'but otherwise this is required.',
              'default': None},
-            *get_docval(DynamicTable.__init__, 'id', 'columns', 'colnames'))
+            *get_docval(DynamicTable.__init__, 'id', 'columns', 'colnames'),
+            allow_positional=AllowPositional.WARNING,)
     def __init__(self, **kwargs):
         intracellular_recordings_table = popargs('intracellular_recordings_table', kwargs)
         # Define default name and description settings
@@ -806,7 +818,8 @@ class SequentialRecordingsTable(DynamicTable):
                     'column indexes. May be None when reading the Container from file as the '
                     'table attribute is already populated in this case but otherwise this is required.',
              'default': None},
-            *get_docval(DynamicTable.__init__, 'id', 'columns', 'colnames'))
+            *get_docval(DynamicTable.__init__, 'id', 'columns', 'colnames'),
+            allow_positional=AllowPositional.WARNING,)
     def __init__(self, **kwargs):
         simultaneous_recordings_table = popargs('simultaneous_recordings_table', kwargs)
         # Define defaultb name and description settings
@@ -863,7 +876,8 @@ class RepetitionsTable(DynamicTable):
                     'be None when reading the Container from file as the table attribute is already populated '
                     'in this case but otherwise this is required.',
              'default': None},
-            *get_docval(DynamicTable.__init__, 'id', 'columns', 'colnames'))
+            *get_docval(DynamicTable.__init__, 'id', 'columns', 'colnames'),
+            allow_positional=AllowPositional.WARNING,)
     def __init__(self, **kwargs):
         sequential_recordings_table = popargs('sequential_recordings_table', kwargs)
         # Define default name and description settings
@@ -915,7 +929,8 @@ class ExperimentalConditionsTable(DynamicTable):
              'type': RepetitionsTable,
              'doc': 'the RepetitionsTable table that the repetitions column indexes',
              'default': None},
-            *get_docval(DynamicTable.__init__, 'id', 'columns', 'colnames'))
+            *get_docval(DynamicTable.__init__, 'id', 'columns', 'colnames'),
+            allow_positional=AllowPositional.WARNING,)
     def __init__(self, **kwargs):
         repetitions_table = popargs('repetitions_table', kwargs)
         # Define default name and description settings

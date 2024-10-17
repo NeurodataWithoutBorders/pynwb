@@ -20,7 +20,7 @@ from pynwb.testing import TestCase
 class ImageSeriesConstructor(TestCase):
 
     def test_init(self):
-        dev = Device('test_device')
+        dev = Device(name='test_device')
         iS = ImageSeries(
             name='test_iS',
             unit='unit',
@@ -411,4 +411,4 @@ class TestImageSubtypes(TestCase):
         RGBImage(name='test_rgb_image', data=np.ones((2, 2, 3)))
 
     def test_rgba_image(self):
-        RGBAImage('test_rgba_image', np.ones((2, 2, 4)))
+        RGBAImage(name='test_rgba_image', data=np.ones((2, 2, 4)))

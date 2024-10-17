@@ -3,7 +3,7 @@ import numpy as np
 import warnings
 
 from hdmf.common import DynamicTable, DynamicTableRegion
-from hdmf.utils import docval, popargs, get_docval, get_data_shape, popargs_to_dict
+from hdmf.utils import docval, popargs, get_docval, get_data_shape, popargs_to_dict, AllowPositional
 
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries
@@ -21,7 +21,8 @@ class OpticalChannel(NWBContainer):
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this electrode'},  # required
             {'name': 'description', 'type': str, 'doc': 'Any notes or comments about the channel.'},  # required
-            {'name': 'emission_lambda', 'type': float, 'doc': 'Emission wavelength for channel, in nm.'})  # required
+            {'name': 'emission_lambda', 'type': float, 'doc': 'Emission wavelength for channel, in nm.'}, # required
+            allow_positional=AllowPositional.WARNING,)  
     def __init__(self, **kwargs):
         description, emission_lambda = popargs("description", "emission_lambda", kwargs)
         super().__init__(**kwargs)
@@ -90,7 +91,8 @@ class ImagingPlane(NWBContainer):
              'default': None},
             {'name': 'grid_spacing_unit', 'type': str,
              'doc': "Measurement units for grid_spacing. The default value is 'meters'.",
-             'default': 'meters'})
+             'default': 'meters'},
+            allow_positional=AllowPositional.WARNING,)
     def __init__(self, **kwargs):
         keys_to_set = ('optical_channel',
                        'description',
@@ -188,7 +190,8 @@ class OnePhotonSeries(ImageSeries):
             "control_description",
             "device",
             "offset",
-        )
+        ),
+        allow_positional=AllowPositional.WARNING,
     )
     def __init__(self, **kwargs):
         keys_to_set = (
@@ -227,7 +230,8 @@ class TwoPhotonSeries(ImageSeries):
              'default': None},
             *get_docval(ImageSeries.__init__, 'external_file', 'starting_frame', 'bits_per_pixel',
                         'dimension', 'resolution', 'conversion', 'timestamps', 'starting_time', 'rate',
-                        'comments', 'description', 'control', 'control_description', 'device', 'offset'))
+                        'comments', 'description', 'control', 'control_description', 'device', 'offset'),
+            allow_positional=AllowPositional.WARNING,)
     def __init__(self, **kwargs):
         keys_to_set = ("field_of_view",
                        "imaging_plane",
@@ -260,7 +264,8 @@ class CorrectedImageStack(NWBDataInterface):
              'doc': 'Link to image series that is being registered.'},
             {'name': 'xy_translation', 'type': TimeSeries,
              'doc': 'Stores the x,y delta necessary to align each frame to the common coordinates, '
-                    'for example, to align each frame to a reference image. This must have the name "xy_translation".'})
+                    'for example, to align each frame to a reference image. This must have the name "xy_translation".'},
+            allow_positional=AllowPositional.WARNING,)
     def __init__(self, **kwargs):
         corrected, original, xy_translation = popargs('corrected', 'original', 'xy_translation', kwargs)
         super().__init__(**kwargs)
@@ -312,7 +317,8 @@ class PlaneSegmentation(DynamicTable):
             {'name': 'name', 'type': str, 'doc': 'name of PlaneSegmentation.', 'default': None},
             {'name': 'reference_images', 'type': (ImageSeries, list, dict, tuple), 'default': None,
              'doc': 'One or more image stacks that the masks apply to (can be oneelement stack).'},
-            *get_docval(DynamicTable.__init__, 'id', 'columns', 'colnames'))
+            *get_docval(DynamicTable.__init__, 'id', 'columns', 'colnames'),
+            allow_positional=AllowPositional.WARNING,)
     def __init__(self, **kwargs):
         imaging_plane, reference_images = popargs('imaging_plane', 'reference_images', kwargs)
         if kwargs['name'] is None:
@@ -425,7 +431,8 @@ class RoiResponseSeries(TimeSeries):
             {'name': 'rois', 'type': DynamicTableRegion,  # required
              'doc': 'a table region corresponding to the ROIs that were used to generate this data'},
             *get_docval(TimeSeries.__init__, 'resolution', 'conversion', 'timestamps', 'starting_time', 'rate',
-                        'comments', 'description', 'control', 'control_description', 'offset'))
+                        'comments', 'description', 'control', 'control_description', 'offset'),
+            allow_positional=AllowPositional.WARNING,)
     def __init__(self, **kwargs):
         rois = popargs('rois', kwargs)
 

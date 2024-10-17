@@ -5,6 +5,7 @@
 ### Breaking changes
 
 ### Enhancements and minor changes
+- Added warnings when using positional arguments in `Container` constructor methods. Positional arguments will raise errors in the next major release. @stephprince [#1972](https://github.com/NeurodataWithoutBorders/pynwb/pull/1972)
 
 ## PyNWB 2.8.3 (Upcoming)
 

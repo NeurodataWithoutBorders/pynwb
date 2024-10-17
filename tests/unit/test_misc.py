@@ -11,14 +11,17 @@ from pynwb.testing import TestCase
 
 class AnnotationSeriesConstructor(TestCase):
     def test_init(self):
-        aS = AnnotationSeries('test_aS', data=[1, 2, 3], timestamps=[1., 2., 3.])
+        aS = AnnotationSeries(name='test_aS', data=[1, 2, 3], timestamps=[1., 2., 3.])
         self.assertEqual(aS.name, 'test_aS')
         aS.add_annotation(2.0, 'comment')
 
 
 class AbstractFeatureSeriesConstructor(TestCase):
     def test_init(self):
-        aFS = AbstractFeatureSeries('test_aFS', ['feature units'], ['features'], timestamps=list())
+        aFS = AbstractFeatureSeries(name='test_aFS', 
+                                    feature_units=['feature units'], 
+                                    features=['features'], 
+                                    timestamps=list())
         self.assertEqual(aFS.name, 'test_aFS')
         self.assertEqual(aFS.feature_units, ['feature units'])
         self.assertEqual(aFS.features, ['features'])
@@ -115,7 +118,7 @@ class IntervalSeriesConstructor(TestCase):
     def test_init(self):
         data = [1.0, -1.0, 1.0, -1.0]
         timestamps = [0.0, 1.0, 2.0, 3.0]
-        iS = IntervalSeries('test_iS', data=data, timestamps=timestamps)
+        iS = IntervalSeries(name='test_iS', data=data, timestamps=timestamps)
         self.assertEqual(iS.name, 'test_iS')
         self.assertEqual(iS.data, data)
         self.assertEqual(iS.timestamps, timestamps)
@@ -123,7 +126,7 @@ class IntervalSeriesConstructor(TestCase):
     def test_add_interval(self):
         data = [1.0, -1.0, 1.0, -1.0]
         timestamps = [0.0, 1.0, 2.0, 3.0]
-        iS = IntervalSeries('test_iS', data=data, timestamps=timestamps)
+        iS = IntervalSeries(name='test_iS', data=data, timestamps=timestamps)
         iS.add_interval(4.0, 5.0)
         data.append(1.0)
         data.append(-1.0)
@@ -247,8 +250,11 @@ class UnitsTests(TestCase):
 
     def test_electrode_group(self):
         ut = Units()
-        device = Device('test_device')
-        electrode_group = ElectrodeGroup('test_electrode_group', 'description', 'location', device)
+        device = Device(name='test_device')
+        electrode_group = ElectrodeGroup(name='test_electrode_group', 
+                                         description='description', 
+                                         location='location', 
+                                         device=device)
         ut.add_unit(electrode_group=electrode_group)
         self.assertEqual(ut['electrode_group'][0], electrode_group)
 
