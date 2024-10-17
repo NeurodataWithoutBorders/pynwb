@@ -1,4 +1,5 @@
 import warnings
+import numpy as np
 from collections.abc import Iterable
 
 from hdmf.common import DynamicTableRegion
@@ -26,13 +27,31 @@ class ElectrodeGroup(NWBContainer):
             {'name': 'location', 'type': str, 'doc': 'description of location of this electrode group'},
             {'name': 'device', 'type': Device, 'doc': 'the device that was used to record from this electrode group'},
             {'name': 'position', 'type': 'array_data',
-             'doc': 'stereotaxic position of this electrode group (x, y, z)', 'default': None})
+             'doc': 'Compound dataset with stereotaxic position of this electrode group (x, y, z). '
+                    'The data array must have three elements or the dtype of the '
+                    'array must be ``(float, float, float)``', 'default': None})
     def __init__(self, **kwargs):
         args_to_set = popargs_to_dict(('description', 'location', 'device', 'position'), kwargs)
         super().__init__(**kwargs)
-        if args_to_set['position'] and len(args_to_set['position']) != 3:
-            raise ValueError('ElectrodeGroup position argument must have three elements: x, y, z, but received: %s'
-                             % str(args_to_set['position']))
+
+        # position is a compound dataset, i.e., this must be a scalar with a
+        # compound data type of three floats or a list/tuple of three entries
+        position = args_to_set['position']
+        if position:
+            # check position argument is valid
+            position_dtype_invalid = (
+                (hasattr(position, 'dtype') and len(position.dtype) != 3) or
+                (not hasattr(position, 'dtype') and len(position) != 3) or
+                (len(np.shape(position)) > 1)
+            )
+            if position_dtype_invalid:
+                raise ValueError(f"ElectrodeGroup position argument must have three elements: x, y, z,"
+                                 f"but received: {position}")
+
+            # convert position to scalar with compound data type if needed
+            if not hasattr(position, 'dtype'):
+                args_to_set['position'] = np.array(tuple(position), dtype=[('x', float), ('y', float), ('z', float)])
+
         for key, val in args_to_set.items():
             setattr(self, key, val)
 
