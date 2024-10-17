@@ -290,6 +290,16 @@ class NWBFileMap(ObjectMapper):
         return ret
 
 
+    @ObjectMapper.object_attr('processing')
+    def processing_attr(self, container, manager):
+        """Change the value for the field 'processing' on NWBFile to remove empty ProcessingModules.
+
+        Used when writing (building) the NWBFile container to a file.
+        """
+        ret = container.processing.values()
+        return [p for p in ret if len(p.data_interfaces) > 0]
+
+
 @register_map(Subject)
 class SubjectMap(ObjectMapper):
 
