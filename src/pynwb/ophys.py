@@ -324,21 +324,40 @@ class PlaneSegmentation(DynamicTable):
         self.reference_images = reference_images
 
     @docval({'name': 'pixel_mask', 'type': 'array_data', 'default': None,
-             'doc': 'pixel mask for 2D ROIs: [(x1, y1, weight1), (x2, y2, weight2), ...]',
+             'doc': ('Pixel mask for 2D ROIs: [(x1, y1, weight1), (x2, y2, weight2), ...]. '),
              'shape': (None, 3)},
             {'name': 'voxel_mask', 'type': 'array_data', 'default': None,
-             'doc': 'voxel mask for 3D ROIs: [(x1, y1, z1, weight1), (x2, y2, z2, weight2), ...]',
+             'doc': ('Voxel mask for 3D ROIs: [(x1, y1, z1, weight1), (x2, y2, z2, weight2), ...].'),
              'shape': (None, 4)},
             {'name': 'image_mask', 'type': 'array_data', 'default': None,
-             'doc': 'image with the same size of image where positive values mark this ROI',
+             'doc': ('Image with the same size of image where positive values mark the ROI weights for '
+                     'each pixel of the image.'),
              'shape': [[None]*2, [None]*3]},
             {'name': 'id', 'type': int, 'doc': 'the ID for the ROI', 'default': None},
             allow_extra=True)
     def add_roi(self, **kwargs):
-        """Add a Region Of Interest (ROI) data to this"""
+        """Add a Region Of Interest (ROI) data to this PlaneSegmentation table
+
+        Add an ROI using an image mask, a pixel mask, or a voxel mask. An image mask is an image with
+        the same size of the data image where positive values mark the ROI weights for each pixel of
+        the image. A pixel mask is a list of triplets [(x1, y1, weight1), (x2, y2, weight2), ...] or
+        Nx3 array that indicates the ROI weights for each pixel. Pixels without a weight have a
+        weight of 0. A voxel mask is a list of quadruplets or Nx4 array, that is similar to the pixel
+        mask, except the format is (x1, y1, z1, weight1).
+
+        If the NWB file will be compressed, then using an image mask will usually result in a smaller
+        file than using a pixel mask. However, note that the image mask will be represented as an
+        array of the same size as the image when read into memory.
+
+        If the NWB file will not be compressed and there are relatively many pixels that comprise the
+        mask (i.e., a dense mask), then using an image mask will usually result in a smaller file and
+        memory usage than using a pixel mask. Conversely, if the NWB file will not be compressed and
+        there are relatively few pixels that comprise the mask (i.e., a sparse mask), then using a
+        pixel mask will usually result in a smaller file and memory usage than using an image mask.
+        """
         pixel_mask, voxel_mask, image_mask = popargs('pixel_mask', 'voxel_mask', 'image_mask', kwargs)
         if image_mask is None and pixel_mask is None and voxel_mask is None:
-            raise ValueError("Must provide 'image_mask' and/or 'pixel_mask'")
+            raise ValueError("Must provide 'image_mask', 'pixel_mask', or 'voxel_mask'.")
         rkwargs = dict(kwargs)
         if image_mask is not None:
             rkwargs['image_mask'] = image_mask
