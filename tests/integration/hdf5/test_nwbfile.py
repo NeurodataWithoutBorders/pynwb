@@ -261,7 +261,7 @@ class TestEpochsIO(NWBH5IOMixin, TestCase):
 
     def setUpContainer(self):
         """ Return placeholder epochs object. Tested epochs are added directly to the NWBFile in addContainer """
-        return TimeIntervals('epochs')
+        return TimeIntervals(name='epochs')
 
     def addContainer(self, nwbfile):
         """ Add the test epochs to the given NWBFile """

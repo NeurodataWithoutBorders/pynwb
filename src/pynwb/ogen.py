@@ -1,4 +1,4 @@
-from hdmf.utils import docval, popargs, get_docval, popargs_to_dict
+from hdmf.utils import docval, popargs, get_docval, popargs_to_dict, AllowPositional
 
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries
@@ -19,7 +19,8 @@ class OptogeneticStimulusSite(NWBContainer):
             {'name': 'device', 'type': Device, 'doc': 'The device that was used.'},
             {'name': 'description', 'type': str, 'doc': 'Description of site.'},
             {'name': 'excitation_lambda', 'type': float, 'doc': 'Excitation wavelength in nm.'},
-            {'name': 'location', 'type': str, 'doc': 'Location of stimulation site.'})
+            {'name': 'location', 'type': str, 'doc': 'Location of stimulation site.'},
+            allow_positional=AllowPositional.WARNING,)
     def __init__(self, **kwargs):
         args_to_set = popargs_to_dict(('device', 'description', 'excitation_lambda', 'location'), kwargs)
         super().__init__(**kwargs)
@@ -43,7 +44,8 @@ class OptogeneticSeries(TimeSeries):
             {'name': 'site', 'type': OptogeneticStimulusSite,  # required
              'doc': 'The site to which this stimulus was applied.'},
             *get_docval(TimeSeries.__init__, 'resolution', 'conversion', 'timestamps', 'starting_time', 'rate',
-                        'comments', 'description', 'control', 'control_description', 'offset'))
+                        'comments', 'description', 'control', 'control_description', 'offset'),
+            allow_positional=AllowPositional.WARNING,)
     def __init__(self, **kwargs):
         site = popargs('site', kwargs)
         kwargs['unit'] = 'watts'

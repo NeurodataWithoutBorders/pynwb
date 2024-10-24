@@ -45,7 +45,8 @@ class LabMetaData(NWBContainer):
     tutorial.
     """
 
-    @docval({'name': 'name', 'type': str, 'doc': 'name of lab metadata'})
+    @docval({'name': 'name', 'type': str, 'doc': 'name of lab metadata'},
+            allow_positional=AllowPositional.WARNING,)
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
@@ -107,6 +108,7 @@ class Subject(NWBContainer):
         {'name': 'date_of_birth', 'type': datetime, 'default': None,
          'doc': 'The datetime of the date of birth. May be supplied instead of age.'},
         {'name': 'strain', 'type': str, 'doc': 'The strain of the subject, e.g., "C57BL/6J"', 'default': None},
+        allow_positional=AllowPositional.WARNING,
     )
     def __init__(self, **kwargs):
         keys_to_set = (
@@ -940,7 +942,8 @@ class NWBFile(MultiContainerInterface, HERDManager):
         will return None if the table is currently not being used.
         """
         if self.icephys_simultaneous_recordings is None:
-            self.icephys_simultaneous_recordings = SimultaneousRecordingsTable(self.get_intracellular_recordings())
+            self.icephys_simultaneous_recordings = SimultaneousRecordingsTable(
+                intracellular_recordings_table=self.get_intracellular_recordings())
         return self.icephys_simultaneous_recordings
 
     @docval(*get_docval(SimultaneousRecordingsTable.add_simultaneous_recording),
@@ -963,7 +966,8 @@ class NWBFile(MultiContainerInterface, HERDManager):
         will return None if the table is currently not being used.
         """
         if self.icephys_sequential_recordings is None:
-            self.icephys_sequential_recordings = SequentialRecordingsTable(self.get_icephys_simultaneous_recordings())
+            self.icephys_sequential_recordings = SequentialRecordingsTable(
+                simultaneous_recordings_table=self.get_icephys_simultaneous_recordings())
         return self.icephys_sequential_recordings
 
     @docval(*get_docval(SequentialRecordingsTable.add_sequential_recording),
@@ -987,7 +991,8 @@ class NWBFile(MultiContainerInterface, HERDManager):
         will return None if the table is currently not being used.
         """
         if self.icephys_repetitions is None:
-            self.icephys_repetitions = RepetitionsTable(self.get_icephys_sequential_recordings())
+            self.icephys_repetitions = RepetitionsTable(
+                sequential_recordings_table=self.get_icephys_sequential_recordings())
         return self.icephys_repetitions
 
     @docval(*get_docval(RepetitionsTable.add_repetition),
@@ -1010,7 +1015,8 @@ class NWBFile(MultiContainerInterface, HERDManager):
         will return None if the table is currently not being used.
         """
         if self.icephys_experimental_conditions is None:
-            self.icephys_experimental_conditions = ExperimentalConditionsTable(self.get_icephys_repetitions())
+            self.icephys_experimental_conditions = ExperimentalConditionsTable(
+                repetitions_table=self.get_icephys_repetitions())
         return self.icephys_experimental_conditions
 
     @docval(*get_docval(ExperimentalConditionsTable.add_experimental_condition),

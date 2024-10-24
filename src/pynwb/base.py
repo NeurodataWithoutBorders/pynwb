@@ -6,7 +6,7 @@ import numpy as np
 
 from hdmf.utils import docval, popargs_to_dict, get_docval, popargs
 from hdmf.common import DynamicTable, VectorData
-from hdmf.utils import get_data_shape
+from hdmf.utils import get_data_shape, AllowPositional
 
 from . import register_class, CORE_NAMESPACE
 from .core import NWBDataInterface, MultiContainerInterface, NWBData
@@ -33,7 +33,8 @@ class ProcessingModule(MultiContainerInterface):
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this processing module'},
             {'name': 'description', 'type': str, 'doc': 'Description of this processing module'},
             {'name': 'data_interfaces', 'type': (list, tuple, dict),
-             'doc': 'NWBDataInterfaces that belong to this ProcessingModule', 'default': None})
+             'doc': 'NWBDataInterfaces that belong to this ProcessingModule', 'default': None},
+             allow_positional=AllowPositional.WARNING,)
     def __init__(self, **kwargs):
         description, data_interfaces = popargs("description", "data_interfaces", kwargs)
         super().__init__(**kwargs)
@@ -143,7 +144,8 @@ class TimeSeries(NWBDataInterface):
                     'distinct moments in time. Times of image presentations would be  "step" because the picture '
                     'remains the same until the next time-point. This field is optional, but is useful in providing '
                     'information about the underlying data. It may inform the way this data is interpreted, the way it '
-                    'is visualized, and what analysis methods are applicable.'})
+                    'is visualized, and what analysis methods are applicable.'},
+              allow_positional=AllowPositional.WARNING,)
     def __init__(self, **kwargs):
         """Create a TimeSeries object
         """
@@ -375,7 +377,8 @@ class Image(NWBData):
             {'name': 'data', 'type': ('array_data', 'data'), 'doc': 'data of image. Dimensions: x, y [, r,g,b[,a]]',
              'shape': ((None, None), (None, None, 3), (None, None, 4))},
             {'name': 'resolution', 'type': float, 'doc': 'pixels / cm', 'default': None},
-            {'name': 'description', 'type': str, 'doc': 'description of image', 'default': None})
+            {'name': 'description', 'type': str, 'doc': 'description of image', 'default': None},
+            allow_positional=AllowPositional.WARNING,)
     def __init__(self, **kwargs):
         args_to_set = popargs_to_dict(("resolution", "description"), kwargs)
         super().__init__(**kwargs)
@@ -392,7 +395,8 @@ class ImageReferences(NWBData):
     __nwbfields__ = ('data', )
 
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this ImageReferences object.'},
-            {'name': 'data', 'type': 'array_data', 'doc': 'The images in order.'},)
+            {'name': 'data', 'type': 'array_data', 'doc': 'The images in order.'},
+            allow_positional=AllowPositional.WARNING,)
     def __init__(self, **kwargs):
         # NOTE we do not use the docval shape validator here because it will recognize a list of P MxN images as
         # having shape (P, M, N)
@@ -424,7 +428,8 @@ class Images(MultiContainerInterface):
             {'name': 'images', 'type': 'array_data', 'doc': 'image objects', 'default': None},
             {'name': 'description', 'type': str, 'doc': 'description of images', 'default': 'no description'},
             {'name': 'order_of_images', 'type': ImageReferences,
-             'doc': 'Ordered dataset of references to Image objects stored in the parent group.', 'default': None},)
+             'doc': 'Ordered dataset of references to Image objects stored in the parent group.', 'default': None},
+             allow_positional=AllowPositional.WARNING,)
     def __init__(self, **kwargs):
 
         args_to_set = popargs_to_dict(("description", "images", "order_of_images"), kwargs)
@@ -617,7 +622,8 @@ class TimeSeriesReferenceVectorData(VectorData):
              'default': "Column storing references to a TimeSeries (rows). For each TimeSeries this "
                         "VectorData column stores the start_index and count to indicate the range in time "
                         "to be selected as well as an object reference to the TimeSeries."},
-            *get_docval(VectorData.__init__, 'data'))
+            *get_docval(VectorData.__init__, 'data'),
+            allow_positional=AllowPositional.WARNING,)
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         # CAUTION: Define any logic specific for init in the self._init_internal function, not here!
