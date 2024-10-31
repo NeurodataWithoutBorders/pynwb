@@ -32,6 +32,7 @@ from dateutil.tz import tzlocal
 
 from pynwb import NWBHDF5IO, NWBFile
 from pynwb.ecephys import LFP, ElectricalSeries
+from pynwb.misc import DecompositionSeries
 
 #######################
 # Creating and Writing NWB files
@@ -240,6 +241,40 @@ ecephys_module = nwbfile.create_processing_module(
     name="ecephys", description="processed extracellular electrophysiology data"
 )
 ecephys_module.add(lfp)
+
+####################
+# In some cases, you may want to further process the LFP data and decompose the signal into different frequency bands 
+# to use for other downstream analyses. You can store the processed data from these spectral analyses using a
+# :py:class:`~pynwb.misc.DecompositionSeries` object. This object allows you to include metadata about the frequency
+# bands and metric used (e.g., power, phase, amplitude), as well as link the decomposed data to the original 
+# :py:class:`~pynwb.base.TimeSeries` signal the data was derived from.
+
+#######################
+# .. note:: When adding data to :py:class:`~pynwb.misc.DecompositionSeries`, the ``data`` argument is assumed to be 
+#           3D where the first dimension is time, the second dimension is channels, and the third dimension is bands.
+
+
+bands = dict(theta=(4.0, 12.0), 
+             beta=(12.0, 30.0), 
+             gamma=(30.0, 80.0))  # in Hz
+phase_data = np.random.randn(50, 12, len(bands))  # 50 samples, 12 channels, 3 frequency bands  
+
+decomp_series = DecompositionSeries(name="theta",
+                                    data=phase_data,
+                                    metric='phase',
+                                    rate=200.0,
+                                    source_channels=all_table_region,
+                                    source_timeseries=lfp_electrical_series)
+
+for band_name, band_limits in bands.items():
+    decomp_series.add_band(band_name=band_name, band_limits=band_limits)  # TODO - band_mean/band_std are currently required
+
+ecephys_module.add(decomp_series)
+
+#######################
+# The frequency band information can also be viewed as a pandas DataFrame.
+
+decomp_series.bands.to_dataframe()
 
 ####################
 # .. _units_electrode:
