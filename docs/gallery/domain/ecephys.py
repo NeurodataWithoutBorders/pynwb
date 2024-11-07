@@ -267,7 +267,7 @@ decomp_series = DecompositionSeries(name="theta",
                                     source_timeseries=lfp_electrical_series)
 
 for band_name, band_limits in bands.items():
-    decomp_series.add_band(band_name=band_name, band_limits=band_limits)  # TODO - band_mean/band_std are currently required
+    decomp_series.add_band(band_name=band_name, band_limits=band_limits)
 
 ecephys_module.add(decomp_series)
 
