@@ -531,3 +531,31 @@ class TestNWBHDF5IO(TestCase):
         with NWBHDF5IO(pathlib_path, 'r') as io:
             read_file = io.read()
             self.assertContainerEqual(read_file, self.nwbfile)
+
+
+    def test_read_nwb_method_path(self):
+        
+        # write the example file
+        with NWBHDF5IO(self.path, 'w') as io:
+            io.write(self.nwbfile)
+            
+        # test that the read_nwb method works
+        read_nwbfile = NWBHDF5IO.read_nwb(path=self.path)
+        self.assertContainerEqual(read_nwbfile, self.nwbfile)
+
+        read_nwbfile.get_read_io().close()
+        
+    def test_read_nwb_method_file(self):
+        
+        # write the example file
+        with NWBHDF5IO(self.path, 'w') as io:
+            io.write(self.nwbfile)
+            
+        import h5py
+        
+        file = h5py.File(self.path, 'r')
+        
+        read_nwbfile = NWBHDF5IO.read_nwb(file=file)
+        self.assertContainerEqual(read_nwbfile, self.nwbfile)
+
+        read_nwbfile.get_read_io().close()
