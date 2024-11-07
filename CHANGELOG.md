@@ -2,6 +2,9 @@
 
 ## PyNWB 2.8.3 (Upcoming)
 
+### Documentation and tutorial enhancements
+- Added a documentation example for `DecompositionSeries`. @stephprince [#1981](https://github.com/NeurodataWithoutBorders/pynwb/pull/1981)
+
 ### Performance
 - Cache global type map to speed import 3X. @sneakers-the-rat [#1931](https://github.com/NeurodataWithoutBorders/pynwb/pull/1931)
 
