@@ -2,6 +2,9 @@
 
 ## PyNWB 2.8.3 (Upcoming)
 
+### Documentation and tutorial enhancements
+- Added documentation example for `SpikeEventSeries`. @stephprince [#1983](https://github.com/NeurodataWithoutBorders/pynwb/pull/1983)
+
 ### Performance
 - Cache global type map to speed import 3X. @sneakers-the-rat [#1931](https://github.com/NeurodataWithoutBorders/pynwb/pull/1931)
 
