@@ -536,7 +536,6 @@ class TestNWBHDF5IO(TestCase):
         """Creating a file with an extension other than .nwb should raise a warning"""
         pathlib_path = Path(self.path).with_suffix('.h5')
 
-        # with self.assertRaises(UserWarning):
         with self.assertWarns(UserWarning):
             with NWBHDF5IO(pathlib_path, 'w') as io:
                 io.write(self.nwbfile)
@@ -544,7 +543,7 @@ class TestNWBHDF5IO(TestCase):
             with NWBHDF5IO(str(pathlib_path), 'w') as io:
                 io.write(self.nwbfile)
 
-       #  should not warn on read or append
+        # should not warn on read or append
         with NWBHDF5IO(str(pathlib_path), 'r') as io:
             io.read()
         with NWBHDF5IO(str(pathlib_path), 'a') as io:
