@@ -11,6 +11,7 @@
 
 ### Enhancements and minor changes
 - Made gain an optional argument for PatchClampSeries to match the schema. @stephprince [#1975](https://github.com/NeurodataWithoutBorders/pynwb/pull/1975)
+- Added warning when writing files with `NWBHDF5IO` without the `.nwb` extension. @stephprince [#1978](https://github.com/NeurodataWithoutBorders/pynwb/pull/1978)
 
 ## PyNWB 2.8.2 (September 9, 2024)
 

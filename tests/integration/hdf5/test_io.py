@@ -313,7 +313,7 @@ class TestH5DataIO(TestCase):
         self.nwbfile = NWBFile(session_description='a',
                                identifier='b',
                                session_start_time=datetime(1970, 1, 1, 12, tzinfo=tzutc()))
-        self.path = "test_pynwb_io_hdf5_h5dataIO.h5"
+        self.path = "test_pynwb_io_hdf5_h5dataIO.nwb"
 
     def tearDown(self):
         remove_test_file(self.path)
@@ -428,7 +428,7 @@ class TestNWBHDF5IO(TestCase):
         self.nwbfile = NWBFile(session_description='a test NWB File',
                                identifier='TEST123',
                                session_start_time=datetime(1970, 1, 1, 12, tzinfo=tzutc()))
-        self.path = "test_pynwb_io_nwbhdf5.h5"
+        self.path = "test_pynwb_io_nwbhdf5.nwb"
 
     def tearDown(self):
         remove_test_file(self.path)
@@ -531,6 +531,23 @@ class TestNWBHDF5IO(TestCase):
         with NWBHDF5IO(pathlib_path, 'r') as io:
             read_file = io.read()
             self.assertContainerEqual(read_file, self.nwbfile)
+
+    def test_warn_for_nwb_extension(self):
+        """Creating a file with an extension other than .nwb should raise a warning"""
+        pathlib_path = Path(self.path).with_suffix('.h5')
+
+        with self.assertWarns(UserWarning):
+            with NWBHDF5IO(pathlib_path, 'w') as io:
+                io.write(self.nwbfile)
+        with self.assertWarns(UserWarning):
+            with NWBHDF5IO(str(pathlib_path), 'w') as io:
+                io.write(self.nwbfile)
+
+        # should not warn on read or append
+        with NWBHDF5IO(str(pathlib_path), 'r') as io:
+            io.read()
+        with NWBHDF5IO(str(pathlib_path), 'a') as io:
+            io.read()
 
     def test_can_read_current_nwb_file(self):
         with NWBHDF5IO(self.path, 'w') as io:

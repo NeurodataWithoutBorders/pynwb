@@ -9,8 +9,8 @@ from pynwb.testing.mock.base import mock_TimeSeries
 class TestFileCopy(TestCase):
 
     def setUp(self):
-        self.path1 = "test_a.h5"
-        self.path2 = "test_b.h5"
+        self.path1 = "test_a.nwb"
+        self.path2 = "test_b.nwb"
 
     def tearDown(self):
         if os.path.exists(self.path1):
