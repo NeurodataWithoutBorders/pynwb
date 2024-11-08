@@ -28,8 +28,8 @@ class SpatialSeries(TimeSeries):
                      'or 3 columns, which represent x, y, and z.')},
             {'name': 'bounds', 'type': list, 'shape': ((1, 2), (2, 2), (3, 2)), 'default': None,
              'doc': 'The boundary range (min, max) for each dimension of data.'},
-            {'name': 'reference_frame', 'type': str,   # required
-             'doc': 'description defining what the zero-position is'},
+            {'name': 'reference_frame', 'type': str,
+             'doc': 'description defining what the zero-position is', 'default': None},
             {'name': 'unit', 'type': str, 'doc': 'The base unit of measurement (should be SI unit)',
              'default': 'meters'},
             *get_docval(TimeSeries.__init__, 'conversion', 'resolution', 'timestamps', 'starting_time', 'rate',
