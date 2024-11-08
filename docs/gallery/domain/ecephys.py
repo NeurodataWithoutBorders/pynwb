@@ -281,7 +281,7 @@ nwbfile.units.to_dataframe()
 # unsorted spiking activity (e.g., multi-unit activity detected via threshold crossings during data acquisition).
 # This information can be stored using :py:class:`~pynwb.ecephys.SpikeEventSeries` objects. 
 
-spike_snippets = np.random.rand(20, 3, 40)  # 20 events, 4 channels, 40 samples per event
+spike_snippets = np.random.rand(20, 3, 40)  # 20 events, 3 channels, 40 samples per event
 shank0 = nwbfile.create_electrode_table_region(
     region=[0, 1, 2],
     description="shank0",
