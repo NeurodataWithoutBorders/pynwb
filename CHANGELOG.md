@@ -2,6 +2,9 @@
 
 ## PyNWB 2.8.3 (Upcoming)
 
+### Enhancements and minor changes
+* Added `NWBHDF5IO.read_nwb` convenience method to simplify reading an NWB file. @h-mayorquin [#1979](https://github.com/NeurodataWithoutBorders/pynwb/pull/1979)
+
 ### Performance
 - Cache global type map to speed import 3X. @sneakers-the-rat [#1931](https://github.com/NeurodataWithoutBorders/pynwb/pull/1931)
 
