@@ -514,11 +514,21 @@ class NWBHDF5IO(_HDF5IO):
         path = popargs('path', kwargs)
         file = popargs('file', kwargs)
 
-        # open the file with NWBZarrIO and rad the file
-        io = NWBHDF5IO(path=path, file=file, mode="r", load_namespaces=True)
-        nwbfile = io.read()
+        # Streaming case
+        if path is not None and str(path).startswith("s3://") or str(path).startswith("http"):
+            import fsspec
+            print(path)
+            path = "https://dandiarchive.s3.amazonaws.com/blobs/11e/c89/11ec8933-1456-4942-922b-94e5878bb991"
+            fsspec_file_system = fsspec.filesystem("http")
+            ffspec_file = fsspec_file_system.open(str(path), "rb")
 
-        # return the NWBFile object
+            open_file = h5py.File(ffspec_file, "r")
+            io = NWBHDF5IO(file=open_file)
+            nwbfile = io.read()
+        else:
+            io = NWBHDF5IO(path=path, file=file, mode="r", load_namespaces=True)
+            nwbfile = io.read()
+
         return nwbfile
 
 from . import io as __io  # noqa: F401,E402
