@@ -24,6 +24,9 @@ be edited in place. For this to work, you must open the file in read/write mode
 
 First, let's create an NWB file with data:
 """
+
+# sphinx_gallery_thumbnail_path = "figures/gallery_thumbnails_editing.png"
+
 from pynwb import NWBHDF5IO, NWBFile, TimeSeries
 from datetime import datetime
 from dateutil.tz import tzlocal

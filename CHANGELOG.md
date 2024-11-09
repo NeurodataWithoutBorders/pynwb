@@ -5,11 +5,19 @@
 ### Enhancements and minor changes
 * Added `NWBHDF5IO.read_nwb` convenience method to simplify reading an NWB file. @h-mayorquin [#1979](https://github.com/NeurodataWithoutBorders/pynwb/pull/1979)
 
+### Documentation and tutorial enhancements
+- Added documentation example for `SpikeEventSeries`. @stephprince [#1983](https://github.com/NeurodataWithoutBorders/pynwb/pull/1983)
+
 ### Performance
 - Cache global type map to speed import 3X. @sneakers-the-rat [#1931](https://github.com/NeurodataWithoutBorders/pynwb/pull/1931)
 
 ### Bug fixes
 - Fixed bug in how `ElectrodeGroup.__init__` validates its `position` argument. @oruebel [#1770](https://github.com/NeurodataWithoutBorders/pynwb/pull/1770)
+- Changed `SpatialSeries.reference_frame` from required to optional as specified in the schema. @rly [#1986](https://github.com/NeurodataWithoutBorders/pynwb/pull/1986)
+
+### Enhancements and minor changes
+- Made gain an optional argument for PatchClampSeries to match the schema. @stephprince [#1975](https://github.com/NeurodataWithoutBorders/pynwb/pull/1975)
+- Added warning when writing files with `NWBHDF5IO` without the `.nwb` extension. @stephprince [#1978](https://github.com/NeurodataWithoutBorders/pynwb/pull/1978)
 
 ## PyNWB 2.8.2 (September 9, 2024)
 
