@@ -4,7 +4,6 @@ import numpy as np
 from h5py import File
 from pathlib import Path
 import tempfile
-import pytest
 
 from pynwb import NWBFile, TimeSeries, get_manager, NWBHDF5IO, validate
 
@@ -18,6 +17,13 @@ from pynwb.ecephys import ElectricalSeries, LFP
 from pynwb.testing import remove_test_file, TestCase
 from pynwb.testing.mock.file import mock_NWBFile
 
+
+import unittest
+try:
+    import fsspec # noqa f401
+    HAVE_FSSPEC = True 
+except ImportError:
+    HAVE_FSSPEC = False
 
 class TestHDF5Writer(TestCase):
 
@@ -615,9 +621,8 @@ class TestNWBHDF5IO(TestCase):
 
         read_nwbfile.get_read_io().close()
     
-    def test_read_nwb_method_s3_path(self):
-        fsspec = pytest.importorskip("fsspec")  # This alone will skip if import fails
-
+    @unittest.skipIf(not HAVE_FSSPEC, "fsspec library not available")
+    def test_read_nwb_method_s3_path():
         s3_test_path = "https://dandiarchive.s3.amazonaws.com/blobs/11e/c89/11ec8933-1456-4942-922b-94e5878bb991"
         read_nwbfile = NWBHDF5IO.read_nwb(path=s3_test_path)
         assert read_nwbfile.identifier == "3f77c586-6139-4777-a05d-f603e90b1330"
