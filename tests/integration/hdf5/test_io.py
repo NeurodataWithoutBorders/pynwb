@@ -622,7 +622,7 @@ class TestNWBHDF5IO(TestCase):
         read_nwbfile.get_read_io().close()
     
     @unittest.skipIf(not HAVE_FSSPEC, "fsspec library not available")
-    def test_read_nwb_method_s3_path():
+    def test_read_nwb_method_s3_path(self):
         s3_test_path = "https://dandiarchive.s3.amazonaws.com/blobs/11e/c89/11ec8933-1456-4942-922b-94e5878bb991"
         read_nwbfile = NWBHDF5IO.read_nwb(path=s3_test_path)
         assert read_nwbfile.identifier == "3f77c586-6139-4777-a05d-f603e90b1330"
