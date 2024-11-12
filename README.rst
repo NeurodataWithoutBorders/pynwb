@@ -49,10 +49,10 @@ Overall Health
      :target: https://github.com/neurodatawithoutborders/pynwb/blob/dev/license.txt
      :alt: PyPI - License
 
-**Conda**
+**Conda Feedstock**
 
-.. image:: https://circleci.com/gh/conda-forge/pynwb-feedstock.svg?style=shield
-     :target: https://circleci.com/gh/conda-forge/pynwb-feedstock
+.. image:: https://dev.azure.com/conda-forge/feedstock-builds/_apis/build/status/pynwb-feedstock?branchName=main
+     :target: https://dev.azure.com/conda-forge/feedstock-builds/_build/latest?definitionId=5703&branchName=main
      :alt: Conda Feedstock Status
 
 NWB Format API

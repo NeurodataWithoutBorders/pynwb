@@ -31,14 +31,13 @@ import numpy as np
 from dateutil.tz import tzlocal
 
 from pynwb import NWBHDF5IO, NWBFile
-from pynwb.ecephys import LFP, ElectricalSeries
+from pynwb.ecephys import LFP, ElectricalSeries, SpikeEventSeries
 
 #######################
 # Creating and Writing NWB files
 # ------------------------------
 #
 # When creating a NWB file, the first step is to create the :py:class:`~pynwb.file.NWBFile`.
-
 
 nwbfile = NWBFile(
     session_description="my first synthetic recording",
@@ -50,7 +49,8 @@ nwbfile = NWBFile(
     lab="Bag End Laboratory",
     institution="University of Middle Earth at the Shire",
     experiment_description="I went on an adventure to reclaim vast treasures.",
-    session_id="LONELYMTN001",
+    keywords=["ecephys", "exploration", "wanderlust"],
+    related_publications="doi:10.1016/j.neuron.2016.12.011",
 )
 
 #######################
@@ -93,7 +93,6 @@ device = nwbfile.create_device(
 # additional user-specified metadata as custom columns of the table. We will be adding a ``"label"`` column to the
 # table. Use the following code to add electrodes for an array with 4 shanks and 3 channels per shank.
 
-
 nwbfile.add_electrode_column(name="label", description="label of electrode")
 
 nshanks = 4
@@ -118,9 +117,8 @@ for ishank in range(nshanks):
         electrode_counter += 1
 
 #######################
-# Similarly to the ``trials`` table, we can view the ``electrodes`` table in tabular form
+# Similarly to other tables in PyNWB, we can view the ``electrodes`` table in tabular form
 # by converting it to a pandas :py:class:`~pandas.DataFrame`.
-
 
 nwbfile.electrodes.to_dataframe()
 
@@ -145,7 +143,6 @@ nwbfile.electrodes.to_dataframe()
 # convenience function that creates a :py:class:`~hdmf.common.table.DynamicTableRegion` which references the
 # ``"electrodes"`` table.
 
-
 all_table_region = nwbfile.create_electrode_table_region(
     region=list(range(electrode_counter)),  # reference row indices 0 to N-1
     description="all electrodes",
@@ -156,7 +153,7 @@ all_table_region = nwbfile.create_electrode_table_region(
 # ^^^^^^^^^^^^^^^^^
 #
 # Now create an :py:class:`~pynwb.ecephys.ElectricalSeries` object to store raw data collected
-# during the experiment, passing in this ``"all_table_region"`` :py:class:`~hdmf.common.table.DynamicTableRegion`
+# during the experiment, passing in this ``all_table_region`` :py:class:`~hdmf.common.table.DynamicTableRegion`
 # reference to all rows of the electrodes table.
 #
 # .. only:: html
@@ -174,10 +171,10 @@ all_table_region = nwbfile.create_electrode_table_region(
 #     :align: center
 #
 
-
 raw_data = np.random.randn(50, 12)
 raw_electrical_series = ElectricalSeries(
     name="ElectricalSeries",
+    description="Raw acquisition traces",
     data=raw_data,
     electrodes=all_table_region,
     starting_time=0.0,  # timestamp of the first sample in seconds relative to the session start time
@@ -187,7 +184,6 @@ raw_electrical_series = ElectricalSeries(
 ####################
 # Since this :py:class:`~pynwb.ecephys.ElectricalSeries` represents raw data from the data acquisition system,
 # add it to the acquisition group of the :py:class:`~pynwb.file.NWBFile`.
-
 
 nwbfile.add_acquisition(raw_electrical_series)
 
@@ -199,10 +195,10 @@ nwbfile.add_acquisition(raw_electrical_series)
 # again passing in the :py:class:`~hdmf.common.table.DynamicTableRegion` reference to all rows of the ``"electrodes"``
 # table.
 
-
 lfp_data = np.random.randn(50, 12)
 lfp_electrical_series = ElectricalSeries(
     name="ElectricalSeries",
+    description="LFP data",
     data=lfp_data,
     electrodes=all_table_region,
     starting_time=0.0,
@@ -240,7 +236,6 @@ lfp = LFP(electrical_series=lfp_electrical_series)
 # This is analogous to how we can store the :py:class:`~pynwb.behavior.Position` object in a processing module
 # created with the method :py:meth:`.NWBFile.create_processing_module`.
 
-
 ecephys_module = nwbfile.create_processing_module(
     name="ecephys", description="processed extracellular electrophysiology data"
 )
@@ -249,17 +244,20 @@ ecephys_module.add(lfp)
 ####################
 # .. _units_electrode:
 #
-# Spike Times
-# ^^^^^^^^^^^
+# Sorted spike times
+# ^^^^^^^^^^^^^^^^^^
 #
 # Spike times are stored in the :py:class:`~pynwb.misc.Units` table, which is a subclass of
 # :py:class:`~hdmf.common.table.DynamicTable`. Adding columns to the :py:class:`~pynwb.misc.Units` table is analogous
-# to how we can add columns to the ``"electrodes"`` and ``"trials"`` tables.
-#
-# Generate some random spike data and populate the :py:class:`~pynwb.misc.Units` table using the
-# method :py:meth:`.NWBFile.add_unit`.
+# to how we can add columns to the ``"electrodes"`` and ``"trials"`` tables. Use the convenience method
+# :py:meth:`.NWBFile.add_unit_column` to add a new column on the :py:class:`~pynwb.misc.Units` table for the
+# sorting quality of the units.
 
 nwbfile.add_unit_column(name="quality", description="sorting quality")
+
+####################
+# Generate some random spike data and populate the :py:class:`~pynwb.misc.Units` table using the
+# method :py:meth:`.NWBFile.add_unit`.
 
 firing_rate = 20
 n_units = 10
@@ -272,8 +270,30 @@ for n_units_per_shank in range(n_units):
 #######################
 # The :py:class:`~pynwb.misc.Units` table can also be converted to a pandas :py:class:`~pandas.DataFrame`.
 
-
 nwbfile.units.to_dataframe()
+
+####################
+# Unsorted spike times
+# ^^^^^^^^^^^^^^^^^^^^
+#
+# While the :py:class:`~pynwb.misc.Units` table is used to store spike times and waveform data for
+# spike-sorted, single-unit activity, you may also want to store spike times and waveform snippets of
+# unsorted spiking activity (e.g., multi-unit activity detected via threshold crossings during data acquisition).
+# This information can be stored using :py:class:`~pynwb.ecephys.SpikeEventSeries` objects. 
+
+spike_snippets = np.random.rand(20, 3, 40)  # 20 events, 3 channels, 40 samples per event
+shank0 = nwbfile.create_electrode_table_region(
+    region=[0, 1, 2],
+    description="shank0",
+)
+
+
+spike_events = SpikeEventSeries(name='SpikeEvents_Shank0',
+                                description="events detected with 100uV threshold",
+                                data=spike_snippets,
+                                timestamps=np.arange(20),
+                                electrodes=shank0)
+nwbfile.add_acquisition(spike_events)
 
 #######################
 # Designating electrophysiology data
@@ -286,17 +306,17 @@ nwbfile.units.to_dataframe()
 # :py:mod:`API documentation <pynwb.ecephys>` and :ref:`basics` for more details on
 # using these objects.
 #
-# For storing spike data, there are two options. Which one you choose depends on what data you have available.
-# If you need to store the complete, continuous raw voltage traces, you should store the traces with
+# For storing unsorted spiking data, there are two options. Which one you choose depends on what data you 
+# have available. If you need to store the complete, continuous raw voltage traces, you should store the traces with
 # :py:class:`~pynwb.ecephys.ElectricalSeries` objects as :ref:`acquisition <basic_timeseries>` data, and use
 # the :py:class:`~pynwb.ecephys.EventDetection` class for identifying the spike events in your raw traces.
 # If you do not want to store the raw voltage traces and only the waveform 'snippets' surrounding spike events,
-# you should use the :py:class:`~pynwb.ecephys.EventWaveform` class, which can store one or more
-# :py:class:`~pynwb.ecephys.SpikeEventSeries` objects.
+# you should use :py:class:`~pynwb.ecephys.SpikeEventSeries` objects.
 #
 # The results of spike sorting (or clustering) should be stored in the top-level :py:class:`~pynwb.misc.Units` table.
-# Note that it is not required to store spike waveforms in order to store spike events or mean waveforms--if you only
-# want to store the spike times of clustered units you can use only the Units table.
+# The :py:class:`~pynwb.misc.Units` table can contain simply the spike times of sorted units, or you can also include 
+# individual and mean waveform information in some of the optional, predefined :py:class:`~pynwb.misc.Units` table 
+# columns: ``waveform_mean``, ``waveform_sd``, or ``waveforms``.
 #
 # For local field potential data, there are two options. Again, which one you choose depends on what data you
 # have available. With both options, you should store your traces with :py:class:`~pynwb.ecephys.ElectricalSeries`
@@ -314,7 +334,6 @@ nwbfile.units.to_dataframe()
 #
 # Once you have finished adding all of your data to the :py:class:`~pynwb.file.NWBFile`,
 # write the file with :py:class:`~pynwb.NWBHDF5IO`.
-
 
 with NWBHDF5IO("ecephys_tutorial.nwb", "w") as io:
     io.write(nwbfile)

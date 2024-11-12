@@ -77,3 +77,6 @@ tests/coverage/htmlcov
 
 # Version
 _version.py
+
+.core_typemap_version
+core_typemap.pkl

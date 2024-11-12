@@ -135,10 +135,6 @@ Fields:
     name1 <class 'pynwb\.base\.TimeSeries'>,
     name2 <class 'pynwb\.base\.TimeSeries'>
   }
-  epoch_tags: {
-    tag1,
-    tag2
-  }
   epochs: epochs <class 'pynwb.epoch.TimeIntervals'>
   file_create_date: \[datetime.datetime\(.*\)\]
   identifier: identifier

@@ -117,22 +117,26 @@ class ElectricalSeriesConstructor(TestCase):
                    ) in str(w[-1].message)
 
     def test_get_data_in_units(self):
-
-        data = np.asarray([[1, 1, 1, 1, 1], [1, 1, 1, 1, 1]])
-        conversion = 1.0
+        samples = 100
+        channels = 5
+        conversion = 10.0
         offset = 3.0
-        channel_conversion = np.asarray([2.0, 2.0])
+        channel_conversion = np.random.rand(channels)
+
         electrical_series = mock_ElectricalSeries(
-            data=data,
+            data=np.ones((samples, channels)),
             conversion=conversion,
             offset=offset,
             channel_conversion=channel_conversion,
         )
 
         data_in_units = electrical_series.get_data_in_units()
-        expected_data = data * conversion * channel_conversion[:, np.newaxis] + offset
 
-        np.testing.assert_almost_equal(data_in_units, expected_data)
+        for channel_index in range(channels):
+            np.testing.assert_almost_equal(
+                data_in_units[:, channel_index],
+                np.ones(samples) * conversion * channel_conversion[channel_index] + offset
+            )
 
 
 class SpikeEventSeriesConstructor(TestCase):
@@ -174,16 +178,34 @@ class ElectrodeGroupConstructor(TestCase):
 
     def test_init(self):
         dev1 = Device('dev1')
-        group = ElectrodeGroup('elec1', 'electrode description', 'electrode location', dev1, (1, 2, 3))
+        group = ElectrodeGroup(name='elec1',
+                               description='electrode description',
+                               location='electrode location',
+                               device=dev1,
+                               position=(1, 2, 3))
         self.assertEqual(group.name, 'elec1')
         self.assertEqual(group.description, 'electrode description')
         self.assertEqual(group.location, 'electrode location')
         self.assertEqual(group.device, dev1)
-        self.assertEqual(group.position, (1, 2, 3))
+        self.assertEqual(group.position.tolist(), (1, 2, 3))
+
+    def test_init_position_array(self):
+        position = np.array((1, 2, 3), dtype=np.dtype([('x', float), ('y', float), ('z', float)]))
+        dev1 = Device('dev1')
+        group = ElectrodeGroup('elec1', 'electrode description', 'electrode location', dev1,
+                               position)
+        self.assertEqual(group.name, 'elec1')
+        self.assertEqual(group.description, 'electrode description')
+        self.assertEqual(group.location, 'electrode location')
+        self.assertEqual(group.device, dev1)
+        self.assertEqual(group.position, position)
 
     def test_init_position_none(self):
         dev1 = Device('dev1')
-        group = ElectrodeGroup('elec1', 'electrode description', 'electrode location', dev1)
+        group = ElectrodeGroup(name='elec1',
+                               description='electrode description',
+                               location='electrode location',
+                               device=dev1)
         self.assertEqual(group.name, 'elec1')
         self.assertEqual(group.description, 'electrode description')
         self.assertEqual(group.location, 'electrode location')
@@ -193,7 +215,29 @@ class ElectrodeGroupConstructor(TestCase):
     def test_init_position_bad(self):
         dev1 = Device('dev1')
         with self.assertRaises(ValueError):
-            ElectrodeGroup('elec1', 'electrode description', 'electrode location', dev1, (1, 2))
+            ElectrodeGroup(name='elec1',
+                           description='electrode description',
+                           location='electrode location',
+                           device=dev1,
+                           position=(1, 2))
+        with self.assertRaises(ValueError):
+            ElectrodeGroup(name='elec1',
+                           description='electrode description',
+                           location='electrode location',
+                           device=dev1,
+                           position=[(1, 2), ])
+        with self.assertRaises(ValueError):
+            ElectrodeGroup(name='elec1',
+                           description='electrode description',
+                           location='electrode location',
+                           device=dev1,
+                           position=np.array([(1., 2.)], dtype=np.dtype([('x', float), ('y', float)])))
+        with self.assertRaises(ValueError):
+            ElectrodeGroup(name='elec1',
+                           description='electrode description',
+                           location='electrode location',
+                           device=dev1,
+                           position=[(1, 2, 3), (4, 5, 6), (7, 8, 9)])
 
 
 class EventDetectionConstructor(TestCase):
