@@ -1,7 +1,9 @@
 """Command line tool to Validate an NWB file against a namespace."""
+import json
 import sys
 from argparse import ArgumentParser
 from typing import Tuple, List, Dict, Optional
+from pathlib import Path
 
 from hdmf.spec import NamespaceCatalog
 from hdmf.build import BuildManager
@@ -194,6 +196,12 @@ def _validate_against_namespaces(io: Optional[HDMFIO] = None,
         "doc": "Driver for h5py to use when opening the HDF5 file.",
         "default": None,
     },
+    {
+        "name": "json_file_path",
+        "type": str,
+        "doc": "Write json output to this location",
+        "default": None,
+    },    
     returns="Validation errors in the file.",
     rtype=(list, (list, bool)),
     is_method=False,
@@ -201,40 +209,18 @@ def _validate_against_namespaces(io: Optional[HDMFIO] = None,
 def validate(**kwargs):
     """Validate NWB file(s) against a namespace or its cached namespaces.
     """
-    from . import NWBHDF5IO  # TODO: modularize to avoid circular import
 
-    io, paths, use_cached_namespaces, namespace, verbose, driver = getargs(
-        "io", "paths", "use_cached_namespaces", "namespace", "verbose", "driver", kwargs
+    io, path, use_cached_namespaces, namespace, verbose, driver, json_file_path = getargs(
+        "io", "path", "use_cached_namespaces", "namespace", "verbose", "driver", "json_file_path", kwargs
     )
-    assert io != paths, "Both 'io' and 'paths' were specified! Please choose only one."
-
-    status = 0
-    validation_errors = list()
-    if io is not None:
-        status, namespaces_to_validate, io_kwargs, namespace_message = _check_namespaces_to_validate(
-            io=io, use_cached_namespaces=use_cached_namespaces, namespace=namespace, verbose=verbose,
-        )
-        if status == 0:
-            validation_errors += _validate_against_namespaces(io=io, 
-                                                            namespaces_to_validate=namespaces_to_validate, 
-                                                            namespace_message=namespace_message, 
-                                                            verbose=verbose)
+    assert io != path, "Both 'io' and 'path' were specified! Please choose only one."
+    path = str(path) if isinstance(path, Path) else path
     else:
-        for path in paths:
-            path_status, namespaces_to_validate, io_kwargs, namespace_message = _check_namespaces_to_validate(
-                path=path, driver=driver, use_cached_namespaces=use_cached_namespaces, namespace=namespace, 
-                verbose=verbose, 
-            )
-            status = status or path_status
-            if path_status == 1:
-                continue
-
-            with NWBHDF5IO(**io_kwargs) as io:
-                validation_errors += _validate_against_namespaces(io=io, 
-                                                                  path=path, 
-                                                                  namespaces_to_validate=namespaces_to_validate, 
-                                                                  namespace_message=namespace_message, 
-                                                                  verbose=verbose)
+    # write output to json file
+    if json_file_path is not None:
+        with open(json_file_path, "w") as f:
+            json.dump(obj=validation_errors, f=f)
+            print(f"Report saved to {str(Path(json_file_path).absolute())}!")
 
     return validation_errors, status
 
@@ -258,6 +244,7 @@ def validate_cli():
     # Common args to the API validate
     parser.add_argument("paths", type=str, nargs="+", help="NWB file paths")
     parser.add_argument("-n", "--ns", type=str, help="the namespace to validate against")
+    parser.add_argument("--json-file-path", help="Write json output to this location.")
     feature_parser = parser.add_mutually_exclusive_group(required=False)
     feature_parser.add_argument(
         "--no-cached-namespace",
@@ -274,10 +261,10 @@ def validate_cli():
             cached_namespaces, _, _ = get_cached_namespaces_to_validate(path=path)
             print("\n".join(cached_namespaces))
     else:
-        validation_errors, validation_status = validate(
-            paths=args.paths, use_cached_namespaces=not args.no_cached_namespace, namespace=args.ns, verbose=True
-        )
-        if not validation_status:
+            validation_errors = validate(
+                path=args.path, use_cached_namespaces=not args.no_cached_namespace, namespace=args.ns, verbose=True, 
+                json_file_path=args.json_file_path
+            )
             _print_errors(validation_errors=validation_errors)
         status = status or validation_status or (validation_errors is not None and len(validation_errors) > 0)
 
