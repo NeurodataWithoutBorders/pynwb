@@ -254,7 +254,7 @@ def validate_cli():
                 path=args.path, use_cached_namespaces=not args.no_cached_namespace, namespace=args.ns, verbose=True, 
             )
             _print_errors(validation_errors=validation_errors)
-            status = validation_errors is not None and len(validation_errors) > 0
+            status = int(validation_errors is not None and len(validation_errors) > 0)
         except ValueError as e:
             print(e, file=sys.stderr)
             status = 1
@@ -262,7 +262,7 @@ def validate_cli():
     # write output to json file
     if args.json_file_path is not None:
         with open(args.json_file_path, "w") as f:
-            json_report = {'status': int(status), 'validation_errors': [str(e) for e in validation_errors]}
+            json_report = {'exitcode': status, 'errors': [str(e) for e in validation_errors]}
             json.dump(obj=json_report, fp=f)
             print(f"Report saved to {str(Path(args.json_file_path).absolute())}!")
 
