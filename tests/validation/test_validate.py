@@ -24,7 +24,7 @@ from pynwb import validate, NWBHDF5IO
 # combine the individual coverage reports into one .coverage file.
 def run_coverage(extra_args: list[str]):
     return subprocess.run(
-        [sys.executable, "-m", "coverage", "run", "-p", "-m", "pynwb.validate"]
+        [sys.executable, "-m", "coverage", "run", "-p", "-m", "pynwb.validation"]
         + extra_args,
         capture_output=True
     )
@@ -178,9 +178,16 @@ class TestValidateCLI(TestCase):
         self.assertRegex(result.stdout.decode('utf-8'), stdout_regex)
 
     def test_validate_file_json_output(self):
-        """Test that validating an invalid file with the json flag ouputs a json file."""
+        """Test that validating a file with the json flag ouputs a json file."""
         json_path = "test_validation.json"
         run_coverage(["tests/back_compat/1.0.2_str_experimenter.nwb", "--no-cached-namespace", "--json-file-path", json_path])
+        self.assertTrue(os.path.exists(json_path))
+        os.remove(json_path)
+
+    def test_validation_entry_point(self):
+        """Test that using the validation entry point succesfully executes the validate CLI."""
+        json_path = "test_validation_entry_point.json"
+        subprocess.run(["pynwb-validate", "tests/back_compat/1.0.2_str_experimenter.nwb", "--json-file-path", json_path])
         self.assertTrue(os.path.exists(json_path))
         os.remove(json_path)
 

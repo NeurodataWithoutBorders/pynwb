@@ -48,6 +48,9 @@ dynamic = ["version"] # the build backend will compute the version dynamically f
 "Homepage" = "https://github.com/NeurodataWithoutBorders/pynwb"
 "Bug Tracker" = "https://github.com/NeurodataWithoutBorders/pynwb/issues"
 
+[project.scripts]
+pynwb-validate = "pynwb.validation:validate_cli"
+
 [tool.hatch.version]
 source = "vcs"
 
