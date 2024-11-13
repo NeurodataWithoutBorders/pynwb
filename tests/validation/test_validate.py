@@ -24,7 +24,7 @@ from pynwb import validate, NWBHDF5IO
 # combine the individual coverage reports into one .coverage file.
 def run_coverage(extra_args: list[str]):
     return subprocess.run(
-        [sys.executable, "-m", "coverage", "run", "-p", "-m", "pynwb.validation"]
+        [sys.executable, "-m", "coverage", "run", "-p", "-m", "pynwb.validation_cli"]
         + extra_args,
         capture_output=True
     )

@@ -157,7 +157,7 @@ def validate_nwbs():
     examples_nwbs = [x for x in examples_nwbs if not x.startswith('sub-')]
 
     import pynwb
-    from pynwb.validation import get_cached_namespaces_to_validate, validate
+    from pynwb.validation import validate, get_cached_namespaces_to_validate
 
     for nwb in examples_nwbs:
         try:
@@ -202,14 +202,14 @@ def validate_nwbs():
                     ERRORS += 1
 
                 cmds = []
-                cmds += [["python", "-m", "pynwb.validate", nwb]]
-                cmds += [["python", "-m", "pynwb.validate", "--no-cached-namespace", nwb]]
+                cmds += [["pynwb-validate", nwb]]
+                cmds += [["pynwb-validate", "--no-cached-namespace", nwb]]
 
                 for ns in namespaces:
                     # for some reason, this logging command is necessary to correctly printing the namespace in the
                     # next logging command
                     logging.info("Namespace found: %s" % ns)
-                    cmds += [["python", "-m", "pynwb.validate", "--ns", ns, nwb]]
+                    cmds += [["pynwb-validate", "--ns", ns, nwb]]
 
                 for cmd in cmds:
                     logging.info("Validating with \"%s\"." % (" ".join(cmd[:-1])))
