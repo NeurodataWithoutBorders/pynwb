@@ -1,5 +1,6 @@
 import subprocess
 import re
+import os
 import sys
 from unittest.mock import patch
 from io import StringIO
@@ -176,6 +177,13 @@ class TestValidateCLI(TestCase):
         stdout_regex = re.compile(r"ndx-testextension\s*")
         self.assertRegex(result.stdout.decode('utf-8'), stdout_regex)
 
+    def test_validate_file_json_output(self):
+        """Test that validating an invalid file with the json flag ouputs a json file."""
+        json_path = "test_validation.json"
+        run_coverage(["tests/back_compat/1.0.2_str_experimenter.nwb", "--no-cached-namespace", "--json-file-path", json_path])
+        self.assertTrue(os.path.exists(json_path))
+        os.remove(json_path)
+
 
 class TestValidateFunction(TestCase):
 
@@ -253,7 +261,6 @@ class TestValidateFunction(TestCase):
                           "['core'] is present.")
         with self.assertRaisesWith(ValueError, expected_error):
             validate(path=nwbfile_path, namespace="notfound")
-
 
     def test_validate_io_cached_hdmf_common(self):
         """Test that validating a file with cached spec against the hdmf-common namespace fails."""

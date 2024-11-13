@@ -145,13 +145,7 @@ def get_cached_namespaces_to_validate(path: Optional[str] = None,
         "type": str,
         "doc": "Driver for h5py to use when opening the HDF5 file.",
         "default": None,
-    },
-    {
-        "name": "json_file_path",
-        "type": str,
-        "doc": "Write json output to this location",
-        "default": None,
-    },    
+    }, 
     returns="Validation errors in the file.",
     rtype=(list, (list, bool)),
     is_method=False,
@@ -160,8 +154,8 @@ def validate(**kwargs):
     """Validate NWB file(s) against a namespace or its cached namespaces.
     """
 
-    io, path, use_cached_namespaces, namespace, verbose, driver, json_file_path = getargs(
-        "io", "path", "use_cached_namespaces", "namespace", "verbose", "driver", "json_file_path", kwargs
+    io, path, use_cached_namespaces, namespace, verbose, driver = getargs(
+        "io", "path", "use_cached_namespaces", "namespace", "verbose", "driver", kwargs
     )
     assert io != path, "Both 'io' and 'path' were specified! Please choose only one."
     path = str(path) if isinstance(path, Path) else path
@@ -216,12 +210,6 @@ def validate(**kwargs):
                   f"{namespace_message} using namespace '{validation_namespace}'.")
         validation_errors += _validate_helper(io=io, namespace=validation_namespace)
 
-    # write output to json file
-    if json_file_path is not None:
-        with open(json_file_path, "w") as f:
-            json.dump(obj=validation_errors, f=f)
-            print(f"Report saved to {str(Path(json_file_path).absolute())}!")
-
     return validation_errors
 
 
@@ -244,10 +232,10 @@ def validate_cli():
     # Common args to the API validate
     parser.add_argument("path", type=str, help="NWB file path")
     parser.add_argument("-n", "--ns", type=str, help="the namespace to validate against")
-    parser.add_argument("--json-file-path", help="Write json output to this location.")
+    parser.add_argument("--json-file-path", dest="json_file_path", type=str, help="Write json output to this location.")
     feature_parser = parser.add_mutually_exclusive_group(required=False)
     feature_parser.add_argument(
-        "--no-cached-namespace",
+        "--no-cached-namespace",  # NOTE - update to match validate inputs?
         dest="no_cached_namespace",
         action="store_true",
         help="Use the PyNWB loaded namespace (true) or use the cached namespace (false; default).",
@@ -260,10 +248,10 @@ def validate_cli():
         print("\n".join(cached_namespaces))
         status = 0
     else:
+        validation_errors = []
         try:
             validation_errors = validate(
                 path=args.path, use_cached_namespaces=not args.no_cached_namespace, namespace=args.ns, verbose=True, 
-                json_file_path=args.json_file_path
             )
             _print_errors(validation_errors=validation_errors)
             status = validation_errors is not None and len(validation_errors) > 0
@@ -271,6 +259,13 @@ def validate_cli():
             print(e, file=sys.stderr)
             status = 1
         
+    # write output to json file
+    if args.json_file_path is not None:
+        with open(args.json_file_path, "w") as f:
+            json_report = {'status': int(status), 'validation_errors': [str(e) for e in validation_errors]}
+            json.dump(obj=json_report, fp=f)
+            print(f"Report saved to {str(Path(args.json_file_path).absolute())}!")
+
     sys.exit(status)
 
 
