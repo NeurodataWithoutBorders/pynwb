@@ -93,7 +93,6 @@ class TestRos3Streaming(TestCase):
         self.assertDictEqual(d1=expected_namespace_dependencies, d2=expected_namespace_dependencies)
 
     def test_dandi_validate(self):
-        result, status = validate(paths=[self.s3_test_path], driver="ros3")
+        result = validate(path=self.s3_test_path, driver="ros3")
 
         assert result == []
-        assert status == 0

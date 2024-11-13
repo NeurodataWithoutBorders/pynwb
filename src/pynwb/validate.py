@@ -4,6 +4,7 @@ import sys
 from argparse import ArgumentParser
 from typing import Tuple, List, Dict, Optional
 from pathlib import Path
+from warnings import warn
 
 from hdmf.spec import NamespaceCatalog
 from hdmf.build import BuildManager, TypeMap
@@ -28,7 +29,16 @@ def _get_backend(path: str):
     from hdmf_zarr import NWBZarrIO
 
     backend_io_classes = [NWBHDF5IO, NWBZarrIO]
-    return [b for b in backend_io_classes if b.can_read(path=path)][0]
+    backend_options = [b for b in backend_io_classes if b.can_read(path=path)]
+    if len(backend_options) == 0:
+        warn(f"Could not find an IO to read the file '{path}'." 
+             f"This may be due to an older file version or invalid file." 
+             f"Defaulting to NWBHDF5IO.", UserWarning)
+        return NWBHDF5IO
+    elif len(backend_options) > 1:
+        raise ValueError(f"Multiple backends found for file '{path}': {backend_options}")
+    else:
+        return backend_options[0]
 
 def _validate_helper(io: HDMFIO, namespace: str = CORE_NAMESPACE) -> list:
     builder = io.read_builder()
@@ -172,10 +182,8 @@ def validate(**kwargs):
         else:
             namespaces_to_validate = [CORE_NAMESPACE]
             if verbose:
-                raise UserWarning(
-                    f"The file {f'{path} ' if path is not None else ''}has no cached namespace information. "
-                    "Falling back to {namespace_message}.",
-                )
+                warn(f"The file {f'{path} ' if path is not None else ''}has no cached namespace information. "
+                     f"Falling back to {namespace_message}.", UserWarning)
     else:
         io_kwargs.update(load_namespaces=False)
         namespaces_to_validate = [CORE_NAMESPACE]
@@ -205,7 +213,7 @@ def validate(**kwargs):
     for validation_namespace in namespaces_to_validate:
         if verbose:
             print(f"Validating {f'{path} ' if path is not None else ''}against "
-                f"{namespace_message} using namespace '{validation_namespace}'.")
+                  f"{namespace_message} using namespace '{validation_namespace}'.")
         validation_errors += _validate_helper(io=io, namespace=validation_namespace)
 
     # write output to json file
