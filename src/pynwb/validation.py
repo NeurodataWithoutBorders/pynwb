@@ -62,7 +62,7 @@ def get_cached_namespaces_to_validate(path: Optional[str] = None,
     .. code-block:: python
 
         from pynwb import validate
-        from pynwb.validate import get_cached_namespaces_to_validate
+        from pynwb.validation import get_cached_namespaces_to_validate
         path = "my_nwb_file.nwb"
         validate_namespaces, manager, cached_namespaces = get_cached_namespaces_to_validate(path)
         with NWBHDF5IO(path, "r", manager=manager) as reader:

@@ -23,7 +23,7 @@ from hdmf.common import unload_type_config as hdmf_unload_type_config
 CORE_NAMESPACE = 'core'
 
 from .spec import NWBDatasetSpec, NWBGroupSpec, NWBNamespace  # noqa E402
-from .validate import validate  # noqa: F401, E402
+from .validation import validate  # noqa: F401, E402
 
 try:
     # see https://effigies.gitlab.io/posts/python-packaging-2023/
