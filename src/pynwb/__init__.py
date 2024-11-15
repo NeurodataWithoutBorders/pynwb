@@ -397,6 +397,10 @@ class NWBHDF5IO(_HDF5IO):
         if mode in io_modes_that_create_file or manager is not None or extensions is not None:
             load_namespaces = False
 
+        if mode in io_modes_that_create_file and not str(path).endswith('.nwb'):
+            warn(f"The file path provided: {path} does not end in '.nwb'. "
+                 "It is recommended that NWB files using the HDF5 backend use the '.nwb' extension.", UserWarning)
+
         if load_namespaces:
             tm = get_type_map()
             super().load_namespaces(tm, path, file=file_obj, driver=driver, aws_region=aws_region)
@@ -502,6 +506,34 @@ class NWBHDF5IO(_HDF5IO):
         kwargs['container'] = nwbfile
         super().export(**kwargs)
 
+    @staticmethod
+    @docval({'name': 'path', 'type': (str, Path), 'doc': 'the path to the HDF5 file', 'default': None},
+            {'name': 'file', 'type': [h5py.File, 'S3File'], 'doc': 'a pre-existing h5py.File object', 'default': None},
+            is_method=False)
+    def read_nwb(**kwargs):
+        """
+        Helper factory method for reading an NWB file and return the NWBFile object
+        """
+        # Retrieve the filepath
+        path = popargs('path', kwargs)
+        file = popargs('file', kwargs)
+        
+        path = str(path) if path is not None else None
+
+        # Streaming case
+        if path is not None and (path.startswith("s3://") or path.startswith("http")):
+            import fsspec
+            fsspec_file_system = fsspec.filesystem("http")
+            ffspec_file = fsspec_file_system.open(path, "rb")
+
+            open_file = h5py.File(ffspec_file, "r")
+            io = NWBHDF5IO(file=open_file)
+            nwbfile = io.read()
+        else:
+            io = NWBHDF5IO(path=path, file=file, mode="r", load_namespaces=True)
+            nwbfile = io.read()
+
+        return nwbfile
 
 from . import io as __io  # noqa: F401,E402
 from .core import NWBContainer, NWBData  # noqa: F401,E402

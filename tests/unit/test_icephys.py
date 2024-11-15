@@ -154,6 +154,13 @@ class PatchClampSeriesConstructor(TestCase):
         self.assertEqual(pCS.electrode, electrode_name)
         self.assertEqual(pCS.gain, 1.0)
 
+    def test_gain_optional(self):
+        electrode_name = GetElectrode()
+
+        pCS = PatchClampSeries('test_pCS', list(), 'unit',
+                               electrode_name, timestamps=list())
+        self.assertIsNone(pCS.gain)
+
     def test_sweepNumber_valid(self):
         electrode_name = GetElectrode()
 
