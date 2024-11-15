@@ -66,6 +66,27 @@ class TestPatchClampSeries(AcquisitionH5IOMixin, TestCase):
         nwbfile.add_device(self.device)
         super().addContainer(nwbfile)
 
+class TestPatchClampSeriesMin(AcquisitionH5IOMixin, TestCase):
+    """ Test a PatchClampSeries with minimum required args to read/write """
+
+    def setUpElectrode(self):
+        """ Set up the test IntracellularElectrode """
+        self.device = Device(name='device_name')
+        self.elec = IntracellularElectrode(name="elec0", description='a fake electrode object',
+                                           device=self.device)
+
+    def setUpContainer(self):
+        self.setUpElectrode()
+        return PatchClampSeries(name="pcs", data=[1, 2, 3, 4, 5], unit='A',
+                                starting_time=123.6, rate=10e3, electrode=self.elec)
+
+    def addContainer(self, nwbfile):
+        """
+        Add the test PatchClampSeries as an acquisition and IntracellularElectrode and Device to the given NWBFile
+        """
+        nwbfile.add_icephys_electrode(self.elec)
+        nwbfile.add_device(self.device)
+        super().addContainer(nwbfile)
 
 class TestCurrentClampStimulusSeries(TestPatchClampSeries):
 
