@@ -105,9 +105,6 @@ position_data.shape
 #
 # For position data ``reference_frame`` indicates the zero-position, e.g.
 # the 0,0 point might be the bottom-left corner of an enclosure, as viewed from the tracking camera.
-# In :py:class:`~pynwb.behavior.SpatialSeries`, the ``bounds`` field allows the user to set
-# the boundary range, i.e.,  (min, max), for each dimension of ``data``. The units are the same as in ``data``.
-# This field does not enforce a boundary on the dataset itself.
 
 timestamps = np.linspace(0, 50) / 200
 
@@ -115,7 +112,6 @@ position_spatial_series = SpatialSeries(
     name="SpatialSeries",
     description="Position (x, y) in an open field.",
     data=position_data,
-    bounds=[(0,50), (0,50)],
     timestamps=timestamps,
     reference_frame="(0,0) is bottom left corner",
 )
