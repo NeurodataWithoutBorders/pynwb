@@ -4,7 +4,7 @@
 
 ### Enhancements and minor changes
 - Added support for NWB schema 2.8.0:
-  - Fixed support for `data__bounds` field to `SpatialSeries` to set optional boundary range (min, max) for each dimension of data. Removed `SpatialSeries.bounds` field that was not functional. @rly [#1907](https://github.com/NeurodataWithoutBorders/pynwb/pull/1907)
+  - Removed `SpatialSeries.bounds` field that was not functional. This will be fixed in a future release. @rly [#1907](https://github.com/NeurodataWithoutBorders/pynwb/pull/1907), 
 
 ## PyNWB 2.8.3 (Upcoming)
 
