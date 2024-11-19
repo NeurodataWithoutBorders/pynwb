@@ -77,10 +77,16 @@ nwbfile = NWBFile(
 #
 # The electrodes table references a required :py:class:`~pynwb.ecephys.ElectrodeGroup`, which is used to represent a
 # group of electrodes. Before creating an :py:class:`~pynwb.ecephys.ElectrodeGroup`, you must define a
-# :py:class:`~pynwb.device.Device` object using the method :py:meth:`.NWBFile.create_device`.
-
+# :py:class:`~pynwb.device.Device` object using the method :py:meth:`.NWBFile.create_device`. The fields
+# ``description``, ``manufacturer``, ``model_number``, ``model_name``, and ``serial_number`` are optional, but
+# recommended.
 device = nwbfile.create_device(
-    name="array", description="the best array", manufacturer="Probe Company 9000"
+    name="array",
+    description="A 12-channel array with 4 shanks and 3 channels per shank",
+    manufacturer="Array Technologies",
+    model_number="PRB_1_4_0480_123",
+    model_name="Neurovoxels 0.99",
+    serial_number="1234567890",
 )
 
 #######################

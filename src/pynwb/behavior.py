@@ -20,14 +20,12 @@ class SpatialSeries(TimeSeries):
     tracking camera. The unit of data will indicate how to interpret SpatialSeries values.
     """
 
-    __nwbfields__ = ('data__bounds', 'reference_frame',)
+    __nwbfields__ = ('reference_frame',)
 
     @docval(*get_docval(TimeSeries.__init__, 'name'),  # required
             {'name': 'data', 'type': ('array_data', 'data', TimeSeries), 'shape': ((None, ), (None, None)), # required
              'doc': ('The data values. Can be 1D or 2D. The first dimension must be time. If 2D, there can be 1, 2, '
                      'or 3 columns, which represent x, y, and z.')},
-            {'name': 'data__bounds', 'type': ('data', 'array_data'), 'shape': ((1, 2), (2, 2), (3, 2)), 'default': None,
-             'doc': 'The boundary range (min, max) for each dimension of data.'},
             {'name': 'reference_frame', 'type': str,
              'doc': 'description defining what the zero-position is', 'default': None},
             {'name': 'unit', 'type': str, 'doc': 'The base unit of measurement (should be SI unit)',
@@ -38,8 +36,8 @@ class SpatialSeries(TimeSeries):
         """
         Create a SpatialSeries TimeSeries dataset
         """
-        name, data, data__bounds, reference_frame, unit = popargs(
-            'name', 'data', 'data__bounds', 'reference_frame', 'unit', kwargs
+        name, data, reference_frame, unit = popargs(
+            'name', 'data', 'reference_frame', 'unit', kwargs
         )
         super().__init__(name, data, unit, **kwargs)
 
@@ -51,7 +49,6 @@ class SpatialSeries(TimeSeries):
                           "The second dimension should have length <= 3 to represent at most x, y, z." %
                           (name, str(data_shape)))
 
-        self.data__bounds = data__bounds
         self.reference_frame = reference_frame
 
     @staticmethod
