@@ -1,6 +1,6 @@
 # PyNWB Changelog
 
-## PyNWB 2.8.3 (Upcoming)
+## PyNWB 2.8.3 (November 19, 2024)
 
 ### Enhancements and minor changes
 * Added `NWBHDF5IO.read_nwb` convenience method to simplify reading an NWB file. @h-mayorquin [#1979](https://github.com/NeurodataWithoutBorders/pynwb/pull/1979)
