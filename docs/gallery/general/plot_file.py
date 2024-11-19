@@ -91,7 +91,6 @@ often hold data of different processing/analysis data types.
       :py:class:`~pynwb.behavior.EyeTracking`.
 
     * **Extracellular electrophysiology:** :py:class:`~pynwb.ecephys.EventDetection`,
-      :py:class:`~pynwb.ecephys.EventWaveform`,
       :py:class:`~pynwb.ecephys.FeatureExtraction`,
       :py:class:`~pynwb.ecephys.FilteredEphys`,
       :py:class:`~pynwb.ecephys.LFP`.
@@ -130,6 +129,7 @@ from dateutil import tz
 from pynwb import NWBHDF5IO, NWBFile, TimeSeries
 from pynwb.behavior import Position, SpatialSeries
 from pynwb.file import Subject
+from pynwb.misc import AnnotationSeries
 
 ####################
 # .. _basics_nwbfile:
@@ -284,6 +284,27 @@ nwbfile.acquisition["test_timeseries"]
 # or using the method :py:meth:`.NWBFile.get_acquisition`:
 nwbfile.get_acquisition("test_timeseries")
 
+####################
+# Other Types of Time Series
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^
+#
+# As mentioned previously, there are many subtypes of :py:class:`~pynwb.base.TimeSeries` that are used to store
+# different kinds of data. One example is :py:class:`~pynwb.misc.AnnotationSeries`, a subclass of 
+# :py:class:`~pynwb.base.TimeSeries` that stores text-based records about the experiment. Similarly to our
+# :py:class:`~pynwb.base.TimeSeries` example above, we can create an :py:class:`~pynwb.misc.AnnotationSeries` 
+# object with text information about a stimulus and add it to the stimulus group in 
+# the :py:class:`~pynwb.file.NWBFile`. 
+
+annotations = AnnotationSeries(name='airpuffs',
+                               data=['Left Airpuff', 'Right Airpuff', 'Right Airpuff'],
+                               description='Airpuff events delivered to the animal',
+                               timestamps=[1.0, 3.0, 8.0])
+
+nwbfile.add_stimulus(annotations)
+
+####################
+# This approach of creating a :py:class:`~pynwb.base.TimeSeries` object and adding it to the appropriate 
+# :py:class:`~pynwb.file.NWBFile` group can be used for all subtypes of :py:class:`~pynwb.base.TimeSeries` data.
 
 ####################
 # .. _basic_spatialseries:
@@ -570,8 +591,7 @@ io.close()
 
 ####################
 # .. [#] Some data interface objects have a default name. This default name is the type of the data interface. For
-#    example, the default name for :py:class:`~pynwb.ophys.ImageSegmentation` is "ImageSegmentation" and the default
-#    name for :py:class:`~pynwb.ecephys.EventWaveform` is "EventWaveform".
+#    example, the default name for :py:class:`~pynwb.ophys.ImageSegmentation` is "ImageSegmentation".
 #
 # .. [#] HDF5 is the primary backend supported by NWB.
 #

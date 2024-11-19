@@ -4,12 +4,31 @@
 
 ### Enhancements and minor changes
 - Added support for NWB schema 2.8.0:
-  - Fixed support for `data__bounds` field to `SpatialSeries` to set optional boundary range (min, max) for each dimension of data. Removed `SpatialSeries.bounds` field that was not functional. @rly [#1907](https://github.com/NeurodataWithoutBorders/pynwb/pull/1907)
+  - Removed `SpatialSeries.bounds` field that was not functional. This will be fixed in a future release. @rly [#1907](https://github.com/NeurodataWithoutBorders/pynwb/pull/1907), [#1996](https://github.com/NeurodataWithoutBorders/pynwb/pull/1996)
+  - Added support for `NWBFile.was_generated_by` field. @stephprince [#1924](https://github.com/NeurodataWithoutBorders/pynwb/pull/1924)
+  - Added support for `model_number`, `model_name`, and `serial_number` fields to `Device`. @stephprince [#1997](https://github.com/NeurodataWithoutBorders/pynwb/pull/1997)
+  - Deprecated `EventWaveform` neurodata type. @rly [#1940](https://github.com/NeurodataWithoutBorders/pynwb/pull/1940)
 
 ## PyNWB 2.8.3 (Upcoming)
 
+### Enhancements and minor changes
+* Added `NWBHDF5IO.read_nwb` convenience method to simplify reading an NWB file. @h-mayorquin [#1979](https://github.com/NeurodataWithoutBorders/pynwb/pull/1979)
+* Removed unused references to region references and builders in preparation for changes in HDMF 4.0. @rly [#1991](https://github.com/NeurodataWithoutBorders/pynwb/pull/1991)
+
+### Documentation and tutorial enhancements
+- Added documentation example for `SpikeEventSeries`. @stephprince [#1983](https://github.com/NeurodataWithoutBorders/pynwb/pull/1983)
+- Added documentation example for `AnnotationSeries`. @stephprince [#1989](https://github.com/NeurodataWithoutBorders/pynwb/pull/1989)
+
 ### Performance
 - Cache global type map to speed import 3X. @sneakers-the-rat [#1931](https://github.com/NeurodataWithoutBorders/pynwb/pull/1931)
+
+### Bug fixes
+- Fixed bug in how `ElectrodeGroup.__init__` validates its `position` argument. @oruebel [#1770](https://github.com/NeurodataWithoutBorders/pynwb/pull/1770)
+- Changed `SpatialSeries.reference_frame` from required to optional as specified in the schema. @rly [#1986](https://github.com/NeurodataWithoutBorders/pynwb/pull/1986)
+
+### Enhancements and minor changes
+- Made gain an optional argument for PatchClampSeries to match the schema. @stephprince [#1975](https://github.com/NeurodataWithoutBorders/pynwb/pull/1975)
+- Added warning when writing files with `NWBHDF5IO` without the `.nwb` extension. @stephprince [#1978](https://github.com/NeurodataWithoutBorders/pynwb/pull/1978)
 
 ## PyNWB 2.8.2 (September 9, 2024)
 

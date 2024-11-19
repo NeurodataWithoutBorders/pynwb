@@ -178,16 +178,34 @@ class ElectrodeGroupConstructor(TestCase):
 
     def test_init(self):
         dev1 = Device('dev1')
-        group = ElectrodeGroup('elec1', 'electrode description', 'electrode location', dev1, (1, 2, 3))
+        group = ElectrodeGroup(name='elec1',
+                               description='electrode description',
+                               location='electrode location',
+                               device=dev1,
+                               position=(1, 2, 3))
         self.assertEqual(group.name, 'elec1')
         self.assertEqual(group.description, 'electrode description')
         self.assertEqual(group.location, 'electrode location')
         self.assertEqual(group.device, dev1)
-        self.assertEqual(group.position, (1, 2, 3))
+        self.assertEqual(group.position.tolist(), (1, 2, 3))
+
+    def test_init_position_array(self):
+        position = np.array((1, 2, 3), dtype=np.dtype([('x', float), ('y', float), ('z', float)]))
+        dev1 = Device('dev1')
+        group = ElectrodeGroup('elec1', 'electrode description', 'electrode location', dev1,
+                               position)
+        self.assertEqual(group.name, 'elec1')
+        self.assertEqual(group.description, 'electrode description')
+        self.assertEqual(group.location, 'electrode location')
+        self.assertEqual(group.device, dev1)
+        self.assertEqual(group.position, position)
 
     def test_init_position_none(self):
         dev1 = Device('dev1')
-        group = ElectrodeGroup('elec1', 'electrode description', 'electrode location', dev1)
+        group = ElectrodeGroup(name='elec1',
+                               description='electrode description',
+                               location='electrode location',
+                               device=dev1)
         self.assertEqual(group.name, 'elec1')
         self.assertEqual(group.description, 'electrode description')
         self.assertEqual(group.location, 'electrode location')
@@ -197,7 +215,29 @@ class ElectrodeGroupConstructor(TestCase):
     def test_init_position_bad(self):
         dev1 = Device('dev1')
         with self.assertRaises(ValueError):
-            ElectrodeGroup('elec1', 'electrode description', 'electrode location', dev1, (1, 2))
+            ElectrodeGroup(name='elec1',
+                           description='electrode description',
+                           location='electrode location',
+                           device=dev1,
+                           position=(1, 2))
+        with self.assertRaises(ValueError):
+            ElectrodeGroup(name='elec1',
+                           description='electrode description',
+                           location='electrode location',
+                           device=dev1,
+                           position=[(1, 2), ])
+        with self.assertRaises(ValueError):
+            ElectrodeGroup(name='elec1',
+                           description='electrode description',
+                           location='electrode location',
+                           device=dev1,
+                           position=np.array([(1., 2.)], dtype=np.dtype([('x', float), ('y', float)])))
+        with self.assertRaises(ValueError):
+            ElectrodeGroup(name='elec1',
+                           description='electrode description',
+                           location='electrode location',
+                           device=dev1,
+                           position=[(1, 2, 3), (4, 5, 6), (7, 8, 9)])
 
 
 class EventDetectionConstructor(TestCase):
@@ -227,27 +267,9 @@ class EventDetectionConstructor(TestCase):
 
 class EventWaveformConstructor(TestCase):
 
-    def _create_table_and_region(self):
-        table = make_electrode_table()
-        region = DynamicTableRegion(
-            name='electrodes',
-            data=[0, 2],
-            description='the first and third electrodes',
-            table=table
-        )
-        return table, region
-
     def test_init(self):
-        table, region = self._create_table_and_region()
-        sES = SpikeEventSeries('test_sES', list(range(10)), list(range(10)), region)
-
-        pm = ProcessingModule(name='test_module', description='a test module')
-        ew = EventWaveform()
-        pm.add(table)
-        pm.add(ew)
-        ew.add_spike_event_series(sES)
-        self.assertEqual(ew.spike_event_series['test_sES'], sES)
-        self.assertEqual(ew['test_sES'], ew.spike_event_series['test_sES'])
+        with self.assertRaises(ValueError):
+            EventWaveform()
 
 
 class ClusteringConstructor(TestCase):

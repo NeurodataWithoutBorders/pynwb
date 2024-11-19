@@ -86,12 +86,17 @@ nwbfile = NWBFile(
 #     :align: center
 #
 # Create a :py:class:`~pynwb.device.Device` named ``"Microscope"`` in the :py:class:`~pynwb.file.NWBFile` object. Then
-# create an  :py:class:`~pynwb.ophys.OpticalChannel` named ``"OpticalChannel"``.
+# create an  :py:class:`~pynwb.ophys.OpticalChannel` named ``"OpticalChannel"``. The fields
+# ``description``, ``manufacturer``, ``model_number``, ``model_name``, and ``serial_number`` are optional, but
+# recommended.
 
 device = nwbfile.create_device(
     name="Microscope",
     description="My two-photon microscope",
-    manufacturer="The best microscope manufacturer",
+    manufacturer="Loki Labs",
+    model_number="ABC-123",
+    model_name="Loki 1.0",
+    serial_number="1234567890",
 )
 optical_channel = OpticalChannel(
     name="OpticalChannel",
