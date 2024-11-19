@@ -55,7 +55,6 @@ serves as the base class for all other :py:class:`~pynwb.base.TimeSeries` types,
 
     * **Optical physiology and imaging:** :py:class:`~pynwb.image.ImageSeries` is the base type
       for image recordings and is further refined by the
-      :py:class:`~pynwb.image.ImageMaskSeries`,
       :py:class:`~pynwb.image.OpticalSeries`,
       :py:class:`~pynwb.ophys.OnePhotonSeries`, and
       :py:class:`~pynwb.ophys.TwoPhotonSeries` types.
