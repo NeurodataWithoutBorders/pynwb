@@ -120,8 +120,7 @@ class SpikeEventSeries(ElectricalSeries):
     """
     Stores "snapshots" of spike events (i.e., threshold crossings) in data. This may also be raw data,
     as reported by ephys hardware. If so, the TimeSeries::description field should describing how
-    events were detected. All SpikeEventSeries should reside in a module (under EventWaveform
-    interface) even if the spikes were reported and stored by hardware. All events span the same
+    events were detected. All events span the same
     recording channels and store snapshots of equal duration. TimeSeries::data array structure:
     [num events] [num channels] [num samples] (or [num events] [num samples] for single
     electrode).
@@ -181,6 +180,7 @@ class EventDetection(NWBDataInterface):
 @register_class('EventWaveform', CORE_NAMESPACE)
 class EventWaveform(MultiContainerInterface):
     """
+    DEPRECATED as of NWB 2.8.0 and PyNWB 3.0.0.
     Spike data for spike events detected in raw data
     stored in this NWBFile, or events detect at acquisition
     """
@@ -192,6 +192,13 @@ class EventWaveform(MultiContainerInterface):
         'get': 'get_spike_event_series',
         'create': 'create_spike_event_series'
     }
+
+    def __init__(self, **kwargs):
+        if not self._in_construct_mode:
+            raise ValueError(
+                "The EventWaveform neurodata type is deprecated. If you are interested in using it, "
+                "please create an issue on https://github.com/NeurodataWithoutBorders/nwb-schema/issues."
+            )
 
 
 @register_class('Clustering', CORE_NAMESPACE)

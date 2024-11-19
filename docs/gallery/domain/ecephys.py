@@ -317,7 +317,7 @@ nwbfile.add_acquisition(spike_events)
 # :py:class:`~pynwb.ecephys.ElectricalSeries` objects as :ref:`acquisition <basic_timeseries>` data, and use
 # the :py:class:`~pynwb.ecephys.EventDetection` class for identifying the spike events in your raw traces.
 # If you do not want to store the raw voltage traces and only the waveform 'snippets' surrounding spike events,
-# you should use :py:class:`~pynwb.ecephys.SpikeEventSeries` objects.
+# you should store the snippets with :py:class:`~pynwb.ecephys.SpikeEventSeries` objects.
 #
 # The results of spike sorting (or clustering) should be stored in the top-level :py:class:`~pynwb.misc.Units` table.
 # The :py:class:`~pynwb.misc.Units` table can contain simply the spike times of sorted units, or you can also include 
