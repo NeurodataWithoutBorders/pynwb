@@ -260,6 +260,7 @@ bands = dict(theta=(4.0, 12.0),
 phase_data = np.random.randn(50, 12, len(bands))  # 50 samples, 12 channels, 3 frequency bands  
 
 decomp_series = DecompositionSeries(name="theta",
+                                    description="phase of bandpass filtered LFP data",
                                     data=phase_data,
                                     metric='phase',
                                     rate=200.0,
@@ -267,7 +268,7 @@ decomp_series = DecompositionSeries(name="theta",
                                     source_timeseries=lfp_electrical_series)
 
 for band_name, band_limits in bands.items():
-    decomp_series.add_band(band_name=band_name, band_limits=band_limits)
+    decomp_series.add_band(band_name=band_name, band_limits=band_limits, band_mean=np.nan, band_stdev=np.nan)
 
 ecephys_module.add(decomp_series)
 
