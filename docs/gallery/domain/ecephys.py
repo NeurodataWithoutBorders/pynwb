@@ -244,7 +244,7 @@ ecephys_module = nwbfile.create_processing_module(
 ecephys_module.add(lfp)
 
 #######################
-# If the derived data is filtered by not downsampled, you can store the data in an
+# If the derived data is filtered but not downsampled, you can store the data in an
 # :py:class:`~pynwb.ecephys.ElectricalSeries` object in a :py:class:`~pynwb.ecephys.FilteredEphys` object
 # instead of a :py:class:`~pynwb.ecephys.LFP` object.
 
