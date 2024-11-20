@@ -297,10 +297,12 @@ nwbfile.get_acquisition("test_timeseries")
 # object with text information about a stimulus and add it to the stimulus group in 
 # the :py:class:`~pynwb.file.NWBFile`. 
 
-annotations = AnnotationSeries(name='airpuffs',
-                               data=['Left Airpuff', 'Right Airpuff', 'Right Airpuff'],
-                               description='Airpuff events delivered to the animal',
-                               timestamps=[1.0, 3.0, 8.0])
+annotations = AnnotationSeries(
+    name='airpuffs',
+    data=['Left Airpuff', 'Right Airpuff', 'Right Airpuff'],
+    description='Airpuff events delivered to the animal',
+    timestamps=[1.0, 3.0, 8.0],
+)
 
 nwbfile.add_stimulus(annotations)
 
