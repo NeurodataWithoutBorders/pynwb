@@ -243,7 +243,27 @@ ecephys_module = nwbfile.create_processing_module(
 )
 ecephys_module.add(lfp)
 
-####################
+#######################
+# If the derived data is filtered by not downsampled, you can store the data in an
+# :py:class:`~pynwb.ecephys.ElectricalSeries` object in a :py:class:`~pynwb.ecephys.FilteredEphys` object
+# instead of a :py:class:`~pynwb.ecephys.LFP` object.
+
+from pynwb.ecephys import FilteredEphys
+
+filtered_data = np.random.randn(50, 12)
+filtered_electrical_series = ElectricalSeries(
+    name="FilteredElectricalSeries",
+    description="Filtered data",
+    data=filtered_data,
+    electrodes=all_table_region,
+    starting_time=0.0,
+    rate=200.0,
+)
+
+filtered_ephys = FilteredEphys(electrical_series=filtered_electrical_series)
+ecephys_module.add(filtered_ephys)
+
+################################
 # In some cases, you may want to further process the LFP data and decompose the signal into different frequency bands 
 # to use for other downstream analyses. You can store the processed data from these spectral analyses using a
 # :py:class:`~pynwb.misc.DecompositionSeries` object. This object allows you to include metadata about the frequency
@@ -260,16 +280,23 @@ bands = dict(theta=(4.0, 12.0),
              gamma=(30.0, 80.0))  # in Hz
 phase_data = np.random.randn(50, 12, len(bands))  # 50 samples, 12 channels, 3 frequency bands  
 
-decomp_series = DecompositionSeries(name="theta",
-                                    description="phase of bandpass filtered LFP data",
-                                    data=phase_data,
-                                    metric='phase',
-                                    rate=200.0,
-                                    source_channels=all_table_region,
-                                    source_timeseries=lfp_electrical_series)
+decomp_series = DecompositionSeries(
+    name="theta",
+    description="phase of bandpass filtered LFP data",
+    data=phase_data,
+    metric='phase',
+    rate=200.0,
+    source_channels=all_table_region,
+    source_timeseries=lfp_electrical_series,
+)
 
 for band_name, band_limits in bands.items():
-    decomp_series.add_band(band_name=band_name, band_limits=band_limits, band_mean=np.nan, band_stdev=np.nan)
+    decomp_series.add_band(
+        band_name=band_name,
+        band_limits=band_limits,
+        band_mean=np.nan,
+        band_stdev=np.nan,
+    )
 
 ecephys_module.add(decomp_series)
 
@@ -306,6 +333,10 @@ for n_units_per_shank in range(n_units):
 
 #######################
 # The :py:class:`~pynwb.misc.Units` table can also be converted to a pandas :py:class:`~pandas.DataFrame`.
+#
+# The :py:class:`~pynwb.misc.Units` table can contain simply the spike times of sorted units, or you can also include
+# individual and mean waveform information in some of the optional, predefined :py:class:`~pynwb.misc.Units` table
+# columns: ``waveform_mean``, ``waveform_sd``, or ``waveforms``.
 
 nwbfile.units.to_dataframe()
 
@@ -368,29 +399,6 @@ feature_extraction = FeatureExtraction(
 )
 
 ecephys_module.add(feature_extraction)
-
-#####################################
-# Designating electrophysiology data
-# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-# As mentioned above, :py:class:`~pynwb.ecephys.ElectricalSeries` objects
-# are meant for storing specific types of extracellular recordings. In addition to this
-# :py:class:`~pynwb.base.TimeSeries` class, NWB provides some :ref:`modules_overview`
-# for designating the type of data you are storing. We will briefly discuss them here, and refer the reader to
-# :py:mod:`API documentation <pynwb.ecephys>` and :ref:`basics` for more details on
-# using these objects.
-#
-# The results of spike sorting (or clustering) should be stored in the top-level :py:class:`~pynwb.misc.Units` table.
-# The :py:class:`~pynwb.misc.Units` table can contain simply the spike times of sorted units, or you can also include 
-# individual and mean waveform information in some of the optional, predefined :py:class:`~pynwb.misc.Units` table 
-# columns: ``waveform_mean``, ``waveform_sd``, or ``waveforms``.
-#
-# For local field potential data, there are two options. Again, which one you choose depends on what data you
-# have available. With both options, you should store your traces with :py:class:`~pynwb.ecephys.ElectricalSeries`
-# objects. If you are storing unfiltered local field potential data, you should store
-# the :py:class:`~pynwb.ecephys.ElectricalSeries` objects in :py:class:`~pynwb.ecephys.LFP` data interface object(s).
-# If you have filtered LFP data, you should store the :py:class:`~pynwb.ecephys.ElectricalSeries` objects  in
-# :py:class:`~pynwb.ecephys.FilteredEphys` data interface object(s).
-
 
 ####################
 # .. _ecephys_writing:
