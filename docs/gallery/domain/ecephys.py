@@ -355,7 +355,7 @@ ecephys_module.add(event_detection)
 # you should use :py:class:`~pynwb.ecephys.SpikeEventSeries` objects.
 #
 # NWB also provides a way to store features of spikes, such as principal components, using the
-# :py:class:`~pynwb.misc.FeatureExtraction` class.
+# :py:class:`~pynwb.ecephys.FeatureExtraction` class.
 
 from pynwb.ecephys import FeatureExtraction
 
