@@ -324,31 +324,44 @@ shank0 = nwbfile.create_electrode_table_region(
     description="shank0",
 )
 
-
-spike_events = SpikeEventSeries(name='SpikeEvents_Shank0',
-                                description="events detected with 100uV threshold",
-                                data=spike_snippets,
-                                timestamps=np.arange(20),
-                                electrodes=shank0)
+spike_events = SpikeEventSeries(
+    name='SpikeEvents_Shank0',
+    description="events detected with 100uV threshold",
+    data=spike_snippets,
+    timestamps=np.arange(20),
+    electrodes=shank0,
+)
 nwbfile.add_acquisition(spike_events)
 
+############################################
+# If you need to store the complete, continuous raw voltage traces, along with unsorted spike times, you should store
+# the traces with :py:class:`~pynwb.ecephys.ElectricalSeries` objects as :ref:`acquisition <basic_timeseries>` data,
+# and use the :py:class:`~pynwb.ecephys.EventDetection` class to identify the spike events in your raw traces.
+
+from pynwb.ecephys import EventDetection
+
+event_detection = EventDetection(
+    name="threshold_events",
+    detection_method="thresholding, 1.5 * std",
+    source_electricalseries=raw_electrical_series,
+    source_idx=[1000, 2000, 3000],
+    times=[.033, .066, .099],
+)
+
+ecephys_module.add(event_detection)
+
 #######################
+# # If you do not want to store the raw voltage traces and only the waveform 'snippets' surrounding spike events,
+# # you should use :py:class:`~pynwb.ecephys.SpikeEventSeries` objects.
+#
 # Designating electrophysiology data
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-#
 # As mentioned above, :py:class:`~pynwb.ecephys.ElectricalSeries` objects
 # are meant for storing specific types of extracellular recordings. In addition to this
 # :py:class:`~pynwb.base.TimeSeries` class, NWB provides some :ref:`modules_overview`
 # for designating the type of data you are storing. We will briefly discuss them here, and refer the reader to
 # :py:mod:`API documentation <pynwb.ecephys>` and :ref:`basics` for more details on
 # using these objects.
-#
-# For storing unsorted spiking data, there are two options. Which one you choose depends on what data you 
-# have available. If you need to store the complete, continuous raw voltage traces, you should store the traces with
-# :py:class:`~pynwb.ecephys.ElectricalSeries` objects as :ref:`acquisition <basic_timeseries>` data, and use
-# the :py:class:`~pynwb.ecephys.EventDetection` class for identifying the spike events in your raw traces.
-# If you do not want to store the raw voltage traces and only the waveform 'snippets' surrounding spike events,
-# you should use :py:class:`~pynwb.ecephys.SpikeEventSeries` objects.
 #
 # The results of spike sorting (or clustering) should be stored in the top-level :py:class:`~pynwb.misc.Units` table.
 # The :py:class:`~pynwb.misc.Units` table can contain simply the spike times of sorted units, or you can also include 
