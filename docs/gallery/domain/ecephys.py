@@ -350,10 +350,26 @@ event_detection = EventDetection(
 
 ecephys_module.add(event_detection)
 
-#######################
-# # If you do not want to store the raw voltage traces and only the waveform 'snippets' surrounding spike events,
-# # you should use :py:class:`~pynwb.ecephys.SpikeEventSeries` objects.
+######################################
+# If you do not want to store the raw voltage traces and only the waveform 'snippets' surrounding spike events,
+# you should use :py:class:`~pynwb.ecephys.SpikeEventSeries` objects.
 #
+# NWB also provides a way to store features of spikes, such as principal components, using the
+# :py:class:`~pynwb.misc.FeatureExtraction` class.
+
+from pynwb.ecephys import FeatureExtraction
+
+feature_extraction = FeatureExtraction(
+    name="PCA_features",
+    electrodes=all_table_region,
+    description=["PC1", "PC2", "PC3", "PC4"],
+    times=[.033, .066, .099],
+    features=np.random.rand(3, 12, 4),  # time, channel, feature
+)
+
+ecephys_module.add(feature_extraction)
+
+#####################################
 # Designating electrophysiology data
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 # As mentioned above, :py:class:`~pynwb.ecephys.ElectricalSeries` objects
