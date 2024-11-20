@@ -168,6 +168,10 @@ nitpicky = True
 nitpick_ignore = [('py:class', 'Intracomm'),
                   ('py:class', 'BaseStorageSpec')]
 
+linkcheck_ignore = [
+    r'https://training.incf.org/*'  # temporary ignore until SSL certificate issue is resolved
+]
+
 suppress_warnings = ["config.cache"]
 
 # Add any paths that contain templates here, relative to this directory.
