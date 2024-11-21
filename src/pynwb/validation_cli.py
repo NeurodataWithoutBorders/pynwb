@@ -17,7 +17,12 @@ def _print_errors(validation_errors: list):
 
 
 def validation_cli():
-    """CLI wrapper around pynwb.validate."""
+    """CLI wrapper around pynwb.validate.
+    
+    Note: this CLI wrapper checks for compliance with the NWB schema. 
+    It is recommended to use the NWBInspector CLI for more comprehensive validation of both
+    compliance with the schema and compliance of data with NWB best practices.
+    """
     parser = ArgumentParser(
         description="Validate an NWB file",
         epilog="If --ns is not specified, validate against all namespaces in the NWB file.",
@@ -33,12 +38,12 @@ def validation_cli():
     )
 
     # Common args to the API validate
-    parser.add_argument("path", type=str, help="NWB file path")
+    parser.add_argument("paths", type=str, nargs="+", help="NWB file paths")
     parser.add_argument("-n", "--ns", type=str, help="the namespace to validate against")
     parser.add_argument("--json-file-path", dest="json_file_path", type=str, help="Write json output to this location.")
     feature_parser = parser.add_mutually_exclusive_group(required=False)
     feature_parser.add_argument(
-        "--no-cached-namespace",  # NOTE - update to match validate inputs?
+        "--no-cached-namespace",
         dest="no_cached_namespace",
         action="store_true",
         help="Use the PyNWB loaded namespace (true) or use the cached namespace (false; default).",
@@ -46,21 +51,23 @@ def validation_cli():
     parser.set_defaults(no_cached_namespace=False)
     args = parser.parse_args()
 
-    if args.list_namespaces:
-        cached_namespaces, _, _ = get_cached_namespaces_to_validate(path=args.path)
-        print("\n".join(cached_namespaces))
-        status = 0
-    else:
-        validation_errors = []
-        try:
-            validation_errors = validate(
-                path=args.path, use_cached_namespaces=not args.no_cached_namespace, namespace=args.ns, verbose=True, 
-            )
-            _print_errors(validation_errors=validation_errors)
-            status = int(validation_errors is not None and len(validation_errors) > 0)
-        except ValueError as e:
-            print(e, file=sys.stderr)
-            status = 1
+    status = 0
+    for path in args.paths:
+        if args.list_namespaces:
+            cached_namespaces, _, _ = get_cached_namespaces_to_validate(path=path)
+            print("\n".join(cached_namespaces))
+        else:
+            validation_errors = []
+            try:
+                val_errors = validate(
+                    path=path, use_cached_namespaces=not args.no_cached_namespace, namespace=args.ns, verbose=True, 
+                )
+                _print_errors(validation_errors=val_errors)
+                status = status or int(val_errors is not None and len(val_errors) > 0)
+                validation_errors.append(val_errors)
+            except ValueError as e:
+                print(e, file=sys.stderr)
+                status = 1
         
     # write output to json file
     if args.json_file_path is not None:

@@ -13,22 +13,6 @@ from pynwb import CORE_NAMESPACE
 from pynwb.spec import NWBDatasetSpec, NWBGroupSpec, NWBNamespace
 
 
-def _get_backend(path: str):
-    from . import NWBHDF5IO
-    from hdmf_zarr import NWBZarrIO
-
-    backend_io_classes = [NWBHDF5IO, NWBZarrIO]
-    backend_options = [b for b in backend_io_classes if b.can_read(path=path)]
-    if len(backend_options) == 0:
-        warn(f"Could not find an IO to read the file '{path}'." 
-             f"This may be due to an older file version or invalid file." 
-             f"Defaulting to NWBHDF5IO.", UserWarning)
-        return NWBHDF5IO
-    elif len(backend_options) > 1:
-        raise ValueError(f"Multiple backends found for file '{path}': {backend_options}")
-    else:
-        return backend_options[0]
-
 def _validate_helper(io: HDMFIO, namespace: str = CORE_NAMESPACE) -> list:
     builder = io.read_builder()
     validator = ValidatorMap(io.manager.namespace_catalog.get_namespace(name=namespace))
@@ -72,8 +56,9 @@ def get_cached_namespaces_to_validate(path: Optional[str] = None,
 
     if io is not None:
         namespace_dependencies = io.load_namespaces(namespace_catalog=catalog, 
-                                                    file=io.file)  # TODO would need to update HDMFIO, ZarrIO to support file input
+                                                    file=io._file)  # TODO would need to update HDMFIO, ZarrIO to support file input
     else:
+        from pynwb import _get_backend
         backend_io = _get_backend(path)
         namespace_dependencies = backend_io.load_namespaces(namespace_catalog=catalog, 
                                                             path=path, 
@@ -141,6 +126,10 @@ def get_cached_namespaces_to_validate(path: Optional[str] = None,
 )
 def validate(**kwargs):
     """Validate NWB file(s) against a namespace or its cached namespaces.
+
+    Note: this function checks for compliance with the NWB schema. 
+    It is recommended to use the NWBInspector for more comprehensive validation of both
+    compliance with the schema and compliance of data with NWB best practices.
     """
 
     io, path, use_cached_namespaces, namespace, verbose, driver = getargs(
@@ -173,6 +162,7 @@ def validate(**kwargs):
 
     # get io object if not provided
     if io is None:
+        from pynwb import _get_backend
         backend_io = _get_backend(path)
         io = backend_io(**io_kwargs)
 
