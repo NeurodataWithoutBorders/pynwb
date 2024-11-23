@@ -187,8 +187,8 @@ def validate(**kwargs):
     validation_errors = []
     for validation_namespace in namespaces_to_validate:
         if verbose:
-            print(f"Validating {f'{path} ' if path is not None else ''}against "
-                  f"{namespace_message} using namespace '{validation_namespace}'.")
+            print(f"Validating {f'{path} ' if path is not None else ''}against "  # noqa: T201
+                  f"{namespace_message} using namespace '{validation_namespace}'.")  
         validation_errors += _validate_helper(io=io, namespace=validation_namespace)
 
     return validation_errors
