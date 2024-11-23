@@ -178,7 +178,7 @@ class TestValidateCLI(TestCase):
         self.assertRegex(result.stdout.decode('utf-8'), stdout_regex)
 
     def test_validate_file_json_output(self):
-        """Test that validating a file with the json flag ouputs a json file."""
+        """Test that validating a file with the json flag outputs a json file."""
         json_path = "test_validation.json"
         run_coverage(["tests/back_compat/1.0.2_str_experimenter.nwb", "--no-cached-namespace", 
                       "--json-file-path", json_path])
@@ -186,7 +186,7 @@ class TestValidateCLI(TestCase):
         os.remove(json_path)
 
     def test_validation_entry_point(self):
-        """Test that using the validation entry point succesfully executes the validate CLI."""
+        """Test that using the validation entry point successfully executes the validate CLI."""
         json_path = "test_validation_entry_point.json"
         subprocess.run(["pynwb-validate", "tests/back_compat/1.0.2_str_experimenter.nwb", 
                         "--json-file-path", json_path])
