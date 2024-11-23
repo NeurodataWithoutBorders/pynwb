@@ -1,12 +1,15 @@
 # PyNWB Changelog
 
-## PyNWB 2.8.3 (Upcoming)
+## PyNWB 2.8.3 (November 19, 2024)
 
 ### Enhancements and minor changes
 * Added `NWBHDF5IO.read_nwb` convenience method to simplify reading an NWB file. @h-mayorquin [#1979](https://github.com/NeurodataWithoutBorders/pynwb/pull/1979)
+* Removed unused references to region references and builders in preparation for changes in HDMF 4.0. @rly [#1991](https://github.com/NeurodataWithoutBorders/pynwb/pull/1991)
 
 ### Documentation and tutorial enhancements
 - Added documentation example for `SpikeEventSeries`. @stephprince [#1983](https://github.com/NeurodataWithoutBorders/pynwb/pull/1983)
+- Added documentation example for `AnnotationSeries`. @stephprince [#1989](https://github.com/NeurodataWithoutBorders/pynwb/pull/1989)
+- Added documentation example for `DecompositionSeries`. @stephprince [#1981](https://github.com/NeurodataWithoutBorders/pynwb/pull/1981)
 
 ### Performance
 - Cache global type map to speed import 3X. @sneakers-the-rat [#1931](https://github.com/NeurodataWithoutBorders/pynwb/pull/1931)
