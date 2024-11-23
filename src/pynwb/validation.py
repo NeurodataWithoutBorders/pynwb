@@ -55,8 +55,10 @@ def get_cached_namespaces_to_validate(path: Optional[str] = None,
     )
 
     if io is not None:
+        # TODO update HDF5IO to have .file property to make consistent with ZarrIO
+        # then update input arguments here
         namespace_dependencies = io.load_namespaces(namespace_catalog=catalog, 
-                                                    file=io._file)  # TODO would need to update HDMFIO, ZarrIO to support file input
+                                                    file=io._file)
     else:
         from pynwb import _get_backend
         backend_io = _get_backend(path)

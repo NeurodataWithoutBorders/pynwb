@@ -169,7 +169,7 @@ def validate_nwbs():
                 is_family_nwb_file = False
                 try:
                     with pynwb.NWBHDF5IO(nwb, mode='r') as io:
-                        errors = validate(io)
+                        errors = validate(io, use_cached_namespaces=False)  # previously io did not validate against cached namespaces
                 except OSError as e:
                     # if the file was created with the family driver, need to use the family driver to open it
                     if 'family driver should be used' in str(e):
@@ -179,7 +179,7 @@ def validate_nwbs():
                         memb_size = 1024**2  # note: the memb_size must be the same as the one used to create the file
                         with h5py.File(filename_pattern, mode='r', driver='family', memb_size=memb_size) as f:
                             with pynwb.NWBHDF5IO(file=f, manager=None, mode='r') as io:
-                                errors = validate(io)
+                                errors = validate(io, use_cached_namespaces=False)
                     else:
                         raise e
 
