@@ -353,6 +353,7 @@ ccss = CurrentClampStimulusSeries(
     sweep_number=np.uint(16),
 )
 
+# IZeroClampSeries is used when the current is clamped to 0.
 izcs = IZeroClampSeries(
     name="izcs",
     data=[0.1, 0.2, 0.3, 0.4, 0.5],
