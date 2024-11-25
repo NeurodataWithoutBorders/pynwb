@@ -250,16 +250,17 @@ ecephys_module = nwbfile.create_processing_module(
 ecephys_module.add(lfp)
 
 #######################
-# If the derived data is filtered but not downsampled, you can store the data in an
-# :py:class:`~pynwb.ecephys.ElectricalSeries` object in a :py:class:`~pynwb.ecephys.FilteredEphys` object
-# instead of a :py:class:`~pynwb.ecephys.LFP` object.
+# If your derived data is filtered for frequency ranges other than LFP—such as Gamma or Theta—you should store the data
+# in an :py:class:`~pynwb.ecephys.ElectricalSeries` and encapsulate it within a :py:class:`~pynwb.ecephys.FilteredEphys`
+# object instead of a :py:class:`~pynwb.ecephys.LFP` object.
 
 from pynwb.ecephys import FilteredEphys
 
 filtered_data = np.random.randn(50, 12)
 filtered_electrical_series = ElectricalSeries(
-    name="FilteredElectricalSeries",
-    description="Filtered data",
+    name="ThetaFilteredElectricalSeries",
+    description="Data filtered in the Theta range",
+    filtering="Band-pass filtered between 4 and 8 Hz",
     data=filtered_data,
     electrodes=all_table_region,
     starting_time=0.0,
