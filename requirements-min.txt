@@ -3,4 +3,4 @@ h5py==3.1.0
 hdmf==3.14.5
 numpy==1.19.3
 pandas==1.2.0
-python-dateutil==2.7.3
+python-dateutil==2.8.2
