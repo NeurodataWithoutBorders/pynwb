@@ -28,7 +28,7 @@ jobs:
           - { os: macos-latest  , opt_req: false }
     env:
       OS: ${{ matrix.os }}
-      PYTHON: '3.12'
+      PYTHON: '3.13'
     steps:
       - name: Cancel non-latest runs
         uses: styfle/cancel-workflow-action@0.11.0
