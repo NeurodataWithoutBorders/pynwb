@@ -38,7 +38,7 @@ jobs:
           - { name: windows-python3.13           , test-tox-env: py313           , build-tox-env: build-py313           , python-ver: "3.13", os: windows-latest }
           - { name: windows-python3.13-upgraded  , test-tox-env: py313-upgraded  , build-tox-env: build-py313-upgraded  , python-ver: "3.13", os: windows-latest }
           - { name: windows-python3.13-prerelease, test-tox-env: py313-prerelease, build-tox-env: build-py313-prerelease, python-ver: "3.13", os: windows-latest }
-          - { name: macos-python3.9-minimum      , test-tox-env: py39-minimum    , build-tox-env: build-py39-minimum    , python-ver: "3.9" , os: macos-latest }
+          - { name: macos-python3.9-minimum      , test-tox-env: py39-minimum    , build-tox-env: build-py39-minimum    , python-ver: "3.9" , os: macos-13 }
           - { name: macos-python3.10             , test-tox-env: py310           , build-tox-env: build-py310           , python-ver: "3.10", os: macos-latest }
           - { name: macos-python3.11             , test-tox-env: py311           , build-tox-env: build-py311           , python-ver: "3.11", os: macos-latest }
           - { name: macos-python3.11-opt         , test-tox-env: py311-optional  , build-tox-env: build-py311           , python-ver: "3.11", os: macos-latest }
@@ -98,7 +98,7 @@ jobs:
           - { name: windows-gallery-python3.9-minimum    , test-tox-env: gallery-py39-minimum    , python-ver: "3.9" , os: windows-latest }
           - { name: windows-gallery-python3.13-upgraded  , test-tox-env: gallery-py313-upgraded  , python-ver: "3.13", os: windows-latest }
           - { name: windows-gallery-python3.13-prerelease, test-tox-env: gallery-py313-prerelease, python-ver: "3.13", os: windows-latest }
-          - { name: macos-gallery-python3.9-minimum      , test-tox-env: gallery-py39-minimum    , python-ver: "3.9" , os: macos-latest }
+          - { name: macos-gallery-python3.9-minimum      , test-tox-env: gallery-py39-minimum    , python-ver: "3.9" , os: macos-13 }
           - { name: macos-gallery-python3.13-upgraded    , test-tox-env: gallery-py313-upgraded  , python-ver: "3.13", os: macos-latest }
           - { name: macos-gallery-python3.13-prerelease  , test-tox-env: gallery-py313-prerelease, python-ver: "3.13", os: macos-latest }
     steps:
