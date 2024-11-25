@@ -55,7 +55,6 @@ serves as the base class for all other :py:class:`~pynwb.base.TimeSeries` types,
 
     * **Optical physiology and imaging:** :py:class:`~pynwb.image.ImageSeries` is the base type
       for image recordings and is further refined by the
-      :py:class:`~pynwb.image.ImageMaskSeries`,
       :py:class:`~pynwb.image.OpticalSeries`,
       :py:class:`~pynwb.ophys.OnePhotonSeries`, and
       :py:class:`~pynwb.ophys.TwoPhotonSeries` types.
@@ -92,7 +91,6 @@ often hold data of different processing/analysis data types.
       :py:class:`~pynwb.behavior.EyeTracking`.
 
     * **Extracellular electrophysiology:** :py:class:`~pynwb.ecephys.EventDetection`,
-      :py:class:`~pynwb.ecephys.EventWaveform`,
       :py:class:`~pynwb.ecephys.FeatureExtraction`,
       :py:class:`~pynwb.ecephys.FilteredEphys`,
       :py:class:`~pynwb.ecephys.LFP`.
@@ -595,8 +593,7 @@ io.close()
 
 ####################
 # .. [#] Some data interface objects have a default name. This default name is the type of the data interface. For
-#    example, the default name for :py:class:`~pynwb.ophys.ImageSegmentation` is "ImageSegmentation" and the default
-#    name for :py:class:`~pynwb.ecephys.EventWaveform` is "EventWaveform".
+#    example, the default name for :py:class:`~pynwb.ophys.ImageSegmentation` is "ImageSegmentation".
 #
 # .. [#] HDF5 is the primary backend supported by NWB.
 #

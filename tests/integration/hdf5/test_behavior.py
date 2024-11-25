@@ -11,7 +11,6 @@ class TestSpatialSeriesIO(AcquisitionH5IOMixin, TestCase):
         return SpatialSeries(
             name='test_sS',
             data=np.ones((3, 2)),
-            bounds=[(-1,1),(-1,1),(-1,1)],
             reference_frame='reference_frame',
             timestamps=[1., 2., 3.]
         )

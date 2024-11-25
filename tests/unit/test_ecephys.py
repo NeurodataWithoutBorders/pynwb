@@ -267,27 +267,9 @@ class EventDetectionConstructor(TestCase):
 
 class EventWaveformConstructor(TestCase):
 
-    def _create_table_and_region(self):
-        table = make_electrode_table()
-        region = DynamicTableRegion(
-            name='electrodes',
-            data=[0, 2],
-            description='the first and third electrodes',
-            table=table
-        )
-        return table, region
-
     def test_init(self):
-        table, region = self._create_table_and_region()
-        sES = SpikeEventSeries('test_sES', list(range(10)), list(range(10)), region)
-
-        pm = ProcessingModule(name='test_module', description='a test module')
-        ew = EventWaveform()
-        pm.add(table)
-        pm.add(ew)
-        ew.add_spike_event_series(sES)
-        self.assertEqual(ew.spike_event_series['test_sES'], sES)
-        self.assertEqual(ew['test_sES'], ew.spike_event_series['test_sES'])
+        with self.assertRaises(ValueError):
+            EventWaveform()
 
 
 class ClusteringConstructor(TestCase):
