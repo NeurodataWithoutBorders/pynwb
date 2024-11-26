@@ -59,7 +59,7 @@ jobs:
 
       - name: Test installation from a wheel
         run: |
-          tox -e wheelinstall --recreate --installpkg dist/*-none-any.whl
+          tox -e wheelinstall --installpkg dist/*-none-any.whl
 
       - name: Upload distribution as a workspace artifact
         if: ${{ matrix.upload-wheels }}
@@ -162,7 +162,7 @@ jobs:
 
       - name: Test installation from a wheel
         run: |
-          tox -e wheelinstall --recreate --installpkg dist/*-none-any.whl
+          tox -e wheelinstall --installpkg dist/*-none-any.whl
 
   run-ros3-tests:  # tox and conda do not play nicely so do not use tox here
     name: ${{ matrix.name }}
