@@ -62,7 +62,7 @@ class TestGetNWBBackend(TestCase):
         self.nwbfile = NWBFile(session_description='a test NWB File',
                                identifier='TEST123',
                                session_start_time=datetime(1970, 1, 1, 12, tzinfo=tzutc()))
-        self.hdf5_path = "test_pynwb_io_nwbhdf5.nwb"
+        self.hdf5_path = "test_pynwb_nwb_backend.nwb"
         with NWBHDF5IO(self.hdf5_path, 'w') as io:
             io.write(self.nwbfile)
 
