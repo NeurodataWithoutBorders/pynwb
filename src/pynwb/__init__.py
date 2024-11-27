@@ -357,12 +357,16 @@ def get_class(**kwargs):
 @docval({'name': 'path', 'type': str, 'doc': 'the neurodata_type to get the NWBContainer class for'},
         is_method=False)
 def _get_backend(path: str):
-    from hdmf_zarr import NWBZarrIO
+    try:
+        from hdmf_zarr import NWBZarrIO
+        backend_io_classes = [NWBHDF5IO, NWBZarrIO]
+    except ImportError:
+        backend_io_classes = [NWBHDF5IO]
 
-    backend_io_classes = [NWBHDF5IO, NWBZarrIO]
     backend_options = [b for b in backend_io_classes if b.can_read(path=path)]
     if len(backend_options) == 0:
-        raise ValueError(f"Could not find an IO to read the file '{path}'.")
+        raise ValueError(f"Could not find an IO to read the file '{path}'. If you are trying to read "
+                         f"a Zarr file, make sure you have hdmf-zarr installed.")
     else:
         return backend_options[0]
 
