@@ -362,12 +362,7 @@ def _get_backend(path: str):
     backend_io_classes = [NWBHDF5IO, NWBZarrIO]
     backend_options = [b for b in backend_io_classes if b.can_read(path=path)]
     if len(backend_options) == 0:
-        warn(f"Could not find an IO to read the file '{path}'." 
-             f"This may be due to an older file version or invalid file." 
-             f"Defaulting to NWBHDF5IO.", UserWarning)
-        return NWBHDF5IO
-    elif len(backend_options) > 1:
-        raise ValueError(f"Multiple backends found for file '{path}': {backend_options}")
+        raise ValueError(f"Could not find an IO to read the file '{path}'.")
     else:
         return backend_options[0]
 
