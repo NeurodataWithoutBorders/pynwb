@@ -1,5 +1,18 @@
 # PyNWB Changelog
 
+## PyNWB 3.0.0 (Upcoming)
+
+### Breaking changes
+- The validation methods have been updated with multiple breaking changes. @stephprince [#1911](https://github.com/NeurodataWithoutBorders/pynwb/pull/1911)
+   - The behavior of `pynwb.validate(io=...)` now matches the behavior of `pynwb.validate(path=...)`. In previous pynwb versions, `pynwb.validate(io=...)` did not use the cached namespaces during validation. To obtain the same behavior as in previous versions, you can update the function call to `pynwb.validate(io=..., used_cached_namespaces=False)`
+   - The validate module has been renamed to `validation.py`. The validate method can be 
+   imported using `import pynwb; pynwb.validate` or `from pynwb.validation import validate`
+
+### Enhancements and minor changes
+- Added enhancements to the validation CLI. @stephprince [#1911](https://github.com/NeurodataWithoutBorders/pynwb/pull/1911)
+   - Added an entry point for the validation module. You can now use `pynwb-validate "file.nwb"` .
+   - Added the `--json-file-path` CLI argument to output validation results in a machine readable format.
+
 ## PyNWB 2.8.3 (November 19, 2024)
 
 ### Enhancements and minor changes
