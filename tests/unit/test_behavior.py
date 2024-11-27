@@ -12,13 +12,11 @@ class SpatialSeriesConstructor(TestCase):
         sS = SpatialSeries(
             name='test_sS',
             data=np.ones((3, 2)),
-            bounds=[(-1,1),(-1,1),(-1,1)],
             reference_frame='reference_frame',
             timestamps=[1., 2., 3.]
         )
         self.assertEqual(sS.name, 'test_sS')
         self.assertEqual(sS.unit, 'meters')
-        self.assertEqual(sS.bounds, [(-1,1),(-1,1),(-1,1)])
         self.assertEqual(sS.reference_frame, 'reference_frame')
 
     def test_init_minimum(self):
@@ -27,7 +25,6 @@ class SpatialSeriesConstructor(TestCase):
             data=np.ones((3, 2)),
             timestamps=[1., 2., 3.]
         )
-        assert sS.bounds is None
         assert sS.reference_frame is None
 
     def test_set_unit(self):

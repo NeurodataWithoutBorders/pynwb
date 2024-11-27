@@ -280,6 +280,7 @@ class IndexSeries(TimeSeries):
 @register_class('ImageMaskSeries', CORE_NAMESPACE)
 class ImageMaskSeries(ImageSeries):
     '''
+    DEPRECATED as of NWB 2.8.0 and PyNWB 3.0.0. 
     An alpha mask that is applied to a presented visual stimulus. The data[] array contains an array
     of mask values that are applied to the displayed image. Mask values are stored as RGBA. Mask
     can vary with time. The timestamps array indicates the starting time of a mask, and that mask
@@ -299,6 +300,11 @@ class ImageMaskSeries(ImageSeries):
                      'The device used to capture the masked ImageSeries data should be stored in the ImageSeries.'),
              'default': None},)
     def __init__(self, **kwargs):
+        if not self._in_construct_mode:
+            raise ValueError(
+                "The ImageMaskSeries neurodata type is deprecated. If you are interested in using it, "
+                "please create an issue on https://github.com/NeurodataWithoutBorders/nwb-schema/issues."
+            )
         masked_imageseries = popargs('masked_imageseries', kwargs)
         super().__init__(**kwargs)
         self.masked_imageseries = masked_imageseries
