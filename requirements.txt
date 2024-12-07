@@ -1,7 +1,7 @@
 # pinned dependencies to reproduce an entire development environment to use PyNWB
-h5py==3.11.0
+h5py==3.12.1
 hdmf==3.14.5
 numpy==2.1.1; python_version > "3.9"  # numpy 2.1+ is not compatible with py3.9
 numpy==2.0.2; python_version == "3.9"
-pandas==2.2.2
+pandas==2.2.3
 python-dateutil==2.9.0.post0
