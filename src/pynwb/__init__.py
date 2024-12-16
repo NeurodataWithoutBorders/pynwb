@@ -355,8 +355,12 @@ def get_class(**kwargs):
 
 
 @docval({'name': 'path', 'type': str, 'doc': 'the neurodata_type to get the NWBContainer class for'},
+        {"name": "method", "type": str, "doc": "the method to use when opening the file", 'default': None},
         is_method=False)
-def _get_backend(path: str):
+def _get_backend(path: str, method: str = None):
+    if method == "ros3":
+        return NWBHDF5IO  # TODO - add additional conditions for other streaming methods
+
     try:
         from hdmf_zarr import NWBZarrIO
         backend_io_classes = [NWBHDF5IO, NWBZarrIO]

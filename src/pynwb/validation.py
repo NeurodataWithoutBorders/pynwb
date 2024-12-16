@@ -61,7 +61,7 @@ def get_cached_namespaces_to_validate(path: Optional[str] = None,
                                                     file=io._file)
     else:
         from pynwb import _get_backend
-        backend_io = _get_backend(path)
+        backend_io = _get_backend(path, method=driver)
         namespace_dependencies = backend_io.load_namespaces(namespace_catalog=catalog, 
                                                             path=path, 
                                                             driver=driver, 
@@ -164,7 +164,7 @@ def validate(**kwargs):
     # get io object if not provided
     if path is not None:
         from pynwb import _get_backend
-        backend_io = _get_backend(path)
+        backend_io = _get_backend(path, method=driver)
         io = backend_io(**io_kwargs)
 
     # check namespaces are accurate
