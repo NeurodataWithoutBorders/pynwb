@@ -67,7 +67,6 @@ def get_cached_namespaces_to_validate(path: Optional[str] = None,
                                                             driver=driver, 
                                                             aws_region=aws_region)
 
-
     # Determine which namespaces are the most specific (i.e. extensions) and validate against those
     candidate_namespaces = set(namespace_dependencies.keys())
     for namespace_dependency in namespace_dependencies:
@@ -163,7 +162,7 @@ def validate(**kwargs):
         namespaces_to_validate = [CORE_NAMESPACE]
 
     # get io object if not provided
-    if io is None:
+    if path is not None:
         from pynwb import _get_backend
         backend_io = _get_backend(path)
         io = backend_io(**io_kwargs)
@@ -191,5 +190,8 @@ def validate(**kwargs):
                   f"{namespace_message} using namespace '{validation_namespace}'.")  
         validation_errors += _validate_helper(io=io, namespace=validation_namespace)
 
+    if path is not None:
+        io.close()  # close the io object if it was created within this function, otherwise leave as is
+    
     return validation_errors
 
