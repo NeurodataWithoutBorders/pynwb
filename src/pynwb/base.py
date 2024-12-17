@@ -50,27 +50,23 @@ class ProcessingModule(MultiContainerInterface):
         '''
         Add an NWBContainer to this ProcessingModule
         '''
-        warn(PendingDeprecationWarning('add_container will be replaced by add'))
-        self.add(kwargs['container'])
+        raise DeprecationWarning("add_container is deprecated. Use add instead.")
 
     @docval({'name': 'container_name', 'type': str, 'doc': 'the name of the NWBContainer to retrieve'})
     def get_container(self, **kwargs):
         '''
         Retrieve an NWBContainer from this ProcessingModule
         '''
-        warn(PendingDeprecationWarning('get_container will be replaced by get'))
-        return self.get(kwargs['container_name'])
+        raise DeprecationWarning('get_container is deprecated. Use get instead.')
 
     @docval({'name': 'NWBDataInterface', 'type': (NWBDataInterface, DynamicTable),
              'doc': 'the NWBDataInterface to add to this Module'})
     def add_data_interface(self, **kwargs):
-        warn(PendingDeprecationWarning('add_data_interface will be replaced by add'))
-        self.add(kwargs['NWBDataInterface'])
+        raise DeprecationWarning('add_data_interface is deprecated. Use add instead')
 
     @docval({'name': 'data_interface_name', 'type': str, 'doc': 'the name of the NWBContainer to retrieve'})
     def get_data_interface(self, **kwargs):
-        warn(PendingDeprecationWarning('get_data_interface will be replaced by get'))
-        return self.get(kwargs['data_interface_name'])
+        raise DeprecationWarning('get_data_interface is deprecated. Use get instead')
 
 
 @register_class('TimeSeries', CORE_NAMESPACE)

@@ -94,13 +94,9 @@ class ImageSeries(TimeSeries):
             setattr(self, key, val)
 
         if self._change_external_file_format():
-            warnings.warn(
-                "%s '%s': The value for 'format' has been changed to 'external'. "
-                "Setting a default value for 'format' is deprecated and will be changed "
-                "to raising a ValueError in the next major release."
-                % (self.__class__.__name__, self.name),
-                DeprecationWarning,
-            )
+            self._error_on_new_warn_on_construct(error_msg=f"{self.__class__.__name__} '{self.name}': "
+                                                "The value for 'format' has been changed to 'external'. "
+                                                "Setting a default value for 'format' is deprecated.")
 
         if not self._check_image_series_dimension():
             warnings.warn(
@@ -198,7 +194,7 @@ class ImageSeries(TimeSeries):
     @bits_per_pixel.setter
     def bits_per_pixel(self, val):
         if val is not None:
-            warnings.warn("bits_per_pixel is no longer used", DeprecationWarning)
+            self._error_on_new_warn_on_construct(error_msg="bits_per_pixel is deprecated")
             self.fields['bits_per_pixel'] = val
 
 
@@ -255,16 +251,13 @@ class IndexSeries(TimeSeries):
     def __init__(self, **kwargs):
         indexed_timeseries, indexed_images = popargs('indexed_timeseries', 'indexed_images', kwargs)
         if kwargs['unit'] and kwargs['unit'] != 'N/A':
-            msg = ("The 'unit' field of IndexSeries is fixed to the value 'N/A' starting in NWB 2.5. Passing "
-                   "a different value for 'unit' will raise an error in PyNWB 3.0.")
-            warnings.warn(msg, PendingDeprecationWarning)
+            self._error_on_new_warn_on_construct(error_msg="The 'unit' field of IndexSeries is fixed to the value 'N/A'.")
         if not indexed_timeseries and not indexed_images:
             msg = "Either indexed_timeseries or indexed_images must be provided when creating an IndexSeries."
             raise ValueError(msg)
         if indexed_timeseries:
-            msg = ("The indexed_timeseries field of IndexSeries is discouraged and will be deprecated in "
-                   "a future version of NWB. Use the indexed_images field instead.")
-            warnings.warn(msg, PendingDeprecationWarning)
+            self._error_on_new_warn_on_construct("The indexed_timeseries field of IndexSeries is deprecated. "
+                                                 "Use the indexed_images field instead.")
         kwargs['unit'] = 'N/A'  # fixed value starting in NWB 2.5
         super().__init__(**kwargs)
         self.indexed_timeseries = indexed_timeseries

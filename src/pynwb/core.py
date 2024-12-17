@@ -128,27 +128,27 @@ class ScratchData(NWBData):
         notes, description = popargs('notes', 'description', kwargs)
         super().__init__(**kwargs)
         if notes != '':
-            warn('The `notes` argument of ScratchData.__init__ will be deprecated. Use description instead.',
-                 PendingDeprecationWarning)
+            self._error_on_new_warn_on_construct(
+                    error_msg='The `notes` argument of ScratchData.__init__ has been deprecated. Use description instead.'
+                    )
             if notes != '' and description != '':
-                raise ValueError('Cannot provide both notes and description to ScratchData.__init__. The description '
-                                 'argument is recommended.')
-            description = notes
+                self._error_on_new_warn_on_construct(
+                    error_msg='Cannot provide both notes and description to ScratchData.__init__. The description '
+                               'argument is recommended.'
+                    )
+                description = notes
         if not description:
-            warn('ScratchData.description will be required in a future major release of PyNWB.',
-                 PendingDeprecationWarning)
+            self._error_on_new_warn_on_construct(error_msg='ScratchData.description is required by PyNWB > 3.0.')
         self.description = description
 
     @property
     def notes(self):
-        warn('Use of ScratchData.notes will be deprecated. Use ScratchData.description instead.',
-             PendingDeprecationWarning)
-        return self.description
-
+        raise DeprecationWarning('Use of ScratchData.notes has been deprecated. Use ScratchData.description instead.')
+    
     @notes.setter
     def notes(self, value):
-        warn('Use of ScratchData.notes will be deprecated. Use ScratchData.description instead.',
-             PendingDeprecationWarning)
+        self._error_on_new_warn_on_construct(
+                    error_msg='Use of ScratchData.notes has been deprecated. Use ScratchData.description instead.')
         self.description = value
 
 

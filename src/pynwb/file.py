@@ -491,8 +491,8 @@ class NWBFile(MultiContainerInterface, HERDManager):
         icephys_electrodes = args_to_set['icephys_electrodes']
         ic_electrodes = args_to_set['ic_electrodes']
         if icephys_electrodes is None and ic_electrodes is not None:
-            warn("Use of the ic_electrodes parameter is deprecated. "
-                 "Use the icephys_electrodes parameter instead", DeprecationWarning)
+            self._error_on_new_warn_on_construct(error_msg=("Use of the ic_electrodes parameter is deprecated. "
+                                                            "Use the icephys_electrodes parameter instead"))
             args_to_set['icephys_electrodes'] = ic_electrodes
         args_to_set.pop('ic_electrodes')  # do not set this arg
 
@@ -552,7 +552,7 @@ class NWBFile(MultiContainerInterface, HERDManager):
 
     @property
     def modules(self):
-        warn("NWBFile.modules has been replaced by NWBFile.processing.", DeprecationWarning)
+        self._error_on_new_warn_on_construct(error_msg="NWBFile.modules is deprecated. Use NWBFile.processing instead.")
         return self.processing
 
     @property
@@ -561,17 +561,17 @@ class NWBFile(MultiContainerInterface, HERDManager):
 
     @property
     def ec_electrode_groups(self):
-        warn("NWBFile.ec_electrode_groups has been replaced by NWBFile.electrode_groups.", DeprecationWarning)
+        self._error_on_new_warn_on_construct(error_msg="NWBFile.ec_electrode_groups is deprecatd. Use NWBFile.electrode_groups instead.")
         return self.electrode_groups
 
     @property
     def ec_electrodes(self):
-        warn("NWBFile.ec_electrodes has been replaced by NWBFile.electrodes.", DeprecationWarning)
+        self._error_on_new_warn_on_construct(error_msg="NWBFile.ec_electrodes is deprecated. Use NWBFile.electrodes instead.")
         return self.electrodes
 
     @property
     def ic_electrodes(self):
-        warn("NWBFile.ic_electrodes has been replaced by NWBFile.icephys_electrodes.", DeprecationWarning)
+        self._error_on_new_warn_on_construct(error_msg="NWBFile.ic_electrodes is deprecated. Use NWBFile.icephys_electrodes instead.")
         return self.icephys_electrodes
 
     @property
@@ -581,33 +581,9 @@ class NWBFile(MultiContainerInterface, HERDManager):
     @icephys_filtering.setter
     def icephys_filtering(self, val):
         if val is not None:
-            warn("Use of icephys_filtering is deprecated. Use the IntracellularElectrode.filtering field instead",
-                 DeprecationWarning)
+            self._error_on_new_warn_on_construct('Use of icephys_filtering is deprecated. '
+                                                 'Use the IntracellularElectrode.filtering field instead')
             self.fields['icephys_filtering'] = val
-
-    def add_ic_electrode(self, *args, **kwargs):
-        """
-        This method is deprecated and will be removed in future versions. Please
-        use :py:meth:`~pynwb.file.NWBFile.add_icephys_electrode` instead
-        """
-        warn("NWBFile.add_ic_electrode has been replaced by NWBFile.add_icephys_electrode.", DeprecationWarning)
-        return self.add_icephys_electrode(*args, **kwargs)
-
-    def create_ic_electrode(self, *args, **kwargs):
-        """
-        This method is deprecated and will be removed in future versions. Please
-        use :py:meth:`~pynwb.file.NWBFile.create_icephys_electrode` instead
-        """
-        warn("NWBFile.create_ic_electrode has been replaced by NWBFile.create_icephys_electrode.", DeprecationWarning)
-        return self.create_icephys_electrode(*args, **kwargs)
-
-    def get_ic_electrode(self, *args, **kwargs):
-        """
-        This method is deprecated and will be removed in future versions. Please
-        use :py:meth:`~pynwb.file.NWBFile.get_icephys_electrode` instead
-        """
-        warn("NWBFile.get_ic_electrode has been replaced by NWBFile.get_icephys_electrode.", DeprecationWarning)
-        return self.get_icephys_electrode(*args, **kwargs)
 
     def __check_epochs(self):
         if self.epochs is None:
@@ -621,13 +597,6 @@ class NWBFile(MultiContainerInterface, HERDManager):
         """
         self.__check_epochs()
         self.epochs.add_column(**kwargs)
-
-    def add_epoch_metadata_column(self, *args, **kwargs):
-        """
-        This method is deprecated and will be removed in future versions. Please
-        use :py:meth:`~pynwb.file.NWBFile.add_epoch_column` instead
-        """
-        raise DeprecationWarning("Please use NWBFile.add_epoch_column")
 
     @docval(*get_docval(TimeIntervals.add_interval),
             allow_extra=True)
@@ -860,23 +829,11 @@ class NWBFile(MultiContainerInterface, HERDManager):
 
     @docval({'name': 'stimulus', 'type': (TimeSeries, DynamicTable, NWBDataInterface), 'default': None,
              'doc': 'The stimulus presentation data to add to this NWBFile.'},
-            {'name': 'use_sweep_table', 'type': bool, 'default': False, 'doc': 'Use the deprecated SweepTable'},
-            {'name': 'timeseries', 'type': TimeSeries, 'default': None,
-             'doc': 'The "timeseries" keyword argument is deprecated. Use the "nwbdata" argument instead.'},)
+            {'name': 'use_sweep_table', 'type': bool, 'default': False, 'doc': 'Use the deprecated SweepTable'},)
     def add_stimulus(self, **kwargs):
-        stimulus, timeseries = popargs('stimulus', 'timeseries', kwargs)
-        if stimulus is None and timeseries is None:
-            raise ValueError(
-                "The 'stimulus' keyword argument is required. The 'timeseries' keyword argument can be "
-                "provided for backwards compatibility but is deprecated in favor of 'stimulus' and will be "
-                "removed in PyNWB 3.0."
-            )
-        # TODO remove this support in PyNWB 3.0
-        if timeseries is not None:
-            warn("The 'timeseries' keyword argument is deprecated and will be removed in PyNWB 3.0. "
-                 "Use the 'stimulus' argument instead.", DeprecationWarning)
-            if stimulus is None:
-                stimulus = timeseries
+        stimulus = popargs('stimulus', kwargs)
+        if stimulus is None:
+            raise ValueError("The 'stimulus' keyword argument is required.")
         self._add_stimulus_internal(stimulus)
         use_sweep_table = popargs('use_sweep_table', kwargs)
         if use_sweep_table:
@@ -1078,10 +1035,8 @@ class NWBFile(MultiContainerInterface, HERDManager):
         data, name, notes, table_description, description = getargs('data', 'name', 'notes', 'table_description',
                                                                     'description', kwargs)
         if notes is not None or table_description != '':
-            warn('Use of the `notes` or `table_description` argument will be removed in a future version of PyNWB. '
-                 'Use the `description` argument instead.', PendingDeprecationWarning)
-            if description is not None:
-                raise ValueError('Cannot call add_scratch with (notes or table_description) and description')
+            raise DeprecationWarning('Use of the `notes` or `table_description` argument is deprecated. '
+                                     'Use the `description` argument instead.')
 
         if isinstance(data, (str, int, float, bytes, np.ndarray, list, tuple, pd.DataFrame)):
             if name is None:
