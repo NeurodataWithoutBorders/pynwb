@@ -153,7 +153,7 @@ class TestSweepTableRoundTripEasy(NWBH5IOMixin, TestCase):
                                     starting_time=123.6, rate=10e3, electrode=self.elec, gain=0.126,
                                     stimulus_description="gotcha ya!", sweep_number=np.uint(4711))
         
-        # create the sweeptable in construct mode, modelling the behavior of the ObjectMapper on read
+        # create the sweeptable in construct mode, modeling the behavior of the ObjectMapper on read
         sweeptable = SweepTable.__new__(SweepTable)
         sweeptable._in_construct_mode = True
         msg = ("SweepTable is deprecated. Use the IntracellularRecordingsTable instead. "
@@ -228,7 +228,7 @@ class TestSweepTableRoundTripComplicated(NWBH5IOMixin, TestCase):
                                       starting_time=123.6, rate=10e3, electrode=self.elec, gain=0.126,
                                       stimulus_description="gotcha ya!", sweep_number=np.uint(4712))
 
-        # create the sweeptable in construct mode, modelling the behavior of the ObjectMapper on read
+        # create the sweeptable in construct mode, modeling the behavior of the ObjectMapper on read
         sweeptable = SweepTable.__new__(SweepTable)
         sweeptable._in_construct_mode = True
         msg = ("SweepTable is deprecated. Use the IntracellularRecordingsTable instead. "

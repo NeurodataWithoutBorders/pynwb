@@ -180,7 +180,7 @@ class TestClusteringIO(AcquisitionH5IOMixin, TestCase):
         with self.assertRaisesWith(ValueError, error_msg):
             Clustering(**kwargs)
 
-        # create object in construct mode, modelling the behavior of the ObjectMapper on read
+        # create object in construct mode, modeling the behavior of the ObjectMapper on read
         obj = Clustering.__new__(Clustering, in_construct_mode=True)
         with self.assertWarnsWith(warn_type=UserWarning, exc_msg=error_msg):
             obj.__init__(**kwargs)
@@ -249,7 +249,7 @@ class ClusterWaveformsConstructor(AcquisitionH5IOMixin, TestCase):
         with self.assertRaisesWith(ValueError, msg):
             cw = ClusterWaveforms(self.clustering, 'filtering', means, stdevs)
 
-        # create object in construct mode, modelling the behavior of the ObjectMapper on read 
+        # create object in construct mode, modeling the behavior of the ObjectMapper on read 
         cw = ClusterWaveforms.__new__(ClusterWaveforms,
                                         container_source=None,
                                         parent=None,

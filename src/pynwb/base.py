@@ -51,6 +51,7 @@ class ProcessingModule(MultiContainerInterface):
         Add an NWBContainer to this ProcessingModule
         '''
         warn("add_container is deprecated. Use add instead.", DeprecationWarning)
+        self.add(kwargs['container'])
 
     @docval({'name': 'container_name', 'type': str, 'doc': 'the name of the NWBContainer to retrieve'})
     def get_container(self, **kwargs):

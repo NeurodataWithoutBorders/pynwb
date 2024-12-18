@@ -146,7 +146,7 @@ class ImagingPlaneConstructor(TestCase):
         with self.assertRaisesWith(ValueError, msg):
             ImagingPlane(**kwargs)
 
-        # create object in construct mode, modelling the behavior of the ObjectMapper on read
+        # create object in construct mode, modeling the behavior of the ObjectMapper on read
         obj = ImagingPlane.__new__(ImagingPlane, in_construct_mode=True)
         with self.assertWarnsWith(warn_type=UserWarning, exc_msg=msg):
             obj.__init__(**kwargs)
@@ -168,7 +168,7 @@ class ImagingPlaneConstructor(TestCase):
         with self.assertRaisesWith(ValueError, msg):
             ImagingPlane(**kwargs)
 
-        # create object in construct mode, modelling the behavior of the ObjectMapper on read
+        # create object in construct mode, modeling the behavior of the ObjectMapper on read
         obj = ImagingPlane.__new__(ImagingPlane, in_construct_mode=True)
         with self.assertWarnsWith(warn_type=UserWarning, exc_msg=msg):
             obj.__init__(**kwargs)
@@ -191,7 +191,7 @@ class ImagingPlaneConstructor(TestCase):
         with self.assertRaisesWith(ValueError, msg):
             ImagingPlane(**kwargs)
 
-        # create object in construct mode, modelling the behavior of the ObjectMapper on read
+        # create object in construct mode, modeling the behavior of the ObjectMapper on read
         obj = ImagingPlane.__new__(ImagingPlane, in_construct_mode=True)
         with self.assertWarnsWith(warn_type=UserWarning, exc_msg=msg):
             obj.__init__(**kwargs)

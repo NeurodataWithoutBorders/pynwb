@@ -33,7 +33,7 @@ class TestScratchData(TestCase):
         with self.assertRaisesWith(ValueError, msg):
             ScratchData(name='test', data=[1, 2, 3, 4, 5], notes='test notes')
 
-        # create object in construct mode, modelling the behavior of the ObjectMapper on read 
+        # create object in construct mode, modeling the behavior of the ObjectMapper on read 
         data = ScratchData.__new__(ScratchData, in_construct_mode=True)
         with self.assertWarnsWith(UserWarning, msg):
             data.__init__(name='test', data=[1, 2, 3, 4, 5], notes='test notes')

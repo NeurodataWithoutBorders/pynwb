@@ -154,7 +154,7 @@ class ImageSeriesConstructor(TestCase):
                     "ImageSeries 'test_iS': The number of frame indices in "
                     "'starting_frame' should have the same length as 'external_file'."
                 )
-                # Create the image series in construct mode, modelling the behavior
+                # Create the image series in construct mode, modeling the behavior
                 # of the ObjectMapper on read while avoiding having to create, write,
                 # and read and entire NWB file
                 obj = ImageSeries.__new__(ImageSeries,
@@ -255,7 +255,7 @@ class ImageSeriesConstructor(TestCase):
         with self.assertRaisesWith(ValueError, msg):
             ImageSeries(**kwargs)
 
-        # create object in construct mode, modelling the behavior of the ObjectMapper on read
+        # create object in construct mode, modeling the behavior of the ObjectMapper on read
         iS = ImageSeries.__new__(ImageSeries, in_construct_mode=True)
         with self.assertWarnsWith(warn_type=UserWarning, exc_msg=msg):
             iS.__init__(**kwargs)
@@ -352,7 +352,7 @@ class IndexSeriesConstructor(TestCase):
         with self.assertRaisesWith(ValueError, msg):
             IndexSeries(**kwargs)
 
-        # create object in construct mode, modelling the behavior of the ObjectMapper on read
+        # create object in construct mode, modeling the behavior of the ObjectMapper on read
         iS = IndexSeries.__new__(IndexSeries, in_construct_mode=True)
         with self.assertWarnsWith(warn_type=UserWarning, exc_msg=msg):
             iS.__init__(**kwargs)
@@ -377,7 +377,7 @@ class IndexSeriesConstructor(TestCase):
         with self.assertRaisesWith(ValueError, msg):
             IndexSeries(**kwargs)
 
-        # create object in construct mode, modelling the behavior of the ObjectMapper on read
+        # create object in construct mode, modeling the behavior of the ObjectMapper on read
         iS = IndexSeries.__new__(IndexSeries, in_construct_mode=True)
         with self.assertWarnsWith(warn_type=UserWarning, exc_msg=msg):
             iS.__init__(**kwargs)

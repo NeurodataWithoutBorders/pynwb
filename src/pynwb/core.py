@@ -133,18 +133,17 @@ class ScratchData(NWBData):
                                "Use description instead.")
                     )
             if notes != '' and description is not None:
-                self._error_on_new_warn_on_construct(
-                    error_msg='Cannot provide both notes and description to ScratchData.__init__. The description '
-                                'argument is recommended.'
-                    )
+                raise ValueError('Cannot provide both notes and description to ScratchData.__init__. The description '
+                                 'argument is recommended.')
             description = notes
         if not description:
-            self._error_on_new_warn_on_construct(error_msg='ScratchData.description is required by PyNWB > 3.0.')
+            self._error_on_new_warn_on_construct(error_msg='ScratchData.description is required.')
         self.description = description
 
     @property
     def notes(self):
         warn('Use of ScratchData.notes has been deprecated. Use ScratchData.description instead.', DeprecationWarning)
+        return self.description
     
     @notes.setter
     def notes(self, value):

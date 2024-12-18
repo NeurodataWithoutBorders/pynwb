@@ -287,7 +287,7 @@ class ClusteringConstructor(TestCase):
         with self.assertRaisesWith(ValueError, error_msg):
             cc = Clustering(**kwargs)
         
-        # create object in construct mode, modelling the behavior of the ObjectMapper on read 
+        # create object in construct mode, modeling the behavior of the ObjectMapper on read 
         cc = Clustering.__new__(Clustering, in_construct_mode=True)
         with self.assertWarnsWith(warn_type=UserWarning, exc_msg=error_msg):
             cc.__init__(**kwargs)
@@ -305,7 +305,7 @@ class ClusterWaveformsConstructor(TestCase):
         num = [3, 4]
         peak_over_rms = [5.3, 6.3]
 
-        # create object in construct mode, modelling the behavior of the ObjectMapper on read 
+        # create object in construct mode, modeling the behavior of the ObjectMapper on read 
         error_msg = "The Clustering neurodata type is deprecated. Use pynwb.misc.Units or NWBFile.units instead"
         cc = Clustering.__new__(Clustering,
                                         container_source=None,
@@ -320,7 +320,7 @@ class ClusterWaveformsConstructor(TestCase):
         with self.assertRaisesWith(ValueError, error_msg):
             cw = ClusterWaveforms(cc, 'filtering', means, stdevs)
 
-        # create object in construct mode, modelling the behavior of the ObjectMapper on read 
+        # create object in construct mode, modeling the behavior of the ObjectMapper on read 
         cw = ClusterWaveforms.__new__(ClusterWaveforms,
                                         container_source=None,
                                         parent=None,

@@ -1169,7 +1169,7 @@ class NWBFileTests(TestCase):
             nwbfile.add_stimulus_template(local_stimulus, use_sweep_table=True)
             # NOTE - the sweep table creation will error but the stimulus template will still be added
 
-        # create object in construct mode, modelling the behavior of the ObjectMapper on read
+        # create object in construct mode, modeling the behavior of the ObjectMapper on read
         nwbfile._in_construct_mode = True
         with self.assertWarnsWith(warn_type=UserWarning, exc_msg=msg):
             nwbfile.add_stimulus_template(local_stimulus2, use_sweep_table=True)
@@ -1239,7 +1239,7 @@ class NWBFileTests(TestCase):
         with self.assertRaisesWith(ValueError, msg):
             nwbfile = NWBFile(**kwargs)
 
-        # create object in construct mode, modelling the behavior of the ObjectMapper on read
+        # create object in construct mode, modeling the behavior of the ObjectMapper on read
         nwbfile = NWBFile.__new__(NWBFile, in_construct_mode=True)
         with self.assertWarnsWith(warn_type=UserWarning, exc_msg=msg):
             nwbfile.__init__(**kwargs)
@@ -1250,7 +1250,7 @@ class NWBFileTests(TestCase):
         stimulus = self.__get_stimulus(electrode=electrode)
         nwbfile.add_stimulus(stimulus, use_sweep_table=True)
 
-    def test_deprectation_icephys_filtering_on_init(self):
+    def test_deprecation_icephys_filtering_on_init(self):
         kwargs = dict(session_description='my first synthetic recording',
                 identifier='EXAMPLE_ID',
                 session_start_time=datetime.now(tzlocal()),
@@ -1261,7 +1261,7 @@ class NWBFileTests(TestCase):
         with self.assertRaisesWith(ValueError, msg):
             nwbfile = NWBFile(**kwargs)
 
-        # create object in construct mode, modelling the behavior of the ObjectMapper on read
+        # create object in construct mode, modeling the behavior of the ObjectMapper on read
         nwbfile = NWBFile.__new__(NWBFile, in_construct_mode=True)
         with self.assertWarnsWith(warn_type=UserWarning, exc_msg=msg):
             nwbfile.__init__(**kwargs)
@@ -1281,7 +1281,7 @@ class NWBFileTests(TestCase):
         with self.assertRaisesWith(ValueError, msg):
             nwbfile.icephys_filtering = 'test filtering'
 
-        # create object in construct mode, modelling the behavior of the ObjectMapper on read
+        # create object in construct mode, modeling the behavior of the ObjectMapper on read
         nwbfile._in_construct_mode = True
         with self.assertWarnsWith(warn_type=UserWarning, exc_msg=msg):
             nwbfile.icephys_filtering = 'test filtering'

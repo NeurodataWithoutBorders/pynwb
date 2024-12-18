@@ -39,14 +39,14 @@ class NWBFileICEphys(TestCase):
     def setUp(self):
         self.icephys_electrode = GetElectrode()
 
-    def test_sweep_table_deprectation_warn(self):
+    def test_sweep_table_deprecation_warn(self):
         msg = ("SweepTable is deprecated. Use the IntracellularRecordingsTable instead. "
                "See also the NWBFile.add_intracellular_recordings function.")
         
         with self.assertRaisesWith(ValueError, msg):
             SweepTable()
 
-        # create object in construct mode, modelling the behavior of the ObjectMapper on read
+        # create object in construct mode, modeling the behavior of the ObjectMapper on read
         sweepT = SweepTable.__new__(SweepTable, in_construct_mode=True)
         with self.assertWarnsWith(warn_type=UserWarning, exc_msg=msg):
             sweepT.__init__()
@@ -60,7 +60,7 @@ class NWBFileICEphys(TestCase):
         with self.assertRaisesWith(ValueError, msg):
             NWBFile(**kwargs)
 
-        # create object in construct mode, modelling the behavior of the ObjectMapper on read
+        # create object in construct mode, modeling the behavior of the ObjectMapper on read
         nwbfile = NWBFile.__new__(NWBFile, in_construct_mode=True)
         
         with self.assertWarnsWith(warn_type=UserWarning, exc_msg=msg):
@@ -76,7 +76,7 @@ class NWBFileICEphys(TestCase):
         with self.assertRaisesWith(ValueError, msg):
             NWBFile(**kwargs)
 
-        # create object in construct mode, modelling the behavior of the ObjectMapper on read
+        # create object in construct mode, modeling the behavior of the ObjectMapper on read
         nwbfile = NWBFile.__new__(NWBFile, in_construct_mode=True)
         with self.assertWarnsWith(warn_type=UserWarning, exc_msg=msg):
             nwbfile.__init__(**kwargs)

@@ -134,7 +134,7 @@ class NWBFileTest(TestCase):
         with self.assertRaisesWith(ValueError, msg):
             self.nwbfile.modules['test_mod']
 
-        # create object in construct mode, modelling the behavior of the ObjectMapper on read
+        # create object in construct mode, modeling the behavior of the ObjectMapper on read
         self.nwbfile._in_construct_mode = True
         with self.assertWarnsWith(warn_type=UserWarning, exc_msg=msg):
             modules = self.nwbfile.modules['test_mod']

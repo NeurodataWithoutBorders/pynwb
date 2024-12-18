@@ -1053,6 +1053,8 @@ class NWBFile(MultiContainerInterface, HERDManager):
         if notes is not None or table_description != '':
             warn(('Use of the `notes` or `table_description` argument is deprecated. '
                   'Use the `description` argument instead.'), DeprecationWarning)
+            if description is not None:
+                raise ValueError('Cannot call add_scratch with (notes or table_description) and description')
 
         if isinstance(data, (str, int, float, bytes, np.ndarray, list, tuple, pd.DataFrame)):
             if name is None:
