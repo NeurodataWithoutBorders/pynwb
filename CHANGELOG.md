@@ -2,6 +2,11 @@
 
 ## PyNWB 3.0.0 (Upcoming)
 
+### Deprecations
+- The following deprecated classes will now raise errors when creating new instances of these classes: ClusteringWaveforms, Clustering, SweepTable. Reading files using these data types will continue to be supported.
+- The following methods and arguments have been deprecated: ProcessingModule.add_container, ProcessingModule.get_container, ProcessingModule.add_data_interface, ProcessingModule.get_data_interface, ScratchData.notes, NWBFile.ic_electrodes, NWBFile.ec_electrodes, NWBFile.modules, ImageSeries.bits_per_pixel, ImageSeries.format,  ImagingPlane.manifold, ImagingPlane.conversion, IndexSeries.unit, IndexSeries.indexed_timeseries
+- The following deprecated methods have been removed: NWBFile.add_ic_electrode, NWBFile.create_ic_electrode, NWBFile.get_ic_electrode, pynwb._get_resources
+
 ### Enhancements and minor changes
 - Added support for NWB schema 2.8.0. @rly [#2001](https://github.com/NeurodataWithoutBorders/pynwb/pull/2001)
   - Removed `SpatialSeries.bounds` field that was not functional. This will be fixed in a future release. @rly [#1907](https://github.com/NeurodataWithoutBorders/pynwb/pull/1907), [#1996](https://github.com/NeurodataWithoutBorders/pynwb/pull/1996)
