@@ -28,6 +28,17 @@ class TestScratchData(TestCase):
         self.assertListEqual(sd.data, [1, 2, 3, 4])
         self.assertEqual(sd.description, 'test scratch')
 
+    def test_scratch_notes_deprecation(self):
+        msg = "The `notes` argument of ScratchData.__init__ has been deprecated. Use description instead."
+        with self.assertRaisesWith(ValueError, msg):
+            ScratchData(name='test', data=[1, 2, 3, 4, 5], notes='test notes')
+
+        # create object in construct mode, modelling the behavior of the ObjectMapper on read 
+        data = ScratchData.__new__(ScratchData, in_construct_mode=True)
+        with self.assertWarnsWith(UserWarning, msg):
+            data.__init__(name='test', data=[1, 2, 3, 4, 5], notes='test notes')
+        self.assertEqual(data.description, 'test notes')
+
     def test_add_scratch_int(self):
         ret = self.nwbfile.add_scratch(2, name='test', description='test data')
         self.assertIsInstance(ret, ScratchData)
@@ -106,6 +117,22 @@ class TestScratchData(TestCase):
         self.nwbfile.add_scratch(data)
         self.assertIs(self.nwbfile.get_scratch('test', convert=False), data)
         self.assertIs(self.nwbfile.scratch['test'], data)
+    
+    def test_add_scratch_notes_deprecation(self):
+        msg =  ("Use of the `notes` or `table_description` argument is deprecated. "
+                "Use the `description` argument instead.")
+        with self.assertWarnsWith(DeprecationWarning, msg):
+            self.nwbfile.add_scratch(name='test', data=[1, 2, 3, 4, 5], notes='test notes')
+        self.assertEqual(self.nwbfile.scratch['test'].description, 'test notes')    
+
+    def test_add_scratch_table_description_deprecation(self):
+        msg =  ("Use of the `notes` or `table_description` argument is deprecated. "
+                "Use the `description` argument instead.")
+        df = pd.DataFrame(data={'col1': [1, 2, 3, 4], 'col2': ['a', 'b', 'c', 'd']})
+        with self.assertWarnsWith(DeprecationWarning, msg):
+            self.nwbfile.add_scratch(name='test', data=df,
+                                     table_description='test table_description')
+        self.assertEqual(self.nwbfile.scratch['test'].description, 'test table_description')    
 
     def test_get_scratch_list_convert_false(self):
         self.nwbfile.add_scratch([1, 2, 3, 4], name='test', description='test description')
