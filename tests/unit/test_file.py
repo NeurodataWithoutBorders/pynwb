@@ -518,6 +518,33 @@ Fields:
                                related_publications=('pub1', 'pub2'))
         self.assertTupleEqual(self.nwbfile.related_publications, ('pub1', 'pub2'))
 
+    def test_ec_electrodes_deprecation(self):
+        nwbfile = NWBFile('a', 'b', datetime.now(tzlocal()))
+        device = nwbfile.create_device('a')
+        elecgrp = nwbfile.create_electrode_group('name', 'desc', device=device, location='a')
+        nwbfile.add_electrode(location='loc1', group=elecgrp, id=0)
+
+        # test that NWBFile.ec_electrodes property warns or errors
+        msg = "NWBFile.ec_electrodes is deprecated. Use NWBFile.electrodes instead."
+        with self.assertRaisesWith(ValueError, msg):
+            nwbfile.ec_electrodes
+
+        nwbfile._in_construct_mode = True
+        with self.assertWarnsWith(warn_type=UserWarning, exc_msg=msg):
+            nwbfile.ec_electrodes
+        self.assertEqual(nwbfile.ec_electrodes.location[0], 'loc1')
+        nwbfile._in_construct_mode = False
+
+        # test that NWBFile.ec_electrode_groups warns or errors
+        msg = "NWBFile.ec_electrode_groups is deprecated. Use NWBFile.electrode_groups instead."
+        with self.assertRaisesWith(ValueError, msg):
+            nwbfile.ec_electrode_groups
+
+        nwbfile._in_construct_mode = True
+        with self.assertWarnsWith(warn_type=UserWarning, exc_msg=msg):
+            nwbfile.ec_electrode_groups
+        self.assertEqual(nwbfile.ec_electrode_groups['name'].description, 'desc')
+        nwbfile._in_construct_mode = False
 
 class SubjectTest(TestCase):
     def setUp(self):

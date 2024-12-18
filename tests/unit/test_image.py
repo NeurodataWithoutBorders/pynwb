@@ -314,6 +314,22 @@ class ImageSeriesConstructor(TestCase):
                 rate=0.2,
             )
 
+    def test_bits_per_pixel_deprecation(self):
+        msg = "bits_per_pixel is deprecated"
+        kwargs = dict(name='test_iS',
+                unit='unit',
+                external_file=['external_file'],
+                starting_frame=[0],
+                format='external',
+                timestamps=[1., 2., 3.],
+                bits_per_pixel=8)
+        with self.assertRaisesWith(ValueError, msg):
+            ImageSeries(**kwargs)
+
+        iS = ImageSeries.__new__(ImageSeries, in_construct_mode=True)
+        with self.assertWarnsWith(UserWarning, msg):
+            iS.__init__(**kwargs)
+
 
 class IndexSeriesConstructor(TestCase):
 
@@ -366,7 +382,8 @@ class IndexSeriesConstructor(TestCase):
             unit='unit',
             timestamps=[0.1, 0.2, 0.3]
         )
-        msg = ("The indexed_timeseries field of IndexSeries is deprecated. Use the indexed_images field instead.")
+        msg = ("The indexed_timeseries field of IndexSeries is deprecated. "
+               "Use the indexed_images field instead.")
         kwargs = dict(name='test_iS',
                 data=[1, 2, 3],
                 unit='N/A',
@@ -383,6 +400,12 @@ class IndexSeriesConstructor(TestCase):
             iS.__init__(**kwargs)
 
         self.assertIs(iS.indexed_timeseries, ts)
+
+    def test_init_no_indexed_ts_or_timeseries(self):
+        msg = ("Either indexed_timeseries or indexed_images "
+               "must be provided when creating an IndexSeries.")
+        with self.assertRaisesWith(ValueError, msg):
+            IndexSeries(name='test_iS', data=[1, 2, 3], unit='N/A', timestamps=[0.1, 0.2, 0.3])
 
 
 class ImageMaskSeriesConstructor(TestCase):

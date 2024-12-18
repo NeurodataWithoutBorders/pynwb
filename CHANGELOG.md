@@ -4,7 +4,7 @@
 
 ### Deprecations
 - The following deprecated classes will now raise errors when creating new instances of these classes: ClusteringWaveforms, Clustering, SweepTable. Reading files using these data types will continue to be supported.
-- The following methods and arguments have been deprecated: ProcessingModule.add_container, ProcessingModule.get_container, ProcessingModule.add_data_interface, ProcessingModule.get_data_interface, ScratchData.notes, NWBFile.ic_electrodes, NWBFile.ec_electrodes, NWBFile.modules, ImageSeries.bits_per_pixel, ImageSeries.format,  ImagingPlane.manifold, ImagingPlane.conversion, IndexSeries.unit, IndexSeries.indexed_timeseries
+- The following methods and arguments have been deprecated: ProcessingModule.add_container, ProcessingModule.get_container, ProcessingModule.add_data_interface, ProcessingModule.get_data_interface, ScratchData.notes, NWBFile.ic_electrodes, NWBFile.ec_electrodes, NWBFile.icephys_filtering, NWBFile.modules, ImageSeries.bits_per_pixel, ImageSeries.format, ImagingPlane.manifold, ImagingPlane.conversion, IndexSeries.unit, IndexSeries.indexed_timeseries
 - The following deprecated methods have been removed: NWBFile.add_ic_electrode, NWBFile.create_ic_electrode, NWBFile.get_ic_electrode, pynwb._get_resources
 
 ### Enhancements and minor changes
