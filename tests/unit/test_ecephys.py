@@ -279,8 +279,19 @@ class ClusteringConstructor(TestCase):
         num = [3, 4]
         peak_over_rms = [5.3, 6.3]
 
-        with self.assertWarnsWith(DeprecationWarning, 'use pynwb.misc.Units or NWBFile.units instead'):
-            cc = Clustering(description='description', num=num, peak_over_rms=peak_over_rms, times=times)
+        error_msg = "The Clustering neurodata type is deprecated. Use pynwb.misc.Units or NWBFile.units instead"
+        kwargs = dict(description='description', 
+                      num=num,
+                      peak_over_rms=peak_over_rms,
+                      times=times)
+        with self.assertRaisesWith(ValueError, error_msg):
+            cc = Clustering(**kwargs)
+        
+        # create object in construct mode, modelling the behavior of the ObjectMapper on read 
+        cc = Clustering.__new__(Clustering, in_construct_mode=True)
+        with self.assertWarnsWith(warn_type=UserWarning, exc_msg=error_msg):
+            cc.__init__(**kwargs)
+
         self.assertEqual(cc.description, 'description')
         self.assertEqual(cc.num, num)
         self.assertEqual(cc.peak_over_rms, peak_over_rms)
@@ -293,19 +304,30 @@ class ClusterWaveformsConstructor(TestCase):
         times = [1.3, 2.3]
         num = [3, 4]
         peak_over_rms = [5.3, 6.3]
-        with self.assertWarnsWith(DeprecationWarning, 'use pynwb.misc.Units or NWBFile.units instead'):
-            cc = Clustering(description='description', num=num, peak_over_rms=peak_over_rms, times=times)
+
+        # create object in construct mode, modelling the behavior of the ObjectMapper on read 
+        error_msg = "The Clustering neurodata type is deprecated. Use pynwb.misc.Units or NWBFile.units instead"
+        cc = Clustering.__new__(Clustering,
+                                        container_source=None,
+                                        parent=None,
+                                        in_construct_mode=True)
+        with self.assertWarnsWith(warn_type=UserWarning, exc_msg=error_msg):
+            cc.__init__('description', num, peak_over_rms, times)
 
         means = [[7.3, 7.3]]
         stdevs = [[8.3, 8.3]]
+        error_msg = "The ClusterWaveforms neurodata type is deprecated. Use pynwb.misc.Units or NWBFile.units instead"
+        with self.assertRaisesWith(ValueError, error_msg):
+            cw = ClusterWaveforms(cc, 'filtering', means, stdevs)
 
-        with self.assertWarnsWith(DeprecationWarning, 'use pynwb.misc.Units or NWBFile.units instead'):
-            cw = ClusterWaveforms(
-                clustering_interface=cc,
-                waveform_filtering='filtering',
-                waveform_mean=means,
-                waveform_sd=stdevs
-            )
+        # create object in construct mode, modelling the behavior of the ObjectMapper on read 
+        cw = ClusterWaveforms.__new__(ClusterWaveforms,
+                                        container_source=None,
+                                        parent=None,
+                                        in_construct_mode=True)
+        with self.assertWarnsWith(warn_type=UserWarning, exc_msg=error_msg):
+            cw.__init__(cc, 'filtering', means, stdevs)
+
         self.assertEqual(cw.clustering_interface, cc)
         self.assertEqual(cw.waveform_filtering, 'filtering')
         self.assertEqual(cw.waveform_mean, means)

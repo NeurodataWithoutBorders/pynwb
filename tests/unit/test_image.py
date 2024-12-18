@@ -243,17 +243,22 @@ class ImageSeriesConstructor(TestCase):
         """Test that format is set to 'external' if not provided, when external_file is provided."""
         msg = (
             "ImageSeries 'test_iS': The value for 'format' has been changed to 'external'. "
-            "Setting a default value for 'format' is deprecated and will be changed to "
-            "raising a ValueError in the next major release."
+            "Setting a default value for 'format' is deprecated."
         )
-        with self.assertWarnsWith(DeprecationWarning, msg):
-            iS = ImageSeries(
-                name="test_iS",
+        kwargs = dict(name="test_iS",
                 external_file=["external_file", "external_file2"],
                 unit="n.a.",
                 starting_frame=[0, 10],
-                rate=0.2,
-            )
+                rate=0.2,)
+        
+        # create object with deprecated argument
+        with self.assertRaisesWith(ValueError, msg):
+            ImageSeries(**kwargs)
+
+        # create object in construct mode, modelling the behavior of the ObjectMapper on read
+        iS = ImageSeries.__new__(ImageSeries, in_construct_mode=True)
+        with self.assertWarnsWith(warn_type=UserWarning, exc_msg=msg):
+            iS.__init__(**kwargs)
         self.assertEqual(iS.format, "external")
 
     def test_external_file_with_correct_format(self):
@@ -329,23 +334,29 @@ class IndexSeriesConstructor(TestCase):
         self.assertEqual(iS.unit, 'N/A')
         self.assertIs(iS.indexed_images, images)
 
-    def test_init_bad_unit(self):
+    def test_init_bad_unit(self):        
         ts = TimeSeries(
             name='test_ts',
             data=[1, 2, 3],
             unit='unit',
             timestamps=[0.1, 0.2, 0.3]
         )
-        msg = ("The 'unit' field of IndexSeries is fixed to the value 'N/A' starting in NWB 2.5. Passing "
-               "a different value for 'unit' will raise an error in PyNWB 3.0.")
-        with self.assertWarnsWith(PendingDeprecationWarning, msg):
-            iS = IndexSeries(
-                name='test_iS',
+        msg = ("The 'unit' field of IndexSeries is fixed to the value 'N/A'.")
+        kwargs = dict(name='test_iS',
                 data=[1, 2, 3],
                 unit='na',
                 indexed_timeseries=ts,
-                timestamps=[0.1, 0.2, 0.3]
-            )
+                timestamps=[0.1, 0.2, 0.3])
+
+        # create object with deprecated argument
+        with self.assertRaisesWith(ValueError, msg):
+            IndexSeries(**kwargs)
+
+        # create object in construct mode, modelling the behavior of the ObjectMapper on read
+        iS = IndexSeries.__new__(IndexSeries, in_construct_mode=True)
+        with self.assertWarnsWith(warn_type=UserWarning, exc_msg=msg):
+            iS.__init__(**kwargs)
+
         self.assertEqual(iS.unit, 'N/A')
 
     def test_init_indexed_ts(self):
@@ -355,16 +366,22 @@ class IndexSeriesConstructor(TestCase):
             unit='unit',
             timestamps=[0.1, 0.2, 0.3]
         )
-        msg = ("The indexed_timeseries field of IndexSeries is discouraged and will be deprecated in "
-               "a future version of NWB. Use the indexed_images field instead.")
-        with self.assertWarnsWith(PendingDeprecationWarning, msg):
-            iS = IndexSeries(
-                name='test_iS',
+        msg = ("The indexed_timeseries field of IndexSeries is deprecated. Use the indexed_images field instead.")
+        kwargs = dict(name='test_iS',
                 data=[1, 2, 3],
                 unit='N/A',
                 indexed_timeseries=ts,
-                timestamps=[0.1, 0.2, 0.3]
-            )
+                timestamps=[0.1, 0.2, 0.3])
+        
+        # create object with deprecated argument
+        with self.assertRaisesWith(ValueError, msg):
+            IndexSeries(**kwargs)
+
+        # create object in construct mode, modelling the behavior of the ObjectMapper on read
+        iS = IndexSeries.__new__(IndexSeries, in_construct_mode=True)
+        with self.assertWarnsWith(warn_type=UserWarning, exc_msg=msg):
+            iS.__init__(**kwargs)
+
         self.assertIs(iS.indexed_timeseries, ts)
 
 

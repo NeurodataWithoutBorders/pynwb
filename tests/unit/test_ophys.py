@@ -131,11 +131,8 @@ class ImagingPlaneConstructor(TestCase):
 
     def test_manifold_deprecated(self):
         oc, device = self.set_up_dependencies()
-
         msg = "The 'manifold' argument is deprecated in favor of 'origin_coords' and 'grid_spacing'."
-        with self.assertWarnsWith(DeprecationWarning, msg):
-            ImagingPlane(
-                name='test_imaging_plane',
+        kwargs = dict(name='test_imaging_plane',
                 optical_channel=oc,
                 description='description',
                 device=device,
@@ -143,16 +140,21 @@ class ImagingPlaneConstructor(TestCase):
                 imaging_rate=300.,
                 indicator='indicator',
                 location='location',
-                manifold=(1, 1, (2, 2, 2))
-            )
+                manifold=(1, 1, (2, 2, 2)))
+        
+        # create object with deprecated argument
+        with self.assertRaisesWith(ValueError, msg):
+            ImagingPlane(**kwargs)
+
+        # create object in construct mode, modelling the behavior of the ObjectMapper on read
+        obj = ImagingPlane.__new__(ImagingPlane, in_construct_mode=True)
+        with self.assertWarnsWith(warn_type=UserWarning, exc_msg=msg):
+            obj.__init__(**kwargs)
 
     def test_conversion_deprecated(self):
         oc, device = self.set_up_dependencies()
-
         msg = "The 'conversion' argument is deprecated in favor of 'origin_coords' and 'grid_spacing'."
-        with self.assertWarnsWith(DeprecationWarning, msg):
-            ImagingPlane(
-                name='test_imaging_plane',
+        kwargs = dict(name='test_imaging_plane',
                 optical_channel=oc,
                 description='description',
                 device=device,
@@ -160,16 +162,21 @@ class ImagingPlaneConstructor(TestCase):
                 imaging_rate=300.,
                 indicator='indicator',
                 location='location',
-                conversion=2.0
-            )
+                conversion=2.0)
+
+        # create object with deprecated argument
+        with self.assertRaisesWith(ValueError, msg):
+            ImagingPlane(**kwargs)
+
+        # create object in construct mode, modelling the behavior of the ObjectMapper on read
+        obj = ImagingPlane.__new__(ImagingPlane, in_construct_mode=True)
+        with self.assertWarnsWith(warn_type=UserWarning, exc_msg=msg):
+            obj.__init__(**kwargs)
 
     def test_unit_deprecated(self):
         oc, device = self.set_up_dependencies()
-
         msg = "The 'unit' argument is deprecated in favor of 'origin_coords_unit' and 'grid_spacing_unit'."
-        with self.assertWarnsWith(DeprecationWarning, msg):
-            ImagingPlane(
-                name='test_imaging_plane',
+        kwargs = dict(name='test_imaging_plane',
                 optical_channel=oc,
                 description='description',
                 device=device,
@@ -178,8 +185,16 @@ class ImagingPlaneConstructor(TestCase):
                 indicator='indicator',
                 location='location',
                 reference_frame='reference_frame',
-                unit='my_unit'
-            )
+                unit='my_unit')
+
+        # create object with deprecated argument
+        with self.assertRaisesWith(ValueError, msg):
+            ImagingPlane(**kwargs)
+
+        # create object in construct mode, modelling the behavior of the ObjectMapper on read
+        obj = ImagingPlane.__new__(ImagingPlane, in_construct_mode=True)
+        with self.assertWarnsWith(warn_type=UserWarning, exc_msg=msg):
+            obj.__init__(**kwargs)
 
 
 class OnePhotonSeriesConstructor(TestCase):

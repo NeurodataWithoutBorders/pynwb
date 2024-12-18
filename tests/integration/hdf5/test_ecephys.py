@@ -169,18 +169,33 @@ class TestClusteringIO(AcquisitionH5IOMixin, TestCase):
 
     def setUpContainer(self):
         """ Return a test Clustering to read/write """
-        with self.assertWarnsWith(DeprecationWarning, 'use pynwb.misc.Units or NWBFile.units instead'):
-            return Clustering("A fake Clustering interface",
-                              [0, 1, 2, 0, 1, 2], [100., 101., 102.], [float(i) for i in range(10, 61, 10)])
+        # raise error on write
+        error_msg = "The Clustering neurodata type is deprecated. Use pynwb.misc.Units or NWBFile.units instead"
+        kwargs = dict(description="A fake Clustering interface",
+                      num=[0, 1, 2, 0, 1, 2], 
+                      peak_over_rms=[100., 101., 102.], 
+                      times=[float(i) for i in range(10, 61, 10)])
+        
+        # create object with deprecated argument
+        with self.assertRaisesWith(ValueError, error_msg):
+            Clustering(**kwargs)
+
+        # create object in construct mode, modelling the behavior of the ObjectMapper on read
+        obj = Clustering.__new__(Clustering, in_construct_mode=True)
+        with self.assertWarnsWith(warn_type=UserWarning, exc_msg=error_msg):
+            obj.__init__(**kwargs)
+        
+        return obj
 
     def roundtripContainer(self, cache_spec=False):
         # catch the DeprecationWarning raised when reading the Clustering object from file
-        with self.assertWarnsWith(DeprecationWarning, 'use pynwb.misc.Units or NWBFile.units instead'):
+        error_msg = "The Clustering neurodata type is deprecated. Use pynwb.misc.Units or NWBFile.units instead"
+        with self.assertWarnsWith(UserWarning, error_msg):
             return super().roundtripContainer(cache_spec)
 
     def roundtripExportContainer(self, cache_spec=False):
-        # catch the DeprecationWarning raised when reading the Clustering object from file
-        with self.assertWarnsWith(DeprecationWarning, 'use pynwb.misc.Units or NWBFile.units instead'):
+        error_msg = "The Clustering neurodata type is deprecated. Use pynwb.misc.Units or NWBFile.units instead"
+        with self.assertWarnsWith(UserWarning, error_msg):
             return super().roundtripExportContainer(cache_spec)
 
 
@@ -220,12 +235,28 @@ class ClusterWaveformsConstructor(AcquisitionH5IOMixin, TestCase):
         times = [1.3, 2.3]
         num = [3, 4]
         peak_over_rms = [5.3, 6.3]
-        with self.assertWarnsWith(DeprecationWarning, 'use pynwb.misc.Units or NWBFile.units instead'):
-            self.clustering = Clustering('description', num, peak_over_rms, times)
+
+        # raise error on write
+        msg = "The Clustering neurodata type is deprecated. Use pynwb.misc.Units or NWBFile.units instead"
+        clust = Clustering.__new__(Clustering, in_construct_mode=True)
+        with self.assertWarnsWith(warn_type=UserWarning, exc_msg=msg):
+            clust.__init__('description', num, peak_over_rms, times)
+            self.clustering = clust
+
         means = [[7.3, 7.3]]
         stdevs = [[8.3, 8.3]]
-        with self.assertWarnsWith(DeprecationWarning, 'use pynwb.misc.Units or NWBFile.units instead'):
+        msg = "The ClusterWaveforms neurodata type is deprecated. Use pynwb.misc.Units or NWBFile.units instead"
+        with self.assertRaisesWith(ValueError, msg):
             cw = ClusterWaveforms(self.clustering, 'filtering', means, stdevs)
+
+        # create object in construct mode, modelling the behavior of the ObjectMapper on read 
+        cw = ClusterWaveforms.__new__(ClusterWaveforms,
+                                        container_source=None,
+                                        parent=None,
+                                        in_construct_mode=True)
+        with self.assertWarnsWith(warn_type=UserWarning, exc_msg=msg):
+            cw.__init__(self.clustering, 'filtering', means, stdevs)
+
         return cw
 
     def addContainer(self, nwbfile):
@@ -235,12 +266,14 @@ class ClusterWaveformsConstructor(AcquisitionH5IOMixin, TestCase):
 
     def roundtripContainer(self, cache_spec=False):
         # catch the DeprecationWarning raised when reading the Clustering object from file
-        with self.assertWarnsWith(DeprecationWarning, 'use pynwb.misc.Units or NWBFile.units instead'):
+        msg = "The ClusterWaveforms neurodata type is deprecated. Use pynwb.misc.Units or NWBFile.units instead"
+        with self.assertWarnsWith(UserWarning, msg):
             return super().roundtripContainer(cache_spec)
 
     def roundtripExportContainer(self, cache_spec=False):
         # catch the DeprecationWarning raised when reading the Clustering object from file
-        with self.assertWarnsWith(DeprecationWarning, 'use pynwb.misc.Units or NWBFile.units instead'):
+        msg = "The ClusterWaveforms neurodata type is deprecated. Use pynwb.misc.Units or NWBFile.units instead"
+        with self.assertWarnsWith(UserWarning, msg):
             return super().roundtripExportContainer(cache_spec)
 
 
