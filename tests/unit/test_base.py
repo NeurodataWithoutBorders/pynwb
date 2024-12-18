@@ -45,15 +45,15 @@ class TestProcessingModule(TestCase):
 
     def test_deprecated_add_data_interface(self):
         ts = self._create_time_series()
-        with self.assertWarnsWith(
-            DeprecationWarning, "add_data_interface is deprecated. Use add instead."
+        with self.assertWarnsWith(warn_type=DeprecationWarning,
+                                  exc_msg="add_data_interface is deprecated. Use add instead."
         ):
             self.pm.add_data_interface(ts)
 
     def test_deprecated_add_container(self):
         ts = self._create_time_series()
-        with self.assertWarnsWith(
-            DeprecationWarning, "add_container is deprecated. Use add instead."
+        with self.assertWarnsWith(warn_type=DeprecationWarning, 
+                                  exc_msg="add_container is deprecated. Use add instead."
         ):
             self.pm.add_container(ts)
 
@@ -68,18 +68,20 @@ class TestProcessingModule(TestCase):
     def test_deprecated_get_data_interface(self):
         ts = self._create_time_series()
         self.pm.add(ts)
-        with self.assertWarnsWith(
-            DeprecationWarning, "get_data_interface is deprecated. Use get instead."
+        with self.assertWarnsWith(warn_type=DeprecationWarning, 
+                                  exc_msg="get_data_interface is deprecated. Use get instead."
         ):
             tmp = self.pm.get_data_interface("test_ts")
+            self.assertIs(tmp, ts)
 
     def test_deprecated_get_container(self):
         ts = self._create_time_series()
         self.pm.add(ts)
-        with self.assertWarnsWith(
-            DeprecationWarning, "get_container is deprecated. Use get instead."
+        with self.assertWarnsWith(warn_type=DeprecationWarning, 
+                                  exc_msg="get_container is deprecated. Use get instead."
         ):
             tmp = self.pm.get_container("test_ts")
+            self.assertIs(tmp, ts)
 
     def test_getitem(self):
         """Test adding a data interface to a ProcessingModule and retrieving it using __getitem__(...)."""

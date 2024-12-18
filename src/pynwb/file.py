@@ -384,7 +384,8 @@ class NWBFile(MultiContainerInterface, HERDManager):
              'doc': 'DEPRECATED use icephys_electrodes parameter instead. '
                     'IntracellularElectrodes that belong to this NWBFile', 'default': None},
             {'name': 'sweep_table', 'type': SweepTable,
-             'doc': '[DEPRECATED] Use IntracellularRecordingsTable instead. The SweepTable that belong to this NWBFile', 'default': None},
+             'doc': '[DEPRECATED] Use IntracellularRecordingsTable instead. '
+                    'The SweepTable that belong to this NWBFile', 'default': None},
             {'name': 'imaging_planes', 'type': (list, tuple),
              'doc': 'ImagingPlanes that belong to this NWBFile', 'default': None},
             {'name': 'ogen_sites', 'type': (list, tuple),
@@ -567,17 +568,20 @@ class NWBFile(MultiContainerInterface, HERDManager):
 
     @property
     def ec_electrode_groups(self):
-        self._error_on_new_warn_on_construct(error_msg="NWBFile.ec_electrode_groups is deprecatd. Use NWBFile.electrode_groups instead.")
+        self._error_on_new_warn_on_construct(error_msg=("NWBFile.ec_electrode_groups is deprecated. "
+                                                        "Use NWBFile.electrode_groups instead."))
         return self.electrode_groups
 
     @property
     def ec_electrodes(self):
-        self._error_on_new_warn_on_construct(error_msg="NWBFile.ec_electrodes is deprecated. Use NWBFile.electrodes instead.")
+        self._error_on_new_warn_on_construct(error_msg=("NWBFile.ec_electrodes is deprecated. "
+                                                        "Use NWBFile.electrodes instead."))
         return self.electrodes
 
     @property
     def ic_electrodes(self):
-        self._error_on_new_warn_on_construct(error_msg="NWBFile.ic_electrodes is deprecated. Use NWBFile.icephys_electrodes instead.")
+        self._error_on_new_warn_on_construct(error_msg=("NWBFile.ic_electrodes is deprecated. "
+                                                        "Use NWBFile.icephys_electrodes instead."))
         return self.icephys_electrodes
 
     @property
@@ -1029,11 +1033,12 @@ class NWBFile(MultiContainerInterface, HERDManager):
              'doc': 'The name of the data. Required only when passing in a scalar, numpy.ndarray, list, or tuple',
              'default': None},
             {'name': 'notes', 'type': str,
-             'doc': ('Notes to add to the data. Only used when passing in numpy.ndarray, list, or tuple. This '
-                     'argument is not recommended. Use the `description` argument instead.'),
+             'doc': ('[DEPRECATED] Notes to add to the data. '
+                     'Only used when passing in numpy.ndarray, list, or tuple. This argument is not recommended. '
+                     'Use the `description` argument instead.'),
              'default': None},
             {'name': 'table_description', 'type': str,
-             'doc': ('Description for the internal DynamicTable used to store a pandas.DataFrame. This '
+             'doc': ('[DEPRECATED] Description for the internal DynamicTable used to store a pandas.DataFrame. This '
                      'argument is not recommended. Use the `description` argument instead.'),
              'default': ''},
             {'name': 'description', 'type': str,
@@ -1046,8 +1051,8 @@ class NWBFile(MultiContainerInterface, HERDManager):
         data, name, notes, table_description, description = getargs('data', 'name', 'notes', 'table_description',
                                                                     'description', kwargs)
         if notes is not None or table_description != '':
-            raise DeprecationWarning('Use of the `notes` or `table_description` argument is deprecated. '
-                                     'Use the `description` argument instead.')
+            warn(('Use of the `notes` or `table_description` argument is deprecated. '
+                  'Use the `description` argument instead.'), DeprecationWarning)
 
         if isinstance(data, (str, int, float, bytes, np.ndarray, list, tuple, pd.DataFrame)):
             if name is None:

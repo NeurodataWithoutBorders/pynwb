@@ -251,7 +251,8 @@ class IndexSeries(TimeSeries):
     def __init__(self, **kwargs):
         indexed_timeseries, indexed_images = popargs('indexed_timeseries', 'indexed_images', kwargs)
         if kwargs['unit'] and kwargs['unit'] != 'N/A':
-            self._error_on_new_warn_on_construct(error_msg="The 'unit' field of IndexSeries is fixed to the value 'N/A'.")
+            self._error_on_new_warn_on_construct(error_msg=("The 'unit' field of IndexSeries is "
+                                                            "fixed to the value 'N/A'."))
         if not indexed_timeseries and not indexed_images:
             msg = "Either indexed_timeseries or indexed_images must be provided when creating an IndexSeries."
             raise ValueError(msg)

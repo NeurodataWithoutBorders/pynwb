@@ -6,7 +6,6 @@ from pynwb.icephys import (IntracellularElectrode, PatchClampSeries, CurrentClam
                            VoltageClampSeries, IZeroClampSeries)
 from pynwb.device import Device
 from pynwb.testing import NWBH5IOMixin, AcquisitionH5IOMixin, TestCase
-import warnings
 
 
 class TestIntracellularElectrode(NWBH5IOMixin, TestCase):
@@ -168,8 +167,6 @@ class TestSweepTableRoundTripEasy(NWBH5IOMixin, TestCase):
         """
         Add the test SweepTable, PatchClampSeries, IntracellularElectrode, and Device to the given NWBFile
         """
-        msg = ("SweepTable is deprecated. Use the IntracellularRecordingsTable instead. "
-               "See also the NWBFile.add_intracellular_recordings function.")
         # NOTE - if the SweepTable creation warning has already been bypassed so that self.container is an
         # instance of SweepTable, then adding sweep_table to the NWBFile in this way will not trigger an
         # error
@@ -235,7 +232,7 @@ class TestSweepTableRoundTripComplicated(NWBH5IOMixin, TestCase):
         sweeptable = SweepTable.__new__(SweepTable)
         sweeptable._in_construct_mode = True
         msg = ("SweepTable is deprecated. Use the IntracellularRecordingsTable instead. "
-                     "See also the NWBFile.add_intracellular_recordings function.")
+               "See also the NWBFile.add_intracellular_recordings function.")
         with self.assertWarnsWith(warn_type=UserWarning, exc_msg=msg):
             sweeptable.__init__(name='sweep_table')
             
