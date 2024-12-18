@@ -208,6 +208,7 @@ lfp_electrical_series = ElectricalSeries(
     name="ElectricalSeries",
     description="LFP data",
     data=lfp_data,
+    filtering='Low-pass filter at 300 Hz',
     electrodes=all_table_region,
     starting_time=0.0,
     rate=200.0,
@@ -237,8 +238,8 @@ lfp_electrical_series = ElectricalSeries(
 lfp = LFP(electrical_series=lfp_electrical_series)
 
 ####################
-# Unlike the raw data, which we put into the acquisition group of the :py:class:`~pynwb.file.NWBFile`,
-# LFP data is typically considered processed data because the raw data was filtered and downsampled to generate the LFP.
+# LFP refers to data that has been low-pass filtered, typically below 300 Hz. This data may also be downsampled. 
+# Because it is filtered and potentially resampled, it is categorized as processed data.
 #
 # Create a processing module named ``"ecephys"`` and add the :py:class:`~pynwb.ecephys.LFP` object to it.
 # This is analogous to how we can store the :py:class:`~pynwb.behavior.Position` object in a processing module
@@ -250,9 +251,9 @@ ecephys_module = nwbfile.create_processing_module(
 ecephys_module.add(lfp)
 
 #######################
-# If the derived data is filtered but not downsampled, you can store the data in an
-# :py:class:`~pynwb.ecephys.ElectricalSeries` object in a :py:class:`~pynwb.ecephys.FilteredEphys` object
-# instead of a :py:class:`~pynwb.ecephys.LFP` object.
+# If your data is filtered for frequency ranges other than LFP — such as Gamma or Theta — you should store it in an
+# :py:class:`~pynwb.ecephys.ElectricalSeries` and encapsulate it within a 
+# :py:class:`~pynwb.ecephys.FilteredEphys` object.
 
 from pynwb.ecephys import FilteredEphys
 
@@ -261,6 +262,7 @@ filtered_electrical_series = ElectricalSeries(
     name="FilteredElectricalSeries",
     description="Filtered data",
     data=filtered_data,
+    filtering='Band-pass filtered between 4 and 8 Hz',
     electrodes=all_table_region,
     starting_time=0.0,
     rate=200.0,
@@ -300,8 +302,6 @@ for band_name, band_limits in bands.items():
     decomp_series.add_band(
         band_name=band_name,
         band_limits=band_limits,
-        band_mean=np.nan,
-        band_stdev=np.nan,
     )
 
 ecephys_module.add(decomp_series)
@@ -355,7 +355,7 @@ nwbfile.units.to_dataframe()
 # unsorted spiking activity (e.g., multi-unit activity detected via threshold crossings during data acquisition).
 # This information can be stored using :py:class:`~pynwb.ecephys.SpikeEventSeries` objects. 
 
-spike_snippets = np.random.rand(20, 3, 40)  # 20 events, 3 channels, 40 samples per event
+spike_snippets = np.random.rand(40, 3, 30)  # 40 events, 3 channels, 30 samples per event
 shank0 = nwbfile.create_electrode_table_region(
     region=[0, 1, 2],
     description="shank0",
@@ -365,7 +365,7 @@ spike_events = SpikeEventSeries(
     name='SpikeEvents_Shank0',
     description="events detected with 100uV threshold",
     data=spike_snippets,
-    timestamps=np.arange(20),
+    timestamps=np.arange(40).astype(float),
     electrodes=shank0,
 )
 nwbfile.add_acquisition(spike_events)
