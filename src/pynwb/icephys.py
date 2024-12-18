@@ -338,9 +338,12 @@ class SweepTable(DynamicTable):
              'default': "A sweep table groups different PatchClampSeries together."},
             *get_docval(DynamicTable.__init__, 'id', 'columns', 'colnames'))
     def __init__(self, **kwargs):
-        self._error_on_new_warn_on_construct(error_msg='SweepTable is deprecated. Use the IntracellularRecordingsTable '
-                                                       'instead. See also the  NWBFile.add_intracellular_recordings '
-                                                       'function.')
+        error_msg=('SweepTable is deprecated. Use the IntracellularRecordingsTable instead. '
+                   'See also the NWBFile.add_intracellular_recordings function.')
+        if not self._in_construct_mode:
+            raise ValueError(error_msg)
+        warnings.warn(error_msg)
+
         super().__init__(**kwargs)
 
     @docval({'name': 'pcs', 'type': PatchClampSeries,

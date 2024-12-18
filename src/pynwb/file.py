@@ -384,7 +384,7 @@ class NWBFile(MultiContainerInterface, HERDManager):
              'doc': 'DEPRECATED use icephys_electrodes parameter instead. '
                     'IntracellularElectrodes that belong to this NWBFile', 'default': None},
             {'name': 'sweep_table', 'type': SweepTable,
-             'doc': 'the SweepTable that belong to this NWBFile', 'default': None},
+             'doc': '[DEPRECATED] Use IntracellularRecordingsTable instead. The SweepTable that belong to this NWBFile', 'default': None},
             {'name': 'imaging_planes', 'type': (list, tuple),
              'doc': 'ImagingPlanes that belong to this NWBFile', 'default': None},
             {'name': 'ogen_sites', 'type': (list, tuple),
@@ -496,6 +496,12 @@ class NWBFile(MultiContainerInterface, HERDManager):
             args_to_set['icephys_electrodes'] = ic_electrodes
         args_to_set.pop('ic_electrodes')  # do not set this arg
 
+        # backwards-compatibility for sweep table
+        if args_to_set['sweep_table'] is not None:
+            self._error_on_new_warn_on_construct(error_msg=("SweepTable is deprecated. Use the "
+                                                            "IntracellularRecordingsTable instead. See also the "
+                                                            "NWBFile.add_intracellular_recordings function."))
+
         # convert single experimenter to tuple
         experimenter = args_to_set['experimenter']
         if isinstance(experimenter, str):
@@ -581,8 +587,8 @@ class NWBFile(MultiContainerInterface, HERDManager):
     @icephys_filtering.setter
     def icephys_filtering(self, val):
         if val is not None:
-            self._error_on_new_warn_on_construct('Use of icephys_filtering is deprecated. '
-                                                 'Use the IntracellularElectrode.filtering field instead')
+            self._error_on_new_warn_on_construct("Use of icephys_filtering is deprecated. "
+                                                 "Use the IntracellularElectrode.filtering field instead")
             self.fields['icephys_filtering'] = val
 
     def __check_epochs(self):
@@ -806,7 +812,12 @@ class NWBFile(MultiContainerInterface, HERDManager):
         Create a SweepTable if not yet done.
         """
         if self.sweep_table is None:
-            self.sweep_table = SweepTable(name='sweep_table')
+            if self._in_construct_mode:
+                sweep_table = SweepTable.__new__(SweepTable, parent=self, in_construct_mode=True)
+                sweep_table.__init__(name='sweep_table')
+            else:
+                sweep_table = SweepTable(name='sweep_table')
+            self.sweep_table = sweep_table
 
     def _update_sweep_table(self, nwbdata):
         """
