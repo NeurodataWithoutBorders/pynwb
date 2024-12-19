@@ -19,13 +19,13 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { name: linux-python3.8-minimum      , test-tox-env: py38-minimum    , build-tox-env: build-py38-minimum   , python-ver: "3.8" , os: ubuntu-latest }
+          - { name: linux-python3.9-minimum      , test-tox-env: test-py39-minimum    , build-tox-env: build-py39-minimum   , python-ver: "3.9" , os: ubuntu-latest }
           # NOTE config below with "upload-wheels: true" specifies that wheels should be uploaded as an artifact
-          - { name: linux-python3.12-upgraded    , test-tox-env: py312-upgraded  , build-tox-env: build-py312-upgraded , python-ver: "3.12", os: ubuntu-latest , upload-wheels: true }
-          - { name: windows-python3.8-minimum    , test-tox-env: py38-minimum    , build-tox-env: build-py38-minimum   , python-ver: "3.8" , os: windows-latest }
-          - { name: windows-python3.12-upgraded  , test-tox-env: py312-upgraded  , build-tox-env: build-py312-upgraded , python-ver: "3.12", os: windows-latest }
-          # minimum versions of dependencies do not have wheels or cannot be built on macos-arm64
-          - { name: macos-python3.8-minimum      , test-tox-env: py38-minimum    , build-tox-env: build-py38-minimum   , python-ver: "3.8" , os: macos-13 }
+          - { name: linux-python3.13-upgraded    , test-tox-env: test-py313-upgraded  , build-tox-env: build-py313-upgraded , python-ver: "3.13", os: ubuntu-latest , upload-wheels: true }
+          - { name: windows-python3.9-minimum    , test-tox-env: test-py39-minimum    , build-tox-env: build-py39-minimum   , python-ver: "3.9" , os: windows-latest }
+          - { name: windows-python3.13-upgraded  , test-tox-env: test-py313-upgraded  , build-tox-env: build-py313-upgraded , python-ver: "3.13", os: windows-latest }
+          - { name: macos-python3.9-minimum      , test-tox-env: test-py39-minimum    , build-tox-env: build-py39-minimum   , python-ver: "3.9" , os: macos-13 }
+          - { name: macos-python3.13-upgraded    , test-tox-env: test-py313-upgraded  , build-tox-env: build-py313-upgraded , python-ver: "3.13" , os: macos-latest }
     steps:
       - name: Cancel non-latest runs
         uses: styfle/cancel-workflow-action@0.11.0
@@ -79,10 +79,10 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { name: linux-gallery-python3.8-minimum    , test-tox-env: gallery-py38-minimum  , python-ver: "3.8" , os: ubuntu-latest }
-          - { name: linux-gallery-python3.12-upgraded  , test-tox-env: gallery-py312-upgraded, python-ver: "3.12", os: ubuntu-latest }
-          - { name: windows-gallery-python3.8-minimum  , test-tox-env: gallery-py38-minimum  , python-ver: "3.8" , os: windows-latest }
-          - { name: windows-gallery-python3.12-upgraded, test-tox-env: gallery-py312-upgraded, python-ver: "3.12", os: windows-latest }
+          - { name: linux-gallery-python3.9-minimum    , test-tox-env: gallery-py39-minimum  , python-ver: "3.9" , os: ubuntu-latest }
+          - { name: linux-gallery-python3.13-upgraded  , test-tox-env: gallery-py313-upgraded, python-ver: "3.13", os: ubuntu-latest }
+          - { name: windows-gallery-python3.9-minimum  , test-tox-env: gallery-py39-minimum  , python-ver: "3.9" , os: windows-latest }
+          - { name: windows-gallery-python3.13-upgraded, test-tox-env: gallery-py313-upgraded, python-ver: "3.13", os: windows-latest }
     steps:
       - name: Cancel non-latest runs
         uses: styfle/cancel-workflow-action@0.11.0
@@ -120,8 +120,8 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { name: conda-linux-python3.8-minimum    , test-tox-env: py38-minimum    , build-tox-env: build-py38-minimum    , python-ver: "3.8" , os: ubuntu-latest }
-          - { name: conda-linux-python3.12-upgraded  , test-tox-env: py312-upgraded  , build-tox-env: build-py312-upgraded  , python-ver: "3.12", os: ubuntu-latest }
+          - { name: conda-linux-python3.9-minimum    , test-tox-env: test-py39-minimum    , build-tox-env: build-py39-minimum    , python-ver: "3.9" , os: ubuntu-latest }
+          - { name: conda-linux-python3.13-upgraded  , test-tox-env: test-py313-upgraded  , build-tox-env: build-py313-upgraded  , python-ver: "3.13", os: ubuntu-latest }
     steps:
       - name: Cancel non-latest runs
         uses: styfle/cancel-workflow-action@0.11.0
@@ -175,7 +175,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { name: conda-linux-python3.12-ros3  , python-ver: "3.12", os: ubuntu-latest }
+          - { name: conda-linux-python3.13-ros3  , python-ver: "3.13", os: ubuntu-latest }
     steps:
       - name: Cancel non-latest runs
         uses: styfle/cancel-workflow-action@0.11.0
@@ -220,7 +220,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { name: conda-linux-gallery-python3.12-ros3  , python-ver: "3.12", os: ubuntu-latest }
+          - { name: conda-linux-gallery-python3.13-ros3  , python-ver: "3.13", os: ubuntu-latest }
     steps:
       - name: Cancel non-latest runs
         uses: styfle/cancel-workflow-action@0.11.0
@@ -280,7 +280,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: '3.13'
 
       - name: Download wheel and source distributions from artifact
         uses: actions/download-artifact@v4
