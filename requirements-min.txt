@@ -1,6 +1,6 @@
 # minimum versions of package dependencies for installing PyNWB
-h5py==2.10  # support for selection of datasets with list of indices added in 2.10
+h5py==3.2.0
 hdmf==3.14.5
-numpy==1.18
-pandas==1.1.5
-python-dateutil==2.7.3
+numpy==1.24.0
+pandas==1.2.0
+python-dateutil==2.8.2
