@@ -1,3 +1,5 @@
+import numpy as np
+
 from hdmf.common import DynamicTableRegion
 from pynwb import NWBFile
 
@@ -26,7 +28,8 @@ class TestElectrodeGroupIO(NWBH5IOMixin, TestCase):
                             description='a test ElectrodeGroup',
                             location='a nonexistent place',
                             device=self.dev1,
-                            position=(1., 2., 3.))
+                            position=np.array((1, 2, 3),
+                                              dtype=np.dtype([('x', float), ('y', float), ('z', float)])))
         return eg
 
     def addContainer(self, nwbfile):

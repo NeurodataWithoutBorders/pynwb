@@ -6,7 +6,7 @@ Installing PyNWB
 
 PyNWB has the following minimum requirements, which must be installed before you can get started using PyNWB.
 
-#. Python 3.8, 3.9, 3.10, or 3.11
+#. Python 3.9, 3.10, 3.11, 3.12, or 3.13
 #. pip
 
 .. note:: If you are a developer then please see the :ref:`install_developers` installation instructions instead.

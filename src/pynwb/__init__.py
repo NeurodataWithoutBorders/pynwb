@@ -64,11 +64,7 @@ def unload_type_config(**kwargs):
     hdmf_unload_type_config(type_map=type_map)
 
 def __get_resources() -> dict:
-    try:
-        from importlib.resources import files
-    except ImportError:
-        # TODO: Remove when python 3.9 becomes the new minimum
-        from importlib_resources import files
+    from importlib.resources import files
 
     __location_of_this_file = files(__name__)
     __core_ns_file_name = 'nwb.namespace.yaml'
