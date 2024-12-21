@@ -90,10 +90,6 @@ allensdk_examples = [
     os.path.join('domain', 'brain_observatory.py'),  # TODO create separate workflow for this
 ]
 
-deprecated_examples = [
-    os.path.join('domain', 'icephys.py'),
-]
-
 def run_example_tests():
     """Run the Sphinx gallery example files, excluding ROS3-dependent ones, to check for errors."""
     logging.info('running example tests')
@@ -102,7 +98,7 @@ def run_example_tests():
         for f in files:
             if f.endswith(".py"):
                 name_with_parent_dir = os.path.join(os.path.basename(root), f)
-                if name_with_parent_dir in [*ros3_examples, *allensdk_examples, *deprecated_examples]:
+                if name_with_parent_dir in [*ros3_examples, *allensdk_examples]:
                     logging.info("Skipping %s" % name_with_parent_dir)
                     continue
                 examples_scripts.append(os.path.join(root, f))
