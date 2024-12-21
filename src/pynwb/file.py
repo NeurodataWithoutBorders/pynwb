@@ -561,6 +561,17 @@ class NWBFile(MultiContainerInterface, HERDManager):
     def epoch_tags(self):
         return set(self.epochs.tags[:]) if self.epochs is not None else set()
 
+    @property
+    def icephys_filtering(self):
+        return self.fields.get('icephys_filtering')
+
+    @icephys_filtering.setter
+    def icephys_filtering(self, val):
+        if val is not None:
+            self._error_on_new_warn_on_construct("Use of icephys_filtering is deprecated. "
+                                                 "Use the IntracellularElectrode.filtering field instead")
+            self.fields['icephys_filtering'] = val
+
     def __check_epochs(self):
         if self.epochs is None:
             self.epochs = TimeIntervals(name='epochs', description='experimental epochs')
@@ -1017,7 +1028,7 @@ class NWBFile(MultiContainerInterface, HERDManager):
         data, name, notes, table_description, description = getargs('data', 'name', 'notes', 'table_description',
                                                                     'description', kwargs)
         if notes is not None or table_description != '':
-            warn(('Use of the `notes` or `table_description` argument is deprecate and will be removed in PyNWB 4.0. '
+            warn(('Use of the `notes` or `table_description` argument is deprecated and will be removed in PyNWB 4.0. '
                   'Use the `description` argument instead.'), DeprecationWarning)
             if description is not None:
                 raise ValueError('Cannot call add_scratch with (notes or table_description) and description')

@@ -45,15 +45,17 @@ class TestProcessingModule(TestCase):
 
     def test_deprecated_add_data_interface(self):
         ts = self._create_time_series()
+        msg = 'add_data_interface is deprecated and will be removed in PyNWB 4.0. Use add instead.'
         with self.assertWarnsWith(warn_type=DeprecationWarning,
-                                  exc_msg="add_data_interface is deprecated. Use add instead."
+                                  exc_msg=msg
         ):
             self.pm.add_data_interface(ts)
 
     def test_deprecated_add_container(self):
         ts = self._create_time_series()
+        msg = 'add_container is deprecated and will be removed in PyNWB 4.0. Use add instead.'
         with self.assertWarnsWith(warn_type=DeprecationWarning, 
-                                  exc_msg="add_container is deprecated. Use add instead."
+                                  exc_msg=msg
         ):
             self.pm.add_container(ts)
 
@@ -68,8 +70,9 @@ class TestProcessingModule(TestCase):
     def test_deprecated_get_data_interface(self):
         ts = self._create_time_series()
         self.pm.add(ts)
+        msg = 'get_data_interface is deprecated and will be removed in PyNWB 4.0. Use get instead.'
         with self.assertWarnsWith(warn_type=DeprecationWarning, 
-                                  exc_msg="get_data_interface is deprecated. Use get instead."
+                                  exc_msg=msg
         ):
             tmp = self.pm.get_data_interface("test_ts")
             self.assertIs(tmp, ts)
@@ -77,8 +80,9 @@ class TestProcessingModule(TestCase):
     def test_deprecated_get_container(self):
         ts = self._create_time_series()
         self.pm.add(ts)
+        msg = 'get_container is deprecated and will be removed in PyNWB 4.0. Use get instead.'
         with self.assertWarnsWith(warn_type=DeprecationWarning, 
-                                  exc_msg="get_container is deprecated. Use get instead."
+                                  exc_msg=msg
         ):
             tmp = self.pm.get_container("test_ts")
             self.assertIs(tmp, ts)

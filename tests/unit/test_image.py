@@ -243,7 +243,8 @@ class ImageSeriesConstructor(TestCase):
         """Test that format is set to 'external' if not provided, when external_file is provided."""
         msg = (
             "ImageSeries 'test_iS': The value for 'format' has been changed to 'external'. "
-            "Setting a default value for 'format' is deprecated."
+            "If an external file is detected, setting a value for "
+            "'format' other than 'external' is deprecated."
         )
         kwargs = dict(name="test_iS",
                 external_file=["external_file", "external_file2"],
@@ -326,9 +327,10 @@ class ImageSeriesConstructor(TestCase):
         with self.assertRaisesWith(ValueError, msg):
             ImageSeries(**kwargs)
 
+        # create object in construct mode, modeling the behavior of the ObjectMapper on read
+        # no warning or error should be raised
         iS = ImageSeries.__new__(ImageSeries, in_construct_mode=True)
-        with self.assertWarnsWith(UserWarning, msg):
-            iS.__init__(**kwargs)
+        iS.__init__(**kwargs)
 
 
 class IndexSeriesConstructor(TestCase):
@@ -369,9 +371,9 @@ class IndexSeriesConstructor(TestCase):
             IndexSeries(**kwargs)
 
         # create object in construct mode, modeling the behavior of the ObjectMapper on read
+        # no warning or error should be raised
         iS = IndexSeries.__new__(IndexSeries, in_construct_mode=True)
-        with self.assertWarnsWith(warn_type=UserWarning, exc_msg=msg):
-            iS.__init__(**kwargs)
+        iS.__init__(**kwargs)
 
         self.assertEqual(iS.unit, 'N/A')
 
@@ -395,9 +397,9 @@ class IndexSeriesConstructor(TestCase):
             IndexSeries(**kwargs)
 
         # create object in construct mode, modeling the behavior of the ObjectMapper on read
+        # no warning or error should be raised
         iS = IndexSeries.__new__(IndexSeries, in_construct_mode=True)
-        with self.assertWarnsWith(warn_type=UserWarning, exc_msg=msg):
-            iS.__init__(**kwargs)
+        iS.__init__(**kwargs)
 
         self.assertIs(iS.indexed_timeseries, ts)
 

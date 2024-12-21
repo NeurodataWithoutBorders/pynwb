@@ -184,22 +184,19 @@ class TestClusteringIO(AcquisitionH5IOMixin, TestCase):
             Clustering(**kwargs)
 
         # create object in construct mode, modeling the behavior of the ObjectMapper on read
+        # no warning should be raised
         obj = Clustering.__new__(Clustering, in_construct_mode=True)
-        with self.assertWarnsWith(warn_type=UserWarning, exc_msg=error_msg):
-            obj.__init__(**kwargs)
+        obj.__init__(**kwargs)
         
         return obj
 
     def roundtripContainer(self, cache_spec=False):
-        # catch the DeprecationWarning raised when reading the Clustering object from file
-        error_msg = "The Clustering neurodata type is deprecated. Use pynwb.misc.Units or NWBFile.units instead"
-        with self.assertWarnsWith(UserWarning, error_msg):
-            return super().roundtripContainer(cache_spec)
+        # no warning or error should be raised when reading the Clustering object from file
+        return super().roundtripContainer(cache_spec)
 
     def roundtripExportContainer(self, cache_spec=False):
-        error_msg = "The Clustering neurodata type is deprecated. Use pynwb.misc.Units or NWBFile.units instead"
-        with self.assertWarnsWith(UserWarning, error_msg):
-            return super().roundtripExportContainer(cache_spec)
+        # no warning or error should be raised when reading the Clustering object from file
+        return super().roundtripExportContainer(cache_spec)
 
 
 class SpikeEventSeriesConstructor(NWBH5IOFlexMixin, TestCase):
@@ -240,11 +237,9 @@ class ClusterWaveformsConstructor(AcquisitionH5IOMixin, TestCase):
         peak_over_rms = [5.3, 6.3]
 
         # raise error on write
-        msg = "The Clustering neurodata type is deprecated. Use pynwb.misc.Units or NWBFile.units instead"
         clust = Clustering.__new__(Clustering, in_construct_mode=True)
-        with self.assertWarnsWith(warn_type=UserWarning, exc_msg=msg):
-            clust.__init__('description', num, peak_over_rms, times)
-            self.clustering = clust
+        clust.__init__('description', num, peak_over_rms, times)
+        self.clustering = clust
 
         means = [[7.3, 7.3]]
         stdevs = [[8.3, 8.3]]
@@ -253,12 +248,12 @@ class ClusterWaveformsConstructor(AcquisitionH5IOMixin, TestCase):
             cw = ClusterWaveforms(self.clustering, 'filtering', means, stdevs)
 
         # create object in construct mode, modeling the behavior of the ObjectMapper on read 
+        # no warning should be raised
         cw = ClusterWaveforms.__new__(ClusterWaveforms,
                                         container_source=None,
                                         parent=None,
                                         in_construct_mode=True)
-        with self.assertWarnsWith(warn_type=UserWarning, exc_msg=msg):
-            cw.__init__(self.clustering, 'filtering', means, stdevs)
+        cw.__init__(self.clustering, 'filtering', means, stdevs)
 
         return cw
 
@@ -268,16 +263,12 @@ class ClusterWaveformsConstructor(AcquisitionH5IOMixin, TestCase):
         nwbfile.add_acquisition(self.container)
 
     def roundtripContainer(self, cache_spec=False):
-        # catch the DeprecationWarning raised when reading the Clustering object from file
-        msg = "The ClusterWaveforms neurodata type is deprecated. Use pynwb.misc.Units or NWBFile.units instead"
-        with self.assertWarnsWith(UserWarning, msg):
-            return super().roundtripContainer(cache_spec)
+        # no warning or error should be raised when reading the Clustering object from file
+        return super().roundtripContainer(cache_spec)
 
     def roundtripExportContainer(self, cache_spec=False):
-        # catch the DeprecationWarning raised when reading the Clustering object from file
-        msg = "The ClusterWaveforms neurodata type is deprecated. Use pynwb.misc.Units or NWBFile.units instead"
-        with self.assertWarnsWith(UserWarning, msg):
-            return super().roundtripExportContainer(cache_spec)
+        # no warning or error should be raised when reading the Clustering object from file
+        return super().roundtripExportContainer(cache_spec)
 
 
 class FeatureExtractionConstructor(NWBH5IOFlexMixin, TestCase):

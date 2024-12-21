@@ -288,9 +288,9 @@ class ClusteringConstructor(TestCase):
             cc = Clustering(**kwargs)
         
         # create object in construct mode, modeling the behavior of the ObjectMapper on read 
+        # no error or warning should be raised
         cc = Clustering.__new__(Clustering, in_construct_mode=True)
-        with self.assertWarnsWith(warn_type=UserWarning, exc_msg=error_msg):
-            cc.__init__(**kwargs)
+        cc.__init__(**kwargs)
 
         self.assertEqual(cc.description, 'description')
         self.assertEqual(cc.num, num)
@@ -306,13 +306,11 @@ class ClusterWaveformsConstructor(TestCase):
         peak_over_rms = [5.3, 6.3]
 
         # create object in construct mode, modeling the behavior of the ObjectMapper on read 
-        error_msg = "The Clustering neurodata type is deprecated. Use pynwb.misc.Units or NWBFile.units instead"
         cc = Clustering.__new__(Clustering,
                                         container_source=None,
                                         parent=None,
                                         in_construct_mode=True)
-        with self.assertWarnsWith(warn_type=UserWarning, exc_msg=error_msg):
-            cc.__init__('description', num, peak_over_rms, times)
+        cc.__init__('description', num, peak_over_rms, times)
 
         means = [[7.3, 7.3]]
         stdevs = [[8.3, 8.3]]
@@ -321,12 +319,12 @@ class ClusterWaveformsConstructor(TestCase):
             cw = ClusterWaveforms(cc, 'filtering', means, stdevs)
 
         # create object in construct mode, modeling the behavior of the ObjectMapper on read 
+        # no error or warning should be raised
         cw = ClusterWaveforms.__new__(ClusterWaveforms,
                                         container_source=None,
                                         parent=None,
                                         in_construct_mode=True)
-        with self.assertWarnsWith(warn_type=UserWarning, exc_msg=error_msg):
-            cw.__init__(cc, 'filtering', means, stdevs)
+        cw.__init__(cc, 'filtering', means, stdevs)
 
         self.assertEqual(cw.clustering_interface, cc)
         self.assertEqual(cw.waveform_filtering, 'filtering')

@@ -154,12 +154,11 @@ class TestSweepTableRoundTripEasy(NWBH5IOMixin, TestCase):
                                     stimulus_description="gotcha ya!", sweep_number=np.uint(4711))
         
         # create the sweeptable in construct mode, modeling the behavior of the ObjectMapper on read
+        # no user warning or error should be raised
         sweeptable = SweepTable.__new__(SweepTable)
         sweeptable._in_construct_mode = True
-        msg = ("SweepTable is deprecated. Use the IntracellularRecordingsTable instead. "
-                     "See also the NWBFile.add_intracellular_recordings function.")
-        with self.assertWarnsWith(warn_type=UserWarning, exc_msg=msg):
-            sweeptable.__init__(name='sweep_table')
+        sweeptable.__init__(name='sweep_table')
+        sweeptable._in_construct_mode = False
 
         return sweeptable
 
@@ -181,17 +180,13 @@ class TestSweepTableRoundTripEasy(NWBH5IOMixin, TestCase):
 
     def roundtripContainer(self, cache_spec=False):
         # catch the DeprecationWarning raised when reading the SweepTable object from file
-        msg = ("SweepTable is deprecated. Use the IntracellularRecordingsTable instead. "
-               "See also the NWBFile.add_intracellular_recordings function.")
-        with self.assertWarnsWith(UserWarning, msg):
-            return super().roundtripContainer(cache_spec)
+        # no warning or error message should be raised
+        return super().roundtripContainer(cache_spec)
 
     def roundtripExportContainer(self, cache_spec=False):
         # catch the DeprecationWarning raised when reading the SweepTable object from file
-        msg = ("SweepTable is deprecated. Use the IntracellularRecordingsTable instead. "
-               "See also the NWBFile.add_intracellular_recordings function.")
-        with self.assertWarnsWith(UserWarning, msg):
-            return super().roundtripExportContainer(cache_spec)
+        # no warning or error message should be raised
+        return super().roundtripExportContainer(cache_spec)
 
     def test_container(self):
         """ Test properties of the SweepTable read from file """
@@ -229,12 +224,11 @@ class TestSweepTableRoundTripComplicated(NWBH5IOMixin, TestCase):
                                       stimulus_description="gotcha ya!", sweep_number=np.uint(4712))
 
         # create the sweeptable in construct mode, modeling the behavior of the ObjectMapper on read
+        # no warning or error should be raised
         sweeptable = SweepTable.__new__(SweepTable)
         sweeptable._in_construct_mode = True
-        msg = ("SweepTable is deprecated. Use the IntracellularRecordingsTable instead. "
-               "See also the NWBFile.add_intracellular_recordings function.")
-        with self.assertWarnsWith(warn_type=UserWarning, exc_msg=msg):
-            sweeptable.__init__(name='sweep_table')
+        sweeptable.__init__(name='sweep_table')
+        sweeptable._in_construct_mode = False
             
         return sweeptable
 
@@ -258,18 +252,12 @@ class TestSweepTableRoundTripComplicated(NWBH5IOMixin, TestCase):
         return nwbfile.sweep_table
 
     def roundtripContainer(self, cache_spec=False):
-        # catch the DeprecationWarning raised when reading the SweepTable object from file
-        msg = ("SweepTable is deprecated. Use the IntracellularRecordingsTable instead. "
-               "See also the NWBFile.add_intracellular_recordings function.")
-        with self.assertWarnsWith(UserWarning, msg):
-            return super().roundtripContainer(cache_spec)
+        # no warning or error should be raised when reading the SweepTable object from file
+        return super().roundtripContainer(cache_spec)
 
     def roundtripExportContainer(self, cache_spec=False):
-        # catch the DeprecationWarning raised when reading the SweepTable object from file
-        msg = ("SweepTable is deprecated. Use the IntracellularRecordingsTable instead. "
-               "See also the NWBFile.add_intracellular_recordings function.")
-        with self.assertWarnsWith(UserWarning, msg):
-            return super().roundtripExportContainer(cache_spec)
+        # no warning or error should be raised when reading the SweepTable object from file
+        return super().roundtripExportContainer(cache_spec)
 
     def test_container(self):
         """ Test properties of the SweepTable read from file """

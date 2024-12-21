@@ -126,22 +126,13 @@ class NWBFileTest(TestCase):
 
         remove_test_file("electrodes_mwe.nwb")
 
-    def test_access_processing(self):
+    def test_access_processing_with_modules(self):
         self.nwbfile.create_processing_module('test_mod', 'test_description')
-        msg = 'NWBFile.modules is deprecated. Use NWBFile.processing instead.'
 
         # create object with deprecated argument
-        with self.assertRaisesWith(ValueError, msg):
+        msg = "'NWBFile' object has no attribute 'modules'"
+        with self.assertRaisesWith(AttributeError, msg):
             self.nwbfile.modules['test_mod']
-
-        # create object in construct mode, modeling the behavior of the ObjectMapper on read
-        self.nwbfile._in_construct_mode = True
-        with self.assertWarnsWith(warn_type=UserWarning, exc_msg=msg):
-            modules = self.nwbfile.modules['test_mod']
-        self.assertIs(self.nwbfile.processing['test_mod'], modules)
-
-        # reset construct mode for other tests
-        self.nwbfile._in_construct_mode = False
 
     def test_epoch_tags(self):
         tags1 = ['t1', 't2']
@@ -178,7 +169,7 @@ class NWBFileTest(TestCase):
 
     def test_add_stimulus_timeseries_arg(self):
         """Test nwbfile.add_stimulus using the deprecated 'timeseries' keyword argument"""
-        msg = ("NWBFile.add_stimulus: unrecognized argument: 'timeseries'")
+        msg = ("NWBFile.add_stimulus: missing argument 'stimulus', unrecognized argument: 'timeseries'")
         with self.assertRaisesWith(TypeError, msg):
             self.nwbfile.add_stimulus(
                 timeseries=TimeSeries(
@@ -191,9 +182,9 @@ class NWBFileTest(TestCase):
 
     def test_add_stimulus_no_stimulus_arg(self):
         """Test nwbfile.add_stimulus using the deprecated 'timeseries' keyword argument"""
-        msg = ("The 'stimulus' keyword argument is required.")
-        with self.assertRaisesWith(ValueError, msg):
-            self.nwbfile.add_stimulus(None)
+        msg = ("NWBFile.add_stimulus: missing argument 'stimulus'")
+        with self.assertRaisesWith(TypeError, msg):
+            self.nwbfile.add_stimulus()
         self.assertEqual(len(self.nwbfile.stimulus), 0)
 
     def test_add_stimulus_dynamic_table(self):
@@ -525,26 +516,14 @@ Fields:
         nwbfile.add_electrode(location='loc1', group=elecgrp, id=0)
 
         # test that NWBFile.ec_electrodes property warns or errors
-        msg = "NWBFile.ec_electrodes is deprecated. Use NWBFile.electrodes instead."
-        with self.assertRaisesWith(ValueError, msg):
+        msg = "'NWBFile' object has no attribute 'ec_electrodes'"
+        with self.assertRaisesWith(AttributeError, msg):
             nwbfile.ec_electrodes
-
-        nwbfile._in_construct_mode = True
-        with self.assertWarnsWith(warn_type=UserWarning, exc_msg=msg):
-            nwbfile.ec_electrodes
-        self.assertEqual(nwbfile.ec_electrodes.location[0], 'loc1')
-        nwbfile._in_construct_mode = False
 
         # test that NWBFile.ec_electrode_groups warns or errors
-        msg = "NWBFile.ec_electrode_groups is deprecated. Use NWBFile.electrode_groups instead."
-        with self.assertRaisesWith(ValueError, msg):
+        msg = "'NWBFile' object has no attribute 'ec_electrode_groups'"
+        with self.assertRaisesWith(AttributeError, msg):
             nwbfile.ec_electrode_groups
-
-        nwbfile._in_construct_mode = True
-        with self.assertWarnsWith(warn_type=UserWarning, exc_msg=msg):
-            nwbfile.ec_electrode_groups
-        self.assertEqual(nwbfile.ec_electrode_groups['name'].description, 'desc')
-        nwbfile._in_construct_mode = False
 
 class SubjectTest(TestCase):
     def setUp(self):

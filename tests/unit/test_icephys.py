@@ -47,9 +47,9 @@ class NWBFileICEphys(TestCase):
             SweepTable()
 
         # create object in construct mode, modeling the behavior of the ObjectMapper on read
+        # should not raise error or warning
         sweepT = SweepTable.__new__(SweepTable, in_construct_mode=True)
-        with self.assertWarnsWith(warn_type=UserWarning, exc_msg=msg):
-            sweepT.__init__()
+        sweepT.__init__()
         
         kwargs = dict(session_description='NWBFile icephys test',
                 identifier='NWB123',  # required
@@ -61,25 +61,9 @@ class NWBFileICEphys(TestCase):
             NWBFile(**kwargs)
 
         # create object in construct mode, modeling the behavior of the ObjectMapper on read
+        # should not warn or error
         nwbfile = NWBFile.__new__(NWBFile, in_construct_mode=True)
-        
-        with self.assertWarnsWith(warn_type=UserWarning, exc_msg=msg):
-            nwbfile.__init__(**kwargs)
-
-    def test_ic_electrodes_parameter_deprecation(self):
-        # Make sure we warn when using the ic_electrodes parameter on NWBFile
-        msg = "Use of the ic_electrodes parameter is deprecated. Use the icephys_electrodes parameter instead"
-        kwargs = dict(session_description='NWBFile icephys test',
-                identifier='NWB123',  # required
-                session_start_time=datetime(2017, 4, 3, 11, tzinfo=tzlocal()),
-                ic_electrodes=[self.icephys_electrode, ])
-        with self.assertRaisesWith(ValueError, msg):
-            NWBFile(**kwargs)
-
-        # create object in construct mode, modeling the behavior of the ObjectMapper on read
-        nwbfile = NWBFile.__new__(NWBFile, in_construct_mode=True)
-        with self.assertWarnsWith(warn_type=UserWarning, exc_msg=msg):
-            nwbfile.__init__(**kwargs)
+        nwbfile.__init__(**kwargs)
 
     def test_icephys_electrodes_parameter(self):
         nwbfile = NWBFile(
@@ -95,16 +79,6 @@ class NWBFileICEphys(TestCase):
             identifier='NWB123',  # required
             session_start_time=datetime(2017, 4, 3, 11, tzinfo=tzlocal()),
             icephys_electrodes=[self.icephys_electrode, ])
-        
-        # make sure NWBFile.ic_electrodes property warns or errors
-        msg = "NWBFile.ic_electrodes is deprecated. Use NWBFile.icephys_electrodes instead."
-        with self.assertRaisesWith(ValueError, msg):
-            nwbfile.ic_electrodes
-
-        nwbfile._in_construct_mode = True
-        with self.assertWarnsWith(warn_type=UserWarning, exc_msg=msg):
-            nwbfile.ic_electrodes
-        nwbfile._in_construct_mode = False
 
         # make sure NWBFile.get_ic_electrode warns
         msg = "'NWBFile' object has no attribute 'get_ic_electrode'"

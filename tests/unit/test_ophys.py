@@ -147,9 +147,9 @@ class ImagingPlaneConstructor(TestCase):
             ImagingPlane(**kwargs)
 
         # create object in construct mode, modeling the behavior of the ObjectMapper on read
+        # no warning or error should be raised
         obj = ImagingPlane.__new__(ImagingPlane, in_construct_mode=True)
-        with self.assertWarnsWith(warn_type=UserWarning, exc_msg=msg):
-            obj.__init__(**kwargs)
+        obj.__init__(**kwargs)
 
     def test_conversion_deprecated(self):
         oc, device = self.set_up_dependencies()
@@ -169,9 +169,9 @@ class ImagingPlaneConstructor(TestCase):
             ImagingPlane(**kwargs)
 
         # create object in construct mode, modeling the behavior of the ObjectMapper on read
+        # no warning or error should be raised
         obj = ImagingPlane.__new__(ImagingPlane, in_construct_mode=True)
-        with self.assertWarnsWith(warn_type=UserWarning, exc_msg=msg):
-            obj.__init__(**kwargs)
+        obj.__init__(**kwargs)
 
     def test_unit_deprecated(self):
         oc, device = self.set_up_dependencies()
@@ -192,9 +192,9 @@ class ImagingPlaneConstructor(TestCase):
             ImagingPlane(**kwargs)
 
         # create object in construct mode, modeling the behavior of the ObjectMapper on read
+        # no warning or error should be raised
         obj = ImagingPlane.__new__(ImagingPlane, in_construct_mode=True)
-        with self.assertWarnsWith(warn_type=UserWarning, exc_msg=msg):
-            obj.__init__(**kwargs)
+        obj.__init__(**kwargs)
 
 
 class OnePhotonSeriesConstructor(TestCase):

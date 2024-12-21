@@ -1117,9 +1117,9 @@ class NWBFileTests(TestCase):
         with self.assertRaisesWith(ValueError, msg):
             nwbfile.add_stimulus(stimulus, use_sweep_table=True)
         
+        # shoudl not error when in construct mode
         nwbfile._in_construct_mode = True
-        with self.assertWarnsWith(warn_type=UserWarning, exc_msg=msg):
-            nwbfile.add_stimulus(stimulus2, use_sweep_table=True)
+        nwbfile.add_stimulus(stimulus2, use_sweep_table=True)
         
         # make sure we don't trigger the same deprecation warning twice
         nwbfile.add_acquisition(response, use_sweep_table=True)
@@ -1153,15 +1153,6 @@ class NWBFileTests(TestCase):
             gain=0.02,
             sweep_number=np.uint64(15)
         )
-        local_stimulus3 = VoltageClampStimulusSeries(
-            name="ccss3",
-            data=[1, 2, 3, 4, 5],
-            starting_time=123.6,
-            rate=10e3,
-            electrode=local_electrode,
-            gain=0.02,
-            sweep_number=np.uint64(15)
-        )
 
         msg = ("SweepTable is deprecated. Use the IntracellularRecordingsTable instead. "
                "See also the NWBFile.add_intracellular_recordings function.")
@@ -1170,12 +1161,9 @@ class NWBFileTests(TestCase):
             # NOTE - the sweep table creation will error but the stimulus template will still be added
 
         # create object in construct mode, modeling the behavior of the ObjectMapper on read
+        # should not trigger any warnings or errors
         nwbfile._in_construct_mode = True
-        with self.assertWarnsWith(warn_type=UserWarning, exc_msg=msg):
-            nwbfile.add_stimulus_template(local_stimulus2, use_sweep_table=True)
-
-        # make sure we don't trigger the same warning twice (should only be triggered on table creation)
-        nwbfile.add_stimulus_template(local_stimulus3, use_sweep_table=True)
+        nwbfile.add_stimulus_template(local_stimulus2, use_sweep_table=True)
         nwbfile._in_construct_mode = False
 
     def test_deprecate_sweepstable_on_add_acquistion(self):
@@ -1209,9 +1197,9 @@ class NWBFileTests(TestCase):
             nwbfile.add_acquisition(response, use_sweep_table=True)
             # NOTE - the sweep table creation will error but the acquisition will still be added
         
+        # should not trigger error or warning in construct mode
         nwbfile._in_construct_mode = True
-        with self.assertWarnsWith(warn_type=UserWarning, exc_msg=msg):
-            nwbfile.add_acquisition(response2, use_sweep_table=True)
+        nwbfile.add_acquisition(response2, use_sweep_table=True)
         
         # make sure we don't trigger the same deprecation warning twice
         nwbfile.add_stimulus(stimulus, use_sweep_table=True)
@@ -1223,12 +1211,8 @@ class NWBFileTests(TestCase):
         Test that warnings are raised if the user tries to use a sweeps table
         """
         from pynwb.icephys import SweepTable
-        msg = ("SweepTable is deprecated. Use the IntracellularRecordingsTable instead. "
-               "See also the NWBFile.add_intracellular_recordings function.")
-        
-        with self.assertWarnsWith(warn_type=UserWarning, exc_msg=msg):
-            sweepT = SweepTable.__new__(SweepTable, in_construct_mode=True)
-            sweepT.__init__()
+        sweepT = SweepTable.__new__(SweepTable, in_construct_mode=True)
+        sweepT.__init__()
 
         kwargs = dict(session_description='my first synthetic recording',
                 identifier='EXAMPLE_ID',
@@ -1236,13 +1220,15 @@ class NWBFileTests(TestCase):
                 sweep_table=sweepT)
         
         # check we raise an error when using the sweeptable argument on init
+        msg = ("SweepTable is deprecated. Use the IntracellularRecordingsTable instead. "
+            "See also the NWBFile.add_intracellular_recordings function.")
         with self.assertRaisesWith(ValueError, msg):
             nwbfile = NWBFile(**kwargs)
 
         # create object in construct mode, modeling the behavior of the ObjectMapper on read
+        # should not trigger warning or error
         nwbfile = NWBFile.__new__(NWBFile, in_construct_mode=True)
-        with self.assertWarnsWith(warn_type=UserWarning, exc_msg=msg):
-            nwbfile.__init__(**kwargs)
+        nwbfile.__init__(**kwargs)
 
         # make sure we don't trigger the same deprecation warning twice
         device = self.__add_device(nwbfile)

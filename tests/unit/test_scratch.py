@@ -29,18 +29,20 @@ class TestScratchData(TestCase):
         self.assertEqual(sd.description, 'test scratch')
 
     def test_scratch_notes_deprecation(self):
-        msg = "The `notes` argument of ScratchData.__init__ has been deprecated. Use description instead."
+        msg = ("The `notes` argument of ScratchData.__init__ has been deprecated and will "
+               "be removed in PyNWB 4.0. Use description instead.")
         with self.assertRaisesWith(ValueError, msg):
             ScratchData(name='test', data=[1, 2, 3, 4, 5], notes='test notes')
 
         # create object in construct mode, modeling the behavior of the ObjectMapper on read 
+        # should not raise error or warning
         data = ScratchData.__new__(ScratchData, in_construct_mode=True)
-        with self.assertWarnsWith(UserWarning, msg):
-            data.__init__(name='test', data=[1, 2, 3, 4, 5], notes='test notes')
+        data.__init__(name='test', data=[1, 2, 3, 4, 5], notes='test notes')
         self.assertEqual(data.description, 'test notes')
 
         # test notes property
-        msg = "Use of ScratchData.notes has been deprecated. Use ScratchData.description instead."
+        msg = ("Use of ScratchData.notes has been deprecated and will be removed in PyNWB 4.0. "
+               "Use ScratchData.description instead.")
         with self.assertWarnsWith(DeprecationWarning, msg):
             data.notes
 
@@ -146,15 +148,15 @@ class TestScratchData(TestCase):
         self.assertIs(self.nwbfile.scratch['test'], data)
     
     def test_add_scratch_notes_deprecation(self):
-        msg =  ("Use of the `notes` or `table_description` argument is deprecated. "
+        msg =  ("Use of the `notes` or `table_description` argument is deprecated and will be removed in PyNWB 4.0. "
                 "Use the `description` argument instead.")
         with self.assertWarnsWith(DeprecationWarning, msg):
             self.nwbfile.add_scratch(name='test', data=[1, 2, 3, 4, 5], notes='test notes')
         self.assertEqual(self.nwbfile.scratch['test'].description, 'test notes')    
 
     def test_add_scratch_table_description_deprecation(self):
-        msg =  ("Use of the `notes` or `table_description` argument is deprecated. "
-                "Use the `description` argument instead.")
+        msg =  ('Use of the `notes` or `table_description` argument is deprecated and will be removed in PyNWB 4.0. '
+                'Use the `description` argument instead.')
         df = pd.DataFrame(data={'col1': [1, 2, 3, 4], 'col2': ['a', 'b', 'c', 'd']})
         with self.assertWarnsWith(DeprecationWarning, msg):
             self.nwbfile.add_scratch(name='test', data=df,
