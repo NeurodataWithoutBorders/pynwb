@@ -342,7 +342,6 @@ class SweepTable(DynamicTable):
                    'See also the NWBFile.add_intracellular_recordings function.')
         if not self._in_construct_mode:
             raise ValueError(error_msg)
-        warnings.warn(error_msg)
 
         super().__init__(**kwargs)
 

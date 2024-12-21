@@ -227,7 +227,7 @@ class Clustering(NWBDataInterface):
              'shape': (None,)},
             {'name': 'name', 'type': str, 'doc': 'the name of this container', 'default': 'Clustering'})
     def __init__(self, **kwargs):
-        self._error_on_new_warn_on_construct(
+        self._error_on_new_pass_on_construct(
             error_msg='The Clustering neurodata type is deprecated. Use pynwb.misc.Units or NWBFile.units instead'
         )
         args_to_set = popargs_to_dict(('description', 'num', 'peak_over_rms', 'times'), kwargs)
@@ -263,7 +263,7 @@ class ClusterWaveforms(NWBDataInterface):
              'doc': 'the standard deviations of waveforms for each cluster'},
             {'name': 'name', 'type': str, 'doc': 'the name of this container', 'default': 'ClusterWaveforms'})
     def __init__(self, **kwargs):
-        self._error_on_new_warn_on_construct(
+        self._error_on_new_pass_on_construct(
             error_msg='The ClusterWaveforms neurodata type is deprecated. Use pynwb.misc.Units or NWBFile.units instead'
         )
         args_to_set = popargs_to_dict(('clustering_interface', 'waveform_filtering',

@@ -492,14 +492,14 @@ class NWBFile(MultiContainerInterface, HERDManager):
         icephys_electrodes = args_to_set['icephys_electrodes']
         ic_electrodes = args_to_set['ic_electrodes']
         if icephys_electrodes is None and ic_electrodes is not None:
-            self._error_on_new_warn_on_construct(error_msg=("Use of the ic_electrodes parameter is deprecated. "
+            self._error_on_new_pass_on_construct(error_msg=("Use of the ic_electrodes parameter is deprecated. "
                                                             "Use the icephys_electrodes parameter instead"))
             args_to_set['icephys_electrodes'] = ic_electrodes
         args_to_set.pop('ic_electrodes')  # do not set this arg
 
         # backwards-compatibility for sweep table
         if args_to_set['sweep_table'] is not None:
-            self._error_on_new_warn_on_construct(error_msg=("SweepTable is deprecated. Use the "
+            self._error_on_new_pass_on_construct(error_msg=("SweepTable is deprecated. Use the "
                                                             "IntracellularRecordingsTable instead. See also the "
                                                             "NWBFile.add_intracellular_recordings function."))
 
@@ -783,8 +783,10 @@ class NWBFile(MultiContainerInterface, HERDManager):
         """
         if self.sweep_table is None:
             if self._in_construct_mode:
+                # Construct the SweepTable without triggering errors in construct mode because SweepTable has been deprecated
                 sweep_table = SweepTable.__new__(SweepTable, parent=self, in_construct_mode=True)
                 sweep_table.__init__(name='sweep_table')
+                sweep_table._in_construct_mode = False
             else:
                 sweep_table = SweepTable(name='sweep_table')
             self.sweep_table = sweep_table
