@@ -16,6 +16,9 @@
   - Deprecated `ImageMaskSeries` neurodata type. @rly [#1941](https://github.com/NeurodataWithoutBorders/pynwb/pull/1941)
 - Removed python 3.8 support, added python 3.13 support. @stephprince [#2007](https://github.com/NeurodataWithoutBorders/pynwb/pull/2007)
 
+### Documentation and tutorial enhancements
+- Updated `SpikeEventSeries`, `DecompositionSeries`, and `FilteredEphys` examples. @stephprince [#2012](https://github.com/NeurodataWithoutBorders/pynwb/pull/2012)
+
 ## PyNWB 2.8.3 (November 19, 2024)
 
 ### Enhancements and minor changes
