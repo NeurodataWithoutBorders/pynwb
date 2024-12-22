@@ -1117,7 +1117,7 @@ class NWBFileTests(TestCase):
         with self.assertRaisesWith(ValueError, msg):
             nwbfile.add_stimulus(stimulus, use_sweep_table=True)
         
-        # shoudl not error when in construct mode
+        # test that adding a stimulus does not error when in construct mode
         nwbfile._in_construct_mode = True
         nwbfile.add_stimulus(stimulus2, use_sweep_table=True)
         

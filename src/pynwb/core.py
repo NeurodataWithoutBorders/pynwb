@@ -142,8 +142,8 @@ class ScratchData(NWBData):
         super().__init__(**kwargs)
         if notes != '':
             self._error_on_new_pass_on_construct(
-                    error_msg=("The `notes` argument of ScratchData.__init__ has been deprecated and will be removed in PyNWB 4.0. "
-                               "Use description instead.")
+                    error_msg=("The `notes` argument of ScratchData.__init__ has been deprecated and "
+                               "will be removed in PyNWB 4.0. Use description instead.")
                     )
             if notes != '' and description is not None:
                 raise ValueError('Cannot provide both notes and description to ScratchData.__init__. The description '

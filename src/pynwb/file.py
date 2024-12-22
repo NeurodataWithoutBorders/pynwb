@@ -794,7 +794,8 @@ class NWBFile(MultiContainerInterface, HERDManager):
         """
         if self.sweep_table is None:
             if self._in_construct_mode:
-                # Construct the SweepTable without triggering errors in construct mode because SweepTable has been deprecated
+                # Construct the SweepTable without triggering errors in construct mode because 
+                # SweepTable has been deprecated
                 sweep_table = SweepTable.__new__(SweepTable, parent=self, in_construct_mode=True)
                 sweep_table.__init__(name='sweep_table')
                 sweep_table._in_construct_mode = False
