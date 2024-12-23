@@ -324,6 +324,50 @@ response = VoltageClampSeries(
 )
 
 #####################################################################
+# You can add current clamp in the same way.
+
+from pynwb.icephys import CurrentClampStimulusSeries, CurrentClampSeries, IZeroClampSeries
+
+ccs = CurrentClampSeries(
+    name="ccs",
+    data=[0.1, 0.2, 0.3, 0.4, 0.5],
+    conversion=1e-12,
+    resolution=np.nan,
+    starting_time=123.6,
+    rate=20e3,
+    electrode=electrode,
+    gain=0.02,
+    bias_current=1e-12,
+    bridge_balance=70e6,
+    capacitance_compensation=1e-12,
+    sweep_number=np.uint(16)
+)
+
+ccss = CurrentClampStimulusSeries(
+    name="ccss",
+    data=[1, 2, 3, 4, 5],
+    starting_time=123.6,
+    rate=10e3,
+    electrode=electrode,
+    gain=0.02,
+    sweep_number=np.uint(16),
+)
+
+# IZeroClampSeries is used when the current is clamped to 0.
+izcs = IZeroClampSeries(
+    name="izcs",
+    data=[0.1, 0.2, 0.3, 0.4, 0.5],
+    electrode=electrode,
+    gain=0.02,
+    resolution=np.nan,
+    conversion=1e-12,
+    starting_time=345.6,
+    rate=20e3,
+    sweep_number=np.uint(17),
+)
+
+
+########################################################################
 # Adding an intracellular recording
 # ---------------------------------
 #

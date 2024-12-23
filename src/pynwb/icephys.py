@@ -110,7 +110,8 @@ class PatchClampSeries(TimeSeries):
             'name': 'gain',
             'type': float,
             'doc': 'Units: Volt/Amp (v-clamp) or Volt/Volt (c-clamp)',
-        },  # required
+            'default': None,
+        },
         {
             'name': 'stimulus_description',
             'type': str,
@@ -166,7 +167,7 @@ class CurrentClampSeries(PatchClampSeries):
                      'capacitance_compensation')
 
     @docval(*get_docval(PatchClampSeries.__init__, 'name', 'data', 'electrode'),  # required
-            {'name': 'gain', 'type': float, 'doc': 'Units - Volt/Volt'},
+            {'name': 'gain', 'type': float, 'doc': 'Units - Volt/Volt', 'default': None},
             *get_docval(PatchClampSeries.__init__, 'stimulus_description'),
             {'name': 'bias_current', 'type': float, 'doc': 'Unit - Amp', 'default': None},
             {'name': 'bridge_balance', 'type': float, 'doc': 'Unit - Ohm', 'default': None},
@@ -199,7 +200,7 @@ class IZeroClampSeries(CurrentClampSeries):
     __nwbfields__ = ()
 
     @docval(*get_docval(CurrentClampSeries.__init__, 'name', 'data', 'electrode'),  # required
-            {'name': 'gain', 'type': float, 'doc': 'Units: Volt/Volt'},  # required
+            {'name': 'gain', 'type': float, 'doc': 'Units: Volt/Volt', 'default': None},
             {'name': 'stimulus_description', 'type': str,
              'doc': ('The stimulus name/protocol. Setting this to a value other than "N/A" is deprecated as of '
                      'NWB 2.3.0.'),
@@ -242,10 +243,10 @@ class CurrentClampStimulusSeries(PatchClampSeries):
 
     __nwbfields__ = ()
 
-    @docval(*get_docval(PatchClampSeries.__init__, 'name', 'data', 'electrode', 'gain'),  # required
-            *get_docval(PatchClampSeries.__init__, 'stimulus_description', 'resolution', 'conversion', 'timestamps',
-                        'starting_time', 'rate', 'comments', 'description', 'control', 'control_description',
-                        'sweep_number', 'offset'),
+    @docval(*get_docval(PatchClampSeries.__init__, 'name', 'data', 'electrode'),  # required
+            *get_docval(PatchClampSeries.__init__, 'gain', 'stimulus_description', 'resolution', 'conversion', 
+                        'timestamps', 'starting_time', 'rate', 'comments', 'description', 'control', 
+                        'control_description', 'sweep_number', 'offset'),
             {'name': 'unit', 'type': str, 'doc': "The base unit of measurement (must be 'amperes')",
              'default': 'amperes'},
              allow_positional=AllowPositional.WARNING,)
@@ -272,7 +273,7 @@ class VoltageClampSeries(PatchClampSeries):
                      'whole_cell_series_resistance_comp')
 
     @docval(*get_docval(PatchClampSeries.__init__, 'name', 'data', 'electrode'),  # required
-            {'name': 'gain', 'type': float, 'doc': 'Units - Volt/Amp'},  # required
+            {'name': 'gain', 'type': float, 'doc': 'Units - Volt/Amp', 'default': None},
             *get_docval(PatchClampSeries.__init__, 'stimulus_description'),
             {'name': 'capacitance_fast', 'type': float, 'doc': 'Unit - Farad', 'default': None},
             {'name': 'capacitance_slow', 'type': float, 'doc': 'Unit - Farad', 'default': None},
@@ -313,10 +314,10 @@ class VoltageClampStimulusSeries(PatchClampSeries):
 
     __nwbfields__ = ()
 
-    @docval(*get_docval(PatchClampSeries.__init__, 'name', 'data', 'electrode', 'gain'),  # required
-            *get_docval(PatchClampSeries.__init__, 'stimulus_description', 'resolution', 'conversion', 'timestamps',
-                        'starting_time', 'rate', 'comments', 'description', 'control', 'control_description',
-                        'sweep_number', 'offset'),
+    @docval(*get_docval(PatchClampSeries.__init__, 'name', 'data', 'electrode'),  # required
+            *get_docval(PatchClampSeries.__init__, 'gain', 'stimulus_description', 'resolution', 'conversion', 
+                        'timestamps', 'starting_time', 'rate', 'comments', 'description', 'control',
+                        'control_description', 'sweep_number', 'offset'),
             {'name': 'unit', 'type': str, 'doc': "The base unit of measurement (must be 'volts')",
              'default': 'volts'},
              allow_positional=AllowPositional.WARNING,)

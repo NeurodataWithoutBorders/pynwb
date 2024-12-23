@@ -8,7 +8,7 @@ order to more easily validate terms within datasets or attributes.
 Introduction
 -------------
 Users will create a configuration YAML file that outlines the fields (within a neurodata type)
-they want to be validated against a set of allowed terms. 
+they want to be validated against a set of allowed terms.
 After creating the configuration file, users will need to load the
 configuration file with the :py:func:`~pynwb.load_type_config` method.
 With the configuration loaded, every instance of the neurodata
@@ -16,10 +16,10 @@ types defined in the configuration file will have the respective fields wrapped 
 :py:class:`~hdmf.term_set.TermSetWrapper`.
 This automatic wrapping is what provides the term validation for the field value.
 For greater control on which datasets and attributes are validated
-against which sets of allowed terms, use the 
+against which sets of allowed terms, use the
 :py:class:`~hdmf.term_set.TermSetWrapper` on individual datasets and attributes instead.
-You can follow the 
-`TermSet tutorial in the HDMF documentation 
+You can follow the
+`TermSet tutorial in the HDMF documentation
 <https://hdmf.readthedocs.io/en/stable/tutorials/plot_term_set.html#sphx-glr-tutorials-plot-term-set-py>`_
 for more information.
 
@@ -42,6 +42,8 @@ user will construct a series of nested dictionaries to encompass all the necessa
 3. Each data type will have a list of fields associated with a :py:class:`~hdmf.term_set.TermSet`.
    The user can use the same or unique TermSet instances for each field.
 """
+# sphinx_gallery_thumbnail_path = 'figures/gallery_thumbnails_configurator.png'
+
 try:
     import linkml_runtime  # noqa: F401
 except ImportError as e:

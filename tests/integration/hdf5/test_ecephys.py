@@ -1,3 +1,5 @@
+import numpy as np
+
 from hdmf.common import DynamicTableRegion
 from pynwb import NWBFile
 
@@ -9,7 +11,6 @@ from pynwb.ecephys import (
     Clustering,
     ClusterWaveforms,
     SpikeEventSeries,
-    EventWaveform,
     EventDetection,
     FeatureExtraction,
 )
@@ -27,7 +28,8 @@ class TestElectrodeGroupIO(NWBH5IOMixin, TestCase):
                             description='a test ElectrodeGroup',
                             location='a nonexistent place',
                             device=self.dev1,
-                            position=(1., 2., 3.))
+                            position=np.array((1, 2, 3),
+                                              dtype=np.dtype([('x', float), ('y', float), ('z', float)])))
         return eg
 
     def addContainer(self, nwbfile):
@@ -185,7 +187,7 @@ class TestClusteringIO(AcquisitionH5IOMixin, TestCase):
             return super().roundtripExportContainer(cache_spec)
 
 
-class EventWaveformConstructor(NWBH5IOFlexMixin, TestCase):
+class SpikeEventSeriesConstructor(NWBH5IOFlexMixin, TestCase):
 
     def getContainerType(self):
         return "SpikeEventSeries"
@@ -202,18 +204,16 @@ class EventWaveformConstructor(NWBH5IOFlexMixin, TestCase):
                                     description='the first and third electrodes',
                                     table=table)
         ses = SpikeEventSeries(
-            name='test_sES',
+            name='SpikeEventSeries',
             data=((1, 1), (2, 2), (3, 3)),
             timestamps=[0., 1., 2.],
             electrodes=region
         )
 
-        ew = EventWaveform()
-        self.nwbfile.add_acquisition(ew)
-        ew.add_spike_event_series(ses)
+        self.nwbfile.add_acquisition(ses)
 
     def getContainer(self, nwbfile: NWBFile):
-        return nwbfile.acquisition['EventWaveform']
+        return nwbfile.acquisition['SpikeEventSeries']
 
 
 class ClusterWaveformsConstructor(AcquisitionH5IOMixin, TestCase):

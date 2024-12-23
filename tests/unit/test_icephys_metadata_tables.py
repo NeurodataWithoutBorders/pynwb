@@ -82,7 +82,7 @@ class ICEphysMetaTestBase(TestCase):
             sweep_number=np.uint64(15)
         )
         self.nwbfile.add_acquisition(self.response)
-        self.path = 'test_icephys_meta_intracellularrecording.h5'
+        self.path = 'test_icephys_meta_intracellularrecording.nwb'
 
     def tearDown(self):
         remove_test_file(self.path)
@@ -1037,7 +1037,7 @@ class NWBFileTests(TestCase):
     """
     def setUp(self):
         warnings.simplefilter("always")  # Trigger all warnings
-        self.path = 'test_icephys_meta_intracellularrecording.h5'
+        self.path = 'test_icephys_meta_intracellularrecording.nwb'
 
     def tearDown(self):
         remove_test_file(self.path)
