@@ -106,13 +106,17 @@ class ImageSeries(TimeSeries):
                 % (self.__class__.__name__, self.name)
             )
 
-        self._error_on_new_warn_on_construct(
-            error_msg=self._check_external_file_starting_frame_length()
-        )
-        self._error_on_new_warn_on_construct(
-            error_msg=self._check_external_file_format()
-        )
-        self._error_on_new_warn_on_construct(error_msg=self._check_external_file_data())
+        error_msg = self._check_external_file_starting_frame_length()
+        if error_msg:
+            self._error_on_new_warn_on_construct(error_msg=error_msg)
+        
+        error_msg = self._check_external_file_format()
+        if error_msg:
+            self._error_on_new_warn_on_construct(error_msg=error_msg)
+        
+        error_msg = self._check_external_file_data()
+        if error_msg:
+            self._error_on_new_warn_on_construct(error_msg=error_msg)
 
     def _change_external_file_format(self):
         """

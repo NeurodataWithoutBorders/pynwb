@@ -38,11 +38,8 @@ class NWBMixin(AbstractContainer):
         Raise an error when a check is violated on instance creation.
         To ensure backwards compatibility, this method throws a warning
         instead of raising an error when reading from a file, ensuring that
-        files with invalid data can be read. If error_msg is set to None
-        the function will simply return without further action.
+        files with invalid data can be read.
         """
-        if error_msg is None:
-            return
         if not self._in_construct_mode:
             raise ValueError(error_msg)
         warn(error_msg)
@@ -52,11 +49,7 @@ class NWBMixin(AbstractContainer):
         Raise an error when a check is violated on instance creation.
         When reading from a file, do nothing, ensuring that files with
         invalid data or deprecated neurodata types can be read.
-        If error_msg is set to None the function will simply return
-        without further action.
         """
-        if error_msg is None:
-            return
         if not self._in_construct_mode:
             raise ValueError(error_msg)
 

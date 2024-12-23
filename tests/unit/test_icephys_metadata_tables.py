@@ -1241,7 +1241,7 @@ class NWBFileTests(TestCase):
                 identifier='EXAMPLE_ID',
                 session_start_time=datetime.now(tzlocal()),
                 icephys_filtering='test filtering')
-        msg = ("Use of icephys_filtering is deprecated. "
+        msg = ("Use of icephys_filtering is deprecated and will be removed in PyNWB 4.0. "
                "Use the IntracellularElectrode.filtering field instead")        
         
         with self.assertRaisesWith(ValueError, msg):
@@ -1262,7 +1262,7 @@ class NWBFileTests(TestCase):
             session_start_time=datetime.now(tzlocal())
         )
         # set the icephys_filtering attribute and make sure we get a deprecation warning
-        msg = ("Use of icephys_filtering is deprecated. "
+        msg = ("Use of icephys_filtering is deprecated and will be removed in PyNWB 4.0. "
                "Use the IntracellularElectrode.filtering field instead")
         with self.assertRaisesWith(ValueError, msg):
             nwbfile.icephys_filtering = 'test filtering'

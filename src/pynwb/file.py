@@ -382,7 +382,8 @@ class NWBFile(MultiContainerInterface, HERDManager):
              'doc': 'the ElectrodeGroups that belong to this NWBFile', 'default': None},
             {'name': 'ic_electrodes', 'type': (list, tuple),
              'doc': 'DEPRECATED use icephys_electrodes parameter instead. '
-                    'IntracellularElectrodes that belong to this NWBFile', 'default': None},  # TODO remove this arg in PyNWB 4.0
+                    'IntracellularElectrodes that belong to this NWBFile', 'default': None},  
+                    # TODO remove this arg in PyNWB 4.0
             {'name': 'sweep_table', 'type': SweepTable,
              'doc': '[DEPRECATED] Use IntracellularRecordingsTable instead. '
                     'The SweepTable that belong to this NWBFile', 'default': None},
@@ -491,7 +492,7 @@ class NWBFile(MultiContainerInterface, HERDManager):
         # backwards-compatibility code for ic_electrodes / icephys_electrodes
         icephys_electrodes = args_to_set['icephys_electrodes']
         ic_electrodes = args_to_set['ic_electrodes']
-        if icephys_electrodes is None and ic_electrodes is not None:
+        if ic_electrodes is not None:
             self._error_on_new_pass_on_construct(error_msg=("Use of the ic_electrodes parameter is deprecated "
                                                             "and will be removed in PyNWB 4.0. "
                                                             "Use the icephys_electrodes parameter instead"))
