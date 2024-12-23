@@ -145,7 +145,7 @@ class ScratchData(NWBData):
                     error_msg=("The `notes` argument of ScratchData.__init__ has been deprecated and "
                                "will be removed in PyNWB 4.0. Use description instead.")
                     )
-            if notes != '' and description is not None:
+            if description is not None:
                 raise ValueError('Cannot provide both notes and description to ScratchData.__init__. The description '
                                  'argument is recommended.')
             description = notes
