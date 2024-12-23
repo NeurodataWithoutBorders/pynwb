@@ -382,7 +382,7 @@ class NWBFile(MultiContainerInterface, HERDManager):
              'doc': 'the ElectrodeGroups that belong to this NWBFile', 'default': None},
             {'name': 'ic_electrodes', 'type': (list, tuple),
              'doc': 'DEPRECATED use icephys_electrodes parameter instead. '
-                    'IntracellularElectrodes that belong to this NWBFile', 'default': None},
+                    'IntracellularElectrodes that belong to this NWBFile', 'default': None},  # TODO remove this arg in PyNWB 4.0
             {'name': 'sweep_table', 'type': SweepTable,
              'doc': '[DEPRECATED] Use IntracellularRecordingsTable instead. '
                     'The SweepTable that belong to this NWBFile', 'default': None},
@@ -492,7 +492,8 @@ class NWBFile(MultiContainerInterface, HERDManager):
         icephys_electrodes = args_to_set['icephys_electrodes']
         ic_electrodes = args_to_set['ic_electrodes']
         if icephys_electrodes is None and ic_electrodes is not None:
-            self._error_on_new_pass_on_construct(error_msg=("Use of the ic_electrodes parameter is deprecated. "
+            self._error_on_new_pass_on_construct(error_msg=("Use of the ic_electrodes parameter is deprecated "
+                                                            "and will be removed in PyNWB 4.0. "
                                                             "Use the icephys_electrodes parameter instead"))
             args_to_set['icephys_electrodes'] = ic_electrodes
         args_to_set.pop('ic_electrodes')  # do not set this arg
@@ -568,7 +569,8 @@ class NWBFile(MultiContainerInterface, HERDManager):
     @icephys_filtering.setter
     def icephys_filtering(self, val):
         if val is not None:
-            self._error_on_new_warn_on_construct("Use of icephys_filtering is deprecated. "
+            self._error_on_new_warn_on_construct("Use of icephys_filtering is deprecated "
+                                                 "and will be removed in PyNWB 4.0. "
                                                  "Use the IntracellularElectrode.filtering field instead")
             self.fields['icephys_filtering'] = val
 
@@ -1013,11 +1015,12 @@ class NWBFile(MultiContainerInterface, HERDManager):
             {'name': 'notes', 'type': str,
              'doc': ('[DEPRECATED] Notes to add to the data. '
                      'Only used when passing in numpy.ndarray, list, or tuple. This argument is not recommended. '
-                     'Use the `description` argument instead.'),
+                     'Use the `description` argument instead.'),  # TODO remove this arg in PyNWB 4.0
              'default': None},
             {'name': 'table_description', 'type': str,
              'doc': ('[DEPRECATED] Description for the internal DynamicTable used to store a pandas.DataFrame. This '
                      'argument is not recommended. Use the `description` argument instead.'),
+                     # TODO remove this arg in PyNWB 4.0
              'default': ''},
             {'name': 'description', 'type': str,
              'doc': ('Description of the data. Required only when passing in a scalar, numpy.ndarray, '
