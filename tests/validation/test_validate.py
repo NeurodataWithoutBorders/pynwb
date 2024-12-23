@@ -181,7 +181,7 @@ class TestValidateCLI(TestCase):
         """Test that validating a file with the json flag outputs a json file."""
         json_path = "test_validation.json"
         run_coverage(["tests/back_compat/1.0.2_str_experimenter.nwb", "--no-cached-namespace", 
-                      "--json-file-path", json_path])
+                      "--json-output-path", json_path])
         self.assertTrue(os.path.exists(json_path))
         os.remove(json_path)
 
@@ -189,7 +189,7 @@ class TestValidateCLI(TestCase):
         """Test that using the validation entry point successfully executes the validate CLI."""
         json_path = "test_validation_entry_point.json"
         subprocess.run(["pynwb-validate", "tests/back_compat/1.0.2_str_experimenter.nwb", 
-                        "--json-file-path", json_path])
+                        "--json-output-path", json_path])
         self.assertTrue(os.path.exists(json_path))
         os.remove(json_path)
 
@@ -292,7 +292,7 @@ class TestValidateFunction(TestCase):
                             ('tests/back_compat/1.1.2_nwbfile.nwb', 'hdmf-common'),
                             ('tests/back_compat/2.1.0_nwbfile_with_extension.nwb', 'core'),]
         
-        # paths that cause errors
+        # paths that cause no errors
         for path, ns in tests:
             with patch("sys.stdout", new=StringIO()) as fake_out:
                 with self.get_io(path=path) as io:
@@ -308,7 +308,7 @@ class TestValidateFunction(TestCase):
             self.assertEqual(results_io, results_path)
             self.assertEqual(out_io, out_path)
         
-        # paths that return no errors
+        # paths that return errors
         for path, ns in tests_with_error:
             with self.assertRaises(ValueError) as e_io:
                 with self.get_io(path=path) as io:

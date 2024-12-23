@@ -64,10 +64,10 @@ of the **core** NWB specification that are installed with newer or older version
     -lns, --list-namespaces
                           List the available namespaces and exit.
     -n NS, --ns NS        the namespace to validate against
-    --json-file-path JSON_FILE_PATH
+    --json-output-path JSON_OUTPUT_PATH
                           Write json output to this location.
     --no-cached-namespace
-                          Use the PyNWB loaded namespace (true) or use the cached namespace (false; default).
+                          Use the namespaces installed by PyNWB (true) or use the cached namespaces (false; default).
 
   If --ns is not specified, validate against all namespaces in the NWB file.
 

@@ -40,13 +40,13 @@ def validation_cli():
     # Common args to the API validate
     parser.add_argument("paths", type=str, nargs="+", help="NWB file paths")
     parser.add_argument("-n", "--ns", type=str, help="the namespace to validate against")
-    parser.add_argument("--json-file-path", dest="json_file_path", type=str, help="Write json output to this location.")
+    parser.add_argument("--json-output-path", dest="json_output_path", type=str, help="Write json output to this location.")
     feature_parser = parser.add_mutually_exclusive_group(required=False)
     feature_parser.add_argument(
         "--no-cached-namespace",
         dest="no_cached_namespace",
         action="store_true",
-        help="Use the PyNWB loaded namespace (true) or use the cached namespace (false; default).",
+        help="Use the namespaces installed by PyNWB (true) or use the cached namespaces (false; default).",
     )
     parser.set_defaults(no_cached_namespace=False)
     args = parser.parse_args()
@@ -70,11 +70,11 @@ def validation_cli():
                 status = 1
         
     # write output to json file
-    if args.json_file_path is not None:
-        with open(args.json_file_path, "w") as f:
+    if args.json_output_path is not None:
+        with open(args.json_output_path, "w") as f:
             json_report = {'exitcode': status, 'errors': [str(e) for e in validation_errors]}
             json.dump(obj=json_report, fp=f)
-            print(f"Report saved to {str(Path(args.json_file_path).absolute())}!")
+            print(f"Report saved to {str(Path(args.json_output_path).absolute())}!")
 
     sys.exit(status)
 
