@@ -40,7 +40,8 @@ def validation_cli():
     # Common args to the API validate
     parser.add_argument("paths", type=str, nargs="+", help="NWB file paths")
     parser.add_argument("-n", "--ns", type=str, help="the namespace to validate against")
-    parser.add_argument("--json-output-path", dest="json_output_path", type=str, help="Write json output to this location.")
+    parser.add_argument("--json-output-path", dest="json_output_path", type=str, 
+                        help="Write json output to this location.")
     feature_parser = parser.add_mutually_exclusive_group(required=False)
     feature_parser.add_argument(
         "--no-cached-namespace",
