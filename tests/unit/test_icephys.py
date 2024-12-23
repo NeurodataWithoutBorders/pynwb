@@ -161,8 +161,11 @@ class PatchClampSeriesConstructor(TestCase):
     def test_gain_optional(self):
         electrode_name = GetElectrode()
 
-        pCS = PatchClampSeries('test_pCS', list(), 'unit',
-                               electrode_name, timestamps=list())
+        pCS = PatchClampSeries(name='test_pCS',
+                               data=list(),
+                               unit='unit',
+                               electrode=electrode_name,
+                               timestamps=list())
         self.assertIsNone(pCS.gain)
 
     def test_sweepNumber_valid(self):
