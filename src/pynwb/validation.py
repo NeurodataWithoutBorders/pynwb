@@ -5,7 +5,7 @@ from warnings import warn
 
 from hdmf.spec import NamespaceCatalog
 from hdmf.build import BuildManager, TypeMap
-from hdmf.utils import docval, getargs
+from hdmf.utils import docval, getargs, AllowPositional
 from hdmf.backends.io import HDMFIO
 from hdmf.validate import ValidatorMap
 
@@ -124,6 +124,7 @@ def get_cached_namespaces_to_validate(path: Optional[str] = None,
     returns="Validation errors in the file.",
     rtype=list,
     is_method=False,
+    allow_positional=AllowPositional.WARNING,
 )
 def validate(**kwargs):
     """Validate NWB file(s) against a namespace or its cached namespaces.
