@@ -6,7 +6,7 @@
 - The validation methods have been updated with multiple breaking changes. @stephprince [#1911](https://github.com/NeurodataWithoutBorders/pynwb/pull/1911)
    - The behavior of `pynwb.validate(io=...)` now matches the behavior of `pynwb.validate(path=...)`. In previous pynwb versions, `pynwb.validate(io=...)` did not use the cached namespaces during validation. To obtain the same behavior as in previous versions, you can update the function call to `pynwb.validate(io=..., use_cached_namespaces=False)`
    - The validate module has been renamed to `validation.py`. The validate method can be 
-   imported using `import pynwb; pynwb.validate` or `from pynwb.validation import validate`
+   imported using `import pynwb; pynwb.validate` or `from pynwb import validate`
 
 ### Enhancements and minor changes
 - Added support for NWB schema 2.8.0. @rly [#2001](https://github.com/NeurodataWithoutBorders/pynwb/pull/2001)

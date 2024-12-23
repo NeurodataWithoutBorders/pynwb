@@ -350,7 +350,7 @@ def get_class(**kwargs):
     return __TYPE_MAP.get_dt_container_cls(neurodata_type, namespace)
 
 
-@docval({'name': 'path', 'type': str, 'doc': 'the neurodata_type to get the NWBContainer class for'},
+@docval({'name': 'path', 'type': str, 'doc': 'Path to the NWB file which can be an HDF5 file or a Zarr store.'},
         {"name": "method", "type": str, "doc": "the method to use when opening the file", 'default': None},
         is_method=False)
 def _get_backend(path: str, method: str = None):
