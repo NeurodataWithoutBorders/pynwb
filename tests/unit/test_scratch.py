@@ -43,6 +43,7 @@ class TestScratchData(TestCase):
         # test notes property
         msg = ("Use of ScratchData.notes has been deprecated and will be removed in PyNWB 4.0. "
                "Use ScratchData.description instead.")
+        
         with self.assertWarnsWith(DeprecationWarning, msg):
             data.notes
 
@@ -106,9 +107,12 @@ class TestScratchData(TestCase):
             self.nwbfile.add_scratch(data, name='test')
 
     def test_add_scratch_notes_and_description(self):
-        msg = 'Cannot call add_scratch with (notes or table_description) and description'
-        with self.assertRaisesWith(ValueError, msg):
-            self.nwbfile.add_scratch([1, 2, 3, 4], name='test', description='test data', notes='test notes')
+        error_msg = 'Cannot call add_scratch with (notes or table_description) and description'
+        warning_msg = ("Use of the `notes` or `table_description` argument is deprecated and will be "
+                       "removed in PyNWB 4.0. Use the `description` argument instead.")
+        with self.assertWarnsWith(DeprecationWarning, warning_msg):
+            with self.assertRaisesWith(ValueError, error_msg):
+                self.nwbfile.add_scratch([1, 2, 3, 4], name='test', description='test data', notes='test notes')
 
     def test_add_scratch_container(self):
         data = TimeSeries(name='test_ts', data=[1, 2, 3, 4, 5], unit='unit', timestamps=[1.1, 1.2, 1.3, 1.4, 1.5])
