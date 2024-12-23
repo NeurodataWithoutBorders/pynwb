@@ -1102,15 +1102,28 @@ class NWBFileTests(TestCase):
         electrode = self.__add_electrode(nwbfile, device)
         stimulus = self.__get_stimulus(electrode=electrode)
         response = self.__get_response(electrode=electrode)
-        # Make sure we warn if sweeptable is added on add_stimulus
-        with warnings.catch_warnings(record=True) as w:
-            warnings.simplefilter("always")  # Trigger all warnings
+        stimulus2 = VoltageClampStimulusSeries(
+            name="ccss2",
+            data=[1, 2, 3, 4, 5],
+            starting_time=123.6,
+            rate=10e3,
+            electrode=electrode,
+            gain=0.02,
+            sweep_number=np.uint64(16)
+        )
+
+        msg = ("SweepTable is deprecated. Use the IntracellularRecordingsTable instead. "
+               "See also the NWBFile.add_intracellular_recordings function.")
+        with self.assertRaisesWith(ValueError, msg):
             nwbfile.add_stimulus(stimulus, use_sweep_table=True)
-            self.assertEqual(len(w), 1)
-            assert issubclass(w[-1].category, DeprecationWarning)
-            # make sure we don't trigger the same deprecation warning twice
-            nwbfile.add_acquisition(response, use_sweep_table=True)
-            self.assertEqual(len(w), 1)
+        
+        # test that adding a stimulus does not error when in construct mode
+        nwbfile._in_construct_mode = True
+        nwbfile.add_stimulus(stimulus2, use_sweep_table=True)
+        
+        # make sure we don't trigger the same deprecation warning twice
+        nwbfile.add_acquisition(response, use_sweep_table=True)
+        nwbfile._in_construct_mode = False
 
     def test_deprecate_sweeptable_on_add_stimulus_template(self):
         """
@@ -1140,16 +1153,18 @@ class NWBFileTests(TestCase):
             gain=0.02,
             sweep_number=np.uint64(15)
         )
-        with warnings.catch_warnings(record=True) as w:
+
+        msg = ("SweepTable is deprecated. Use the IntracellularRecordingsTable instead. "
+               "See also the NWBFile.add_intracellular_recordings function.")
+        with self.assertRaisesWith(ValueError, msg):
             nwbfile.add_stimulus_template(local_stimulus, use_sweep_table=True)
-            self.assertEqual(len(w), 1)
-            assert issubclass(w[-1].category, DeprecationWarning)
-            self.assertEqual(str(w[-1].message),
-                             "Use of SweepTable is deprecated. Use the IntracellularRecordingsTable "
-                             "instead. See also the  NWBFile.add_intracellular_recordings function.")
-            # make sure we don't trigger the same deprecation warning twice
-            nwbfile.add_stimulus_template(local_stimulus2, use_sweep_table=True)
-            self.assertEqual(len(w), 1)
+            # NOTE - the sweep table creation will error but the stimulus template will still be added
+
+        # create object in construct mode, modeling the behavior of the ObjectMapper on read
+        # should not trigger any warnings or errors
+        nwbfile._in_construct_mode = True
+        nwbfile.add_stimulus_template(local_stimulus2, use_sweep_table=True)
+        nwbfile._in_construct_mode = False
 
     def test_deprecate_sweepstable_on_add_acquistion(self):
         """
@@ -1160,49 +1175,84 @@ class NWBFileTests(TestCase):
         electrode = self.__add_electrode(nwbfile, device)
         stimulus = self.__get_stimulus(electrode=electrode)
         response = self.__get_response(electrode=electrode)
-        # Make sure we warn if sweeptable is added on add_stimulus
-        with warnings.catch_warnings(record=True) as w:
+        response2 = VoltageClampSeries(
+            name='vcs2',
+            data=[0.1, 0.2, 0.3, 0.4, 0.5],
+            conversion=1e-12,
+            resolution=np.nan,
+            starting_time=123.6,
+            rate=20e3,
+            electrode=electrode,
+            gain=0.02,
+            capacitance_slow=100e-12,
+            resistance_comp_correction=70.0,
+            sweep_number=np.uint64(16)
+        )
+
+        msg = ("SweepTable is deprecated. Use the IntracellularRecordingsTable instead. "
+            "See also the NWBFile.add_intracellular_recordings function.")
+        
+        # check we raise an error when using the sweeptable with add_acquisition
+        with self.assertRaisesWith(ValueError, msg):
             nwbfile.add_acquisition(response, use_sweep_table=True)
-            self.assertEqual(len(w), 1)
-            assert issubclass(w[-1].category, DeprecationWarning)
-            self.assertEqual(str(w[-1].message),
-                             "Use of SweepTable is deprecated. Use the IntracellularRecordingsTable "
-                             "instead. See also the  NWBFile.add_intracellular_recordings function.")
-            # make sure we don't trigger the same deprecation warning twice
-            nwbfile.add_stimulus(stimulus, use_sweep_table=True)
-            self.assertEqual(len(w), 1)
+            # NOTE - the sweep table creation will error but the acquisition will still be added
+        
+        # should not trigger error or warning in construct mode
+        nwbfile._in_construct_mode = True
+        nwbfile.add_acquisition(response2, use_sweep_table=True)
+        
+        # make sure we don't trigger the same deprecation warning twice
+        nwbfile.add_stimulus(stimulus, use_sweep_table=True)
+        nwbfile._in_construct_mode = False
+
 
     def test_deprecate_sweepstable_on_init(self):
         """
         Test that warnings are raised if the user tries to use a sweeps table
         """
         from pynwb.icephys import SweepTable
-        with warnings.catch_warnings(record=True) as w:
-            nwbfile = NWBFile(
-                session_description='my first synthetic recording',
-                identifier='EXAMPLE_ID',
-                session_start_time=datetime.now(tzlocal()),
-                sweep_table=SweepTable()
-            )
-            device = self.__add_device(nwbfile)
-            electrode = self.__add_electrode(nwbfile, device)
-            stimulus = self.__get_stimulus(electrode=electrode)
-            self.assertEqual(len(w), 1)
-            assert issubclass(w[-1].category, DeprecationWarning)
-            # make sure we don't trigger the same deprecation warning twice
-            nwbfile.add_stimulus(stimulus, use_sweep_table=True)
-            self.assertEqual(len(w), 1)
+        sweepT = SweepTable.__new__(SweepTable, in_construct_mode=True)
+        sweepT.__init__()
 
-    def test_deprectation_icephys_filtering_on_init(self):
-        with warnings.catch_warnings(record=True) as w:
-            nwbfile = NWBFile(
-                session_description='my first synthetic recording',
+        kwargs = dict(session_description='my first synthetic recording',
                 identifier='EXAMPLE_ID',
                 session_start_time=datetime.now(tzlocal()),
-                icephys_filtering='test filtering'
-            )
-            assert issubclass(w[-1].category, DeprecationWarning)
-            self.assertEqual(nwbfile.icephys_filtering, 'test filtering')
+                sweep_table=sweepT)
+        
+        # check we raise an error when using the sweeptable argument on init
+        msg = ("SweepTable is deprecated. Use the IntracellularRecordingsTable instead. "
+            "See also the NWBFile.add_intracellular_recordings function.")
+        with self.assertRaisesWith(ValueError, msg):
+            nwbfile = NWBFile(**kwargs)
+
+        # create object in construct mode, modeling the behavior of the ObjectMapper on read
+        # should not trigger warning or error
+        nwbfile = NWBFile.__new__(NWBFile, in_construct_mode=True)
+        nwbfile.__init__(**kwargs)
+
+        # make sure we don't trigger the same deprecation warning twice
+        device = self.__add_device(nwbfile)
+        electrode = self.__add_electrode(nwbfile, device)
+        stimulus = self.__get_stimulus(electrode=electrode)
+        nwbfile.add_stimulus(stimulus, use_sweep_table=True)
+
+    def test_deprecation_icephys_filtering_on_init(self):
+        kwargs = dict(session_description='my first synthetic recording',
+                identifier='EXAMPLE_ID',
+                session_start_time=datetime.now(tzlocal()),
+                icephys_filtering='test filtering')
+        msg = ("Use of icephys_filtering is deprecated and will be removed in PyNWB 4.0. "
+               "Use the IntracellularElectrode.filtering field instead")        
+        
+        with self.assertRaisesWith(ValueError, msg):
+            nwbfile = NWBFile(**kwargs)
+
+        # create object in construct mode, modeling the behavior of the ObjectMapper on read
+        nwbfile = NWBFile.__new__(NWBFile, in_construct_mode=True)
+        with self.assertWarnsWith(warn_type=UserWarning, exc_msg=msg):
+            nwbfile.__init__(**kwargs)
+
+        self.assertEqual(nwbfile.icephys_filtering, 'test filtering')
 
     def test_icephys_filtering_roundtrip(self):
         # create the base file
@@ -1212,18 +1262,24 @@ class NWBFileTests(TestCase):
             session_start_time=datetime.now(tzlocal())
         )
         # set the icephys_filtering attribute and make sure we get a deprecation warning
-        with warnings.catch_warnings(record=True) as w:
+        msg = ("Use of icephys_filtering is deprecated and will be removed in PyNWB 4.0. "
+               "Use the IntracellularElectrode.filtering field instead")
+        with self.assertRaisesWith(ValueError, msg):
             nwbfile.icephys_filtering = 'test filtering'
-            assert issubclass(w[-1].category, DeprecationWarning)
-        # write the test fil
+
+        # create object in construct mode, modeling the behavior of the ObjectMapper on read
+        nwbfile._in_construct_mode = True
+        with self.assertWarnsWith(warn_type=UserWarning, exc_msg=msg):
+            nwbfile.icephys_filtering = 'test filtering'
+        nwbfile._in_construct_mode = False
+
+        # write the test file
         with NWBHDF5IO(self.path, 'w') as io:
             io.write(nwbfile)
         # read the test file and confirm icephys_filtering has been written
         with NWBHDF5IO(self.path, 'r') as io:
-            with warnings.catch_warnings(record=True) as w:
+            with self.assertWarnsWith(UserWarning, msg):
                 infile = io.read()
-                self.assertEqual(len(w), 1)  # make sure a warning is being raised
-                assert issubclass(w[0].category, DeprecationWarning)  # make sure it is a deprecation warning
                 self.assertEqual(infile.icephys_filtering, 'test filtering')  # make sure the value is set
 
     def test_get_icephys_meta_parent_table(self):

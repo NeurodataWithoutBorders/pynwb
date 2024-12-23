@@ -38,14 +38,20 @@ class NWBMixin(AbstractContainer):
         Raise an error when a check is violated on instance creation.
         To ensure backwards compatibility, this method throws a warning
         instead of raising an error when reading from a file, ensuring that
-        files with invalid data can be read. If error_msg is set to None
-        the function will simply return without further action.
+        files with invalid data can be read.
         """
-        if error_msg is None:
-            return
         if not self._in_construct_mode:
             raise ValueError(error_msg)
         warn(error_msg)
+
+    def _error_on_new_pass_on_construct(self, error_msg: str):
+        """
+        Raise an error when a check is violated on instance creation.
+        When reading from a file, do nothing, ensuring that files with
+        invalid data or deprecated neurodata types can be read.
+        """
+        if not self._in_construct_mode:
+            raise ValueError(error_msg)
 
     def _get_type_map(self):
         return get_type_map()
@@ -130,27 +136,29 @@ class ScratchData(NWBData):
         notes, description = popargs('notes', 'description', kwargs)
         super().__init__(**kwargs)
         if notes != '':
-            warn('The `notes` argument of ScratchData.__init__ will be deprecated. Use description instead.',
-                 PendingDeprecationWarning)
-            if notes != '' and description != '':
+            self._error_on_new_pass_on_construct(
+                    error_msg=("The `notes` argument of ScratchData.__init__ has been deprecated and "
+                               "will be removed in PyNWB 4.0. Use description instead.")
+                    )
+            if description is not None:
                 raise ValueError('Cannot provide both notes and description to ScratchData.__init__. The description '
                                  'argument is recommended.')
             description = notes
         if not description:
-            warn('ScratchData.description will be required in a future major release of PyNWB.',
-                 PendingDeprecationWarning)
+            self._error_on_new_pass_on_construct(error_msg='ScratchData.description is required.')
         self.description = description
 
     @property
     def notes(self):
-        warn('Use of ScratchData.notes will be deprecated. Use ScratchData.description instead.',
-             PendingDeprecationWarning)
+        warn(("Use of ScratchData.notes has been deprecated and will be removed in PyNWB 4.0. "
+              "Use ScratchData.description instead."), DeprecationWarning)
         return self.description
-
+    
     @notes.setter
     def notes(self, value):
-        warn('Use of ScratchData.notes will be deprecated. Use ScratchData.description instead.',
-             PendingDeprecationWarning)
+        self._error_on_new_pass_on_construct(
+                    error_msg=("Use of ScratchData.notes has been deprecated and will be removed in PyNWB 4.0. "
+                               "Use ScratchData.description instead."))
         self.description = value
 
 

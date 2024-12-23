@@ -115,14 +115,14 @@ class ImagingPlane(NWBContainer):
         if not isinstance(args_to_set['optical_channel'], list):
             args_to_set['optical_channel'] = [args_to_set['optical_channel']]
         if args_to_set['manifold'] is not None:
-            warnings.warn("The 'manifold' argument is deprecated in favor of 'origin_coords' and 'grid_spacing'.",
-                          DeprecationWarning)
+            error_msg = "The 'manifold' argument is deprecated in favor of 'origin_coords' and 'grid_spacing'."
+            self._error_on_new_pass_on_construct(error_msg=error_msg)
         if args_to_set['conversion'] != 1.0:
-            warnings.warn("The 'conversion' argument is deprecated in favor of 'origin_coords' and 'grid_spacing'.",
-                          DeprecationWarning)
+            error_msg = "The 'conversion' argument is deprecated in favor of 'origin_coords' and 'grid_spacing'."
+            self._error_on_new_pass_on_construct(error_msg=error_msg)
         if args_to_set['unit'] != 'meters':
-            warnings.warn("The 'unit' argument is deprecated in favor of 'origin_coords_unit' and 'grid_spacing_unit'.",
-                          DeprecationWarning)
+            error_msg = "The 'unit' argument is deprecated in favor of 'origin_coords_unit' and 'grid_spacing_unit'."
+            self._error_on_new_pass_on_construct(error_msg=error_msg)
         for key, val in args_to_set.items():
             setattr(self, key, val)
 

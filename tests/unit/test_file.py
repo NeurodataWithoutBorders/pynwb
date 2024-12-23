@@ -126,12 +126,13 @@ class NWBFileTest(TestCase):
 
         remove_test_file("electrodes_mwe.nwb")
 
-    def test_access_processing(self):
+    def test_access_processing_with_modules(self):
         self.nwbfile.create_processing_module('test_mod', 'test_description')
-        # test deprecate .modules
-        with self.assertWarnsWith(DeprecationWarning, 'NWBFile.modules has been replaced by NWBFile.processing.'):
-            modules = self.nwbfile.modules['test_mod']
-        self.assertIs(self.nwbfile.processing['test_mod'], modules)
+
+        # create object with deprecated argument
+        msg = "'NWBFile' object has no attribute 'modules'"
+        with self.assertRaisesWith(AttributeError, msg):
+            self.nwbfile.modules['test_mod']
 
     def test_epoch_tags(self):
         tags1 = ['t1', 't2']
@@ -175,11 +176,8 @@ class NWBFileTest(TestCase):
 
     def test_add_stimulus_timeseries_arg(self):
         """Test nwbfile.add_stimulus using the deprecated 'timeseries' keyword argument"""
-        msg = (
-            "The 'timeseries' keyword argument is deprecated and will be removed in PyNWB 3.0. "
-            "Use the 'stimulus' argument instead."
-        )
-        with self.assertWarnsWith(DeprecationWarning, msg):
+        msg = ("NWBFile.add_stimulus: missing argument 'stimulus', unrecognized argument: 'timeseries'")
+        with self.assertRaisesWith(TypeError, msg):
             self.nwbfile.add_stimulus(
                 timeseries=TimeSeries(
                     name='test_ts',
@@ -188,17 +186,12 @@ class NWBFileTest(TestCase):
                     timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5]
                 )
             )
-        self.assertEqual(len(self.nwbfile.stimulus), 1)
 
     def test_add_stimulus_no_stimulus_arg(self):
         """Test nwbfile.add_stimulus using the deprecated 'timeseries' keyword argument"""
-        msg = (
-            "The 'stimulus' keyword argument is required. The 'timeseries' keyword argument can be "
-            "provided for backwards compatibility but is deprecated in favor of 'stimulus' and will be "
-            "removed in PyNWB 3.0."
-        )
-        with self.assertRaisesWith(ValueError, msg):
-            self.nwbfile.add_stimulus(None)
+        msg = ("NWBFile.add_stimulus: missing argument 'stimulus'")
+        with self.assertRaisesWith(TypeError, msg):
+            self.nwbfile.add_stimulus()
         self.assertEqual(len(self.nwbfile.stimulus), 0)
 
     def test_add_stimulus_dynamic_table(self):
@@ -542,6 +535,21 @@ Fields:
                                related_publications=('pub1', 'pub2'))
         self.assertTupleEqual(self.nwbfile.related_publications, ('pub1', 'pub2'))
 
+    def test_ec_electrodes_deprecation(self):
+        nwbfile = NWBFile('a', 'b', datetime.now(tzlocal()))
+        device = nwbfile.create_device('a')
+        elecgrp = nwbfile.create_electrode_group('name', 'desc', device=device, location='a')
+        nwbfile.add_electrode(location='loc1', group=elecgrp, id=0)
+
+        # test that NWBFile.ec_electrodes property warns or errors
+        msg = "'NWBFile' object has no attribute 'ec_electrodes'"
+        with self.assertRaisesWith(AttributeError, msg):
+            nwbfile.ec_electrodes
+
+        # test that NWBFile.ec_electrode_groups warns or errors
+        msg = "'NWBFile' object has no attribute 'ec_electrode_groups'"
+        with self.assertRaisesWith(AttributeError, msg):
+            nwbfile.ec_electrode_groups
 
 class SubjectTest(TestCase):
     def setUp(self):
