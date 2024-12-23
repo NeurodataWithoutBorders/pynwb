@@ -17,7 +17,7 @@
   - Deprecated `ImageMaskSeries` neurodata type. @rly [#1941](https://github.com/NeurodataWithoutBorders/pynwb/pull/1941)
 - Added enhancements to the validation CLI. @stephprince [#1911](https://github.com/NeurodataWithoutBorders/pynwb/pull/1911)
   - Added an entry point for the validation module. You can now use `pynwb-validate "file.nwb"`.
-  - Added the `--json-file-path` CLI argument to output validation results in a machine readable format.
+  - Added the `--json-outpath-path` CLI argument to output validation results in a machine readable format.
 - Removed python 3.8 support, added python 3.13 support. @stephprince [#2007](https://github.com/NeurodataWithoutBorders/pynwb/pull/2007)
 
 ### Documentation and tutorial enhancements

@@ -52,7 +52,7 @@ of the **core** NWB specification that are installed with newer or older version
 .. code-block:: text
 
   $pynwb-validate --help
-  usage: pynwb-validate [-h] [-lns] [-n NS] [--json-file-path JSON_FILE_PATH] [--no-cached-namespace] paths [paths ...]
+  usage: pynwb-validate [-h] [-lns] [-n NS] [--json-output-path JSON_OUTPUT_PATH] [--no-cached-namespace] paths [paths ...]
 
   Validate an NWB file
 
