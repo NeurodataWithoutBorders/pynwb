@@ -490,7 +490,6 @@ class NWBFile(MultiContainerInterface, HERDManager):
         args_to_set['file_create_date'] = list(map(_add_missing_timezone, file_create_date))
 
         # backwards-compatibility code for ic_electrodes / icephys_electrodes
-        icephys_electrodes = args_to_set['icephys_electrodes']
         ic_electrodes = args_to_set['ic_electrodes']
         if ic_electrodes is not None:
             self._error_on_new_pass_on_construct(error_msg=("Use of the ic_electrodes parameter is deprecated "
