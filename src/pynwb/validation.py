@@ -122,7 +122,7 @@ def get_cached_namespaces_to_validate(path: Optional[str] = None,
         "default": None,
     }, 
     returns="Validation errors in the file.",
-    rtype=(list, (list, bool)),
+    rtype=list,
     is_method=False,
 )
 def validate(**kwargs):
