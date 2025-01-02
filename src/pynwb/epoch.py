@@ -2,7 +2,7 @@ from bisect import bisect_left
 
 from hdmf.data_utils import DataIO
 from hdmf.common import DynamicTable
-from hdmf.utils import docval, getargs, popargs, get_docval
+from hdmf.utils import docval, getargs, popargs, get_docval, AllowPositional
 
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries, TimeSeriesReferenceVectorData, TimeSeriesReference
@@ -27,7 +27,8 @@ class TimeIntervals(DynamicTable):
     @docval({'name': 'name', 'type': str, 'doc': 'name of this TimeIntervals'},  # required
             {'name': 'description', 'type': str, 'doc': 'Description of this TimeIntervals',
              'default': "experimental intervals"},
-            *get_docval(DynamicTable.__init__, 'id', 'columns', 'colnames'))
+            *get_docval(DynamicTable.__init__, 'id', 'columns', 'colnames'),
+            allow_positional=AllowPositional.WARNING,)
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
