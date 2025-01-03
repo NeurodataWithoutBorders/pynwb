@@ -2,6 +2,13 @@
 
 ## PyNWB 3.0.0 (Upcoming)
 
+### Breaking changes
+- The validation methods have been updated with multiple breaking changes. @stephprince [#1911](https://github.com/NeurodataWithoutBorders/pynwb/pull/1911)
+   - The behavior of `pynwb.validate(io=...)` now matches the behavior of `pynwb.validate(path=...)`. In previous pynwb versions, `pynwb.validate(io=...)` did not use the cached namespaces during validation. To obtain the same behavior as in previous versions, you can update the function call to `pynwb.validate(io=..., use_cached_namespaces=False)`
+   - `pynwb.validate` will return only a list of validation errors instead of a tuple: (list of validation_errors, status code)
+   - The validate module has been renamed to `validation.py`. The validate method can be 
+   imported using `import pynwb; pynwb.validate` or `from pynwb import validate`
+
 ### Deprecations
 - The following deprecated classes will now raise errors when creating new instances of these classes: ``ClusteringWaveforms``, ``Clustering``, ``SweepTable``. Reading files using these data types will continue to be supported.
 - The following methods and arguments have been deprecated:
@@ -30,6 +37,9 @@
   - Added support for `model_number`, `model_name`, and `serial_number` fields to `Device`. @stephprince [#1997](https://github.com/NeurodataWithoutBorders/pynwb/pull/1997)
   - Deprecated `EventWaveform` neurodata type. @rly [#1940](https://github.com/NeurodataWithoutBorders/pynwb/pull/1940)
   - Deprecated `ImageMaskSeries` neurodata type. @rly [#1941](https://github.com/NeurodataWithoutBorders/pynwb/pull/1941)
+- Added enhancements to the validation CLI. @stephprince [#1911](https://github.com/NeurodataWithoutBorders/pynwb/pull/1911)
+  - Added an entry point for the validation module. You can now use `pynwb-validate "file.nwb"`.
+  - Added the `--json-outpath-path` CLI argument to output validation results in a machine readable format.
 - Removed python 3.8 support, added python 3.13 support. @stephprince [#2007](https://github.com/NeurodataWithoutBorders/pynwb/pull/2007)
 - Added warnings when using positional arguments in `Container` constructor methods. Positional arguments will raise errors in the next major release. @stephprince [#1972](https://github.com/NeurodataWithoutBorders/pynwb/pull/1972)
 
