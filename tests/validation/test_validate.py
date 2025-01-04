@@ -313,7 +313,6 @@ class TestValidateFunction(TestCase):
             with self.assertWarns(UserWarning) as w_io:
                 with self.get_io(path=path) as io:
                     results_io = validate(io=io, namespace=ns, verbose=True)
-                    print(results_io)
 
             with self.assertWarns(UserWarning) as w_path:
                 results_path = validate(path=path, namespace=ns, verbose=True)
