@@ -296,21 +296,21 @@ nwbfile.add_acquisition(images)
 # :py:class:`~pynwb.image.IndexSeries` that indexes into the
 # :py:class:`~pynwb.base.Images`.
 
-from scipy import misc
+from scipy import datasets
 
 from pynwb.base import ImageReferences
 from pynwb.image import GrayscaleImage, Images, IndexSeries, RGBImage
 
 gs_face = GrayscaleImage(
     name="gs_face",
-    data=misc.face(gray=True),
+    data=datasets.face(gray=True),
     description="Grayscale version of a raccoon.",
     resolution=35.433071,
 )
 
 rgb_face = RGBImage(
     name="rgb_face",
-    data=misc.face(),
+    data=datasets.face(),
     resolution=70.0,
     description="RGB version of a raccoon.",
 )

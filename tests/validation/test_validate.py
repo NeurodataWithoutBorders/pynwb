@@ -213,7 +213,7 @@ class TestValidateFunction(TestCase):
     def test_validate_io_no_cache(self):
         """Test that validating a file with no cached spec against the core namespace succeeds."""
         with self.get_io('tests/back_compat/1.0.2_nwbfile.nwb') as io:
-            errors = validate(io)
+            errors = validate(io=io)
             self.assertEqual(errors, [])
 
     def test_validate_io_no_cache_bad_ns(self):
@@ -227,19 +227,19 @@ class TestValidateFunction(TestCase):
     def test_validate_io_cached(self):
         """Test that validating a file with cached spec against its cached namespace succeeds."""
         with self.get_io('tests/back_compat/1.1.2_nwbfile.nwb') as io:
-            errors = validate(io)
+            errors = validate(io=io)
             self.assertEqual(errors, [])
 
     def test_validate_io_cached_extension(self):
         """Test that validating a file with cached spec against its cached namespaces succeeds."""
         with self.get_io('tests/back_compat/2.1.0_nwbfile_with_extension.nwb') as io:
-            errors = validate(io)
+            errors = validate(io=io)
             self.assertEqual(errors, [])
 
     def test_validate_io_cached_extension_pass_ns(self):
         """Test that validating a file with cached extension spec against the extension namespace succeeds."""
         with self.get_io('tests/back_compat/2.1.0_nwbfile_with_extension.nwb') as io:
-            errors = validate(io, 'ndx-testextension')
+            errors = validate(io=io, namespace='ndx-testextension')
             self.assertEqual(errors, [])
 
     def test_validate_file_cached_extension(self):
@@ -281,17 +281,17 @@ class TestValidateFunction(TestCase):
 
     def test_validate_io_and_path_same(self):
         """Test that validating a file with an io object and a path return the same results."""
-        tests = [('tests/back_compat/1.0.2_nwbfile.nwb', None),
-                 ('tests/back_compat/1.1.2_nwbfile.nwb', None),
+        tests = [('tests/back_compat/1.1.2_nwbfile.nwb', None),
                  ('tests/back_compat/1.1.2_nwbfile.nwb', 'core'),
                  ('tests/back_compat/2.1.0_nwbfile_with_extension.nwb', None),
                  ('tests/back_compat/2.1.0_nwbfile_with_extension.nwb', 'ndx-testextension'),]
         
-        tests_with_error = [('tests/back_compat/1.0.2_nwbfile.nwb', 'notfound'),
-                            ('tests/back_compat/1.1.2_nwbfile.nwb', 'notfound'), 
+        tests_with_error = [('tests/back_compat/1.1.2_nwbfile.nwb', 'notfound'),
                             ('tests/back_compat/1.1.2_nwbfile.nwb', 'hdmf-common'),
                             ('tests/back_compat/2.1.0_nwbfile_with_extension.nwb', 'core'),]
         
+        tests_with_warning = [('tests/back_compat/1.0.2_nwbfile.nwb', None),]
+
         # paths that cause no errors
         for path, ns in tests:
             with patch("sys.stdout", new=StringIO()) as fake_out:
@@ -307,7 +307,21 @@ class TestValidateFunction(TestCase):
             out_path = out_path.replace(f'{path} ', '')
             self.assertEqual(results_io, results_path)
             self.assertEqual(out_io, out_path)
-        
+
+        #paths that return warnings
+        for path, ns in tests_with_warning:
+            with self.assertWarns(UserWarning) as w_io:
+                with self.get_io(path=path) as io:
+                    results_io = validate(io=io, namespace=ns, verbose=True)
+                    print(results_io)
+
+            with self.assertWarns(UserWarning) as w_path:
+                results_path = validate(path=path, namespace=ns, verbose=True)
+
+            # remove path from error messages since it will not be included in io outputs
+            out_path = str(w_path.warning).replace(f'{path} ', '')
+            self.assertEqual(str(w_io.warning), out_path)
+
         # paths that return errors
         for path, ns in tests_with_error:
             with self.assertRaises(ValueError) as e_io:
