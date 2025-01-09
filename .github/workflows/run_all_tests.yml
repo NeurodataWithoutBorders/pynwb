@@ -22,30 +22,30 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { name: linux-python3.9-minimum      , test-tox-env: test-py39-minimum    , build-tox-env: build-py39-minimum    , python-ver: "3.9" , os: ubuntu-latest }
-          - { name: linux-python3.10             , test-tox-env: test-py310           , build-tox-env: build-py310           , python-ver: "3.10", os: ubuntu-latest }
-          - { name: linux-python3.11             , test-tox-env: test-py311           , build-tox-env: build-py311           , python-ver: "3.11", os: ubuntu-latest }
-          - { name: linux-python3.11-opt         , test-tox-env: test-py311-optional  , build-tox-env: build-py311           , python-ver: "3.11", os: ubuntu-latest }
-          - { name: linux-python3.12             , test-tox-env: test-py312           , build-tox-env: build-py312           , python-ver: "3.12", os: ubuntu-latest }
-          - { name: linux-python3.13             , test-tox-env: test-py313           , build-tox-env: build-py313           , python-ver: "3.13", os: ubuntu-latest }
-          - { name: linux-python3.13-upgraded    , test-tox-env: test-py313-upgraded  , build-tox-env: build-py313-upgraded  , python-ver: "3.13", os: ubuntu-latest }
-          - { name: linux-python3.13-prerelease  , test-tox-env: test-py313-prerelease, build-tox-env: build-py313-prerelease, python-ver: "3.13", os: ubuntu-latest }
-          - { name: windows-python3.9-minimum    , test-tox-env: test-py39-minimum    , build-tox-env: build-py39-minimum    , python-ver: "3.9" , os: windows-latest }
-          - { name: windows-python3.10           , test-tox-env: test-py310           , build-tox-env: build-py310           , python-ver: "3.10", os: windows-latest }
-          - { name: windows-python3.11           , test-tox-env: test-py311           , build-tox-env: build-py311           , python-ver: "3.11", os: windows-latest }
-          - { name: windows-python3.11-opt       , test-tox-env: test-py311-optional  , build-tox-env: build-py311           , python-ver: "3.11", os: windows-latest }
-          - { name: windows-python3.12           , test-tox-env: test-py312           , build-tox-env: build-py312           , python-ver: "3.12", os: windows-latest }
-          - { name: windows-python3.13           , test-tox-env: test-py313           , build-tox-env: build-py313           , python-ver: "3.13", os: windows-latest }
-          - { name: windows-python3.13-upgraded  , test-tox-env: test-py313-upgraded  , build-tox-env: build-py313-upgraded  , python-ver: "3.13", os: windows-latest }
-          - { name: windows-python3.13-prerelease, test-tox-env: test-py313-prerelease, build-tox-env: build-py313-prerelease, python-ver: "3.13", os: windows-latest }
-          - { name: macos-python3.9-minimum      , test-tox-env: test-py39-minimum    , build-tox-env: build-py39-minimum    , python-ver: "3.9" , os: macos-13 }
-          - { name: macos-python3.10             , test-tox-env: test-py310           , build-tox-env: build-py310           , python-ver: "3.10", os: macos-latest }
-          - { name: macos-python3.11             , test-tox-env: test-py311           , build-tox-env: build-py311           , python-ver: "3.11", os: macos-latest }
-          - { name: macos-python3.11-opt         , test-tox-env: test-py311-optional  , build-tox-env: build-py311           , python-ver: "3.11", os: macos-latest }
-          - { name: macos-python3.12             , test-tox-env: test-py312           , build-tox-env: build-py312           , python-ver: "3.12", os: macos-latest }
-          - { name: macos-python3.13             , test-tox-env: test-py313           , build-tox-env: build-py313           , python-ver: "3.13", os: macos-latest }
-          - { name: macos-python3.13-upgraded    , test-tox-env: test-py313-upgraded  , build-tox-env: build-py313-upgraded  , python-ver: "3.13", os: macos-latest }
-          - { name: macos-python3.13-prerelease  , test-tox-env: test-py313-prerelease, build-tox-env: build-py313-prerelease, python-ver: "3.13", os: macos-latest }
+          - { name: linux-python3.9-minimum      , test-tox-env: test-py39-minimum         , build-tox-env: build-py39-minimum    , python-ver: "3.9" , os: ubuntu-latest }
+          - { name: linux-python3.10             , test-tox-env: test-py310-pinned         , build-tox-env: build-py310-pinned    , python-ver: "3.10", os: ubuntu-latest }
+          - { name: linux-python3.11             , test-tox-env: test-py311-pinned         , build-tox-env: build-py311-pinned    , python-ver: "3.11", os: ubuntu-latest }
+          - { name: linux-python3.11-opt         , test-tox-env: test-py311-optional-pinned, build-tox-env: build-py311-pinned    , python-ver: "3.11", os: ubuntu-latest }
+          - { name: linux-python3.12             , test-tox-env: test-py312-pinned         , build-tox-env: build-py312-pinned    , python-ver: "3.12", os: ubuntu-latest }
+          - { name: linux-python3.13             , test-tox-env: test-py313-pinned         , build-tox-env: build-py313-pinned    , python-ver: "3.13", os: ubuntu-latest }
+          - { name: linux-python3.13-upgraded    , test-tox-env: test-py313-upgraded       , build-tox-env: build-py313-upgraded  , python-ver: "3.13", os: ubuntu-latest }
+          - { name: linux-python3.13-prerelease  , test-tox-env: test-py313-prerelease     , build-tox-env: build-py313-prerelease, python-ver: "3.13", os: ubuntu-latest }
+          - { name: windows-python3.9-minimum    , test-tox-env: test-py39-minimum         , build-tox-env: build-py39-minimum    , python-ver: "3.9" , os: windows-latest }
+          - { name: windows-python3.10           , test-tox-env: test-py310-pinned         , build-tox-env: build-py310-pinned    , python-ver: "3.10", os: windows-latest }
+          - { name: windows-python3.11           , test-tox-env: test-py311-pinned         , build-tox-env: build-py311-pinned    , python-ver: "3.11", os: windows-latest }
+          - { name: windows-python3.11-opt       , test-tox-env: test-py311-optional-pinned, build-tox-env: build-py311-pinned    , python-ver: "3.11", os: windows-latest }
+          - { name: windows-python3.12           , test-tox-env: test-py312-pinned         , build-tox-env: build-py312-pinned    , python-ver: "3.12", os: windows-latest }
+          - { name: windows-python3.13           , test-tox-env: test-py313-pinned         , build-tox-env: build-py313-pinned    , python-ver: "3.13", os: windows-latest }
+          - { name: windows-python3.13-upgraded  , test-tox-env: test-py313-upgraded       , build-tox-env: build-py313-upgraded  , python-ver: "3.13", os: windows-latest }
+          - { name: windows-python3.13-prerelease, test-tox-env: test-py313-prerelease     , build-tox-env: build-py313-prerelease, python-ver: "3.13", os: windows-latest }
+          - { name: macos-python3.9-minimum      , test-tox-env: test-py39-minimum         , build-tox-env: build-py39-minimum    , python-ver: "3.9" , os: macos-13 }
+          - { name: macos-python3.10             , test-tox-env: test-py310-pinned         , build-tox-env: build-py310-pinned    , python-ver: "3.10", os: macos-latest }
+          - { name: macos-python3.11             , test-tox-env: test-py311-pinned         , build-tox-env: build-py311-pinned    , python-ver: "3.11", os: macos-latest }
+          - { name: macos-python3.11-opt         , test-tox-env: test-py311-optional-pinned, build-tox-env: build-py311-pinned    , python-ver: "3.11", os: macos-latest }
+          - { name: macos-python3.12             , test-tox-env: test-py312-pinned         , build-tox-env: build-py312-pinned    , python-ver: "3.12", os: macos-latest }
+          - { name: macos-python3.13             , test-tox-env: test-py313-pinned         , build-tox-env: build-py313-pinned    , python-ver: "3.13", os: macos-latest }
+          - { name: macos-python3.13-upgraded    , test-tox-env: test-py313-upgraded       , build-tox-env: build-py313-upgraded  , python-ver: "3.13", os: macos-latest }
+          - { name: macos-python3.13-prerelease  , test-tox-env: test-py313-prerelease     , build-tox-env: build-py313-prerelease, python-ver: "3.13", os: macos-latest }
     steps:
       - name: Cancel non-latest runs
         uses: styfle/cancel-workflow-action@0.11.0
@@ -139,10 +139,10 @@ jobs:
       matrix:
         include:
           - { name: conda-linux-python3.9-minimum    , test-tox-env: test-py39-minimum    , build-tox-env: build-py39-minimum    , python-ver: "3.9" , os: ubuntu-latest }
-          - { name: conda-linux-python3.10           , test-tox-env: test-py310           , build-tox-env: build-py310           , python-ver: "3.10", os: ubuntu-latest }
-          - { name: conda-linux-python3.11           , test-tox-env: test-py311           , build-tox-env: build-py311           , python-ver: "3.11", os: ubuntu-latest }
-          - { name: conda-linux-python3.12           , test-tox-env: test-py312           , build-tox-env: build-py312           , python-ver: "3.12", os: ubuntu-latest }
-          - { name: conda-linux-python3.13           , test-tox-env: test-py313           , build-tox-env: build-py313           , python-ver: "3.13", os: ubuntu-latest }
+          - { name: conda-linux-python3.10           , test-tox-env: test-py310-pinned    , build-tox-env: build-py310-pinned    , python-ver: "3.10", os: ubuntu-latest }
+          - { name: conda-linux-python3.11           , test-tox-env: test-py311-pinned    , build-tox-env: build-py311-pinned    , python-ver: "3.11", os: ubuntu-latest }
+          - { name: conda-linux-python3.12           , test-tox-env: test-py312-pinned    , build-tox-env: build-py312-pinned    , python-ver: "3.12", os: ubuntu-latest }
+          - { name: conda-linux-python3.13           , test-tox-env: test-py313-pinned    , build-tox-env: build-py313-pinned    , python-ver: "3.13", os: ubuntu-latest }
           - { name: conda-linux-python3.13-upgraded  , test-tox-env: test-py313-upgraded  , build-tox-env: build-py313-upgraded  , python-ver: "3.13", os: ubuntu-latest }
           - { name: conda-linux-python3.13-prerelease, test-tox-env: test-py313-prerelease, build-tox-env: build-py313-prerelease, python-ver: "3.13", os: ubuntu-latest }
     steps:
