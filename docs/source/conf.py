@@ -159,7 +159,7 @@ extlinks = {
     'pynwb': ('https://github.com/NeurodataWithoutBorders/pynwb/%s', '%s'),
     'nwb_overview': ('https://nwb-overview.readthedocs.io/en/latest/%s', '%s'),
     'hdmf-docs': ('https://hdmf.readthedocs.io/en/stable/%s', '%s'),
-    'dandi': ('https://www.dandiarchive.org/%s', '%s'),
+    'dandi': ('https://dandiarchive.org/%s', '%s'),
     "nwbinspector": ("https://nwbinspector.readthedocs.io/en/dev/%s", "%s"),
     'hdmf-zarr': ('https://hdmf-zarr.readthedocs.io/en/stable/%s', '%s'),
 }
