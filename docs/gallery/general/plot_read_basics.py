@@ -83,7 +83,7 @@ download("https://api.dandiarchive.org/api/assets/0f57f0b0-f021-42bb-8eaa-56cd48
 # .. seealso::
 #
 #   Learn about all the different ways you can download data from the DANDI Archive
-#   `here <https://www.dandiarchive.org/handbook/12_download/>`_
+#   `here <https://docs.dandiarchive.org/12_download/>`_
 #
 # .. seealso:: Streaming data
 #
