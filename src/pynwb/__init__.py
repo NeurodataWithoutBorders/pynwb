@@ -531,7 +531,9 @@ class NWBHDF5IO(_HDF5IO):
 
         return nwbfile
 
-@docval({'name': 'path', 'type': (str, Path), 'doc': 'the path to the nwbfile'}, 
+@docval({'name': 'path', 'type': (str, Path), 
+         'doc': 'Path to the NWB file. Can be either a local filesystem path to '
+                'an HDF5 (.nwb) or Zarr (.zarr) file.'}, 
         is_method=False)
 def read_nwb(**kwargs):
     """Read an NWB file from a local path.
@@ -540,46 +542,33 @@ def read_nwb(**kwargs):
     and Zarr formats. For advanced use cases (parallel I/O, custom namespaces), 
     use NWBHDF5IO or NWBZarrIO.
 
-    Parameters
-    ----------
-    path : str or pathlib.Path
-        Path to the NWB file. Can be either a local filesystem path to an HDF5 (.nwb) 
-        or Zarr (.zarr) file
-
-    Returns
-    -------
-    pynwb.NWBFile
-        The loaded NWB file object.
-
-    See Also
-    --------
-    pynwb.NWBHDF5IO : Core I/O class for HDF5 files with advanced options.
-    hdmf_zarr.nwb.NWBZarrIO : Core I/O class for Zarr files with advanced options.
+    See also 
+        * :py:class:`~pynwb.NWBHDF5IO`: Core I/O class for HDF5 files with advanced options.
+        * :py:class:`~hdmf_zarr.nwb.NWBZarrIO`: Core I/O class for Zarr files with advanced options.
 
     Notes
-    -----
-    This function uses the following defaults:
-    * Always opens in read-only mode
-    * Automatically loads namespaces
-    * Reads any backend (e.g. HDF5 or Zarr) if there is an IO class available.
+        This function uses the following defaults:
+            * Always opens in read-only mode
+            * Automatically loads namespaces
+            * Reads any backend (e.g. HDF5 or Zarr) if there is an IO class available.
 
-    Advanced features requiring direct use of IO classes (e.g. NWBHDF5IO NWBZarrIO) include:
-    * Streaming data from s3
-    * Custom namespace extensions
-    * Parallel I/O with MPI
-    * Custom build managers
-    * Write or append modes
-    * Pre-opened HDF5 file objects or Zarr stores
-    * Remote file access configuration
+        Advanced features requiring direct use of IO classes (e.g. NWBHDF5IO NWBZarrIO) include:
+            * Streaming data from s3
+            * Custom namespace extensions
+            * Parallel I/O with MPI
+            * Custom build managers
+            * Write or append modes
+            * Pre-opened HDF5 file objects or Zarr stores
+            * Remote file access configuration
+ 
+    Example usage reading a local NWB file:
 
-    Examples
-    --------
-    Read a local NWB file:
+    .. code-block:: python
 
-    >>> from pynwb import read_nwb
-    >>> nwbfile = read_nwb("path/to/file.nwb")
+        from pynwb import read_nwb
+        nwbfile = read_nwb("path/to/file.nwb")    
 
-    
+    :Returns: pynwb.NWBFile The loaded NWB file object.
     """
     
     path = popargs('path', kwargs)
