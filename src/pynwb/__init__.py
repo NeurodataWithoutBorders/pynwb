@@ -585,8 +585,8 @@ def read_nwb(**kwargs):
                 return NWBZarrIO.read_nwb(path=path) 
             else:
                 raise ValueError(
-                    f"Unable to read file: '{path}'. The file exists but is not recognized as "
-                    "either a valid HDF5 or Zarr NWB file. Please ensure the file contains valid NWB data."
+                    f"Unable to read file: '{path}'. The file is not recognized as "
+                    "either a valid HDF5 or Zarr NWB file. Please ensure the file exists and contains valid NWB data."
                 )     
         except ImportError:
             raise ValueError(
