@@ -68,7 +68,10 @@ class TestReadNWBMethod(TestCase):
             path = Path(temp_dir) / "test.txt"
             path.write_text("Not an NWB file")
             
-            with self.assertRaisesWith(ValueError,
-                f"Unable to read file: '{path}'. The file exists but is not recognized as "
-                "either a valid HDF5 or Zarr NWB file. Please ensure the file contains valid NWB data."):
+            expected_message = (
+                f"Unable to read file: '{path}'. The file is not recognized as either a valid HDF5 or Zarr NWB file. "
+                "Please ensure the file exists and contains valid NWB data."
+            )
+            
+            with self.assertRaisesWith(ValueError, expected_message):
                 read_nwb(path=path)
