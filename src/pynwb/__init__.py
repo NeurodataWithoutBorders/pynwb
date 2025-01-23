@@ -531,6 +531,71 @@ class NWBHDF5IO(_HDF5IO):
 
         return nwbfile
 
+@docval({'name': 'path', 'type': (str, Path), 
+         'doc': 'Path to the NWB file. Can be either a local filesystem path to '
+                'an HDF5 (.nwb) or Zarr (.zarr) file.'}, 
+        is_method=False)
+def read_nwb(**kwargs):
+    """Read an NWB file from a local path.
+
+    High-level interface for reading NWB files. Automatically handles both HDF5 
+    and Zarr formats. For advanced use cases (parallel I/O, custom namespaces), 
+    use NWBHDF5IO or NWBZarrIO.
+
+    See also 
+        * :py:class:`~pynwb.NWBHDF5IO`: Core I/O class for HDF5 files with advanced options.
+        * :py:class:`~hdmf_zarr.nwb.NWBZarrIO`: Core I/O class for Zarr files with advanced options.
+
+    Notes
+        This function uses the following defaults:
+            * Always opens in read-only mode
+            * Automatically loads namespaces
+            * Reads any backend (e.g. HDF5 or Zarr) if there is an IO class available.
+
+        Advanced features requiring direct use of IO classes (e.g. NWBHDF5IO NWBZarrIO) include:
+            * Streaming data from s3
+            * Custom namespace extensions
+            * Parallel I/O with MPI
+            * Custom build managers
+            * Write or append modes
+            * Pre-opened HDF5 file objects or Zarr stores
+            * Remote file access configuration
+ 
+    Example usage reading a local NWB file:
+
+    .. code-block:: python
+
+        from pynwb import read_nwb
+        nwbfile = read_nwb("path/to/file.nwb")    
+
+    :Returns: pynwb.NWBFile The loaded NWB file object.
+    """
+    
+    path = popargs('path', kwargs)
+    # HDF5 is always available so we try that first
+    backend_is_hdf5 = NWBHDF5IO.can_read(path=path)
+    if backend_is_hdf5:
+        return NWBHDF5IO.read_nwb(path=path)
+    else:
+        # If hdmf5 zarr is available we try that next
+        try:
+            from hdmf_zarr import NWBZarrIO
+            backend_is_zarr = NWBZarrIO.can_read(path=path)
+            if backend_is_zarr:
+                return NWBZarrIO.read_nwb(path=path) 
+            else:
+                raise ValueError(
+                    f"Unable to read file: '{path}'. The file is not recognized as "
+                    "either a valid HDF5 or Zarr NWB file. Please ensure the file exists and contains valid NWB data."
+                )     
+        except ImportError:
+            raise ValueError(
+                f"Unable to read file: '{path}'. The file is not recognized as an HDF5 NWB file. "
+                "If you are trying to read a Zarr file, please install hdmf-zarr using: pip install hdmf-zarr"
+            )
+    
+
+
 from . import io as __io  # noqa: F401,E402
 from .core import NWBContainer, NWBData  # noqa: F401,E402
 from .base import TimeSeries, ProcessingModule  # noqa: F401,E402

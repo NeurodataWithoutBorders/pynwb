@@ -6,3 +6,6 @@ oaklib==0.5.32
 fsspec==2024.10.0
 requests==2.32.3
 aiohttp==3.10.11
+
+# For read_nwb tests
+hdmf-zarr
