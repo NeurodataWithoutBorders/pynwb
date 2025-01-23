@@ -264,6 +264,7 @@ def run_integration_tests(verbose=True):
         logging.info('all classes have integration tests')
 
     run_test_suite("tests/integration/utils", "integration utils tests", verbose=verbose)
+    run_test_suite("tests/integration/io", "integration io tests", verbose=verbose)
 
 
 def clean_up_tests():
