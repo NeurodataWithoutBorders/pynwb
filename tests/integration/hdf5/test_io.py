@@ -613,7 +613,7 @@ class TestNWBHDF5IO(TestCase):
             io.write(self.nwbfile)
             
         import h5py
-        
+
         file = h5py.File(self.path, 'r')
         
         read_nwbfile = NWBHDF5IO.read_nwb(file=file)
