@@ -5,7 +5,7 @@ from warnings import warn
 
 from hdmf.spec import NamespaceCatalog
 from hdmf.build import BuildManager, TypeMap
-from hdmf.utils import docval, getargs, AllowPositional
+from hdmf.utils import docval, getargs, popargs, AllowPositional
 from hdmf.backends.io import HDMFIO
 from hdmf.validate import ValidatorMap
 
@@ -98,6 +98,13 @@ def get_cached_namespaces_to_validate(path: Optional[str] = None,
         "default": None,
     },  # Argument order is for back-compatability
     {
+         "name": "paths",
+         "type": list,
+         "doc": ("List of NWB file paths. This argument will be deprecated in PyNWB 4.0. "
+                 "Use 'path' instead."),
+         "default": None,
+    },
+    {
         "name": "path",
         "type": (str, Path),
         "doc": "NWB file path.",
@@ -133,6 +140,29 @@ def validate(**kwargs):
     It is recommended to use the NWBInspector for more comprehensive validation of both
     compliance with the schema and compliance of data with NWB best practices.
     """
+
+    paths, path = popargs("paths", "path", kwargs)
+
+    if paths is not None:
+        warn("The 'paths' argument will be deprecated in PyNWB 4.0 "
+            "Use 'path' instead. To migrate, call this function separately for "
+            "each path instead of passing a list.",
+            DeprecationWarning)
+
+        if path is not None:
+            raise ValueError("Both 'paths' and 'path' were specified. "
+                             "Please choose only one.")
+
+        validation_errors = []
+        for p in paths:
+            validation_errors +=  _validate_single_file(path=p, **kwargs)
+    else:
+        validation_errors = _validate_single_file(path=path, **kwargs)
+
+    return validation_errors
+
+
+def _validate_single_file(**kwargs):
 
     io, path, use_cached_namespaces, namespace, verbose, driver = getargs(
         "io", "path", "use_cached_namespaces", "namespace", "verbose", "driver", kwargs
