@@ -94,6 +94,35 @@ class TestProcessingModule(TestCase):
         tmp = self.pm["test_ts"]
         self.assertIs(tmp, ts)
 
+    def test_len(self):
+        """Test that len() returns number of data interfaces."""
+        self.assertEqual(len(self.pm), 0)
+        ts = self._create_time_series()
+        self.pm.add(ts)
+        self.assertEqual(len(self.pm), 1)
+        ts2 = TimeSeries(name="test_ts2", data=[1, 2, 3], unit="unit", rate=1.0)
+        self.pm.add(ts2)
+        self.assertEqual(len(self.pm), 2)
+
+    def test_dict_methods(self):
+        """Test dictionary-like methods (keys, values, items)."""
+        ts = self._create_time_series()
+        ts2 = TimeSeries(name="test_ts2", data=[1, 2, 3], unit="unit", rate=1.0)
+        self.pm.add(ts)
+        self.pm.add(ts2)
+
+        # Test keys()
+        keys = self.pm.keys()
+        self.assertEqual(set(keys), {"test_ts", "test_ts2"})
+
+        # Test values()
+        values = self.pm.values()
+        self.assertEqual(set(values), {ts, ts2})
+
+        # Test items()
+        items = self.pm.items()
+        self.assertEqual(set(items), {("test_ts", ts), ("test_ts2", ts2)})
+
 
 class TestTimeSeries(TestCase):
     def test_init_no_parent(self):

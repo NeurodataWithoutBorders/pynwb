@@ -72,6 +72,46 @@ class ProcessingModule(MultiContainerInterface):
         warn(PendingDeprecationWarning('get_data_interface will be replaced by get'))
         return self.get(kwargs['data_interface_name'])
 
+    def __len__(self):
+        """Get the number of data interfaces in this ProcessingModule.
+
+        Returns
+        -------
+        int
+            Number of data interfaces
+        """
+        return len(self.data_interfaces)
+
+    def keys(self):
+        """Get the names of data interfaces in this ProcessingModule.
+
+        Returns
+        -------
+        KeysView
+            View of interface names
+        """
+        return self.data_interfaces.keys()
+
+    def values(self):
+        """Get the data interfaces in this ProcessingModule.
+
+        Returns
+        -------
+        ValuesView
+            View of interfaces
+        """
+        return self.data_interfaces.values()
+
+    def items(self):
+        """Get the (name, interface) pairs in this ProcessingModule.
+
+        Returns
+        -------
+        ItemsView
+            View of (name, interface) pairs
+        """
+        return self.data_interfaces.items()
+
 
 @register_class('TimeSeries', CORE_NAMESPACE)
 class TimeSeries(NWBDataInterface):
