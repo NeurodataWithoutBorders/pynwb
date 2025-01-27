@@ -396,6 +396,21 @@ class OpticalSeriesConstructor(TestCase):
         self.assertEqual(ts.format, 'external')
 
 
+    def test_init_all_optional_fields_none(self):
+        """Test that OpticalSeries can be created with all optional fields set to None."""
+        ts = OpticalSeries(
+            name="test_ts",
+            unit="unit",
+            external_file=["external_file"],
+            starting_frame=[0],
+            format="external",
+            timestamps=[1.0, 2.0],
+        )
+        self.assertIsNone(ts.distance)
+        self.assertIsNone(ts.field_of_view)
+        self.assertIsNone(ts.orientation)
+
+
 class TestImageSubtypes(TestCase):
 
     def test_grayscale_image(self):
