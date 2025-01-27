@@ -7,6 +7,7 @@ from hdmf.utils import docval, getargs, popargs, get_docval
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries, TimeSeriesReferenceVectorData, TimeSeriesReference
 
+__all__ = ['TimeIntervals']
 
 @register_class('TimeIntervals', CORE_NAMESPACE)
 class TimeIntervals(DynamicTable):
