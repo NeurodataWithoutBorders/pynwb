@@ -207,7 +207,7 @@ class TimeSeries(NWBDataInterface):
         """Check that the 0th dimension of data equals the length of timestamps, when applicable.
         """
         if self.timestamps is None:
-            return True
+            return
 
         data_shape = get_data_shape(data=self.fields["data"], strict_no_data_load=True)
         timestamps_shape = get_data_shape(data=self.fields["timestamps"], strict_no_data_load=True)

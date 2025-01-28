@@ -18,6 +18,8 @@ Create an nwb file from Allen Brain Observatory data.
 
 # sphinx_gallery_thumbnail_path = 'figures/gallery_thumbnails_allenbrainobservatory.png'
 
+import numpy as np
+
 import allensdk.brain_observatory.stimulus_info as si
 from allensdk.core.brain_observatory_cache import BrainObservatoryCache
 
@@ -71,7 +73,7 @@ for stimulus in stimulus_list:
         data=dataset.get_stimulus_template(stimulus),
         unit="NA",
         format="raw",
-        rate=1.0,
+        rate=np.nan,
     )
     
     image_index = IndexSeries(
