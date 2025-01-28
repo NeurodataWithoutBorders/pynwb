@@ -141,7 +141,7 @@ class ImageSeries(TimeSeries):
         is provided. Otherwise, this function calls the parent class' _check_time_series_dimension method.
         """
         if self.external_file is not None:
-            return True
+            return
         return super()._check_time_series_dimension()
 
     def _check_external_file_starting_frame_length(self):
