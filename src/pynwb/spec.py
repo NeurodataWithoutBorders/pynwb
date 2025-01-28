@@ -62,7 +62,7 @@ class NWBLinkSpec(LinkSpec):
 
 class BaseStorageOverride:
     ''' This class is used for the purpose of overriding
-        BaseStorageSpec classmethods, without creating diamond
+        :py:class:`~hdmf.spec.spec.BaseStorageSpec` classmethods, without creating diamond
         inheritance hierarchies.
     '''
 

@@ -1,0 +1,44 @@
+name: Generate test files
+on:
+  workflow_dispatch:
+  # pull_request:
+
+jobs:
+  gen-test-files:
+    name: ${{ matrix.os }}
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { name: pynwb-1.5.1, pynwb-version: "1.5.1", python-version: "3.8"}
+          - { name: pynwb-2.1.0, pynwb-version: "2.1.0", python-version: "3.9"}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: 'recursive'
+          fetch-depth: 0  # tags are required for versioneer to determine the version
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install package
+        run: |
+          python -m pip install "pynwb==${{ matrix.pynwb-version }}"
+          python -m pip list
+
+      - name: Generate test files
+        run: |
+          python src/pynwb/testing/make_test_files.py
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-files-${{ matrix.name }}
+          path: |
+            src/pynwb/testing/*.nwb

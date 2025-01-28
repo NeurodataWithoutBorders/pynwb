@@ -46,7 +46,7 @@ class ImageSeries(TimeSeries):
                      'is specified. If unit (and data) are not specified, then unit will be set to "unknown".'),
              'default': None},
             {'name': 'format', 'type': str,
-             'doc': 'Format of image. Three types: 1) Image format; tiff, png, jpg, etc. 2) external 3) raw.',
+             'doc': 'Format of image. Three types - 1) Image format; tiff, png, jpg, etc. 2) external 3) raw.',
              'default': None},
             {'name': 'external_file', 'type': ('array_data', 'data'),
              'doc': 'Path or URL to one or more external file(s). Field only present if format=external. '
@@ -97,7 +97,7 @@ class ImageSeries(TimeSeries):
             warnings.warn(
                 "%s '%s': The value for 'format' has been changed to 'external'. "
                 "Setting a default value for 'format' is deprecated and will be changed "
-                "to raising a ValueError in the next release."
+                "to raising a ValueError in the next major release."
                 % (self.__class__.__name__, self.name),
                 DeprecationWarning,
             )
@@ -208,23 +208,46 @@ class IndexSeries(TimeSeries):
     array indicates when that image was displayed.
     '''
 
-    __nwbfields__ = ('indexed_timeseries',)
+    __nwbfields__ = ("indexed_timeseries",)
 
     # # value used when an ImageSeries is read and missing data
     # DEFAULT_UNIT = 'N/A'
 
-    @docval(*get_docval(TimeSeries.__init__, 'name'),  # required
-            {'name': 'data', 'type': ('array_data', 'data', TimeSeries), 'shape': (None, ),  # required
-            'doc': ('The data values. Must be 1D, where the first dimension must be time (frame)')},
-            *get_docval(TimeSeries.__init__, 'unit'),  # required
-            {'name': 'indexed_timeseries', 'type': TimeSeries,  # required
-             'doc': 'Link to TimeSeries containing images that are indexed.', 'default': None},
-            {'name': 'indexed_images', 'type': Images,  # required
-             'doc': ("Link to Images object containing an ordered set of images that are indexed. The Images object "
-                     "must contain a 'ordered_images' dataset specifying the order of the images in the Images type."),
-             'default': None},
-            *get_docval(TimeSeries.__init__, 'resolution', 'conversion', 'timestamps', 'starting_time', 'rate',
-                        'comments', 'description', 'control', 'control_description', 'offset'))
+    @docval(
+        *get_docval(TimeSeries.__init__, 'name'),  # required
+        {
+            'name': 'data',
+            'type': ('array_data', 'data', TimeSeries),
+            'shape': (None,),  # required
+            'doc': 'The data values. Must be 1D, where the first dimension must be time (frame)',
+        },
+        *get_docval(TimeSeries.__init__, 'unit'),  # required
+        {
+            'name': 'indexed_timeseries', 'type': TimeSeries,  # required
+            'doc': 'Link to TimeSeries containing images that are indexed.',
+            'default': None,
+        },
+        {
+            'name': 'indexed_images',
+            'type': Images,  # required
+            'doc': "Link to Images object containing an ordered set of images that are indexed. The Images object must "
+                   "contain a 'ordered_images' dataset specifying the order of the images in the Images type.",
+            'default': None
+        },
+        *get_docval(
+            TimeSeries.__init__,
+            'resolution',
+            'conversion',
+            'timestamps',
+            'starting_time',
+            'rate',
+            'comments',
+            'description',
+            'control',
+            'control_description',
+            'offset',
+        ),
+    )
     def __init__(self, **kwargs):
         indexed_timeseries, indexed_images = popargs('indexed_timeseries', 'indexed_images', kwargs)
         if kwargs['unit'] and kwargs['unit'] != 'N/A':
@@ -253,6 +276,7 @@ class IndexSeries(TimeSeries):
 @register_class('ImageMaskSeries', CORE_NAMESPACE)
 class ImageMaskSeries(ImageSeries):
     '''
+    DEPRECATED as of NWB 2.8.0 and PyNWB 3.0.0. 
     An alpha mask that is applied to a presented visual stimulus. The data[] array contains an array
     of mask values that are applied to the displayed image. Mask values are stored as RGBA. Mask
     can vary with time. The timestamps array indicates the starting time of a mask, and that mask
@@ -272,6 +296,11 @@ class ImageMaskSeries(ImageSeries):
                      'The device used to capture the masked ImageSeries data should be stored in the ImageSeries.'),
              'default': None},)
     def __init__(self, **kwargs):
+        if not self._in_construct_mode:
+            raise ValueError(
+                "The ImageMaskSeries neurodata type is deprecated. If you are interested in using it, "
+                "please create an issue on https://github.com/NeurodataWithoutBorders/nwb-schema/issues."
+            )
         masked_imageseries = popargs('masked_imageseries', kwargs)
         super().__init__(**kwargs)
         self.masked_imageseries = masked_imageseries

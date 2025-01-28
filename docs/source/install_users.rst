@@ -6,7 +6,7 @@ Installing PyNWB
 
 PyNWB has the following minimum requirements, which must be installed before you can get started using PyNWB.
 
-#. Python 3.7, 3.8, or 3.9
+#. Python 3.9, 3.10, 3.11, 3.12, or 3.13
 #. pip
 
 .. note:: If you are a developer then please see the :ref:`install_developers` installation instructions instead.
@@ -34,7 +34,7 @@ This will automatically install the following required dependencies:
 Install release from Conda-forge
 --------------------------------
 
-`Conda-forge <https://conda-forge.org/#about>`_ is a community led collection of recipes, build infrastructure
+`Conda-forge <https://conda-forge.org>`_ is a community led collection of recipes, build infrastructure
 and distributions for the `conda <https://conda.io/docs/>`_ package manager.
 
 To install or update PyNWB distribution from conda-forge using conda simply run:

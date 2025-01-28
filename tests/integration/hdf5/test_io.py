@@ -3,6 +3,7 @@ from dateutil.tz import tzlocal, tzutc
 import numpy as np
 from h5py import File
 from pathlib import Path
+import tempfile
 
 from pynwb import NWBFile, TimeSeries, get_manager, NWBHDF5IO, validate
 
@@ -14,7 +15,15 @@ from hdmf.spec import NamespaceCatalog
 from pynwb.spec import NWBGroupSpec, NWBDatasetSpec, NWBNamespace
 from pynwb.ecephys import ElectricalSeries, LFP
 from pynwb.testing import remove_test_file, TestCase
+from pynwb.testing.mock.file import mock_NWBFile
 
+
+import unittest
+try:
+    import fsspec # noqa f401
+    HAVE_FSSPEC = True 
+except ImportError:
+    HAVE_FSSPEC = False
 
 class TestHDF5Writer(TestCase):
 
@@ -121,6 +130,19 @@ class TestHDF5Writer(TestCase):
             io.write(self.container, cache_spec=False)
         with File(self.path, 'r') as f:
             self.assertNotIn('specifications', f)
+
+    def test_file_creation_io_modes(self):
+        io_modes_that_create_file = ["w", "w-", "x"]
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            temp_dir = Path(temp_dir)
+            for io_mode in io_modes_that_create_file:
+                file_path = temp_dir / f"test_io_mode={io_mode}.nwb"
+
+                # Test file creation
+                nwbfile = mock_NWBFile()
+                with NWBHDF5IO(str(file_path), io_mode) as io:
+                    io.write(nwbfile)
 
 
 class TestHDF5WriterWithInjectedFile(TestCase):
@@ -298,7 +320,7 @@ class TestH5DataIO(TestCase):
         self.nwbfile = NWBFile(session_description='a',
                                identifier='b',
                                session_start_time=datetime(1970, 1, 1, 12, tzinfo=tzutc()))
-        self.path = "test_pynwb_io_hdf5_h5dataIO.h5"
+        self.path = "test_pynwb_io_hdf5_h5dataIO.nwb"
 
     def tearDown(self):
         remove_test_file(self.path)
@@ -413,14 +435,93 @@ class TestNWBHDF5IO(TestCase):
         self.nwbfile = NWBFile(session_description='a test NWB File',
                                identifier='TEST123',
                                session_start_time=datetime(1970, 1, 1, 12, tzinfo=tzutc()))
-        self.path = "test_pynwb_io_nwbhdf5.h5"
+        self.path = "test_pynwb_io_nwbhdf5.nwb"
 
     def tearDown(self):
         remove_test_file(self.path)
 
+    def test_nwb_version_property(self):
+        """Test reading of files with missing nwb_version"""
+        # check empty version before write
+        with NWBHDF5IO(self.path, 'w') as io:
+            self.assertTupleEqual(io.nwb_version, (None, None))
+        # write the example file
+        with NWBHDF5IO(self.path, 'w') as io:
+            io.write(self.nwbfile)
+        # check behavior for various different version strings
+        for ver in [("2.0.5", (2, 0, 5)),
+                    ("2.0.5-alpha", (2, 0, 5, "alpha")),
+                    ("1.0.4_beta", (1, 0, 4, "beta")),
+                    ("bad_version", ("bad", "version", ))]:
+            # Set version string
+            with File(self.path, mode='a') as io:
+                io.attrs['nwb_version'] = ver[0]
+            # Assert expected result for nwb_version tuple
+            with NWBHDF5IO(self.path, 'r') as io:
+                self.assertEqual(io.nwb_version[0], ver[0])
+                self.assertTupleEqual(io.nwb_version[1], ver[1])
+        # check empty version attribute
+        with File(self.path, mode='a') as io:
+            del io.attrs['nwb_version']
+        with NWBHDF5IO(self.path, 'r') as io:
+            self.assertTupleEqual(io.nwb_version, (None, None))
+        # check that it works when setting the attribute to a fixed-length numpy-bytes string
+        with File(self.path, mode='a') as io:
+            io.attrs['nwb_version'] = np.asarray("2.0.5", dtype=np.bytes_)[()]
+        with NWBHDF5IO(self.path, 'r') as io:
+            self.assertTupleEqual(io.nwb_version, ("2.0.5", (2, 0, 5)))
+
+    def test_check_nwb_version_ok(self):
+        """Test that opening a current NWBFile passes the version check"""
+        with NWBHDF5IO(self.path, 'w') as io:
+            io.write(self.nwbfile)
+        with NWBHDF5IO(self.path, 'r') as io:
+            self.assertIsNotNone(io.nwb_version[0])
+            self.assertIsNotNone(io.nwb_version[1])
+            self.assertGreater(io.nwb_version[1][0], 1)
+            read_file = io.read()
+            self.assertContainerEqual(read_file, self.nwbfile)
+
+    def test_check_nwb_version_missing_version(self):
+        """Test reading of files with missing nwb_version"""
+        # write the example file
+        with NWBHDF5IO(self.path, 'w') as io:
+            io.write(self.nwbfile)
+        # remove the version attribute
+        with File(self.path, mode='a') as io:
+            del io.attrs['nwb_version']
+        # test that reading the file without a version strings fails
+        with self.assertRaisesWith(
+                TypeError,
+                "Missing NWB version in file. The file is not a valid NWB file."):
+            with NWBHDF5IO(self.path, 'r') as io:
+                _ = io.read()
+        # test that reading the file when skipping the version check works
+        with NWBHDF5IO(self.path, 'r') as io:
+            read_file = io.read(skip_version_check=True)
+            self.assertContainerEqual(read_file, self.nwbfile)
+
+    def test_check_nwb_version_old_version(self):
+        """Test reading of files with version less than 2 """
+        # write the example file
+        with NWBHDF5IO(self.path, 'w') as io:
+            io.write(self.nwbfile)
+        # remove the version attribute
+        with File(self.path, mode='a') as io:
+            io.attrs['nwb_version'] = "1.0.5"
+        # test that reading the file without a version strings fails
+        with self.assertRaisesWith(
+                TypeError,
+                "NWB version 1.0.5 not supported. PyNWB supports NWB files version 2 and above."):
+            with NWBHDF5IO(self.path, 'r') as io:
+                _ = io.read()
+        # test that reading the file when skipping the version check works
+        with NWBHDF5IO(self.path, 'r') as io:
+            read_file = io.read(skip_version_check=True)
+            self.assertContainerEqual(read_file, self.nwbfile)
+
     def test_round_trip_with_path_string(self):
         """Opening a NWBHDF5IO with a path string should work correctly"""
-
         path_str = self.path
         with NWBHDF5IO(path_str, 'w') as io:
             io.write(self.nwbfile)
@@ -437,3 +538,93 @@ class TestNWBHDF5IO(TestCase):
         with NWBHDF5IO(pathlib_path, 'r') as io:
             read_file = io.read()
             self.assertContainerEqual(read_file, self.nwbfile)
+
+    def test_warn_for_nwb_extension(self):
+        """Creating a file with an extension other than .nwb should raise a warning"""
+        pathlib_path = Path(self.path).with_suffix('.h5')
+
+        with self.assertWarns(UserWarning):
+            with NWBHDF5IO(pathlib_path, 'w') as io:
+                io.write(self.nwbfile)
+        with self.assertWarns(UserWarning):
+            with NWBHDF5IO(str(pathlib_path), 'w') as io:
+                io.write(self.nwbfile)
+
+        # should not warn on read or append
+        with NWBHDF5IO(str(pathlib_path), 'r') as io:
+            io.read()
+        with NWBHDF5IO(str(pathlib_path), 'a') as io:
+            io.read()
+
+    def test_can_read_current_nwb_file(self):
+        with NWBHDF5IO(self.path, 'w') as io:
+            io.write(self.nwbfile)
+        self.assertTrue(NWBHDF5IO.can_read(self.path))
+
+    def test_can_read_file_does_not_exits(self):
+        self.assertFalse(NWBHDF5IO.can_read('not_a_file.nwb'))
+
+    def test_can_read_file_no_version(self):
+        # write the example file
+        with NWBHDF5IO(self.path, 'w') as io:
+            io.write(self.nwbfile)
+        # remove the version attribute
+        with File(self.path, mode='a') as io:
+            del io.attrs['nwb_version']
+
+        # assert can_read returns False and warning raised
+        warn_msg = "Cannot read because missing NWB version in the HDF5 file. The file is not a valid NWB file."
+        with self.assertWarnsWith(UserWarning, warn_msg):
+            self.assertFalse(NWBHDF5IO.can_read(self.path))
+
+    def test_can_read_file_old_version(self):
+        # write the example file
+        with NWBHDF5IO(self.path, 'w') as io:
+            io.write(self.nwbfile)
+        # set the version attribute <2.0
+        with File(self.path, mode='a') as io:
+            io.attrs['nwb_version'] = "1.0.5"
+
+        # assert can_read returns False and warning raised
+        warn_msg = "Cannot read because PyNWB supports NWB files version 2 and above."
+        with self.assertWarnsWith(UserWarning, warn_msg):
+            self.assertFalse(NWBHDF5IO.can_read(self.path))
+
+    def test_can_read_file_invalid_hdf5_file(self):
+        # current file is not an HDF5 file
+        self.assertFalse(NWBHDF5IO.can_read(__file__))
+
+    def test_read_nwb_method_path(self):
+        
+        # write the example file
+        with NWBHDF5IO(self.path, 'w') as io:
+            io.write(self.nwbfile)
+            
+        # test that the read_nwb method works
+        read_nwbfile = NWBHDF5IO.read_nwb(path=self.path)
+        self.assertContainerEqual(read_nwbfile, self.nwbfile)
+
+        read_nwbfile.get_read_io().close()
+        
+    def test_read_nwb_method_file(self):
+        
+        # write the example file
+        with NWBHDF5IO(self.path, 'w') as io:
+            io.write(self.nwbfile)
+            
+        import h5py
+
+        file = h5py.File(self.path, 'r')
+        
+        read_nwbfile = NWBHDF5IO.read_nwb(file=file)
+        self.assertContainerEqual(read_nwbfile, self.nwbfile)
+
+        read_nwbfile.get_read_io().close()
+    
+    @unittest.skipIf(not HAVE_FSSPEC, "fsspec library not available")
+    def test_read_nwb_method_s3_path(self):
+        s3_test_path = "https://dandiarchive.s3.amazonaws.com/blobs/11e/c89/11ec8933-1456-4942-922b-94e5878bb991"
+        read_nwbfile = NWBHDF5IO.read_nwb(path=s3_test_path)
+        assert read_nwbfile.identifier == "3f77c586-6139-4777-a05d-f603e90b1330"
+    
+        assert read_nwbfile.subject.subject_id == "1"

@@ -3,16 +3,28 @@ import warnings
 import re
 import argparse
 import glob
+import h5py
 import inspect
 import logging
 import os.path
 import os
+import shutil
 from subprocess import run, PIPE, STDOUT
 import sys
 import traceback
 import unittest
+import importlib.util
 
-flags = {'pynwb': 2, 'integration': 3, 'example': 4, 'backwards': 5, 'validation': 6, 'ros3': 7, 'example-ros3': 8}
+flags = {
+    'pynwb': 2,
+    'integration': 3,
+    'example': 4,
+    'backwards': 5,
+    'validate-examples': 6,
+    'ros3': 7,
+    'example-ros3': 8,
+    'validation-module': 9
+}
 
 TOTAL = 0
 FAILURES = 0
@@ -59,8 +71,11 @@ def run_test_suite(directory, description="", verbose=True):
 
 
 def _import_from_file(script):
-    import imp
-    return imp.load_source(os.path.basename(script), script)
+    modname = os.path.basename(script)
+    spec = importlib.util.spec_from_file_location(os.path.basename(script), script)
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[modname] = module
+    spec.loader.exec_module(module)
 
 
 warning_re = re.compile("Parent module '[a-zA-Z0-9]+' not found while handling absolute import")
@@ -69,6 +84,10 @@ warning_re = re.compile("Parent module '[a-zA-Z0-9]+' not found while handling a
 ros3_examples = [
     os.path.join('general', 'read_basics.py'),
     os.path.join('advanced_io', 'streaming.py'),
+]
+
+allensdk_examples = [
+    os.path.join('domain', 'brain_observatory.py'),  # TODO create separate workflow for this
 ]
 
 
@@ -80,7 +99,7 @@ def run_example_tests():
         for f in files:
             if f.endswith(".py"):
                 name_with_parent_dir = os.path.join(os.path.basename(root), f)
-                if name_with_parent_dir in ros3_examples:
+                if name_with_parent_dir in ros3_examples or name_with_parent_dir in allensdk_examples:
                     logging.info("Skipping %s" % name_with_parent_dir)
                     continue
                 examples_scripts.append(os.path.join(root, f))
@@ -118,6 +137,11 @@ def __run_example_tests_helper(examples_scripts):
                         ws.append(w)
             for w in ws:
                 warnings.showwarning(w.message, w.category, w.filename, w.lineno, w.line)
+        except (ImportError, ValueError, ModuleNotFoundError) as e:
+            if "linkml" in str(e):
+                pass  # this is OK because linkml is not always installed
+            else:
+                raise e
         except Exception:
             print(traceback.format_exc())
             FAILURES += 1
@@ -129,7 +153,11 @@ def validate_nwbs():
     logging.info('running validation tests on NWB files')
     examples_nwbs = glob.glob('*.nwb')
 
+    # exclude files downloaded from dandi, validation of those files is handled by dandisets-health-status checks
+    examples_nwbs = [x for x in examples_nwbs if not x.startswith('sub-')]
+
     import pynwb
+    from pynwb.validate import get_cached_namespaces_to_validate
 
     for nwb in examples_nwbs:
         try:
@@ -138,27 +166,36 @@ def validate_nwbs():
             ws = list()
             with warnings.catch_warnings(record=True) as tmp:
                 logging.info("Validating with pynwb.validate method.")
-                with pynwb.NWBHDF5IO(nwb, mode='r') as io:
-                    errors = pynwb.validate(io)
-                    TOTAL += 1
+                is_family_nwb_file = False
+                try:
+                    with pynwb.NWBHDF5IO(nwb, mode='r') as io:
+                        errors = pynwb.validate(io)
+                except OSError as e:
+                    # if the file was created with the family driver, need to use the family driver to open it
+                    if 'family driver should be used' in str(e):
+                        is_family_nwb_file = True
+                        match = re.search(r'(\d+)', nwb)
+                        filename_pattern = nwb[:match.start()] + '%d' + nwb[match.end():]  # infer the filename pattern
+                        memb_size = 1024**2  # note: the memb_size must be the same as the one used to create the file
+                        with h5py.File(filename_pattern, mode='r', driver='family', memb_size=memb_size) as f:
+                            with pynwb.NWBHDF5IO(file=f, manager=None, mode='r') as io:
+                                errors = pynwb.validate(io)
+                    else:
+                        raise e
 
-                    if errors:
-                        FAILURES += 1
-                        ERRORS += 1
-                        for err in errors:
-                            print("Error: %s" % err)
+                TOTAL += 1
 
-                def get_namespaces(nwbfile):
-                    comp = run(["python", "-m", "pynwb.validate",
-                               "--list-namespaces", "--cached-namespace", nwb],
-                               stdout=PIPE, stderr=STDOUT, universal_newlines=True, timeout=30)
+                if errors:
+                    FAILURES += 1
+                    ERRORS += 1
+                    for err in errors:
+                        print("Error: %s" % err)
 
-                    if comp.returncode != 0:
-                        return []
+                # if file was created with family driver, skip pynwb.validate CLI because not yet supported
+                if is_family_nwb_file:
+                    continue
 
-                    return comp.stdout.split()
-
-                namespaces = get_namespaces(nwb)
+                namespaces, _, _ = get_cached_namespaces_to_validate(nwb)
 
                 if len(namespaces) == 0:
                     FAILURES += 1
@@ -166,11 +203,13 @@ def validate_nwbs():
 
                 cmds = []
                 cmds += [["python", "-m", "pynwb.validate", nwb]]
-                cmds += [["python", "-m", "pynwb.validate", "--cached-namespace", nwb]]
                 cmds += [["python", "-m", "pynwb.validate", "--no-cached-namespace", nwb]]
 
                 for ns in namespaces:
-                    cmds += [["python", "-m", "pynwb.validate", "--cached-namespace", "--ns", ns, nwb]]
+                    # for some reason, this logging command is necessary to correctly printing the namespace in the
+                    # next logging command
+                    logging.info("Namespace found: %s" % ns)
+                    cmds += [["python", "-m", "pynwb.validate", "--ns", ns, nwb]]
 
                 for cmd in cmds:
                     logging.info("Validating with \"%s\"." % (" ".join(cmd[:-1])))
@@ -224,8 +263,58 @@ def run_integration_tests(verbose=True):
     else:
         logging.info('all classes have integration tests')
 
-    # also test the validation script
-    run_test_suite("tests/validation", "validation CLI tests", verbose=verbose)
+    run_test_suite("tests/integration/utils", "integration utils tests", verbose=verbose)
+    run_test_suite("tests/integration/io", "integration io tests", verbose=verbose)
+
+
+def clean_up_tests():
+    # remove files generated from running example files
+    files_to_remove = [
+        "advanced_io_example.nwb",
+        "basic_alternative_custom_write.nwb",
+        "basic_iterwrite_example.nwb",
+        "basic_sparse_iterwrite_*.nwb",
+        "basic_sparse_iterwrite_*.npy",
+        "basics_tutorial.nwb",
+        "behavioral_tutorial.nwb",
+        "brain_observatory.nwb",
+        "cache_spec_example.nwb",
+        "ecephys_tutorial.nwb",
+        "ecog.extensions.yaml",
+        "ecog.namespace.yaml",
+        "ex_test_icephys_file.nwb",
+        "example_timeintervals_file.nwb",
+        "exported_nwbfile.nwb",
+        "external_linkcontainer_example.nwb",
+        "external_linkdataset_example.nwb",
+        "external1_example.nwb",
+        "external2_example.nwb",
+        "icephys_example.nwb",
+        "icephys_pandas_testfile.nwb",
+        "images_tutorial.nwb",
+        "manifest.json",
+        "mylab.extensions.yaml",
+        "mylab.namespace.yaml",
+        "nwbfile.nwb",
+        "ophys_tutorial.nwb",
+        "processed_data.nwb",
+        "raw_data.nwb",
+        "scratch_analysis.nwb",
+        "sub-P11HMH_ses-20061101_ecephys+image.nwb",
+        "test_edit.nwb",
+        "test_edit2.nwb",
+        "test_cortical_surface.nwb",
+        "test_icephys_file.nwb",
+        "test_multicontainerinterface.extensions.yaml",
+        "test_multicontainerinterface.namespace.yaml",
+        "test_multicontainerinterface.nwb",
+    ]
+    for f in files_to_remove:
+        for name in glob.glob(f):
+            if os.path.exists(name):
+                os.remove(name)
+
+    shutil.rmtree("zarr_tutorial.nwb.zarr")
 
 
 def main():
@@ -244,18 +333,21 @@ def main():
                         help='run example tests with ros3 streaming')
     parser.add_argument('-b', '--backwards', action='append_const', const=flags['backwards'], dest='suites',
                         help='run backwards compatibility tests')
-    parser.add_argument('-w', '--validation', action='append_const', const=flags['validation'], dest='suites',
-                        help='run validation tests')
+    parser.add_argument('-w', '--validate-examples', action='append_const', const=flags['validate-examples'],
+                        dest='suites', help='run example tests and validation tests on example NWB files')
     parser.add_argument('-r', '--ros3', action='append_const', const=flags['ros3'], dest='suites',
                         help='run ros3 streaming tests')
+    parser.add_argument('-x', '--validation-module', action='append_const', const=flags['validation-module'],
+                        dest='suites', help='run tests on pynwb.validate')
     args = parser.parse_args()
     if not args.suites:
         args.suites = list(flags.values())
         # remove from test suites run by default
         args.suites.pop(args.suites.index(flags['example']))
         args.suites.pop(args.suites.index(flags['example-ros3']))
-        args.suites.pop(args.suites.index(flags['validation']))
+        args.suites.pop(args.suites.index(flags['validate-examples']))
         args.suites.pop(args.suites.index(flags['ros3']))
+        args.suites.pop(args.suites.index(flags['validation-module']))
 
     # set up logger
     root = logging.getLogger()
@@ -278,8 +370,10 @@ def main():
         run_test_suite("tests/unit", "pynwb unit tests", verbose=args.verbosity)
 
     # Run example tests
-    if flags['example'] in args.suites or flags['validation'] in args.suites:
+    is_run_example_tests = False
+    if flags['example'] in args.suites or flags['validate-examples'] in args.suites:
         run_example_tests()
+        is_run_example_tests = True
 
     # Run example tests with ros3 streaming examples
     # NOTE this requires h5py to be built with ROS3 support and the dandi package to be installed
@@ -288,12 +382,16 @@ def main():
         run_example_ros3_tests()
 
     # Run validation tests on the example NWB files generated above
-    if flags['validation'] in args.suites:
+    if flags['validate-examples'] in args.suites:
         validate_nwbs()
 
     # Run integration tests
     if flags['integration'] in args.suites:
         run_integration_tests(verbose=args.verbosity)
+
+    # Run validation module tests, requires coverage to be installed
+    if flags['validation-module'] in args.suites:
+        run_test_suite("tests/validation", "validation tests", verbose=args.verbosity)
 
     # Run backwards compatibility tests
     if flags['backwards'] in args.suites:
@@ -302,6 +400,10 @@ def main():
     # Run ros3 streaming tests
     if flags['ros3'] in args.suites:
         run_test_suite("tests/integration/ros3", "pynwb ros3 streaming tests", verbose=args.verbosity)
+
+    # Delete files generated from running example tests above
+    if is_run_example_tests:
+        clean_up_tests()
 
     final_message = 'Ran %s tests' % TOTAL
     exitcode = 0

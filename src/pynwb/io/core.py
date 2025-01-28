@@ -1,4 +1,4 @@
-from hdmf.build import ObjectMapper, RegionBuilder
+from hdmf.build import ObjectMapper
 from hdmf.common import VectorData
 from hdmf.utils import getargs, docval
 from hdmf.spec import AttributeSpec
@@ -29,14 +29,7 @@ class NWBContainerMapper(NWBBaseTypeMapper):
 
 @register_map(NWBData)
 class NWBDataMap(NWBBaseTypeMapper):
-
-    @ObjectMapper.constructor_arg('name')
-    def carg_name(self, builder, manager):
-        return builder.name
-
-    # @ObjectMapper.constructor_arg('data')
-    # def carg_data(self, builder, manager):
-    #     return builder.data
+    pass
 
 
 @register_map(ScratchData)
@@ -45,19 +38,6 @@ class ScratchDataMap(NWBContainerMapper):
     def __init__(self, spec):
         super().__init__(spec)
         self.map_spec('description', spec.get_attribute('notes'))
-
-
-class NWBTableRegionMap(NWBDataMap):
-
-    @ObjectMapper.constructor_arg('table')
-    def carg_table(self, builder, manager):
-        return manager.construct(builder.data.builder)
-
-    @ObjectMapper.constructor_arg('region')
-    def carg_region(self, builder, manager):
-        if not isinstance(builder.data, RegionBuilder):
-            raise ValueError("'builder' must be a RegionBuilder")
-        return builder.data.region
 
 
 @register_map(VectorData)

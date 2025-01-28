@@ -8,4 +8,3 @@ from . import image as __image
 from . import misc as __misc
 from . import ogen as __ogen
 from . import ophys as __ophys
-from . import retinotopy as __retinotopy

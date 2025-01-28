@@ -19,6 +19,14 @@ class SpatialSeriesConstructor(TestCase):
         self.assertEqual(sS.unit, 'meters')
         self.assertEqual(sS.reference_frame, 'reference_frame')
 
+    def test_init_minimum(self):
+        sS = SpatialSeries(
+            name='test_sS',
+            data=np.ones((3, 2)),
+            timestamps=[1., 2., 3.]
+        )
+        assert sS.reference_frame is None
+
     def test_set_unit(self):
         sS = SpatialSeries(
             name='test_sS',

@@ -1,0 +1,35 @@
+name: Check Sphinx links
+on:
+  pull_request:
+  schedule:
+    - cron: '0 5 * * *'  # once per day at midnight ET
+  workflow_dispatch:
+
+jobs:
+  check-sphinx-links:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Cancel non-latest runs
+        uses: styfle/cancel-workflow-action@0.11.0
+        with:
+          all_but_latest: true
+          access_token: ${{ github.token }}
+
+      - uses: actions/checkout@v4
+        with:
+          submodules: 'recursive'
+          fetch-depth: 0  # tags are required for versioneer to determine the version
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install Sphinx dependencies and package
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements-doc.txt -r requirements-opt.txt
+          python -m pip install .
+
+      - name: Check Sphinx internal and external links
+        run: sphinx-build -W -b linkcheck ./docs/source ./test_build

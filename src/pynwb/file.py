@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from dateutil.tz import tzlocal
 from collections.abc import Iterable
 from warnings import warn
@@ -8,6 +8,7 @@ import numpy as np
 import pandas as pd
 
 from hdmf.common import DynamicTableRegion, DynamicTable
+from hdmf.container import HERDManager
 from hdmf.utils import docval, getargs, get_docval, popargs, popargs_to_dict, AllowPositional
 
 from . import register_class, CORE_NAMESPACE
@@ -18,6 +19,7 @@ from .ecephys import ElectrodeGroup
 from .icephys import (IntracellularElectrode, SweepTable, PatchClampSeries, IntracellularRecordingsTable,
                       SimultaneousRecordingsTable, SequentialRecordingsTable, RepetitionsTable,
                       ExperimentalConditionsTable)
+from .image import Images
 from .ophys import ImagingPlane
 from .ogen import OptogeneticStimulusSite
 from .misc import Units
@@ -30,7 +32,18 @@ def _not_parent(arg):
 
 @register_class('LabMetaData', CORE_NAMESPACE)
 class LabMetaData(NWBContainer):
-    """Container for storing lab-specific meta-data"""
+    """
+    Container for storing lab-specific meta-data
+
+    The LabMetaData class serves as a base type for defining lab specific meta-data.
+    To define your own lab-specific metadata, create a Neurodata Extension (NDX) for
+    NWB that defines the data to add. Using the LabMetaData container as a base type
+    makes it easy to add your data to an NWBFile without having to modify the NWBFile
+    type itself, since adding of LabMetaData is already implemented. For more details
+    on how to create an extension see the
+    :nwb_overview:`Extending NWB <extensions_tutorial/extensions_tutorial_home.html>`
+    tutorial.
+    """
 
     @docval({'name': 'name', 'type': str, 'doc': 'name of lab metadata'})
     def __init__(self, **kwargs):
@@ -43,6 +56,7 @@ class Subject(NWBContainer):
 
     __nwbfields__ = (
         'age',
+        "age__reference",
         'description',
         'genotype',
         'sex',
@@ -53,46 +67,79 @@ class Subject(NWBContainer):
         'strain'
     )
 
-    @docval({'name': 'age', 'type': str,
-             'doc': ('The age of the subject. The ISO 8601 Duration format is recommended, e.g., "P90D" for '
-                     '90 days old.'), 'default': None},
-            {'name': 'description', 'type': str,
-             'doc': 'A description of the subject, e.g., "mouse A10".', 'default': None},
-            {'name': 'genotype', 'type': str,
-             'doc': 'The genotype of the subject, e.g., "Sst-IRES-Cre/wt;Ai32(RCL-ChR2(H134R)_EYFP)/wt".',
-             'default': None},
-            {'name': 'sex', 'type': str,
-             'doc': ('The sex of the subject. Using "F" (female), "M" (male), "U" (unknown), or "O" (other) '
-                     'is recommended.'), 'default': None},
-            {'name': 'species', 'type': str,
-             'doc': ('The species of the subject. The formal latin binomal name is recommended, e.g., "Mus musculus"'),
-             'default': None},
-            {'name': 'subject_id', 'type': str, 'doc': 'A unique identifier for the subject, e.g., "A10"',
-             'default': None},
-            {'name': 'weight', 'type': (float, str),
-             'doc': ('The weight of the subject, including units. Using kilograms is recommended. e.g., "0.02 kg". '
-                     'If a float is provided, then the weight will be stored as "[value] kg".'),
-             'default': None},
-            {'name': 'date_of_birth', 'type': datetime, 'default': None,
-             'doc': 'The datetime of the date of birth. May be supplied instead of age.'},
-            {'name': 'strain', 'type': str, 'doc': 'The strain of the subject, e.g., "C57BL/6J"', 'default': None})
+    @docval(
+        {
+            "name": "age",
+            "type": (str, timedelta),
+            "doc": 'The age of the subject. The ISO 8601 Duration format is recommended, e.g., "P90D" for 90 days old.'
+                   'A timedelta will automatically be converted to The ISO 8601 Duration format.',
+            "default": None,
+        },
+        {
+            "name": "age__reference",
+            "type": str,
+            "doc": "Age is with reference to this event. Can be 'birth' or 'gestational'. If reference is omitted, "
+                   "then 'birth' is implied. Value can be None when read from an NWB file with schema version "
+                   "2.0 to 2.5 where age__reference is missing.",
+            "default": "birth",
+        },
+        {
+            "name": "description",
+            "type": str,
+            "doc": 'A description of the subject, e.g., "mouse A10".',
+            "default": None,
+        },
+        {'name': 'genotype', 'type': str,
+         'doc': 'The genotype of the subject, e.g., "Sst-IRES-Cre/wt;Ai32(RCL-ChR2(H134R)_EYFP)/wt".',
+         'default': None},
+        {'name': 'sex', 'type': str,
+         'doc': ('The sex of the subject. Using "F" (female), "M" (male), "U" (unknown), or "O" (other) '
+                 'is recommended.'), 'default': None},
+        {'name': 'species', 'type': str,
+         'doc': 'The species of the subject. The formal latin binomal name is recommended, e.g., "Mus musculus"',
+         'default': None},
+        {'name': 'subject_id', 'type': str, 'doc': 'A unique identifier for the subject, e.g., "A10"',
+         'default': None},
+        {'name': 'weight', 'type': (float, str),
+         'doc': ('The weight of the subject, including units. Using kilograms is recommended. e.g., "0.02 kg". '
+                 'If a float is provided, then the weight will be stored as "[value] kg".'),
+         'default': None},
+        {'name': 'date_of_birth', 'type': datetime, 'default': None,
+         'doc': 'The datetime of the date of birth. May be supplied instead of age.'},
+        {'name': 'strain', 'type': str, 'doc': 'The strain of the subject, e.g., "C57BL/6J"', 'default': None},
+    )
     def __init__(self, **kwargs):
-        keys_to_set = ("age",
-                       "description",
-                       "genotype",
-                       "sex",
-                       "species",
-                       "subject_id",
-                       "weight",
-                       "date_of_birth",
-                       "strain")
+        keys_to_set = (
+            "age",
+            "age__reference",
+            "description",
+            "genotype",
+            "sex",
+            "species",
+            "subject_id",
+            "weight",
+            "date_of_birth",
+            "strain",
+        )
         args_to_set = popargs_to_dict(keys_to_set, kwargs)
-        kwargs['name'] = 'subject'
-        super().__init__(**kwargs)
+        super().__init__(name="subject", **kwargs)
+
+        # NOTE when the Subject I/O mapper (see pynwb.io.file.py) reads an age__reference value of None from an
+        # NWB 2.0-2.5 file, it sets the value to "unspecified" so that when Subject.__init__ is called, the incoming
+        # age__reference value is NOT replaced by the default value ("birth") specified in the docval.
+        # then we replace "unspecified" with None here. the user will never see the value "unspecified".
+        # the ONLY way that age__reference can now be None is if it is read as None from an NWB 2.0-2.5 file.
+        if self._in_construct_mode and args_to_set["age__reference"] == "unspecified":
+            args_to_set["age__reference"] = None
+        elif args_to_set["age__reference"] not in ("birth", "gestational"):
+            raise ValueError("age__reference, if supplied, must be 'birth' or 'gestational'.")
 
         weight = args_to_set['weight']
         if isinstance(weight, float):
             args_to_set['weight'] = str(weight) + ' kg'
+
+        if isinstance(args_to_set["age"], timedelta):
+            args_to_set["age"] = pd.Timedelta(args_to_set["age"]).isoformat()
 
         date_of_birth = args_to_set['date_of_birth']
         if date_of_birth and date_of_birth.tzinfo is None:
@@ -103,7 +150,7 @@ class Subject(NWBContainer):
 
 
 @register_class('NWBFile', CORE_NAMESPACE)
-class NWBFile(MultiContainerInterface):
+class NWBFile(MultiContainerInterface, HERDManager):
     """
     A representation of an NWB file.
     """
@@ -130,13 +177,13 @@ class NWBFile(MultiContainerInterface):
         {
             'attr': 'stimulus',
             'add': '_add_stimulus_internal',
-            'type': TimeSeries,
+            'type': (NWBDataInterface, DynamicTable),
             'get': 'get_stimulus'
         },
         {
             'attr': 'stimulus_template',
             'add': '_add_stimulus_template_internal',
-            'type': TimeSeries,
+            'type': (TimeSeries, Images),
             'get': 'get_stimulus_template'
         },
         {
@@ -214,6 +261,7 @@ class NWBFile(MultiContainerInterface):
                      'slices',
                      'source_script',
                      'source_script_file_name',
+                     'was_generated_by',
                      'data_collection',
                      'surgery',
                      'virus',
@@ -226,7 +274,6 @@ class NWBFile(MultiContainerInterface):
                      {'name': 'subject', 'child': True, 'required_name': 'subject'},
                      {'name': 'sweep_table', 'child': True, 'required_name': 'sweep_table'},
                      {'name': 'invalid_times', 'child': True, 'required_name': 'invalid_times'},
-                     'epoch_tags',
                      # icephys_filtering is temporary. /intracellular_ephys/filtering dataset will be deprecated
                      {'name': 'icephys_filtering', 'settable': False},
                      {'name': 'intracellular_recordings', 'child': True,
@@ -293,6 +340,8 @@ class NWBFile(MultiContainerInterface):
              'doc': 'Script file used to create this NWB file.', 'default': None},
             {'name': 'source_script_file_name', 'type': str,
              'doc': 'Name of the source_script file', 'default': None},
+            {'name': 'was_generated_by', 'type': 'array_data',
+             'doc': 'List of software package names and versions used to generate this NWB File.', 'default': None},
             {'name': 'data_collection', 'type': str,
              'doc': 'Notes about data collection and analysis.', 'default': None},
             {'name': 'surgery', 'type': str,
@@ -309,13 +358,12 @@ class NWBFile(MultiContainerInterface):
             {'name': 'analysis', 'type': (list, tuple),
              'doc': 'result of analysis', 'default': None},
             {'name': 'stimulus', 'type': (list, tuple),
-             'doc': 'Stimulus TimeSeries objects belonging to this NWBFile', 'default': None},
+             'doc': 'Stimulus TimeSeries, DynamicTable, or NWBDataInterface objects belonging to this NWBFile',
+             'default': None},
             {'name': 'stimulus_template', 'type': (list, tuple),
              'doc': 'Stimulus template TimeSeries objects belonging to this NWBFile', 'default': None},
             {'name': 'epochs', 'type': TimeIntervals,
              'doc': 'Epoch objects belonging to this NWBFile', 'default': None},
-            {'name': 'epoch_tags', 'type': (tuple, list, set),
-             'doc': 'A sorted list of tags used across all epochs', 'default': set()},
             {'name': 'trials', 'type': TimeIntervals,
              'doc': 'A table containing trial data', 'default': None},
             {'name': 'invalid_times', 'type': TimeIntervals,
@@ -378,7 +426,6 @@ class NWBFile(MultiContainerInterface):
             'stimulus_template',
             'keywords',
             'processing',
-            'epoch_tags',
             'electrodes',
             'electrode_groups',
             'devices',
@@ -404,6 +451,7 @@ class NWBFile(MultiContainerInterface):
             'slices',
             'source_script',
             'source_script_file_name',
+            'was_generated_by',
             'surgery',
             'virus',
             'stimulus_notes',
@@ -508,6 +556,10 @@ class NWBFile(MultiContainerInterface):
         return self.processing
 
     @property
+    def epoch_tags(self):
+        return set(self.epochs.tags[:]) if self.epochs is not None else set()
+
+    @property
     def ec_electrode_groups(self):
         warn("NWBFile.ec_electrode_groups has been replaced by NWBFile.electrode_groups.", DeprecationWarning)
         return self.electrode_groups
@@ -561,14 +613,13 @@ class NWBFile(MultiContainerInterface):
         if self.epochs is None:
             self.epochs = TimeIntervals(name='epochs', description='experimental epochs')
 
-    @docval(*get_docval(TimeIntervals.add_column))
+    @docval(*get_docval(TimeIntervals.add_column), allow_extra=True)
     def add_epoch_column(self, **kwargs):
         """
         Add a column to the epoch table.
-        See :py:meth:`~pynwb.core.TimeIntervals.add_column` for more details
+        See :py:meth:`~hdmf.common.table.DynamicTable.add_column` for more details
         """
         self.__check_epochs()
-        self.epoch_tags.update(kwargs.pop('tags', list()))
         self.epochs.add_column(**kwargs)
 
     def add_epoch_metadata_column(self, *args, **kwargs):
@@ -590,19 +641,17 @@ class NWBFile(MultiContainerInterface):
         enclosure versus sleeping between explorations)
         """
         self.__check_epochs()
-        if kwargs['tags'] is not None:
-            self.epoch_tags.update(kwargs['tags'])
         self.epochs.add_interval(**kwargs)
 
     def __check_electrodes(self):
         if self.electrodes is None:
             self.electrodes = ElectrodeTable()
 
-    @docval(*get_docval(DynamicTable.add_column))
+    @docval(*get_docval(DynamicTable.add_column), allow_extra=True)
     def add_electrode_column(self, **kwargs):
         """
         Add a column to the electrode table.
-        See :py:meth:`~hdmf.common.DynamicTable.add_column` for more details
+        See :py:meth:`~hdmf.common.table.DynamicTable.add_column` for more details
         """
         self.__check_electrodes()
         self.electrodes.add_column(**kwargs)
@@ -635,7 +684,7 @@ class NWBFile(MultiContainerInterface):
     def add_electrode(self, **kwargs):
         """
         Add an electrode to the electrodes table.
-        See :py:meth:`~hdmf.common.DynamicTable.add_row` for more details.
+        See :py:meth:`~hdmf.common.table.DynamicTable.add_row` for more details.
 
         Required fields are *location* and
         *group* and any columns that have been added
@@ -700,11 +749,11 @@ class NWBFile(MultiContainerInterface):
         if self.units is None:
             self.units = Units(name='units', description='Autogenerated by NWBFile')
 
-    @docval(*get_docval(Units.add_column))
+    @docval(*get_docval(Units.add_column), allow_extra=True)
     def add_unit_column(self, **kwargs):
         """
         Add a column to the unit table.
-        See :py:meth:`~hdmf.common.DynamicTable.add_column` for more details
+        See :py:meth:`~hdmf.common.table.DynamicTable.add_column` for more details
         """
         self.__check_units()
         self.units.add_column(**kwargs)
@@ -713,7 +762,7 @@ class NWBFile(MultiContainerInterface):
     def add_unit(self, **kwargs):
         """
         Add a unit to the unit table.
-        See :py:meth:`~hdmf.common.DynamicTable.add_row` for more details.
+        See :py:meth:`~hdmf.common.table.DynamicTable.add_row` for more details.
 
         """
         self.__check_units()
@@ -723,11 +772,11 @@ class NWBFile(MultiContainerInterface):
         if self.trials is None:
             self.trials = TimeIntervals(name='trials', description='experimental trials')
 
-    @docval(*get_docval(DynamicTable.add_column))
+    @docval(*get_docval(DynamicTable.add_column), allow_extra=True)
     def add_trial_column(self, **kwargs):
         """
         Add a column to the trial table.
-        See :py:meth:`~hdmf.common.DynamicTable.add_column` for more details
+        See :py:meth:`~hdmf.common.table.DynamicTable.add_column` for more details
         """
         self.__check_trials()
         self.trials.add_column(**kwargs)
@@ -736,7 +785,7 @@ class NWBFile(MultiContainerInterface):
     def add_trial(self, **kwargs):
         """
         Add a trial to the trial table.
-        See :py:meth:`~hdmf.common.DynamicTable.add_interval` for more details.
+        See :py:meth:`~pynwb.epoch.TimeIntervals.add_interval` for more details.
 
         Required fields are *start_time*, *stop_time*, and any columns that have
         been added (through calls to `add_trial_columns`).
@@ -751,11 +800,11 @@ class NWBFile(MultiContainerInterface):
                 description='time intervals to be removed from analysis'
             )
 
-    @docval(*get_docval(DynamicTable.add_column))
+    @docval(*get_docval(DynamicTable.add_column), allow_extra=True)
     def add_invalid_times_column(self, **kwargs):
         """
         Add a column to the invalid times table.
-        See :py:meth:`~hdmf.common.DynamicTable.add_column` for more details
+        See :py:meth:`~hdmf.common.table.DynamicTable.add_column` for more details
         """
         self.__check_invalid_times()
         self.invalid_times.add_column(**kwargs)
@@ -764,7 +813,7 @@ class NWBFile(MultiContainerInterface):
     def add_invalid_time_interval(self, **kwargs):
         """
         Add a time interval to the invalid times table.
-        See :py:meth:`~hdmf.common.DynamicTable.add_row` for more details.
+        See :py:meth:`~hdmf.common.table.DynamicTable.add_row` for more details.
 
         Required fields are *start_time*, *stop_time*, and any columns that have
         been added (through calls to `add_invalid_times_columns`).
@@ -809,16 +858,31 @@ class NWBFile(MultiContainerInterface):
         if use_sweep_table:
             self._update_sweep_table(nwbdata)
 
-    @docval({'name': 'timeseries', 'type': TimeSeries},
-            {'name': 'use_sweep_table', 'type': bool, 'default': False, 'doc': 'Use the deprecated SweepTable'})
+    @docval({'name': 'stimulus', 'type': (TimeSeries, DynamicTable, NWBDataInterface), 'default': None,
+             'doc': 'The stimulus presentation data to add to this NWBFile.'},
+            {'name': 'use_sweep_table', 'type': bool, 'default': False, 'doc': 'Use the deprecated SweepTable'},
+            {'name': 'timeseries', 'type': TimeSeries, 'default': None,
+             'doc': 'The "timeseries" keyword argument is deprecated. Use the "nwbdata" argument instead.'},)
     def add_stimulus(self, **kwargs):
-        timeseries = popargs('timeseries', kwargs)
-        self._add_stimulus_internal(timeseries)
+        stimulus, timeseries = popargs('stimulus', 'timeseries', kwargs)
+        if stimulus is None and timeseries is None:
+            raise ValueError(
+                "The 'stimulus' keyword argument is required. The 'timeseries' keyword argument can be "
+                "provided for backwards compatibility but is deprecated in favor of 'stimulus' and will be "
+                "removed in PyNWB 3.0."
+            )
+        # TODO remove this support in PyNWB 3.0
+        if timeseries is not None:
+            warn("The 'timeseries' keyword argument is deprecated and will be removed in PyNWB 3.0. "
+                 "Use the 'stimulus' argument instead.", DeprecationWarning)
+            if stimulus is None:
+                stimulus = timeseries
+        self._add_stimulus_internal(stimulus)
         use_sweep_table = popargs('use_sweep_table', kwargs)
         if use_sweep_table:
-            self._update_sweep_table(timeseries)
+            self._update_sweep_table(stimulus)
 
-    @docval({'name': 'timeseries', 'type': TimeSeries},
+    @docval({'name': 'timeseries', 'type': (TimeSeries, Images)},
             {'name': 'use_sweep_table', 'type': bool, 'default': False, 'doc': 'Use the deprecated SweepTable'})
     def add_stimulus_template(self, **kwargs):
         timeseries = popargs('timeseries', kwargs)
@@ -1099,7 +1163,7 @@ def _add_missing_timezone(date):
     if not isinstance(date, datetime):
         raise ValueError("require datetime object")
     if date.tzinfo is None:
-        warn("Date is missing timezone information. Updating to local timezone.")
+        warn("Date is missing timezone information. Updating to local timezone.", stacklevel=2)
         return date.replace(tzinfo=tzlocal())
     return date
 

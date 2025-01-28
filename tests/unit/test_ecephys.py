@@ -2,11 +2,23 @@ import warnings
 
 import numpy as np
 
-from pynwb.ecephys import ElectricalSeries, SpikeEventSeries, EventDetection, Clustering, EventWaveform,\
-                          ClusterWaveforms, LFP, FilteredEphys, FeatureExtraction, ElectrodeGroup
+from pynwb.base import ProcessingModule
+from pynwb.ecephys import (
+    ElectricalSeries,
+    SpikeEventSeries,
+    EventDetection,
+    Clustering,
+    EventWaveform,
+    ClusterWaveforms,
+    LFP,
+    FilteredEphys,
+    FeatureExtraction,
+    ElectrodeGroup,
+)
 from pynwb.device import Device
 from pynwb.file import ElectrodeTable
 from pynwb.testing import TestCase
+from pynwb.testing.mock.ecephys import mock_ElectricalSeries
 
 from hdmf.common import DynamicTableRegion
 
@@ -104,6 +116,28 @@ class ElectricalSeriesConstructor(TestCase):
                "but instead the first does. Data is oriented incorrectly and should be transposed."
                    ) in str(w[-1].message)
 
+    def test_get_data_in_units(self):
+        samples = 100
+        channels = 5
+        conversion = 10.0
+        offset = 3.0
+        channel_conversion = np.random.rand(channels)
+
+        electrical_series = mock_ElectricalSeries(
+            data=np.ones((samples, channels)),
+            conversion=conversion,
+            offset=offset,
+            channel_conversion=channel_conversion,
+        )
+
+        data_in_units = electrical_series.get_data_in_units()
+
+        for channel_index in range(channels):
+            np.testing.assert_almost_equal(
+                data_in_units[:, channel_index],
+                np.ones(samples) * conversion * channel_conversion[channel_index] + offset
+            )
+
 
 class SpikeEventSeriesConstructor(TestCase):
 
@@ -133,21 +167,45 @@ class SpikeEventSeriesConstructor(TestCase):
         with self.assertRaises(TypeError):
             SpikeEventSeries(name='test_sES', data=data, electrodes=region, rate=1.)
 
+    def test_incorrect_timestamps(self):
+        table, region = self._create_table_and_region()
+        data = ((1, 1, 1), (2, 2, 2))
+        with self.assertRaisesWith(ValueError, "Must provide the same number of timestamps and spike events"):
+            SpikeEventSeries(name='test_sES', data=data, electrodes=region, timestamps=[1.0, 2.0, 3.0])
+
 
 class ElectrodeGroupConstructor(TestCase):
 
     def test_init(self):
         dev1 = Device('dev1')
-        group = ElectrodeGroup('elec1', 'electrode description', 'electrode location', dev1, (1, 2, 3))
+        group = ElectrodeGroup(name='elec1',
+                               description='electrode description',
+                               location='electrode location',
+                               device=dev1,
+                               position=(1, 2, 3))
         self.assertEqual(group.name, 'elec1')
         self.assertEqual(group.description, 'electrode description')
         self.assertEqual(group.location, 'electrode location')
         self.assertEqual(group.device, dev1)
-        self.assertEqual(group.position, (1, 2, 3))
+        self.assertEqual(group.position.tolist(), (1, 2, 3))
+
+    def test_init_position_array(self):
+        position = np.array((1, 2, 3), dtype=np.dtype([('x', float), ('y', float), ('z', float)]))
+        dev1 = Device('dev1')
+        group = ElectrodeGroup('elec1', 'electrode description', 'electrode location', dev1,
+                               position)
+        self.assertEqual(group.name, 'elec1')
+        self.assertEqual(group.description, 'electrode description')
+        self.assertEqual(group.location, 'electrode location')
+        self.assertEqual(group.device, dev1)
+        self.assertEqual(group.position, position)
 
     def test_init_position_none(self):
         dev1 = Device('dev1')
-        group = ElectrodeGroup('elec1', 'electrode description', 'electrode location', dev1)
+        group = ElectrodeGroup(name='elec1',
+                               description='electrode description',
+                               location='electrode location',
+                               device=dev1)
         self.assertEqual(group.name, 'elec1')
         self.assertEqual(group.description, 'electrode description')
         self.assertEqual(group.location, 'electrode location')
@@ -156,8 +214,30 @@ class ElectrodeGroupConstructor(TestCase):
 
     def test_init_position_bad(self):
         dev1 = Device('dev1')
-        with self.assertRaises(TypeError):
-            ElectrodeGroup('elec1', 'electrode description', 'electrode location', dev1, (1, 2))
+        with self.assertRaises(ValueError):
+            ElectrodeGroup(name='elec1',
+                           description='electrode description',
+                           location='electrode location',
+                           device=dev1,
+                           position=(1, 2))
+        with self.assertRaises(ValueError):
+            ElectrodeGroup(name='elec1',
+                           description='electrode description',
+                           location='electrode location',
+                           device=dev1,
+                           position=[(1, 2), ])
+        with self.assertRaises(ValueError):
+            ElectrodeGroup(name='elec1',
+                           description='electrode description',
+                           location='electrode location',
+                           device=dev1,
+                           position=np.array([(1., 2.)], dtype=np.dtype([('x', float), ('y', float)])))
+        with self.assertRaises(ValueError):
+            ElectrodeGroup(name='elec1',
+                           description='electrode description',
+                           location='electrode location',
+                           device=dev1,
+                           position=[(1, 2, 3), (4, 5, 6), (7, 8, 9)])
 
 
 class EventDetectionConstructor(TestCase):
@@ -187,23 +267,9 @@ class EventDetectionConstructor(TestCase):
 
 class EventWaveformConstructor(TestCase):
 
-    def _create_table_and_region(self):
-        table = make_electrode_table()
-        region = DynamicTableRegion(
-            name='electrodes',
-            data=[0, 2],
-            description='the first and third electrodes',
-            table=table
-        )
-        return table, region
-
     def test_init(self):
-        table, region = self._create_table_and_region()
-        sES = SpikeEventSeries('test_sES', list(range(10)), list(range(10)), region)
-
-        ew = EventWaveform(sES)
-        self.assertEqual(ew.spike_event_series['test_sES'], sES)
-        self.assertEqual(ew['test_sES'], ew.spike_event_series['test_sES'])
+        with self.assertRaises(ValueError):
+            EventWaveform()
 
 
 class ClusteringConstructor(TestCase):
@@ -258,10 +324,25 @@ class LFPTest(TestCase):
         )
         return table, region
 
+    def test_init(self):
+        _, region = self._create_table_and_region()
+        eS = ElectricalSeries('test_eS', [0, 1, 2, 3], region, timestamps=[0.1, 0.2, 0.3, 0.4])
+        msg = (
+            "The linked table for DynamicTableRegion 'electrodes' does not share "
+            "an ancestor with the DynamicTableRegion."
+        )
+        with self.assertWarnsRegex(UserWarning, msg):
+            lfp = LFP(eS)
+        self.assertEqual(lfp.electrical_series.get('test_eS'), eS)
+        self.assertEqual(lfp['test_eS'], lfp.electrical_series.get('test_eS'))
+
     def test_add_electrical_series(self):
         lfp = LFP()
         table, region = self._create_table_and_region()
         eS = ElectricalSeries('test_eS', [0, 1, 2, 3], region, timestamps=[0.1, 0.2, 0.3, 0.4])
+        pm = ProcessingModule(name='test_module', description='a test module')
+        pm.add(table)
+        pm.add(lfp)
         lfp.add_electrical_series(eS)
         self.assertEqual(lfp.electrical_series.get('test_eS'), eS)
 
@@ -279,16 +360,24 @@ class FilteredEphysTest(TestCase):
         return table, region
 
     def test_init(self):
-        table, region = self._create_table_and_region()
+        _, region = self._create_table_and_region()
         eS = ElectricalSeries('test_eS', [0, 1, 2, 3], region, timestamps=[0.1, 0.2, 0.3, 0.4])
-        fe = FilteredEphys(eS)
+        msg = (
+            "The linked table for DynamicTableRegion 'electrodes' does not share "
+            "an ancestor with the DynamicTableRegion."
+        )
+        with self.assertWarnsRegex(UserWarning, msg):
+            fe = FilteredEphys(eS)
         self.assertEqual(fe.electrical_series.get('test_eS'), eS)
         self.assertEqual(fe['test_eS'], fe.electrical_series.get('test_eS'))
 
     def test_add_electrical_series(self):
-        fe = FilteredEphys()
         table, region = self._create_table_and_region()
         eS = ElectricalSeries('test_eS', [0, 1, 2, 3], region, timestamps=[0.1, 0.2, 0.3, 0.4])
+        pm = ProcessingModule(name='test_module', description='a test module')
+        fe = FilteredEphys()
+        pm.add(table)
+        pm.add(fe)
         fe.add_electrical_series(eS)
         self.assertEqual(fe.electrical_series.get('test_eS'), eS)
         self.assertEqual(fe['test_eS'], fe.electrical_series.get('test_eS'))

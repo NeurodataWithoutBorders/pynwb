@@ -10,6 +10,7 @@ if "%SPHINXAPIDOC%" == "" (
 )
 set BUILDDIR=_build
 set RSTDIR=source
+set GALLERYDIR=gallery
 set SRCDIR=../src
 set PKGNAME=pynwb
 set ALLSPHINXOPTS=-d %BUILDDIR%/doctrees %SPHINXOPTS% %RSTDIR%
@@ -51,6 +52,8 @@ if "%1" == "clean" (
 	del /q /s %BUILDDIR%\*
 	del /q %RSTDIR%\%PKGNAME%*.rst
 	rmdir /q /s %RSTDIR%\tutorials
+	del /q /s %GALLERYDIR%\advanced_io\*.npy
+        del /q /s %GALLERYDIR%\advanced_io\*.nwb
 	goto end
 )
 
@@ -180,7 +183,7 @@ if "%1" == "changes" (
 )
 
 if "%1" == "linkcheck" (
-	%SPHINXBUILD% -b linkcheck %ALLSPHINXOPTS% %BUILDDIR%/linkcheck
+	%SPHINXBUILD% -W -b linkcheck %ALLSPHINXOPTS% %BUILDDIR%/linkcheck
 	if errorlevel 1 exit /b 1
 	echo.
 	echo.Link check complete; look for any errors in the above output ^

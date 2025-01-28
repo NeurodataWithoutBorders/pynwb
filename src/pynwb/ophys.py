@@ -43,7 +43,12 @@ class ImagingPlane(NWBContainer):
                      'manifold',
                      'conversion',
                      'unit',
-                     'reference_frame')
+                     'reference_frame',
+                     'grid_spacing',
+                     'grid_spacing_unit',
+                     'origin_coords',
+                     'origin_coords_unit'
+                     )
 
     @docval(*get_docval(NWBContainer.__init__, 'name'),  # required
             {'name': 'optical_channel', 'type': (list, OpticalChannel),  # required
@@ -57,15 +62,15 @@ class ImagingPlane(NWBContainer):
              'doc': 'Rate images are acquired, in Hz. If the corresponding TimeSeries is present, the rate should be '
                     'stored there instead.', 'default': None},
             {'name': 'manifold', 'type': 'array_data',
-             'doc': ('DEPRECATED: Physical position of each pixel. size=("height", "width", "xyz"). '
+             'doc': ('DEPRECATED - Physical position of each pixel. size=("height", "width", "xyz"). '
                      'Deprecated in favor of origin_coords and grid_spacing.'),
              'default': None},
             {'name': 'conversion', 'type': float,
-             'doc': ('DEPRECATED: Multiplier to get from stored values to specified unit (e.g., 1e-3 for millimeters) '
+             'doc': ('DEPRECATED - Multiplier to get from stored values to specified unit (e.g., 1e-3 for millimeters) '
                      'Deprecated in favor of origin_coords and grid_spacing.'),
              'default': 1.0},
             {'name': 'unit', 'type': str,
-             'doc': 'DEPRECATED: Base unit that coordinates are stored in (e.g., Meters). '
+             'doc': 'DEPRECATED - Base unit that coordinates are stored in (e.g., Meters). '
                     'Deprecated in favor of origin_coords_unit and grid_spacing_unit.',
              'default': 'meters'},
             {'name': 'reference_frame', 'type': str,
@@ -116,6 +121,87 @@ class ImagingPlane(NWBContainer):
         if args_to_set['unit'] != 'meters':
             warnings.warn("The 'unit' argument is deprecated in favor of 'origin_coords_unit' and 'grid_spacing_unit'.",
                           DeprecationWarning)
+        for key, val in args_to_set.items():
+            setattr(self, key, val)
+
+
+@register_class("OnePhotonSeries", CORE_NAMESPACE)
+class OnePhotonSeries(ImageSeries):
+    """Image stack recorded over time from 1-photon microscope."""
+
+    __nwbfields__ = (
+        "imaging_plane", "pmt_gain", "scan_line_rate", "exposure_time", "binning", "power", "intensity"
+    )
+
+    @docval(
+        *get_docval(ImageSeries.__init__, "name"),  # required
+        {"name": "imaging_plane", "type": ImagingPlane, "doc": "Imaging plane class/pointer."},  # required
+        *get_docval(ImageSeries.__init__, "data", "unit", "format"),
+        {"name": "pmt_gain", "type": float, "doc": "Photomultiplier gain.", "default": None},
+        {
+            "name": "scan_line_rate",
+            "type": float,
+            "doc": (
+                "Lines imaged per second. This is also stored in /general/optophysiology but is kept "
+                "here as it is useful information for analysis, and so good to be stored w/ the actual data."
+             ),
+            "default": None,
+        },
+        {
+            "name": "exposure_time",
+            "type": float,
+            "doc": "Exposure time of the sample; often the inverse of the frequency.",
+            "default": None,
+        },
+        {
+            "name": "binning",
+            "type": (int, "uint"),
+            "doc": "Amount of pixels combined into 'bins'; could be 1, 2, 4, 8, etc.",
+            "default": None,
+        },
+        {
+            "name": "power",
+            "type": float,
+            "doc": "Power of the excitation in mW, if known.",
+            "default": None,
+        },
+        {
+            "name": "intensity",
+            "type": float,
+            "doc": "Intensity of the excitation in mW/mm^2, if known.",
+            "default": None,
+        },
+        *get_docval(
+            ImageSeries.__init__,
+            "external_file",
+            "starting_frame",
+            "bits_per_pixel",
+            "dimension",
+            "resolution",
+            "conversion",
+            "timestamps",
+            "starting_time",
+            "rate",
+            "comments",
+            "description",
+            "control",
+            "control_description",
+            "device",
+            "offset",
+        )
+    )
+    def __init__(self, **kwargs):
+        keys_to_set = (
+            "imaging_plane", "pmt_gain", "scan_line_rate", "exposure_time", "binning", "power", "intensity"
+        )
+        args_to_set = popargs_to_dict(keys_to_set, kwargs)
+        super().__init__(**kwargs)
+
+        if args_to_set["binning"] is not None and args_to_set["binning"] < 0:
+            raise ValueError(f"Binning value must be >= 0: {args_to_set['binning']}")
+        if isinstance(args_to_set["binning"], int):
+            args_to_set["binning"] = np.uint(args_to_set["binning"])
+
         for key, val in args_to_set.items():
             setattr(self, key, val)
 

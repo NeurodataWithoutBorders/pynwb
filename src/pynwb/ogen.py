@@ -37,8 +37,9 @@ class OptogeneticSeries(TimeSeries):
     __nwbfields__ = ('site',)
 
     @docval(*get_docval(TimeSeries.__init__, 'name'),  # required
-            {'name': 'data', 'type': ('array_data', 'data', TimeSeries), 'shape': (None, ),  # required
-             'doc': 'The data values over time. Must be 1D.'},
+            {'name': 'data', 'type': ('array_data', 'data', TimeSeries),  # required
+             'shape': [(None, ), (None, None)],
+             'doc': 'The data values over time.'},
             {'name': 'site', 'type': OptogeneticStimulusSite,  # required
              'doc': 'The site to which this stimulus was applied.'},
             *get_docval(TimeSeries.__init__, 'resolution', 'conversion', 'timestamps', 'starting_time', 'rate',

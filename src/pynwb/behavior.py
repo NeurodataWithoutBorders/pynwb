@@ -23,11 +23,11 @@ class SpatialSeries(TimeSeries):
     __nwbfields__ = ('reference_frame',)
 
     @docval(*get_docval(TimeSeries.__init__, 'name'),  # required
-            {'name': 'data', 'type': ('array_data', 'data', TimeSeries), 'shape': ((None, ), (None, None)),  # required
+            {'name': 'data', 'type': ('array_data', 'data', TimeSeries), 'shape': ((None, ), (None, None)), # required
              'doc': ('The data values. Can be 1D or 2D. The first dimension must be time. If 2D, there can be 1, 2, '
                      'or 3 columns, which represent x, y, and z.')},
-            {'name': 'reference_frame', 'type': str,   # required
-             'doc': 'description defining what the zero-position is'},
+            {'name': 'reference_frame', 'type': str,
+             'doc': 'description defining what the zero-position is', 'default': None},
             {'name': 'unit', 'type': str, 'doc': 'The base unit of measurement (should be SI unit)',
              'default': 'meters'},
             *get_docval(TimeSeries.__init__, 'conversion', 'resolution', 'timestamps', 'starting_time', 'rate',
@@ -36,7 +36,9 @@ class SpatialSeries(TimeSeries):
         """
         Create a SpatialSeries TimeSeries dataset
         """
-        name, data, reference_frame, unit = popargs('name', 'data', 'reference_frame', 'unit', kwargs)
+        name, data, reference_frame, unit = popargs(
+            'name', 'data', 'reference_frame', 'unit', kwargs
+        )
         super().__init__(name, data, unit, **kwargs)
 
         # NWB 2.5 restricts length of second dimension to be <= 3

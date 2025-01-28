@@ -11,26 +11,31 @@ Image data can be a collection of individual images or movie segments (as a movi
 about the subject, the environment, the presented stimuli, or other parts
 related to the experiment. This tutorial focuses in particular on the usage of:
 
-* :py:class:`~pynwb.image.OpticalSeries` for series of images that were presented as stimulus
+* :py:class:`~pynwb.image.OpticalSeries` and :py:class:`~pynwb.misc.AbstractFeatureSeries` for series of images that
+  were presented as stimulus
 * :py:class:`~pynwb.image.ImageSeries`, for series of images (movie segments);
-* :py:class:`~pynwb.image.GrayscaleImage`, :py:class:`~pynwb.image.RGBImage`, :py:class:`~pynwb.image.RGBAImage`, for static images;
+* :py:class:`~pynwb.image.GrayscaleImage`, :py:class:`~pynwb.image.RGBImage`,
+  :py:class:`~pynwb.image.RGBAImage`, for static images;
 
 The following examples will reference variables that may not be defined within the block they are used in. For
 clarity, we define them here:
 """
+
 # sphinx_gallery_thumbnail_path = 'figures/gallery_thumbnails_image_data.png'
 from datetime import datetime
-from dateutil import tz
+import os
+from uuid import uuid4
 
 import numpy as np
+from dateutil import tz
 from PIL import Image
 
-from pynwb import NWBFile, NWBHDF5IO
+from pynwb import NWBHDF5IO, NWBFile
 from pynwb.base import Images
-from pynwb.image import RGBAImage, RGBImage, GrayscaleImage, OpticalSeries, ImageSeries
+from pynwb.image import GrayscaleImage, ImageSeries, OpticalSeries, RGBAImage, RGBImage
+from pynwb.misc import AbstractFeatureSeries
 
 # Define file paths used in the tutorial
-import os
 nwbfile_path = os.path.abspath("images_tutorial.nwb")
 moviefiles_path = [
     os.path.abspath("image/file_1.tiff"),
@@ -48,14 +53,16 @@ moviefiles_path = [
 session_start_time = datetime(2018, 4, 25, 2, 30, 3, tzinfo=tz.gettz("US/Pacific"))
 
 nwbfile = NWBFile(
-    session_description="Mouse exploring an open field",  # required
-    identifier="Mouse5_Day3",  # required
-    session_start_time=session_start_time,  # required
-    session_id="session_1234",  # optional
-    experimenter="My Name",  # optional
-    lab="My Lab Name",  # optional
-    institution="University of My Institution",  # optional
-    related_publications="DOI:10.1016/j.neuron.2016.12.011",  # optional
+    session_description="my first synthetic recording",
+    identifier=str(uuid4()),
+    session_start_time=session_start_time,
+    experimenter=[
+        "Baggins, Bilbo",
+    ],
+    lab="Bag End Laboratory",
+    institution="University of Middle Earth at the Shire",
+    experiment_description="I went on an adventure to reclaim vast treasures.",
+    session_id="LONELYMTN001",
 )
 
 nwbfile
@@ -99,9 +106,38 @@ optical_series = OpticalSeries(
     description="The images presented to the subject as stimuli",
 )
 
-nwbfile.add_stimulus(timeseries=optical_series)
+nwbfile.add_stimulus(stimulus=optical_series)
 
 ####################
+# AbstractFeatureSeries: Storing features of visual stimuli
+# ---------------------------------------------------------
+#
+# While it is usually recommended to store the entire image data as an :py:class:`~pynwb.image.OpticalSeries`, sometimes
+# it is useful to store features of the visual stimuli instead of or in addition to the raw image data. For example,
+# you may want to store the mean luminance of the image, the contrast, or the spatial frequency. This can be done using
+# an instance of :py:class:`~pynwb.misc.AbstractFeatureSeries`. This class is a general container for storing time
+# series of features that are derived from the raw image data.
+
+# Create some fake feature data
+feature_data = np.random.rand(200, 3)  # 200 time points, 3 features
+
+# Create an AbstractFeatureSeries object
+abstract_feature_series = AbstractFeatureSeries(
+    name="StimulusFeatures",
+    data=feature_data,
+    timestamps=np.linspace(0, 1, 200),
+    description="Features of the visual stimuli",
+    features=["luminance", "contrast", "spatial frequency"],
+    feature_units=["n.a.", "n.a.", "cycles/degree"],
+)
+
+# Add the AbstractFeatureSeries to the NWBFile
+nwbfile.add_stimulus(abstract_feature_series)
+
+####################
+# Like all :py:class:`~pynwb.base.TimeSeries`, :py:class:`~pynwb.misc.AbstractFeatureSeries` specify timing using
+# either the ``rate`` and ``starting_time`` attributes or the ``timestamps`` attribute.
+#
 # ImageSeries: Storing series of images as acquisition
 # ----------------------------------------------------
 #
@@ -111,7 +147,6 @@ nwbfile.add_stimulus(timeseries=optical_series)
 #
 # We can add raw data to the :py:class:`~pynwb.file.NWBFile` object as *acquisition* using
 # the :py:meth:`~pynwb.file.NWBFile.add_acquisition` method.
-#
 
 image_data = np.random.randint(low=0, high=255, size=(200, 50, 50, 3), dtype=np.uint8)
 behavior_images = ImageSeries(
@@ -130,19 +165,23 @@ nwbfile.add_acquisition(behavior_images)
 # External Files
 # ^^^^^^^^^^^^^^
 #
-# External files (e.g. video files of the behaving animal) can be added to the :py:class:`~pynwb.file.NWBFile` by creating
-# an :py:class:`~pynwb.image.ImageSeries` object using the :py:attr:`~pynwb.image.ImageSeries.external_file` attribute that specifies the
-# path to the external file(s) on disk. The file(s) path must be relative to the path of the NWB file.
+# External files (e.g. video files of the behaving animal) can be added to the :py:class:`~pynwb.file.NWBFile`
+# by creating an :py:class:`~pynwb.image.ImageSeries` object using the
+# :py:attr:`~pynwb.image.ImageSeries.external_file` attribute that specifies
+# the path to the external file(s) on disk.
+# The file(s) path must be relative to the path of the NWB file.
 # Either ``external_file`` or ``data`` must be specified, but not both.
 #
-# If the sampling rate is constant, use :py:attr:`~pynwb.base.TimeSeries.rate` and :py:attr:`~pynwb.base.TimeSeries.starting_time` to specify time.
-# For irregularly sampled recordings, use :py:attr:`~pynwb.base.TimeSeries.timestamps` to specify time for each sample image.
+# If the sampling rate is constant, use :py:attr:`~pynwb.base.TimeSeries.rate` and
+# :py:attr:`~pynwb.base.TimeSeries.starting_time` to specify time.
+# For irregularly sampled recordings, use :py:attr:`~pynwb.base.TimeSeries.timestamps` to specify time for each sample
+# image.
 #
 # Each external image may contain one or more consecutive frames of the full :py:class:`~pynwb.image.ImageSeries`.
 # The :py:attr:`~pynwb.image.ImageSeries.starting_frame` attribute serves as an index to indicate which frame
 # each file contains.
-# For example, if the ``external_file`` dataset has three paths to files and the first and the second file have 2 frames,
-# and the third file has 3 frames, then this attribute will have values `[0, 2, 4]`.
+# For example, if the ``external_file`` dataset has three paths to files and the first and the second file have 2
+# frames, and the third file has 3 frames, then this attribute will have values `[0, 2, 4]`.
 
 external_file = [
     os.path.relpath(movie_path, nwbfile_path) for movie_path in moviefiles_path
@@ -184,7 +223,7 @@ nwbfile.add_acquisition(behavior_external_file)
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 #
 # :py:class:`~pynwb.image.RGBAImage` is for storing data of color image with transparency.
-# :py:attr:`~pynwb.image.RGBAImage.data` must be 3D where the first and second dimensions
+# ``RGBAImage.data`` must be 3D where the first and second dimensions
 # represent x and y. The third dimension has length 4 and represents the RGBA value.
 #
 
@@ -202,7 +241,7 @@ rgba_logo = RGBAImage(
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^
 #
 # :py:class:`~pynwb.image.RGBImage` is for storing data of RGB color image.
-# :py:attr:`~pynwb.image.RGBImage.data` must be 3D where the first and second dimensions
+# ``RGBImage.data`` must be 3D where the first and second dimensions
 # represent x and y. The third dimension has length 3 and represents the RGB value.
 #
 
@@ -218,8 +257,7 @@ rgb_logo = RGBImage(
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 #
 # :py:class:`~pynwb.image.GrayscaleImage` is for storing grayscale image data.
-# :py:attr:`~pynwb.image.GrayscaleImage.data` must be 2D where the first and second dimensions
-# represent x and y.
+# ``GrayscaleImage.data`` must be 2D where the first and second dimensions represent x and y.
 #
 
 gs_logo = GrayscaleImage(
@@ -245,6 +283,41 @@ images = Images(
 nwbfile.add_acquisition(images)
 
 ####################
+# IndexSeries for repeated images
+# -------------------------------
+#
+# You may want to set up a time series of images where some images are repeated many
+# times. You could create an :py:class:`~pynwb.image.ImageSeries` that repeats the data
+# each time the image is shown, but that would be inefficient, because it would store
+# the same data multiple times. A better solution would be to store the unique images
+# once and reference those images. This is how :py:class:`~pynwb.image.IndexSeries`
+# works. First, create an :py:class:`~pynwb.base.Images` container with the order of
+# images defined using an :py:class:`~pynwb.base.ImageReferences`. Then create an
+# :py:class:`~pynwb.image.IndexSeries` that indexes into the
+# :py:class:`~pynwb.base.Images`.
+
+from pynwb.base import ImageReferences
+from pynwb.image import GrayscaleImage, Images, IndexSeries, RGBImage
+
+images = Images(
+    name="raccoons",
+    images=[rgb_logo, gs_logo],
+    description="A collection of raccoons.",
+    order_of_images=ImageReferences("order_of_images", [rgb_logo, gs_logo]),
+)
+
+idx_series = IndexSeries(
+    name="stimuli",
+    data=[0, 1, 0, 1],
+    indexed_images=images,
+    unit="N/A",
+    timestamps=[0.1, 0.2, 0.3, 0.4],
+)
+
+####################
+# Here `data` contains the (0-indexed) index of the displayed image as they are ordered
+# in the :py:class:`~pynwb.base.ImageReferences`.
+#
 # Writing the images to an NWB File
 # ---------------------------------------
 # As demonstrated in the :ref:`basic_writing` tutorial, we will use :py:class:`~pynwb.NWBHDF5IO`

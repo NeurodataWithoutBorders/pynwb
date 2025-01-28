@@ -1,11 +1,15 @@
 import numpy as np
 import pandas as pd
 
-from datetime import datetime
+from datetime import datetime, timedelta
 from dateutil.tz import tzlocal, tzutc
+from hdmf.common import DynamicTable
 
+from hdmf.common import VectorData
+from hdmf.utils import docval, get_docval, popargs
 from pynwb import NWBFile, TimeSeries, NWBHDF5IO
-from pynwb.file import Subject, ElectrodeTable
+from pynwb.base import Image, Images
+from pynwb.file import Subject, ElectrodeTable, _add_missing_timezone
 from pynwb.epoch import TimeIntervals
 from pynwb.ecephys import ElectricalSeries
 from pynwb.testing import TestCase, remove_test_file
@@ -38,6 +42,7 @@ class NWBFileTest(TestCase):
                                virus='a virus',
                                source_script='noscript',
                                source_script_file_name='nofilename',
+                               was_generated_by=[('nosoftware', '0.0.0')],
                                stimulus_notes='test stimulus notes',
                                data_collection='test data collection notes',
                                keywords=('these', 'are', 'keywords'))
@@ -57,6 +62,7 @@ class NWBFileTest(TestCase):
         self.assertEqual(self.nwbfile.related_publications, ('my pubs',))
         self.assertEqual(self.nwbfile.source_script, 'noscript')
         self.assertEqual(self.nwbfile.source_script_file_name, 'nofilename')
+        self.assertEqual(self.nwbfile.was_generated_by, [('nosoftware', '0.0.0')])
         self.assertEqual(self.nwbfile.keywords, ('these', 'are', 'keywords'))
         self.assertEqual(self.nwbfile.timestamps_reference_time, self.ref_time)
 
@@ -138,6 +144,18 @@ class NWBFileTest(TestCase):
         tags = self.nwbfile.epoch_tags
         self.assertEqual(set(expected_tags), set(tags))
 
+    def test_epoch_tags_single_string(self):
+        tags1 = 't1'
+        tags2 = 't2'
+        expected_tags = set([tags1, tags2])
+        self.nwbfile.add_epoch(0.0, 1.0, tags=tags1)
+        self.nwbfile.add_epoch(1.0, 2.0, tags=tags2)
+        tags = self.nwbfile.epoch_tags
+        self.assertEqual(expected_tags, tags)
+
+    def test_epoch_tags_no_table(self):
+        self.assertEqual(set(), self.nwbfile.epoch_tags)
+
     def test_add_acquisition(self):
         self.nwbfile.add_acquisition(TimeSeries('test_ts', [0, 1, 2, 3, 4, 5],
                                                 'grams', timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5]))
@@ -148,9 +166,52 @@ class NWBFileTest(TestCase):
                                              'grams', timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5]))
         self.assertEqual(len(self.nwbfile.stimulus), 1)
 
+    def test_add_stimulus_timeseries_arg(self):
+        """Test nwbfile.add_stimulus using the deprecated 'timeseries' keyword argument"""
+        msg = (
+            "The 'timeseries' keyword argument is deprecated and will be removed in PyNWB 3.0. "
+            "Use the 'stimulus' argument instead."
+        )
+        with self.assertWarnsWith(DeprecationWarning, msg):
+            self.nwbfile.add_stimulus(
+                timeseries=TimeSeries(
+                    name='test_ts',
+                    data=[0, 1, 2, 3, 4, 5],
+                    unit='grams',
+                    timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5]
+                )
+            )
+        self.assertEqual(len(self.nwbfile.stimulus), 1)
+
+    def test_add_stimulus_no_stimulus_arg(self):
+        """Test nwbfile.add_stimulus using the deprecated 'timeseries' keyword argument"""
+        msg = (
+            "The 'stimulus' keyword argument is required. The 'timeseries' keyword argument can be "
+            "provided for backwards compatibility but is deprecated in favor of 'stimulus' and will be "
+            "removed in PyNWB 3.0."
+        )
+        with self.assertRaisesWith(ValueError, msg):
+            self.nwbfile.add_stimulus(None)
+        self.assertEqual(len(self.nwbfile.stimulus), 0)
+
+    def test_add_stimulus_dynamic_table(self):
+        dt = DynamicTable(
+            name='test_dynamic_table',
+            description='a test dynamic table',
+        )
+        self.nwbfile.add_stimulus(dt)
+        self.assertEqual(len(self.nwbfile.stimulus), 1)
+        self.assertIs(self.nwbfile.stimulus['test_dynamic_table'], dt)
+
     def test_add_stimulus_template(self):
         self.nwbfile.add_stimulus_template(TimeSeries('test_ts', [0, 1, 2, 3, 4, 5],
                                                       'grams', timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5]))
+        self.assertEqual(len(self.nwbfile.stimulus_template), 1)
+
+    def test_add_stimulus_template_images(self):
+        image1 = Image(name='test_image1', data=np.ones((10, 10)))
+        images = Images(name='images_name', images=[image1])
+        self.nwbfile.add_stimulus_template(images)
         self.assertEqual(len(self.nwbfile.stimulus_template), 1)
 
     def test_add_analysis(self):
@@ -214,6 +275,27 @@ class NWBFileTest(TestCase):
     def test_add_trial_column(self):
         self.nwbfile.add_trial_column('trial_type', 'the type of trial')
         self.assertEqual(self.nwbfile.trials.colnames, ('start_time', 'stop_time', 'trial_type'))
+
+    def test_add_trial_column_custom_class(self):
+        class SubVectorData(VectorData):
+            __fields__ = ('extra_kwarg', )
+
+            @docval(
+                *get_docval(VectorData.__init__, "name", "description", "data"),
+                {'name': 'extra_kwarg', 'type': 'str', 'doc': 'An extra kwarg.'},
+            )
+            def __init__(self, **kwargs):
+                extra_kwarg = popargs('extra_kwarg', kwargs)
+                super().__init__(**kwargs)
+                self.extra_kwarg = extra_kwarg
+
+        self.nwbfile.add_trial_column(
+            name="test",
+            description="test",
+            col_cls=SubVectorData,
+            extra_kwarg="test_extra_kwarg"
+        )
+        self.assertEqual(self.nwbfile.trials["test"].extra_kwarg, "test_extra_kwarg")
 
     def test_add_trial(self):
         self.nwbfile.add_trial(start_time=10.0, stop_time=20.0)
@@ -437,29 +519,35 @@ Fields:
 
 class SubjectTest(TestCase):
     def setUp(self):
-        self.subject = Subject(age='P90D',
-                               description='An unfortunate rat',
-                               genotype='WT',
-                               sex='M',
-                               species='Rattus norvegicus',
-                               subject_id='RAT123',
-                               weight='2 kg',
-                               date_of_birth=datetime(2017, 5, 1, 12, tzinfo=tzlocal()),
-                               strain='my_strain')
+        self.subject = Subject(
+            age='P90D',
+            age__reference="birth",
+            description='An unfortunate rat',
+            genotype='WT',
+            sex='M',
+            species='Rattus norvegicus',
+            subject_id='RAT123',
+            weight='2 kg',
+            date_of_birth=datetime(2017, 5, 1, 12, tzinfo=tzlocal()),
+            strain='my_strain',
+        )
         self.start = datetime(2017, 5, 1, 12, tzinfo=tzlocal())
         self.path = 'nwbfile_test.h5'
-        self.nwbfile = NWBFile('a test session description for a test NWBFile',
-                               'FILE123',
-                               self.start,
-                               experimenter='A test experimenter',
-                               lab='a test lab',
-                               institution='a test institution',
-                               experiment_description='a test experiment description',
-                               session_id='test1',
-                               subject=self.subject)
+        self.nwbfile = NWBFile(
+            'a test session description for a test NWBFile',
+            'FILE123',
+            self.start,
+            experimenter='A test experimenter',
+            lab='a test lab',
+            institution='a test institution',
+            experiment_description='a test experiment description',
+            session_id='test1',
+            subject=self.subject,
+        )
 
     def test_constructor(self):
         self.assertEqual(self.subject.age, 'P90D')
+        self.assertEqual(self.subject.age__reference, "birth")
         self.assertEqual(self.subject.description, 'An unfortunate rat')
         self.assertEqual(self.subject.genotype, 'WT')
         self.assertEqual(self.subject.sex, 'M')
@@ -479,8 +567,42 @@ class SubjectTest(TestCase):
         )
         self.assertEqual(subject.weight, '2.3 kg')
 
+    def test_age_reference_arg_check(self):
+        with self.assertRaisesWith(ValueError, "age__reference, if supplied, must be 'birth' or 'gestational'."):
+            Subject(subject_id='RAT123', age='P90D', age__reference='brth')
+
+    def test_age_regression_1(self):
+        subject = Subject(
+            age='P90D',
+            description='An unfortunate rat',
+            subject_id='RAT123',
+        )
+
+        self.assertEqual(subject.age, 'P90D')
+        self.assertEqual(subject.age__reference, "birth")
+        self.assertEqual(subject.description, 'An unfortunate rat')
+        self.assertEqual(subject.subject_id, 'RAT123')
+
+    def test_age_regression_2(self):
+        subject = Subject(
+            description='An unfortunate rat',
+            subject_id='RAT123',
+        )
+
+        self.assertEqual(subject.description, 'An unfortunate rat')
+        self.assertEqual(subject.subject_id, 'RAT123')
+
+    def test_subject_age_duration(self):
+        subject = Subject(
+            subject_id='RAT123',
+            age=timedelta(seconds=99999)
+        )
+
+        self.assertEqual(subject.age, "P1DT3H46M39S")
+
 
 class TestCacheSpec(TestCase):
+    """Test whether the file can be written and read when caching the spec."""
 
     def setUp(self):
         self.path = 'unittest_cached_spec.nwb'
@@ -489,18 +611,20 @@ class TestCacheSpec(TestCase):
         remove_test_file(self.path)
 
     def test_simple(self):
-        nwbfile = NWBFile(' ', ' ',
+        nwbfile = NWBFile('sess_desc', 'identifier',
                           datetime.now(tzlocal()),
                           file_create_date=datetime.now(tzlocal()),
                           institution='University of California, San Francisco',
                           lab='Chang Lab')
         with NWBHDF5IO(self.path, 'w') as io:
             io.write(nwbfile)
-        with NWBHDF5IO(self.path, 'r', load_namespaces=True) as reader:
+        with NWBHDF5IO(self.path, 'r') as reader:
             nwbfile = reader.read()
+            assert nwbfile.session_description == "sess_desc"
 
 
 class TestNoCacheSpec(TestCase):
+    """Test whether the file can be written and read when not caching the spec."""
 
     def setUp(self):
         self.path = 'unittest_cached_spec.nwb'
@@ -509,7 +633,7 @@ class TestNoCacheSpec(TestCase):
         remove_test_file(self.path)
 
     def test_simple(self):
-        nwbfile = NWBFile(' ', ' ',
+        nwbfile = NWBFile('sess_desc', 'identifier',
                           datetime.now(tzlocal()),
                           file_create_date=datetime.now(tzlocal()),
                           institution='University of California, San Francisco',
@@ -517,9 +641,9 @@ class TestNoCacheSpec(TestCase):
         with NWBHDF5IO(self.path, 'w') as io:
             io.write(nwbfile, cache_spec=False)
 
-        with self.assertWarnsWith(UserWarning, "No cached namespaces found in %s" % self.path):
-            with NWBHDF5IO(self.path, 'r', load_namespaces=True) as reader:
-                nwbfile = reader.read()
+        with NWBHDF5IO(self.path, 'r') as reader:
+            nwbfile = reader.read()
+            assert nwbfile.session_description == "sess_desc"
 
 
 class TestTimestampsRefDefault(TestCase):
@@ -546,3 +670,9 @@ class TestTimestampsRefAware(TestCase):
                     'TEST124',
                     self.start_time,
                     timestamps_reference_time=self.ref_time_notz)
+
+
+class TestTimezone(TestCase):
+    def test_raise_warning__add_missing_timezone(self):
+        with self.assertWarnsWith(UserWarning, "Date is missing timezone information. Updating to local timezone."):
+            _add_missing_timezone(datetime(2017, 5, 1, 12))

@@ -6,7 +6,7 @@ Installing PyNWB for Developers
 
 PyNWB has the following minimum requirements, which must be installed before you can get started using PyNWB.
 
-#. Python 3.7, 3.8, or 3.9
+#. Python 3.9, 3.10, 3.11, 3.12, or 3.13
 #. pip
 
 
@@ -54,11 +54,11 @@ Option 2: Using conda
 ^^^^^^^^^^^^^^^^^^^^^
 
 First, install Anaconda_ to install the ``conda`` tool. Then create and
-activate a new virtual environment called "venv" with Python 3.8 installed.
+activate a new virtual environment called "venv" with Python 3.9 installed.
 
 .. code:: bash
 
-    conda create --name venv python=3.8
+    conda create --name venv python=3.9
     conda activate venv
 
 Similar to a virtual environment created with ``virtualenv``, a conda environment
@@ -76,14 +76,15 @@ Install from Git repository
 ---------------------------
 
 After you have created and activated a virtual environment, clone the PyNWB git repository from GitHub, install the
-package requirements using the `pip <https://pip.pypa.io/en/stable/>`_ Python package manager, and install PyNWB in editable mode.
+package requirements using the `pip <https://pip.pypa.io/en/stable/>`_ Python package manager, and install PyNWB in
+editable mode.
 
-.. code::
+.. code:: bash
 
-   $ git clone --recurse-submodules git@github.com:NeurodataWithoutBorders/pynwb.git
-   $ cd pynwb
-   $ pip install -r requirements.txt
-   $ pip install -e .
+    git clone --recurse-submodules https://github.com/NeurodataWithoutBorders/pynwb.git
+    cd pynwb
+    pip install -r requirements.txt -r requirements-dev.txt
+    pip install -e .
 
 
 Run tests
@@ -92,29 +93,17 @@ Run tests
 For running the tests, it is required to install the development requirements. Again, first activate your
 virtualenv or conda environment.
 
-.. code::
+.. code:: bash
 
-   $ git clone --recurse-submodules git@github.com:NeurodataWithoutBorders/pynwb.git
-   $ cd pynwb
-   $ pip install -r requirements.txt -r requirements-dev.txt
-   $ pip install -e .
-   $ tox
+    git clone --recurse-submodules https://github.com/NeurodataWithoutBorders/pynwb.git
+    cd pynwb
+    pip install -r requirements.txt -r requirements-dev.txt
+    pip install -e .
+    tox
 
 For debugging it can be useful to keep the intermediate NWB files created by
 the tests. To keep these files create the environment variables
 ``CLEAN_NWB``/``CLEAN_HDMF`` and set them to ``1``.
-
-
-Following PyNWB Style Guide
----------------------------
-
-Before you create a Pull Request, make sure you are following PyNWB style guide
-(`PEP8 <https://www.python.org/dev/peps/pep-0008/>`_). To do that simply run
-the following command in the project's root directory.
-
-.. code::
-
-   $ flake8
 
 
 FAQ
@@ -123,12 +112,15 @@ FAQ
 1.  I am using a git cloned copy of PyNWB and getting the error:
     ``RuntimeError: Unable to load a TypeMap - no namespace file found``
 
+    or the error:
+    ``RuntimeError: 'core' is not a registered namespace.``
+
     - The PyNWB repo uses git submodules that have to be checked out when cloning the repos. Please make sure you
       are using the ``--recurse-submodules`` flag when running ``git clone``:
 
       .. code-block:: bash
 
-          git clone --recurse-submodules git@github.com:NeurodataWithoutBorders/pynwb.git
+          git clone --recurse-submodules https://github.com/NeurodataWithoutBorders/pynwb.git
 
       You can also run the following on your existing cloned repo.
 

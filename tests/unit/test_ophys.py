@@ -2,11 +2,22 @@ import warnings
 
 import numpy as np
 
-from pynwb.base import TimeSeries
+from pynwb.base import TimeSeries, ProcessingModule
 from pynwb.device import Device
 from pynwb.image import ImageSeries
-from pynwb.ophys import (TwoPhotonSeries, RoiResponseSeries, DfOverF, Fluorescence, PlaneSegmentation,
-                         ImageSegmentation, OpticalChannel, ImagingPlane, MotionCorrection, CorrectedImageStack)
+from pynwb.ophys import (
+    OnePhotonSeries,
+    TwoPhotonSeries,
+    RoiResponseSeries,
+    DfOverF,
+    Fluorescence,
+    PlaneSegmentation,
+    ImageSegmentation,
+    OpticalChannel,
+    ImagingPlane,
+    MotionCorrection,
+    CorrectedImageStack
+)
 from pynwb.testing import TestCase
 
 
@@ -168,6 +179,53 @@ class ImagingPlaneConstructor(TestCase):
                 location='location',
                 reference_frame='reference_frame',
                 unit='my_unit'
+            )
+
+
+class OnePhotonSeriesConstructor(TestCase):
+
+    def test_init(self):
+        ip = create_imaging_plane()
+        one_photon_series = OnePhotonSeries(
+            name="test_one_photon_series",
+            unit="unit",
+            imaging_plane=ip,
+            pmt_gain=1.,
+            scan_line_rate=2.,
+            exposure_time=123.,
+            binning=2,
+            power=9001.,
+            intensity=5.,
+            external_file=["external_file"],
+            starting_frame=[0],
+            format="external",
+            timestamps=list(),
+        )
+        self.assertEqual(one_photon_series.name, 'test_one_photon_series')
+        self.assertEqual(one_photon_series.unit, 'unit')
+        self.assertEqual(one_photon_series.imaging_plane, ip)
+        self.assertEqual(one_photon_series.pmt_gain, 1.)
+        self.assertEqual(one_photon_series.scan_line_rate, 2.)
+        self.assertEqual(one_photon_series.exposure_time, 123.)
+        self.assertEqual(one_photon_series.binning, 2)
+        self.assertEqual(one_photon_series.power, 9001.)
+        self.assertEqual(one_photon_series.intensity, 5.)
+        self.assertEqual(one_photon_series.external_file, ["external_file"])
+        self.assertEqual(one_photon_series.starting_frame, [0])
+        self.assertEqual(one_photon_series.format, "external")
+        self.assertIsNone(one_photon_series.dimension)
+
+    def test_negative_binning_assertion(self):
+        ip = create_imaging_plane()
+
+        with self.assertRaisesWith(exc_type=ValueError, exc_msg="Binning value must be >= 0: -1"):
+            OnePhotonSeries(
+                name="test_one_photon_series_binning_assertion",
+                unit="unit",
+                data=np.empty(shape=(10, 100, 100)),
+                imaging_plane=ip,
+                rate=1.,
+                binning=-1,
             )
 
 
@@ -340,9 +398,15 @@ class RoiResponseSeriesConstructor(TestCase):
 
 class DfOverFConstructor(TestCase):
     def test_init(self):
-        ps = create_plane_segmentation()
-        rt_region = ps.create_roi_table_region(description='the second ROI', region=[1])
+        pm = ProcessingModule(name='ophys', description="Optical physiology")
 
+        ps = create_plane_segmentation()
+        pm.add(ps)
+
+        dof = DfOverF()
+        pm.add(dof)
+
+        rt_region = ps.create_roi_table_region(description='the second ROI', region=[1])
         rrs = RoiResponseSeries(
             name='test_ts',
             data=[1, 2, 3],
@@ -350,26 +414,32 @@ class DfOverFConstructor(TestCase):
             unit='unit',
             timestamps=[0.1, 0.2, 0.3]
         )
+        dof.add_roi_response_series(rrs)
 
-        dof = DfOverF(rrs)
         self.assertEqual(dof.roi_response_series['test_ts'], rrs)
 
 
 class FluorescenceConstructor(TestCase):
     def test_init(self):
-        ps = create_plane_segmentation()
-        rt_region = ps.create_roi_table_region(description='the second ROI', region=[1])
+        pm = ProcessingModule(name='ophys', description="Optical physiology")
 
-        ts = RoiResponseSeries(
+        ps = create_plane_segmentation()
+        pm.add(ps)
+
+        ff = Fluorescence()
+        pm.add(ff)
+
+        rt_region = ps.create_roi_table_region(description='the second ROI', region=[1])
+        rrs = RoiResponseSeries(
             name='test_ts',
             data=[1, 2, 3],
             rois=rt_region,
             unit='unit',
             timestamps=[0.1, 0.2, 0.3]
         )
+        ff.add_roi_response_series(rrs)
 
-        ff = Fluorescence(ts)
-        self.assertEqual(ff.roi_response_series['test_ts'], ts)
+        self.assertEqual(ff.roi_response_series['test_ts'], rrs)
 
 
 class ImageSegmentationConstructor(TestCase):

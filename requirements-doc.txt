@@ -4,10 +4,16 @@ sphinx>=4  # improved support for docutils>=0.17
 sphinx_rtd_theme>=1  # <1 does not work with docutils>=0.17
 matplotlib
 sphinx-gallery
-allensdk>=2.11.0  # python 3.8 is not supported in allensdk<2.11
-MarkupSafe==2.0.1  # resolve incompatibility between jinja2 and markupsafe: https://github.com/AllenInstitute/AllenSDK/issues/2308
+# allensdk>=2.13.2  # allensdk reinstalls pynwb and hdmf. TODO set up a separate workflow to test allensdk
+# MarkupSafe==2.0.1  # resolve incompatibility between jinja2 and markupsafe: https://github.com/AllenInstitute/AllenSDK/issues/2308
 Pillow
 sphinx-copybutton
 dataframe_image   # used to render large dataframe as image in the sphinx gallery to improve html display
 lxml  # used by dataframe_image when using the matplotlib backend
 hdf5plugin
+dandi>=0.46.6
+hdmf-zarr>=0.3.0
+zarr<3  # limited to zarr<3 until hdmf-zarr resolves issues with zarr 3.0
+linkml-runtime==1.7.4; python_version >= "3.10"
+schemasheets==0.2.1; python_version >= "3.10"
+oaklib==0.5.32; python_version >= "3.10"

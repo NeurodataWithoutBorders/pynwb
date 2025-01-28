@@ -109,20 +109,36 @@ class TestDecompositionSeriesIO(NWBH5IOMixin, TestCase):
 
     def setUpContainer(self):
         """ Return the test DecompositionSeries to read/write """
-        self.timeseries = TimeSeries(name='dummy timeseries', description='desc',
-                                     data=np.ones((3, 3)), unit='flibs',
-                                     timestamps=np.ones((3,)))
-        bands = DynamicTable(name='bands', description='band info for LFPSpectralAnalysis', columns=[
-            VectorData(name='band_name', description='name of bands', data=['alpha', 'beta', 'gamma']),
-            VectorData(name='band_limits', description='low and high cutoffs in Hz', data=np.ones((3, 2)))
-        ])
-        spec_anal = DecompositionSeries(name='LFPSpectralAnalysis',
-                                        description='my description',
-                                        data=np.ones((3, 3, 3)),
-                                        timestamps=np.ones((3,)),
-                                        source_timeseries=self.timeseries,
-                                        metric='amplitude',
-                                        bands=bands)
+        self.timeseries = TimeSeries(
+            name='dummy timeseries',
+            description='desc',
+            data=np.ones((3, 3)),
+            unit='flibs',
+            timestamps=np.ones((3,)),
+        )
+        bands = DynamicTable(
+            name='bands',
+            description='band info for LFPSpectralAnalysis',
+            columns=[
+                VectorData(name='band_name', description='name of bands', data=['alpha', 'beta', 'gamma']),
+                VectorData(name='band_limits', description='low and high cutoffs in Hz', data=np.ones((3, 2))),
+                VectorData(name='band_mean', description='mean gaussian filters in Hz', data=np.ones((3,))),
+                VectorData(
+                    name='band_stdev',
+                    description='standard deviation of gaussian filters in Hz',
+                    data=np.ones((3,))
+                ),
+            ],
+        )
+        spec_anal = DecompositionSeries(
+            name='LFPSpectralAnalysis',
+            description='my description',
+            data=np.ones((3, 3, 3)),
+            timestamps=np.ones((3,)),
+            source_timeseries=self.timeseries,
+            metric='amplitude',
+            bands=bands,
+        )
 
         return spec_anal
 
@@ -144,27 +160,48 @@ class TestDecompositionSeriesWithSourceChannelsIO(AcquisitionH5IOMixin, TestCase
         """ Make an electrode table, electrode group, and device """
         self.table = get_electrode_table()
         self.dev1 = Device(name='dev1')
-        self.group = ElectrodeGroup(name='tetrode1',
-                                    description='tetrode description',
-                                    location='tetrode location',
-                                    device=self.dev1)
-        for i in range(4):
+        self.group = ElectrodeGroup(
+            name='tetrode1',
+            description='tetrode description',
+            location='tetrode location',
+            device=self.dev1
+        )
+        for _ in range(4):
             self.table.add_row(location='CA1', group=self.group, group_name='tetrode1')
 
     def setUpContainer(self):
         """ Return the test ElectricalSeries to read/write """
         self.make_electrode_table(self)
-        region = DynamicTableRegion(name='source_channels',
-                                    data=[0, 2],
-                                    description='the first and third electrodes',
-                                    table=self.table)
+        region = DynamicTableRegion(
+            name='source_channels',
+            data=[0, 2],
+            description='the first and third electrodes',
+            table=self.table
+        )
         data = np.random.randn(100, 2, 30)
         timestamps = np.arange(100)/100
-        ds = DecompositionSeries(name='test_DS',
-                                 data=data,
-                                 source_channels=region,
-                                 timestamps=timestamps,
-                                 metric='amplitude')
+        bands = DynamicTable(
+            name='bands',
+            description='band info for LFPSpectralAnalysis',
+            columns=[
+                VectorData(name='band_name', description='name of bands', data=['alpha', 'beta', 'gamma']),
+                VectorData(name='band_limits', description='low and high cutoffs in Hz', data=np.ones((3, 2))),
+                VectorData(name='band_mean', description='mean gaussian filters in Hz', data=np.ones((3,))),
+                VectorData(
+                    name='band_stdev',
+                    description='standard deviation of gaussian filters in Hz',
+                    data=np.ones((3,))
+                ),
+            ],
+        )
+        ds = DecompositionSeries(
+            name='test_DS',
+            data=data,
+            source_channels=region,
+            timestamps=timestamps,
+            metric='amplitude',
+            bands=bands,
+        )
         return ds
 
     def addContainer(self, nwbfile):

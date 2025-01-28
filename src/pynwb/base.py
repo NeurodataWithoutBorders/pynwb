@@ -174,15 +174,25 @@ class TimeSeries(NWBDataInterface):
         timestamps = args_to_process['timestamps']
         if timestamps is not None:
             if self.rate is not None:
-                raise ValueError('Specifying rate and timestamps is not supported.')
+                self._error_on_new_warn_on_construct(
+                    error_msg='Specifying rate and timestamps is not supported.'
+                )
             if self.starting_time is not None:
-                raise ValueError('Specifying starting_time and timestamps is not supported.')
+                self._error_on_new_warn_on_construct(
+                    error_msg='Specifying starting_time and timestamps is not supported.'
+                )
             self.fields['timestamps'] = timestamps
             self.timestamps_unit = self.__time_unit
             self.interval = 1
             if isinstance(timestamps, TimeSeries):
                 timestamps.__add_link('timestamp_link', self)
         elif self.rate is not None:
+            if self.rate < 0:
+                self._error_on_new_warn_on_construct(
+                    error_msg='Rate must not be a negative value.'
+                )
+            elif self.rate == 0.0 and get_data_shape(data)[0] > 1:
+                warn('Timeseries has a rate of 0.0 Hz, but the length of the data is greater than 1.')
             if self.starting_time is None:  # override default if rate is provided but not starting time
                 self.starting_time = 0.0
             self.starting_time_unit = self.__time_unit
@@ -283,9 +293,80 @@ class TimeSeries(NWBDataInterface):
     def __add_link(self, links_key, link):
         self.fields.setdefault(links_key, list()).append(link)
 
+    def _generate_field_html(self, key, value, level, access_code):
+        def find_location_in_memory_nwbfile(current_location: str, neurodata_object) -> str:
+            """
+            Method for determining the location of a neurodata object within an in-memory NWBFile object. Adapted from
+            neuroconv package.
+            """
+            parent = neurodata_object.parent
+            if parent is None:
+                return neurodata_object.name + "/" + current_location
+            elif parent.name == 'root':
+                # Items in defined top-level places like acquisition, intervals, etc. do not act as 'containers'
+                # in that they do not set the `.parent` attribute; ask if object is in their in-memory dictionaries
+                # instead
+                for parent_field_name, parent_field_value in parent.fields.items():
+                    if isinstance(parent_field_value, dict) and neurodata_object.name in parent_field_value:
+                        return parent_field_name + "/" + neurodata_object.name + "/" + current_location
+                return neurodata_object.name + "/" + current_location
+            return find_location_in_memory_nwbfile(
+                current_location=neurodata_object.name + "/" + current_location, neurodata_object=parent
+            )
+
+        # reassign value if linked timestamp or linked data to avoid recursion error
+        if key in ['timestamps', 'data'] and isinstance(value, TimeSeries):
+            path_to_linked_object = find_location_in_memory_nwbfile(key, value)
+            if key == 'timestamps':
+                value = value.timestamps
+            elif key == 'data':
+                value = value.data
+            key = f'{key} (link to {path_to_linked_object})'
+
+        if key in ['timestamp_link', 'data_link']:
+            linked_key = 'timestamps' if key == 'timestamp_link' else 'data'
+            value = [find_location_in_memory_nwbfile(linked_key, v) for v in value]
+
+        return super()._generate_field_html(key, value, level, access_code)
+
     @property
     def time_unit(self):
         return self.__time_unit
+
+    def get_timestamps(self):
+        """
+        Get the timestamps of this TimeSeries. If timestamps are not stored in this TimeSeries, generate timestamps.
+        """
+        if self.fields.get('timestamps'):
+            return self.timestamps
+        else:
+            return np.arange(len(self.data)) / self.rate + self.starting_time
+
+    def get_data_in_units(self):
+        """
+        Get the data of this TimeSeries in the specified unit of measurement, applying the conversion factor and offset:
+
+        .. math::
+            out = data * conversion + offset
+
+        If the field 'channel_conversion' is present, the conversion factor for each channel is additionally applied 
+        to each channel:
+
+        .. math::
+            out_{channel} = data * conversion * conversion_{channel} + offset
+
+        NOTE: This will read the entire dataset into memory.
+
+        Returns
+        -------
+        :class:`numpy.ndarray`
+
+        """
+        if "channel_conversion" in self.fields:
+            scale_factor = self.conversion * self.channel_conversion
+        else:
+            scale_factor = self.conversion
+        return np.asarray(self.data) * scale_factor + self.offset
 
 
 @register_class('Image', CORE_NAMESPACE)
@@ -480,6 +561,26 @@ class TimeSeriesReference(NamedTuple):
         # load the data from the timeseries
         return self.timeseries.data[self.idx_start: (self.idx_start + self.count)]
 
+    @classmethod
+    @docval({'name': 'timeseries', 'type': TimeSeries, 'doc': 'the timeseries object to reference.'})
+    def empty(cls, timeseries):
+        """
+        Creates an empty TimeSeriesReference object to represent missing data.
+
+        When missing data needs to be represented, NWB defines ``None`` for the complex data type ``(idx_start,
+        count, TimeSeries)`` as (-1, -1, TimeSeries) for storage. The exact timeseries object will technically not
+        matter since the empty reference is a way of indicating a NaN value in a
+        :py:class:`~pynwb.base.TimeSeriesReferenceVectorData` column.
+
+        An example where this functionality is used is :py:class:`~pynwb.icephys.IntracellularRecordingsTable`
+        where only one of stimulus or response data was recorded. In such cases, the timeseries object for the
+        empty stimulus :py:class:`~pynwb.base.TimeSeriesReference` could be set to the response series, or vice versa.
+
+        :returns: Returns :py:class:`~pynwb.base.TimeSeriesReference`
+        """
+
+        return cls(-1, -1, timeseries)
+
 
 @register_class('TimeSeriesReferenceVectorData', CORE_NAMESPACE)
 class TimeSeriesReferenceVectorData(VectorData):
@@ -497,7 +598,7 @@ class TimeSeriesReferenceVectorData(VectorData):
     then this indicates an invalid link (in practice both ``idx_start`` and ``count`` must always
     either both be positive or both be negative). When selecting data via the
     :py:meth:`~pynwb.base.TimeSeriesReferenceVectorData.get` or
-    :py:meth:`~pynwb.base. TimeSeriesReferenceVectorData.__getitem__`
+    :py:meth:`~object.__getitem__`
     functions, ``(-1, -1, TimeSeries)`` values are replaced by the corresponding
     :py:class:`~pynwb.base.TimeSeriesReferenceVectorData.TIME_SERIES_REFERENCE_NONE_TYPE` tuple
     to avoid exposing NWB storage internals to the user and simplifying the use of and checking
@@ -510,11 +611,11 @@ class TimeSeriesReferenceVectorData(VectorData):
 
     TIME_SERIES_REFERENCE_TUPLE = TimeSeriesReference
     """Return type when calling :py:meth:`~pynwb.base.TimeSeriesReferenceVectorData.get` or
-    :py:meth:`~pynwb.base. TimeSeriesReferenceVectorData.__getitem__`."""
+    :py:meth:`~object.__getitem__`"""
 
     TIME_SERIES_REFERENCE_NONE_TYPE = TIME_SERIES_REFERENCE_TUPLE(None, None, None)
     """Tuple used to represent None values when calling :py:meth:`~pynwb.base.TimeSeriesReferenceVectorData.get` or
-    :py:meth:`~pynwb.base. TimeSeriesReferenceVectorData.__getitem__`. See also
+    :py:meth:`~object.__getitem__`. See also
     :py:class:`~pynwb.base.TimeSeriesReferenceVectorData.TIME_SERIES_REFERENCE_TUPLE`"""
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this VectorData', 'default': 'timeseries'},
@@ -566,7 +667,7 @@ class TimeSeriesReferenceVectorData(VectorData):
 
         The function uses :py:class:`~pynwb.base.TimeSeriesReferenceVectorData.TIME_SERIES_REFERENCE_TUPLE`
         to describe individual records in the dataset. This allows the code to avoid exposing internal
-        details of the schema to the user and simplifies handling of missing values by explictly
+        details of the schema to the user and simplifies handling of missing values by explicitly
         representing missing values via
         :py:class:`~pynwb.base.TimeSeriesReferenceVectorData.TIME_SERIES_REFERENCE_NONE_TYPE`
         rather than the internal representation used for storage of ``(-1, -1, TimeSeries)``.

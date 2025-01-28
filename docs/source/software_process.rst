@@ -10,40 +10,45 @@ Continuous Integration
 
 PyNWB is tested against Ubuntu, macOS, and Windows operating systems.
 The project has both unit and integration tests.
+Tests run on :pynwb:`GitHub Actions <actions>`.
 
-* CircleCI_ runs all PyNWB tests on Ubuntu
-* `Azure Pipelines`_ runs all PyNWB tests on Windows and macOS
-
-Each time a PR is published or updated, the project is built, packaged, and tested on all supported operating systems
-and python distributions. That way, as a contributor, you know if you introduced regressions or coding style
+Each time a PR is published or updated, the project is built, packaged, and
+tested on all supported operating systems and python distributions. That way,
+as a contributor, you know if you introduced regressions or coding style
 inconsistencies.
 
-There are badges in the README_ file which shows the current condition of the dev branch.
-
-.. _CircleCI: https://circleci.com/gh/NeurodataWithoutBorders/workflows/pynwb
-.. _Azure Pipelines: https://dev.azure.com/NeurodataWithoutBorders/pynwb/_build
-.. _README: https://github.com/NeurodataWithoutBorders/pynwb#readme
-
+There are badges in the :pynwb:`README <blob/dev/README.rst>` file which shows
+the current condition of the dev branch.
 
 --------
 Coverage
 --------
 
-Coverage is computed and reported using the coverage_ tool. There is a badge in the README_ file which
-shows percentage coverage. A detailed report can be found on codecov_ which shows line by line which
-lines are covered by the tests.
+Code coverage is computed and reported using the coverage_ tool. There are two coverage-related
+badges in the :pynwb:`README <blob/dev/README.rst>` file. One shows the status of the :pynwb:`GitHub Action workflow <actions?query=workflow%3A%22Run+coverage%22>` which runs the coverage_ tool and uploads the report to
+codecov_, and the other badge shows the percentage coverage reported from codecov_. A detailed report can be found on
+codecov_, which shows line by line which lines are covered by the tests.
 
 .. _coverage: https://coverage.readthedocs.io
-.. _codecov: https://codecov.io/gh/NeurodataWithoutBorders/pynwb/tree/dev/src/pynwb
+.. _codecov: https://app.codecov.io/gh/NeurodataWithoutBorders/pynwb/tree/dev/src/pynwb
 
-..  _software_process_requirement_specifications:
+-------------------------
+Installation Requirements
+-------------------------
 
+:pynwb:`pyproject.toml <blob/dev/pyproject.toml>` contains a list of package dependencies and their version ranges allowed for
+running PyNWB. As a library, upper bound version constraints create more harm than good in the long term (see this
+`blog post`_) so we avoid setting upper bounds on requirements.
 
---------------------------
-Requirement Specifications
---------------------------
+If some of the packages are outdated, see :ref:`update_requirements_files`.
 
-There are 5 kinds of requirements specification in PyNWB.
+.. _blog post: https://iscinumpy.dev/post/bound-version-constraints/
+
+--------------------
+Testing Requirements
+--------------------
+
+There are several kinds of requirements files used for testing PyNWB.
 
 The first one is the :pynwb:`requirements-min.txt <blob/dev/requirements-min.txt>` file, which lists the package dependencies and their minimum versions for
 installing PyNWB.
@@ -55,20 +60,19 @@ The third one is :pynwb:`requirements-dev.txt <blob/dev/requirements-dev.txt>`, 
 an entire development environment to use PyNWB, run PyNWB tests, check code style, compute coverage, and create test
 environments.
 
-The fourth one is :pynwb:`requirements-doc.txt <blob/dev/requirements-doc.txt>`, which lists the dependencies to generate the documentation for PyNWB.
-Both this file and :pynwb:`requirements.txt <blob/dev/requirements.txt>` are used by ReadTheDocs_ to initialize the local environment for Sphinx to run.
+The final one is :pynwb:`environment-ros3.yml <blob/dev/environment-ros3.yml>`, which lists the dependencies used to
+test ROS3 streaming in PyNWB.
 
-The final one is within :pynwb:`setup.py <blob/dev/setup.py>`, which contains a list of package dependencies and their version ranges allowed for
-running PyNWB.
+--------------------------
+Documentation Requirements
+--------------------------
 
-In order to check the status of the required packages, requires.io_ is used to create a badge on the project
-README_. If all the required packages are up to date, a green badge appears.
-
-If some of the packages are outdated, see :ref:`update_requirements_files`.
+:pynwb:`requirements-doc.txt <blob/dev/requirements-doc.txt>` lists the dependencies to generate the documentation
+for PyNWB.
+Both this file and :pynwb:`requirements.txt <blob/dev/requirements.txt>` are used by ReadTheDocs_ to initialize the
+local environment for Sphinx to run.
 
 .. _ReadTheDocs: https://readthedocs.org/projects/pynwb/
-.. _requires.io: https://requires.io/github/NeurodataWithoutBorders/pynwb/requirements/?branch=dev
-
 
 -------------------------
 Versioning and Releasing
@@ -87,7 +91,6 @@ thus do not serve as a complete installation. For a complete source code archive
 by CircleCI, typically named `pynwb-{version}.tar.gz`.
 
 .. _versioneer: https://github.com/warner/python-versioneer
-.. _release: https://github.com/NeurodataWithoutBorders/pynwb/releases
 
 ----------------------------------------------------
 Coordinating with nwb-schema Repository and Releases
