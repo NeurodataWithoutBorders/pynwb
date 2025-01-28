@@ -131,13 +131,13 @@ class ImageSeries(TimeSeries):
         """Override _check_time_series_dimension to do nothing.
         The _check_image_series_dimension method will be called instead.
         """
-        return
+        return True
 
     def _check_image_series_dimension(self):
         """Check that the 0th dimension of data equals the length of timestamps, when applicable.
 
         ImageSeries objects can have an external file instead of data stored. The external file cannot be
-        queried for the number of frames it contains, so this check will return when an external file
+        queried for the number of frames it contains, so this check will return True when an external file
         is provided. Otherwise, this function calls the parent class' _check_time_series_dimension method.
         """
         if self.external_file is not None:
@@ -164,9 +164,9 @@ class ImageSeries(TimeSeries):
         Check that format is 'external' when external_file is specified.
         """
         if self.external_file is None:
-            return True
+            return 
         if self.format == "external":
-            return True
+            return
 
         return "%s '%s': Format must be 'external' when external_file is specified." % (
             self.__class__.__name__,
@@ -178,9 +178,9 @@ class ImageSeries(TimeSeries):
         Check that data is an empty array when external_file is specified.
         """
         if self.external_file is None:
-            return True
+            return
         if get_data_shape(self.data)[0] == 0:
-            return True
+            return
 
         return (
             "%s '%s': Either external_file or data must be specified (not None), but not both."
