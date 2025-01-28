@@ -207,21 +207,21 @@ class TimeSeries(NWBDataInterface):
         """Check that the 0th dimension of data equals the length of timestamps, when applicable.
         """
         if self.timestamps is None:
-            return
+            return True
 
         data_shape = get_data_shape(data=self.fields["data"], strict_no_data_load=True)
         timestamps_shape = get_data_shape(data=self.fields["timestamps"], strict_no_data_load=True)
 
         # skip check if shape of data or timestamps cannot be computed
         if data_shape is None or timestamps_shape is None:
-            return
+            return True
 
         # skip check if length of the first dimension is not known
         if data_shape[0] is None or timestamps_shape[0] is None:
-            return
+            return True
 
         if data_shape[0] == timestamps_shape[0]:
-            return
+            return True
 
         return (
             "%s '%s': Length of data does not match length of timestamps. Your data may be transposed. "

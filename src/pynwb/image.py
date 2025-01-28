@@ -141,7 +141,7 @@ class ImageSeries(TimeSeries):
         is provided. Otherwise, this function calls the parent class' _check_time_series_dimension method.
         """
         if self.external_file is not None:
-            return
+            return True
         return super()._check_time_series_dimension()
 
     def _check_external_file_starting_frame_length(self):
@@ -150,9 +150,9 @@ class ImageSeries(TimeSeries):
         the number of files in 'external_file'.
         """
         if self.external_file is None:
-            return
+            return True 
         if get_data_shape(self.external_file) == get_data_shape(self.starting_frame):
-            return
+            return True
 
         return (
             "%s '%s': The number of frame indices in 'starting_frame' should have "
@@ -164,9 +164,9 @@ class ImageSeries(TimeSeries):
         Check that format is 'external' when external_file is specified.
         """
         if self.external_file is None:
-            return
+            return True
         if self.format == "external":
-            return
+            return True
 
         return "%s '%s': Format must be 'external' when external_file is specified." % (
             self.__class__.__name__,
@@ -178,9 +178,9 @@ class ImageSeries(TimeSeries):
         Check that data is an empty array when external_file is specified.
         """
         if self.external_file is None:
-            return
+            return True
         if get_data_shape(self.data)[0] == 0:
-            return
+            return True
 
         return (
             "%s '%s': Either external_file or data must be specified (not None), but not both."
