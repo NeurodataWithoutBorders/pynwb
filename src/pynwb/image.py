@@ -150,7 +150,7 @@ class ImageSeries(TimeSeries):
         the number of files in 'external_file'.
         """
         if self.external_file is None:
-            return 
+            return
         if get_data_shape(self.external_file) == get_data_shape(self.starting_frame):
             return
 
