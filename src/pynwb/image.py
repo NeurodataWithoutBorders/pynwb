@@ -150,9 +150,9 @@ class ImageSeries(TimeSeries):
         the number of files in 'external_file'.
         """
         if self.external_file is None:
-            return True 
+            return 
         if get_data_shape(self.external_file) == get_data_shape(self.starting_frame):
-            return True
+            return
 
         return (
             "%s '%s': The number of frame indices in 'starting_frame' should have "
@@ -164,7 +164,7 @@ class ImageSeries(TimeSeries):
         Check that format is 'external' when external_file is specified.
         """
         if self.external_file is None:
-            return 
+            return
         if self.format == "external":
             return
 
