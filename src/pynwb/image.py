@@ -131,7 +131,7 @@ class ImageSeries(TimeSeries):
         """Override _check_time_series_dimension to do nothing.
         The _check_image_series_dimension method will be called instead.
         """
-        return True
+        return
 
     def _check_image_series_dimension(self):
         """Check that the 0th dimension of data equals the length of timestamps, when applicable.
