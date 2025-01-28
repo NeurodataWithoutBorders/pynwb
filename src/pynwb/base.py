@@ -214,14 +214,14 @@ class TimeSeries(NWBDataInterface):
 
         # skip check if shape of data or timestamps cannot be computed
         if data_shape is None or timestamps_shape is None:
-            return True
+            return
 
         # skip check if length of the first dimension is not known
         if data_shape[0] is None or timestamps_shape[0] is None:
-            return True
+            return
 
         if data_shape[0] == timestamps_shape[0]:
-            return True
+            return
 
         return (
             "%s '%s': Length of data does not match length of timestamps. Your data may be transposed. "
