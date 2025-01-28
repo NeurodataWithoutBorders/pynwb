@@ -1,6 +1,6 @@
 # PyNWB Changelog
 
-## PyNWB 3.0.0rc1 (January 7, 2025)
+## PyNWB 3.0.0rc1 (January 28, 2025)
 
 ### Breaking changes
 - The validation methods have been updated with multiple breaking changes. @stephprince [#1911](https://github.com/NeurodataWithoutBorders/pynwb/pull/1911)
@@ -44,6 +44,7 @@
   - Added the `--json-outpath-path` CLI argument to output validation results in a machine readable format.
 - Removed python 3.8 support, added python 3.13 support. @stephprince [#2007](https://github.com/NeurodataWithoutBorders/pynwb/pull/2007)
 - Added warnings when using positional arguments in `Container` constructor methods. Positional arguments will raise errors in the next major release. @stephprince [#1972](https://github.com/NeurodataWithoutBorders/pynwb/pull/1972)
+- `mock_ElectricalSeries`. Make number of electrodes between data and electrode region agree when explicitly passing data @h-mayorquin [#2019](https://github.com/NeurodataWithoutBorders/pynwb/pull/2019)
 
 ### Documentation and tutorial enhancements
 - Updated `SpikeEventSeries`, `DecompositionSeries`, and `FilteredEphys` examples. @stephprince [#2012](https://github.com/NeurodataWithoutBorders/pynwb/pull/2012)
