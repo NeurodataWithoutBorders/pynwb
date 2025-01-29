@@ -43,6 +43,9 @@ build/
 dist/
 *.egg-info
 
+# Virtual Environment
+venv/
+
 # Jupyter Notebook
 .ipynb_checkpoints
 
