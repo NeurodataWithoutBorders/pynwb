@@ -10,7 +10,7 @@ from .utils import name_generator
 def mock_NWBFile(
     session_description: str = 'session_description',
     identifier: Optional[str] = None,
-    session_start_time: datetime = datetime(1970, 1, 1, 12, tzinfo=tzutc()),
+    session_start_time: datetime = datetime(1970, 1, 1, tzinfo=tzutc()),
     **kwargs
 ):
     return NWBFile(
