@@ -213,7 +213,7 @@ class IntracellularRecordingsTableTests(ICEphysMetaTestBase):
         categories = [DynamicTable(name=val,
                                    description=val+" description",
                                    ) for val in category_names]
-        ret = IntracellularRecordingsTable(category_tables=categories, categories=category_names
+        ret = IntracellularRecordingsTable(category_tables=categories, categories=category_names)
         self.assertEqual(ret.name, 'intracellular_recordings')
         self.assertIsNotNone(ret.electrodes)
         self.assertIsInstance(ret.electrodes, IntracellularElectrodesTable)
