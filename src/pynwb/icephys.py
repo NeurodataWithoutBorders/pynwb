@@ -495,6 +495,9 @@ class IntracellularRecordingsTable(AlignedDynamicTable):
             # Compile the complete list of tables
             dynamic_table_arg = copy(in_category_tables)
             categories_arg = [] if getargs('categories', kwargs) is None else copy(getargs('categories', kwargs))
+            # Add the required tables if they are missing. We can do this here since we already
+            # confirmed that any other category tables are empty so we can create the missing tables 
+            # on behalf of the user here
             if required_dynamic_table_missing:
                 if required_dynamic_table_given[2] < 0:
                     dynamic_table_arg.append(IntracellularResponsesTable)
