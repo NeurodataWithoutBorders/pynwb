@@ -517,7 +517,7 @@ class PlaneSegmentationConstructor(TestCase):
         )
         self.assertEqual(pS.name, ip.name)
 
-    def test_init_pixel_mask(self):
+    def test_add_pixel_mask(self):
         pix_mask = [[1, 2, 1.0], [3, 4, 1.0], [5, 6, 1.0],
                     [7, 8, 2.0], [9, 10, 2.0]]
 
@@ -534,7 +534,7 @@ class PlaneSegmentationConstructor(TestCase):
         self.assertEqual(pS['pixel_mask'][0], pix_mask[0:3])
         self.assertEqual(pS['pixel_mask'][1], pix_mask[3:5])
 
-    def test_init_voxel_mask(self):
+    def test_add_voxel_mask(self):
         vox_mask = [[1, 2, 3, 1.0], [3, 4, 1, 1.0], [5, 6, 3, 1.0],
                     [7, 8, 3, 2.0], [9, 10, 2, 2.0]]
 
@@ -551,7 +551,7 @@ class PlaneSegmentationConstructor(TestCase):
         self.assertEqual(pS['voxel_mask'][0], vox_mask[0:3])
         self.assertEqual(pS['voxel_mask'][1], vox_mask[3:5])
 
-    def test_init_image_mask(self):
+    def test_add_image_mask(self):
         w, h = 5, 5
         img_mask = [[[1.0 for x in range(w)] for y in range(h)], [[2.0 for x in range(w)] for y in range(h)]]
 
@@ -566,7 +566,7 @@ class PlaneSegmentationConstructor(TestCase):
 
         self.assertEqual(pS['image_mask'].data, img_mask)
 
-    def test_init_3d_image_mask(self):
+    def test_add_3d_image_mask(self):
         img_masks = np.random.randn(2, 20, 30, 4)
 
         _, _, pS = self.create_basic_plane_segmentation()
@@ -575,6 +575,13 @@ class PlaneSegmentationConstructor(TestCase):
 
         self.assertTrue(np.allclose(pS['image_mask'][0], img_masks[0]))
         self.assertTrue(np.allclose(pS['image_mask'][1], img_masks[1]))
+
+    def test_add_roi_missing_params(self):
+        _, _, pS = self.create_basic_plane_segmentation()
+        msg = "Must provide at least on of 'image_mask', 'pixel_mask', or 'voxel_mask'"
+        with self.assertRaises(ValueError, msg=msg):
+            pS.add_roi()
+
 
     def test_conversion_of_2d_pixel_mask_to_image_mask(self):
         pixel_mask = [[0, 0, 1.0], [1, 0, 2.0], [2, 0, 2.0]]
@@ -595,9 +602,3 @@ class PlaneSegmentationConstructor(TestCase):
 
         pixel_mask = pS.image_to_pixel(image_mask)
         np.testing.assert_allclose(pixel_mask, np.asarray([[0, 0, 1.0], [1, 1, 1.0], [2, 2, 1.0]]))
-
-    def test_add_roi_missing_params(self):
-        _, _, pS = self.create_basic_plane_segmentation()
-        msg = "Must provide at least on of 'image_mask', 'pixel_mask', or 'voxel_mask'"
-        with self.assertRaises(ValueError, msg=msg):
-            pS.add_roi()
