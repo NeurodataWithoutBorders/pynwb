@@ -6,7 +6,7 @@ gets mapped appropriately when constructors and methods are invoked
 '''
 import json
 
-from pynwb.spec import NWBNamespaceBuilder, NWBRefSpec, NWBLinkSpec
+from pynwb.spec import NWBNamespaceBuilder, NWBRefSpec, NWBLinkSpec, NWBDtypeSpec
 from pynwb.testing import TestCase
 
 
@@ -32,11 +32,27 @@ class NWBRefSpecTests(TestCase):
 class NWBLinkSpecTest(TestCase):
 
     def test_constructor(self):
-        spec = NWBLinkSpec('TimeSeries', 'object')
+        spec = NWBLinkSpec(
+            doc='A test link',
+            target_type='TimeSeries',
+            quantity='+',
+            name='Link1',
+        )
+        self.assertEqual(spec.doc, 'A test link')
         self.assertEqual(spec.target_type, 'TimeSeries')
-        self.assertEqual(spec.reftype, 'object')
-        json.dumps(spec)  # to ensure there are no circular links
+        self.assertEqual(spec.data_type_inc, 'TimeSeries')
+        self.assertEqual(spec.quantity, '+')
+        self.assertEqual(spec.name, 'Link1')
+        json.dumps(spec)
 
     def test_wrong_reference_type(self):
         with self.assertRaises(ValueError):
             NWBLinkSpec('TimeSeries', 'unknownreftype')
+
+class NWBDtypeSpecTest(TestCase):
+
+    def test_constructor(self):
+        spec = NWBDtypeSpec('column1', 'an example column', 'int')
+        self.assertEqual(spec.doc, 'an example column')
+        self.assertEqual(spec.name, 'column1')
+        self.assertEqual(spec.dtype, 'int')
