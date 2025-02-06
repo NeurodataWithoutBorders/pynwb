@@ -6,7 +6,7 @@ gets mapped appropriately when constructors and methods are invoked
 '''
 import json
 
-from pynwb.spec import NWBNamespaceBuilder, NWBRefSpec, NWBLinkSpec, NWBDtypeSpec
+from pynwb.spec import NWBNamespaceBuilder, NWBRefSpec, NWBLinkSpec, NWBDtypeSpec, NWBGroupSpec, NWBDatasetSpec
 from pynwb.testing import TestCase
 
 
@@ -53,3 +53,64 @@ class NWBDtypeSpecTest(TestCase):
         self.assertEqual(spec.doc, 'an example column')
         self.assertEqual(spec.name, 'column1')
         self.assertEqual(spec.dtype, 'int')
+
+class NWBGroupSpecTest(TestCase):
+
+    def test_constructor(self):
+        spec = NWBGroupSpec(
+            doc='A test group',
+            neurodata_type_def='TimeSeries',
+            neurodata_type_inc='NWBData',
+            linkable=True,
+            quantity='*',
+            name='Group1',
+        )
+        self.assertEqual(spec.doc, 'A test group')
+        self.assertEqual(spec.neurodata_type_def, 'TimeSeries')
+        self.assertEqual(spec.neurodata_type_inc, 'NWBData')
+        self.assertEqual(spec.linkable, True)
+        self.assertEqual(spec.quantity, '*')
+        self.assertEqual(spec.name, 'Group1')
+        json.dumps(spec)
+
+    def test_add_group(self):
+        spec = NWBGroupSpec(
+            doc='A test group',
+            neurodata_type_def='TimeSeries',
+            neurodata_type_inc='NWBData',
+            linkable=True,
+            quantity='*',
+            name='Group1',
+        )
+        spec.add_group(
+            doc='A test group',
+            neurodata_type_def='TimeSeries',
+            neurodata_type_inc='NWBData',
+            linkable=True,
+            quantity='*',
+            name='Group2',
+        )
+        self.assertEqual(len(spec.groups), 1)
+        self.assertEqual(spec.groups[0].name, 'Group2')
+        self.assertIsInstance(spec.groups[0], NWBGroupSpec)
+
+    def test_add_dataset(self):
+        spec = NWBGroupSpec(
+            doc='A test group',
+            neurodata_type_def='TimeSeries',
+            neurodata_type_inc='NWBData',
+            linkable=True,
+            quantity='*',
+            name='Group1',
+        )
+        spec.add_dataset(
+            doc='A test dataset',
+            name='dataset1',
+            dtype='int',
+            shape=(None,),
+            dims=('time',),
+            quantity='?',
+        )
+        self.assertEqual(len(spec.datasets), 1)
+        self.assertEqual(spec.datasets[0].name, 'dataset1')
+        self.assertIsInstance(spec.datasets[0], NWBDatasetSpec)
