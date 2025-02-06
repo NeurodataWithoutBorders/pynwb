@@ -367,6 +367,71 @@ class IndexSeriesConstructor(TestCase):
             )
         self.assertIs(iS.indexed_timeseries, ts)
 
+    def test_init_no_indexed_source(self):
+        """Test that an error is raised when neither indexed_timeseries nor indexed_images is provided"""
+        msg = "Either indexed_timeseries or indexed_images must be provided when creating an IndexSeries."
+        with self.assertRaisesWith(ValueError, msg):
+            IndexSeries(
+                name='test_iS',
+                data=[1, 2, 3],
+                unit='N/A',
+                timestamps=[0.1, 0.2, 0.3]
+            )
+
+    def test_init_conversion_warning(self):
+        """Test that a warning is raised when conversion is provided"""
+        ts = TimeSeries(
+            name='test_ts',
+            data=[1, 2, 3],
+            unit='unit',
+            timestamps=[0.1, 0.2, 0.3]
+        )
+        with self.assertWarnsWith(UserWarning, "The conversion attribute is not used by IndexSeries."):
+            IndexSeries(
+                name='test_iS',
+                data=[1, 2, 3],
+                unit='N/A',
+                indexed_timeseries=ts,
+                timestamps=[0.1, 0.2, 0.3],
+                conversion=1.0
+            )
+
+    def test_init_resolution_warning(self):
+        """Test that a warning is raised when resolution is provided"""
+        ts = TimeSeries(
+            name='test_ts',
+            data=[1, 2, 3],
+            unit='unit',
+            timestamps=[0.1, 0.2, 0.3]
+        )
+        with self.assertWarnsWith(UserWarning, "The resolution attribute is not used by IndexSeries."):
+            IndexSeries(
+                name='test_iS',
+                data=[1, 2, 3],
+                unit='N/A',
+                indexed_timeseries=ts,
+                timestamps=[0.1, 0.2, 0.3],
+                resolution=1.0
+            )
+
+    def test_init_offset_warning(self):
+        """Test that a warning is raised when offset is provided"""
+        ts = TimeSeries(
+            name='test_ts',
+            data=[1, 2, 3],
+            unit='unit',
+            timestamps=[0.1, 0.2, 0.3]
+        )
+        with self.assertWarnsWith(UserWarning, "The offset attribute is not used by IndexSeries."):
+            IndexSeries(
+                name='test_iS',
+                data=[1, 2, 3],
+                unit='N/A',
+                indexed_timeseries=ts,
+                timestamps=[0.1, 0.2, 0.3],
+                offset=1.0
+            )
+
 
 class ImageMaskSeriesConstructor(TestCase):
 
