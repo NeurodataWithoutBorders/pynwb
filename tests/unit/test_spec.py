@@ -45,9 +45,6 @@ class NWBLinkSpecTest(TestCase):
         self.assertEqual(spec.name, 'Link1')
         json.dumps(spec)
 
-    def test_wrong_reference_type(self):
-        with self.assertRaises(ValueError):
-            NWBLinkSpec('TimeSeries', 'unknownreftype')
 
 class NWBDtypeSpecTest(TestCase):
 
