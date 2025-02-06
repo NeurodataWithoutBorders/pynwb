@@ -85,9 +85,11 @@ class NWBData(NWBMixin, Data):
 
     @property
     def data(self):
+        """The data managed by this object"""
         return self.__data
 
     def __len__(self):
+        """Size of the data. Same as len(self.data)"""
         return len(self.__data)
 
     def __getitem__(self, args):
@@ -96,6 +98,14 @@ class NWBData(NWBMixin, Data):
         return self.data[args]
 
     def append(self, arg):
+        """
+        Append a single element to the data
+        
+        Note: The arg to append should be 1 dimension less than the data. 
+        For example, if the data is a 2D array, arg should be a 1D array.
+        Appending to scalar data is not supported. To append multiple
+        elements, use extend.
+        """
         if isinstance(self.data, list):
             self.data.append(arg)
         elif isinstance(self.data, np.ndarray):
@@ -105,6 +115,9 @@ class NWBData(NWBMixin, Data):
             raise ValueError(msg)
 
     def extend(self, arg):
+        """
+        Extend the data with multiple elements.
+        """
         if isinstance(self.data, list):
             self.data.extend(arg)
         elif isinstance(self.data, np.ndarray):
@@ -141,12 +154,18 @@ class ScratchData(NWBData):
 
     @property
     def notes(self):
+        """
+        Get the notes attribute. This will be deprecated in the future.
+        """
         warn('Use of ScratchData.notes will be deprecated. Use ScratchData.description instead.',
              PendingDeprecationWarning)
         return self.description
 
     @notes.setter
     def notes(self, value):
+        """
+        Set the notes attribute. This will be deprecated in the future.
+        """
         warn('Use of ScratchData.notes will be deprecated. Use ScratchData.description instead.',
              PendingDeprecationWarning)
         self.description = value
