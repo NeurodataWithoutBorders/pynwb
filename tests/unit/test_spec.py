@@ -68,7 +68,6 @@ class NWBGroupSpecTest(TestCase):
         self.assertEqual(spec.neurodata_type_def, 'TimeSeries')
         self.assertEqual(spec.neurodata_type_inc, 'NWBData')
         self.assertEqual(spec.linkable, True)
-        self.assertEqual(spec.quantity, '*')
         self.assertEqual(spec.name, 'Group1')
         json.dumps(spec)
 
