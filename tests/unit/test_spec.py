@@ -62,7 +62,6 @@ class NWBGroupSpecTest(TestCase):
             neurodata_type_def='TimeSeries',
             neurodata_type_inc='NWBData',
             linkable=True,
-            quantity='*',
             name='Group1',
         )
         self.assertEqual(spec.doc, 'A test group')
@@ -79,7 +78,6 @@ class NWBGroupSpecTest(TestCase):
             neurodata_type_def='TimeSeries',
             neurodata_type_inc='NWBData',
             linkable=True,
-            quantity='*',
             name='Group1',
         )
         spec.add_group(
@@ -87,7 +85,6 @@ class NWBGroupSpecTest(TestCase):
             neurodata_type_def='TimeSeries',
             neurodata_type_inc='NWBData',
             linkable=True,
-            quantity='*',
             name='Group2',
         )
         self.assertEqual(len(spec.groups), 1)
@@ -100,7 +97,6 @@ class NWBGroupSpecTest(TestCase):
             neurodata_type_def='TimeSeries',
             neurodata_type_inc='NWBData',
             linkable=True,
-            quantity='*',
             name='Group1',
         )
         spec.add_dataset(
