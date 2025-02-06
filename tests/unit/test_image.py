@@ -393,7 +393,7 @@ class IndexSeriesConstructor(TestCase):
                 unit='N/A',
                 indexed_timeseries=ts,
                 timestamps=[0.1, 0.2, 0.3],
-                conversion=1.0
+                conversion=5.0
             )
 
     def test_init_resolution_warning(self):
