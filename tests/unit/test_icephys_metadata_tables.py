@@ -209,7 +209,7 @@ class IntracellularRecordingsTableTests(ICEphysMetaTestBase):
         The __init__ method should now create all the missing required tables 
         for us since we have no data in the tables. 
         """
-        category_names = ['test1', 'test2', 'test2']
+        category_names = ['test1', 'test2', 'test3']
         categories = [DynamicTable(name=val,
                                    description=val+" description",
                                    ) for val in category_names]
@@ -229,7 +229,7 @@ class IntracellularRecordingsTableTests(ICEphysMetaTestBase):
         since we cannot populate the missing data for rows in the missing 
         required tables. 
         """
-        category_names = ['test1', 'test2', 'test2']
+        category_names = ['test1', 'test2', 'test3']
         num_rows = 10
         categories = [DynamicTable(name=val,
                                    description=val+" description",
