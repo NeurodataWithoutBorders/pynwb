@@ -445,7 +445,7 @@ class FluorescenceConstructor(TestCase):
 class ImageSegmentationConstructor(TestCase):
 
     def test_init(self):
-        ps = create_plane_segmentation(self)
+        ps = create_plane_segmentation()
         iS = ImageSegmentation(ps, name='test_iS')
         self.assertEqual(iS.name, 'test_iS')
         self.assertEqual(iS.plane_segmentations[ps.name], ps)
@@ -505,6 +505,17 @@ class PlaneSegmentationConstructor(TestCase):
         self.assertEqual(pS['pixel_mask'][0], pix_mask[0:3])
         self.assertEqual(pS['pixel_mask'][1], pix_mask[3:5])
         self.assertEqual(pS['image_mask'].data, img_mask)
+
+    def test_init_no_name(self):
+        """If no name is provided, the name of the imaging plane should be used"""
+        iSS, ip = self.set_up_dependencies()
+        pS = PlaneSegmentation(
+            description='description',
+            imaging_plane=ip,
+            name=None,
+            reference_images=iSS
+        )
+        self.assertEqual(pS.name, ip.name)
 
     def test_init_pixel_mask(self):
         pix_mask = [[1, 2, 1.0], [3, 4, 1.0], [5, 6, 1.0],
