@@ -30,7 +30,7 @@ class TestScratchData(TestCase):
 
     def test_notes_deprecation(self):
         with self.assertWarnsWith(PendingDeprecationWarning, 
-                                 'The `notes` argument of ScratchData.__init__ will' \
+                                 'The `notes` argument of ScratchData.__init__ will ' \
                                  'be deprecated. Use description instead.'):
             ScratchData(name='foo', data=[1, 2, 3, 4], notes='notes')
         with self.assertRaises(ValueError):
