@@ -6,7 +6,14 @@ gets mapped appropriately when constructors and methods are invoked
 '''
 import json
 
-from pynwb.spec import NWBNamespaceBuilder, NWBRefSpec, NWBLinkSpec, NWBDtypeSpec, NWBGroupSpec, NWBDatasetSpec
+from pynwb.spec import (
+    NWBNamespaceBuilder, 
+    NWBRefSpec, 
+    NWBLinkSpec, 
+    NWBDtypeSpec,
+    NWBGroupSpec, 
+    NWBDatasetSpec
+)
 from pynwb.testing import TestCase
 
 

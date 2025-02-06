@@ -445,12 +445,19 @@ class FluorescenceConstructor(TestCase):
 class ImageSegmentationConstructor(TestCase):
 
     def test_init(self):
-        ps = create_plane_segmentation()
-
+        ps = create_plane_segmentation(self)
         iS = ImageSegmentation(ps, name='test_iS')
         self.assertEqual(iS.name, 'test_iS')
         self.assertEqual(iS.plane_segmentations[ps.name], ps)
         self.assertEqual(iS[ps.name], iS.plane_segmentations[ps.name])
+    
+    def test_add_segementation(self):
+        ps = create_plane_segmentation()
+        iS = ImageSegmentation(name='test_iS')
+        result = iS.add_plane_segmentation(ps)
+        self.assertEqual(iS.plane_segmentations[ps.name], ps)
+        self.assertEqual(iS[ps.name], iS.plane_segmentations[ps.name])
+        self.assertIsInstance(result, PlaneSegmentation)
 
 
 class PlaneSegmentationConstructor(TestCase):
