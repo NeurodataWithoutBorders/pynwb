@@ -122,15 +122,15 @@ class ScratchData(NWBData):
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this container'},
             {'name': 'data', 'type': ('scalar_data', 'array_data', 'data', Data), 'doc': 'the source of the data'},
             {'name': 'notes', 'type': str,
-             'doc': 'notes about the data. This argument will be deprecated. Use description instead', 'default': ''},
+             'doc': 'notes about the data. This argument will be deprecated. Use description instead', 'default': None},
             {'name': 'description', 'type': str, 'doc': 'notes about the data', 'default': None})
     def __init__(self, **kwargs):
         notes, description = popargs('notes', 'description', kwargs)
         super().__init__(**kwargs)
-        if notes != '':
+        if notes is not None:
             warn('The `notes` argument of ScratchData.__init__ will be deprecated. Use description instead.',
                  PendingDeprecationWarning)
-            if notes != '' and description != '':
+            if notes is not None and description is not None:
                 raise ValueError('Cannot provide both notes and description to ScratchData.__init__. The description '
                                  'argument is recommended.')
             description = notes

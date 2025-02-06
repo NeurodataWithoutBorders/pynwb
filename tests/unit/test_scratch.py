@@ -33,13 +33,16 @@ class TestScratchData(TestCase):
             ScratchData(name='foo', data=[1, 2, 3, 4], notes='notes')
         with self.assertRaises(ValueError):
             ScratchData(name='foo', data=[1, 2, 3, 4], description='test scratch', notes='notes')
-        with self.assertWarnsWith(PendingDeprecationWarning, 'ScratchData.description will be required in a future major release of PyNWB.'):
+        with self.assertWarnsWith(PendingDeprecationWarning, 
+                                  'ScratchData.description will be required in a future major release of PyNWB.'):
             ScratchData(name='foo', data=[1, 2, 3, 4])
         # test getting and setting notes after the fact
         testScratch = ScratchData(name='foo', data=[1, 2, 3, 4], description='test scratch')
-        with self.assertWarnsWith(PendingDeprecationWarning, 'Use of ScratchData.notes will be deprecated. Use ScratchData.description instead.'):
+        with self.assertWarnsWith(PendingDeprecationWarning,
+                                 'Use of ScratchData.notes will be deprecated. Use ScratchData.description instead.'):
             testScratch.notes
-        with self.assertWarnsWith(PendingDeprecationWarning, 'Use of ScratchData.notes will be deprecated. Use ScratchData.description instead.'):
+        with self.assertWarnsWith(PendingDeprecationWarning, 
+                                 'Use of ScratchData.notes will be deprecated. Use ScratchData.description instead.'):
             testScratch.notes = 'new notes'
 
     def test_add_scratch_int(self):
