@@ -28,6 +28,20 @@ class TestScratchData(TestCase):
         self.assertListEqual(sd.data, [1, 2, 3, 4])
         self.assertEqual(sd.description, 'test scratch')
 
+    def test_notes_deprecation(self):
+        with self.assertWarnsWith(PendingDeprecationWarning, 'The notes argument is deprecated'):
+            ScratchData(name='foo', data=[1, 2, 3, 4], notes='notes')
+        with self.assertRaises(ValueError):
+            ScratchData(name='foo', data=[1, 2, 3, 4], description='test scratch', notes='notes')
+        with self.assertWarnsWith(PendingDeprecationWarning, 'ScratchData.description will be required in a future major release of PyNWB.'):
+            ScratchData(name='foo', data=[1, 2, 3, 4])
+        # test getting and setting notes after the fact
+        testScratch = ScratchData(name='foo', data=[1, 2, 3, 4], description='test scratch')
+        with self.assertWarnsWith(PendingDeprecationWarning, 'Use of ScratchData.notes will be deprecated. Use ScratchData.description instead.'):
+            testScratch.notes
+        with self.assertWarnsWith(PendingDeprecationWarning, 'Use of ScratchData.notes will be deprecated. Use ScratchData.description instead.'):
+            testScratch.notes = 'new notes'
+
     def test_add_scratch_int(self):
         ret = self.nwbfile.add_scratch(2, name='test', description='test data')
         self.assertIsInstance(ret, ScratchData)
