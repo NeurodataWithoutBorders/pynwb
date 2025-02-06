@@ -173,12 +173,14 @@ from pynwb import NWBFile, NWBHDF5IO
 from pynwb.file import Subject
 import h5py
 from datetime import datetime
+from dateutil.tz import tzlocal
+
 
 # First, let's create a file with a Subject that is missing a genotype
 nwbfile = NWBFile(
     session_description="example file with subject",
     identifier="EXAMPLE_ID",
-    session_start_time=datetime.now(),
+    session_start_time=datetime.now(tzlocal()),
     session_id="LONELYMTN",
     subject=Subject(
         subject_id="mouse001",
