@@ -26,10 +26,6 @@ from .misc import Units
 from .core import NWBContainer, NWBDataInterface, MultiContainerInterface, ScratchData, LabelledDict
 
 
-def _not_parent(arg):
-    return arg['name'] != 'parent'
-
-
 @register_class('LabMetaData', CORE_NAMESPACE)
 class LabMetaData(NWBContainer):
     """

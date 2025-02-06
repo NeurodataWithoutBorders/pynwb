@@ -2,6 +2,10 @@
 
 ## PyNWB 3.0.0 (Upcoming)
 
+### Breaking changes
+- Removed unused functions `prepend_string` and `_not_parent` from `core.py` @oruebel [#2032](https://github.com/NeurodataWithoutBorders/pynwb/pull/2031)
+- 
+
 ### Enhancements and minor changes
 - Added `pynwb.read_nwb` convenience method to simplify reading an NWBFile written with any backend @h-mayorquin [#1994](https://github.com/NeurodataWithoutBorders/pynwb/pull/1994)
 - Added support for NWB schema 2.8.0. @rly [#2001](https://github.com/NeurodataWithoutBorders/pynwb/pull/2001)
