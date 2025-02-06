@@ -36,7 +36,7 @@ from pynwb.device import Device
 from pynwb.base import TimeSeriesReferenceVectorData
 from pynwb import NWBHDF5IO
 from hdmf.utils import docval, popargs
-from hdmf.table import DynamicTable, VectorData
+from hdmf.common import DynamicTable, VectorData
 
 
 class ICEphysMetaTestBase(TestCase):
