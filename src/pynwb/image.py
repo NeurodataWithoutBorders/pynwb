@@ -305,9 +305,9 @@ class ImageMaskSeries(ImageSeries):
                 "The ImageMaskSeries neurodata type is deprecated. If you are interested in using it, "
                 "please create an issue on https://github.com/NeurodataWithoutBorders/nwb-schema/issues."
             )
-        masked_imageseries = popargs('masked_imageseries', kwargs)
-        super().__init__(**kwargs)
-        self.masked_imageseries = masked_imageseries
+        masked_imageseries = popargs('masked_imageseries', kwargs)  # pragma: no cover
+        super().__init__(**kwargs)  # pragma: no cover
+        self.masked_imageseries = masked_imageseries  # pragma: no cover
 
 
 @register_class('OpticalSeries', CORE_NAMESPACE)
