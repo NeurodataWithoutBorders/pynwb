@@ -19,6 +19,25 @@ data = np.linspace(0, 100, 1000)
 timestamps = np.linspace(0, 100, 1000)
 ```
 
+## 0. Core Namespace Loading
+
+The core namespace is automatically loaded when PyNWB is imported. Here's how it happens:
+
+```python
+# In pynwb/__init__.py
+from hdmf.spec import NamespaceCatalog
+from hdmf.build import BuildManager, TypeMap
+
+# Create the namespace catalog with NWB-specific specs
+__ns_catalog = NamespaceCatalog(NWBGroupSpec, NWBDatasetSpec, NWBNamespace)
+
+# Create the global type map
+__TYPE_MAP = TypeMap(__ns_catalog)
+
+# Load the core namespace
+__load_core_namespace()  # This loads nwb-schema/core/nwb.namespace.yaml
+
+
 ## 1. Creating Containers
 
 First, let's create our containers the normal way:
@@ -168,7 +187,52 @@ def write_nwb_file(builder, filename='example.nwb'):
 write_nwb_file(nwbfile_builder)
 ```
 
-## 5. Understanding the Components
+## 5. Understanding Containers vs Builders
+
+Before diving into the components, it's important to understand the key differences between Containers and Builders:
+
+### Containers (e.g., NWBContainer, TimeSeries)
+Containers are high-level Python objects that represent NWB data structures. They have:
+- `name`: Name of the container
+- `parent`: Reference to parent container
+- `object_id`: Unique identifier
+- `container_source`: Source file path
+- `modified`: Flag indicating if the container has been modified
+- Data-specific attributes (e.g., `data`, `timestamps` for TimeSeries)
+- Methods for data manipulation and validation
+- No direct knowledge of HDF5 structure
+
+### Builders (e.g., GroupBuilder, DatasetBuilder)
+Builders are intermediate representations that bridge between containers and HDF5. They have:
+- `name`: Name of the group/dataset
+- `parent`: Reference to parent builder
+- `source`: Source file path
+- `attributes`: Dictionary of HDF5 attributes
+- `location`: Location in the HDF5 file
+- Structural properties:
+  - GroupBuilder: `groups`, `datasets`, `links` dictionaries
+  - DatasetBuilder: `data`, `dtype`, `maxshape`, `chunks`
+- No data manipulation methods
+- Direct mapping to HDF5 structure
+
+### Key Differences
+1. Purpose:
+   - Containers: High-level data organization and manipulation
+   - Builders: HDF5 file structure representation
+
+2. Attributes:
+   - Containers: Focus on scientific data and relationships
+   - Builders: Focus on HDF5 storage details
+
+3. Methods:
+   - Containers: Data manipulation and validation
+   - Builders: HDF5 structure management
+
+4. Relationships:
+   - Containers: Parent-child relationships between data objects
+   - Builders: Parent-child relationships mirroring HDF5 hierarchy
+
+## 6. Understanding the Components
 
 ### TypeMap
 The TypeMap is our schema registry that maintains mappings between Python classes and NWB specifications. It provides:
