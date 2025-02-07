@@ -8,7 +8,7 @@ from hdmf.common import DynamicTable
 from hdmf.common import VectorData
 from hdmf.utils import docval, get_docval, popargs
 from pynwb import NWBFile, TimeSeries, NWBHDF5IO
-from pynwb.base import Image, Images
+from pynwb.base import Image, Images, ProcessingModule
 from pynwb.file import Subject, ElectrodeTable, _add_missing_timezone
 from pynwb.epoch import TimeIntervals
 from pynwb.ecephys import ElectricalSeries
@@ -128,10 +128,8 @@ class NWBFileTest(TestCase):
 
     def test_access_processing(self):
         self.nwbfile.create_processing_module('test_mod', 'test_description')
-        # test deprecate .modules
-        with self.assertWarnsWith(DeprecationWarning, 'NWBFile.modules has been replaced by NWBFile.processing.'):
-            modules = self.nwbfile.modules['test_mod']
-        self.assertIs(self.nwbfile.processing['test_mod'], modules)
+        self.assertIsInstance(self.nwbfile.processing['test_mod'], ProcessingModule)
+        self.assertEquals(self.nwbfile.processing['test_mod'].description, 'test_description')
 
     def test_epoch_tags(self):
         tags1 = ['t1', 't2']
@@ -166,31 +164,13 @@ class NWBFileTest(TestCase):
                                              'grams', timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5]))
         self.assertEqual(len(self.nwbfile.stimulus), 1)
 
-    def test_add_stimulus_timeseries_arg(self):
-        """Test nwbfile.add_stimulus using the deprecated 'timeseries' keyword argument"""
-        msg = (
-            "The 'timeseries' keyword argument is deprecated and will be removed in PyNWB 3.0. "
-            "Use the 'stimulus' argument instead."
-        )
-        with self.assertWarnsWith(DeprecationWarning, msg):
-            self.nwbfile.add_stimulus(
-                timeseries=TimeSeries(
-                    name='test_ts',
-                    data=[0, 1, 2, 3, 4, 5],
-                    unit='grams',
-                    timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5]
-                )
-            )
-        self.assertEqual(len(self.nwbfile.stimulus), 1)
-
     def test_add_stimulus_no_stimulus_arg(self):
         """Test nwbfile.add_stimulus using the deprecated 'timeseries' keyword argument"""
         msg = (
-            "The 'stimulus' keyword argument is required. The 'timeseries' keyword argument can be "
-            "provided for backwards compatibility but is deprecated in favor of 'stimulus' and will be "
-            "removed in PyNWB 3.0."
+            "NWBFile.add_stimulus: None is not allowed for 'stimulus' "
+            "(expected 'TimeSeries, DynamicTable or NWBDataInterface', not None)"
         )
-        with self.assertRaisesWith(ValueError, msg):
+        with self.assertRaisesWith(TypeError, msg):
             self.nwbfile.add_stimulus(None)
         self.assertEqual(len(self.nwbfile.stimulus), 0)
 
