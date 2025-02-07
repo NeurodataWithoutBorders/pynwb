@@ -200,7 +200,7 @@ class EventWaveform(MultiContainerInterface):
     }
 
     def __init__(self, **kwargs):
-        if not self._in_construct_mode:
+        if not self._in_construct_mode:  # pragma: no cover
             raise ValueError(
                 "The EventWaveform neurodata type is deprecated. If you are interested in using it, "
                 "please create an issue on https://github.com/NeurodataWithoutBorders/nwb-schema/issues."
