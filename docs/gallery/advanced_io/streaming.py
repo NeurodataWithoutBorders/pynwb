@@ -85,11 +85,11 @@ rem_file.close()
 # This approach can be a bit cumbersome when exploring files interactively, but is the preferred approach once 
 # the program is finalized because it will ensure that the file is closed properly even if an exception is raised.
 
-with remfile.File(s3_url) as rem_file:
-    with h5py.File(rem_file, "r") as h5py_file:
-        with NWBHDF5IO(file=h5py_file, load_namespaces=True) as io:
-            nwbfile = io.read()
-            streamed_data = nwbfile.acquisition["lick_times"].time_series["lick_left_times"].data[:]
+rem_file = remfile.File(s3_url, disk_cache=disk_cache)
+with h5py.File(rem_file, "r") as h5py_file:
+    with NWBHDF5IO(file=h5py_file, load_namespaces=True) as io:
+        nwbfile = io.read()
+        streamed_data = nwbfile.acquisition["lick_times"].time_series["lick_left_times"].data[:]
 
 # After the contexts end, the file is closed, so you cannot download new data from the file.
 
