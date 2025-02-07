@@ -500,7 +500,7 @@ class IntracellularRecordingsTable(AlignedDynamicTable):
             # on behalf of the user here
             if required_dynamic_table_missing:
                 if required_dynamic_table_given[2] < 0:
-                    dynamic_table_arg.append(IntracellularResponsesTable)
+                    dynamic_table_arg.append(IntracellularResponsesTable())
                     if dynamic_table_arg[-1].name not in categories_arg:
                         categories_arg.insert(0, dynamic_table_arg[-1].name)
                 if required_dynamic_table_given[1] < 0:
