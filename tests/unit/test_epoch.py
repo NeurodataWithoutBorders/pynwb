@@ -8,6 +8,8 @@ from pynwb import TimeSeries, NWBFile
 from pynwb.base import TimeSeriesReference, TimeSeriesReferenceVectorData
 from pynwb.testing import TestCase
 
+from hdmf.backends.hdf5 import H5DataIO
+
 
 class TimeIntervalsTest(TestCase):
 
@@ -65,6 +67,117 @@ class TimeIntervalsTest(TestCase):
 
         self.assertNotIn('timeseries', obtained.columns)
         self.assertEqual(obtained.loc[2, 'foo'], df.loc[2, 'foo'])
+
+    def test_add_interval_basic(self):
+        """Test adding interval with just start/stop times"""
+        epochs = TimeIntervals(name='test_epochs')
+        epochs.add_interval(start_time=10.0, stop_time=20.0)
+        row = epochs[0]
+        self.assertEqual(row.loc[0]['start_time'], 10.0)
+        self.assertEqual(row.loc[0]['stop_time'], 20.0)
+
+    def test_add_interval_tags_string(self):
+        """Test adding interval with tags as comma-separated string"""
+        epochs = TimeIntervals(name='test_epochs')
+        epochs.add_interval(start_time=10.0, stop_time=20.0, tags='tag1, tag2, tag3')
+        row = epochs[0]
+        self.assertEqual(row.loc[0]['tags'], ['tag1', 'tag2', 'tag3'])
+
+    def test_add_interval_tags_list(self):
+        """Test adding interval with tags as list"""
+        epochs = TimeIntervals(name='test_epochs')
+        epochs.add_interval(start_time=10.0, stop_time=20.0, tags=['tag1', 'tag2', 'tag3'])
+        row = epochs[0]
+        self.assertEqual(row.loc[0]['tags'], ['tag1', 'tag2', 'tag3'])
+
+    def test_add_interval_single_timeseries_timestamps(self):
+        """Test adding interval with single TimeSeries using timestamps"""
+        epochs = TimeIntervals(name='test_epochs')
+        ts = TimeSeries(
+            name='test_ts',
+            data=list(range(100)),
+            unit='units',
+            timestamps=np.linspace(0, 10, 100)
+        )
+        epochs.add_interval(start_time=2.0, stop_time=4.0, timeseries=ts)
+        row = epochs[0]
+        self.assertEqual(len(row.loc[0]['timeseries']), 1)
+        ts_ref = row.loc[0]['timeseries'][0]
+        self.assertEqual(ts_ref.idx_start, 20)  # at t=2.0
+        self.assertEqual(ts_ref.count, 20)      # from t=2.0 to t=4.0
+
+    def test_add_interval_single_timeseries_timestamps_with_dataio(self):
+        """Test adding interval with single TimeSeries using timestamps"""
+        epochs = TimeIntervals(name='test_epochs')
+        ts = TimeSeries(
+            name='test_ts',
+            data=list(range(100)),
+            unit='units',
+            timestamps=H5DataIO(np.linspace(0, 10, 100))
+        )
+        epochs.add_interval(start_time=2.0, stop_time=4.0, timeseries=ts)
+        row = epochs[0]
+        self.assertEqual(len(row.loc[0]['timeseries']), 1)
+        ts_ref = row.loc[0]['timeseries'][0]
+        self.assertEqual(ts_ref.idx_start, 20)  # at t=2.0
+        self.assertEqual(ts_ref.count, 20)      # from t=2.0 to t=4.0
+
+    def test_add_interval_single_timeseries_rate(self):
+        """Test adding interval with single TimeSeries using starting_time and rate"""
+        epochs = TimeIntervals(name='test_epochs')
+        ts = TimeSeries(
+            name='test_ts',
+            data=list(range(100)),
+            unit='units',
+            starting_time=0.0,
+            rate=10.0  # 10 samples per second
+        )
+        epochs.add_interval(start_time=2.0, stop_time=4.0, timeseries=ts)
+        row = epochs[0]
+        self.assertEqual(len(row.loc[0]['timeseries']), 1)
+        ts_ref = row.loc[0]['timeseries'][0]
+        self.assertEqual(ts_ref.idx_start, 20)  # at t=2.0
+        self.assertEqual(ts_ref.count, 20)      # from t=2.0 to t=4.0
+
+    def test_add_interval_multiple_timeseries(self):
+        """Test adding interval with multiple TimeSeries"""
+        epochs = TimeIntervals(name='test_epochs')
+        ts1 = TimeSeries(
+            name='test_ts1',
+            data=list(range(100)),
+            unit='units',
+            timestamps=np.linspace(0, 10, 100)
+        )
+        ts2 = TimeSeries(
+            name='test_ts2',
+            data=list(range(50)),
+            unit='units',
+            starting_time=0.0,
+            rate=5.0
+        )
+        epochs.add_interval(start_time=2.0, stop_time=4.0, timeseries=[ts1, ts2])
+        row = epochs[0]
+        self.assertEqual(len(row.loc[0]['timeseries']), 2)
+        ts1_ref = row.loc[0]['timeseries'][0]
+        ts2_ref = row.loc[0]['timeseries'][1]
+        self.assertEqual(ts1_ref.idx_start, 20)
+        self.assertEqual(ts1_ref.count, 20)
+        self.assertEqual(ts2_ref.idx_start, 10)
+        self.assertEqual(ts2_ref.count, 10)
+
+    def test_add_interval_timeseries_missing_timing(self):
+        """Test error when TimeSeries has neither timestamps nor starting_time/rate"""
+        epochs = TimeIntervals(name='test_epochs')
+        ts = TimeSeries(
+            name='test_ts',
+            data=list(range(100)),
+            unit='units',
+            timestamps=np.linspace(0, 10, 100)
+        )
+        ts.fields['timestamps'] = None  # remove timestamps to trigger error 
+        msg = "TimeSeries object must have timestamps or starting_time and rate"
+        with self.assertRaisesWith(ValueError, msg):
+            epochs.add_interval(start_time=2.0, stop_time=4.0, timeseries=ts)
 
     def test_no_tags(self):
         nwbfile = NWBFile("a file with header data", "NB123A", datetime(1970, 1, 1, tzinfo=tz.tzutc()))
