@@ -2,6 +2,9 @@
 
 ## PyNWB 3.0.0 (Upcoming)
 
+### Breaking changes
+- Removed previously deprecated functions and parameters from `NWBFile`: 1) `ic_electrode` parameter of `NWBFile.__init__`, 2) `NWBFile.modules`, 3) `NWBFile.ec_electrode_groups`, 4) `NWBFile.ec_electrodes`, 5) `NWBFile.ic_electrodes`, 6) `NWBFile.add_ic_electrode`, 7) `NWFile.create_ic_electrode`, 8) `NWBFile.get_ic_electrode`, 9) `NWBFile.add_epoch_metadata_column`, 11) `timeseries` parameter of `NWBFile.add_stimulus`. @oruebel [#2033](https://github.com/NeurodataWithoutBorders/pynwb/pull/2033)
+
 ### Enhancements and minor changes
 - Added `pynwb.read_nwb` convenience method to simplify reading an NWBFile written with any backend @h-mayorquin [#1994](https://github.com/NeurodataWithoutBorders/pynwb/pull/1994)
 - Added support for NWB schema 2.8.0. @rly [#2001](https://github.com/NeurodataWithoutBorders/pynwb/pull/2001)
