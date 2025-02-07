@@ -309,6 +309,27 @@ class ImageSeriesConstructor(TestCase):
                 rate=0.2,
             )
 
+    def test_with_bits_per_pixel(self):
+        """Test that bits_per_pixel can be set and that a deprecated warning is raised."""
+        msg = "bits_per_pixel is no longer used"
+        # test that warning is raised when bits_per_pixel is set on construction
+        with self.assertWarnsWith(warn_type=DeprecationWarning, exc_msg=msg):
+            iS = ImageSeries(
+                name='test_iS',
+                unit='unit',
+                external_file=['external_file'],
+                starting_frame=[0],
+                format='external',
+                timestamps=[1., 2., 3.],
+                bits_per_pixel=8
+            )
+        self.assertEqual(iS.bits_per_pixel, 8)
+
+        # test that warning is raised when bits_per_pixel is set after construction
+        with self.assertWarnsWith(warn_type=DeprecationWarning, exc_msg=msg):
+            iS.bits_per_pixel = 9
+        self.assertEqual(iS.bits_per_pixel, 9)
+
 
 class IndexSeriesConstructor(TestCase):
 
