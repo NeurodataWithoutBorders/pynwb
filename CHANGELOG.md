@@ -18,7 +18,10 @@
 - Replaced deprecated `scipy.misc.face` dataset in the images tutorial with another example. @stephprince [#2016](https://github.com/NeurodataWithoutBorders/pynwb/pull/2016)
 
 ### Bug fixes
-- Fixed bug in `IntracellularRecordingsTable.__init__` were `IntracellularResponsesTable` wasn't created correctly when custom category tables were provided @oruebel [#2032](https://github.com/NeurodataWithoutBorders/pynwb/pull/2031)
+- Fixed bug in `IntracellularRecordingsTable.__init__` were `IntracellularResponsesTable` wasn't created correctly when custom category tables were provided @oruebel. [#2031](https://github.com/NeurodataWithoutBorders/pynwb/pull/2031)
+- Fixed shape check in `SpikeEventSeries.__init__` to support `AbstractDataChunkIterator` for timestamps/data. @oruebel [#2031](https://github.com/NeurodataWithoutBorders/pynwb/pull/2031)
+- Added unit tests to enhance coverage of `core.py`, `image.py`, `spec.py`, `icephys.py`, `epoch.py` and others. @oruebel [#2031](https://github.com/NeurodataWithoutBorders/pynwb/pull/2031)
+ 
 
 ## PyNWB 2.8.3 (November 19, 2024)
 
