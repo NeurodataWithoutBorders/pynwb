@@ -215,12 +215,12 @@ class IntracellularRecordingsTableTests(ICEphysMetaTestBase):
                                    ) for val in category_names]
         ret = IntracellularRecordingsTable(category_tables=categories, categories=category_names)
         self.assertEqual(ret.name, 'intracellular_recordings')
-        self.assertIsNotNone(ret.electrodes)
-        self.assertIsInstance(ret.electrodes, IntracellularElectrodesTable)
-        self.assertIsNotNone(ret.stimuli)
-        self.assertIsInstance(ret.stimuli, IntracellularStimuliTable)
-        self.assertIsNotNone(ret.responses)
-        self.assertIsInstance(ret.responses, IntracellularResponsesTable)
+        self.assertIsNotNone(ret.get_category('electrodes'))
+        self.assertIsInstance(ret.get_category('electrodes'), IntracellularElectrodesTable)
+        self.assertIsNotNone(ret.get_category('stimuli'))
+        self.assertIsInstance(ret.get_category('stimuli'), IntracellularStimuliTable)
+        self.assertIsNotNone(ret.get_category('responses'))
+        self.assertIsInstance(ret.get_category('responses'), IntracellularResponsesTable)
 
     def test_init_with_nonempty_category_tables_and_missing_required_tables(self):
         """
