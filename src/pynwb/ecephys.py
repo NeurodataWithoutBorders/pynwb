@@ -3,7 +3,7 @@ import numpy as np
 from collections.abc import Iterable
 
 from hdmf.common import DynamicTableRegion
-from hdmf.data_utils import DataChunkIterator, assertEqualShape
+from hdmf.data_utils import AbstractDataChunkIterator, assertEqualShape
 from hdmf.utils import docval, popargs, get_docval, popargs_to_dict, get_data_shape
 
 from . import register_class, CORE_NAMESPACE
@@ -138,12 +138,10 @@ class SpikeEventSeries(ElectricalSeries):
         data = kwargs['data']
         timestamps = kwargs['timestamps']
         if not (isinstance(data, TimeSeries) or isinstance(timestamps, TimeSeries)):
-            if not (isinstance(data, DataChunkIterator) or isinstance(timestamps, DataChunkIterator)):
+            if not (isinstance(data, AbstractDataChunkIterator) or isinstance(timestamps, AbstractDataChunkIterator)):
                 if len(data) != len(timestamps):
                     raise ValueError('Must provide the same number of timestamps and spike events')
-            else:
-                # TODO: add check when we have DataChunkIterators
-                pass
+            # TODO: add check when we have AbstractDataChunkIterator objects
         super().__init__(**kwargs)
 
 
