@@ -94,5 +94,48 @@ with NWBZarrIO(path=absolute_path, mode="r") as io:
     read_nwbfile = io.read()
 
 #######################################################################################
+# Streaming from DANDI
+# -------------------
+# One of the advantages of Zarr is its ability to efficiently stream data from cloud storage.
+# Here's how to stream NWB files stored in Zarr format from the DANDI archive:
+
+from dandi.dandiapi import DandiAPIClient
+import zarr
+import s3fs
+
+# Initialize DANDI client and get a dandiset
+client = DandiAPIClient()
+dandiset = client.get_dandiset("000001", "draft")  # Replace with your dandiset ID
+
+# Get an asset's S3 URL
+asset = next(dandiset.get_assets())
+s3_url = asset.get_content_url(follow_redirects=1, strip_query=True)
+
+# Set up S3 access
+fs = s3fs.S3FileSystem(anon=True)
+store = zarr.S3Store(s3_url, client_kwargs={'S3': {'anon': True}})
+
+# Stream data efficiently
+with NWBZarrIO(path=store, mode='r') as io:
+    nwbfile = io.read()
+    
+    # Example: Access specific chunks of data
+    # This only loads the requested timepoints into memory
+    if 'neural_data' in nwbfile.acquisition:
+        chunk = nwbfile.acquisition['neural_data'].data[:1000]
+
+    # Process data in chunks for memory efficiency
+    chunk_size = 1000
+    if 'neural_data' in nwbfile.acquisition:
+        total_size = len(nwbfile.acquisition['neural_data'].data)
+        for i in range(0, total_size, chunk_size):
+            chunk = nwbfile.acquisition['neural_data'].data[i:i+chunk_size]
+            # Process your chunk here
+            chunk_mean = chunk.mean()
+
+# Clean up S3 filesystem cache
+fs.clear_instance_cache()
+
+#######################################################################################
 # .. note::
 #    For more information, see the :hdmf-zarr:`hdmf-zarr documentation<>`.
