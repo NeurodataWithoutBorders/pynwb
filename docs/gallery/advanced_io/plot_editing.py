@@ -164,19 +164,15 @@ with h5py.File("test_edit.nwb", "r+") as f:
     )
 
 ##############################################
-# Adding datasets using h5py
-# --------------------------
-# You can also use h5py to add new datasets to existing groups. Here's an example of
-# adding a genotype dataset to the Subject object:
+# Adding datasets to existing groups
+# ---------------------------------
+# You can add new datasets to existing groups using PyNWB by calling ``set_modified()``.
+# Here's an example of adding a genotype to a Subject:
 
 from pynwb import NWBFile, NWBHDF5IO
 from pynwb.file import Subject
-import h5py
-from datetime import datetime
-from dateutil.tz import tzlocal
 
-
-# First, let's create a file with a Subject that is missing a genotype
+# First, let's create a file with a Subject that is missing the genotype, which is optional
 nwbfile = NWBFile(
     session_description="example file with subject",
     identifier="EXAMPLE_ID",
@@ -192,13 +188,15 @@ nwbfile = NWBFile(
 with NWBHDF5IO("test_edit3.nwb", "w") as io:
     io.write(nwbfile)
 
-# Now add a genotype dataset to the Subject using h5py
-with h5py.File("test_edit3.nwb", "r+") as f:
-    # Create the genotype dataset in the subject group
-    subject_group = f["general/subject"]
-    subject_group.create_dataset("genotype", data="Sst-IRES-Cre")
+# Now add the genotype using PyNWB and set_modified()
+with NWBHDF5IO("test_edit3.nwb", "a") as io:
+    nwbfile = io.read()
+    nwbfile.subject.genotype = "Sst-IRES-Cre"
+    nwbfile.subject.set_modified()  # Required to mark the container as modified
+    io.write(nwbfile)
 
 # Verify the dataset was added
 with NWBHDF5IO("test_edit3.nwb", "r") as io:
     nwbfile = io.read()
     print(f"Subject genotype: {nwbfile.subject.genotype}")
+    # Output: Subject genotype: Sst-IRES-Cre
