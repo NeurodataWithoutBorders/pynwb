@@ -81,4 +81,8 @@ _version.py
 .core_typemap_version
 core_typemap.pkl
 
+<<<<<<< HEAD
 venv/
+=======
+venv
+>>>>>>> 2e61c05ff6cdc663e47fd9adcb14c950be9c9ea6
