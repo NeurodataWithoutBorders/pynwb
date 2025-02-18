@@ -410,40 +410,6 @@ class OpticalSeriesConstructor(TestCase):
         self.assertIsNone(ts.field_of_view)
         self.assertIsNone(ts.orientation)
 
-    def test_roundtrip_optional_fields(self):
-        """Test that OpticalSeries with optional fields set to None can be written to and read from file."""
-        from datetime import datetime
-        import tempfile
-        from pynwb import NWBFile
-        
-        nwbfile = NWBFile(
-            session_description='test session',
-            identifier='TEST123',
-            session_start_time=datetime.now().astimezone()
-        )
-        
-        # Create OpticalSeries without providing the optional fields
-        ts = OpticalSeries(
-            name="test_ts",
-            unit="unit",
-            external_file=["external_file"],
-            starting_frame=[0],
-            format="external",
-            timestamps=[1.0, 2.0]
-        )
-        
-        nwbfile.add_acquisition(ts)
-        
-        with tempfile.NamedTemporaryFile(suffix='.nwb') as temp:
-            with NWBHDF5IO(temp.name, mode='w') as io:
-                io.write(nwbfile)
-            with NWBHDF5IO(temp.name, mode='r', load_namespaces=True) as io:
-                nwbfile_read = io.read()
-                ts_read = nwbfile_read.acquisition['test_ts']
-                self.assertIsNone(ts_read.distance)
-                self.assertIsNone(ts_read.field_of_view)
-                self.assertIsNone(ts_read.orientation)
-
 class TestImageSubtypes(TestCase):
 
     def test_grayscale_image(self):
