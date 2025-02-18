@@ -86,10 +86,6 @@ ros3_examples = [
     os.path.join('advanced_io', 'streaming.py'),
 ]
 
-allensdk_examples = [
-    os.path.join('domain', 'brain_observatory.py'),  # TODO create separate workflow for this
-]
-
 
 def run_example_tests():
     """Run the Sphinx gallery example files, excluding ROS3-dependent ones, to check for errors."""
@@ -99,7 +95,7 @@ def run_example_tests():
         for f in files:
             if f.endswith(".py"):
                 name_with_parent_dir = os.path.join(os.path.basename(root), f)
-                if name_with_parent_dir in ros3_examples or name_with_parent_dir in allensdk_examples:
+                if name_with_parent_dir in ros3_examples:
                     logging.info("Skipping %s" % name_with_parent_dir)
                     continue
                 examples_scripts.append(os.path.join(root, f))
@@ -277,7 +273,6 @@ def clean_up_tests():
         "basic_sparse_iterwrite_*.npy",
         "basics_tutorial.nwb",
         "behavioral_tutorial.nwb",
-        "brain_observatory.nwb",
         "cache_spec_example.nwb",
         "ecephys_tutorial.nwb",
         "ecog.extensions.yaml",
