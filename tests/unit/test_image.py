@@ -2,7 +2,7 @@ import warnings
 
 import numpy as np
 
-from pynwb import TimeSeries, NWBHDF5IO
+from pynwb import TimeSeries
 from pynwb.base import Image, Images, ImageReferences
 from pynwb.device import Device
 from pynwb.image import (
