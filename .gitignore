@@ -86,4 +86,4 @@ _version.py
 .core_typemap_version
 core_typemap.pkl
 
-venv
+venv/
