@@ -165,7 +165,7 @@ with h5py.File("test_edit.nwb", "r+") as f:
 
 ##############################################
 # Adding datasets to existing groups
-# ---------------------------------
+# ----------------------------------
 # You can add new datasets to existing groups using PyNWB by calling ``set_modified()``.
 # Here's an example of adding a genotype to a Subject:
 
