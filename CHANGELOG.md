@@ -11,11 +11,13 @@
   - Deprecated `EventWaveform` neurodata type. @rly [#1940](https://github.com/NeurodataWithoutBorders/pynwb/pull/1940)
   - Deprecated `ImageMaskSeries` neurodata type. @rly [#1941](https://github.com/NeurodataWithoutBorders/pynwb/pull/1941)
 - Removed python 3.8 support, added python 3.13 support. @stephprince [#2007](https://github.com/NeurodataWithoutBorders/pynwb/pull/2007)
+- `mock_ElectricalSeries`. Make number of electrodes between data and electrode region agree when explicitly passing data @h-mayorquin [#2019](https://github.com/NeurodataWithoutBorders/pynwb/pull/2019)
 
 ### Documentation and tutorial enhancements
 - Updated `SpikeEventSeries`, `DecompositionSeries`, and `FilteredEphys` examples. @stephprince [#2012](https://github.com/NeurodataWithoutBorders/pynwb/pull/2012)
 - Replaced deprecated `scipy.misc.face` dataset in the images tutorial with another example. @stephprince [#2016](https://github.com/NeurodataWithoutBorders/pynwb/pull/2016)
-
+- Removed Allen Brain Observatory example which was unnecessary and difficult to maintain. @rly [#2026](https://github.com/NeurodataWithoutBorders/pynwb/pull/2026)
+ 
 ## PyNWB 2.8.3 (November 19, 2024)
 
 ### Enhancements and minor changes

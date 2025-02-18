@@ -83,15 +83,16 @@ def mock_ElectricalSeries(
     
     # Set a default rate if timestamps are not provided
     rate = 30_000.0 if (timestamps is None and rate is None) else rate
+    n_electrodes = data.shape[1] if data is not None else 5
 
     electrical_series = ElectricalSeries(
         name=name or name_generator("ElectricalSeries"),
         description=description,
-        data=data if data is not None else np.ones((10, 5)),
+        data=data if data is not None else np.ones((10, n_electrodes)),
         rate=rate,
         starting_time=starting_time,
         timestamps=timestamps,
-        electrodes=electrodes or mock_electrodes(nwbfile=nwbfile),
+        electrodes=electrodes or mock_electrodes(nwbfile=nwbfile, n_electrodes=n_electrodes),
         filtering=filtering,
         conversion=conversion,
         offset=offset,
