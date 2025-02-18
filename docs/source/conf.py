@@ -40,6 +40,9 @@ import pynwb
 autoclass_content = 'both'
 autodoc_docstring_signature = True
 autodoc_member_order = 'bysource'
+autodoc_default_options = {
+    'ignore-module-all': True,  # Continue documenting classes not in __all__
+}
 
 # -- General configuration -----------------------------------------------------
 
