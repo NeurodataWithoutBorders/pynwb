@@ -412,12 +412,7 @@ with NWBHDF5IO("behavioral_tutorial.nwb", "r") as io:
 
 with NWBHDF5IO("behavioral_tutorial.nwb", "r") as io:
     read_nwbfile = io.read()
-    behavior_module = read_nwbfile.processing["behavior"]
-    
-    # Access Position interface using dictionary-style access
-    position = behavior_module["Position"]
-    spatial_series = position["SpatialSeries"]
-    print(spatial_series)
+    print(read_nwbfile.processing["behavior"]["Position"]["SpatialSeries"])
 
 ####################
 # Data arrays are read passively from the file.
