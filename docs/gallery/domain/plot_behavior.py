@@ -396,7 +396,9 @@ with NWBHDF5IO("behavioral_tutorial.nwb", "w") as io:
 
 with NWBHDF5IO("behavioral_tutorial.nwb", "r") as io:
     read_nwbfile = io.read()
-    print(read_nwbfile.processing["behavior"].children)
+    behavior_module = read_nwbfile.processing["behavior"]
+    
+    print(f"Available data interfaces: {list(behavior_module.values())}")
 
 ####################
 # For instance, we can access the :py:class:`~pynwb.behavior.SpatialSeries` data
@@ -410,7 +412,12 @@ with NWBHDF5IO("behavioral_tutorial.nwb", "r") as io:
 
 with NWBHDF5IO("behavioral_tutorial.nwb", "r") as io:
     read_nwbfile = io.read()
-    print(read_nwbfile.processing["behavior"]["Position"]["SpatialSeries"])
+    behavior_module = read_nwbfile.processing["behavior"]
+    
+    # Access Position interface using dictionary-style access
+    position = behavior_module["Position"]
+    spatial_series = position["SpatialSeries"]
+    print(spatial_series)
 
 ####################
 # Data arrays are read passively from the file.
