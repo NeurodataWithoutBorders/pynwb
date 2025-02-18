@@ -84,7 +84,6 @@ class CustomSphinxGallerySectionSortKey(ExampleTitleSortKey):
             "icephys.py",
             "plot_behavior.py",
             "images.py",
-            "brain_observatory.py"
         ],
         'advanced_io': []
     }
