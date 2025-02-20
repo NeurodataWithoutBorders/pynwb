@@ -17,6 +17,16 @@ from .base import TimeSeries, Image, Images
 from .device import Device
 
 
+__all__ = [
+    'ImageSeries',
+    'IndexSeries',
+    'OpticalSeries',
+    'GrayscaleImage',
+    'RGBImage',
+    'RGBAImage'
+]
+
+
 @register_class('ImageSeries', CORE_NAMESPACE)
 class ImageSeries(TimeSeries):
     '''

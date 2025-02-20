@@ -7,6 +7,17 @@ from .core import MultiContainerInterface
 from .misc import IntervalSeries
 from .base import TimeSeries
 
+__all__ = [
+    'SpatialSeries',
+    'BehavioralEpochs',
+    'BehavioralEvents',
+    'BehavioralTimeSeries',
+    'PupilTracking',
+    'EyeTracking',
+    'CompassDirection',
+    'Position'
+]
+
 
 @register_class('SpatialSeries', CORE_NAMESPACE)
 class SpatialSeries(TimeSeries):

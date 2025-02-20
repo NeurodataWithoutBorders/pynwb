@@ -38,6 +38,11 @@ docs/build/
 docs/source/pynwb.*.rst
 
 
+# Virtual Environment
+venv/
+env/
+ENV/
+
 # setuptools
 build/
 dist/

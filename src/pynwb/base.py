@@ -12,6 +12,17 @@ from . import register_class, CORE_NAMESPACE
 from .core import NWBDataInterface, MultiContainerInterface, NWBData
 
 
+__all__ = [
+    'ProcessingModule',
+    'TimeSeries',
+    'Image',
+    'ImageReferences',
+    'Images',
+    'TimeSeriesReferenceVectorData',
+    'TimeSeriesReference'
+]
+
+
 @register_class('ProcessingModule', CORE_NAMESPACE)
 class ProcessingModule(MultiContainerInterface):
     """ Processing module. This is a container for one or more containers
