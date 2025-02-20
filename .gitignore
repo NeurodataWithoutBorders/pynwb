@@ -38,6 +38,11 @@ docs/build/
 docs/source/pynwb.*.rst
 
 
+# Virtual Environment
+venv/
+env/
+ENV/
+
 # setuptools
 build/
 dist/
@@ -83,3 +88,5 @@ _version.py
 
 .core_typemap_version
 core_typemap.pkl
+
+venv/

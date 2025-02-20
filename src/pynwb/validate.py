@@ -14,6 +14,12 @@ from pynwb import CORE_NAMESPACE
 from pynwb.spec import NWBDatasetSpec, NWBGroupSpec, NWBNamespace
 
 
+__all__ = [
+    'validate',
+    'get_cached_namespaces_to_validate'
+]
+
+
 def _print_errors(validation_errors: list):
     if validation_errors:
         print(" - found the following errors:", file=sys.stderr)

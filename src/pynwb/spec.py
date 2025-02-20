@@ -8,6 +8,19 @@ from hdmf.utils import docval, get_docval
 from . import CORE_NAMESPACE
 
 
+__all__ = [
+    'NWBRefSpec',
+    'NWBAttributeSpec',
+    'NWBLinkSpec',
+    'NWBDtypeSpec',
+    'NWBDatasetSpec',
+    'NWBGroupSpec',
+    'NWBNamespace',
+    'NWBNamespaceBuilder',
+    'export_spec'  # Re-exported from hdmf.spec.write
+]
+
+
 def __swap_inc_def(cls):
     args = get_docval(cls.__init__)
     clsname = 'NWB%s' % cls.__name__

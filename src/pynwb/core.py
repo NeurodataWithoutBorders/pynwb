@@ -13,6 +13,17 @@ from . import CORE_NAMESPACE, register_class
 from pynwb import get_type_map
 
 
+__all__ = [
+    'NWBMixin',
+    'NWBContainer',
+    'NWBDataInterface',
+    'NWBData',
+    'ScratchData',
+    'NWBTable',
+    'MultiContainerInterface'
+]
+
+
 def _not_parent(arg):
     return arg['name'] != 'parent'
 
