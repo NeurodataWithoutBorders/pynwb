@@ -5,6 +5,9 @@
 ### Enhancements and minor changes
 - Added `__all__` to modules. @bendichter [#2021](https://github.com/NeurodataWithoutBorders/pynwb/pull/2021)
 - Added `pynwb.read_nwb` convenience method to simplify reading an NWBFile written with any backend @h-mayorquin [#1994](https://github.com/NeurodataWithoutBorders/pynwb/pull/1994)
+
+### Bug fixes
+- Made distance, orientation, and field_of_view optional in OpticalSeries to match schema @bendichter [#2023](https://github.com/NeurodataWithoutBorders/pynwb/pull/2023)
 - Added support for NWB schema 2.8.0. @rly [#2001](https://github.com/NeurodataWithoutBorders/pynwb/pull/2001)
   - Removed `SpatialSeries.bounds` field that was not functional. This will be fixed in a future release. @rly [#1907](https://github.com/NeurodataWithoutBorders/pynwb/pull/1907), [#1996](https://github.com/NeurodataWithoutBorders/pynwb/pull/1996)
   - Added support for `NWBFile.was_generated_by` field. @stephprince [#1924](https://github.com/NeurodataWithoutBorders/pynwb/pull/1924)

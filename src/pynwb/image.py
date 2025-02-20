@@ -331,12 +331,26 @@ class OpticalSeries(ImageSeries):
                      'orientation')
 
     @docval(*get_docval(ImageSeries.__init__, 'name'),  # required
-            {'name': 'distance', 'type': float, 'doc': 'Distance from camera/monitor to target/eye.'},  # required
-            {'name': 'field_of_view', 'type': ('array_data', 'data', 'TimeSeries'), 'shape': ((2, ), (3, )),  # required
-             'doc': 'Width, height and depth of image, or imaged area (meters).'},
-            {'name': 'orientation', 'type': str,  # required
-             'doc': 'Description of image relative to some reference frame (e.g., which way is up). '
-                    'Must also specify frame of reference.'},
+            {
+                "name": "distance",
+                "type": float,
+                "doc": "Distance from camera/monitor to target/eye.",
+                "default": None,
+            },
+            {
+                "name": "field_of_view",
+                "type": ("array_data", "data", "TimeSeries"),
+                "shape": ((2,), (3,)),
+                "doc": "Width, height and depth of image, or imaged area (meters).",
+                "default": None,
+            },
+            {
+                "name": "orientation",
+                "type": str,
+                "doc": "Description of image relative to some reference frame (e.g., which way is up). "
+                "Must also specify frame of reference.",
+                "default": None,
+            },
             {'name': 'data', 'type': ('array_data', 'data'), 'shape': ([None] * 3, [None, None, None, 3]),
              'doc': ('Images presented to subject, either grayscale or RGB. May be 3D or 4D. The first dimension must '
                      'be time (frame). The second and third dimensions represent x and y. The optional fourth '
