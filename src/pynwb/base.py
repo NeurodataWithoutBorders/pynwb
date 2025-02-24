@@ -211,9 +211,9 @@ class TimeSeries(NWBDataInterface):
         else:
             raise TypeError("either 'timestamps' or 'rate' must be specified")
 
-        self._error_on_new_warn_on_construct(
-            error_msg=self._check_time_series_dimension()
-        )
+        error_msg = self._check_time_series_dimension()
+        if error_msg:
+            self._error_on_new_warn_on_construct(error_msg=error_msg)
 
     def _check_time_series_dimension(self):
         """Check that the 0th dimension of data equals the length of timestamps, when applicable.

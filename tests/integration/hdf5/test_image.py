@@ -60,7 +60,7 @@ class TestOpticalSeriesOptionalFieldsIO(NWBH5IOMixin, TestCase):
 
     def setUpContainer(self):
         """ Return a test OpticalSeries with optional fields set to None """
-        self.dev1 = Device('dev1')
+        self.dev1 = Device(name='dev1')
         self.optical_series = OpticalSeries(
             name='OpticalSeries',
             data=np.ones((10, 3, 3)),

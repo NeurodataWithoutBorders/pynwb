@@ -111,16 +111,21 @@ class ImageSeries(TimeSeries):
                                                 "If an external file is detected, setting a value for "
                                                 "'format' other than 'external' is deprecated.")
 
-        self._error_on_new_warn_on_construct(
-            error_msg=self._check_image_series_dimension()
-        )
-        self._error_on_new_warn_on_construct(
-            error_msg=self._check_external_file_starting_frame_length()
-        )
-        self._error_on_new_warn_on_construct(
-            error_msg=self._check_external_file_format()
-        )
-        self._error_on_new_warn_on_construct(error_msg=self._check_external_file_data())
+        error_msg = self._check_image_series_dimension()
+        if error_msg:
+            self._error_on_new_warn_on_construct(error_msg=error_msg)
+
+        error_msg = self._check_external_file_starting_frame_length()
+        if error_msg:
+            self._error_on_new_warn_on_construct(error_msg=error_msg)
+
+        error_msg = self._check_external_file_format()
+        if error_msg:
+            self._error_on_new_warn_on_construct(error_msg=error_msg)
+
+        error_msg = self._check_external_file_data()
+        if error_msg:
+            self._error_on_new_warn_on_construct(error_msg=error_msg)
 
     def _change_external_file_format(self):
         """
