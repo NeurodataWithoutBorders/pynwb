@@ -13,6 +13,11 @@ from pynwb import CORE_NAMESPACE
 from pynwb.spec import NWBDatasetSpec, NWBGroupSpec, NWBNamespace
 
 
+__all__ = [
+    'validate',
+    'get_cached_namespaces_to_validate'
+]
+
 def _validate_helper(io: HDMFIO, namespace: str = CORE_NAMESPACE) -> list:
     builder = io.read_builder()
     validator = ValidatorMap(io.manager.namespace_catalog.get_namespace(name=namespace))

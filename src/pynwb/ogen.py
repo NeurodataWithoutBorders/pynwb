@@ -5,6 +5,10 @@ from .base import TimeSeries
 from .core import NWBContainer
 from .device import Device
 
+__all__ = [
+    'OptogeneticStimulusSite',
+    'OptogeneticSeries'
+]
 
 @register_class('OptogeneticStimulusSite', CORE_NAMESPACE)
 class OptogeneticStimulusSite(NWBContainer):

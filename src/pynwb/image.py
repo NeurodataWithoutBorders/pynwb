@@ -18,6 +18,16 @@ from .base import TimeSeries, Image, Images
 from .device import Device
 
 
+__all__ = [
+    'ImageSeries',
+    'IndexSeries',
+    'OpticalSeries',
+    'GrayscaleImage',
+    'RGBImage',
+    'RGBAImage'
+]
+
+
 @register_class('ImageSeries', CORE_NAMESPACE)
 class ImageSeries(TimeSeries):
     '''
@@ -101,24 +111,16 @@ class ImageSeries(TimeSeries):
                                                 "If an external file is detected, setting a value for "
                                                 "'format' other than 'external' is deprecated.")
 
-        if not self._check_image_series_dimension():
-            warnings.warn(
-                "%s '%s': Length of data does not match length of timestamps. Your data may be transposed. "
-                "Time should be on the 0th dimension"
-                % (self.__class__.__name__, self.name)
-            )
-
-        error_msg = self._check_external_file_starting_frame_length()
-        if error_msg:
-            self._error_on_new_warn_on_construct(error_msg=error_msg)
-        
-        error_msg = self._check_external_file_format()
-        if error_msg:
-            self._error_on_new_warn_on_construct(error_msg=error_msg)
-        
-        error_msg = self._check_external_file_data()
-        if error_msg:
-            self._error_on_new_warn_on_construct(error_msg=error_msg)
+        self._error_on_new_warn_on_construct(
+            error_msg=self._check_image_series_dimension()
+        )
+        self._error_on_new_warn_on_construct(
+            error_msg=self._check_external_file_starting_frame_length()
+        )
+        self._error_on_new_warn_on_construct(
+            error_msg=self._check_external_file_format()
+        )
+        self._error_on_new_warn_on_construct(error_msg=self._check_external_file_data())
 
     def _change_external_file_format(self):
         """
@@ -138,7 +140,7 @@ class ImageSeries(TimeSeries):
         """Override _check_time_series_dimension to do nothing.
         The _check_image_series_dimension method will be called instead.
         """
-        return True
+        return
 
     def _check_image_series_dimension(self):
         """Check that the 0th dimension of data equals the length of timestamps, when applicable.
@@ -148,7 +150,7 @@ class ImageSeries(TimeSeries):
         is provided. Otherwise, this function calls the parent class' _check_time_series_dimension method.
         """
         if self.external_file is not None:
-            return True
+            return
         return super()._check_time_series_dimension()
 
     def _check_external_file_starting_frame_length(self):
@@ -328,12 +330,26 @@ class OpticalSeries(ImageSeries):
                      'orientation')
 
     @docval(*get_docval(ImageSeries.__init__, 'name'),  # required
-            {'name': 'distance', 'type': float, 'doc': 'Distance from camera/monitor to target/eye.'},  # required
-            {'name': 'field_of_view', 'type': ('array_data', 'data', 'TimeSeries'), 'shape': ((2, ), (3, )),  # required
-             'doc': 'Width, height and depth of image, or imaged area (meters).'},
-            {'name': 'orientation', 'type': str,  # required
-             'doc': 'Description of image relative to some reference frame (e.g., which way is up). '
-                    'Must also specify frame of reference.'},
+            {
+                "name": "distance",
+                "type": float,
+                "doc": "Distance from camera/monitor to target/eye.",
+                "default": None,
+            },
+            {
+                "name": "field_of_view",
+                "type": ("array_data", "data", "TimeSeries"),
+                "shape": ((2,), (3,)),
+                "doc": "Width, height and depth of image, or imaged area (meters).",
+                "default": None,
+            },
+            {
+                "name": "orientation",
+                "type": str,
+                "doc": "Description of image relative to some reference frame (e.g., which way is up). "
+                "Must also specify frame of reference.",
+                "default": None,
+            },
             {'name': 'data', 'type': ('array_data', 'data'), 'shape': ([None] * 3, [None, None, None, 3]),
              'doc': ('Images presented to subject, either grayscale or RGB. May be 3D or 4D. The first dimension must '
                      'be time (frame). The second and third dimensions represent x and y. The optional fourth '

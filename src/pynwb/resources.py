@@ -2,6 +2,7 @@ from hdmf.common import HERD as hdmf_HERD
 from . import get_type_map as tm
 from hdmf.utils import docval, get_docval, AllowPositional
 
+__all__ = ['HERD']
 
 class HERD(hdmf_HERD):
     """

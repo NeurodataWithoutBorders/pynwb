@@ -11,6 +11,13 @@ from .base import TimeSeries
 from .ecephys import ElectrodeGroup
 from hdmf.common import DynamicTable, DynamicTableRegion
 
+__all__ = [
+    'AnnotationSeries',
+    'AbstractFeatureSeries',
+    'IntervalSeries',
+    'Units',
+    'DecompositionSeries'
+]
 
 @register_class('AnnotationSeries', CORE_NAMESPACE)
 class AnnotationSeries(TimeSeries):

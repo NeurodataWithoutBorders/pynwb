@@ -11,6 +11,20 @@ from .image import ImageSeries
 from .core import NWBContainer, MultiContainerInterface, NWBDataInterface
 from .device import Device
 
+__all__ = [
+    'OpticalChannel',
+    'ImagingPlane',
+    'OnePhotonSeries',
+    'TwoPhotonSeries',
+    'CorrectedImageStack',
+    'MotionCorrection',
+    'PlaneSegmentation',
+    'ImageSegmentation',
+    'RoiResponseSeries',
+    'DfOverF',
+    'Fluorescence'
+]
+
 
 @register_class('OpticalChannel', CORE_NAMESPACE)
 class OpticalChannel(NWBContainer):

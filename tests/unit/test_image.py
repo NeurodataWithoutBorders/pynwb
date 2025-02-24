@@ -84,14 +84,13 @@ class ImageSeriesConstructor(TestCase):
         )
         self.assertEqual(iS.unit, ImageSeries.DEFAULT_UNIT)
 
-    def test_dimension_warning(self):
-        """Test that a warning is raised when the dimensions of the data are not the
-        same as the dimensions of the timestamps."""
+    def test_dimension_error(self):
+        """Test that ImageSeries cannot be created with timestamps and data of different lengths."""
         msg = (
             "ImageSeries 'test_iS': Length of data does not match length of timestamps. Your data may be "
             "transposed. Time should be on the 0th dimension"
         )
-        with self.assertWarnsWith(UserWarning, msg):
+        with self.assertRaisesWith(ValueError, msg):
             ImageSeries(
                 name='test_iS',
                 data=np.ones((3, 3, 3)),
@@ -100,9 +99,14 @@ class ImageSeriesConstructor(TestCase):
             )
 
     def test_dimension_warning_external_file_with_timestamps(self):
-        """Test that a warning is not raised when external file is used with timestamps."""
+        """Test that warning is not raised when external file is used with timestamps."""
+        obj = ImageSeries.__new__(ImageSeries,
+                                  container_source=None,
+                                  parent=None,
+                                  object_id="test",
+                                  in_construct_mode=True)
         with warnings.catch_warnings(record=True) as w:
-            ImageSeries(
+            obj.__init__(
                 name='test_iS',
                 external_file=['external_file'],
                 format='external',
@@ -111,6 +115,10 @@ class ImageSeriesConstructor(TestCase):
                 timestamps=[1, 2, 3, 4]
             )
             self.assertEqual(w, [])
+        # Disable construct mode. Since we are not using this object any more
+        # this is not strictly necessary but is good style in case we expand
+        # the test later on
+        obj._in_construct_mode = False
 
     def test_dimension_warning_external_file_with_rate(self):
         """Test that a warning is not raised when external file is used with rate."""
@@ -437,6 +445,20 @@ class OpticalSeriesConstructor(TestCase):
         self.assertEqual(ts.starting_frame, [0])
         self.assertEqual(ts.format, 'external')
 
+
+    def test_init_all_optional_fields_none(self):
+        """Test that OpticalSeries can be created with all optional fields set to None."""
+        ts = OpticalSeries(
+            name="test_ts",
+            unit="unit",
+            external_file=["external_file"],
+            starting_frame=[0],
+            format="external",
+            timestamps=[1.0, 2.0],
+        )
+        self.assertIsNone(ts.distance)
+        self.assertIsNone(ts.field_of_view)
+        self.assertIsNone(ts.orientation)
 
 class TestImageSubtypes(TestCase):
 

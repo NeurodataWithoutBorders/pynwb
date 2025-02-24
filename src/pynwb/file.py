@@ -26,6 +26,16 @@ from .misc import Units
 from .core import NWBContainer, NWBDataInterface, MultiContainerInterface, ScratchData, LabelledDict
 
 
+__all__ = [
+    'LabMetaData',
+    'Subject',
+    'NWBFile',
+    'ElectrodeTable',
+    'TrialTable',
+    'InvalidTimesTable'
+]
+
+
 def _not_parent(arg):
     return arg['name'] != 'parent'
 

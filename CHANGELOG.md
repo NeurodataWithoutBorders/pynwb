@@ -1,6 +1,6 @@
 # PyNWB Changelog
 
-## PyNWB 3.0.0rc1 (January 28, 2025)
+## PyNWB 3.0.0 (Upcoming)
 
 ### Breaking changes
 - The validation methods have been updated with multiple breaking changes. @stephprince [#1911](https://github.com/NeurodataWithoutBorders/pynwb/pull/1911)
@@ -32,7 +32,11 @@
   - ``pynwb._get_resources`` is removed.
 
 ### Enhancements and minor changes
+- Added `__all__` to modules. @bendichter [#2021](https://github.com/NeurodataWithoutBorders/pynwb/pull/2021)
 - Added `pynwb.read_nwb` convenience method to simplify reading an NWBFile written with any backend @h-mayorquin [#1994](https://github.com/NeurodataWithoutBorders/pynwb/pull/1994)
+
+### Bug fixes
+- Made distance, orientation, and field_of_view optional in OpticalSeries to match schema @bendichter [#2023](https://github.com/NeurodataWithoutBorders/pynwb/pull/2023)
 - Added support for NWB schema 2.8.0. @rly [#2001](https://github.com/NeurodataWithoutBorders/pynwb/pull/2001)
   - Removed `SpatialSeries.bounds` field that was not functional. This will be fixed in a future release. @rly [#1907](https://github.com/NeurodataWithoutBorders/pynwb/pull/1907), [#1996](https://github.com/NeurodataWithoutBorders/pynwb/pull/1996)
   - Added support for `NWBFile.was_generated_by` field. @stephprince [#1924](https://github.com/NeurodataWithoutBorders/pynwb/pull/1924)
@@ -49,8 +53,8 @@
 ### Documentation and tutorial enhancements
 - Updated `SpikeEventSeries`, `DecompositionSeries`, and `FilteredEphys` examples. @stephprince [#2012](https://github.com/NeurodataWithoutBorders/pynwb/pull/2012)
 - Replaced deprecated `scipy.misc.face` dataset in the images tutorial with another example. @stephprince [#2016](https://github.com/NeurodataWithoutBorders/pynwb/pull/2016)
-
-
+- Removed Allen Brain Observatory example which was unnecessary and difficult to maintain. @rly [#2026](https://github.com/NeurodataWithoutBorders/pynwb/pull/2026)
+ 
 ## PyNWB 2.8.3 (November 19, 2024)
 
 ### Enhancements and minor changes

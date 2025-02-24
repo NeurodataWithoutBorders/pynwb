@@ -11,6 +11,16 @@ from .base import TimeSeries
 from .core import NWBContainer, NWBDataInterface, MultiContainerInterface
 from .device import Device
 
+__all__ = [
+    'ElectrodeGroup',
+    'ElectricalSeries',
+    'SpikeEventSeries',
+    'EventDetection',
+    'LFP',
+    'FilteredEphys',
+    'FeatureExtraction'
+]
+
 
 @register_class('ElectrodeGroup', CORE_NAMESPACE)
 class ElectrodeGroup(NWBContainer):
