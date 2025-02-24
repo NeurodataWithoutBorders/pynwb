@@ -613,6 +613,32 @@ from . import legacy  # noqa: F401,E402
 from hdmf.data_utils import DataChunkIterator  # noqa: F401,E402
 from hdmf.backends.hdf5 import H5DataIO  # noqa: F401,E402
 
+__all__ = [
+    # Functions
+    'get_type_map',
+    'get_manager',
+    'load_namespaces', 
+    'available_namespaces',
+    'register_class',
+    'register_map',
+    'get_class',
+    'load_type_config',
+    'get_loaded_type_config',
+    'unload_type_config',
+    'read_nwb',
+    'get_nwbfile_version',
+    
+    # Classes
+    'NWBHDF5IO',
+    'NWBContainer',
+    'NWBData', 
+    'TimeSeries',
+    'ProcessingModule',
+    'NWBFile',
+    'DataChunkIterator',
+    'H5DataIO'
+]
+
 
 
 from ._due import due, BibTeX  # noqa: E402

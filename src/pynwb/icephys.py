@@ -11,6 +11,24 @@ from .base import TimeSeries, TimeSeriesReferenceVectorData
 from .core import NWBContainer
 from .device import Device
 
+__all__ = [
+    'IntracellularElectrode',
+    'PatchClampSeries',
+    'CurrentClampSeries',
+    'IZeroClampSeries',
+    'CurrentClampStimulusSeries',
+    'VoltageClampSeries',
+    'VoltageClampStimulusSeries',
+    'IntracellularElectrodesTable',
+    'IntracellularStimuliTable',
+    'IntracellularResponsesTable',
+    'IntracellularRecordingsTable',
+    'SimultaneousRecordingsTable',
+    'SequentialRecordingsTable',
+    'RepetitionsTable',
+    'ExperimentalConditionsTable'
+]
+
 
 def ensure_unit(self, name, current_unit, unit, nwb_version):
     """A helper to ensure correct unit used.
