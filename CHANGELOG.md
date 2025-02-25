@@ -1,6 +1,6 @@
 # PyNWB Changelog
 
-## PyNWB 3.0.0 (Upcoming)
+## PyNWB 3.0.0 (February 25, 2025)
 
 ### Breaking changes
 - The validation methods have been updated with multiple breaking changes. @stephprince [#1911](https://github.com/NeurodataWithoutBorders/pynwb/pull/1911)
