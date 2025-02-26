@@ -1,6 +1,6 @@
 # PyNWB Changelog
 
-## PyNWB 3.0.0 (February 25, 2025)
+## PyNWB 3.0.0 (February 26, 2025)
 
 ### Breaking changes
 - The validation methods have been updated with multiple breaking changes. @stephprince [#1911](https://github.com/NeurodataWithoutBorders/pynwb/pull/1911)
@@ -34,6 +34,7 @@
 ### Enhancements and minor changes
 - Added `__all__` to modules. @bendichter [#2021](https://github.com/NeurodataWithoutBorders/pynwb/pull/2021)
 - Added `pynwb.read_nwb` convenience method to simplify reading an NWBFile written with any backend @h-mayorquin [#1994](https://github.com/NeurodataWithoutBorders/pynwb/pull/1994)
+- Constrained `hdmf<5` to prevent future compatibility issues. [#2040](https://github.com/NeurodataWithoutBorders/pynwb/pull/2040)   
 
 ### Bug fixes
 - Made distance, orientation, and field_of_view optional in OpticalSeries to match schema @bendichter [#2023](https://github.com/NeurodataWithoutBorders/pynwb/pull/2023)
