@@ -1,4 +1,4 @@
-from hdmf.utils import docval, popargs
+from hdmf.utils import docval, popargs, AllowPositional
 
 from . import register_class, CORE_NAMESPACE
 from .core import NWBContainer
@@ -39,6 +39,7 @@ class Device(NWBContainer):
         {'name': 'serial_number', 'type': str,
          'doc': 'The serial number of the device.',
          'default': None},
+         allow_positional=AllowPositional.WARNING,
     )
     def __init__(self, **kwargs):
         description, manufacturer, model_number, model_name, serial_number = popargs(

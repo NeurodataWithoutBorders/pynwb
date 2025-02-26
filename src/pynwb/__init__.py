@@ -23,7 +23,7 @@ from hdmf.common import unload_type_config as hdmf_unload_type_config
 CORE_NAMESPACE = 'core'
 
 from .spec import NWBDatasetSpec, NWBGroupSpec, NWBNamespace  # noqa E402
-from .validate import validate  # noqa: F401, E402
+from .validation import validate  # noqa: F401, E402
 
 try:
     # see https://effigies.gitlab.io/posts/python-packaging-2023/
@@ -78,12 +78,6 @@ def __get_resources() -> dict:
     ret['cached_version_indicator'] = str(cached_version_indicator)
     return ret
 
-
-def _get_resources():
-    # LEGACY: Needed to support legacy implementation.
-    # TODO: Remove this in PyNWB 3.0.
-    warn("The function '_get_resources' is deprecated and will be removed in a future release.", DeprecationWarning)
-    return __get_resources()
 
 
 # a global type map
@@ -348,6 +342,27 @@ def get_class(**kwargs):
     """
     neurodata_type, namespace = getargs('neurodata_type', 'namespace', kwargs)
     return __TYPE_MAP.get_dt_container_cls(neurodata_type, namespace)
+
+
+@docval({'name': 'path', 'type': str, 'doc': 'Path to the NWB file which can be an HDF5 file or a Zarr store.'},
+        {"name": "method", "type": str, "doc": "the method to use when opening the file", 'default': None},
+        is_method=False)
+def _get_backend(path: str, method: str = None):
+    if method == "ros3":
+        return NWBHDF5IO  # TODO - add additional conditions for other streaming methods
+
+    try:
+        from hdmf_zarr import NWBZarrIO
+        backend_io_classes = [NWBHDF5IO, NWBZarrIO]
+    except ImportError:
+        backend_io_classes = [NWBHDF5IO]
+
+    backend_options = [b for b in backend_io_classes if b.can_read(path=path)]
+    if len(backend_options) == 0:
+        raise ValueError(f"Could not find an IO to read the file '{path}'. If you are trying to read "
+                         f"a Zarr file, make sure you have hdmf-zarr installed.")
+    else:
+        return backend_options[0]
 
 
 class NWBHDF5IO(_HDF5IO):
