@@ -31,7 +31,9 @@ import numpy as np
 from dateutil.tz import tzlocal
 
 from pynwb import NWBHDF5IO, NWBFile
-from pynwb.ecephys import LFP, ElectricalSeries
+
+from pynwb.ecephys import LFP, ElectricalSeries, SpikeEventSeries
+from pynwb.misc import DecompositionSeries
 
 #######################
 # Creating and Writing NWB files
@@ -77,10 +79,16 @@ nwbfile = NWBFile(
 #
 # The electrodes table references a required :py:class:`~pynwb.ecephys.ElectrodeGroup`, which is used to represent a
 # group of electrodes. Before creating an :py:class:`~pynwb.ecephys.ElectrodeGroup`, you must define a
-# :py:class:`~pynwb.device.Device` object using the method :py:meth:`.NWBFile.create_device`.
-
+# :py:class:`~pynwb.device.Device` object using the method :py:meth:`.NWBFile.create_device`. The fields
+# ``description``, ``manufacturer``, ``model_number``, ``model_name``, and ``serial_number`` are optional, but
+# recommended.
 device = nwbfile.create_device(
-    name="array", description="the best array", manufacturer="Probe Company 9000"
+    name="array",
+    description="A 12-channel array with 4 shanks and 3 channels per shank",
+    manufacturer="Array Technologies",
+    model_number="PRB_1_4_0480_123",
+    model_name="Neurovoxels 0.99",
+    serial_number="1234567890",
 )
 
 #######################
@@ -200,6 +208,7 @@ lfp_electrical_series = ElectricalSeries(
     name="ElectricalSeries",
     description="LFP data",
     data=lfp_data,
+    filtering='Low-pass filter at 300 Hz',
     electrodes=all_table_region,
     starting_time=0.0,
     rate=200.0,
@@ -229,8 +238,8 @@ lfp_electrical_series = ElectricalSeries(
 lfp = LFP(electrical_series=lfp_electrical_series)
 
 ####################
-# Unlike the raw data, which we put into the acquisition group of the :py:class:`~pynwb.file.NWBFile`,
-# LFP data is typically considered processed data because the raw data was filtered and downsampled to generate the LFP.
+# LFP refers to data that has been low-pass filtered, typically below 300 Hz. This data may also be downsampled. 
+# Because it is filtered and potentially resampled, it is categorized as processed data.
 #
 # Create a processing module named ``"ecephys"`` and add the :py:class:`~pynwb.ecephys.LFP` object to it.
 # This is analogous to how we can store the :py:class:`~pynwb.behavior.Position` object in a processing module
@@ -241,11 +250,72 @@ ecephys_module = nwbfile.create_processing_module(
 )
 ecephys_module.add(lfp)
 
+#######################
+# If your data is filtered for frequency ranges other than LFP — such as Gamma or Theta — you should store it in an
+# :py:class:`~pynwb.ecephys.ElectricalSeries` and encapsulate it within a 
+# :py:class:`~pynwb.ecephys.FilteredEphys` object.
+
+from pynwb.ecephys import FilteredEphys
+
+filtered_data = np.random.randn(50, 12)
+filtered_electrical_series = ElectricalSeries(
+    name="FilteredElectricalSeries",
+    description="Filtered data",
+    data=filtered_data,
+    filtering='Band-pass filtered between 4 and 8 Hz',
+    electrodes=all_table_region,
+    starting_time=0.0,
+    rate=200.0,
+)
+
+filtered_ephys = FilteredEphys(electrical_series=filtered_electrical_series)
+ecephys_module.add(filtered_ephys)
+
+################################
+# In some cases, you may want to further process the LFP data and decompose the signal into different frequency bands 
+# to use for other downstream analyses. You can store the processed data from these spectral analyses using a
+# :py:class:`~pynwb.misc.DecompositionSeries` object. This object allows you to include metadata about the frequency
+# bands and metric used (e.g., power, phase, amplitude), as well as link the decomposed data to the original 
+# :py:class:`~pynwb.base.TimeSeries` signal the data was derived from.
+
+#######################
+# .. note:: When adding data to :py:class:`~pynwb.misc.DecompositionSeries`, the ``data`` argument is assumed to be 
+#           3D where the first dimension is time, the second dimension is channels, and the third dimension is bands.
+
+
+bands = dict(theta=(4.0, 12.0), 
+             beta=(12.0, 30.0), 
+             gamma=(30.0, 80.0))  # in Hz
+phase_data = np.random.randn(50, 12, len(bands))  # 50 samples, 12 channels, 3 frequency bands  
+
+decomp_series = DecompositionSeries(
+    name="theta",
+    description="phase of bandpass filtered LFP data",
+    data=phase_data,
+    metric='phase',
+    rate=200.0,
+    source_channels=all_table_region,
+    source_timeseries=lfp_electrical_series,
+)
+
+for band_name, band_limits in bands.items():
+    decomp_series.add_band(
+        band_name=band_name,
+        band_limits=band_limits,
+    )
+
+ecephys_module.add(decomp_series)
+
+#######################
+# The frequency band information can also be viewed as a pandas DataFrame.
+
+decomp_series.bands.to_dataframe()
+
 ####################
 # .. _units_electrode:
 #
-# Spike Times
-# ^^^^^^^^^^^
+# Sorted spike times
+# ^^^^^^^^^^^^^^^^^^
 #
 # Spike times are stored in the :py:class:`~pynwb.misc.Units` table, which is a subclass of
 # :py:class:`~hdmf.common.table.DynamicTable`. Adding columns to the :py:class:`~pynwb.misc.Units` table is analogous
@@ -269,39 +339,72 @@ for n_units_per_shank in range(n_units):
 
 #######################
 # The :py:class:`~pynwb.misc.Units` table can also be converted to a pandas :py:class:`~pandas.DataFrame`.
+#
+# The :py:class:`~pynwb.misc.Units` table can contain simply the spike times of sorted units, or you can also include
+# individual and mean waveform information in some of the optional, predefined :py:class:`~pynwb.misc.Units` table
+# columns: ``waveform_mean``, ``waveform_sd``, or ``waveforms``.
 
 nwbfile.units.to_dataframe()
 
-#######################
-# Designating electrophysiology data
-# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+####################
+# Unsorted spike times
+# ^^^^^^^^^^^^^^^^^^^^
 #
-# As mentioned above, :py:class:`~pynwb.ecephys.ElectricalSeries` objects
-# are meant for storing specific types of extracellular recordings. In addition to this
-# :py:class:`~pynwb.base.TimeSeries` class, NWB provides some :ref:`modules_overview`
-# for designating the type of data you are storing. We will briefly discuss them here, and refer the reader to
-# :py:mod:`API documentation <pynwb.ecephys>` and :ref:`basics` for more details on
-# using these objects.
-#
-# For storing spike data, there are two options. Which one you choose depends on what data you have available.
-# If you need to store the complete, continuous raw voltage traces, you should store the traces with
-# :py:class:`~pynwb.ecephys.ElectricalSeries` objects as :ref:`acquisition <basic_timeseries>` data, and use
-# the :py:class:`~pynwb.ecephys.EventDetection` class for identifying the spike events in your raw traces.
-# If you do not want to store the raw voltage traces and only the waveform 'snippets' surrounding spike events,
-# you should use the :py:class:`~pynwb.ecephys.EventWaveform` class, which can store one or more
-# :py:class:`~pynwb.ecephys.SpikeEventSeries` objects.
-#
-# The results of spike sorting (or clustering) should be stored in the top-level :py:class:`~pynwb.misc.Units` table.
-# Note that it is not required to store spike waveforms in order to store spike events or mean waveforms--if you only
-# want to store the spike times of clustered units you can use only the Units table.
-#
-# For local field potential data, there are two options. Again, which one you choose depends on what data you
-# have available. With both options, you should store your traces with :py:class:`~pynwb.ecephys.ElectricalSeries`
-# objects. If you are storing unfiltered local field potential data, you should store
-# the :py:class:`~pynwb.ecephys.ElectricalSeries` objects in :py:class:`~pynwb.ecephys.LFP` data interface object(s).
-# If you have filtered LFP data, you should store the :py:class:`~pynwb.ecephys.ElectricalSeries` objects  in
-# :py:class:`~pynwb.ecephys.FilteredEphys` data interface object(s).
+# While the :py:class:`~pynwb.misc.Units` table is used to store spike times and waveform data for
+# spike-sorted, single-unit activity, you may also want to store spike times and waveform snippets of
+# unsorted spiking activity (e.g., multi-unit activity detected via threshold crossings during data acquisition).
+# This information can be stored using :py:class:`~pynwb.ecephys.SpikeEventSeries` objects. 
 
+spike_snippets = np.random.rand(40, 3, 30)  # 40 events, 3 channels, 30 samples per event
+shank0 = nwbfile.create_electrode_table_region(
+    region=[0, 1, 2],
+    description="shank0",
+)
+
+spike_events = SpikeEventSeries(
+    name='SpikeEvents_Shank0',
+    description="events detected with 100uV threshold",
+    data=spike_snippets,
+    timestamps=np.arange(40).astype(float),
+    electrodes=shank0,
+)
+nwbfile.add_acquisition(spike_events)
+
+############################################
+# If you need to store the complete, continuous raw voltage traces, along with unsorted spike times, you should store
+# the traces with :py:class:`~pynwb.ecephys.ElectricalSeries` objects as :ref:`acquisition <basic_timeseries>` data,
+# and use the :py:class:`~pynwb.ecephys.EventDetection` class to identify the spike events in your raw traces.
+
+from pynwb.ecephys import EventDetection
+
+event_detection = EventDetection(
+    name="threshold_events",
+    detection_method="thresholding, 1.5 * std",
+    source_electricalseries=raw_electrical_series,
+    source_idx=[1000, 2000, 3000],
+    times=[.033, .066, .099],
+)
+
+ecephys_module.add(event_detection)
+
+######################################
+# If you do not want to store the raw voltage traces and only the waveform 'snippets' surrounding spike events,
+# you should store the snippets with :py:class:`~pynwb.ecephys.SpikeEventSeries` objects.
+#
+# NWB also provides a way to store features of spikes, such as principal components, using the
+# :py:class:`~pynwb.ecephys.FeatureExtraction` class.
+
+from pynwb.ecephys import FeatureExtraction
+
+feature_extraction = FeatureExtraction(
+    name="PCA_features",
+    electrodes=all_table_region,
+    description=["PC1", "PC2", "PC3", "PC4"],
+    times=[.033, .066, .099],
+    features=np.random.rand(3, 12, 4),  # time, channel, feature
+)
+
+ecephys_module.add(feature_extraction)
 
 ####################
 # .. _ecephys_writing:

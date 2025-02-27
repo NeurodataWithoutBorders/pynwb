@@ -1,3 +1,5 @@
+import numpy as np
+
 from hdmf.common import DynamicTableRegion
 from pynwb import NWBFile
 
@@ -9,7 +11,6 @@ from pynwb.ecephys import (
     Clustering,
     ClusterWaveforms,
     SpikeEventSeries,
-    EventWaveform,
     EventDetection,
     FeatureExtraction,
 )
@@ -26,7 +27,9 @@ class TestElectrodeGroupIO(NWBH5IOMixin, TestCase):
         eg = ElectrodeGroup(name='elec1',
                             description='a test ElectrodeGroup',
                             location='a nonexistent place',
-                            device=self.dev1)
+                            device=self.dev1,
+                            position=np.array((1, 2, 3),
+                                              dtype=np.dtype([('x', float), ('y', float), ('z', float)])))
         return eg
 
     def addContainer(self, nwbfile):
@@ -169,22 +172,34 @@ class TestClusteringIO(AcquisitionH5IOMixin, TestCase):
 
     def setUpContainer(self):
         """ Return a test Clustering to read/write """
-        with self.assertWarnsWith(DeprecationWarning, 'use pynwb.misc.Units or NWBFile.units instead'):
-            return Clustering("A fake Clustering interface",
-                              [0, 1, 2, 0, 1, 2], [100., 101., 102.], [float(i) for i in range(10, 61, 10)])
+        # raise error on write
+        error_msg = "The Clustering neurodata type is deprecated. Use pynwb.misc.Units or NWBFile.units instead"
+        kwargs = dict(description="A fake Clustering interface",
+                      num=[0, 1, 2, 0, 1, 2], 
+                      peak_over_rms=[100., 101., 102.], 
+                      times=[float(i) for i in range(10, 61, 10)])
+        
+        # create object with deprecated argument
+        with self.assertRaisesWith(ValueError, error_msg):
+            Clustering(**kwargs)
+
+        # create object in construct mode, modeling the behavior of the ObjectMapper on read
+        # no warning should be raised
+        obj = Clustering.__new__(Clustering, in_construct_mode=True)
+        obj.__init__(**kwargs)
+        
+        return obj
 
     def roundtripContainer(self, cache_spec=False):
-        # catch the DeprecationWarning raised when reading the Clustering object from file
-        with self.assertWarnsWith(DeprecationWarning, 'use pynwb.misc.Units or NWBFile.units instead'):
-            return super().roundtripContainer(cache_spec)
+        # no warning or error should be raised when reading the Clustering object from file
+        return super().roundtripContainer(cache_spec)
 
     def roundtripExportContainer(self, cache_spec=False):
-        # catch the DeprecationWarning raised when reading the Clustering object from file
-        with self.assertWarnsWith(DeprecationWarning, 'use pynwb.misc.Units or NWBFile.units instead'):
-            return super().roundtripExportContainer(cache_spec)
+        # no warning or error should be raised when reading the Clustering object from file
+        return super().roundtripExportContainer(cache_spec)
 
 
-class EventWaveformConstructor(NWBH5IOFlexMixin, TestCase):
+class SpikeEventSeriesConstructor(NWBH5IOFlexMixin, TestCase):
 
     def getContainerType(self):
         return "SpikeEventSeries"
@@ -201,18 +216,16 @@ class EventWaveformConstructor(NWBH5IOFlexMixin, TestCase):
                                     description='the first and third electrodes',
                                     table=table)
         ses = SpikeEventSeries(
-            name='test_sES',
+            name='SpikeEventSeries',
             data=((1, 1), (2, 2), (3, 3)),
             timestamps=[0., 1., 2.],
             electrodes=region
         )
 
-        ew = EventWaveform()
-        self.nwbfile.add_acquisition(ew)
-        ew.add_spike_event_series(ses)
+        self.nwbfile.add_acquisition(ses)
 
     def getContainer(self, nwbfile: NWBFile):
-        return nwbfile.acquisition['EventWaveform']
+        return nwbfile.acquisition['SpikeEventSeries']
 
 
 class ClusterWaveformsConstructor(AcquisitionH5IOMixin, TestCase):
@@ -222,12 +235,26 @@ class ClusterWaveformsConstructor(AcquisitionH5IOMixin, TestCase):
         times = [1.3, 2.3]
         num = [3, 4]
         peak_over_rms = [5.3, 6.3]
-        with self.assertWarnsWith(DeprecationWarning, 'use pynwb.misc.Units or NWBFile.units instead'):
-            self.clustering = Clustering('description', num, peak_over_rms, times)
+
+        # raise error on write
+        clust = Clustering.__new__(Clustering, in_construct_mode=True)
+        clust.__init__('description', num, peak_over_rms, times)
+        self.clustering = clust
+
         means = [[7.3, 7.3]]
         stdevs = [[8.3, 8.3]]
-        with self.assertWarnsWith(DeprecationWarning, 'use pynwb.misc.Units or NWBFile.units instead'):
+        msg = "The ClusterWaveforms neurodata type is deprecated. Use pynwb.misc.Units or NWBFile.units instead"
+        with self.assertRaisesWith(ValueError, msg):
             cw = ClusterWaveforms(self.clustering, 'filtering', means, stdevs)
+
+        # create object in construct mode, modeling the behavior of the ObjectMapper on read 
+        # no warning should be raised
+        cw = ClusterWaveforms.__new__(ClusterWaveforms,
+                                        container_source=None,
+                                        parent=None,
+                                        in_construct_mode=True)
+        cw.__init__(self.clustering, 'filtering', means, stdevs)
+
         return cw
 
     def addContainer(self, nwbfile):
@@ -236,14 +263,12 @@ class ClusterWaveformsConstructor(AcquisitionH5IOMixin, TestCase):
         nwbfile.add_acquisition(self.container)
 
     def roundtripContainer(self, cache_spec=False):
-        # catch the DeprecationWarning raised when reading the Clustering object from file
-        with self.assertWarnsWith(DeprecationWarning, 'use pynwb.misc.Units or NWBFile.units instead'):
-            return super().roundtripContainer(cache_spec)
+        # no warning or error should be raised when reading the Clustering object from file
+        return super().roundtripContainer(cache_spec)
 
     def roundtripExportContainer(self, cache_spec=False):
-        # catch the DeprecationWarning raised when reading the Clustering object from file
-        with self.assertWarnsWith(DeprecationWarning, 'use pynwb.misc.Units or NWBFile.units instead'):
-            return super().roundtripExportContainer(cache_spec)
+        # no warning or error should be raised when reading the Clustering object from file
+        return super().roundtripExportContainer(cache_spec)
 
 
 class FeatureExtractionConstructor(NWBH5IOFlexMixin, TestCase):

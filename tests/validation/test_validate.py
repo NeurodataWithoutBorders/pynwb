@@ -1,5 +1,6 @@
 import subprocess
 import re
+import os
 import sys
 from unittest.mock import patch
 from io import StringIO
@@ -23,7 +24,7 @@ from pynwb import validate, NWBHDF5IO
 # combine the individual coverage reports into one .coverage file.
 def run_coverage(extra_args: list[str]):
     return subprocess.run(
-        [sys.executable, "-m", "coverage", "run", "-p", "-m", "pynwb.validate"]
+        [sys.executable, "-m", "coverage", "run", "-p", "-m", "pynwb.validation_cli"]
         + extra_args,
         capture_output=True
     )
@@ -54,13 +55,15 @@ class TestValidateCLI(TestCase):
         """Test that validating a file with no cached spec against a specified, unknown namespace fails."""
         result = run_coverage(["tests/back_compat/1.0.2_nwbfile.nwb", "--ns", "notfound"])
 
-        stderr_regex = re.compile(
+        stderr_regex_1 = re.compile(
             r"The file tests/back_compat/1\.0\.2_nwbfile\.nwb has no cached namespace information\. "
-            r"Falling back to PyNWB namespace information\.\s*"
+            r"Falling back to PyNWB namespace information\.\s*")
+        stderr_regex_2 = re.compile(
             r"The namespace 'notfound' could not be found in PyNWB namespace information as only "
-            r"\['core'\] is present\.\s*"
-        )
-        self.assertRegex(result.stderr.decode('utf-8'), stderr_regex)
+            r"\['core'\] is present\.\s*")
+        
+        self.assertRegex(result.stderr.decode('utf-8'), stderr_regex_1)
+        self.assertRegex(result.stderr.decode('utf-8'), stderr_regex_2)
 
         self.assertEqual(result.stdout.decode('utf-8'), '')
 
@@ -174,6 +177,22 @@ class TestValidateCLI(TestCase):
         stdout_regex = re.compile(r"ndx-testextension\s*")
         self.assertRegex(result.stdout.decode('utf-8'), stdout_regex)
 
+    def test_validate_file_json_output(self):
+        """Test that validating a file with the json flag outputs a json file."""
+        json_path = "test_validation.json"
+        run_coverage(["tests/back_compat/1.0.2_str_experimenter.nwb", "--no-cached-namespace", 
+                      "--json-output-path", json_path])
+        self.assertTrue(os.path.exists(json_path))
+        os.remove(json_path)
+
+    def test_validation_entry_point(self):
+        """Test that using the validation entry point successfully executes the validate CLI."""
+        json_path = "test_validation_entry_point.json"
+        subprocess.run(["pynwb-validate", "tests/back_compat/1.0.2_str_experimenter.nwb", 
+                        "--json-output-path", json_path])
+        self.assertTrue(os.path.exists(json_path))
+        os.remove(json_path)
+
 
 class TestValidateFunction(TestCase):
 
@@ -194,41 +213,34 @@ class TestValidateFunction(TestCase):
     def test_validate_io_no_cache(self):
         """Test that validating a file with no cached spec against the core namespace succeeds."""
         with self.get_io('tests/back_compat/1.0.2_nwbfile.nwb') as io:
-            errors = validate(io)
+            errors = validate(io=io)
             self.assertEqual(errors, [])
 
     def test_validate_io_no_cache_bad_ns(self):
         """Test that validating a file with no cached spec against a specified, unknown namespace fails."""
-        with self.get_io('tests/back_compat/1.0.2_nwbfile.nwb') as io:
-            with self.assertRaisesWith(KeyError, "\"'notfound' not a namespace\""):
-                validate(io, 'notfound')
+        expected_error = ("The namespace 'notfound' could not be found in PyNWB namespace information as only "
+                          "['core'] is present.")
+        with self.assertRaisesWith(ValueError, expected_error):
+            with self.get_io('tests/back_compat/1.0.2_nwbfile.nwb') as io:
+                validate(io=io, namespace='notfound')
 
     def test_validate_io_cached(self):
         """Test that validating a file with cached spec against its cached namespace succeeds."""
         with self.get_io('tests/back_compat/1.1.2_nwbfile.nwb') as io:
-            errors = validate(io)
+            errors = validate(io=io)
             self.assertEqual(errors, [])
 
     def test_validate_io_cached_extension(self):
         """Test that validating a file with cached spec against its cached namespaces succeeds."""
         with self.get_io('tests/back_compat/2.1.0_nwbfile_with_extension.nwb') as io:
-            errors = validate(io)
+            errors = validate(io=io)
             self.assertEqual(errors, [])
 
     def test_validate_io_cached_extension_pass_ns(self):
         """Test that validating a file with cached extension spec against the extension namespace succeeds."""
         with self.get_io('tests/back_compat/2.1.0_nwbfile_with_extension.nwb') as io:
-            errors = validate(io, 'ndx-testextension')
+            errors = validate(io=io, namespace='ndx-testextension')
             self.assertEqual(errors, [])
-
-    def test_validate_io_cached_core_with_io(self):
-        """
-        For back-compatability, test that validating a file with cached extension spec against the core
-        namespace succeeds when using the `io` + `namespace` keywords.
-        """
-        with self.get_io(path='tests/back_compat/2.1.0_nwbfile_with_extension.nwb') as io:
-            results = validate(io=io, namespace="core")
-            self.assertEqual(results, [])
 
     def test_validate_file_cached_extension(self):
         """
@@ -236,60 +248,106 @@ class TestValidateFunction(TestCase):
         namespace raises an error with the new CLI-mimicing paths keyword.
         """
         nwbfile_path = "tests/back_compat/2.1.0_nwbfile_with_extension.nwb"
-        with patch("sys.stderr", new=StringIO()) as fake_err:
-            with patch("sys.stdout", new=StringIO()) as fake_out:
-                results, status = validate(paths=[nwbfile_path], namespace="core", verbose=True)
-                self.assertEqual(results, [])
-                self.assertEqual(status, 1)
-                self.assertEqual(
-                    fake_err.getvalue(),
-                    (
-                        "The namespace 'core' is included by the namespace 'ndx-testextension'. "
-                        "Please validate against that namespace instead.\n"
-                    )
-                )
-                self.assertEqual(fake_out.getvalue(), "")
+        expected_error = ("The namespace 'core' is included by the namespace 'ndx-testextension'. "
+                          "Please validate against that namespace instead.")
+        with self.assertRaisesWith(ValueError, expected_error):
+            validate(path=nwbfile_path, namespace="core", verbose=True)
 
     def test_validate_file_cached_core(self):
         """
         Test that validating a file with cached core spec with verbose=False.
         """
         nwbfile_path = "tests/back_compat/1.1.2_nwbfile.nwb"
-        with patch("sys.stderr", new=StringIO()) as fake_err:
-            with patch("sys.stdout", new=StringIO()) as fake_out:
-                results, status = validate(paths=[nwbfile_path], namespace="core")
-                self.assertEqual(results, [])
-                self.assertEqual(status, 0)
-                self.assertEqual(fake_err.getvalue(), "")
-                self.assertEqual(fake_out.getvalue(), "")
+        results = validate(path=nwbfile_path, namespace="core")
+        self.assertEqual(results, [])
 
     def test_validate_file_cached_no_cache_bad_ns(self):
         """
         Test that validating a file with no cached namespace, a namespace that is not found, and verbose=False.
         """
         nwbfile_path = "tests/back_compat/1.0.2_nwbfile.nwb"
-        with patch("sys.stderr", new=StringIO()) as fake_err:
-            with patch("sys.stdout", new=StringIO()) as fake_out:
-                results, status = validate(paths=[nwbfile_path], namespace="notfound")
-                self.assertEqual(results, [])
-                self.assertEqual(status, 1)
-                stderr_regex = (
-                    r"The namespace 'notfound' could not be found in PyNWB namespace information as only "
-                    r"\['core'\] is present.\n"
-                )
-                self.assertRegex(fake_err.getvalue(), stderr_regex)
-                self.assertEqual(fake_out.getvalue(), "")
-
-    def test_validate_io_cached_bad_ns(self):
-        """Test that validating a file with cached spec against a specified, unknown namespace fails."""
-        with self.get_io('tests/back_compat/1.1.2_nwbfile.nwb') as io:
-            with self.assertRaisesWith(KeyError, "\"'notfound' not a namespace\""):
-                validate(io, 'notfound')
+        expected_error = ("The namespace 'notfound' could not be found in PyNWB namespace information as only "
+                          "['core'] is present.")
+        with self.assertRaisesWith(ValueError, expected_error):
+            validate(path=nwbfile_path, namespace="notfound")
 
     def test_validate_io_cached_hdmf_common(self):
         """Test that validating a file with cached spec against the hdmf-common namespace fails."""
-        with self.get_io('tests/back_compat/1.1.2_nwbfile.nwb') as io:
-            # TODO this error should not be different from the error when using the validate script above
-            msg = "builder must have data type defined with attribute 'data_type'"
-            with self.assertRaisesWith(ValueError, msg):
-                validate(io, 'hdmf-common')
+        expected_error = ("The namespace 'hdmf-common' is included by the namespace 'core'. "
+                          "Please validate against that namespace instead.")
+        with self.assertRaisesWith(ValueError, expected_error):
+            with self.get_io(path='tests/back_compat/1.1.2_nwbfile.nwb') as io:
+                validate(io=io, namespace="hdmf-common", verbose=True)
+
+    def test_validate_io_and_path_same(self):
+        """Test that validating a file with an io object and a path return the same results."""
+        tests = [('tests/back_compat/1.1.2_nwbfile.nwb', None),
+                 ('tests/back_compat/1.1.2_nwbfile.nwb', 'core'),
+                 ('tests/back_compat/2.1.0_nwbfile_with_extension.nwb', None),
+                 ('tests/back_compat/2.1.0_nwbfile_with_extension.nwb', 'ndx-testextension'),]
+        
+        tests_with_error = [('tests/back_compat/1.1.2_nwbfile.nwb', 'notfound'),
+                            ('tests/back_compat/1.1.2_nwbfile.nwb', 'hdmf-common'),
+                            ('tests/back_compat/2.1.0_nwbfile_with_extension.nwb', 'core'),]
+        
+        tests_with_warning = [('tests/back_compat/1.0.2_nwbfile.nwb', None),]
+
+        # paths that cause no errors
+        for path, ns in tests:
+            with patch("sys.stdout", new=StringIO()) as fake_out:
+                with self.get_io(path=path) as io:
+                    results_io = validate(io=io, namespace=ns, verbose=True)
+                out_io = fake_out.getvalue()        
+
+            with patch("sys.stdout", new=StringIO()) as fake_out:
+                results_path = validate(path=path, namespace=ns, verbose=True)
+                out_path = fake_out.getvalue()
+
+            # remove path from error messages since it will not be included in io outputs
+            out_path = out_path.replace(f'{path} ', '')
+            self.assertEqual(results_io, results_path)
+            self.assertEqual(out_io, out_path)
+
+        #paths that return warnings
+        for path, ns in tests_with_warning:
+            with self.assertWarns(UserWarning) as w_io:
+                with self.get_io(path=path) as io:
+                    results_io = validate(io=io, namespace=ns, verbose=True)
+
+            with self.assertWarns(UserWarning) as w_path:
+                results_path = validate(path=path, namespace=ns, verbose=True)
+
+            # remove path from error messages since it will not be included in io outputs
+            out_path = str(w_path.warning).replace(f'{path} ', '')
+            self.assertEqual(str(w_io.warning), out_path)
+
+        # paths that return errors
+        for path, ns in tests_with_error:
+            with self.assertRaises(ValueError) as e_io:
+                with self.get_io(path=path) as io:
+                    results_io = validate(io=io, namespace=ns, verbose=True)
+            
+            with self.assertRaises(ValueError) as e_path:
+                results_path = validate(path=path, namespace=ns, verbose=True)
+
+            # remove path from error messages since it will not be included in io outputs
+            self.assertEqual(str(e_io.exception), str(e_path.exception))
+
+    def test_validate_paths_deprecation(self):
+        """Test paths argument deprecation warning."""
+
+        # test deprecation warning for 'paths' argument
+        msg = ("The 'paths' argument will be deprecated in PyNWB 4.0 "
+            "Use 'path' instead. To migrate, call this function separately for "
+            "each path instead of passing a list.")
+        with self.assertWarnsWith(DeprecationWarning, msg):
+            results = validate(paths=['tests/back_compat/1.1.2_nwbfile.nwb',
+                                      'tests/back_compat/2.1.0_nwbfile_with_extension.nwb'],)
+        self.assertEqual(results, [])
+
+        # test specifying both 'paths' and 'path' arguments
+        expected_error = "Both 'paths' and 'path' were specified. Please choose only one."
+        with self.assertWarnsWith(DeprecationWarning, msg):
+            with self.assertRaisesWith(ValueError, expected_error):
+                validate(paths=['tests/back_compat/1.0.2_nwbfile.nwb'],
+                         path='tests/back_compat/1.0.2_nwbfile.nwb')

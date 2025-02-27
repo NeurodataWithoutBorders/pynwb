@@ -18,6 +18,13 @@ from pynwb.testing import remove_test_file, TestCase
 from pynwb.testing.mock.file import mock_NWBFile
 
 
+import unittest
+try:
+    import fsspec # noqa f401
+    HAVE_FSSPEC = True 
+except ImportError:
+    HAVE_FSSPEC = False
+
 class TestHDF5Writer(TestCase):
 
     _required_tests = ('test_nwbio', 'test_write_clobber', 'test_write_cache_spec', 'test_write_no_cache_spec')
@@ -289,7 +296,7 @@ class TestAppend(TestCase):
             np.testing.assert_equal(nwb.acquisition['timeseries2'].data[:], ts2.data)
             self.assertIs(nwb.processing['test_proc_mod']['LFP'].electrical_series['test_es'].electrodes,
                           nwb.acquisition['timeseries2'].electrodes)
-            errors = validate(io)
+            errors = validate(io=io)
             self.assertEqual(len(errors), 0, errors)
 
     def test_electrode_id_uniqueness(self):
@@ -313,7 +320,7 @@ class TestH5DataIO(TestCase):
         self.nwbfile = NWBFile(session_description='a',
                                identifier='b',
                                session_start_time=datetime(1970, 1, 1, 12, tzinfo=tzutc()))
-        self.path = "test_pynwb_io_hdf5_h5dataIO.h5"
+        self.path = "test_pynwb_io_hdf5_h5dataIO.nwb"
 
     def tearDown(self):
         remove_test_file(self.path)
@@ -428,7 +435,7 @@ class TestNWBHDF5IO(TestCase):
         self.nwbfile = NWBFile(session_description='a test NWB File',
                                identifier='TEST123',
                                session_start_time=datetime(1970, 1, 1, 12, tzinfo=tzutc()))
-        self.path = "test_pynwb_io_nwbhdf5.h5"
+        self.path = "test_pynwb_io_nwbhdf5.nwb"
 
     def tearDown(self):
         remove_test_file(self.path)
@@ -532,6 +539,23 @@ class TestNWBHDF5IO(TestCase):
             read_file = io.read()
             self.assertContainerEqual(read_file, self.nwbfile)
 
+    def test_warn_for_nwb_extension(self):
+        """Creating a file with an extension other than .nwb should raise a warning"""
+        pathlib_path = Path(self.path).with_suffix('.h5')
+
+        with self.assertWarns(UserWarning):
+            with NWBHDF5IO(pathlib_path, 'w') as io:
+                io.write(self.nwbfile)
+        with self.assertWarns(UserWarning):
+            with NWBHDF5IO(str(pathlib_path), 'w') as io:
+                io.write(self.nwbfile)
+
+        # should not warn on read or append
+        with NWBHDF5IO(str(pathlib_path), 'r') as io:
+            io.read()
+        with NWBHDF5IO(str(pathlib_path), 'a') as io:
+            io.read()
+
     def test_can_read_current_nwb_file(self):
         with NWBHDF5IO(self.path, 'w') as io:
             io.write(self.nwbfile)
@@ -569,3 +593,38 @@ class TestNWBHDF5IO(TestCase):
     def test_can_read_file_invalid_hdf5_file(self):
         # current file is not an HDF5 file
         self.assertFalse(NWBHDF5IO.can_read(__file__))
+
+    def test_read_nwb_method_path(self):
+        
+        # write the example file
+        with NWBHDF5IO(self.path, 'w') as io:
+            io.write(self.nwbfile)
+            
+        # test that the read_nwb method works
+        read_nwbfile = NWBHDF5IO.read_nwb(path=self.path)
+        self.assertContainerEqual(read_nwbfile, self.nwbfile)
+
+        read_nwbfile.get_read_io().close()
+        
+    def test_read_nwb_method_file(self):
+        
+        # write the example file
+        with NWBHDF5IO(self.path, 'w') as io:
+            io.write(self.nwbfile)
+            
+        import h5py
+
+        file = h5py.File(self.path, 'r')
+        
+        read_nwbfile = NWBHDF5IO.read_nwb(file=file)
+        self.assertContainerEqual(read_nwbfile, self.nwbfile)
+
+        read_nwbfile.get_read_io().close()
+    
+    @unittest.skipIf(not HAVE_FSSPEC, "fsspec library not available")
+    def test_read_nwb_method_s3_path(self):
+        s3_test_path = "https://dandiarchive.s3.amazonaws.com/blobs/11e/c89/11ec8933-1456-4942-922b-94e5878bb991"
+        read_nwbfile = NWBHDF5IO.read_nwb(path=s3_test_path)
+        assert read_nwbfile.identifier == "3f77c586-6139-4777-a05d-f603e90b1330"
+    
+        assert read_nwbfile.subject.subject_id == "1"

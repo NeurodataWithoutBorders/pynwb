@@ -39,26 +39,31 @@ class NWBFileICEphys(TestCase):
     def setUp(self):
         self.icephys_electrode = GetElectrode()
 
-    def test_sweep_table_depractation_warn(self):
-        msg = ("Use of SweepTable is deprecated. Use the IntracellularRecordingsTable "
-               "instead. See also the  NWBFile.add_intracellular_recordings function.")
-        with self.assertWarnsWith(DeprecationWarning, msg):
-            _ = NWBFile(
-                session_description='NWBFile icephys test',
-                identifier='NWB123',  # required
-                session_start_time=datetime(2017, 4, 3, 11, tzinfo=tzlocal()),
-                ic_electrodes=[self.icephys_electrode, ],
-                sweep_table=SweepTable())
+    def test_sweep_table_deprecation_warn(self):
+        msg = ("SweepTable is deprecated. Use the IntracellularRecordingsTable instead. "
+               "See also the NWBFile.add_intracellular_recordings function.")
+        
+        with self.assertRaisesWith(ValueError, msg):
+            SweepTable()
 
-    def test_ic_electrodes_parameter_deprecation(self):
-        # Make sure we warn when using the ic_electrodes parameter on NWBFile
-        msg = "Use of the ic_electrodes parameter is deprecated. Use the icephys_electrodes parameter instead"
-        with self.assertWarnsWith(DeprecationWarning, msg):
-            _ = NWBFile(
-                session_description='NWBFile icephys test',
+        # create object in construct mode, modeling the behavior of the ObjectMapper on read
+        # should not raise error or warning
+        sweepT = SweepTable.__new__(SweepTable, in_construct_mode=True)
+        sweepT.__init__()
+        
+        kwargs = dict(session_description='NWBFile icephys test',
                 identifier='NWB123',  # required
                 session_start_time=datetime(2017, 4, 3, 11, tzinfo=tzlocal()),
-                ic_electrodes=[self.icephys_electrode, ])
+                icephys_electrodes=[self.icephys_electrode, ],
+                sweep_table=sweepT)
+        
+        with self.assertRaisesWith(ValueError, msg):
+            NWBFile(**kwargs)
+
+        # create object in construct mode, modeling the behavior of the ObjectMapper on read
+        # should not warn or error
+        nwbfile = NWBFile.__new__(NWBFile, in_construct_mode=True)
+        nwbfile.__init__(**kwargs)
 
     def test_icephys_electrodes_parameter(self):
         nwbfile = NWBFile(
@@ -68,68 +73,33 @@ class NWBFileICEphys(TestCase):
                 icephys_electrodes=[self.icephys_electrode, ])
         self.assertEqual(nwbfile.get_icephys_electrode('test_iS'), self.icephys_electrode)
 
-    def test_add_ic_electrode_deprecation(self):
-        # Make sure we warn when using the add_ic_electrodes parameter on NWBFile
-        nwbfile = NWBFile(
-                session_description='NWBFile icephys test',
-                identifier='NWB123',  # required
-                session_start_time=datetime(2017, 4, 3, 11, tzinfo=tzlocal()))
-
-        msg = "NWBFile.add_ic_electrode has been replaced by NWBFile.add_icephys_electrode."
-        with self.assertWarnsWith(DeprecationWarning, msg):
-            nwbfile.add_ic_electrode(self.icephys_electrode)
-
     def test_ic_electrodes_attribute_deprecation(self):
         nwbfile = NWBFile(
             session_description='NWBFile icephys test',
             identifier='NWB123',  # required
             session_start_time=datetime(2017, 4, 3, 11, tzinfo=tzlocal()),
             icephys_electrodes=[self.icephys_electrode, ])
-        # make sure NWBFile.ic_electrodes property warns
-
-        msg = "NWBFile.ic_electrodes has been replaced by NWBFile.icephys_electrodes."
-        with self.assertWarnsWith(DeprecationWarning, msg):
-            nwbfile.ic_electrodes
 
         # make sure NWBFile.get_ic_electrode warns
-        msg = "NWBFile.get_ic_electrode has been replaced by NWBFile.get_icephys_electrode."
-        with self.assertWarnsWith(DeprecationWarning, msg):
+        msg = "'NWBFile' object has no attribute 'get_ic_electrode'"
+        with self.assertRaisesWith(AttributeError, msg):
             nwbfile.get_ic_electrode(self.icephys_electrode.name)
-
-    def test_create_ic_electrode_deprecation(self):
-        nwbfile = NWBFile(
-            session_description='NWBFile icephys test',
-            identifier='NWB123',  # required
-            session_start_time=datetime(2017, 4, 3, 11, tzinfo=tzlocal()))
-        device = Device(name='device_name')
-        msg = "NWBFile.create_ic_electrode has been replaced by NWBFile.create_icephys_electrode."
-        with self.assertWarnsWith(DeprecationWarning, msg):
-            nwbfile.create_ic_electrode(
-                name='test_iS',
-                device=device,
-                description='description',
-                slice='slice',
-                seal='seal',
-                location='location',
-                resistance='resistance',
-                filtering='filtering',
-                initial_access_resistance='initial_access_resistance')
 
 
 class IntracellularElectrodeConstructor(TestCase):
 
     def test_constructor(self):
         device = Device(name='device_name')
-        elec = IntracellularElectrode('test_iS',
-                                      device,
-                                      'description',
-                                      'slice',
-                                      'seal',
-                                      'location',
-                                      'resistance',
-                                      'filtering',
-                                      'initial_access_resistance',
-                                      'this_cell')
+        elec = IntracellularElectrode(name='test_iS',
+                                      device=device,
+                                      description='description',
+                                      slice='slice',
+                                      seal='seal',
+                                      location='location',
+                                      resistance='resistance',
+                                      filtering='filtering',
+                                      initial_access_resistance='initial_access_resistance',
+                                      cell_id='this_cell')
         self.assertEqual(elec.name, 'test_iS')
         self.assertEqual(elec.device, device)
         self.assertEqual(elec.description, 'description')
@@ -147,18 +117,37 @@ class PatchClampSeriesConstructor(TestCase):
     def test_default(self):
         electrode_name = GetElectrode()
 
-        pCS = PatchClampSeries('test_pCS', list(), 'unit',
-                               electrode_name, 1.0, timestamps=list())
+        pCS = PatchClampSeries(name='test_pCS', 
+                               data=list(), 
+                               unit='unit',
+                               electrode=electrode_name, 
+                               gain=1.0, 
+                               timestamps=list())
         self.assertEqual(pCS.name, 'test_pCS')
         self.assertEqual(pCS.unit, 'unit')
         self.assertEqual(pCS.electrode, electrode_name)
         self.assertEqual(pCS.gain, 1.0)
 
+    def test_gain_optional(self):
+        electrode_name = GetElectrode()
+
+        pCS = PatchClampSeries(name='test_pCS',
+                               data=list(),
+                               unit='unit',
+                               electrode=electrode_name,
+                               timestamps=list())
+        self.assertIsNone(pCS.gain)
+
     def test_sweepNumber_valid(self):
         electrode_name = GetElectrode()
 
-        pCS = PatchClampSeries('test_pCS', list(), 'unit',
-                               electrode_name, 1.0, timestamps=list(), sweep_number=4711)
+        pCS = PatchClampSeries(name='test_pCS', 
+                               data=list(), 
+                               unit='unit',
+                               electrode=electrode_name, 
+                               gain=1.0, 
+                               timestamps=list(), 
+                               sweep_number=4711)
         self.assertEqual(pCS.name, 'test_pCS')
         self.assertEqual(pCS.unit, 'unit')
         self.assertEqual(pCS.electrode, electrode_name)
@@ -168,8 +157,13 @@ class PatchClampSeriesConstructor(TestCase):
     def test_sweepNumber_valid_np(self):
         electrode_name = GetElectrode()
 
-        pCS = PatchClampSeries('test_pCS', list(), 'unit',
-                               electrode_name, 1.0, timestamps=list(), sweep_number=1)
+        pCS = PatchClampSeries(name='test_pCS', 
+                               data=list(), 
+                               unit='unit',
+                               electrode=electrode_name, 
+                               gain=1.0, 
+                               timestamps=list(), 
+                               sweep_number=1)
         self.assertEqual(pCS.name, 'test_pCS')
         self.assertEqual(pCS.unit, 'unit')
         self.assertEqual(pCS.electrode, electrode_name)
@@ -179,8 +173,13 @@ class PatchClampSeriesConstructor(TestCase):
     def test_sweepNumber_large_and_valid(self):
         electrode_name = GetElectrode()
 
-        pCS = PatchClampSeries('test_pCS', list(), 'unit',
-                               electrode_name, 1.0, timestamps=list(), sweep_number=np.uint64(2**63-1))
+        pCS = PatchClampSeries(name='test_pCS', 
+                               data=list(), 
+                               unit='unit',
+                               electrode=electrode_name, 
+                               gain=1.0, 
+                               timestamps=list(), 
+                               sweep_number=np.uint64(2**63-1))
         self.assertEqual(pCS.name, 'test_pCS')
         self.assertEqual(pCS.unit, 'unit')
         self.assertEqual(pCS.electrode, electrode_name)
@@ -191,22 +190,37 @@ class PatchClampSeriesConstructor(TestCase):
         electrode_name = GetElectrode()
 
         with self.assertRaises(ValueError):
-            PatchClampSeries('test_pCS', list(), 'unit',
-                             electrode_name, 1.0, timestamps=list(), sweep_number=-1)
+            PatchClampSeries(name='test_pCS', 
+                             data=list(), 
+                             unit='unit',
+                             electrode=electrode_name, 
+                             gain=1.0, 
+                             timestamps=list(), 
+                             sweep_number=-1)
 
     def test_sweepNumber_throws_with_NaN(self):
         electrode_name = GetElectrode()
 
         with self.assertRaises(TypeError):
-            PatchClampSeries('test_pCS', list(), 'unit',
-                             electrode_name, 1.0, timestamps=list(), sweep_number=float('nan'))
+            PatchClampSeries(name='test_pCS', 
+                             data=list(), 
+                             unit='unit',
+                             electrodes=electrode_name, 
+                             gain=1.0, 
+                             timestamps=list(), 
+                             sweep_number=float('nan'))
 
     def test_sweepNumber_throws_with_Float(self):
         electrode_name = GetElectrode()
 
         with self.assertRaises(TypeError):
-            PatchClampSeries('test_pCS', list(), 'unit',
-                             electrode_name, 1.0, timestamps=list(), sweep_number=1.5)
+            PatchClampSeries(name='test_pCS', 
+                             data=list(), 
+                             unit='unit',
+                             electrodes=electrode_name, 
+                             gain=1.0, 
+                             timestamps=list(),
+                             sweep_number=1.5)
 
     def test_data_shape(self):
         electrode_name = GetElectrode()
@@ -227,7 +241,14 @@ class CurrentClampSeriesConstructor(TestCase):
     def test_init(self):
         electrode_name = GetElectrode()
 
-        cCS = CurrentClampSeries('test_cCS', list(), electrode_name, 1.0, "stimset", 2.0, 3.0, 4.0,
+        cCS = CurrentClampSeries(name='test_cCS', 
+                                 data=list(), 
+                                 electrode=electrode_name, 
+                                 gain=1.0, 
+                                 stimulus_description="stimset", 
+                                 bias_current=2.0, 
+                                 bridge_balance=3.0, 
+                                 capacitance_compensation=4.0,
                                  timestamps=list())
         self.assertEqual(cCS.name, 'test_cCS')
         self.assertEqual(cCS.unit, 'volts')
@@ -253,7 +274,11 @@ class IZeroClampSeriesConstructor(TestCase):
     def test_init(self):
         electrode_name = GetElectrode()
 
-        iZCS = IZeroClampSeries('test_iZCS', list(), electrode_name, 1.0, timestamps=list())
+        iZCS = IZeroClampSeries(name='test_iZCS', 
+                                data=list(), 
+                                electrode=electrode_name, 
+                                gain=1.0, 
+                                timestamps=list())
         self.assertEqual(iZCS.name, 'test_iZCS')
         self.assertEqual(iZCS.unit, 'volts')
         self.assertEqual(iZCS.electrode, electrode_name)
@@ -287,7 +312,11 @@ class CurrentClampStimulusSeriesConstructor(TestCase):
     def test_init(self):
         electrode_name = GetElectrode()
 
-        cCSS = CurrentClampStimulusSeries('test_cCSS', list(), electrode_name, 1.0, timestamps=list())
+        cCSS = CurrentClampStimulusSeries(name='test_cCSS', 
+                                          data=list(), 
+                                          electrode=electrode_name, 
+                                          gain=1.0, 
+                                          timestamps=list())
         self.assertEqual(cCSS.name, 'test_cCSS')
         self.assertEqual(cCSS.unit, 'amperes')
         self.assertEqual(cCSS.electrode, electrode_name)
@@ -308,8 +337,19 @@ class VoltageClampSeriesConstructor(TestCase):
     def test_init(self):
         electrode_name = GetElectrode()
 
-        vCS = VoltageClampSeries('test_vCS', list(), electrode_name,
-                                 1.0, "stimset", 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, timestamps=list())
+        vCS = VoltageClampSeries(name='test_vCS', 
+                                 data=list(), 
+                                 electrode=electrode_name,
+                                 gain=1.0, 
+                                 stimulus_description="stimset", 
+                                 capacitance_fast=2.0, 
+                                 capacitance_slow=3.0, 
+                                 resistance_comp_bandwidth=4.0, 
+                                 resistance_comp_correction=5.0, 
+                                 resistance_comp_prediction=6.0, 
+                                 whole_cell_capacitance_comp=7.0, 
+                                 whole_cell_series_resistance_comp=8.0, 
+                                 timestamps=list())
         self.assertEqual(vCS.name, 'test_vCS')
         self.assertEqual(vCS.unit, 'amperes')
         self.assertEqual(vCS.electrode, electrode_name)
@@ -329,8 +369,20 @@ class VoltageClampSeriesConstructor(TestCase):
         msg = "Unit 'unit' for VoltageClampSeries 'test_vCS' is ignored and will be set " \
               "to 'amperes' as per NWB 2.1.0."
         with self.assertWarnsWith(UserWarning, msg):
-            vCS = VoltageClampSeries('test_vCS', list(), electrode_name,
-                                     1.0, "stimset", 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, timestamps=list(), unit='unit')
+            vCS = VoltageClampSeries(name='test_vCS', 
+                                     data=list(), 
+                                     electrode=electrode_name,
+                                     gain=1.0, 
+                                     stimulus_description="stimset", 
+                                     capacitance_fast=2.0, 
+                                     capacitance_slow=3.0, 
+                                     resistance_comp_bandwidth=4.0, 
+                                     resistance_comp_correction=5.0, 
+                                     resistance_comp_prediction=6.0, 
+                                     whole_cell_capacitance_comp=7.0, 
+                                     whole_cell_series_resistance_comp=8.0, 
+                                     timestamps=list(), 
+                                     unit='unit')
         self.assertEqual(vCS.unit, 'amperes')
 
 
@@ -339,7 +391,8 @@ class VoltageClampStimulusSeriesConstructor(TestCase):
     def test_init(self):
         electrode_name = GetElectrode()
 
-        vCSS = VoltageClampStimulusSeries('test_vCSS', list(), electrode_name, 1.0, timestamps=list())
+        vCSS = VoltageClampStimulusSeries(name='test_vCSS', data=list(), electrode=electrode_name, gain=1.0, 
+                                          timestamps=list())
         self.assertEqual(vCSS.name, 'test_vCSS')
         self.assertEqual(vCSS.unit, 'volts')
         self.assertEqual(vCSS.electrode, electrode_name)

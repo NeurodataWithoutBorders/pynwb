@@ -70,9 +70,10 @@ class ElectricalSeriesConstructor(TestCase):
 
     def test_link(self):
         table, region = self._create_table_and_region()
-        ts1 = ElectricalSeries('test_ts1', [0, 1, 2, 3, 4, 5], region, timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5])
-        ts2 = ElectricalSeries('test_ts2', ts1, region, timestamps=ts1)
-        ts3 = ElectricalSeries('test_ts3', ts2, region, timestamps=ts2)
+        ts1 = ElectricalSeries(name='test_ts1', data=[0, 1, 2, 3, 4, 5], electrodes=region,
+                               timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5])
+        ts2 = ElectricalSeries(name='test_ts2', data=ts1, electrodes=region, timestamps=ts1)
+        ts3 = ElectricalSeries(name='test_ts3', data=ts2, electrodes=region, timestamps=ts2)
         self.assertEqual(ts2.data, [0, 1, 2, 3, 4, 5])
         self.assertEqual(ts2.timestamps, [0.0, 0.1, 0.2, 0.3, 0.4, 0.5])
         self.assertEqual(ts3.data, [0, 1, 2, 3, 4, 5])
@@ -82,7 +83,8 @@ class ElectricalSeriesConstructor(TestCase):
         table, region = self._create_table_and_region()
         with self.assertRaisesWith(ValueError, ("ElectricalSeries.__init__: incorrect shape for 'data' (got '(2, 2, 2, "
                                                 "2)', expected '((None,), (None, None), (None, None, None))')")):
-            ElectricalSeries('test_ts1', np.ones((2, 2, 2, 2)), region, timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5])
+            ElectricalSeries(name='test_ts1', data=np.ones((2, 2, 2, 2)), electrodes=region,
+                             timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5])
 
     def test_dimensions_warning(self):
         table, region = self._create_table_and_region()
@@ -177,17 +179,38 @@ class SpikeEventSeriesConstructor(TestCase):
 class ElectrodeGroupConstructor(TestCase):
 
     def test_init(self):
-        dev1 = Device('dev1')
-        group = ElectrodeGroup('elec1', 'electrode description', 'electrode location', dev1, (1, 2, 3))
+        dev1 = Device(name='dev1')
+        group = ElectrodeGroup(name='elec1',
+                               description='electrode description',
+                               location='electrode location',
+                               device=dev1,
+                               position=(1, 2, 3))
         self.assertEqual(group.name, 'elec1')
         self.assertEqual(group.description, 'electrode description')
         self.assertEqual(group.location, 'electrode location')
         self.assertEqual(group.device, dev1)
-        self.assertEqual(group.position, (1, 2, 3))
+        self.assertEqual(group.position.tolist(), (1, 2, 3))
+
+    def test_init_position_array(self):
+        position = np.array((1, 2, 3), dtype=np.dtype([('x', float), ('y', float), ('z', float)]))
+        dev1 = Device(name='dev1')
+        group = ElectrodeGroup(name='elec1',
+                               description='electrode description',
+                               location='electrode location',
+                               device=dev1,
+                               position=position)
+        self.assertEqual(group.name, 'elec1')
+        self.assertEqual(group.description, 'electrode description')
+        self.assertEqual(group.location, 'electrode location')
+        self.assertEqual(group.device, dev1)
+        self.assertEqual(group.position, position)
 
     def test_init_position_none(self):
-        dev1 = Device('dev1')
-        group = ElectrodeGroup('elec1', 'electrode description', 'electrode location', dev1)
+        dev1 = Device(name='dev1')
+        group = ElectrodeGroup(name='elec1',
+                               description='electrode description',
+                               location='electrode location',
+                               device=dev1)
         self.assertEqual(group.name, 'elec1')
         self.assertEqual(group.description, 'electrode description')
         self.assertEqual(group.location, 'electrode location')
@@ -195,9 +218,31 @@ class ElectrodeGroupConstructor(TestCase):
         self.assertIsNone(group.position)
 
     def test_init_position_bad(self):
-        dev1 = Device('dev1')
+        dev1 = Device(name='dev1')
         with self.assertRaises(ValueError):
-            ElectrodeGroup('elec1', 'electrode description', 'electrode location', dev1, (1, 2))
+            ElectrodeGroup(name='elec1',
+                           description='electrode description',
+                           location='electrode location',
+                           device=dev1,
+                           position=(1, 2))
+        with self.assertRaises(ValueError):
+            ElectrodeGroup(name='elec1',
+                           description='electrode description',
+                           location='electrode location',
+                           device=dev1,
+                           position=[(1, 2), ])
+        with self.assertRaises(ValueError):
+            ElectrodeGroup(name='elec1',
+                           description='electrode description',
+                           location='electrode location',
+                           device=dev1,
+                           position=np.array([(1., 2.)], dtype=np.dtype([('x', float), ('y', float)])))
+        with self.assertRaises(ValueError):
+            ElectrodeGroup(name='elec1',
+                           description='electrode description',
+                           location='electrode location',
+                           device=dev1,
+                           position=[(1, 2, 3), (4, 5, 6), (7, 8, 9)])
 
 
 class EventDetectionConstructor(TestCase):
@@ -216,8 +261,11 @@ class EventDetectionConstructor(TestCase):
         data = list(range(10))
         ts = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
         table, region = self._create_table_and_region()
-        eS = ElectricalSeries('test_eS', data, region, timestamps=ts)
-        eD = EventDetection('detection_method', eS, (1, 2, 3), (0.1, 0.2, 0.3))
+        eS = ElectricalSeries(name='test_eS', data=data, electrodes=region, timestamps=ts)
+        eD = EventDetection(detection_method='detection_method',
+                            source_electricalseries=eS,
+                            source_idx=(1, 2, 3),
+                            times=(0.1, 0.2, 0.3))
         self.assertEqual(eD.detection_method, 'detection_method')
         self.assertEqual(eD.source_electricalseries, eS)
         self.assertEqual(eD.source_idx, (1, 2, 3))
@@ -227,27 +275,9 @@ class EventDetectionConstructor(TestCase):
 
 class EventWaveformConstructor(TestCase):
 
-    def _create_table_and_region(self):
-        table = make_electrode_table()
-        region = DynamicTableRegion(
-            name='electrodes',
-            data=[0, 2],
-            description='the first and third electrodes',
-            table=table
-        )
-        return table, region
-
     def test_init(self):
-        table, region = self._create_table_and_region()
-        sES = SpikeEventSeries('test_sES', list(range(10)), list(range(10)), region)
-
-        pm = ProcessingModule(name='test_module', description='a test module')
-        ew = EventWaveform()
-        pm.add(table)
-        pm.add(ew)
-        ew.add_spike_event_series(sES)
-        self.assertEqual(ew.spike_event_series['test_sES'], sES)
-        self.assertEqual(ew['test_sES'], ew.spike_event_series['test_sES'])
+        with self.assertRaises(ValueError):
+            EventWaveform()
 
 
 class ClusteringConstructor(TestCase):
@@ -257,8 +287,19 @@ class ClusteringConstructor(TestCase):
         num = [3, 4]
         peak_over_rms = [5.3, 6.3]
 
-        with self.assertWarnsWith(DeprecationWarning, 'use pynwb.misc.Units or NWBFile.units instead'):
-            cc = Clustering(description='description', num=num, peak_over_rms=peak_over_rms, times=times)
+        error_msg = "The Clustering neurodata type is deprecated. Use pynwb.misc.Units or NWBFile.units instead"
+        kwargs = dict(description='description',
+                      num=num,
+                      peak_over_rms=peak_over_rms,
+                      times=times)
+        with self.assertRaisesWith(ValueError, error_msg):
+            cc = Clustering(**kwargs)
+
+        # create object in construct mode, modeling the behavior of the ObjectMapper on read
+        # no error or warning should be raised
+        cc = Clustering.__new__(Clustering, in_construct_mode=True)
+        cc.__init__(**kwargs)
+
         self.assertEqual(cc.description, 'description')
         self.assertEqual(cc.num, num)
         self.assertEqual(cc.peak_over_rms, peak_over_rms)
@@ -271,19 +312,28 @@ class ClusterWaveformsConstructor(TestCase):
         times = [1.3, 2.3]
         num = [3, 4]
         peak_over_rms = [5.3, 6.3]
-        with self.assertWarnsWith(DeprecationWarning, 'use pynwb.misc.Units or NWBFile.units instead'):
-            cc = Clustering(description='description', num=num, peak_over_rms=peak_over_rms, times=times)
+
+        # create object in construct mode, modeling the behavior of the ObjectMapper on read
+        cc = Clustering.__new__(Clustering,
+                                        container_source=None,
+                                        parent=None,
+                                        in_construct_mode=True)
+        cc.__init__('description', num, peak_over_rms, times)
 
         means = [[7.3, 7.3]]
         stdevs = [[8.3, 8.3]]
+        error_msg = "The ClusterWaveforms neurodata type is deprecated. Use pynwb.misc.Units or NWBFile.units instead"
+        with self.assertRaisesWith(ValueError, error_msg):
+            cw = ClusterWaveforms(cc, 'filtering', means, stdevs)
 
-        with self.assertWarnsWith(DeprecationWarning, 'use pynwb.misc.Units or NWBFile.units instead'):
-            cw = ClusterWaveforms(
-                clustering_interface=cc,
-                waveform_filtering='filtering',
-                waveform_mean=means,
-                waveform_sd=stdevs
-            )
+        # create object in construct mode, modeling the behavior of the ObjectMapper on read
+        # no error or warning should be raised
+        cw = ClusterWaveforms.__new__(ClusterWaveforms,
+                                        container_source=None,
+                                        parent=None,
+                                        in_construct_mode=True)
+        cw.__init__(cc, 'filtering', means, stdevs)
+
         self.assertEqual(cw.clustering_interface, cc)
         self.assertEqual(cw.waveform_filtering, 'filtering')
         self.assertEqual(cw.waveform_mean, means)
@@ -304,7 +354,8 @@ class LFPTest(TestCase):
 
     def test_init(self):
         _, region = self._create_table_and_region()
-        eS = ElectricalSeries('test_eS', [0, 1, 2, 3], region, timestamps=[0.1, 0.2, 0.3, 0.4])
+        eS = ElectricalSeries(name='test_eS', data=[0, 1, 2, 3],
+                              electrodes=region, timestamps=[0.1, 0.2, 0.3, 0.4])
         msg = (
             "The linked table for DynamicTableRegion 'electrodes' does not share "
             "an ancestor with the DynamicTableRegion."
@@ -317,7 +368,10 @@ class LFPTest(TestCase):
     def test_add_electrical_series(self):
         lfp = LFP()
         table, region = self._create_table_and_region()
-        eS = ElectricalSeries('test_eS', [0, 1, 2, 3], region, timestamps=[0.1, 0.2, 0.3, 0.4])
+        eS = ElectricalSeries(name='test_eS',
+                              data=[0, 1, 2, 3],
+                              electrodes=region,
+                              timestamps=[0.1, 0.2, 0.3, 0.4])
         pm = ProcessingModule(name='test_module', description='a test module')
         pm.add(table)
         pm.add(lfp)
@@ -339,7 +393,10 @@ class FilteredEphysTest(TestCase):
 
     def test_init(self):
         _, region = self._create_table_and_region()
-        eS = ElectricalSeries('test_eS', [0, 1, 2, 3], region, timestamps=[0.1, 0.2, 0.3, 0.4])
+        eS = ElectricalSeries(name='test_eS',
+                              data=[0, 1, 2, 3],
+                              electrodes=region,
+                              timestamps=[0.1, 0.2, 0.3, 0.4])
         msg = (
             "The linked table for DynamicTableRegion 'electrodes' does not share "
             "an ancestor with the DynamicTableRegion."
@@ -351,7 +408,10 @@ class FilteredEphysTest(TestCase):
 
     def test_add_electrical_series(self):
         table, region = self._create_table_and_region()
-        eS = ElectricalSeries('test_eS', [0, 1, 2, 3], region, timestamps=[0.1, 0.2, 0.3, 0.4])
+        eS = ElectricalSeries(name='test_eS',
+                              data=[0, 1, 2, 3],
+                              electrodes=region,
+                              timestamps=[0.1, 0.2, 0.3, 0.4])
         pm = ProcessingModule(name='test_module', description='a test module')
         fe = FilteredEphys()
         pm.add(table)
@@ -378,7 +438,10 @@ class FeatureExtractionConstructor(TestCase):
         table, region = self._create_table_and_region()
         description = ['desc1', 'desc2', 'desc3']
         features = [[[0, 1, 2], [3, 4, 5]], [[6, 7, 8], [9, 10, 11]]]
-        fe = FeatureExtraction(region, description, event_times, features)
+        fe = FeatureExtraction(electrodes=region,
+                               description=description,
+                               times=event_times,
+                               features=features)
         self.assertEqual(fe.description, description)
         self.assertEqual(fe.times, event_times)
         self.assertEqual(fe.features, features)
@@ -388,7 +451,11 @@ class FeatureExtractionConstructor(TestCase):
         table, region = self._create_table_and_region()
         description = ['desc1', 'desc2', 'desc3']
         features = [[[0, 1, 2], [3, 4, 5]]]
-        self.assertRaises(ValueError, FeatureExtraction, region, description, event_times, features)
+        with self.assertRaises(ValueError):
+            FeatureExtraction(electrodes=region,
+                              description=description,
+                              times=event_times,
+                              features=features)
 
     def test_invalid_init_mismatched_electrodes(self):
         event_times = [1]
@@ -396,18 +463,30 @@ class FeatureExtractionConstructor(TestCase):
         region = DynamicTableRegion(name='electrodes', data=[0], description='the first electrode', table=table)
         description = ['desc1', 'desc2', 'desc3']
         features = [[[0, 1, 2], [3, 4, 5]]]
-        self.assertRaises(ValueError, FeatureExtraction, region, description, event_times, features)
+        with self.assertRaises(ValueError):
+            FeatureExtraction(electrodes=region,
+                              description=description,
+                              times=event_times,
+                              features=features)
 
     def test_invalid_init_mismatched_description(self):
         event_times = [1]
         table, region = self._create_table_and_region()
         description = ['desc1', 'desc2', 'desc3', 'desc4']  # Need 3 descriptions but give 4
         features = [[[0, 1, 2], [3, 4, 5]]]
-        self.assertRaises(ValueError, FeatureExtraction, region, description, event_times, features)
+        with self.assertRaises(ValueError):
+            FeatureExtraction(electrodes=region,
+                              description=description,
+                              times=event_times,
+                              features=features)
 
     def test_invalid_init_mismatched_description2(self):
         event_times = [1]
         table, region = self._create_table_and_region()
         description = ['desc1', 'desc2', 'desc3']
         features = [[0, 1, 2], [3, 4, 5]]  # Need 3D feature array but give only 2D array
-        self.assertRaises(ValueError, FeatureExtraction, region, description, event_times, features)
+        with self.assertRaises(ValueError):
+            FeatureExtraction(electrodes=region,
+                              description=description,
+                              times=event_times,
+                              features=features)

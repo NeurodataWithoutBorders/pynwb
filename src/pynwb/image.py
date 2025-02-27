@@ -10,11 +10,22 @@ from hdmf.utils import (
     popargs_to_dict,
     get_docval,
     get_data_shape,
+    AllowPositional,
 )
 
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries, Image, Images
 from .device import Device
+
+
+__all__ = [
+    'ImageSeries',
+    'IndexSeries',
+    'OpticalSeries',
+    'GrayscaleImage',
+    'RGBImage',
+    'RGBAImage'
+]
 
 
 @register_class('ImageSeries', CORE_NAMESPACE)
@@ -61,7 +72,8 @@ class ImageSeries(TimeSeries):
             *get_docval(TimeSeries.__init__, 'resolution', 'conversion', 'timestamps', 'starting_time', 'rate',
                         'comments', 'description', 'control', 'control_description', 'offset'),
             {'name': 'device', 'type': Device,
-             'doc': 'Device used to capture the images/video.', 'default': None},)
+             'doc': 'Device used to capture the images/video.', 'default': None},
+             allow_positional=AllowPositional.WARNING,)
     def __init__(self, **kwargs):
         keys_to_set = ('bits_per_pixel', 'dimension', 'external_file', 'starting_frame', 'format', 'device')
         args_to_set = popargs_to_dict(keys_to_set, kwargs)
@@ -94,28 +106,26 @@ class ImageSeries(TimeSeries):
             setattr(self, key, val)
 
         if self._change_external_file_format():
-            warnings.warn(
-                "%s '%s': The value for 'format' has been changed to 'external'. "
-                "Setting a default value for 'format' is deprecated and will be changed "
-                "to raising a ValueError in the next major release."
-                % (self.__class__.__name__, self.name),
-                DeprecationWarning,
-            )
+            self._error_on_new_warn_on_construct(error_msg=f"{self.__class__.__name__} '{self.name}': "
+                                                "The value for 'format' has been changed to 'external'. "
+                                                "If an external file is detected, setting a value for "
+                                                "'format' other than 'external' is deprecated.")
 
-        if not self._check_image_series_dimension():
-            warnings.warn(
-                "%s '%s': Length of data does not match length of timestamps. Your data may be transposed. "
-                "Time should be on the 0th dimension"
-                % (self.__class__.__name__, self.name)
-            )
+        error_msg = self._check_image_series_dimension()
+        if error_msg:
+            self._error_on_new_warn_on_construct(error_msg=error_msg)
 
-        self._error_on_new_warn_on_construct(
-            error_msg=self._check_external_file_starting_frame_length()
-        )
-        self._error_on_new_warn_on_construct(
-            error_msg=self._check_external_file_format()
-        )
-        self._error_on_new_warn_on_construct(error_msg=self._check_external_file_data())
+        error_msg = self._check_external_file_starting_frame_length()
+        if error_msg:
+            self._error_on_new_warn_on_construct(error_msg=error_msg)
+
+        error_msg = self._check_external_file_format()
+        if error_msg:
+            self._error_on_new_warn_on_construct(error_msg=error_msg)
+
+        error_msg = self._check_external_file_data()
+        if error_msg:
+            self._error_on_new_warn_on_construct(error_msg=error_msg)
 
     def _change_external_file_format(self):
         """
@@ -135,7 +145,7 @@ class ImageSeries(TimeSeries):
         """Override _check_time_series_dimension to do nothing.
         The _check_image_series_dimension method will be called instead.
         """
-        return True
+        return
 
     def _check_image_series_dimension(self):
         """Check that the 0th dimension of data equals the length of timestamps, when applicable.
@@ -145,7 +155,7 @@ class ImageSeries(TimeSeries):
         is provided. Otherwise, this function calls the parent class' _check_time_series_dimension method.
         """
         if self.external_file is not None:
-            return True
+            return
         return super()._check_time_series_dimension()
 
     def _check_external_file_starting_frame_length(self):
@@ -198,7 +208,7 @@ class ImageSeries(TimeSeries):
     @bits_per_pixel.setter
     def bits_per_pixel(self, val):
         if val is not None:
-            warnings.warn("bits_per_pixel is no longer used", DeprecationWarning)
+            self._error_on_new_pass_on_construct(error_msg="bits_per_pixel is deprecated")
             self.fields['bits_per_pixel'] = val
 
 
@@ -251,20 +261,19 @@ class IndexSeries(TimeSeries):
             'control_description',
             'offset',
         ),
+        allow_positional=AllowPositional.WARNING,
     )
     def __init__(self, **kwargs):
         indexed_timeseries, indexed_images = popargs('indexed_timeseries', 'indexed_images', kwargs)
         if kwargs['unit'] and kwargs['unit'] != 'N/A':
-            msg = ("The 'unit' field of IndexSeries is fixed to the value 'N/A' starting in NWB 2.5. Passing "
-                   "a different value for 'unit' will raise an error in PyNWB 3.0.")
-            warnings.warn(msg, PendingDeprecationWarning)
+            self._error_on_new_pass_on_construct(error_msg=("The 'unit' field of IndexSeries is "
+                                                            "fixed to the value 'N/A'."))
         if not indexed_timeseries and not indexed_images:
             msg = "Either indexed_timeseries or indexed_images must be provided when creating an IndexSeries."
             raise ValueError(msg)
         if indexed_timeseries:
-            msg = ("The indexed_timeseries field of IndexSeries is discouraged and will be deprecated in "
-                   "a future version of NWB. Use the indexed_images field instead.")
-            warnings.warn(msg, PendingDeprecationWarning)
+            self._error_on_new_pass_on_construct("The indexed_timeseries field of IndexSeries is deprecated. "
+                                                 "Use the indexed_images field instead.")
         kwargs['unit'] = 'N/A'  # fixed value starting in NWB 2.5
         super().__init__(**kwargs)
         self.indexed_timeseries = indexed_timeseries
@@ -280,6 +289,7 @@ class IndexSeries(TimeSeries):
 @register_class('ImageMaskSeries', CORE_NAMESPACE)
 class ImageMaskSeries(ImageSeries):
     '''
+    DEPRECATED as of NWB 2.8.0 and PyNWB 3.0.0. 
     An alpha mask that is applied to a presented visual stimulus. The data[] array contains an array
     of mask values that are applied to the displayed image. Mask values are stored as RGBA. Mask
     can vary with time. The timestamps array indicates the starting time of a mask, and that mask
@@ -297,8 +307,14 @@ class ImageMaskSeries(ImageSeries):
             {'name': 'device', 'type': Device,
              'doc': ('Device used to capture the mask data. This field will likely not be needed. '
                      'The device used to capture the masked ImageSeries data should be stored in the ImageSeries.'),
-             'default': None},)
+             'default': None},
+            allow_positional=AllowPositional.WARNING,)
     def __init__(self, **kwargs):
+        if not self._in_construct_mode:
+            raise ValueError(
+                "The ImageMaskSeries neurodata type is deprecated. If you are interested in using it, "
+                "please create an issue on https://github.com/NeurodataWithoutBorders/nwb-schema/issues."
+            )
         masked_imageseries = popargs('masked_imageseries', kwargs)
         super().__init__(**kwargs)
         self.masked_imageseries = masked_imageseries
@@ -319,12 +335,26 @@ class OpticalSeries(ImageSeries):
                      'orientation')
 
     @docval(*get_docval(ImageSeries.__init__, 'name'),  # required
-            {'name': 'distance', 'type': float, 'doc': 'Distance from camera/monitor to target/eye.'},  # required
-            {'name': 'field_of_view', 'type': ('array_data', 'data', 'TimeSeries'), 'shape': ((2, ), (3, )),  # required
-             'doc': 'Width, height and depth of image, or imaged area (meters).'},
-            {'name': 'orientation', 'type': str,  # required
-             'doc': 'Description of image relative to some reference frame (e.g., which way is up). '
-                    'Must also specify frame of reference.'},
+            {
+                "name": "distance",
+                "type": float,
+                "doc": "Distance from camera/monitor to target/eye.",
+                "default": None,
+            },
+            {
+                "name": "field_of_view",
+                "type": ("array_data", "data", "TimeSeries"),
+                "shape": ((2,), (3,)),
+                "doc": "Width, height and depth of image, or imaged area (meters).",
+                "default": None,
+            },
+            {
+                "name": "orientation",
+                "type": str,
+                "doc": "Description of image relative to some reference frame (e.g., which way is up). "
+                "Must also specify frame of reference.",
+                "default": None,
+            },
             {'name': 'data', 'type': ('array_data', 'data'), 'shape': ([None] * 3, [None, None, None, 3]),
              'doc': ('Images presented to subject, either grayscale or RGB. May be 3D or 4D. The first dimension must '
                      'be time (frame). The second and third dimensions represent x and y. The optional fourth '
@@ -333,7 +363,8 @@ class OpticalSeries(ImageSeries):
              'default': None},
             *get_docval(ImageSeries.__init__, 'unit', 'format', 'external_file', 'starting_frame', 'bits_per_pixel',
                         'dimension', 'resolution', 'conversion', 'timestamps', 'starting_time', 'rate', 'comments',
-                        'description', 'control', 'control_description', 'device', 'offset'))
+                        'description', 'control', 'control_description', 'device', 'offset'),
+            allow_positional=AllowPositional.WARNING,)
     def __init__(self, **kwargs):
         distance, field_of_view, orientation = popargs('distance', 'field_of_view', 'orientation', kwargs)
         super().__init__(**kwargs)
@@ -349,7 +380,8 @@ class GrayscaleImage(Image):
             {'name': 'data', 'type': ('array_data', 'data'),
              'doc': 'Data of grayscale image. Must be 2D where the dimensions represent x and y.',
              'shape': (None, None)},
-            *get_docval(Image.__init__, 'resolution', 'description'))
+            *get_docval(Image.__init__, 'resolution', 'description'),
+            allow_positional=AllowPositional.WARNING,)
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
@@ -362,7 +394,8 @@ class RGBImage(Image):
              'doc': 'Data of color image. Must be 3D where the first and second dimensions represent x and y. '
                     'The third dimension has length 3 and represents the RGB value.',
              'shape': (None, None, 3)},
-            *get_docval(Image.__init__, 'resolution', 'description'))
+            *get_docval(Image.__init__, 'resolution', 'description'),
+            allow_positional=AllowPositional.WARNING,)
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
@@ -375,6 +408,7 @@ class RGBAImage(Image):
              'doc': 'Data of color image with transparency. Must be 3D where the first and second dimensions '
                     'represent x and y. The third dimension has length 4 and represents the RGBA value.',
              'shape': (None, None, 4)},
-            *get_docval(Image.__init__, 'resolution', 'description'))
+            *get_docval(Image.__init__, 'resolution', 'description'),
+            allow_positional=AllowPositional.WARNING,)
     def __init__(self, **kwargs):
         super().__init__(**kwargs)

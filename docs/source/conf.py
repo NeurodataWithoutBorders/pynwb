@@ -40,6 +40,9 @@ import pynwb
 autoclass_content = 'both'
 autodoc_docstring_signature = True
 autodoc_member_order = 'bysource'
+autodoc_default_options = {
+    'ignore-module-all': True,  # Continue documenting classes not in __all__
+}
 
 # -- General configuration -----------------------------------------------------
 
@@ -84,7 +87,6 @@ class CustomSphinxGallerySectionSortKey(ExampleTitleSortKey):
             "icephys.py",
             "plot_behavior.py",
             "images.py",
-            "brain_observatory.py"
         ],
         'advanced_io': []
     }
@@ -147,8 +149,8 @@ intersphinx_mapping = {
     'fsspec': ("https://filesystem-spec.readthedocs.io/en/latest/", None),
     'nwbwidgets': ("https://nwb-widgets.readthedocs.io/en/latest/", None),
     'nwb-overview': ("https://nwb-overview.readthedocs.io/en/latest/", None),
-    'zarr': ("https://zarr.readthedocs.io/en/stable/", None),
-    'hdmf-zarr': ("https://hdmf-zarr.readthedocs.io/en/latest/", None),
+    'zarr': ("https://zarr.readthedocs.io/en/v2.18.4/", None),  # TODO - update when hdmf-zarr supports Zarr 3.0
+    'hdmf-zarr': ("https://hdmf-zarr.readthedocs.io/en/stable/", None),
     'numcodecs': ("https://numcodecs.readthedocs.io/en/latest/", None),
 }
 
@@ -159,14 +161,18 @@ extlinks = {
     'pynwb': ('https://github.com/NeurodataWithoutBorders/pynwb/%s', '%s'),
     'nwb_overview': ('https://nwb-overview.readthedocs.io/en/latest/%s', '%s'),
     'hdmf-docs': ('https://hdmf.readthedocs.io/en/stable/%s', '%s'),
-    'dandi': ('https://www.dandiarchive.org/%s', '%s'),
+    'dandi': ('https://dandiarchive.org/%s', '%s'),
     "nwbinspector": ("https://nwbinspector.readthedocs.io/en/dev/%s", "%s"),
-    'hdmf-zarr': ('https://hdmf-zarr.readthedocs.io/en/latest/%s', '%s'),
+    'hdmf-zarr': ('https://hdmf-zarr.readthedocs.io/en/stable/%s', '%s'),
 }
 
 nitpicky = True
 nitpick_ignore = [('py:class', 'Intracomm'),
                   ('py:class', 'BaseStorageSpec')]
+
+linkcheck_ignore = [
+    r'https://training.incf.org/*'  # temporary ignore until SSL certificate issue is resolved
+]
 
 suppress_warnings = ["config.cache"]
 
@@ -185,7 +191,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'PyNWB'
-copyright = u'2017-2024, Neurodata Without Borders'
+copyright = u'2017-2025, Neurodata Without Borders'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -244,7 +250,6 @@ pygments_style = 'sphinx'
 # html_theme = 'default'
 # html_theme = "sphinxdoc"
 html_theme = "sphinx_rtd_theme"
-html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
@@ -259,9 +264,6 @@ html_theme_options = {
 html_css_files = [
     'css/custom.css',
 ]
-
-# Add any paths that contain custom themes here, relative to this directory.
-# html_theme_path = []
 
 # The name for this set of Sphinx documents.  If None, it defaults to
 # "<project> v<release> documentation".
