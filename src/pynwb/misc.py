@@ -253,6 +253,30 @@ class Units(DynamicTable):
         index = getargs('index', kwargs)
         return np.asarray(self['obs_intervals'][index])
 
+@register_class('BandsTable', CORE_NAMESPACE)
+class BandsTable(DynamicTable):
+    """
+    Table for describing the bands that DecompositionSeries was generated from.
+    """
+    __columns__ = (
+        {'name': 'band_name', 'description': 'Name of the band, e.g. theta.', 'required': True},
+        {'name': 'band_limits', 'description': 'Low and high limit of each band in Hz.', 'required': True},
+        {'name': 'band_mean', 'description': 'The mean Gaussian filters, in Hz.', 'required': False },
+        {'name': 'band_stdev', 'description': 'The standard deviation Gaussian filters, in Hz.', 'required': False })
+
+    @docval({'name': 'band_name', 'type': VectorData, 'doc': 'Name of the band, e.g. theta.'},
+            {'name': 'band_limits', 'type': VectorData, 'shape': [None, 2],
+             'doc': 'Low and high limit of each band in Hz.'},
+            {'name': 'band_mean', 'type': VectorData, 'doc': 'The mean Gaussian filters, in Hz.', 'required',
+             'default': None},
+            {'name': 'band_stdev', 'type': VectorData, 'doc': 'The standard deviation Gaussian filters, in Hz.', 'default': None},
+            *get_docval(DynamicTable.__init__, 'id', 'columns', 'colnames'))
+    def __init__(self, **kwargs):
+        kwargs['name'] = 'bands'
+        kwargs['description'] = 'Table for describing the bands that DecompositionSeries was generated from.'
+
+        super().__init__(**kwargs)
+
 
 @register_class('DecompositionSeries', CORE_NAMESPACE)
 class DecompositionSeries(TimeSeries):
@@ -278,7 +302,7 @@ class DecompositionSeries(TimeSeries):
             {'name': 'metric', 'type': str,  # required
              'doc': "metric of analysis. recommended - 'phase', 'amplitude', 'power'"},
             {'name': 'unit', 'type': str, 'doc': 'SI unit of measurement', 'default': 'no unit'},
-            {'name': 'bands', 'type': DynamicTable,
+            {'name': 'bands', 'type': BandsTable,
              'doc': 'a table for describing the frequency bands that the signal was decomposed into', 'default': None},
             {'name': 'source_timeseries', 'type': TimeSeries,
              'doc': 'the input TimeSeries from this analysis', 'default': None},
@@ -302,10 +326,7 @@ class DecompositionSeries(TimeSeries):
                           "corresponding source_channels. (Optional)")
         self.metric = metric
         if bands is None:
-            bands = DynamicTable(
-                name="bands",
-                description="data about the frequency bands that the signal was decomposed into"
-            )
+            bands = BandsTable()
         self.bands = bands
 
     def __check_column(self, name, desc):
