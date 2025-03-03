@@ -2,7 +2,7 @@ import numpy as np
 
 from hdmf.common import DynamicTable, VectorData, DynamicTableRegion
 from pynwb import TimeSeries
-from pynwb.misc import Units, DecompositionSeries
+from pynwb.misc import Units, DecompositionSeries, BandsTable
 from pynwb.testing import NWBH5IOMixin, AcquisitionH5IOMixin, TestCase
 from pynwb.ecephys import ElectrodeGroup
 from pynwb.device import Device
@@ -116,20 +116,8 @@ class TestDecompositionSeriesIO(NWBH5IOMixin, TestCase):
             unit='flibs',
             timestamps=np.ones((3,)),
         )
-        bands = DynamicTable(
-            name='bands',
-            description='band info for LFPSpectralAnalysis',
-            columns=[
-                VectorData(name='band_name', description='name of bands', data=['alpha', 'beta', 'gamma']),
-                VectorData(name='band_limits', description='low and high cutoffs in Hz', data=np.ones((3, 2))),
-                VectorData(name='band_mean', description='mean gaussian filters in Hz', data=np.ones((3,))),
-                VectorData(
-                    name='band_stdev',
-                    description='standard deviation of gaussian filters in Hz',
-                    data=np.ones((3,))
-                ),
-            ],
-        )
+        bands = BandsTable()
+        bands.add_band(band_name='alpha', band_limits=np.ones((1, 2)), band_mean=np.ones((3,)), band_stdev=np.ones((3,)))
         spec_anal = DecompositionSeries(
             name='LFPSpectralAnalysis',
             description='my description',
@@ -180,20 +168,8 @@ class TestDecompositionSeriesWithSourceChannelsIO(AcquisitionH5IOMixin, TestCase
         )
         data = np.random.randn(100, 2, 30)
         timestamps = np.arange(100)/100
-        bands = DynamicTable(
-            name='bands',
-            description='band info for LFPSpectralAnalysis',
-            columns=[
-                VectorData(name='band_name', description='name of bands', data=['alpha', 'beta', 'gamma']),
-                VectorData(name='band_limits', description='low and high cutoffs in Hz', data=np.ones((3, 2))),
-                VectorData(name='band_mean', description='mean gaussian filters in Hz', data=np.ones((3,))),
-                VectorData(
-                    name='band_stdev',
-                    description='standard deviation of gaussian filters in Hz',
-                    data=np.ones((3,))
-                ),
-            ],
-        )
+        bands = BandsTable()
+        bands.add_band(band_name='alpha', band_limits=np.array([[1, 2]]), band_mean= np.array([1., 1., 1.]), band_stdev=np.array([1., 1., 1.]))
         ds = DecompositionSeries(
             name='test_DS',
             data=data,

@@ -9,7 +9,7 @@ from hdmf.utils import docval, getargs, popargs, popargs_to_dict, get_docval, Al
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries
 from .ecephys import ElectrodeGroup
-from hdmf.common import DynamicTable, DynamicTableRegion
+from hdmf.common import DynamicTable, DynamicTableRegion, VectorData
 
 __all__ = [
     'AnnotationSeries',
@@ -264,18 +264,22 @@ class BandsTable(DynamicTable):
         {'name': 'band_mean', 'description': 'The mean Gaussian filters, in Hz.', 'required': False },
         {'name': 'band_stdev', 'description': 'The standard deviation Gaussian filters, in Hz.', 'required': False })
 
-    @docval({'name': 'band_name', 'type': VectorData, 'doc': 'Name of the band, e.g. theta.'},
-            {'name': 'band_limits', 'type': VectorData, 'shape': [None, 2],
-             'doc': 'Low and high limit of each band in Hz.'},
-            {'name': 'band_mean', 'type': VectorData, 'doc': 'The mean Gaussian filters, in Hz.', 'required',
-             'default': None},
-            {'name': 'band_stdev', 'type': VectorData, 'doc': 'The standard deviation Gaussian filters, in Hz.', 'default': None},
-            *get_docval(DynamicTable.__init__, 'id', 'columns', 'colnames'))
     def __init__(self, **kwargs):
         kwargs['name'] = 'bands'
         kwargs['description'] = 'Table for describing the bands that DecompositionSeries was generated from.'
 
         super().__init__(**kwargs)
+
+    @docval({'name': 'band_name', 'type': str, 'doc': 'Name of the band, e.g. theta.'},
+            {'name': 'band_limits', 'type': 'array_data', 'shape': [None, 2],
+             'doc': 'Low and high limit of each band in Hz.'},
+            {'name': 'band_mean', 'type': 'array_data', 'doc': 'The mean Gaussian filters, in Hz.',
+             'default': None},
+            {'name': 'band_stdev', 'type': 'array_data', 'doc': 'The standard deviation Gaussian filters, in Hz.', 'default': None},
+            )
+    def add_band(self, **kwargs):
+        super().add_row(**kwargs)
+
 
 
 @register_class('DecompositionSeries', CORE_NAMESPACE)

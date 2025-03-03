@@ -1,7 +1,20 @@
 from hdmf.common.io.table import DynamicTableMap
+from .base import TimeSeriesMap
 
 from .. import register_map
-from pynwb.misc import Units
+from pynwb.misc import Units, DecompositionSeries
+
+
+@register_map(DecompositionSeries)
+class DecompositionSeriesMap(TimeSeriesMap):
+    def __init__(self, spec):
+        super().__init__(spec)
+    # 
+    # @TimeSeriesMap.constructor_arg('bands')
+    # def bands(self, container, manager):
+    #     breakpoint()
+    #     pass
+
 
 
 @register_map(Units)

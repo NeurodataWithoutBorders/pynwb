@@ -24,10 +24,10 @@ def _validate_helper(io: HDMFIO, namespace: str = CORE_NAMESPACE) -> list:
     return validator.validate(builder)
 
 
-def get_cached_namespaces_to_validate(path: Optional[str] = None, 
-                                      driver: Optional[str] = None, 
+def get_cached_namespaces_to_validate(path: Optional[str] = None,
+                                      driver: Optional[str] = None,
                                       aws_region: Optional[str] = None,
-                                      io: Optional[HDMFIO] = None 
+                                      io: Optional[HDMFIO] = None
 ) -> Tuple[List[str], BuildManager, Dict[str, str]]:
     """
     Determine the most specific namespace(s) that are cached in the given NWBFile that can be used for validation.
@@ -62,14 +62,14 @@ def get_cached_namespaces_to_validate(path: Optional[str] = None,
     if io is not None:
         # TODO update HDF5IO to have .file property to make consistent with ZarrIO
         # then update input arguments here
-        namespace_dependencies = io.load_namespaces(namespace_catalog=catalog, 
+        namespace_dependencies = io.load_namespaces(namespace_catalog=catalog,
                                                     file=io._file)
     else:
         from pynwb import _get_backend
         backend_io = _get_backend(path, method=driver)
-        namespace_dependencies = backend_io.load_namespaces(namespace_catalog=catalog, 
-                                                            path=path, 
-                                                            driver=driver, 
+        namespace_dependencies = backend_io.load_namespaces(namespace_catalog=catalog,
+                                                            path=path,
+                                                            driver=driver,
                                                             aws_region=aws_region)
 
     # Determine which namespaces are the most specific (i.e. extensions) and validate against those
@@ -132,7 +132,7 @@ def get_cached_namespaces_to_validate(path: Optional[str] = None,
         "type": str,
         "doc": "Driver for h5py to use when opening the HDF5 file.",
         "default": None,
-    }, 
+    },
     returns="Validation errors in the file.",
     rtype=list,
     is_method=False,
@@ -141,7 +141,7 @@ def get_cached_namespaces_to_validate(path: Optional[str] = None,
 def validate(**kwargs):
     """Validate NWB file(s) against a namespace or its cached namespaces.
 
-    Note: this function checks for compliance with the NWB schema. 
+    Note: this function checks for compliance with the NWB schema.
     It is recommended to use the NWBInspector for more comprehensive validation of both
     compliance with the schema and compliance of data with NWB best practices.
     """
@@ -178,10 +178,10 @@ def _validate_single_file(**kwargs):
     # get namespaces to validate
     namespace_message = "PyNWB namespace information"
     io_kwargs = dict(path=path, mode="r", driver=driver)
-        
+
     if use_cached_namespaces:
-        cached_namespaces, manager, namespace_dependencies = get_cached_namespaces_to_validate(path=path, 
-                                                                                               driver=driver, 
+        cached_namespaces, manager, namespace_dependencies = get_cached_namespaces_to_validate(path=path,
+                                                                                               driver=driver,
                                                                                                io=io)
         io_kwargs.update(manager=manager)
 
@@ -217,17 +217,16 @@ def _validate_single_file(**kwargs):
             raise ValueError(
                 f"The namespace '{namespace}' could not be found in {namespace_message} as only "
                 f"{namespaces_to_validate} is present.",)
-  
+
     # validate against namespaces
     validation_errors = []
     for validation_namespace in namespaces_to_validate:
         if verbose:
             print(f"Validating {f'{path} ' if path is not None else ''}against "  # noqa: T201
-                  f"{namespace_message} using namespace '{validation_namespace}'.")  
+                  f"{namespace_message} using namespace '{validation_namespace}'.")
         validation_errors += _validate_helper(io=io, namespace=validation_namespace)
 
     if path is not None:
         io.close()  # close the io object if it was created within this function, otherwise leave as is
-    
+    breakpoint()
     return validation_errors
-
