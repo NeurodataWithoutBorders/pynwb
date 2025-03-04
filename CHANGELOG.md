@@ -3,7 +3,7 @@
 ## Upcoming
 
 ### Bug fixes
-- Readd `add_data_interface` functionality that was mistakenly removed in PyNWB 3.0. @stephprince [#2052](https://github.com/NeurodataWithoutBorders/pynwb/pull/2052)
+- Fix `add_data_interface` functionality that was mistakenly removed in PyNWB 3.0. @stephprince [#2052](https://github.com/NeurodataWithoutBorders/pynwb/pull/2052)
 
 ## PyNWB 3.0.0 (February 26, 2025)
 
