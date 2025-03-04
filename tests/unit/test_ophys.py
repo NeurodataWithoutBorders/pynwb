@@ -118,6 +118,7 @@ class ImagingPlaneConstructor(TestCase):
             grid_spacing_unit='gs_unit'
         )
         self.assertEqual(ip.optical_channel[0], oc)
+        self.assertEqual(ip.description, 'description')
         self.assertEqual(ip.device, device)
         self.assertEqual(ip.excitation_lambda, 600.)
         self.assertEqual(ip.imaging_rate, 300.)
@@ -195,6 +196,25 @@ class ImagingPlaneConstructor(TestCase):
         # no warning or error should be raised
         obj = ImagingPlane.__new__(ImagingPlane, in_construct_mode=True)
         obj.__init__(**kwargs)
+
+    def test_init_pos_args(self):
+        """Check creation of ImagingPlane with only required dependencies and positional kwargs.
+
+        This is to check how creation of an ImagingPlane changes when the "description" argument moves from a
+        required arg in the middle of the required args section to an optional arg, in alignment with the schema.
+        """
+        oc, device = self.set_up_dependencies()
+
+        ip = ImagingPlane(
+            'test_imaging_plane',
+            oc,
+            device,
+            600.,
+            'indicator',
+            'location',
+        )
+        self.assertIsNone(ip.description)
+        self.assertIs(ip.device, device)
 
 
 class OnePhotonSeriesConstructor(TestCase):

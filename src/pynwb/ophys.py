@@ -68,7 +68,7 @@ class ImagingPlane(NWBContainer):
     @docval(*get_docval(NWBContainer.__init__, 'name'),  # required
             {'name': 'optical_channel', 'type': (list, OpticalChannel),  # required
              'doc': 'One of possibly many groups storing channel-specific data.'},
-            {'name': 'description', 'type': str, 'doc': 'Description of this ImagingPlane.'},  # required
+            {'name': 'description', 'type': str, 'doc': 'Description of this ImagingPlane.', 'default': None},
             {'name': 'device', 'type': Device, 'doc': 'the device that was used to record'},  # required
             {'name': 'excitation_lambda', 'type': float, 'doc': 'Excitation wavelength in nm.'},  # required
             {'name': 'indicator', 'type': str, 'doc': 'Calcium indicator'},  # required
