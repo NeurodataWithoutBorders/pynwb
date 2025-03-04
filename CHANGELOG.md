@@ -3,7 +3,7 @@
 ## [Upcoming]
 
 ### Bug fixes
-- Made `ImagingPlane.description` optional to comform with the NWB Schema. Note that if you use positional arguments to create
+- Made `ImagingPlane.description` optional to conform with the NWB Schema. Note that if you use positional arguments to create
   an `ImagingPlane`, the order of arguments has changed. @rly [#2051](https://github.com/NeurodataWithoutBorders/pynwb/pull/2051)
 
 ## PyNWB 3.0.0 (February 26, 2025)
