@@ -705,7 +705,7 @@ class TestTimestampsRefAware(TestCase):
                     self.start_time,
                     timestamps_reference_time=self.ref_time_notz)
 
-    def test_reftime_tzaware_warn_on_construct(self):
+    def test_reftime_tzaware_pass_on_construct(self):
         nwbfile = NWBFile.__new__(NWBFile, in_construct_mode=True)
         nwbfile.__init__('test session description',
                         'TEST124',
