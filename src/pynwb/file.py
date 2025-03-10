@@ -491,7 +491,9 @@ class NWBFile(MultiContainerInterface, HERDManager):
         if timestamps_reference_time is None:
             args_to_set['timestamps_reference_time'] = args_to_set['session_start_time']
         elif timestamps_reference_time.tzinfo is None:
-            raise ValueError("'timestamps_reference_time' must be a timezone-aware datetime object.")
+            self._error_on_new_warn_on_construct(
+                    error_msg="'timestamps_reference_time' must be a timezone-aware datetime object."
+                )
 
         # convert file_create_date to list and add timezone if missing
         file_create_date = args_to_set['file_create_date']
