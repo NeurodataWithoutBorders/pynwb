@@ -491,7 +491,7 @@ class NWBFile(MultiContainerInterface, HERDManager):
         if timestamps_reference_time is None:
             args_to_set['timestamps_reference_time'] = args_to_set['session_start_time']
         elif timestamps_reference_time.tzinfo is None:
-            self._error_on_new_warn_on_construct(
+            self._error_on_new_pass_on_construct(
                     error_msg="'timestamps_reference_time' must be a timezone-aware datetime object."
                 )
 
