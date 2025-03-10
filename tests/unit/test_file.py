@@ -705,6 +705,14 @@ class TestTimestampsRefAware(TestCase):
                     self.start_time,
                     timestamps_reference_time=self.ref_time_notz)
 
+    def test_reftime_tzaware_warn_on_construct(self):
+        with self.assertWarnsWith(UserWarning, "'timestamps_reference_time' must be a timezone-aware datetime object."):
+            nwbfile = NWBFile.__new__(NWBFile, in_construct_mode=True)
+            nwbfile.__init__('test session description',
+                            'TEST124',
+                            self.start_time,
+                            timestamps_reference_time=self.ref_time_notz)
+            self.assertEqual(nwbfile.timestamps_reference_time, self.ref_time_notz)
 
 class TestTimezone(TestCase):
     def test_raise_warning__add_missing_timezone(self):
