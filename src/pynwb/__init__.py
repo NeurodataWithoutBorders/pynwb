@@ -7,6 +7,7 @@ from copy import deepcopy
 import subprocess
 import pickle
 from warnings import warn
+from platformdirs import PlatformDirs
 import h5py
 
 from hdmf.spec import NamespaceCatalog
@@ -69,13 +70,16 @@ def __get_resources() -> dict:
     __location_of_this_file = files(__name__)
     __core_ns_file_name = 'nwb.namespace.yaml'
     __schema_dir = 'nwb-schema/core'
-    cached_core_typemap = __location_of_this_file / 'core_typemap.pkl'
-    cached_version_indicator = __location_of_this_file / '.core_typemap_version'
+
+    # create a cache directory for the core typemap
+    dirs = PlatformDirs(appname="pynwb", version=__version__, ensure_exists=True)
+    cache_dir = dirs.user_cache_path
+    cached_core_typemap = cache_dir / 'pynwb_core_typemap.pkl'
 
     ret = dict()
     ret['namespace_path'] = str(__location_of_this_file / __schema_dir / __core_ns_file_name)
     ret['cached_typemap_path'] = str(cached_core_typemap)
-    ret['cached_version_indicator'] = str(cached_version_indicator)
+    ret['user_cache_dir'] = str(dirs.user_cache_dir)
     return ret
 
 
@@ -180,6 +184,15 @@ def __clone_submodules():
     else:  # pragma: no cover
         raise RuntimeError("Package is not installed from a git repository, can't clone submodules")
 
+def clear_cache_dir():
+    """
+    Clear all the cached typemap files for all versions
+    """
+    try:
+        for f in Path(__resources['user_cache_dir']).parent.glob('**/pynwb_core_typemap.pkl'):
+            Path(f).unlink()
+    except (OSError, PermissionError) as e:
+        warn(f'Could not clear cache directory: {e}', UserWarning)
 
 def __load_core_namespace(final:bool=False):
     """
@@ -197,30 +210,25 @@ def __load_core_namespace(final:bool=False):
     global __TYPE_MAP
     global __resources
 
-    # if we have a version indicator file and it doesn't match the current version,
-    # scrap the cached typemap
-    if os.path.exists(__resources['cached_version_indicator']):
-        with open(__resources['cached_version_indicator'], 'r') as f:
-            cached_version = f.read().strip()
-        if cached_version != __version__:
-            Path(__resources['cached_typemap_path']).unlink(missing_ok=True)
-    else:
-        # remove any cached typemap, forcing re-creation
-        Path(__resources['cached_typemap_path']).unlink(missing_ok=True)
+    # Check for environment variable to disable caching
+    disable_cache = os.environ.get('PYNWB_NO_CACHE_DIR', '0') == '1'
 
-    # load pickled typemap if we have one
-    if os.path.exists(__resources['cached_typemap_path']):
+    # load pickled typemap if we have one and want to use caching
+    if os.path.exists(__resources['cached_typemap_path']) and not disable_cache:
         with open(__resources['cached_typemap_path'], 'rb') as f:
             __TYPE_MAP = pickle.load(f)  # type: TypeMap
 
     # otherwise make a new one and cache it
     elif os.path.exists(__resources['namespace_path']):
         load_namespaces(__resources['namespace_path'])
-        with open(__resources['cached_typemap_path'], 'wb') as f:
-            pickle.dump(__TYPE_MAP, f, protocol=pickle.HIGHEST_PROTOCOL)
-        with open(__resources['cached_version_indicator'], 'w') as f:
-            f.write(__version__)
 
+        # cache the loaded namespace if caching is not disabled
+        if not disable_cache:
+            try:
+                with open(__resources['cached_typemap_path'], 'wb') as f:
+                    pickle.dump(__TYPE_MAP, f, protocol=pickle.HIGHEST_PROTOCOL)
+            except (OSError, PermissionError) as e:
+                pass  # skip caching if we can't write the cached typemap
     # otherwise, we don't have the schema and try and initialize from submodules,
     # afterwards trying to load the namespace again
     else:
@@ -634,6 +642,7 @@ __all__ = [
     'get_manager',
     'load_namespaces', 
     'available_namespaces',
+    'clear_cache_dir',
     'register_class',
     'register_map',
     'get_class',
