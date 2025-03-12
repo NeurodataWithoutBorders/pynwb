@@ -153,16 +153,6 @@ def load_namespaces(**kwargs):
     namespace_path = getargs('namespace_path', kwargs)
     return __TYPE_MAP.load_namespaces(namespace_path)
 
-def reset_namespaces():
-    """
-    Resets namespaces so just the core namespace is loaded
-    """
-    __ns_catalog = NamespaceCatalog(NWBGroupSpec, NWBDatasetSpec, NWBNamespace)
-    hdmf_typemap = hdmf.common.get_type_map()
-    __TYPE_MAP = TypeMap(__ns_catalog)
-    __TYPE_MAP.merge(hdmf_typemap, ns_catalog=True)
-
-    __load_core_namespace()
 
 def available_namespaces():
     """Returns all namespaces registered in the namespace catalog"""
