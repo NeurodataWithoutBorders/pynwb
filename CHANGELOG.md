@@ -5,6 +5,9 @@
 ### Enhancements and minor changes
 - Added option to disable typemap caching and updated type map cache location. @stephprince [#2057](https://github.com/NeurodataWithoutBorders/pynwb/pull/2057)
 
+### Bug fixes
+- Fix `add_data_interface` functionality that was mistakenly removed in PyNWB 3.0. @stephprince [#2052](https://github.com/NeurodataWithoutBorders/pynwb/pull/2052)
+
 ## PyNWB 3.0.0 (February 26, 2025)
 
 ### Breaking changes
