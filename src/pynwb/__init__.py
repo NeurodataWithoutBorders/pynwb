@@ -643,7 +643,6 @@ __all__ = [
     'get_manager',
     'load_namespaces', 
     'available_namespaces',
-    'reset_namespaces',
     'clear_cache_dir',
     'register_class',
     'register_map',
