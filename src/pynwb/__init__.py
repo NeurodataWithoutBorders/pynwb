@@ -153,6 +153,17 @@ def load_namespaces(**kwargs):
     namespace_path = getargs('namespace_path', kwargs)
     return __TYPE_MAP.load_namespaces(namespace_path)
 
+def reset_namespaces():
+    """
+    Resets namespaces so just the core namespace is loaded
+    """
+    __ns_catalog = NamespaceCatalog(NWBGroupSpec, NWBDatasetSpec, NWBNamespace)
+    hdmf_typemap = hdmf.common.get_type_map()
+    __TYPE_MAP = TypeMap(__ns_catalog)
+    __TYPE_MAP.merge(hdmf_typemap, ns_catalog=True)
+
+    __load_core_namespace()
+
 def available_namespaces():
     """Returns all namespaces registered in the namespace catalog"""
     return __TYPE_MAP.namespace_catalog.namespaces
@@ -227,7 +238,7 @@ def __load_core_namespace(final:bool=False):
             try:
                 with open(__resources['cached_typemap_path'], 'wb') as f:
                     pickle.dump(__TYPE_MAP, f, protocol=pickle.HIGHEST_PROTOCOL)
-            except (OSError, PermissionError) as e:
+            except (OSError, PermissionError):
                 pass  # skip caching if we can't write the cached typemap
     # otherwise, we don't have the schema and try and initialize from submodules,
     # afterwards trying to load the namespace again
@@ -642,6 +653,7 @@ __all__ = [
     'get_manager',
     'load_namespaces', 
     'available_namespaces',
+    'reset_namespaces',
     'clear_cache_dir',
     'register_class',
     'register_map',

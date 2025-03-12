@@ -12,15 +12,20 @@ from hdmf.build import TypeMap
 class TestTypemapCache(unittest.TestCase):
     """Tests for the typemap caching functionality."""
 
+    @classmethod
+    def setUpClass(cls):
+        pynwb.reset_namespaces()  # reset namespaces before running these tests
+
     def setUp(self):
         """Set up a temporary directory for cache files."""
 
         # create mock resources variables for testing
         self.temp_dir = tempfile.TemporaryDirectory()
         self.original_resources = getattr(pynwb, '__resources')
-        self.mock_resources = dict(namespace_path=self.original_resources['namespace_path'],
-                                   user_cache_dir=Path(self.temp_dir.name) / "pynwb" / pynwb.__version__,
-                                   cached_typemap_path=Path(self.temp_dir.name) / "pynwb" / pynwb.__version__ / 'pynwb_core_typemap.pkl',
+        self.mock_resources = dict(
+            namespace_path=self.original_resources['namespace_path'],
+            user_cache_dir=Path(self.temp_dir.name) / "pynwb" / pynwb.__version__,
+            cached_typemap_path=Path(self.temp_dir.name) / "pynwb" / pynwb.__version__ / 'pynwb_core_typemap.pkl',
         )
 
         # make the cache directories if they do not exist
