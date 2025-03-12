@@ -1,5 +1,10 @@
 # PyNWB Changelog
 
+## Upcoming
+
+### Enhancements and minor changes
+- Added option to disable typemap caching and updated type map cache location. @stephprince [#2057](https://github.com/NeurodataWithoutBorders/pynwb/pull/2057)
+
 ## PyNWB 3.0.0 (February 26, 2025)
 
 ### Breaking changes

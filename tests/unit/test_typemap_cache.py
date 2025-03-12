@@ -100,7 +100,7 @@ class TestTypemapCache(unittest.TestCase):
                 load_func()
             self.assertTrue(test_version_cache_path.exists())
 
-        # Verify the test cache version path is not the same as the orignial
+        # Verify the test cache version path is not the same as the original
         original_resources = getattr(pynwb, '__resources')
         current_cache_path = Path(original_resources['cached_typemap_path'])
         self.assertNotEqual(current_cache_path, test_version_cache_path)
