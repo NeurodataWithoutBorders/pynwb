@@ -5,6 +5,9 @@
 ### Enhancements and minor changes
 - Allow files with a timestamps reference time that has no timezone information to be read. @stephprince [#2056](https://github.com/NeurodataWithoutBorders/pynwb/pull/2056)
 
+### Bug fixes
+- Fix `add_data_interface` functionality that was mistakenly removed in PyNWB 3.0. @stephprince [#2052](https://github.com/NeurodataWithoutBorders/pynwb/pull/2052)
+
 ## PyNWB 3.0.0 (February 26, 2025)
 
 ### Breaking changes
