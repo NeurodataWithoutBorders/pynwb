@@ -77,6 +77,7 @@ class ProcessingModule(MultiContainerInterface):
              'doc': 'the NWBDataInterface to add to this Module'})
     def add_data_interface(self, **kwargs):
         warn('add_data_interface is deprecated and will be removed in PyNWB 4.0. Use add instead.', DeprecationWarning)
+        self.add(kwargs['NWBDataInterface'])
 
     @docval({'name': 'data_interface_name', 'type': str, 'doc': 'the name of the NWBContainer to retrieve'})
     def get_data_interface(self, **kwargs):

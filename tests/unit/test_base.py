@@ -50,6 +50,8 @@ class TestProcessingModule(TestCase):
                                   exc_msg=msg
         ):
             self.pm.add_data_interface(ts)
+            self.assertIn(ts.name, self.pm.containers)
+            self.assertIs(ts, self.pm.containers[ts.name])
 
     def test_deprecated_add_container(self):
         ts = self._create_time_series()
@@ -58,6 +60,8 @@ class TestProcessingModule(TestCase):
                                   exc_msg=msg
         ):
             self.pm.add_container(ts)
+            self.assertIn(ts.name, self.pm.containers)
+            self.assertIs(ts, self.pm.containers[ts.name])
 
     def test_get_data_interface(self):
         """Test adding a data interface to a ProcessingModule and retrieving it using get(...)."""
