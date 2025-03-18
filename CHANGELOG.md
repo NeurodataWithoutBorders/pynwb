@@ -5,6 +5,9 @@
 ### Bug fixes
 - Fix `add_data_interface` functionality that was mistakenly removed in PyNWB 3.0. @stephprince [#2052](https://github.com/NeurodataWithoutBorders/pynwb/pull/2052)
 
+### Enhancements and minor changes
+- When an external file is detected when initializing an ImageSeries, automatically set format to "external" instead of raising an error if no format was provided. @stephprince
+
 ## PyNWB 3.0.0 (February 26, 2025)
 
 ### Breaking changes

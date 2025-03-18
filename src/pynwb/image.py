@@ -105,11 +105,7 @@ class ImageSeries(TimeSeries):
         for key, val in args_to_set.items():
             setattr(self, key, val)
 
-        if self._change_external_file_format():
-            self._error_on_new_warn_on_construct(error_msg=f"{self.__class__.__name__} '{self.name}': "
-                                                "The value for 'format' has been changed to 'external'. "
-                                                "If an external file is detected, setting a value for "
-                                                "'format' other than 'external' is deprecated.")
+        self._change_external_file_format()
 
         error_msg = self._check_image_series_dimension()
         if error_msg:
@@ -137,9 +133,6 @@ class ImageSeries(TimeSeries):
             and self.format is None
         ):
             self.format = "external"
-            return True
-
-        return False
 
     def _check_time_series_dimension(self):
         """Override _check_time_series_dimension to do nothing.
