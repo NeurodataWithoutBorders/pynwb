@@ -338,7 +338,7 @@ class PlaneSegmentation(DynamicTable):
         """Add a Region Of Interest (ROI) data to this"""
         pixel_mask, voxel_mask, image_mask = popargs('pixel_mask', 'voxel_mask', 'image_mask', kwargs)
         if image_mask is None and pixel_mask is None and voxel_mask is None:
-            raise ValueError("Must provide at least on of 'image_mask', 'pixel_mask', or 'voxel_mask'")
+            raise ValueError("Must provide at least one of 'image_mask', 'pixel_mask', or 'voxel_mask'")
         rkwargs = dict(kwargs)
         if image_mask is not None:
             rkwargs['image_mask'] = image_mask

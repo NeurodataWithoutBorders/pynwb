@@ -578,7 +578,7 @@ class PlaneSegmentationConstructor(TestCase):
 
     def test_add_roi_missing_params(self):
         _, _, pS = self.create_basic_plane_segmentation()
-        msg = "Must provide at least on of 'image_mask', 'pixel_mask', or 'voxel_mask'"
+        msg = "Must provide at least one of 'image_mask', 'pixel_mask', or 'voxel_mask'"
         with self.assertRaises(ValueError, msg=msg):
             pS.add_roi()
 

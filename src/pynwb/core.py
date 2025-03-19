@@ -155,7 +155,7 @@ class ScratchData(NWBData):
     @property
     def notes(self):
         """
-        Get the notes attribute. This will be deprecated in the future.
+        Get the notes attribute. Use of ScratchData.notes has been deprecated and will be removed in PyNWB 4.0.
         """
         warn('Use of ScratchData.notes will be deprecated. Use ScratchData.description instead.',
              PendingDeprecationWarning)
@@ -164,7 +164,7 @@ class ScratchData(NWBData):
     @notes.setter
     def notes(self, value):
         """
-        Set the notes attribute. This will be deprecated in the future.
+        Set the notes attribute. Use of ScratchData.notes has been deprecated and will be removed in PyNWB 4.0.
         """
         warn('Use of ScratchData.notes will be deprecated. Use ScratchData.description instead.',
              PendingDeprecationWarning)
