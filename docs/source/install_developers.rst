@@ -86,6 +86,11 @@ editable mode.
     pip install -r requirements.txt -r requirements-dev.txt
     pip install -e .
 
+.. note::
+    When importing PyNWB for the first time, the type map is automatically cached in a pickle file to improve load 
+    times on future imports. However, this can cause issues if you are modifying the schema and testing schema-related 
+    changes. To disable type map caching, set the environment variable ``PYNWB_NO_CACHE_DIR`` to ``1``.
+
 
 Run tests
 ---------
