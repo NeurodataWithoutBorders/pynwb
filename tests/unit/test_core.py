@@ -76,7 +76,7 @@ class TestNWBData(TestCase):
         np.testing.assert_array_equal(obj.data, [1, 2, 3, 4])
 
     def test_append_scalar(self):
-        obj = NWBData("obj1", data=1)
+        obj = NWBData(name="obj1", data=1)
         with self.assertRaises(ValueError):
             obj.append(2)
 
@@ -96,7 +96,7 @@ class TestNWBData(TestCase):
         np.testing.assert_array_equal(obj.data, [[1, 2, 3], [1, 2, 3], [4, 5, 6]])
 
     def test_extend_scalar(self):
-        obj = NWBData("obj1", data=1)
+        obj = NWBData(name="obj1", data=1)
         with self.assertRaises(ValueError):
             obj.extend(2)
     
