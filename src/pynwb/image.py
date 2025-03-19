@@ -13,7 +13,8 @@ The following classes are available:
 - :class:`~pynwb.base.Images`: Container for storing a collection of images (imported from :mod:`pynwb.base`)
 - :class:`~pynwb.base.Image`: Base class for image data (imported from :mod:`pynwb.base`)
 
-Note: While the :class:`~pynwb.base.Image` and :class:`~pynwb.base.Images` classes are defined in :mod:`pynwb.base`, they can be imported directly from this module:
+Note: While the :class:`~pynwb.base.Image` and :class:`~pynwb.base.Images` classes are defined in :mod:`pynwb.base`, 
+they can be imported directly from this module:
     from pynwb.image import Image, Images
 """
 
