@@ -15,6 +15,9 @@ The following classes are available:
 
 Note: While the :class:`~pynwb.base.Image` and :class:`~pynwb.base.Images` classes are defined in :mod:`pynwb.base`, 
 they can be imported directly from this module:
+
+.. code-block:: python
+
     from pynwb.image import Image, Images
 """
 
