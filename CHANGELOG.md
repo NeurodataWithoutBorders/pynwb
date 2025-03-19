@@ -1,28 +1,72 @@
 # PyNWB Changelog
 
-## PyNWB 3.0.0 (Upcoming)
+## Upcoming
 
 ### Enhancements and minor changes
+- Added option to disable typemap caching and updated type map cache location. @stephprince [#2057](https://github.com/NeurodataWithoutBorders/pynwb/pull/2057)
+
+### Bug fixes
+- Fix `add_data_interface` functionality that was mistakenly removed in PyNWB 3.0. @stephprince [#2052](https://github.com/NeurodataWithoutBorders/pynwb/pull/2052)
+- Fixed bug in `IntracellularRecordingsTable.__init__` were `IntracellularResponsesTable` wasn't created correctly when custom category tables were provided @oruebel. [#2031](https://github.com/NeurodataWithoutBorders/pynwb/pull/2031)
+- Fixed shape check in `SpikeEventSeries.__init__` to support `AbstractDataChunkIterator` for timestamps/data. @oruebel [#2031](https://github.com/NeurodataWithoutBorders/pynwb/pull/2031)
+- Added unit tests to enhance coverage of `core.py`, `image.py`, `spec.py`, `icephys.py`, `epoch.py` and others. @oruebel [#2031](https://github.com/NeurodataWithoutBorders/pynwb/pull/2031)
+ 
+## PyNWB 3.0.0 (February 26, 2025)
+
+### Breaking changes
+- The validation methods have been updated with multiple breaking changes. @stephprince [#1911](https://github.com/NeurodataWithoutBorders/pynwb/pull/1911)
+   - The behavior of `pynwb.validate(io=...)` now matches the behavior of `pynwb.validate(path=...)`. In previous pynwb versions, `pynwb.validate(io=...)` did not use the cached namespaces during validation. To obtain the same behavior as in previous versions, you can update the function call to `pynwb.validate(io=..., use_cached_namespaces=False)`
+   - `pynwb.validate` will return only a list of validation errors instead of a tuple: (list of validation_errors, status code)
+   - the `pynwb.validate(path=...)` argument has been added as a replacement for `pynwb.validate(paths=[...])`, which will be deprecated in a future major release [#2024](https://github.com/NeurodataWithoutBorders/pynwb/pull/2024)
+   - The validate module has been renamed to `validation.py`. The validate method can be 
+   imported using `import pynwb; pynwb.validate` or `from pynwb import validate`
+
+### Deprecations
+- The following deprecated classes will now raise errors when creating new instances of these classes: ``ClusteringWaveforms``, ``Clustering``, ``SweepTable``. Reading files using these data types will continue to be supported.
+- The following methods and arguments have been deprecated:
+  - ``ProcessingModule.add_container`` and ``ProcessingModule.add_data_interface`` are replaced by  ``ProcessingModule.add``
+  - ``ProcessingModule.get_container`` and ``ProcessingModule.get_data_interface`` are replaced by ``ProcessingModule.get``
+  - ``ScratchData.notes`` is deprecated. Use ``ScratchData.description`` instead.
+  - ``NWBFile.ic_electrodes`` is deprecated. Use ``NWBFile.icephys_electrodes`` instead.
+  - ``NWBFile.ec_electrodes`` is deprecated. Use ``NWBFile.electrodes`` instead.
+  - ``NWBFile.icephys_filtering`` is deprecated. Use ``IntracellularElectrode.filtering`` instead.
+  - ``NWBFile.modules`` is deprecated. Use ``NWBFile.processing`` instead.
+  - ``ImageSeries.format`` is fixed to 'external' if an external file is provided.
+  - ``ImageSeries.bits_per_pixel`` is deprecated.
+  - ``ImagingPlane.manifold``, ``ImagingPlane.conversion`` and ``ImagingPlane.unit`` are deprecated. Use ``ImagingPlane.origin_coords`` and ``ImagingPlane.grid_spacing`` instead.
+  - ``IndexSeries.unit`` is fixed to "N\A". 
+  - ``IndexSeries.indexed_timeseries`` is deprecated. Use ``IndexSeries.indexed_images`` instead.
+- The following deprecated methods have been removed:
+  - ``NWBFile.add_ic_electrode`` is removed. Use ``NWBFile.add_icephys_electrode`` instead.
+  - ``NWBFile.create_ic_electrode`` is removed. Use ``NWBFile.create_icephys_electrode`` instead.
+  - ``NWBFile.get_ic_electrode`` is removed. Use ``NWBFile.get_icephys_electrode`` instead.
+  - ``pynwb._get_resources`` is removed.
+
+### Enhancements and minor changes
+- Added `__all__` to modules. @bendichter [#2021](https://github.com/NeurodataWithoutBorders/pynwb/pull/2021)
 - Added `pynwb.read_nwb` convenience method to simplify reading an NWBFile written with any backend @h-mayorquin [#1994](https://github.com/NeurodataWithoutBorders/pynwb/pull/1994)
+- Constrained `hdmf<5` to prevent future compatibility issues. [#2040](https://github.com/NeurodataWithoutBorders/pynwb/pull/2040)   
+
+### Bug fixes
+- Made distance, orientation, and field_of_view optional in OpticalSeries to match schema @bendichter [#2023](https://github.com/NeurodataWithoutBorders/pynwb/pull/2023)
 - Added support for NWB schema 2.8.0. @rly [#2001](https://github.com/NeurodataWithoutBorders/pynwb/pull/2001)
   - Removed `SpatialSeries.bounds` field that was not functional. This will be fixed in a future release. @rly [#1907](https://github.com/NeurodataWithoutBorders/pynwb/pull/1907), [#1996](https://github.com/NeurodataWithoutBorders/pynwb/pull/1996)
   - Added support for `NWBFile.was_generated_by` field. @stephprince [#1924](https://github.com/NeurodataWithoutBorders/pynwb/pull/1924)
   - Added support for `model_number`, `model_name`, and `serial_number` fields to `Device`. @stephprince [#1997](https://github.com/NeurodataWithoutBorders/pynwb/pull/1997)
   - Deprecated `EventWaveform` neurodata type. @rly [#1940](https://github.com/NeurodataWithoutBorders/pynwb/pull/1940)
   - Deprecated `ImageMaskSeries` neurodata type. @rly [#1941](https://github.com/NeurodataWithoutBorders/pynwb/pull/1941)
+- Added enhancements to the validation CLI. @stephprince [#1911](https://github.com/NeurodataWithoutBorders/pynwb/pull/1911)
+  - Added an entry point for the validation module. You can now use `pynwb-validate "file.nwb"`.
+  - Added the `--json-outpath-path` CLI argument to output validation results in a machine readable format.
 - Removed python 3.8 support, added python 3.13 support. @stephprince [#2007](https://github.com/NeurodataWithoutBorders/pynwb/pull/2007)
+- Added warnings when using positional arguments in `Container` constructor methods. Positional arguments will raise errors in the next major release. @stephprince [#1972](https://github.com/NeurodataWithoutBorders/pynwb/pull/1972)
 - `mock_ElectricalSeries`. Make number of electrodes between data and electrode region agree when explicitly passing data @h-mayorquin [#2019](https://github.com/NeurodataWithoutBorders/pynwb/pull/2019)
 
 ### Documentation and tutorial enhancements
 - Updated `SpikeEventSeries`, `DecompositionSeries`, and `FilteredEphys` examples. @stephprince [#2012](https://github.com/NeurodataWithoutBorders/pynwb/pull/2012)
 - Replaced deprecated `scipy.misc.face` dataset in the images tutorial with another example. @stephprince [#2016](https://github.com/NeurodataWithoutBorders/pynwb/pull/2016)
-
-### Bug fixes
-- Fixed bug in `IntracellularRecordingsTable.__init__` were `IntracellularResponsesTable` wasn't created correctly when custom category tables were provided @oruebel. [#2031](https://github.com/NeurodataWithoutBorders/pynwb/pull/2031)
-- Fixed shape check in `SpikeEventSeries.__init__` to support `AbstractDataChunkIterator` for timestamps/data. @oruebel [#2031](https://github.com/NeurodataWithoutBorders/pynwb/pull/2031)
-- Added unit tests to enhance coverage of `core.py`, `image.py`, `spec.py`, `icephys.py`, `epoch.py` and others. @oruebel [#2031](https://github.com/NeurodataWithoutBorders/pynwb/pull/2031)
+- Removed Allen Brain Observatory example which was unnecessary and difficult to maintain. @rly [#2026](https://github.com/NeurodataWithoutBorders/pynwb/pull/2026)
  
-
 ## PyNWB 2.8.3 (November 19, 2024)
 
 ### Enhancements and minor changes

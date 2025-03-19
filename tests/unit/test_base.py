@@ -45,21 +45,23 @@ class TestProcessingModule(TestCase):
 
     def test_deprecated_add_data_interface(self):
         ts = self._create_time_series()
-        with self.assertWarnsWith(
-            PendingDeprecationWarning, "add_data_interface will be replaced by add"
+        msg = 'add_data_interface is deprecated and will be removed in PyNWB 4.0. Use add instead.'
+        with self.assertWarnsWith(warn_type=DeprecationWarning,
+                                  exc_msg=msg
         ):
             self.pm.add_data_interface(ts)
-        self.assertIn(ts.name, self.pm.containers)
-        self.assertIs(ts, self.pm.containers[ts.name])
+            self.assertIn(ts.name, self.pm.containers)
+            self.assertIs(ts, self.pm.containers[ts.name])
 
     def test_deprecated_add_container(self):
         ts = self._create_time_series()
-        with self.assertWarnsWith(
-            PendingDeprecationWarning, "add_container will be replaced by add"
+        msg = 'add_container is deprecated and will be removed in PyNWB 4.0. Use add instead.'
+        with self.assertWarnsWith(warn_type=DeprecationWarning, 
+                                  exc_msg=msg
         ):
             self.pm.add_container(ts)
-        self.assertIn(ts.name, self.pm.containers)
-        self.assertIs(ts, self.pm.containers[ts.name])
+            self.assertIn(ts.name, self.pm.containers)
+            self.assertIs(ts, self.pm.containers[ts.name])
 
     def test_get_data_interface(self):
         """Test adding a data interface to a ProcessingModule and retrieving it using get(...)."""
@@ -72,20 +74,22 @@ class TestProcessingModule(TestCase):
     def test_deprecated_get_data_interface(self):
         ts = self._create_time_series()
         self.pm.add(ts)
-        with self.assertWarnsWith(
-            PendingDeprecationWarning, "get_data_interface will be replaced by get"
+        msg = 'get_data_interface is deprecated and will be removed in PyNWB 4.0. Use get instead.'
+        with self.assertWarnsWith(warn_type=DeprecationWarning, 
+                                  exc_msg=msg
         ):
             tmp = self.pm.get_data_interface("test_ts")
-        self.assertIs(tmp, ts)
+            self.assertIs(tmp, ts)
 
     def test_deprecated_get_container(self):
         ts = self._create_time_series()
         self.pm.add(ts)
-        with self.assertWarnsWith(
-            PendingDeprecationWarning, "get_container will be replaced by get"
+        msg = 'get_container is deprecated and will be removed in PyNWB 4.0. Use get instead.'
+        with self.assertWarnsWith(warn_type=DeprecationWarning, 
+                                  exc_msg=msg
         ):
             tmp = self.pm.get_container("test_ts")
-        self.assertIs(tmp, ts)
+            self.assertIs(tmp, ts)
 
     def test_getitem(self):
         """Test adding a data interface to a ProcessingModule and retrieving it using __getitem__(...)."""
@@ -375,12 +379,13 @@ class TestTimeSeries(TestCase):
                 timestamps=[0.3, 0.4, 0.5],
             )
 
-    def test_dimension_warning(self):
+    def test_timestamps_data_length_error_raised(self):
+        """Test that TimeSeries cannot be created with timestamps and data of different lengths."""
         msg = (
             "TimeSeries 'test_ts2': Length of data does not match length of timestamps. Your data may be "
             "transposed. Time should be on the 0th dimension"
         )
-        with self.assertWarnsWith(UserWarning, msg):
+        with self.assertRaisesWith(ValueError, msg):
             TimeSeries(
                 name="test_ts2",
                 data=[10, 11, 12],
@@ -477,6 +482,39 @@ class TestTimeSeries(TestCase):
         pm.add(ts1)
         pm.add(ts2)
         self.assertIn('(link to processing/test_ts1/timestamps)', pm._repr_html_())
+
+    def test_timestamps_data_length_warning_construct_mode(self):
+        """
+        Test that warning is raised when the length of data does not match the length of
+        timestamps in case that the TimeSeries in construct mode (i.e., during read).
+        """
+        msg = (
+            "TimeSeries 'test_ts2': Length of data does not match length of timestamps. Your data may be "
+            "transposed. Time should be on the 0th dimension"
+        )
+        for timestamps in [[0], [1, 2, 3, 4]]:
+            with self.subTest():
+                # Create the time series in construct mode, modelling the behavior
+                # of the ObjectMapper on read while avoiding having to create, write,
+                # and read and entire NWB file
+                obj = TimeSeries.__new__(
+                    TimeSeries,
+                    container_source=None,
+                    parent=None,
+                    object_id="test",
+                    in_construct_mode=True,
+                )
+                with self.assertWarnsWith(UserWarning, msg):
+                    obj.__init__(
+                        name="test_ts2",
+                        data=[10, 11, 12],
+                        unit="grams",
+                        timestamps=timestamps,
+                    )
+                # Disable construct mode. Since we are not using this object anymore
+                # this is not strictly necessary but is good style in case we expand
+                # the test later on.
+                obj._in_construct_mode = False
 
 
 class TestImage(TestCase):

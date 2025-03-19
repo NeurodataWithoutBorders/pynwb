@@ -6,7 +6,7 @@ from pynwb.testing import TestCase
 class OptogeneticSeriesConstructor(TestCase):
 
     def test_init(self):
-        device = Device('name')
+        device = Device(name='name')
         oS = OptogeneticStimulusSite(
             name='site1',
             device=device,

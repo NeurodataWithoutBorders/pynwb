@@ -20,7 +20,7 @@ from pynwb.testing import TestCase
 class ImageSeriesConstructor(TestCase):
 
     def test_init(self):
-        dev = Device('test_device')
+        dev = Device(name='test_device')
         iS = ImageSeries(
             name='test_iS',
             unit='unit',
@@ -84,14 +84,13 @@ class ImageSeriesConstructor(TestCase):
         )
         self.assertEqual(iS.unit, ImageSeries.DEFAULT_UNIT)
 
-    def test_dimension_warning(self):
-        """Test that a warning is raised when the dimensions of the data are not the
-        same as the dimensions of the timestamps."""
+    def test_dimension_error(self):
+        """Test that ImageSeries cannot be created with timestamps and data of different lengths."""
         msg = (
             "ImageSeries 'test_iS': Length of data does not match length of timestamps. Your data may be "
             "transposed. Time should be on the 0th dimension"
         )
-        with self.assertWarnsWith(UserWarning, msg):
+        with self.assertRaisesWith(ValueError, msg):
             ImageSeries(
                 name='test_iS',
                 data=np.ones((3, 3, 3)),
@@ -100,9 +99,14 @@ class ImageSeriesConstructor(TestCase):
             )
 
     def test_dimension_warning_external_file_with_timestamps(self):
-        """Test that a warning is not raised when external file is used with timestamps."""
+        """Test that warning is not raised when external file is used with timestamps."""
+        obj = ImageSeries.__new__(ImageSeries,
+                                  container_source=None,
+                                  parent=None,
+                                  object_id="test",
+                                  in_construct_mode=True)
         with warnings.catch_warnings(record=True) as w:
-            ImageSeries(
+            obj.__init__(
                 name='test_iS',
                 external_file=['external_file'],
                 format='external',
@@ -111,6 +115,10 @@ class ImageSeriesConstructor(TestCase):
                 timestamps=[1, 2, 3, 4]
             )
             self.assertEqual(w, [])
+        # Disable construct mode. Since we are not using this object any more
+        # this is not strictly necessary but is good style in case we expand
+        # the test later on
+        obj._in_construct_mode = False
 
     def test_dimension_warning_external_file_with_rate(self):
         """Test that a warning is not raised when external file is used with rate."""
@@ -154,7 +162,7 @@ class ImageSeriesConstructor(TestCase):
                     "ImageSeries 'test_iS': The number of frame indices in "
                     "'starting_frame' should have the same length as 'external_file'."
                 )
-                # Create the image series in construct mode, modelling the behavior
+                # Create the image series in construct mode, modeling the behavior
                 # of the ObjectMapper on read while avoiding having to create, write,
                 # and read and entire NWB file
                 obj = ImageSeries.__new__(ImageSeries,
@@ -243,17 +251,23 @@ class ImageSeriesConstructor(TestCase):
         """Test that format is set to 'external' if not provided, when external_file is provided."""
         msg = (
             "ImageSeries 'test_iS': The value for 'format' has been changed to 'external'. "
-            "Setting a default value for 'format' is deprecated and will be changed to "
-            "raising a ValueError in the next major release."
+            "If an external file is detected, setting a value for "
+            "'format' other than 'external' is deprecated."
         )
-        with self.assertWarnsWith(DeprecationWarning, msg):
-            iS = ImageSeries(
-                name="test_iS",
+        kwargs = dict(name="test_iS",
                 external_file=["external_file", "external_file2"],
                 unit="n.a.",
                 starting_frame=[0, 10],
-                rate=0.2,
-            )
+                rate=0.2,)
+        
+        # create object with deprecated argument
+        with self.assertRaisesWith(ValueError, msg):
+            ImageSeries(**kwargs)
+
+        # create object in construct mode, modeling the behavior of the ObjectMapper on read
+        iS = ImageSeries.__new__(ImageSeries, in_construct_mode=True)
+        with self.assertWarnsWith(warn_type=UserWarning, exc_msg=msg):
+            iS.__init__(**kwargs)
         self.assertEqual(iS.format, "external")
 
     def test_external_file_with_correct_format(self):
@@ -309,26 +323,24 @@ class ImageSeriesConstructor(TestCase):
                 rate=0.2,
             )
 
-    def test_with_bits_per_pixel(self):
+
+    def test_bits_per_pixel_deprecation(self):
         """Test that bits_per_pixel can be set and that a deprecated warning is raised."""
-        msg = "bits_per_pixel is no longer used"
-        # test that warning is raised when bits_per_pixel is set on construction
-        with self.assertWarnsWith(warn_type=DeprecationWarning, exc_msg=msg):
-            iS = ImageSeries(
-                name='test_iS',
+        msg = "bits_per_pixel is deprecated"
+        kwargs = dict(name='test_iS',
                 unit='unit',
                 external_file=['external_file'],
                 starting_frame=[0],
                 format='external',
                 timestamps=[1., 2., 3.],
-                bits_per_pixel=8
-            )
-        self.assertEqual(iS.bits_per_pixel, 8)
+                bits_per_pixel=8)
+        with self.assertRaisesWith(ValueError, msg):
+            ImageSeries(**kwargs)
 
-        # test that warning is raised when bits_per_pixel is set after construction
-        with self.assertWarnsWith(warn_type=DeprecationWarning, exc_msg=msg):
-            iS.bits_per_pixel = 9
-        self.assertEqual(iS.bits_per_pixel, 9)
+        # create object in construct mode, modeling the behavior of the ObjectMapper on read
+        # no warning or error should be raised
+        iS = ImageSeries.__new__(ImageSeries, in_construct_mode=True)
+        iS.__init__(**kwargs)
 
 
 class IndexSeriesConstructor(TestCase):
@@ -350,23 +362,29 @@ class IndexSeriesConstructor(TestCase):
         self.assertEqual(iS.unit, 'N/A')
         self.assertIs(iS.indexed_images, images)
 
-    def test_init_bad_unit(self):
+    def test_init_bad_unit(self):        
         ts = TimeSeries(
             name='test_ts',
             data=[1, 2, 3],
             unit='unit',
             timestamps=[0.1, 0.2, 0.3]
         )
-        msg = ("The 'unit' field of IndexSeries is fixed to the value 'N/A' starting in NWB 2.5. Passing "
-               "a different value for 'unit' will raise an error in PyNWB 3.0.")
-        with self.assertWarnsWith(PendingDeprecationWarning, msg):
-            iS = IndexSeries(
-                name='test_iS',
+        msg = ("The 'unit' field of IndexSeries is fixed to the value 'N/A'.")
+        kwargs = dict(name='test_iS',
                 data=[1, 2, 3],
                 unit='na',
                 indexed_timeseries=ts,
-                timestamps=[0.1, 0.2, 0.3]
-            )
+                timestamps=[0.1, 0.2, 0.3])
+
+        # create object with deprecated argument
+        with self.assertRaisesWith(ValueError, msg):
+            IndexSeries(**kwargs)
+
+        # create object in construct mode, modeling the behavior of the ObjectMapper on read
+        # no warning or error should be raised
+        iS = IndexSeries.__new__(IndexSeries, in_construct_mode=True)
+        iS.__init__(**kwargs)
+
         self.assertEqual(iS.unit, 'N/A')
 
     def test_init_indexed_ts(self):
@@ -376,28 +394,34 @@ class IndexSeriesConstructor(TestCase):
             unit='unit',
             timestamps=[0.1, 0.2, 0.3]
         )
-        msg = ("The indexed_timeseries field of IndexSeries is discouraged and will be deprecated in "
-               "a future version of NWB. Use the indexed_images field instead.")
-        with self.assertWarnsWith(PendingDeprecationWarning, msg):
-            iS = IndexSeries(
-                name='test_iS',
+        msg = ("The indexed_timeseries field of IndexSeries is deprecated. "
+               "Use the indexed_images field instead.")
+        kwargs = dict(name='test_iS',
                 data=[1, 2, 3],
                 unit='N/A',
                 indexed_timeseries=ts,
-                timestamps=[0.1, 0.2, 0.3]
-            )
+                timestamps=[0.1, 0.2, 0.3])
+        
+        # create object with deprecated argument
+        with self.assertRaisesWith(ValueError, msg):
+            IndexSeries(**kwargs)
+
+        # create object in construct mode, modeling the behavior of the ObjectMapper on read
+        # no warning or error should be raised
+        iS = IndexSeries.__new__(IndexSeries, in_construct_mode=True)
+        iS.__init__(**kwargs)
+
         self.assertIs(iS.indexed_timeseries, ts)
 
-    def test_init_no_indexed_source(self):
+    def test_init_no_indexed_ts_or_timeseries(self):
         """Test that an error is raised when neither indexed_timeseries nor indexed_images is provided"""
-        msg = "Either indexed_timeseries or indexed_images must be provided when creating an IndexSeries."
+        msg = ("Either indexed_timeseries or indexed_images "
+               "must be provided when creating an IndexSeries.")
         with self.assertRaisesWith(ValueError, msg):
-            IndexSeries(
-                name='test_iS',
-                data=[1, 2, 3],
-                unit='N/A',
-                timestamps=[0.1, 0.2, 0.3]
-            )
+            IndexSeries(name='test_iS', 
+                        data=[1, 2, 3], 
+                        unit='N/A', 
+                        timestamps=[0.1, 0.2, 0.3])
 
     def test_init_conversion_warning(self):
         """Test that a warning is raised when conversion is provided"""
@@ -454,6 +478,7 @@ class IndexSeriesConstructor(TestCase):
             )
 
 
+
 class ImageMaskSeriesConstructor(TestCase):
 
     def test_init(self):
@@ -482,6 +507,20 @@ class OpticalSeriesConstructor(TestCase):
         self.assertEqual(ts.format, 'external')
 
 
+    def test_init_all_optional_fields_none(self):
+        """Test that OpticalSeries can be created with all optional fields set to None."""
+        ts = OpticalSeries(
+            name="test_ts",
+            unit="unit",
+            external_file=["external_file"],
+            starting_frame=[0],
+            format="external",
+            timestamps=[1.0, 2.0],
+        )
+        self.assertIsNone(ts.distance)
+        self.assertIsNone(ts.field_of_view)
+        self.assertIsNone(ts.orientation)
+
 class TestImageSubtypes(TestCase):
 
     def test_grayscale_image(self):
@@ -491,4 +530,4 @@ class TestImageSubtypes(TestCase):
         RGBImage(name='test_rgb_image', data=np.ones((2, 2, 3)))
 
     def test_rgba_image(self):
-        RGBAImage('test_rgba_image', np.ones((2, 2, 4)))
+        RGBAImage(name='test_rgba_image', data=np.ones((2, 2, 4)))
