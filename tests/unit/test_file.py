@@ -126,18 +126,22 @@ class NWBFileTest(TestCase):
 
         remove_test_file("electrodes_mwe.nwb")
 
-    def test_access_processing(self):
+    def test_access_processing_with_modules(self):
         self.nwbfile.create_processing_module('test_mod', 'test_description')
-        # test deprecate .modules
-        with self.assertWarnsWith(DeprecationWarning, 'NWBFile.modules has been replaced by NWBFile.processing.'):
-            modules = self.nwbfile.modules['test_mod']
-        self.assertIs(self.nwbfile.processing['test_mod'], modules)
+
+        # create object with deprecated argument
+        msg = "'NWBFile' object has no attribute 'modules'"
+        with self.assertRaisesWith(AttributeError, msg):
+            self.nwbfile.modules['test_mod']
 
     def test_epoch_tags(self):
         tags1 = ['t1', 't2']
         tags2 = ['t3', 't4']
         tstamps = np.arange(1.0, 100.0, 0.1, dtype=np.float64)
-        ts = TimeSeries("test_ts", list(range(len(tstamps))), 'unit', timestamps=tstamps)
+        ts = TimeSeries(name="test_ts", 
+                        data=list(range(len(tstamps))), 
+                        unit='unit', 
+                        timestamps=tstamps)
         expected_tags = tags1 + tags2
         self.nwbfile.add_epoch(0.0, 1.0, tags1, ts)
         self.nwbfile.add_epoch(0.0, 1.0, tags2, ts)
@@ -157,22 +161,23 @@ class NWBFileTest(TestCase):
         self.assertEqual(set(), self.nwbfile.epoch_tags)
 
     def test_add_acquisition(self):
-        self.nwbfile.add_acquisition(TimeSeries('test_ts', [0, 1, 2, 3, 4, 5],
-                                                'grams', timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5]))
+        self.nwbfile.add_acquisition(TimeSeries(name='test_ts', 
+                                                data=[0, 1, 2, 3, 4, 5],
+                                                unit='grams',
+                                                timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5]))
         self.assertEqual(len(self.nwbfile.acquisition), 1)
 
     def test_add_stimulus(self):
-        self.nwbfile.add_stimulus(TimeSeries('test_ts', [0, 1, 2, 3, 4, 5],
-                                             'grams', timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5]))
+        self.nwbfile.add_stimulus(TimeSeries(name='test_ts', 
+                                             data=[0, 1, 2, 3, 4, 5],
+                                             unit='grams', 
+                                             timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5]))
         self.assertEqual(len(self.nwbfile.stimulus), 1)
 
     def test_add_stimulus_timeseries_arg(self):
         """Test nwbfile.add_stimulus using the deprecated 'timeseries' keyword argument"""
-        msg = (
-            "The 'timeseries' keyword argument is deprecated and will be removed in PyNWB 3.0. "
-            "Use the 'stimulus' argument instead."
-        )
-        with self.assertWarnsWith(DeprecationWarning, msg):
+        msg = ("NWBFile.add_stimulus: missing argument 'stimulus', unrecognized argument: 'timeseries'")
+        with self.assertRaisesWith(TypeError, msg):
             self.nwbfile.add_stimulus(
                 timeseries=TimeSeries(
                     name='test_ts',
@@ -181,17 +186,12 @@ class NWBFileTest(TestCase):
                     timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5]
                 )
             )
-        self.assertEqual(len(self.nwbfile.stimulus), 1)
 
     def test_add_stimulus_no_stimulus_arg(self):
         """Test nwbfile.add_stimulus using the deprecated 'timeseries' keyword argument"""
-        msg = (
-            "The 'stimulus' keyword argument is required. The 'timeseries' keyword argument can be "
-            "provided for backwards compatibility but is deprecated in favor of 'stimulus' and will be "
-            "removed in PyNWB 3.0."
-        )
-        with self.assertRaisesWith(ValueError, msg):
-            self.nwbfile.add_stimulus(None)
+        msg = ("NWBFile.add_stimulus: missing argument 'stimulus'")
+        with self.assertRaisesWith(TypeError, msg):
+            self.nwbfile.add_stimulus()
         self.assertEqual(len(self.nwbfile.stimulus), 0)
 
     def test_add_stimulus_dynamic_table(self):
@@ -204,8 +204,10 @@ class NWBFileTest(TestCase):
         self.assertIs(self.nwbfile.stimulus['test_dynamic_table'], dt)
 
     def test_add_stimulus_template(self):
-        self.nwbfile.add_stimulus_template(TimeSeries('test_ts', [0, 1, 2, 3, 4, 5],
-                                                      'grams', timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5]))
+        self.nwbfile.add_stimulus_template(TimeSeries(name='test_ts', 
+                                                      data=[0, 1, 2, 3, 4, 5],
+                                                      unit='grams', 
+                                                      timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5]))
         self.assertEqual(len(self.nwbfile.stimulus_template), 1)
 
     def test_add_stimulus_template_images(self):
@@ -215,33 +217,45 @@ class NWBFileTest(TestCase):
         self.assertEqual(len(self.nwbfile.stimulus_template), 1)
 
     def test_add_analysis(self):
-        self.nwbfile.add_analysis(TimeSeries('test_ts', [0, 1, 2, 3, 4, 5],
-                                             'grams', timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5]))
+        self.nwbfile.add_analysis(TimeSeries(name='test_ts', 
+                                             data=[0, 1, 2, 3, 4, 5],
+                                             unit='grams', 
+                                             timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5]))
         self.assertEqual(len(self.nwbfile.analysis), 1)
 
     def test_add_acquisition_check_dups(self):
-        self.nwbfile.add_acquisition(TimeSeries('test_ts', [0, 1, 2, 3, 4, 5],
-                                                'grams', timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5]))
+        self.nwbfile.add_acquisition(TimeSeries(name='test_ts', 
+                                                data=[0, 1, 2, 3, 4, 5],
+                                                unit='grams', 
+                                                timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5]))
         with self.assertRaises(ValueError):
-            self.nwbfile.add_acquisition(TimeSeries('test_ts', [0, 1, 2, 3, 4, 5],
-                                                    'grams', timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5]))
+            self.nwbfile.add_acquisition(TimeSeries(name='test_ts', 
+                                                    data=[0, 1, 2, 3, 4, 5],
+                                                    unit='grams', 
+                                                    timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5]))
 
     def test_get_acquisition_empty(self):
         with self.assertRaisesWith(ValueError, "acquisition of NWBFile 'root' is empty."):
             self.nwbfile.get_acquisition()
 
     def test_get_acquisition_multiple_elements(self):
-        self.nwbfile.add_acquisition(TimeSeries('test_ts1', [0, 1, 2, 3, 4, 5],
-                                                'grams', timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5]))
-        self.nwbfile.add_acquisition(TimeSeries('test_ts2', [0, 1, 2, 3, 4, 5],
-                                                'grams', timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5]))
+        self.nwbfile.add_acquisition(TimeSeries(name='test_ts1', 
+                                                data=[0, 1, 2, 3, 4, 5],
+                                                unit='grams', 
+                                                timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5]))
+        self.nwbfile.add_acquisition(TimeSeries(name='test_ts2', 
+                                                data=[0, 1, 2, 3, 4, 5],
+                                                unit='grams', 
+                                                timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5]))
         msg = "More than one element in acquisition of NWBFile 'root' -- must specify a name."
         with self.assertRaisesWith(ValueError,  msg):
             self.nwbfile.get_acquisition()
 
     def test_add_acquisition_invalid_name(self):
-        self.nwbfile.add_acquisition(TimeSeries('test_ts', [0, 1, 2, 3, 4, 5],
-                                                'grams', timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5]))
+        self.nwbfile.add_acquisition(TimeSeries(name='test_ts', 
+                                                data=[0, 1, 2, 3, 4, 5],
+                                                unit='grams', 
+                                                timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5]))
         msg = "\"'TEST_TS' not found in acquisition of NWBFile 'root'.\""
         with self.assertRaisesWith(KeyError, msg):
             self.nwbfile.get_acquisition("TEST_TS")
@@ -408,8 +422,10 @@ class NWBFileTest(TestCase):
             nwbfile.add_electrode(location='a', id=0)
 
     def test_all_children(self):
-        ts1 = TimeSeries('test_ts1', [0, 1, 2, 3, 4, 5], 'grams', timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5])
-        ts2 = TimeSeries('test_ts2', [0, 1, 2, 3, 4, 5], 'grams', timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5])
+        ts1 = TimeSeries(name='test_ts1', data=[0, 1, 2, 3, 4, 5], unit='grams', 
+                         timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5])
+        ts2 = TimeSeries(name='test_ts2', data=[0, 1, 2, 3, 4, 5], unit='grams', 
+                         timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5])
         self.nwbfile.add_acquisition(ts1)
         self.nwbfile.add_acquisition(ts2)
         name = 'example_electrode_group'
@@ -431,8 +447,10 @@ class NWBFileTest(TestCase):
                     source_script_file_name='nofilename')
 
     def test_get_neurodata_type(self):
-        ts1 = TimeSeries('test_ts1', [0, 1, 2, 3, 4, 5], 'grams', timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5])
-        ts2 = TimeSeries('test_ts2', [0, 1, 2, 3, 4, 5], 'grams', timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5])
+        ts1 = TimeSeries(name='test_ts1', data=[0, 1, 2, 3, 4, 5], unit='grams', 
+                         timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5])
+        ts2 = TimeSeries(name='test_ts2', data=[0, 1, 2, 3, 4, 5], unit='grams', 
+                         timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5])
         self.nwbfile.add_acquisition(ts1)
         self.nwbfile.add_acquisition(ts2)
         p1 = ts1.get_ancestor(neurodata_type='NWBFile')
@@ -464,8 +482,9 @@ Fields:
         self.nwbfile.add_electrode(x=2.0, location='b', group=elecgrp)
         elec_region = self.nwbfile.create_electrode_table_region([1], 'name')
 
-        ts1 = TimeSeries('test_ts1', [0, 1, 2, 3, 4, 5], 'grams', timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5])
-        ts2 = ElectricalSeries('test_ts2', [0, 1, 2, 3, 4, 5],
+        ts1 = TimeSeries(name='test_ts1', data=[0, 1, 2, 3, 4, 5], unit='grams', 
+                         timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5])
+        ts2 = ElectricalSeries(name='test_ts2', data=[0, 1, 2, 3, 4, 5],
                                electrodes=elec_region, timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5])
         self.nwbfile.add_acquisition(ts1)
         self.nwbfile.add_acquisition(ts2)
@@ -516,6 +535,21 @@ Fields:
                                related_publications=('pub1', 'pub2'))
         self.assertTupleEqual(self.nwbfile.related_publications, ('pub1', 'pub2'))
 
+    def test_ec_electrodes_deprecation(self):
+        nwbfile = NWBFile('a', 'b', datetime.now(tzlocal()))
+        device = nwbfile.create_device('a')
+        elecgrp = nwbfile.create_electrode_group('name', 'desc', device=device, location='a')
+        nwbfile.add_electrode(location='loc1', group=elecgrp, id=0)
+
+        # test that NWBFile.ec_electrodes property warns or errors
+        msg = "'NWBFile' object has no attribute 'ec_electrodes'"
+        with self.assertRaisesWith(AttributeError, msg):
+            nwbfile.ec_electrodes
+
+        # test that NWBFile.ec_electrode_groups warns or errors
+        msg = "'NWBFile' object has no attribute 'ec_electrode_groups'"
+        with self.assertRaisesWith(AttributeError, msg):
+            nwbfile.ec_electrode_groups
 
 class SubjectTest(TestCase):
     def setUp(self):

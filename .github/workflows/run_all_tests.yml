@@ -167,7 +167,7 @@ jobs:
         run: |
           conda config --set always_yes yes --set changeps1 no
           conda info
-          conda install -c conda-forge tox
+          conda install -c conda-forge "tox>=4.0"
 
       - name: Conda reporting
         run: |
