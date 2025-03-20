@@ -61,7 +61,6 @@ class TestNWBData(TestCase):
         self.assertEqual(obj.name, "obj1")
 
     def test_append_list(self):
-
         obj = MyNWBData("obj1", data=[[1, 2, 3], [1, 2, 3]])
         obj.append([4, 5, 6])
         np.testing.assert_array_equal(obj.data, [[1, 2, 3], [1, 2, 3], [4, 5, 6]])
@@ -71,10 +70,15 @@ class TestNWBData(TestCase):
         obj.append([4, 5, 6])
         np.testing.assert_array_equal(obj.data, [[1, 2, 3], [1, 2, 3], [4, 5, 6]])
 
-        def test_append_ndarray_1d(self):
-            obj = MyNWBData("obj1", data=np.array([1, 2, 3]))
-            obj.append([4])
-            np.testing.assert_array_equal(obj.data, [1, 2, 3, 4])
+    def test_append_ndarray_1d(self):
+        obj = MyNWBData("obj1", data=np.array([1, 2, 3]))
+        obj.append(4)
+        np.testing.assert_array_equal(obj.data, [1, 2, 3, 4])
+
+    def test_append_scalar(self):
+        obj = NWBData(name="obj1", data=1)
+        with self.assertRaises(ValueError):
+            obj.append(2)
 
     def test_extend_list(self):
         obj = MyNWBData("obj1", data=[[1, 2, 3], [1, 2, 3]])
@@ -90,6 +94,15 @@ class TestNWBData(TestCase):
         obj = MyNWBData("obj1", data=np.array([[1, 2, 3], [1, 2, 3]]))
         obj.extend([[4, 5, 6]])
         np.testing.assert_array_equal(obj.data, [[1, 2, 3], [1, 2, 3], [4, 5, 6]])
+
+    def test_extend_scalar(self):
+        obj = NWBData(name="obj1", data=1)
+        with self.assertRaises(ValueError):
+            obj.extend(2)
+    
+    def test_slicing_list_with_list(self):
+        obj = MyNWBData("obj1", data=[[1, 2, 3], [4, 5, 6]])
+        self.assertEqual(obj[[1,]], [[4, 5, 6]])
 
 
 class TestPrint(TestCase):
