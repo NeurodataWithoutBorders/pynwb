@@ -1,3 +1,26 @@
+"""
+Module for image data in NWB files.
+
+This module provides classes for storing and manipulating image data in NWB files.
+The following classes are available:
+
+- :class:`~pynwb.image.ImageSeries`: General image data that is common between acquisition and stimulus time series
+- :class:`~pynwb.image.IndexSeries`: Stores indices to image frames stored in an ImageSeries
+- :class:`~pynwb.image.OpticalSeries`: Image data that is presented or recorded
+- :class:`~pynwb.image.GrayscaleImage`: Single-channel (grayscale) image data
+- :class:`~pynwb.image.RGBImage`: Three-channel (RGB) image data
+- :class:`~pynwb.image.RGBAImage`: Four-channel (RGBA) image data with transparency
+- :class:`~pynwb.base.Images`: Container for storing a collection of images (imported from :mod:`pynwb.base`)
+- :class:`~pynwb.base.Image`: Base class for image data (imported from :mod:`pynwb.base`)
+
+Note: While the :class:`~pynwb.base.Image` and :class:`~pynwb.base.Images` classes are defined in :mod:`pynwb.base`, 
+they can be imported directly from this module:
+
+.. code-block:: python
+
+    from pynwb.image import Image, Images
+"""
+
 import warnings
 from collections.abc import Iterable
 
