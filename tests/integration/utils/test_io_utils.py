@@ -1,10 +1,13 @@
 """Tests related to pynwb.io.utils."""
 import pytest
 
+from datetime import datetime
+from dateutil.tz import tzutc
+
 from hdmf.build import GroupBuilder
 from pynwb.io.utils import get_nwb_version
-from pynwb.testing import TestCase
-
+from pynwb.testing import TestCase, remove_test_file
+from pynwb import NWBFile, NWBHDF5IO, _get_backend
 
 class TestGetNWBVersion(TestCase):
 
@@ -53,3 +56,23 @@ class TestGetNWBVersion(TestCase):
         builder1.set_attribute(name="nwb_version", value="2.0b")
         assert get_nwb_version(builder1) == (2, 0, 0)
         assert get_nwb_version(builder1, include_prerelease=True) == (2, 0, 0, "b")
+
+class TestGetNWBBackend(TestCase):
+    def setUp(self):
+        self.nwbfile = NWBFile(session_description='a test NWB File',
+                               identifier='TEST123',
+                               session_start_time=datetime(1970, 1, 1, 12, tzinfo=tzutc()))
+        self.hdf5_path = "test_pynwb_nwb_backend.nwb"
+        with NWBHDF5IO(self.hdf5_path, 'w') as io:
+            io.write(self.nwbfile)
+
+    def tearDown(self):
+        remove_test_file(self.hdf5_path)
+
+    def test_get_backend_invalid_file(self):
+        with self.assertRaises(ValueError):
+            _get_backend('not_a_file.nwb')
+
+    def test_get_backend_HDF5(self):
+        backend_io = _get_backend(self.hdf5_path)
+        self.assertEqual(backend_io, NWBHDF5IO)

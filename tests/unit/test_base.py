@@ -45,21 +45,23 @@ class TestProcessingModule(TestCase):
 
     def test_deprecated_add_data_interface(self):
         ts = self._create_time_series()
-        with self.assertWarnsWith(
-            PendingDeprecationWarning, "add_data_interface will be replaced by add"
+        msg = 'add_data_interface is deprecated and will be removed in PyNWB 4.0. Use add instead.'
+        with self.assertWarnsWith(warn_type=DeprecationWarning,
+                                  exc_msg=msg
         ):
             self.pm.add_data_interface(ts)
-        self.assertIn(ts.name, self.pm.containers)
-        self.assertIs(ts, self.pm.containers[ts.name])
+            self.assertIn(ts.name, self.pm.containers)
+            self.assertIs(ts, self.pm.containers[ts.name])
 
     def test_deprecated_add_container(self):
         ts = self._create_time_series()
-        with self.assertWarnsWith(
-            PendingDeprecationWarning, "add_container will be replaced by add"
+        msg = 'add_container is deprecated and will be removed in PyNWB 4.0. Use add instead.'
+        with self.assertWarnsWith(warn_type=DeprecationWarning, 
+                                  exc_msg=msg
         ):
             self.pm.add_container(ts)
-        self.assertIn(ts.name, self.pm.containers)
-        self.assertIs(ts, self.pm.containers[ts.name])
+            self.assertIn(ts.name, self.pm.containers)
+            self.assertIs(ts, self.pm.containers[ts.name])
 
     def test_get_data_interface(self):
         """Test adding a data interface to a ProcessingModule and retrieving it using get(...)."""
@@ -72,20 +74,22 @@ class TestProcessingModule(TestCase):
     def test_deprecated_get_data_interface(self):
         ts = self._create_time_series()
         self.pm.add(ts)
-        with self.assertWarnsWith(
-            PendingDeprecationWarning, "get_data_interface will be replaced by get"
+        msg = 'get_data_interface is deprecated and will be removed in PyNWB 4.0. Use get instead.'
+        with self.assertWarnsWith(warn_type=DeprecationWarning, 
+                                  exc_msg=msg
         ):
             tmp = self.pm.get_data_interface("test_ts")
-        self.assertIs(tmp, ts)
+            self.assertIs(tmp, ts)
 
     def test_deprecated_get_container(self):
         ts = self._create_time_series()
         self.pm.add(ts)
-        with self.assertWarnsWith(
-            PendingDeprecationWarning, "get_container will be replaced by get"
+        msg = 'get_container is deprecated and will be removed in PyNWB 4.0. Use get instead.'
+        with self.assertWarnsWith(warn_type=DeprecationWarning, 
+                                  exc_msg=msg
         ):
             tmp = self.pm.get_container("test_ts")
-        self.assertIs(tmp, ts)
+            self.assertIs(tmp, ts)
 
     def test_getitem(self):
         """Test adding a data interface to a ProcessingModule and retrieving it using __getitem__(...)."""
