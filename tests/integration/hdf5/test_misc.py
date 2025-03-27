@@ -116,8 +116,18 @@ class TestDecompositionSeriesIO(NWBH5IOMixin, TestCase):
             unit='flibs',
             timestamps=np.ones((3,)),
         )
-        bands = BandsTable()
-        bands.add_band(band_name='alpha', band_limits=np.ones((1, 2)), band_mean=np.ones((3,)), band_stdev=np.ones((3,)))
+        bands = BandsTable(
+            columns=[
+                VectorData(name='band_name', description='name of bands', data=['alpha', 'beta', 'gamma']),
+                VectorData(name='band_limits', description='low and high cutoffs in Hz', data=np.ones((3, 2))),
+                VectorData(name='band_mean', description='mean gaussian filters in Hz', data=np.ones((3,))),
+                VectorData(
+                    name='band_stdev',
+                    description='standard deviation of gaussian filters in Hz',
+                    data=np.ones((3,))
+                ),
+            ],
+        )
         spec_anal = DecompositionSeries(
             name='LFPSpectralAnalysis',
             description='my description',
@@ -168,8 +178,18 @@ class TestDecompositionSeriesWithSourceChannelsIO(AcquisitionH5IOMixin, TestCase
         )
         data = np.random.randn(100, 2, 30)
         timestamps = np.arange(100)/100
-        bands = BandsTable()
-        bands.add_band(band_name='alpha', band_limits=np.array([[1, 2]]), band_mean= np.array([1., 1., 1.]), band_stdev=np.array([1., 1., 1.]))
+        bands = BandsTable(
+            columns=[
+                VectorData(name='band_name', description='name of bands', data=['alpha', 'beta', 'gamma']),
+                VectorData(name='band_limits', description='low and high cutoffs in Hz', data=np.ones((3, 2))),
+                VectorData(name='band_mean', description='mean gaussian filters in Hz', data=np.ones((3,))),
+                VectorData(
+                    name='band_stdev',
+                    description='standard deviation of gaussian filters in Hz',
+                    data=np.ones((3,))
+                ),
+            ],
+        )
         ds = DecompositionSeries(
             name='test_DS',
             data=data,

@@ -228,5 +228,4 @@ def _validate_single_file(**kwargs):
 
     if path is not None:
         io.close()  # close the io object if it was created within this function, otherwise leave as is
-    breakpoint()
     return validation_errors

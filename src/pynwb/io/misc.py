@@ -2,20 +2,22 @@ from hdmf.common.io.table import DynamicTableMap
 from .base import TimeSeriesMap
 
 from .. import register_map
-from pynwb.misc import Units, DecompositionSeries
+from pynwb.misc import Units, DecompositionSeries, BandsTable
 
 
 @register_map(DecompositionSeries)
 class DecompositionSeriesMap(TimeSeriesMap):
     def __init__(self, spec):
         super().__init__(spec)
-    # 
-    # @TimeSeriesMap.constructor_arg('bands')
-    # def bands(self, container, manager):
-    #     breakpoint()
-    #     pass
 
-
+    @TimeSeriesMap.constructor_arg('bands')
+    def bands(self, builder, manager):
+        # breakpoint()
+        if builder.groups['bands']['neurodata_type'] != 'BandsTable':
+            builder.groups['bands']['neurodata_type'] = 'BandsTable'
+            builder.groups['bands']['namespace'] = 'core'
+        new_container =  manager.construct(builder.groups['bands'])
+        return new_container
 
 @register_map(Units)
 class UnitsMap(DynamicTableMap):

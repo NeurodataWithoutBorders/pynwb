@@ -261,12 +261,21 @@ class BandsTable(DynamicTable):
     __columns__ = (
         {'name': 'band_name', 'description': 'Name of the band, e.g. theta.', 'required': True},
         {'name': 'band_limits', 'description': 'Low and high limit of each band in Hz.', 'required': True},
-        {'name': 'band_mean', 'description': 'The mean Gaussian filters, in Hz.', 'required': False },
-        {'name': 'band_stdev', 'description': 'The standard deviation Gaussian filters, in Hz.', 'required': False })
+        {'name': 'band_mean', 'description': 'The mean Gaussian filters, in Hz.', 'required': False},
+        {'name': 'band_stdev', 'description': 'The standard deviation Gaussian filters, in Hz.', 'required': False})
 
+    @docval({'name': 'band_mean', 'type': VectorData, 'doc': 'The mean Gaussian filters, in Hz.', 'default': None},
+            {'name': 'band_stdev', 'type': VectorData, 'doc': 'The standard deviation Gaussian filters, in Hz.', 'default': None},
+            *get_docval(DynamicTable.__init__, 'id', 'columns', 'colnames'))
     def __init__(self, **kwargs):
         kwargs['name'] = 'bands'
         kwargs['description'] = 'Table for describing the bands that DecompositionSeries was generated from.'
+
+        # optional fields
+        keys_to_set = ('band_mean', 'band_stdev')
+        args_to_set = popargs_to_dict(keys_to_set, kwargs)
+        for key, val in args_to_set.items():
+            setattr(self, key, val)
 
         super().__init__(**kwargs)
 
