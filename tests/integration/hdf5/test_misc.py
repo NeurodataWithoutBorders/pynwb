@@ -1,7 +1,7 @@
 import numpy as np
 
 from hdmf.common import DynamicTable, VectorData, DynamicTableRegion
-from pynwb import TimeSeries
+from pynwb import TimeSeries, NWBHDF5IO
 from pynwb.misc import Units, DecompositionSeries, BandsTable
 from pynwb.testing import NWBH5IOMixin, AcquisitionH5IOMixin, TestCase
 from pynwb.ecephys import ElectrodeGroup
@@ -103,6 +103,15 @@ class TestUnitsFileIO(NWBH5IOMixin, TestCase):
     def test_to_dataframe(self):
         units = self.roundtripContainer()
         units.to_dataframe()
+
+
+class TestBackCompatDecompositionSeries(TestCase):
+    def test_read_nwbfile(self):
+        """
+        Test that reads an NWBFile with a DecompositionSeries that has a DynamicTable for bands.
+        """
+        io = NWBHDF5IO("tests/back_compat/3.0.0_DecompositionSeries.nwb", mode="r")
+        nwbfile = io.read()
 
 
 class TestDecompositionSeriesIO(NWBH5IOMixin, TestCase):

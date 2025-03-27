@@ -2,7 +2,7 @@ import numpy as np
 
 from hdmf.common import DynamicTable, VectorData, DynamicTableRegion
 
-from pynwb.misc import AnnotationSeries, AbstractFeatureSeries, IntervalSeries, Units, DecompositionSeries
+from pynwb.misc import AnnotationSeries, AbstractFeatureSeries, IntervalSeries, Units, DecompositionSeries, BandsTable
 from pynwb.file import TimeSeries, ElectrodeTable as get_electrode_table
 from pynwb.device import Device
 from pynwb.ecephys import ElectrodeGroup
@@ -18,9 +18,9 @@ class AnnotationSeriesConstructor(TestCase):
 
 class AbstractFeatureSeriesConstructor(TestCase):
     def test_init(self):
-        aFS = AbstractFeatureSeries(name='test_aFS', 
-                                    feature_units=['feature units'], 
-                                    features=['features'], 
+        aFS = AbstractFeatureSeries(name='test_aFS',
+                                    feature_units=['feature units'],
+                                    features=['features'],
                                     timestamps=list())
         self.assertEqual(aFS.name, 'test_aFS')
         self.assertEqual(aFS.feature_units, ['feature units'])
@@ -34,16 +34,18 @@ class DecompositionSeriesConstructor(TestCase):
         timeseries = TimeSeries(name='dummy timeseries', description='desc',
                                 data=np.ones((3, 3)), unit='Volts',
                                 timestamps=[1., 2., 3.])
-        bands = DynamicTable(name='bands', description='band info for LFPSpectralAnalysis', columns=[
-            VectorData(name='band_name', description='name of bands', data=['alpha', 'beta', 'gamma']),
-            VectorData(name='band_limits', description='low and high cutoffs in Hz', data=np.ones((3, 2))),
-            VectorData(name='band_mean', description='mean gaussian filters in Hz', data=np.ones((3,))),
-            VectorData(
-                name='band_stdev',
-                description='standard deviation of gaussian filters in Hz',
-                data=np.ones((3,))
-            ),
-        ])
+        bands = BandsTable(
+            columns=[
+                VectorData(name='band_name', description='name of bands', data=['alpha', 'beta', 'gamma']),
+                VectorData(name='band_limits', description='low and high cutoffs in Hz', data=np.ones((3, 2))),
+                VectorData(name='band_mean', description='mean gaussian filters in Hz', data=np.ones((3,))),
+                VectorData(
+                    name='band_stdev',
+                    description='standard deviation of gaussian filters in Hz',
+                    data=np.ones((3,))
+                ),
+            ],
+        )
         spec_anal = DecompositionSeries(name='LFPSpectralAnalysis',
                                         description='my description',
                                         data=np.ones((3, 3, 3)),
@@ -251,9 +253,9 @@ class UnitsTests(TestCase):
     def test_electrode_group(self):
         ut = Units()
         device = Device(name='test_device')
-        electrode_group = ElectrodeGroup(name='test_electrode_group', 
-                                         description='description', 
-                                         location='location', 
+        electrode_group = ElectrodeGroup(name='test_electrode_group',
+                                         description='description',
+                                         location='location',
                                          device=device)
         ut.add_unit(electrode_group=electrode_group)
         self.assertEqual(ut['electrode_group'][0], electrode_group)

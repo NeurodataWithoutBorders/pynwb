@@ -12,7 +12,7 @@ class DecompositionSeriesMap(TimeSeriesMap):
 
     @TimeSeriesMap.constructor_arg('bands')
     def bands(self, builder, manager):
-        # breakpoint()
+        breakpoint()
         if builder.groups['bands']['neurodata_type'] != 'BandsTable':
             builder.groups['bands']['neurodata_type'] = 'BandsTable'
             builder.groups['bands']['namespace'] = 'core'
