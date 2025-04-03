@@ -21,6 +21,7 @@ from pynwb.testing import TestCase
 from pynwb.testing.mock.ecephys import mock_ElectricalSeries
 
 from hdmf.common import DynamicTableRegion
+from hdmf.data_utils import DataChunkIterator
 
 
 def make_electrode_table():
@@ -166,18 +167,31 @@ class SpikeEventSeriesConstructor(TestCase):
         np.testing.assert_array_equal(sES.data, data)
         np.testing.assert_array_equal(sES.timestamps, timestamps)
 
-    def test_no_rate(self):
+    def test_init_no_rate(self):
         table, region = self._create_table_and_region()
         data = ((1, 1, 1), (2, 2, 2))
         with self.assertRaises(TypeError):
             SpikeEventSeries(name='test_sES', data=data, electrodes=region, rate=1.)
 
-    def test_incorrect_timestamps(self):
+    def test_init_incorrect_timestamps(self):
         table, region = self._create_table_and_region()
         data = ((1, 1, 1), (2, 2, 2))
         with self.assertRaisesWith(ValueError, "Must provide the same number of timestamps and spike events"):
             SpikeEventSeries(name='test_sES', data=data, electrodes=region, timestamps=[1.0, 2.0, 3.0])
 
+    def test_init_datachunkiterators(self):
+        # test data
+        table, region = self._create_table_and_region()
+        data = DataChunkIterator(np.ones((10, 2)))
+        good_timestamps = DataChunkIterator(np.arange(10))
+        bad_timestamps = DataChunkIterator(np.arange(2)) # too short
+        # check creation with good DataChunkIterators passes
+        sES = SpikeEventSeries(name='test_sES', data=data, timestamps=good_timestamps, electrodes=region)
+        self.assertEqual(sES.name, 'test_sES')
+        # check creation with bad DataChunkIterators fails
+        with self.assertRaisesWith(ValueError, "Must provide the same number of timestamps and spike events"):
+            SpikeEventSeries(name='test_sES', data=data, electrodes=region, timestamps=bad_timestamps)
+        
 
 class ElectrodeGroupConstructor(TestCase):
 

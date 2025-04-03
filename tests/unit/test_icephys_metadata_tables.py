@@ -27,12 +27,16 @@ from pynwb.icephys import (
     ExperimentalConditionsTable,
     IntracellularElectrode,
     CurrentClampSeries,
-    IntracellularRecordingsTable
+    IntracellularRecordingsTable,
+    IntracellularElectrodesTable,
+    IntracellularStimuliTable,
+    IntracellularResponsesTable
 )
 from pynwb.device import Device
 from pynwb.base import TimeSeriesReferenceVectorData
 from pynwb import NWBHDF5IO
 from hdmf.utils import docval, popargs
+from hdmf.common import DynamicTable, VectorData
 
 
 class ICEphysMetaTestBase(TestCase):
@@ -198,6 +202,47 @@ class IntracellularRecordingsTableTests(ICEphysMetaTestBase):
     def test_init(self):
         ret = IntracellularRecordingsTable()
         self.assertEqual(ret.name, 'intracellular_recordings')
+
+    def test_init_with_empty_category_tables_and_missing_required_tables(self):
+        """
+        Test that we can create the table with category tables that are empty.
+        The __init__ method should now create all the missing required tables 
+        for us since we have no data in the tables. 
+        """
+        category_names = ['test1', 'test2', 'test3']
+        categories = [DynamicTable(name=val,
+                                   description=val+" description",
+                                   ) for val in category_names]
+        ret = IntracellularRecordingsTable(category_tables=categories, categories=category_names)
+        self.assertEqual(ret.name, 'intracellular_recordings')
+        self.assertIsNotNone(ret.get_category('electrodes'))
+        self.assertIsInstance(ret.get_category('electrodes'), IntracellularElectrodesTable)
+        self.assertIsNotNone(ret.get_category('stimuli'))
+        self.assertIsInstance(ret.get_category('stimuli'), IntracellularStimuliTable)
+        self.assertIsNotNone(ret.get_category('responses'))
+        self.assertIsInstance(ret.get_category('responses'), IntracellularResponsesTable)
+
+    def test_init_with_nonempty_category_tables_and_missing_required_tables(self):
+        """
+        Test that we cannot create the table with non-empty category tables 
+        and missing required tables. In this case __init__ should raise an error
+        since we cannot populate the missing data for rows in the missing 
+        required tables. 
+        """
+        category_names = ['test1', 'test2', 'test3']
+        num_rows = 10
+        categories = [DynamicTable(name=val,
+                                   description=val+" description",
+                                   columns=[VectorData(name=val+t,
+                                                       description=val+t+' description',
+                                                       data=np.arange(num_rows)) for t in ['c1', 'c2', 'c3']]
+                                   ) for val in category_names]
+        msg = ("IntracellularElectrodeTable, IntracellularStimuliTable, and "
+               "IntracellularResponsesTable are required when adding custom, non-empty "
+               "tables to IntracellularRecordingsTable as the missing data for the required "
+               "tables cannot be determined automatically")
+        with self.assertRaisesWith(ValueError, msg): 
+            IntracellularRecordingsTable(category_tables=categories)
 
     def test_add_row(self):
         # Add a row to our IR table
