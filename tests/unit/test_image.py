@@ -312,7 +312,9 @@ class ImageSeriesConstructor(TestCase):
                 rate=0.2,
             )
 
+
     def test_bits_per_pixel_deprecation(self):
+        """Test that bits_per_pixel can be set and that a deprecated warning is raised."""
         msg = "bits_per_pixel is deprecated"
         kwargs = dict(name='test_iS',
                 unit='unit',
@@ -401,10 +403,66 @@ class IndexSeriesConstructor(TestCase):
         self.assertIs(iS.indexed_timeseries, ts)
 
     def test_init_no_indexed_ts_or_timeseries(self):
+        """Test that an error is raised when neither indexed_timeseries nor indexed_images is provided"""
         msg = ("Either indexed_timeseries or indexed_images "
                "must be provided when creating an IndexSeries.")
         with self.assertRaisesWith(ValueError, msg):
-            IndexSeries(name='test_iS', data=[1, 2, 3], unit='N/A', timestamps=[0.1, 0.2, 0.3])
+            IndexSeries(name='test_iS', 
+                        data=[1, 2, 3], 
+                        unit='N/A', 
+                        timestamps=[0.1, 0.2, 0.3])
+
+    def test_init_conversion_warning(self):
+        """Test that a warning is raised when conversion is provided"""
+        image1 = Image(name='test_image', data=np.ones((10, 10)))
+        image2 = Image(name='test_image2', data=np.ones((10, 10)))
+        image_references = ImageReferences(name='order_of_images', data=[image2, image1])
+        images = Images(name='images_name', images=[image1, image2], order_of_images=image_references)
+
+        with self.assertWarnsWith(UserWarning, "The conversion attribute is not used by IndexSeries."):
+            IndexSeries(
+                name='test_iS',
+                data=[1, 2, 3],
+                unit='N/A',
+                indexed_images=images,
+                timestamps=[0.1, 0.2, 0.3],
+                conversion=5.0
+            )
+
+    def test_init_resolution_warning(self):
+        """Test that a warning is raised when resolution is provided"""
+        image1 = Image(name='test_image', data=np.ones((10, 10)))
+        image2 = Image(name='test_image2', data=np.ones((10, 10)))
+        image_references = ImageReferences(name='order_of_images', data=[image2, image1])
+        images = Images(name='images_name', images=[image1, image2], order_of_images=image_references)
+
+        with self.assertWarnsWith(UserWarning, "The resolution attribute is not used by IndexSeries."):
+            IndexSeries(
+                name='test_iS',
+                data=[1, 2, 3],
+                unit='N/A',
+                indexed_images=images,
+                timestamps=[0.1, 0.2, 0.3],
+                resolution=1.0
+            )
+
+    def test_init_offset_warning(self):
+        """Test that a warning is raised when offset is provided"""
+        image1 = Image(name='test_image', data=np.ones((10, 10)))
+        image2 = Image(name='test_image2', data=np.ones((10, 10)))
+        image_references = ImageReferences(name='order_of_images', data=[image2, image1])
+        images = Images(name='images_name', images=[image1, image2], order_of_images=image_references)
+
+        with self.assertWarnsWith(UserWarning, "The offset attribute is not used by IndexSeries."):
+            IndexSeries(
+                name='test_iS',
+                data=[1, 2, 3],
+                unit='N/A',
+                indexed_images=images,
+                timestamps=[0.1, 0.2, 0.3],
+                offset=1.0
+            )
+
 
 
 class ImageMaskSeriesConstructor(TestCase):
