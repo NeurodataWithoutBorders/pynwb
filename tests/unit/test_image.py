@@ -249,25 +249,14 @@ class ImageSeriesConstructor(TestCase):
 
     def test_external_file_default_format(self):
         """Test that format is set to 'external' if not provided, when external_file is provided."""
-        msg = (
-            "ImageSeries 'test_iS': The value for 'format' has been changed to 'external'. "
-            "If an external file is detected, setting a value for "
-            "'format' other than 'external' is deprecated."
-        )
+
         kwargs = dict(name="test_iS",
                 external_file=["external_file", "external_file2"],
                 unit="n.a.",
                 starting_frame=[0, 10],
                 rate=0.2,)
         
-        # create object with deprecated argument
-        with self.assertRaisesWith(ValueError, msg):
-            ImageSeries(**kwargs)
-
-        # create object in construct mode, modeling the behavior of the ObjectMapper on read
-        iS = ImageSeries.__new__(ImageSeries, in_construct_mode=True)
-        with self.assertWarnsWith(warn_type=UserWarning, exc_msg=msg):
-            iS.__init__(**kwargs)
+        iS = ImageSeries(**kwargs)
         self.assertEqual(iS.format, "external")
 
     def test_external_file_with_correct_format(self):
