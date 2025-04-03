@@ -396,7 +396,9 @@ with NWBHDF5IO("behavioral_tutorial.nwb", "w") as io:
 
 with NWBHDF5IO("behavioral_tutorial.nwb", "r") as io:
     read_nwbfile = io.read()
-    print(read_nwbfile.processing["behavior"].children)
+    behavior_module = read_nwbfile.processing["behavior"]
+    
+    print(f"Available data interfaces: {list(behavior_module.values())}")
 
 ####################
 # For instance, we can access the :py:class:`~pynwb.behavior.SpatialSeries` data
