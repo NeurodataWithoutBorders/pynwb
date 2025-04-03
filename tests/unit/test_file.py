@@ -698,20 +698,14 @@ class TestTimestampsRefAware(TestCase):
         self.ref_time_notz = datetime(1979, 1, 1, 0, 0, 0)
 
     def test_reftime_tzaware(self):
-        with self.assertRaises(ValueError):
-            # 'timestamps_reference_time' must be a timezone-aware datetime
-            NWBFile('test session description',
-                    'TEST124',
-                    self.start_time,
-                    timestamps_reference_time=self.ref_time_notz)
+        with self.assertWarnsWith(UserWarning, "Date is missing timezone information. Updating to local timezone."):
+            nwbfile = NWBFile('test session description',
+                              'TEST124',
+                              self.start_time,
+                              timestamps_reference_time=self.ref_time_notz)
 
-    def test_reftime_tzaware_pass_on_construct(self):
-        nwbfile = NWBFile.__new__(NWBFile, in_construct_mode=True)
-        nwbfile.__init__('test session description',
-                        'TEST124',
-                        self.start_time,
-                        timestamps_reference_time=self.ref_time_notz)
-        self.assertEqual(nwbfile.timestamps_reference_time, self.ref_time_notz)
+        # test time zone is automatically added to timestamps_reference_time
+        self.assertEqual(nwbfile.timestamps_reference_time, self.ref_time_notz.replace(tzinfo=tzlocal()))
 
 class TestTimezone(TestCase):
     def test_raise_warning__add_missing_timezone(self):
