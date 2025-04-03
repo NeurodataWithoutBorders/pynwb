@@ -296,7 +296,6 @@ class DecompositionSeries(TimeSeries):
     """
     Stores product of spectral analysis
     """
-
     __nwbfields__ = ('metric',
                      {'name': 'source_timeseries', 'child': False, 'doc': 'the input TimeSeries from this analysis'},
                      {'name': 'source_channels', 'child': True, 'doc': 'the channels that provided the source data'},
