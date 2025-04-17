@@ -36,10 +36,6 @@ __all__ = [
 ]
 
 
-def _not_parent(arg):
-    return arg['name'] != 'parent'
-
-
 @register_class('LabMetaData', CORE_NAMESPACE)
 class LabMetaData(NWBContainer):
     """

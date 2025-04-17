@@ -2,6 +2,10 @@
 
 ## Upcoming
 
+### Breaking changes
+
+- Removed unused functions `prepend_string` and `_not_parent` in `core.py`, `_not_parent` in `file.py`, and `NWBBaseTypeMapper.get_nwb_file` in `io/core.py` @oruebel [#2036](https://github.com/NeurodataWithoutBorders/pynwb/pull/2036)
+
 ### Enhancements and minor changes
 - Automatically add timezone information to timestamps reference time if no timezone information is specified. @stephprince [#2056](https://github.com/NeurodataWithoutBorders/pynwb/pull/2056)
 - Added option to disable typemap caching and updated type map cache location. @stephprince [#2057](https://github.com/NeurodataWithoutBorders/pynwb/pull/2057)

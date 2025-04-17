@@ -24,14 +24,6 @@ __all__ = [
 ]
 
 
-def _not_parent(arg):
-    return arg['name'] != 'parent'
-
-
-def prepend_string(string, prepend='    '):
-    return prepend + prepend.join(string.splitlines(True))
-
-
 class NWBMixin(AbstractContainer):
 
     _data_type_attr = 'neurodata_type'
