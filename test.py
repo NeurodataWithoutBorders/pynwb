@@ -86,10 +86,6 @@ ros3_examples = [
     os.path.join('advanced_io', 'streaming.py'),
 ]
 
-allensdk_examples = [
-    os.path.join('domain', 'brain_observatory.py'),  # TODO create separate workflow for this
-]
-
 
 def run_example_tests():
     """Run the Sphinx gallery example files, excluding ROS3-dependent ones, to check for errors."""
@@ -99,7 +95,7 @@ def run_example_tests():
         for f in files:
             if f.endswith(".py"):
                 name_with_parent_dir = os.path.join(os.path.basename(root), f)
-                if name_with_parent_dir in ros3_examples or name_with_parent_dir in allensdk_examples:
+                if name_with_parent_dir in ros3_examples:
                     logging.info("Skipping %s" % name_with_parent_dir)
                     continue
                 examples_scripts.append(os.path.join(root, f))
@@ -157,7 +153,7 @@ def validate_nwbs():
     examples_nwbs = [x for x in examples_nwbs if not x.startswith('sub-')]
 
     import pynwb
-    from pynwb.validate import get_cached_namespaces_to_validate
+    from pynwb.validation import validate, get_cached_namespaces_to_validate
 
     for nwb in examples_nwbs:
         try:
@@ -169,7 +165,8 @@ def validate_nwbs():
                 is_family_nwb_file = False
                 try:
                     with pynwb.NWBHDF5IO(nwb, mode='r') as io:
-                        errors = pynwb.validate(io)
+                        errors = validate(io, use_cached_namespaces=False)
+                        errors.extend(validate(io, use_cached_namespaces=True))
                 except OSError as e:
                     # if the file was created with the family driver, need to use the family driver to open it
                     if 'family driver should be used' in str(e):
@@ -179,7 +176,8 @@ def validate_nwbs():
                         memb_size = 1024**2  # note: the memb_size must be the same as the one used to create the file
                         with h5py.File(filename_pattern, mode='r', driver='family', memb_size=memb_size) as f:
                             with pynwb.NWBHDF5IO(file=f, manager=None, mode='r') as io:
-                                errors = pynwb.validate(io)
+                                errors = validate(io, use_cached_namespaces=False)
+                                errors.extend(validate(io, use_cached_namespaces=True))
                     else:
                         raise e
 
@@ -202,14 +200,14 @@ def validate_nwbs():
                     ERRORS += 1
 
                 cmds = []
-                cmds += [["python", "-m", "pynwb.validate", nwb]]
-                cmds += [["python", "-m", "pynwb.validate", "--no-cached-namespace", nwb]]
+                cmds += [["pynwb-validate", nwb]]
+                cmds += [["pynwb-validate", "--no-cached-namespace", nwb]]
 
                 for ns in namespaces:
                     # for some reason, this logging command is necessary to correctly printing the namespace in the
                     # next logging command
                     logging.info("Namespace found: %s" % ns)
-                    cmds += [["python", "-m", "pynwb.validate", "--ns", ns, nwb]]
+                    cmds += [["pynwb-validate", "--ns", ns, nwb]]
 
                 for cmd in cmds:
                     logging.info("Validating with \"%s\"." % (" ".join(cmd[:-1])))
@@ -277,7 +275,6 @@ def clean_up_tests():
         "basic_sparse_iterwrite_*.npy",
         "basics_tutorial.nwb",
         "behavioral_tutorial.nwb",
-        "brain_observatory.nwb",
         "cache_spec_example.nwb",
         "ecephys_tutorial.nwb",
         "ecog.extensions.yaml",

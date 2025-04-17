@@ -3,12 +3,21 @@
 Validating NWB files
 ====================
 
+.. note:: 
+  
+  The pynwb validation CLI checks for structural compliance of NWB files with the NWB schema. 
+  It is recommended to use the `NWBInspector CLI <https://nwbinspector.readthedocs.io/en/dev/>`_ 
+  for more comprehensive validation of both structural compliance with the NWB schema and 
+  compliance of data with NWB best practices. The NWBInspector runs both PyNWB validation as 
+  described here and additional data checks.
+
+
 Validating NWB files is handled by a command-line tool available in :py:mod:`~pynwb`.
 The validator can be invoked like so:
 
 .. code-block:: bash
 
-  python -m pynwb.validate test.nwb
+  pynwb-validate test.nwb
 
 If the file contains no NWB extensions, then this command will validate the file ``test.nwb`` against the
 *core* NWB specification. On success, the output will be:
@@ -29,7 +38,7 @@ within the ``test.nwb`` file.
 
 .. code-block:: bash
 
-  python -m pynwb.validate -n ndx-my-extension test.nwb
+  pynwb-validate -n ndx-my-extension test.nwb
 
 To validate against the version of the **core** NWB specification that is included with the installed version of
 PyNWB, use the ``--no-cached-namespace`` flag. This can be useful in validating files against newer or older versions
@@ -37,27 +46,28 @@ of the **core** NWB specification that are installed with newer or older version
 
 .. code-block:: bash
 
-  python -m pynwb.validate --no-cached-namespace test.nwb
+  pynwb-validate --no-cached-namespace test.nwb
 
 .. Last updated 8/13/2021
 .. code-block:: text
 
-  $python -m pynwb.validate --help
-  usage: validate.py [-h] [-n NS] [-lns] [--cached-namespace | --no-cached-namespace] paths [paths ...]
+  $pynwb-validate --help
+  usage: pynwb-validate [-h] [-lns] [-n NS] [--json-output-path JSON_OUTPUT_PATH] [--no-cached-namespace] paths [paths ...]
 
   Validate an NWB file
 
   positional arguments:
     paths                 NWB file paths
 
-  optional arguments:
+  options:
     -h, --help            show this help message and exit
-    -n NS, --ns NS        the namespace to validate against
     -lns, --list-namespaces
                           List the available namespaces and exit.
-    --cached-namespace    Use the cached namespace (default).
+    -n NS, --ns NS        the namespace to validate against
+    --json-output-path JSON_OUTPUT_PATH
+                          Write json output to this location.
     --no-cached-namespace
-                          Don't use the cached namespace.
+                          Use the namespaces installed by PyNWB (true) or use the cached namespaces (false; default).
 
   If --ns is not specified, validate against all namespaces in the NWB file.
 

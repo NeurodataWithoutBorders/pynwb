@@ -37,8 +37,7 @@ ext_source = "mylab.extensions.yaml"
 ns_builder = NWBNamespaceBuilder(
     "Extension for use in my Lab", "mylab", version="0.1.0"
 )
-
-ns_builder.include_type("ElectricalSeries", namespace="core")
+ns_builder.include_namespace("core")
 
 ext = NWBGroupSpec(
     "A custom ElectricalSeries for my lab",
@@ -264,7 +263,7 @@ ns_path = name + ".namespace.yaml"
 ext_source = name + ".extensions.yaml"
 
 ns_builder = NWBNamespaceBuilder(name + " extensions", name, version="0.1.0")
-ns_builder.include_type("NWBDataInterface", namespace="core")
+ns_builder.include_namespace("core")
 
 potato = NWBGroupSpec(
     neurodata_type_def="Potato",
