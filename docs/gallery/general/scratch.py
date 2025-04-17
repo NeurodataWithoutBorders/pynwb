@@ -145,7 +145,7 @@ nwb_scratch = nwb_proc_in.copy()
 # Now lets do an analysis for which we do not have a specification, but we would like to store
 # the results for.
 
-filt_ts = nwb_scratch.modules["filtering_module"]["filtered_timeseries"]
+filt_ts = nwb_scratch.processing["filtering_module"]["filtered_timeseries"]
 
 fft = np.fft.fft(filt_ts.data)
 

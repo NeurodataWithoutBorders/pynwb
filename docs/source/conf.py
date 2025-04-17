@@ -40,6 +40,9 @@ import pynwb
 autoclass_content = 'both'
 autodoc_docstring_signature = True
 autodoc_member_order = 'bysource'
+autodoc_default_options = {
+    'ignore-module-all': True,  # Continue documenting classes not in __all__
+}
 
 # -- General configuration -----------------------------------------------------
 
@@ -84,7 +87,6 @@ class CustomSphinxGallerySectionSortKey(ExampleTitleSortKey):
             "icephys.py",
             "plot_behavior.py",
             "images.py",
-            "brain_observatory.py"
         ],
         'advanced_io': []
     }
@@ -189,7 +191,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'PyNWB'
-copyright = u'2017-2024, Neurodata Without Borders'
+copyright = u'2017-2025, Neurodata Without Borders'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the

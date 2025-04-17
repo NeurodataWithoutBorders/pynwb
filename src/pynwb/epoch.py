@@ -2,11 +2,12 @@ from bisect import bisect_left
 
 from hdmf.data_utils import DataIO
 from hdmf.common import DynamicTable
-from hdmf.utils import docval, getargs, popargs, get_docval
+from hdmf.utils import docval, getargs, popargs, get_docval, AllowPositional
 
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries, TimeSeriesReferenceVectorData, TimeSeriesReference
 
+__all__ = ['TimeIntervals']
 
 @register_class('TimeIntervals', CORE_NAMESPACE)
 class TimeIntervals(DynamicTable):
@@ -27,7 +28,8 @@ class TimeIntervals(DynamicTable):
     @docval({'name': 'name', 'type': str, 'doc': 'name of this TimeIntervals'},  # required
             {'name': 'description', 'type': str, 'doc': 'Description of this TimeIntervals',
              'default': "experimental intervals"},
-            *get_docval(DynamicTable.__init__, 'id', 'columns', 'colnames'))
+            *get_docval(DynamicTable.__init__, 'id', 'columns', 'colnames'),
+            allow_positional=AllowPositional.WARNING,)
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
@@ -67,10 +69,10 @@ class TimeIntervals(DynamicTable):
             ts_timestamps = ts.timestamps
             ts_starting_time = ts.starting_time
             ts_rate = ts.rate
-        if ts_starting_time is not None and ts_rate:
+        if ts_starting_time is not None and ts_rate is not None:
             start_idx = int((start_time - ts_starting_time)*ts_rate)
             stop_idx = int((stop_time - ts_starting_time)*ts_rate)
-        elif len(ts_timestamps) > 0:
+        elif ts_timestamps is not None and len(ts_timestamps) > 0:
             timestamps = ts_timestamps
             start_idx = bisect_left(timestamps, start_time)
             stop_idx = bisect_left(timestamps, stop_time)

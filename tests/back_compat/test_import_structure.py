@@ -41,7 +41,6 @@ class TestImportStructure(TestCase):
             "__spec__",
             "__version__",
             "_due",
-            "_get_resources",
             "_version",
             "available_namespaces",
             "base",

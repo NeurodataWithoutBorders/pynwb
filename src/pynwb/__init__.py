@@ -7,6 +7,7 @@ from copy import deepcopy
 import subprocess
 import pickle
 from warnings import warn
+from platformdirs import PlatformDirs
 import h5py
 
 from hdmf.spec import NamespaceCatalog
@@ -23,7 +24,7 @@ from hdmf.common import unload_type_config as hdmf_unload_type_config
 CORE_NAMESPACE = 'core'
 
 from .spec import NWBDatasetSpec, NWBGroupSpec, NWBNamespace  # noqa E402
-from .validate import validate  # noqa: F401, E402
+from .validation import validate  # noqa: F401, E402
 
 try:
     # see https://effigies.gitlab.io/posts/python-packaging-2023/
@@ -69,21 +70,18 @@ def __get_resources() -> dict:
     __location_of_this_file = files(__name__)
     __core_ns_file_name = 'nwb.namespace.yaml'
     __schema_dir = 'nwb-schema/core'
-    cached_core_typemap = __location_of_this_file / 'core_typemap.pkl'
-    cached_version_indicator = __location_of_this_file / '.core_typemap_version'
+
+    # create a cache directory for the core typemap
+    dirs = PlatformDirs(appname="pynwb", version=__version__, ensure_exists=True)
+    cache_dir = dirs.user_cache_path
+    cached_core_typemap = cache_dir / 'pynwb_core_typemap.pkl'
 
     ret = dict()
     ret['namespace_path'] = str(__location_of_this_file / __schema_dir / __core_ns_file_name)
     ret['cached_typemap_path'] = str(cached_core_typemap)
-    ret['cached_version_indicator'] = str(cached_version_indicator)
+    ret['user_cache_dir'] = str(dirs.user_cache_dir)
     return ret
 
-
-def _get_resources():
-    # LEGACY: Needed to support legacy implementation.
-    # TODO: Remove this in PyNWB 3.0.
-    warn("The function '_get_resources' is deprecated and will be removed in a future release.", DeprecationWarning)
-    return __get_resources()
 
 
 # a global type map
@@ -155,6 +153,7 @@ def load_namespaces(**kwargs):
     namespace_path = getargs('namespace_path', kwargs)
     return __TYPE_MAP.load_namespaces(namespace_path)
 
+
 def available_namespaces():
     """Returns all namespaces registered in the namespace catalog"""
     return __TYPE_MAP.namespace_catalog.namespaces
@@ -186,6 +185,15 @@ def __clone_submodules():
     else:  # pragma: no cover
         raise RuntimeError("Package is not installed from a git repository, can't clone submodules")
 
+def clear_cache_dir():
+    """
+    Clear all the cached typemap files for all versions
+    """
+    try:
+        for f in Path(__resources['user_cache_dir']).parent.glob('**/pynwb_core_typemap.pkl'):
+            Path(f).unlink()
+    except (OSError, PermissionError) as e:
+        warn(f'Could not clear cache directory: {e}', UserWarning)
 
 def __load_core_namespace(final:bool=False):
     """
@@ -203,30 +211,25 @@ def __load_core_namespace(final:bool=False):
     global __TYPE_MAP
     global __resources
 
-    # if we have a version indicator file and it doesn't match the current version,
-    # scrap the cached typemap
-    if os.path.exists(__resources['cached_version_indicator']):
-        with open(__resources['cached_version_indicator'], 'r') as f:
-            cached_version = f.read().strip()
-        if cached_version != __version__:
-            Path(__resources['cached_typemap_path']).unlink(missing_ok=True)
-    else:
-        # remove any cached typemap, forcing re-creation
-        Path(__resources['cached_typemap_path']).unlink(missing_ok=True)
+    # Check for environment variable to disable caching
+    disable_cache = os.environ.get('PYNWB_NO_CACHE_DIR', '0') == '1'
 
-    # load pickled typemap if we have one
-    if os.path.exists(__resources['cached_typemap_path']):
+    # load pickled typemap if we have one and want to use caching
+    if os.path.exists(__resources['cached_typemap_path']) and not disable_cache:
         with open(__resources['cached_typemap_path'], 'rb') as f:
             __TYPE_MAP = pickle.load(f)  # type: TypeMap
 
     # otherwise make a new one and cache it
     elif os.path.exists(__resources['namespace_path']):
         load_namespaces(__resources['namespace_path'])
-        with open(__resources['cached_typemap_path'], 'wb') as f:
-            pickle.dump(__TYPE_MAP, f, protocol=pickle.HIGHEST_PROTOCOL)
-        with open(__resources['cached_version_indicator'], 'w') as f:
-            f.write(__version__)
 
+        # cache the loaded namespace if caching is not disabled
+        if not disable_cache:
+            try:
+                with open(__resources['cached_typemap_path'], 'wb') as f:
+                    pickle.dump(__TYPE_MAP, f, protocol=pickle.HIGHEST_PROTOCOL)
+            except (OSError, PermissionError):
+                pass  # skip caching if we can't write the cached typemap
     # otherwise, we don't have the schema and try and initialize from submodules,
     # afterwards trying to load the namespace again
     else:
@@ -348,6 +351,27 @@ def get_class(**kwargs):
     """
     neurodata_type, namespace = getargs('neurodata_type', 'namespace', kwargs)
     return __TYPE_MAP.get_dt_container_cls(neurodata_type, namespace)
+
+
+@docval({'name': 'path', 'type': str, 'doc': 'Path to the NWB file which can be an HDF5 file or a Zarr store.'},
+        {"name": "method", "type": str, "doc": "the method to use when opening the file", 'default': None},
+        is_method=False)
+def _get_backend(path: str, method: str = None):
+    if method == "ros3":
+        return NWBHDF5IO  # TODO - add additional conditions for other streaming methods
+
+    try:
+        from hdmf_zarr import NWBZarrIO
+        backend_io_classes = [NWBHDF5IO, NWBZarrIO]
+    except ImportError:
+        backend_io_classes = [NWBHDF5IO]
+
+    backend_options = [b for b in backend_io_classes if b.can_read(path=path)]
+    if len(backend_options) == 0:
+        raise ValueError(f"Could not find an IO to read the file '{path}'. If you are trying to read "
+                         f"a Zarr file, make sure you have hdmf-zarr installed.")
+    else:
+        return backend_options[0]
 
 
 class NWBHDF5IO(_HDF5IO):
@@ -612,6 +636,33 @@ from . import ophys  # noqa: F401,E402
 from . import legacy  # noqa: F401,E402
 from hdmf.data_utils import DataChunkIterator  # noqa: F401,E402
 from hdmf.backends.hdf5 import H5DataIO  # noqa: F401,E402
+
+__all__ = [
+    # Functions
+    'get_type_map',
+    'get_manager',
+    'load_namespaces', 
+    'available_namespaces',
+    'clear_cache_dir',
+    'register_class',
+    'register_map',
+    'get_class',
+    'load_type_config',
+    'get_loaded_type_config',
+    'unload_type_config',
+    'read_nwb',
+    'get_nwbfile_version',
+    
+    # Classes
+    'NWBHDF5IO',
+    'NWBContainer',
+    'NWBData', 
+    'TimeSeries',
+    'ProcessingModule',
+    'NWBFile',
+    'DataChunkIterator',
+    'H5DataIO'
+]
 
 
 

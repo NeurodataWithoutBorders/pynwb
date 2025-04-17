@@ -3,13 +3,23 @@ import numpy as np
 from collections.abc import Iterable
 
 from hdmf.common import DynamicTableRegion
-from hdmf.data_utils import DataChunkIterator, assertEqualShape
-from hdmf.utils import docval, popargs, get_docval, popargs_to_dict, get_data_shape
+from hdmf.data_utils import assertEqualShape
+from hdmf.utils import docval, popargs, get_docval, popargs_to_dict, get_data_shape, AllowPositional
 
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries
 from .core import NWBContainer, NWBDataInterface, MultiContainerInterface
 from .device import Device
+
+__all__ = [
+    'ElectrodeGroup',
+    'ElectricalSeries',
+    'SpikeEventSeries',
+    'EventDetection',
+    'LFP',
+    'FilteredEphys',
+    'FeatureExtraction'
+]
 
 
 @register_class('ElectrodeGroup', CORE_NAMESPACE)
@@ -29,7 +39,8 @@ class ElectrodeGroup(NWBContainer):
             {'name': 'position', 'type': 'array_data',
              'doc': 'Compound dataset with stereotaxic position of this electrode group (x, y, z). '
                     'The data array must have three elements or the dtype of the '
-                    'array must be ``(float, float, float)``', 'default': None})
+                    'array must be ``(float, float, float)``', 'default': None},
+            allow_positional=AllowPositional.WARNING,)
     def __init__(self, **kwargs):
         args_to_set = popargs_to_dict(('description', 'location', 'device', 'position'), kwargs)
         super().__init__(**kwargs)
@@ -91,7 +102,8 @@ class ElectricalSeries(TimeSeries):
              "filter is unknown, then this value could be 'Low-pass filter at 300 Hz'. If a non-standard filter "
              "type is used, provide as much detail about the filter properties as possible.", 'default': None},
             *get_docval(TimeSeries.__init__, 'resolution', 'conversion', 'timestamps', 'starting_time', 'rate',
-                        'comments', 'description', 'control', 'control_description', 'offset'))
+                        'comments', 'description', 'control', 'control_description', 'offset'),
+            allow_positional=AllowPositional.WARNING,)
     def __init__(self, **kwargs):
         args_to_set = popargs_to_dict(('electrodes', 'channel_conversion', 'filtering'), kwargs)
 
@@ -133,17 +145,24 @@ class SpikeEventSeries(ElectricalSeries):
              'doc': 'Timestamps for samples stored in data'},
             *get_docval(ElectricalSeries.__init__, 'electrodes'),  # required
             *get_docval(ElectricalSeries.__init__, 'resolution', 'conversion', 'comments', 'description', 'control',
-                        'control_description', 'offset'))
+                        'control_description', 'offset'),
+            allow_positional=AllowPositional.WARNING,)
     def __init__(self, **kwargs):
         data = kwargs['data']
         timestamps = kwargs['timestamps']
         if not (isinstance(data, TimeSeries) or isinstance(timestamps, TimeSeries)):
-            if not (isinstance(data, DataChunkIterator) or isinstance(timestamps, DataChunkIterator)):
-                if len(data) != len(timestamps):
+            # Validate the shape of the inputs. Use get_data_shape to also handle the
+            # case where the data is a AbstractDataChunkIterator
+            data_shape = get_data_shape(kwargs['data'], strict_no_data_load=True)
+            timestamps_shape = get_data_shape(kwargs['timestamps'], strict_no_data_load=True)
+            if (data_shape is not None and 
+                timestamps_shape is not None and 
+                len(data_shape) > 0 and 
+                len(timestamps_shape) > 0):
+                if (data_shape[0] != timestamps_shape[0] and 
+                    data_shape[0] is not None and 
+                    timestamps_shape[0] is not None):
                     raise ValueError('Must provide the same number of timestamps and spike events')
-            else:
-                # TODO: add check when we have DataChunkIterators
-                pass
         super().__init__(**kwargs)
 
 
@@ -168,7 +187,8 @@ class EventDetection(NWBDataInterface):
                     '(e.g., .25msec before action potential peak, zero-crossing time, etc). '
                     'The index points to each event from the raw data'},
             {'name': 'times', 'type': ('array_data', 'data'), 'doc': 'Timestamps of events, in Seconds'},
-            {'name': 'name', 'type': str, 'doc': 'the name of this container', 'default': 'EventDetection'})
+            {'name': 'name', 'type': str, 'doc': 'the name of this container', 'default': 'EventDetection'},
+            allow_positional=AllowPositional.WARNING,)
     def __init__(self, **kwargs):
         args_to_set = popargs_to_dict(('detection_method', 'source_electricalseries', 'source_idx', 'times'), kwargs)
         super().__init__(**kwargs)
@@ -194,7 +214,7 @@ class EventWaveform(MultiContainerInterface):
     }
 
     def __init__(self, **kwargs):
-        if not self._in_construct_mode:
+        if not self._in_construct_mode:  # pragma: no cover
             raise ValueError(
                 "The EventWaveform neurodata type is deprecated. If you are interested in using it, "
                 "please create an issue on https://github.com/NeurodataWithoutBorders/nwb-schema/issues."
@@ -227,7 +247,9 @@ class Clustering(NWBDataInterface):
              'shape': (None,)},
             {'name': 'name', 'type': str, 'doc': 'the name of this container', 'default': 'Clustering'})
     def __init__(self, **kwargs):
-        warnings.warn("use pynwb.misc.Units or NWBFile.units instead", DeprecationWarning)
+        self._error_on_new_pass_on_construct(
+            error_msg='The Clustering neurodata type is deprecated. Use pynwb.misc.Units or NWBFile.units instead'
+        )
         args_to_set = popargs_to_dict(('description', 'num', 'peak_over_rms', 'times'), kwargs)
         super().__init__(**kwargs)
         args_to_set['peak_over_rms'] = list(args_to_set['peak_over_rms'])
@@ -261,7 +283,9 @@ class ClusterWaveforms(NWBDataInterface):
              'doc': 'the standard deviations of waveforms for each cluster'},
             {'name': 'name', 'type': str, 'doc': 'the name of this container', 'default': 'ClusterWaveforms'})
     def __init__(self, **kwargs):
-        warnings.warn("use pynwb.misc.Units or NWBFile.units instead", DeprecationWarning)
+        self._error_on_new_pass_on_construct(
+            error_msg='The ClusterWaveforms neurodata type is deprecated. Use pynwb.misc.Units or NWBFile.units instead'
+        )
         args_to_set = popargs_to_dict(('clustering_interface', 'waveform_filtering',
                                        'waveform_mean', 'waveform_sd'), kwargs)
         super().__init__(**kwargs)
@@ -327,7 +351,8 @@ class FeatureExtraction(NWBDataInterface):
              'doc': 'The times of events that features correspond to'},
             {'name': 'features', 'type': ('array_data', 'data'), 'shape': (None, None, None),
              'doc': 'Features for each channel'},
-            {'name': 'name', 'type': str, 'doc': 'the name of this container', 'default': 'FeatureExtraction'})
+            {'name': 'name', 'type': str, 'doc': 'the name of this container', 'default': 'FeatureExtraction'},
+            allow_positional=AllowPositional.WARNING,)
     def __init__(self, **kwargs):
         # get the inputs
         electrodes, description, times, features = popargs(
