@@ -214,7 +214,8 @@ def mock_PlaneSegmentation(
     mask_type: Literal["image_mask", "pixel_mask", "voxel_mask"] = "image_mask",
     nwbfile: Optional[NWBFile] = None,
 ) -> PlaneSegmentation:
-    assert mask_type in ["image_mask", "pixel_mask", "voxel_mask"], f"mask_type must be one of ['image_mask', 'pixel_mask', 'voxel_mask'] but got {mask_type}"
+    assert mask_type in ["image_mask", "pixel_mask", "voxel_mask"], \
+        f"mask_type must be one of ['image_mask', 'pixel_mask', 'voxel_mask'] but got {mask_type}"
     plane_segmentation = PlaneSegmentation(
         description=description,
         imaging_plane=imaging_plane or mock_ImagingPlane(nwbfile=nwbfile),
