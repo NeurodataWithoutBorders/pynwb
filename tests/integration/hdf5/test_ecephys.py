@@ -1,7 +1,7 @@
 import numpy as np
 
 from hdmf.common import DynamicTableRegion
-from pynwb import NWBFile
+from pynwb import NWBFile, NWBHDF5IO
 
 from pynwb.ecephys import (
     ElectrodeGroup,
@@ -17,6 +17,15 @@ from pynwb.ecephys import (
 from pynwb.device import Device
 from pynwb.ecephys import ElectrodesTable as get_electrode_table
 from pynwb.testing import NWBH5IOMixin, AcquisitionH5IOMixin, NWBH5IOFlexMixin, TestCase
+
+
+class TestElectrodesTableBackCompat(TestCase):
+    def test_read_nwbfile(self):
+        """
+        Test that reads an NWBFile with an DynamicTable ElectrodesTable.
+        """
+        io = NWBHDF5IO("tests/back_compat/2.6.0_DynamicTableElectrodes.nwb", mode="r")
+        nwbfile = io.read()
 
 
 class TestElectrodeGroupIO(NWBH5IOMixin, TestCase):
@@ -175,10 +184,10 @@ class TestClusteringIO(AcquisitionH5IOMixin, TestCase):
         # raise error on write
         error_msg = "The Clustering neurodata type is deprecated. Use pynwb.misc.Units or NWBFile.units instead"
         kwargs = dict(description="A fake Clustering interface",
-                      num=[0, 1, 2, 0, 1, 2], 
-                      peak_over_rms=[100., 101., 102.], 
+                      num=[0, 1, 2, 0, 1, 2],
+                      peak_over_rms=[100., 101., 102.],
                       times=[float(i) for i in range(10, 61, 10)])
-        
+
         # create object with deprecated argument
         with self.assertRaisesWith(ValueError, error_msg):
             Clustering(**kwargs)
@@ -187,7 +196,7 @@ class TestClusteringIO(AcquisitionH5IOMixin, TestCase):
         # no warning should be raised
         obj = Clustering.__new__(Clustering, in_construct_mode=True)
         obj.__init__(**kwargs)
-        
+
         return obj
 
     def roundtripContainer(self, cache_spec=False):
@@ -247,7 +256,7 @@ class ClusterWaveformsConstructor(AcquisitionH5IOMixin, TestCase):
         with self.assertRaisesWith(ValueError, msg):
             cw = ClusterWaveforms(self.clustering, 'filtering', means, stdevs)
 
-        # create object in construct mode, modeling the behavior of the ObjectMapper on read 
+        # create object in construct mode, modeling the behavior of the ObjectMapper on read
         # no warning should be raised
         cw = ClusterWaveforms.__new__(ClusterWaveforms,
                                         container_source=None,

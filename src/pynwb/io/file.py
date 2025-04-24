@@ -193,8 +193,9 @@ class NWBFileMap(ObjectMapper):
         if (electrodes_builder is not None and electrodes_builder.attributes['neurodata_type'] != 'ElectrodesTable'):
             electrodes_builder.attributes['neurodata_type'] = 'ElectrodesTable'
             electrodes_builder.attributes['namespace'] = 'core'
-
-            new_container =  manager.construct(electrodes_builder, True)
+            manager.clear_cache()
+            new_container =  manager.construct(electrodes_builder)
+            # breakpoint()
             return new_container
         else:
             return None
