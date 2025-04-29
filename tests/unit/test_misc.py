@@ -1,6 +1,6 @@
 import numpy as np
 
-from hdmf.common import DynamicTable, VectorData, DynamicTableRegion
+from hdmf.common import VectorData, DynamicTableRegion
 
 from pynwb.misc import AnnotationSeries, AbstractFeatureSeries, IntervalSeries, Units, DecompositionSeries, BandsTable
 from pynwb.file import TimeSeries, ElectrodeTable as get_electrode_table
@@ -105,17 +105,15 @@ class DecompositionSeriesConstructor(TestCase):
                                         metric='amplitude')
         for band_name in ['alpha', 'beta', 'gamma']:
             spec_anal.add_band(band_name=band_name, band_limits=np.array([[1., 1.]]), band_mean=1., band_stdev=1.)
-        breakpoint()
-    #     self.assertEqual(spec_anal.name, 'LFPSpectralAnalysis')
-    #     self.assertEqual(spec_anal.description, 'my description')
-    #     np.testing.assert_equal(spec_anal.data, np.ones((3, 3, 3)))
-    #     np.testing.assert_equal(spec_anal.timestamps, [1., 2., 3.])
-    #     self.assertEqual(spec_anal.source_timeseries, timeseries)
-    #     self.assertEqual(spec_anal.metric, 'amplitude')
-    #     self.assertEqual(spec_anal.bands['band_name'].data, ['alpha', 'beta', 'gamma'])
-    #     np.testing.assert_equal(spec_anal.bands['band_limits'].data, [np.array([[1., 1.]]) for _ in range(3)])
-    #
-    #
+        self.assertEqual(spec_anal.name, 'LFPSpectralAnalysis')
+        self.assertEqual(spec_anal.description, 'my description')
+        np.testing.assert_equal(spec_anal.data, np.ones((3, 3, 3)))
+        np.testing.assert_equal(spec_anal.timestamps, [1., 2., 3.])
+        self.assertEqual(spec_anal.source_timeseries, timeseries)
+        self.assertEqual(spec_anal.metric, 'amplitude')
+        self.assertEqual(spec_anal.bands['band_name'].data, ['alpha', 'beta', 'gamma'])
+        np.testing.assert_equal(spec_anal.bands['band_limits'].data, [np.array([[1., 1.]]) for _ in range(3)])
+
     @staticmethod
     def make_electrode_table(self):
         """ Make an electrode table, electrode group, and device """

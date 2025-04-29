@@ -1,6 +1,6 @@
 import numpy as np
 
-from hdmf.common import DynamicTable, VectorData, DynamicTableRegion
+from hdmf.common import VectorData, DynamicTableRegion
 from pynwb import TimeSeries, NWBHDF5IO
 from pynwb.misc import Units, DecompositionSeries, BandsTable
 from pynwb.testing import NWBH5IOMixin, AcquisitionH5IOMixin, TestCase
@@ -112,6 +112,9 @@ class TestBackCompatDecompositionSeries(TestCase):
         """
         io = NWBHDF5IO("tests/back_compat/3.0.0_DecompositionSeries.nwb", mode="r")
         nwbfile = io.read()
+        # Read BandsTable to ensure it uses the schema type
+        bands = nwbfile.processing['test_mod']['LFPSpectralAnalysis'].bands
+        self.assertTrue(isinstance(bands, BandsTable))
 
 
 class TestDecompositionSeriesIO(NWBH5IOMixin, TestCase):

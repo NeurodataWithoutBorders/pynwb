@@ -265,7 +265,8 @@ class BandsTable(DynamicTable):
         {'name': 'band_stdev', 'description': 'The standard deviation Gaussian filters, in Hz.', 'required': False})
 
     @docval({'name': 'band_mean', 'type': VectorData, 'doc': 'The mean Gaussian filters, in Hz.', 'default': None},
-            {'name': 'band_stdev', 'type': VectorData, 'doc': 'The standard deviation Gaussian filters, in Hz.', 'default': None},
+            {'name': 'band_stdev', 'type': VectorData, 'doc': 'The standard deviation Gaussian filters, in Hz.',
+             'default': None},
             *get_docval(DynamicTable.__init__, 'id', 'columns', 'colnames'))
     def __init__(self, **kwargs):
         kwargs['name'] = 'bands'
@@ -284,7 +285,8 @@ class BandsTable(DynamicTable):
              'doc': 'Low and high limit of each band in Hz.'},
             {'name': 'band_mean', 'type': float, 'doc': 'The mean Gaussian filters, in Hz.',
              'default': None},
-            {'name': 'band_stdev', 'type': float, 'doc': 'The standard deviation Gaussian filters, in Hz.', 'default': None},
+            {'name': 'band_stdev', 'type': float, 'doc': 'The standard deviation Gaussian filters, in Hz.',
+             'default': None},
             allow_extra=True)
     def add_band(self, **kwargs):
         super().add_row(**kwargs)
