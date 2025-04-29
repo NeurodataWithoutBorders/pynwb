@@ -280,15 +280,14 @@ class BandsTable(DynamicTable):
         super().__init__(**kwargs)
 
     @docval({'name': 'band_name', 'type': str, 'doc': 'Name of the band, e.g. theta.'},
-            {'name': 'band_limits', 'type': 'array_data', 'shape': [None, 2],
+            {'name': 'band_limits', 'type': ('array_data', 'data'), 'shape': [None, 2],
              'doc': 'Low and high limit of each band in Hz.'},
-            {'name': 'band_mean', 'type': 'array_data', 'doc': 'The mean Gaussian filters, in Hz.',
+            {'name': 'band_mean', 'type': float, 'doc': 'The mean Gaussian filters, in Hz.',
              'default': None},
-            {'name': 'band_stdev', 'type': 'array_data', 'doc': 'The standard deviation Gaussian filters, in Hz.', 'default': None},
-            )
+            {'name': 'band_stdev', 'type': float, 'doc': 'The standard deviation Gaussian filters, in Hz.', 'default': None},
+            allow_extra=True)
     def add_band(self, **kwargs):
         super().add_row(**kwargs)
-
 
 
 @register_class('DecompositionSeries', CORE_NAMESPACE)
@@ -341,10 +340,6 @@ class DecompositionSeries(TimeSeries):
             bands = BandsTable()
         self.bands = bands
 
-    def __check_column(self, name, desc):
-        if name not in self.bands.colnames:
-            self.bands.add_column(name, desc)
-
     @docval({'name': 'band_name', 'type': str, 'doc': 'the name of the frequency band',
              'default': None},
             {'name': 'band_limits', 'type': ('array_data', 'data'), 'default': None,
@@ -360,14 +355,8 @@ class DecompositionSeries(TimeSeries):
         """
         band_name, band_limits, band_mean, band_stdev = getargs('band_name', 'band_limits', 'band_mean', 'band_stdev',
                                                                 kwargs)
-        if band_name is not None:
-            self.__check_column('band_name', "the name of the frequency band (recommended: 'alpha', 'beta', 'gamma', "
-                                             "'delta', 'high gamma'")
-        if band_name is not None:
-            self.__check_column('band_limits', 'low and high frequencies of bandpass filter in Hz')
-        if band_mean is not None:
-            self.__check_column('band_mean', 'the mean of Gaussian filters in Hz')
-        if band_stdev is not None:
-            self.__check_column('band_stdev', 'the standard deviation of Gaussian filters in Hz')
 
-        self.bands.add_row({k: v for k, v in kwargs.items() if v is not None})
+        self.bands.add_band(band_name=band_name,
+                            band_limits=band_limits,
+                            band_mean=band_mean,
+                            band_stdev=band_stdev)
