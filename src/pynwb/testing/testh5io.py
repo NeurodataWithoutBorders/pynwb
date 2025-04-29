@@ -95,7 +95,6 @@ class NWBH5IOMixin(metaclass=ABCMeta):
         with warnings.catch_warnings(record=True) as ws:
             with NWBHDF5IO(self.filename, mode='w') as write_io:
                 write_io.write(nwbfile, cache_spec=cache_spec)
-            # breakpoint()
             self.validate()
 
             self.reader = NWBHDF5IO(self.filename, mode='r')
