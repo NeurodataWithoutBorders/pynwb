@@ -1,5 +1,10 @@
 # PyNWB Changelog
 
+## PyNWB 3.1.0 (Upcoming)
+
+### Enhancements
+- Formally defined bands within `DecompositionSeries` as the neurodatatype `FrequencyBandsTable`. @mavaylon1 [#2063](https://github.com/NeurodataWithoutBorders/pynwb/pull/2063)
+
 ## PyNWB 3.0.0 (February 26, 2025)
 
 ### Breaking changes
