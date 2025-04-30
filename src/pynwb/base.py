@@ -77,11 +77,52 @@ class ProcessingModule(MultiContainerInterface):
              'doc': 'the NWBDataInterface to add to this Module'})
     def add_data_interface(self, **kwargs):
         warn('add_data_interface is deprecated and will be removed in PyNWB 4.0. Use add instead.', DeprecationWarning)
+        self.add(kwargs['NWBDataInterface'])
 
     @docval({'name': 'data_interface_name', 'type': str, 'doc': 'the name of the NWBContainer to retrieve'})
     def get_data_interface(self, **kwargs):
         warn('get_data_interface is deprecated and will be removed in PyNWB 4.0. Use get instead.', DeprecationWarning)
         return self.get(kwargs['data_interface_name'])
+
+    def __len__(self):
+        """Get the number of data interfaces in this ProcessingModule.
+
+        Returns
+        -------
+        int
+            Number of data interfaces
+        """
+        return len(self.data_interfaces)
+
+    def keys(self):
+        """Get the names of data interfaces in this ProcessingModule.
+
+        Returns
+        -------
+        KeysView
+            View of interface names
+        """
+        return self.data_interfaces.keys()
+
+    def values(self):
+        """Get the data interfaces in this ProcessingModule.
+
+        Returns
+        -------
+        ValuesView
+            View of interfaces
+        """
+        return self.data_interfaces.values()
+
+    def items(self):
+        """Get the (name, interface) pairs in this ProcessingModule.
+
+        Returns
+        -------
+        ItemsView
+            View of (name, interface) pairs
+        """
+        return self.data_interfaces.items()
 
 
 @register_class('TimeSeries', CORE_NAMESPACE)
