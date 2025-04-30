@@ -5,3 +5,4 @@ numpy==2.1.1; python_version > "3.9"  # numpy 2.1+ is not compatible with py3.9
 numpy==2.0.2; python_version == "3.9"
 pandas==2.2.3
 python-dateutil==2.9.0.post0
+platformdirs==4.3.6

@@ -69,10 +69,10 @@ class TimeIntervals(DynamicTable):
             ts_timestamps = ts.timestamps
             ts_starting_time = ts.starting_time
             ts_rate = ts.rate
-        if ts_starting_time is not None and ts_rate:
+        if ts_starting_time is not None and ts_rate is not None:
             start_idx = int((start_time - ts_starting_time)*ts_rate)
             stop_idx = int((stop_time - ts_starting_time)*ts_rate)
-        elif len(ts_timestamps) > 0:
+        elif ts_timestamps is not None and len(ts_timestamps) > 0:
             timestamps = ts_timestamps
             start_idx = bisect_left(timestamps, start_time)
             stop_idx = bisect_left(timestamps, stop_time)
