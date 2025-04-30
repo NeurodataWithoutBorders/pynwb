@@ -253,8 +253,8 @@ class Units(DynamicTable):
         index = getargs('index', kwargs)
         return np.asarray(self['obs_intervals'][index])
 
-@register_class('BandsTable', CORE_NAMESPACE)
-class BandsTable(DynamicTable):
+@register_class('FrequencyBandsTable', CORE_NAMESPACE)
+class FrequencyBandsTable(DynamicTable):
     """
     Table for describing the bands that DecompositionSeries was generated from.
     """
@@ -315,7 +315,7 @@ class DecompositionSeries(TimeSeries):
             {'name': 'metric', 'type': str,  # required
              'doc': "metric of analysis. recommended - 'phase', 'amplitude', 'power'"},
             {'name': 'unit', 'type': str, 'doc': 'SI unit of measurement', 'default': 'no unit'},
-            {'name': 'bands', 'type': BandsTable,
+            {'name': 'bands', 'type': FrequencyBandsTable,
              'doc': 'a table for describing the frequency bands that the signal was decomposed into', 'default': None},
             {'name': 'source_timeseries', 'type': TimeSeries,
              'doc': 'the input TimeSeries from this analysis', 'default': None},
@@ -339,7 +339,7 @@ class DecompositionSeries(TimeSeries):
                           "corresponding source_channels. (Optional)")
         self.metric = metric
         if bands is None:
-            bands = BandsTable()
+            bands = FrequencyBandsTable()
         self.bands = bands
 
     @docval({'name': 'band_name', 'type': str, 'doc': 'the name of the frequency band',

@@ -12,8 +12,8 @@ class DecompositionSeriesMap(TimeSeriesMap):
 
     @TimeSeriesMap.constructor_arg('bands')
     def bands(self, builder, manager):
-        if builder.groups['bands'].attributes['neurodata_type'] != 'BandsTable':
-            builder.groups['bands'].attributes['neurodata_type'] = 'BandsTable'
+        if builder.groups['bands'].attributes['neurodata_type'] != 'FrequencyBandsTable':
+            builder.groups['bands'].attributes['neurodata_type'] = 'FrequencyBandsTable'
             builder.groups['bands'].attributes['namespace'] = 'core'
         manager.clear_cache()
         new_container =  manager.construct(builder.groups['bands'])

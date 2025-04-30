@@ -2,7 +2,7 @@ import numpy as np
 
 from hdmf.common import VectorData, DynamicTableRegion
 from pynwb import TimeSeries, NWBHDF5IO
-from pynwb.misc import Units, DecompositionSeries, BandsTable
+from pynwb.misc import Units, DecompositionSeries, FrequencyBandsTable
 from pynwb.testing import NWBH5IOMixin, AcquisitionH5IOMixin, TestCase
 from pynwb.ecephys import ElectrodeGroup
 from pynwb.device import Device
@@ -112,9 +112,9 @@ class TestBackCompatDecompositionSeries(TestCase):
         """
         io = NWBHDF5IO("tests/back_compat/3.0.0_DecompositionSeries.nwb", mode="r")
         nwbfile = io.read()
-        # Read BandsTable to ensure it uses the schema type
+        # Read FrequencyBandsTable to ensure it uses the schema type
         bands = nwbfile.processing['test_mod']['LFPSpectralAnalysis'].bands
-        self.assertTrue(isinstance(bands, BandsTable))
+        self.assertTrue(isinstance(bands, FrequencyBandsTable))
 
 
 class TestDecompositionSeriesIO(NWBH5IOMixin, TestCase):
@@ -128,7 +128,7 @@ class TestDecompositionSeriesIO(NWBH5IOMixin, TestCase):
             unit='flibs',
             timestamps=np.ones((3,)),
         )
-        bands = BandsTable(
+        bands = FrequencyBandsTable(
             columns=[
                 VectorData(name='band_name', description='name of bands', data=['alpha', 'beta', 'gamma']),
                 VectorData(name='band_limits', description='low and high cutoffs in Hz', data=np.ones((3, 2))),
@@ -190,7 +190,7 @@ class TestDecompositionSeriesWithSourceChannelsIO(AcquisitionH5IOMixin, TestCase
         )
         data = np.random.randn(100, 2, 30)
         timestamps = np.arange(100)/100
-        bands = BandsTable(
+        bands = FrequencyBandsTable(
             columns=[
                 VectorData(name='band_name', description='name of bands', data=['alpha', 'beta', 'gamma']),
                 VectorData(name='band_limits', description='low and high cutoffs in Hz', data=np.ones((3, 2))),

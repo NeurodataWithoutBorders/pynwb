@@ -2,7 +2,7 @@ import numpy as np
 
 from hdmf.common import VectorData, DynamicTableRegion
 
-from pynwb.misc import AnnotationSeries, AbstractFeatureSeries, IntervalSeries, Units, DecompositionSeries, BandsTable
+from pynwb.misc import AnnotationSeries, AbstractFeatureSeries, IntervalSeries, Units, DecompositionSeries, FrequencyBandsTable
 from pynwb.file import TimeSeries, ElectrodeTable as get_electrode_table
 from pynwb.device import Device
 from pynwb.ecephys import ElectrodeGroup
@@ -29,9 +29,9 @@ class AbstractFeatureSeriesConstructor(TestCase):
         aFS.add_features(2.0, [1.])
 
 
-class BandsTableConstructor(TestCase):
+class FrequencyBandsTableConstructor(TestCase):
     def setUp(self):
-        self.bands = BandsTable(
+        self.bands = FrequencyBandsTable(
             columns=[
                 VectorData(name='band_name', description='name of bands', data=['alpha', 'beta', 'gamma']),
                 VectorData(name='band_limits', description='low and high cutoffs in Hz', data=np.ones((3, 2))),
@@ -62,7 +62,7 @@ class DecompositionSeriesConstructor(TestCase):
         timeseries = TimeSeries(name='dummy timeseries', description='desc',
                                 data=np.ones((3, 3)), unit='Volts',
                                 timestamps=[1., 2., 3.])
-        bands = BandsTable(
+        bands = FrequencyBandsTable(
             columns=[
                 VectorData(name='band_name', description='name of bands', data=['alpha', 'beta', 'gamma']),
                 VectorData(name='band_limits', description='low and high cutoffs in Hz', data=np.ones((3, 2))),
