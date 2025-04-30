@@ -1,10 +1,25 @@
 # PyNWB Changelog
 
-## PyNWB 3.1.0 (Upcoming)
+## Upcoming
 
-### Enhancements
+### Breaking changes
+
+- Removed unused functions `prepend_string` and `_not_parent` in `core.py`, `_not_parent` in `file.py`, and `NWBBaseTypeMapper.get_nwb_file` in `io/core.py` @oruebel [#2036](https://github.com/NeurodataWithoutBorders/pynwb/pull/2036)
+
+### Enhancements and minor changes
+- Automatically add timezone information to timestamps reference time if no timezone information is specified. @stephprince [#2056](https://github.com/NeurodataWithoutBorders/pynwb/pull/2056)
+- Added option to disable typemap caching and updated type map cache location. @stephprince [#2057](https://github.com/NeurodataWithoutBorders/pynwb/pull/2057)
+- Added dictionary-like operations directly on `ProcessingModule` objects (e.g., `len(processing_module)`). @bendichter [#2020](https://github.com/NeurodataWithoutBorders/pynwb/pull/2020)
+- When an external file is detected when initializing an ImageSeries and no format is provided, automatically set format to "external" instead of raising an error. @stephprince [#2060](https://github.com/NeurodataWithoutBorders/pynwb/pull/2060)
+- Added mask_type option to `mock_PlaneSegmentation`. @pauladkisson [#2067](https://github.com/NeurodataWithoutBorders/pynwb/pull/2067)
 - Formally defined bands within `DecompositionSeries` as the neurodatatype `FrequencyBandsTable`. @mavaylon1 [#2063](https://github.com/NeurodataWithoutBorders/pynwb/pull/2063)
 
+### Bug fixes
+- Fix `add_data_interface` functionality that was mistakenly removed in PyNWB 3.0. @stephprince [#2052](https://github.com/NeurodataWithoutBorders/pynwb/pull/2052)
+- Fixed bug in `IntracellularRecordingsTable.__init__` were `IntracellularResponsesTable` wasn't created correctly when custom category tables were provided @oruebel. [#2031](https://github.com/NeurodataWithoutBorders/pynwb/pull/2031)
+- Fixed shape check in `SpikeEventSeries.__init__` to support `AbstractDataChunkIterator` for timestamps/data. @oruebel [#2031](https://github.com/NeurodataWithoutBorders/pynwb/pull/2031)
+- Added unit tests to enhance coverage of `core.py`, `image.py`, `spec.py`, `icephys.py`, `epoch.py` and others. @oruebel [#2031](https://github.com/NeurodataWithoutBorders/pynwb/pull/2031)
+ 
 ## PyNWB 3.0.0 (February 26, 2025)
 
 ### Breaking changes
