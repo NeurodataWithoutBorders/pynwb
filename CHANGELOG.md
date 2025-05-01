@@ -12,6 +12,7 @@
 - Added dictionary-like operations directly on `ProcessingModule` objects (e.g., `len(processing_module)`). @bendichter [#2020](https://github.com/NeurodataWithoutBorders/pynwb/pull/2020)
 - When an external file is detected when initializing an ImageSeries and no format is provided, automatically set format to "external" instead of raising an error. @stephprince [#2060](https://github.com/NeurodataWithoutBorders/pynwb/pull/2060)
 - Added mask_type option to `mock_PlaneSegmentation`. @pauladkisson [#2067](https://github.com/NeurodataWithoutBorders/pynwb/pull/2067)
+- Direct Extensions documentation to NWB Overview. @mavaylon [#2069](https://github.com/NeurodataWithoutBorders/pynwb/pull/2069)
 
 ### Bug fixes
 - Fix `add_data_interface` functionality that was mistakenly removed in PyNWB 3.0. @stephprince [#2052](https://github.com/NeurodataWithoutBorders/pynwb/pull/2052)
