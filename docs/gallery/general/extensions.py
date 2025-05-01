@@ -4,8 +4,9 @@
 Extending NWB
 =============
 
-The NWB format was designed to be easily extendable. Extensions should be defined separately from the code that uses the extensions. This design decision is
-based on the assumption that the extension will be written once, and read or used multiple times.
+The NWB format was designed to be easily extendable. Extensions should be defined separately
+from the code that uses the extensions. This design decision is based on the assumption that
+the extension will be written once, and read or used multiple times.
 
 .. seealso::
 
