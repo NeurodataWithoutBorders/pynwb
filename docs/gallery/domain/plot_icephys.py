@@ -16,7 +16,6 @@ metadata tables that NWB provides.
        tutorials as part of the :incf_collection:`NWB Course <neurodata-without-borders-neurophysiology-nwbn>`
        at the INCF Training Space.
 """
-# sphinx_gallery_thumbnail_path = 'figures/gallery_thumbnails_icephys.png'
 #####################################################################
 # 1. Basic Intracellular Electrophysiology in NWB
 # -----------------------------------------------
@@ -26,6 +25,7 @@ metadata tables that NWB provides.
 # types of stimulus and response time series.
 
 # Standard Python imports
+# sphinx_gallery_thumbnail_path = 'figures/gallery_thumbnails_icephys.png'
 from datetime import datetime, timezone
 from uuid import uuid4
 import numpy as np
