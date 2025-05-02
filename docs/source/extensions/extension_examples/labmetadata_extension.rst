@@ -10,7 +10,9 @@ Use case
 
 Here we address the use case of adding lab-specific metadata to a file, e.g.,
 lab-specific information about experimental protocols, lab-specific identifiers and so on.
-This approach is intended for usually small metadata. :bdg-link-primary:`Extension source <https://github.com/NeurodataWithoutBorders/ndx-labmetadata-example>`
+This approach is intended for usually small metadata.
+
+`Extension source <https://github.com/NeurodataWithoutBorders/ndx-labmetadata-example>`_
 
 .. short_description_end
 

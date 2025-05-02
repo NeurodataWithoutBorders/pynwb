@@ -3,7 +3,7 @@
 Publishing extensions
 ---------------------
 
-.. image:: ../img/publishing_extensions.png
+.. image:: ../_static/publishing_extensions.png
    :width: 315px
    :class: align-right
 
@@ -70,7 +70,7 @@ repositories for the extensions remain with the developers. To publish your exte
    which is used to submit new extension to the catalog via pull requests.
 2. Clone your fork of the *staged-extensions* onto your computer, e.g., via ``git clone <my_fork_url>``
 
-.. image:: ../img/publishing_extensions_clone_fork_repo.png
+.. image:: ../_static/publishing_extensions_clone_fork_repo.png
    :width: 800px
    :class: align-center
 
@@ -129,8 +129,4 @@ Once you have published your extension you can update and publish new version as
 
 Policies: Neurodata Extension (NDX) rules and guidelines
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-* :nwb-main:`Sharing Guidelines <sharing-extensions-guidelines>`: requirements and strategy for sharing format extensions for NWB
-* :nwb-main:`Sharing Strategies <sharing-extensions-strategies>`: standard practices and strategies for sharing format extensions for NWB
-* :nwb-main:`Proposal Review Process <proposal-review-process>`: process by which extensions to the NWB core standard are proposed, evaluated, reviewed, and accepted
-* :nwb-main:`Versioning Guidelines <versioning-guidelines>`: requirements and strategy for versioning namespaces for the NWB core schema and extensions
+See our `Policies Page <https://neurodatawithoutborders.github.io/policies/>`_ for information about how to version, publish, and share your extensions.
