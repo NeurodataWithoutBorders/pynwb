@@ -216,6 +216,8 @@ rowindex = nwbfile.add_intracellular_recording(
 pandas.set_option("display.max_columns", 6)  # avoid oversize table in the html docs,m
 nwbfile.intracellular_recordings.to_dataframe()
 
+
+#####################################################################
 # The add_intracellular_recording method requires the following parameters:
 # - electrode: a reference to the electrode used for recording
 # - stimulus: a reference to the stimulus time series (optional if response is provided)
@@ -223,8 +225,11 @@ nwbfile.intracellular_recordings.to_dataframe()
 #
 # For more information on this method, see the documentation:
 # https://pynwb.readthedocs.io/en/stable/pynwb.file.html#pynwb.file.NWBFile.add_intracellular_recording
-
-#####################################################################
+#
+#
+#
+#
+#
 # 2.2 Handling time alignment with index ranges
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 #
@@ -255,6 +260,9 @@ rowindex3 = nwbfile.add_intracellular_recording(
 # Display the updated intracellular recordings table
 nwbfile.intracellular_recordings.to_dataframe()
 
+
+
+#####################################################################
 # The index range parameters allow you to specify which portion of the data to use:
 # - stimulus_start_index: the starting index for the stimulus data
 # - stimulus_index_count: the number of data points to use from the stimulus
@@ -263,8 +271,12 @@ nwbfile.intracellular_recordings.to_dataframe()
 #
 # This is useful when the stimulus and response data are not perfectly aligned in time,
 # or when you want to use only a specific portion of the data.
-
-#####################################################################
+#
+#
+#
+#
+#
+#
 # 2.3 Adding custom metadata to the recordings table
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 #
@@ -288,6 +300,8 @@ nwbfile.intracellular_recordings.add_column(
 # Display the customized table
 nwbfile.intracellular_recordings.to_dataframe()
 
+
+#####################################################################
 # The add_column method requires the following parameters:
 # - name: the name of the column
 # - data: the data for the column
@@ -296,8 +310,11 @@ nwbfile.intracellular_recordings.to_dataframe()
 #
 # For more information on this method, see the documentation:
 # https://pynwb.readthedocs.io/en/stable/pynwb.icephys.html#pynwb.icephys.IntracellularRecordingsTable.add_column
-
-#####################################################################
+#
+#
+#
+#
+#
 # 2.4 Creating custom categories for additional metadata
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 #
@@ -327,13 +344,17 @@ nwbfile.intracellular_recordings.add_category(category=lab_category)
 # Display the table with the new category
 nwbfile.intracellular_recordings.to_dataframe()
 
+
+#####################################################################
 # The add_category method requires the following parameters:
 # - category: the category table to add
 #
 # For more information on this method, see the documentation:
 # https://pynwb.readthedocs.io/en/stable/pynwb.icephys.html#pynwb.icephys.IntracellularRecordingsTable.add_category
-
-#####################################################################
+#
+#
+#
+#
 # 2.5 Adding stimulus templates
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 #
@@ -402,14 +423,19 @@ rowindex4 = nwbfile.add_intracellular_recording(
 # Display the updated table
 nwbfile.intracellular_recordings.to_dataframe()
 
+
+
+#####################################################################
 # The TimeSeriesReference class is used to reference a specific portion of a time series:
 # - TimeSeriesReference(start_index, count, timeseries): references a specific portion
 # - TimeSeriesReference.empty(timeseries): creates an empty reference
 #
 # For more information on this class, see the documentation:
 # https://pynwb.readthedocs.io/en/stable/pynwb.base.html#pynwb.base.TimeSeriesReference
-
-#####################################################################
+#
+#
+#
+#
 # 3. Hierarchical Organization for Complex Experiments
 # ----------------------------------------------------
 #
@@ -669,13 +695,16 @@ sweep5 = nwbfile.add_icephys_simultaneous_recording(
 # Display the simultaneous recordings table
 icephys_simultaneous_recordings.to_dataframe()
 
+
+
+#####################################################################
 # The add_icephys_simultaneous_recording method requires the following parameters:
 # - recordings: a list of references to intracellular recordings
 #
 # For more information on this method, see the documentation:
 # https://pynwb.readthedocs.io/en/stable/pynwb.file.html#pynwb.file.NWBFile.add_icephys_simultaneous_recording
-
-#####################################################################
+#
+#
 # 3.2 Sequential recordings
 # ^^^^^^^^^^^^^^^^^^^^^^^^^
 #
@@ -707,14 +736,16 @@ seq2 = nwbfile.add_icephys_sequential_recording(
 # Display the sequential recordings table
 nwbfile.icephys_sequential_recordings.to_dataframe()
 
+
+#####################################################################
 # The add_icephys_sequential_recording method requires the following parameters:
 # - simultaneous_recordings: a list of references to simultaneous recordings
 # - stimulus_type: a description of the stimulus type
 #
 # For more information on this method, see the documentation:
 # https://pynwb.readthedocs.io/en/stable/pynwb.file.html#pynwb.file.NWBFile.add_icephys_sequential_recording
-
-#####################################################################
+#
+#
 # 3.3 Repetitions
 # ^^^^^^^^^^^^^^^
 #
@@ -736,13 +767,14 @@ rep1 = nwbfile.add_icephys_repetition(
 # Display the repetitions table
 nwbfile.icephys_repetitions.to_dataframe()
 
+#####################################################################
 # The add_icephys_repetition method requires the following parameters:
 # - sequential_recordings: a list of references to sequential recordings
 #
 # For more information on this method, see the documentation:
 # https://pynwb.readthedocs.io/en/stable/pynwb.file.html#pynwb.file.NWBFile.add_icephys_repetition
-
-#####################################################################
+#
+#
 # 3.4 Experimental conditions
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 #
