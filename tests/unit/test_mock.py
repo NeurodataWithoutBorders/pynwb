@@ -122,3 +122,8 @@ def test_name_generator():
     assert name_generator("TimeSeries") == "TimeSeries"
     assert name_generator("TimeSeries") == "TimeSeries2"
 
+@pytest.mark.parametrize("mask_type", ["image_mask", "pixel_mask", "voxel_mask"])
+def test_mock_PlaneSegmentation_mask_type(mask_type):
+    plane_segmentation = mock_PlaneSegmentation(mask_type=mask_type)
+    assert getattr(plane_segmentation, mask_type) is not None
+

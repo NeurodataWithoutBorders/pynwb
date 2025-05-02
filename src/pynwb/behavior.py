@@ -1,11 +1,22 @@
 import warnings
 
-from hdmf.utils import docval, popargs, get_docval, get_data_shape
+from hdmf.utils import docval, popargs, get_docval, get_data_shape, AllowPositional
 
 from . import register_class, CORE_NAMESPACE
 from .core import MultiContainerInterface
 from .misc import IntervalSeries
 from .base import TimeSeries
+
+__all__ = [
+    'SpatialSeries',
+    'BehavioralEpochs',
+    'BehavioralEvents',
+    'BehavioralTimeSeries',
+    'PupilTracking',
+    'EyeTracking',
+    'CompassDirection',
+    'Position'
+]
 
 
 @register_class('SpatialSeries', CORE_NAMESPACE)
@@ -31,15 +42,14 @@ class SpatialSeries(TimeSeries):
             {'name': 'unit', 'type': str, 'doc': 'The base unit of measurement (should be SI unit)',
              'default': 'meters'},
             *get_docval(TimeSeries.__init__, 'conversion', 'resolution', 'timestamps', 'starting_time', 'rate',
-                        'comments', 'description', 'control', 'control_description', 'offset'))
+                        'comments', 'description', 'control', 'control_description', 'offset'),
+            allow_positional=AllowPositional.WARNING,)
     def __init__(self, **kwargs):
         """
         Create a SpatialSeries TimeSeries dataset
         """
-        name, data, reference_frame, unit = popargs(
-            'name', 'data', 'reference_frame', 'unit', kwargs
-        )
-        super().__init__(name, data, unit, **kwargs)
+        name, data, reference_frame = popargs('name', 'data', 'reference_frame', kwargs)
+        super().__init__(name=name, data=data, **kwargs)
 
         # NWB 2.5 restricts length of second dimension to be <= 3
         allowed_data_shapes = ((None, ), (None, 1), (None, 2), (None, 3))

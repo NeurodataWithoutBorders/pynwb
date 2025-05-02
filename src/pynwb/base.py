@@ -6,10 +6,21 @@ import numpy as np
 
 from hdmf.utils import docval, popargs_to_dict, get_docval, popargs
 from hdmf.common import DynamicTable, VectorData
-from hdmf.utils import get_data_shape
+from hdmf.utils import get_data_shape, AllowPositional
 
 from . import register_class, CORE_NAMESPACE
 from .core import NWBDataInterface, MultiContainerInterface, NWBData
+
+
+__all__ = [
+    'ProcessingModule',
+    'TimeSeries',
+    'Image',
+    'ImageReferences',
+    'Images',
+    'TimeSeriesReferenceVectorData',
+    'TimeSeriesReference'
+]
 
 
 @register_class('ProcessingModule', CORE_NAMESPACE)
@@ -33,7 +44,8 @@ class ProcessingModule(MultiContainerInterface):
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this processing module'},
             {'name': 'description', 'type': str, 'doc': 'Description of this processing module'},
             {'name': 'data_interfaces', 'type': (list, tuple, dict),
-             'doc': 'NWBDataInterfaces that belong to this ProcessingModule', 'default': None})
+             'doc': 'NWBDataInterfaces that belong to this ProcessingModule', 'default': None},
+             allow_positional=AllowPositional.WARNING,)
     def __init__(self, **kwargs):
         description, data_interfaces = popargs("description", "data_interfaces", kwargs)
         super().__init__(**kwargs)
@@ -50,7 +62,7 @@ class ProcessingModule(MultiContainerInterface):
         '''
         Add an NWBContainer to this ProcessingModule
         '''
-        warn(PendingDeprecationWarning('add_container will be replaced by add'))
+        warn("add_container is deprecated and will be removed in PyNWB 4.0. Use add instead.", DeprecationWarning)
         self.add(kwargs['container'])
 
     @docval({'name': 'container_name', 'type': str, 'doc': 'the name of the NWBContainer to retrieve'})
@@ -58,19 +70,59 @@ class ProcessingModule(MultiContainerInterface):
         '''
         Retrieve an NWBContainer from this ProcessingModule
         '''
-        warn(PendingDeprecationWarning('get_container will be replaced by get'))
+        warn('get_container is deprecated and will be removed in PyNWB 4.0. Use get instead.', DeprecationWarning)
         return self.get(kwargs['container_name'])
 
     @docval({'name': 'NWBDataInterface', 'type': (NWBDataInterface, DynamicTable),
              'doc': 'the NWBDataInterface to add to this Module'})
     def add_data_interface(self, **kwargs):
-        warn(PendingDeprecationWarning('add_data_interface will be replaced by add'))
+        warn('add_data_interface is deprecated and will be removed in PyNWB 4.0. Use add instead.', DeprecationWarning)
         self.add(kwargs['NWBDataInterface'])
 
     @docval({'name': 'data_interface_name', 'type': str, 'doc': 'the name of the NWBContainer to retrieve'})
     def get_data_interface(self, **kwargs):
-        warn(PendingDeprecationWarning('get_data_interface will be replaced by get'))
+        warn('get_data_interface is deprecated and will be removed in PyNWB 4.0. Use get instead.', DeprecationWarning)
         return self.get(kwargs['data_interface_name'])
+
+    def __len__(self):
+        """Get the number of data interfaces in this ProcessingModule.
+
+        Returns
+        -------
+        int
+            Number of data interfaces
+        """
+        return len(self.data_interfaces)
+
+    def keys(self):
+        """Get the names of data interfaces in this ProcessingModule.
+
+        Returns
+        -------
+        KeysView
+            View of interface names
+        """
+        return self.data_interfaces.keys()
+
+    def values(self):
+        """Get the data interfaces in this ProcessingModule.
+
+        Returns
+        -------
+        ValuesView
+            View of interfaces
+        """
+        return self.data_interfaces.values()
+
+    def items(self):
+        """Get the (name, interface) pairs in this ProcessingModule.
+
+        Returns
+        -------
+        ItemsView
+            View of (name, interface) pairs
+        """
+        return self.data_interfaces.items()
 
 
 @register_class('TimeSeries', CORE_NAMESPACE)
@@ -143,7 +195,8 @@ class TimeSeries(NWBDataInterface):
                     'distinct moments in time. Times of image presentations would be  "step" because the picture '
                     'remains the same until the next time-point. This field is optional, but is useful in providing '
                     'information about the underlying data. It may inform the way this data is interpreted, the way it '
-                    'is visualized, and what analysis methods are applicable.'})
+                    'is visualized, and what analysis methods are applicable.'},
+              allow_positional=AllowPositional.WARNING,)
     def __init__(self, **kwargs):
         """Create a TimeSeries object
         """
@@ -199,28 +252,34 @@ class TimeSeries(NWBDataInterface):
         else:
             raise TypeError("either 'timestamps' or 'rate' must be specified")
 
-        if not self._check_time_series_dimension():
-            warn("%s '%s': Length of data does not match length of timestamps. Your data may be transposed. "
-                 "Time should be on the 0th dimension" % (self.__class__.__name__, self.name))
+        error_msg = self._check_time_series_dimension()
+        if error_msg:
+            self._error_on_new_warn_on_construct(error_msg=error_msg)
 
     def _check_time_series_dimension(self):
         """Check that the 0th dimension of data equals the length of timestamps, when applicable.
         """
         if self.timestamps is None:
-            return True
+            return
 
         data_shape = get_data_shape(data=self.fields["data"], strict_no_data_load=True)
         timestamps_shape = get_data_shape(data=self.fields["timestamps"], strict_no_data_load=True)
 
         # skip check if shape of data or timestamps cannot be computed
         if data_shape is None or timestamps_shape is None:
-            return True
+            return
 
         # skip check if length of the first dimension is not known
         if data_shape[0] is None or timestamps_shape[0] is None:
-            return True
+            return
 
-        return data_shape[0] == timestamps_shape[0]
+        if data_shape[0] == timestamps_shape[0]:
+            return
+
+        return (
+            "%s '%s': Length of data does not match length of timestamps. Your data may be transposed. "
+            "Time should be on the 0th dimension" % (self.__class__.__name__, self.name)
+        )
 
     @property
     def num_samples(self):
@@ -375,7 +434,8 @@ class Image(NWBData):
             {'name': 'data', 'type': ('array_data', 'data'), 'doc': 'data of image. Dimensions: x, y [, r,g,b[,a]]',
              'shape': ((None, None), (None, None, 3), (None, None, 4))},
             {'name': 'resolution', 'type': float, 'doc': 'pixels / cm', 'default': None},
-            {'name': 'description', 'type': str, 'doc': 'description of image', 'default': None})
+            {'name': 'description', 'type': str, 'doc': 'description of image', 'default': None},
+            allow_positional=AllowPositional.WARNING,)
     def __init__(self, **kwargs):
         args_to_set = popargs_to_dict(("resolution", "description"), kwargs)
         super().__init__(**kwargs)
@@ -392,7 +452,8 @@ class ImageReferences(NWBData):
     __nwbfields__ = ('data', )
 
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this ImageReferences object.'},
-            {'name': 'data', 'type': 'array_data', 'doc': 'The images in order.'},)
+            {'name': 'data', 'type': 'array_data', 'doc': 'The images in order.'},
+            allow_positional=AllowPositional.WARNING,)
     def __init__(self, **kwargs):
         # NOTE we do not use the docval shape validator here because it will recognize a list of P MxN images as
         # having shape (P, M, N)
@@ -424,7 +485,8 @@ class Images(MultiContainerInterface):
             {'name': 'images', 'type': 'array_data', 'doc': 'image objects', 'default': None},
             {'name': 'description', 'type': str, 'doc': 'description of images', 'default': 'no description'},
             {'name': 'order_of_images', 'type': ImageReferences,
-             'doc': 'Ordered dataset of references to Image objects stored in the parent group.', 'default': None},)
+             'doc': 'Ordered dataset of references to Image objects stored in the parent group.', 'default': None},
+             allow_positional=AllowPositional.WARNING,)
     def __init__(self, **kwargs):
 
         args_to_set = popargs_to_dict(("description", "images", "order_of_images"), kwargs)
@@ -617,7 +679,8 @@ class TimeSeriesReferenceVectorData(VectorData):
              'default': "Column storing references to a TimeSeries (rows). For each TimeSeries this "
                         "VectorData column stores the start_index and count to indicate the range in time "
                         "to be selected as well as an object reference to the TimeSeries."},
-            *get_docval(VectorData.__init__, 'data'))
+            *get_docval(VectorData.__init__, 'data'),
+            allow_positional=AllowPositional.WARNING,)
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         # CAUTION: Define any logic specific for init in the self._init_internal function, not here!
