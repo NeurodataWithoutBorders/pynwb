@@ -31,7 +31,7 @@ from uuid import uuid4
 import numpy as np
 
 # Import NWB classes
-from pynwb import NWBHDF5IO, NWBFile
+from pynwb import NWBFile
 from pynwb.icephys import VoltageClampSeries, VoltageClampStimulusSeries
 
 #####################################################################
@@ -428,7 +428,7 @@ import numpy as np
 import pandas
 
 # Import NWB classes
-from pynwb import NWBHDF5IO, NWBFile
+from pynwb import NWBFile
 from pynwb.icephys import (
     VoltageClampSeries, VoltageClampStimulusSeries,
     CurrentClampSeries, CurrentClampStimulusSeries
@@ -783,6 +783,7 @@ nwbfile.icephys_experimental_conditions.to_dataframe()
 # Now let's save our NWB file.
 
 # Write our file
+from pynwb import NWBHDF5IO
 testpath = "test_icephys_file.nwb"
 with NWBHDF5IO(testpath, "w") as io:
     io.write(nwbfile)
