@@ -164,6 +164,13 @@ extlinks = {
     'dandi': ('https://dandiarchive.org/%s', '%s'),
     "nwbinspector": ("https://nwbinspector.readthedocs.io/en/dev/%s", "%s"),
     'hdmf-zarr': ('https://hdmf-zarr.readthedocs.io/en/stable/%s', '%s'),
+    'nwb_extension_git': ('https://github.com/nwb-extensions/%s', '%s'),
+    'nwb-schema-language-docs': ('https://schema-language.readthedocs.io/en/latest/%s', '%s'),
+    'ndx-template-docs': ('https://github.com/nwb-extensions/ndx-template/%s', '%s'),
+    'nwb-schema-docs': ('https://nwb-schema.readthedocs.io/en/latest/%s', '%s'),
+    'hdmf-docutils-docs': ('https://github.com/hdmf-dev/hdmf-docutils/%s', '%s'),
+    'ndx-catalog': ('https://nwb-extensions.github.io/%s', '%s'),
+
 }
 
 nitpicky = True
