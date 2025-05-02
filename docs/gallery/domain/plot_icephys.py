@@ -818,23 +818,3 @@ with NWBHDF5IO(testpath, "w") as io:
 # This hierarchical organization helps avoid duplication of metadata and makes it easier
 # to focus on individual aspects of an experiment while still being able to access
 # information from related tables.
-
-# Optionally plot the organization of our NWB file
-try:
-    import matplotlib.pyplot as plt
-    from hdmf_docutils.doctools.render import (
-        HierarchyDescription,
-        NXGraphHierarchyDescription,
-    )
-
-    file_hierarchy = HierarchyDescription.from_hdf5(testpath)
-    file_graph = NXGraphHierarchyDescription(file_hierarchy)
-    fig = file_graph.draw(
-        show_plot=False,
-        figsize=(12, 16),
-        label_offset=(0.0, 0.0065),
-        label_font_size=10,
-    )
-    plt.show()
-except ImportError:  # ignore in case hdmf_docutils is not installed
-    pass
