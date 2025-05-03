@@ -2,7 +2,7 @@ import numpy as np
 
 from pynwb.base import Image, ImageReferences, Images
 from pynwb.device import Device
-from pynwb.image import ImageSeries, OpticalSeries
+from pynwb.image import ImageSeries, IndexSeries, OpticalSeries
 from pynwb.testing import AcquisitionH5IOMixin, NWBH5IOMixin, TestCase
 
 
