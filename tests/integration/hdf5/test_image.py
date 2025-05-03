@@ -22,8 +22,31 @@ class TestImageSeriesIO(AcquisitionH5IOMixin, TestCase):
         return iS
 
     def addContainer(self, nwbfile):
-        """ Add the test ElectrodeGroup to the given NWBFile """
+        """ Add the test ImageSeries to the given NWBFile """
         nwbfile.add_device(self.dev1)
+        super().addContainer(nwbfile)
+
+
+class TestIndexSeriesIO(AcquisitionH5IOMixin, TestCase):
+
+    def setUpContainer(self):
+        """ Return a test IndexSeries to read/write """
+        image1 = Image(name='test_image', data=np.ones((10, 10)))
+        image2 = Image(name='test_image2', data=np.ones((10, 10)))
+        image_references = ImageReferences(name='order_of_images', data=[image2, image1])
+        images = Images(name='images_name', images=[image1, image2], order_of_images=image_references)
+
+        iS = IndexSeries(
+            name='test_iS',
+            data=[1, 2, 3],
+            unit='N/A',
+            indexed_images=images,
+            timestamps=[0.1, 0.2, 0.3]
+        )
+
+    def addContainer(self, nwbfile):
+        """ Add the test IndexSeries to the given NWBFile """
+        nwbfile.add_stimulus_template(self.images)
         super().addContainer(nwbfile)
 
 
