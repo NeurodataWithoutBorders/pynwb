@@ -1,5 +1,6 @@
 import numpy as np
 
+from pynwb.base import Image, ImageReferences, Images
 from pynwb.device import Device
 from pynwb.image import ImageSeries, OpticalSeries
 from pynwb.testing import AcquisitionH5IOMixin, NWBH5IOMixin, TestCase
@@ -43,6 +44,7 @@ class TestIndexSeriesIO(AcquisitionH5IOMixin, TestCase):
             indexed_images=images,
             timestamps=[0.1, 0.2, 0.3]
         )
+        return iS
 
     def addContainer(self, nwbfile):
         """ Add the test IndexSeries to the given NWBFile """
