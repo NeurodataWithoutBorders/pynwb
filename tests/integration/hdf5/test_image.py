@@ -41,7 +41,7 @@ class TestIndexSeriesIO(AcquisitionH5IOMixin, TestCase):
             name='test_iS',
             data=[1, 2, 3],
             unit='N/A',
-            indexed_images=images,
+            indexed_images=self.images,
             timestamps=[0.1, 0.2, 0.3]
         )
         return iS
