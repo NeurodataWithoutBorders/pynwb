@@ -97,14 +97,20 @@ __TYPE_MAP.merge(hdmf_typemap, ns_catalog=True)
 __resources = __get_resources()
 
 
-@docval({'name': 'extensions', 'type': (str, TypeMap, list),
-         'doc': 'a path to a namespace, a TypeMap, or a list consisting of paths to namespaces and TypeMaps',
-         'default': None},
-        {'name': 'copy', 'type': bool,
-         'doc': 'Whether to return a deepcopy of the TypeMap. If False, a direct reference may be returned (use with caution).',
-         'default': True},
-        returns="TypeMap loaded for the given extension or NWB core namespace", rtype=TypeMap,
-        is_method=False)
+@docval(
+    {
+        'name': 'extensions', 'type': (str, TypeMap, list),
+        'doc': 'a path to a namespace, a TypeMap, or a list consisting of paths to namespaces and TypeMaps',
+        'default': None
+    },
+    {
+        'name': 'copy', 'type': bool,
+        'doc': 'Whether to return a deepcopy of the TypeMap. '
+        'If False, a direct reference may be returned (use with caution).',
+        'default': True
+    },
+    returns="TypeMap loaded for the given extension or NWB core namespace", rtype=TypeMap,
+    is_method=False)
 def get_type_map(**kwargs):
     '''
     Get the TypeMap for the given extensions. If no extensions are provided,
