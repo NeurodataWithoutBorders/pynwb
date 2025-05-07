@@ -100,35 +100,49 @@ __resources = __get_resources()
 @docval({'name': 'extensions', 'type': (str, TypeMap, list),
          'doc': 'a path to a namespace, a TypeMap, or a list consisting of paths to namespaces and TypeMaps',
          'default': None},
-        returns="TypeMap loaded for the given extension or NWB core namespace", rtype=tuple,
+        {'name': 'copy', 'type': bool,
+         'doc': 'Whether to return a deepcopy of the TypeMap. If False, a direct reference may be returned (use with caution).',
+         'default': True},
+        returns="TypeMap loaded for the given extension or NWB core namespace", rtype=TypeMap,
         is_method=False)
 def get_type_map(**kwargs):
     '''
     Get the TypeMap for the given extensions. If no extensions are provided,
-    return the TypeMap for the core namespace
+    return the TypeMap for the core namespace.
+    The `copy` parameter determines if a deepcopy of the resulting TypeMap is returned.
     '''
-    extensions = getargs('extensions', kwargs)
-    type_map = None
+    extensions, copy_map = getargs('extensions', 'copy', kwargs)
+
     if extensions is None:
-        type_map = deepcopy(__TYPE_MAP)
+        # Case 1: No extensions, use core __TYPE_MAP.
+        # If copy_map is False, return direct reference. Otherwise, return a deepcopy.
+        final_map_to_consider = __TYPE_MAP
+    elif isinstance(extensions, TypeMap):
+        # Case 2: Extensions is already a TypeMap instance.
+        # This is the map to consider.
+        final_map_to_consider = extensions
     else:
-        if isinstance(extensions, TypeMap):
-            type_map = extensions
-        else:
-            type_map = deepcopy(__TYPE_MAP)
+        # Case 3: Extensions are strings or a list to be loaded/merged.
+        # Start with a deepcopy of the core __TYPE_MAP to modify.
+        # This ensures __TYPE_MAP itself is not altered by loading/merging.
+        current_processing_map = deepcopy(__TYPE_MAP)
         if isinstance(extensions, list):
-            for ext in extensions:
-                if isinstance(ext, str):
-                    type_map.load_namespaces(ext)
-                elif isinstance(ext, TypeMap):
-                    type_map.merge(ext)
+            for ext_item in extensions:
+                if isinstance(ext_item, str):
+                    current_processing_map.load_namespaces(ext_item)
+                elif isinstance(ext_item, TypeMap):
+                    current_processing_map.merge(ext_item)
                 else:
-                    raise ValueError('extensions must be a list of paths to namespace specs or a TypeMaps')
+                    raise ValueError('Items in the extensions list must be paths to namespace specs or TypeMaps')
         elif isinstance(extensions, str):
-            type_map.load_namespaces(extensions)
-        elif isinstance(extensions, TypeMap):
-            type_map.merge(extensions)
-    return type_map
+            current_processing_map.load_namespaces(extensions)
+        else:
+            # This case should ideally not be reached if 'extensions' type is validated by docval.
+            raise ValueError('extensions must be a path to a namespace spec, a TypeMap, or a list of these.')
+        final_map_to_consider = current_processing_map
+
+    # Return the final_map_to_consider or its deepcopy based on the copy_map flag.
+    return deepcopy(final_map_to_consider) if copy_map else final_map_to_consider
 
 
 @docval(*get_docval(get_type_map),

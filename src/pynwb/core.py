@@ -57,7 +57,11 @@ class NWBMixin(AbstractContainer):
             raise ValueError(error_msg)
 
     def _get_type_map(self):
-        return get_type_map()
+        # Return the type map without deepcopying for performance,
+        # as this is called frequently during attribute setting.
+        # The get_type_map function in pynwb.__init__ now handles the copy logic.
+        # We want the non-copied version here.
+        return get_type_map(copy=False)
 
     @property
     def data_type(self):
