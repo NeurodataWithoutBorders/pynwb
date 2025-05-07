@@ -87,7 +87,12 @@ def __get_resources() -> dict:
 # a global type map
 global __TYPE_MAP
 
-__ns_catalog = NamespaceCatalog(NWBGroupSpec, NWBDatasetSpec, NWBNamespace, core_namespaces=[CORE_NAMESPACE])
+try:
+    __ns_catalog = NamespaceCatalog(NWBGroupSpec, NWBDatasetSpec, NWBNamespace, core_namespaces=[CORE_NAMESPACE])
+except TypeError:
+    # Fall back to the old signature if core_namespaces is not supported
+    # TODO: remove this when HDMF 4.0.1 is the minimum
+    __ns_catalog = NamespaceCatalog(NWBGroupSpec, NWBDatasetSpec, NWBNamespace)
 
 hdmf_typemap = hdmf.common.get_type_map()
 __TYPE_MAP = TypeMap(__ns_catalog)

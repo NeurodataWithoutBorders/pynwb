@@ -39,8 +39,7 @@ class TestReadOldVersions(TestCase):
 
     def get_io(self, path):
         """Get an NWBHDF5IO object for the given path."""
-        with warnings.catch_warnings():
-            return NWBHDF5IO(str(path), 'r')
+        return NWBHDF5IO(str(path), 'r')
 
     def test_read(self):
         """Test reading and validating all NWB files in the same folder as this file.
