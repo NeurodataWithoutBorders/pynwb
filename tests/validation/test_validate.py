@@ -4,7 +4,6 @@ import os
 import sys
 from unittest.mock import patch
 from io import StringIO
-import warnings
 
 from pynwb.testing import TestCase
 from pynwb import validate, NWBHDF5IO
