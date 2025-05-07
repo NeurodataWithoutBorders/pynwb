@@ -1,0 +1,66 @@
+.assistant-toggle {
+    display: none;
+    position: fixed;
+    right: 20px;
+    top: 20px;
+    z-index: 1001;
+    padding: 8px 16px;
+    background-color: #2980b9;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+/* Hide button when assistant is open */
+.assistant-container.show ~ .assistant-toggle {
+    display: none !important;
+}
+
+.assistant-toggle:hover {
+    background-color: #3498db;
+}
+
+.assistant-container {
+    display: none;
+}
+
+@media (min-width: 1300px) {
+    .assistant-toggle {
+        display: block;
+    }
+
+    .assistant-container {
+        display: block;
+        visibility: hidden;
+        position: fixed;
+        right: 0;
+        top: 0;
+        width: calc(100vw - 1140px);
+        height: 100vh;
+        z-index: 1000;
+        transform: translateX(100%);
+        transition: transform 0.3s ease-in-out, visibility 0.3s ease-in-out;
+    }
+
+    .assistant-container.show {
+        visibility: visible;
+        transform: translateX(0);
+    }
+
+    .assistant-iframe {
+        width: 100%;
+        height: 100%;
+        border: none;
+        background: white;
+    }
+
+    .wy-nav-content {
+        transition: margin-right 0.3s ease-in-out;
+    }
+
+    .assistant-container.show ~ .wy-nav-content {
+        margin-right: calc(100vw - 1140px);
+    }
+}
