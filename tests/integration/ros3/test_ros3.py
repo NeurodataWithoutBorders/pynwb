@@ -30,11 +30,6 @@ class TestRos3Streaming(TestCase):
     def test_read(self):
         s3_path = 'https://dandiarchive.s3.amazonaws.com/ros3test.nwb'
         with warnings.catch_warnings():
-            warnings.filterwarnings(
-                "ignore",
-                message=r"Ignoring cached namespace .*",
-                category=UserWarning,
-            )
             with NWBHDF5IO(s3_path, mode='r', driver='ros3') as io:
                 nwbfile = io.read()
                 test_data = nwbfile.acquisition['ts_name'].data[:]
@@ -42,11 +37,6 @@ class TestRos3Streaming(TestCase):
 
     def test_dandi_read(self):
         with warnings.catch_warnings():
-            warnings.filterwarnings(
-                "ignore",
-                message=r"Ignoring cached namespace .*",
-                category=UserWarning,
-            )
             with NWBHDF5IO(path=self.s3_test_path, mode='r', driver='ros3') as io:
                 nwbfile = io.read()
                 test_data = nwbfile.acquisition['TestData'].data[:]

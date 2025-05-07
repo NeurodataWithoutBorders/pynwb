@@ -40,11 +40,6 @@ class TestReadOldVersions(TestCase):
     def get_io(self, path):
         """Get an NWBHDF5IO object for the given path."""
         with warnings.catch_warnings():
-            warnings.filterwarnings(
-                "ignore",
-                message=r"Ignoring cached namespace .*",
-                category=UserWarning,
-            )
             return NWBHDF5IO(str(path), 'r')
 
     def test_read(self):
