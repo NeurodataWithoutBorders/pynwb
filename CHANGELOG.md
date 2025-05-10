@@ -6,7 +6,8 @@
 - Removed unused functions `prepend_string` and `_not_parent` in `core.py`, `_not_parent` in `file.py`, and `NWBBaseTypeMapper.get_nwb_file` in `io/core.py` @oruebel [#2036](https://github.com/NeurodataWithoutBorders/pynwb/pull/2036)
 
 ### Enhancements and minor changes
-- Added support for NWB schema 2.9.0. @rly
+- Added support for NWB Schema 2.9.0.
+  - Added `BaseImage` and `ExternalImage` as new neurodata types. The first so both `Image` and `ExternalImage` can inherit from it. The second to store external images. @rly [#2079](https://github.com/NeurodataWithoutBorders/pynwb/pull/2079)
   - Added new `ElectrodesTable` neurodata type. @mavaylon1 [#1890](https://github.com/NeurodataWithoutBorders/pynwb/pull/1890)
   - Formally defined and renamed `ElectrodeTable` as the `ElectrodesTable` neurodata type. @mavaylon1 [#1890](https://github.com/NeurodataWithoutBorders/pynwb/pull/1890)
 - Automatically add timezone information to timestamps reference time if no timezone information is specified. @stephprince [#2056](https://github.com/NeurodataWithoutBorders/pynwb/pull/2056)
