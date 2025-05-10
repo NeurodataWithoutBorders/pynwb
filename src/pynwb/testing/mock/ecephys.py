@@ -1,4 +1,5 @@
 from typing import Optional
+import warnings
 
 import numpy as np
 
@@ -37,7 +38,7 @@ def mock_ElectrodeGroup(
 
 def mock_ElectrodesTable(
         n_rows: int = 5, group: Optional[ElectrodeGroup] = None, nwbfile: Optional[NWBFile] = None
-) -> DynamicTable:
+) -> ElectrodesTable:
     electrodes_table = ElectrodesTable()
     group = group if group is not None else mock_ElectrodeGroup(nwbfile=nwbfile)
     for i in range(n_rows):
@@ -51,6 +52,13 @@ def mock_ElectrodesTable(
         nwbfile.electrodes = electrodes_table
 
     return electrodes_table
+
+
+def mock_ElectrodeTable(
+        n_rows: int = 5, group: Optional[ElectrodeGroup] = None, nwbfile: Optional[NWBFile] = None
+) -> ElectrodesTable:
+    warnings.warn("mock_ElectrodeTable() is deprecated. Use mock_ElectrodesTable() instead.", DeprecationWarning)
+    return mock_ElectrodesTable(n_rows=n_rows, group=group, nwbfile=nwbfile)
 
 
 def mock_electrodes(
