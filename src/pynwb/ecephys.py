@@ -18,7 +18,8 @@ __all__ = [
     'EventDetection',
     'LFP',
     'FilteredEphys',
-    'FeatureExtraction'
+    'FeatureExtraction',
+    'ElectrodesTable',
 ]
 
 

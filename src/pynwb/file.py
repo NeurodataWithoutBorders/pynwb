@@ -390,7 +390,7 @@ class NWBFile(MultiContainerInterface, HERDManager):
              'doc': 'the ElectrodeGroups that belong to this NWBFile', 'default': None},
             {'name': 'ic_electrodes', 'type': (list, tuple),
              'doc': 'DEPRECATED use icephys_electrodes parameter instead. '
-                    'IntracellularElectrodes that belong to this NWBFile', 'default': None},  
+                    'IntracellularElectrodes that belong to this NWBFile', 'default': None},
                     # TODO remove this arg in PyNWB 4.0
             {'name': 'sweep_table', 'type': SweepTable,
              'doc': '[DEPRECATED] Use IntracellularRecordingsTable instead. '
@@ -804,7 +804,7 @@ class NWBFile(MultiContainerInterface, HERDManager):
         """
         if self.sweep_table is None:
             if self._in_construct_mode:
-                # Construct the SweepTable without triggering errors in construct mode because 
+                # Construct the SweepTable without triggering errors in construct mode because
                 # SweepTable has been deprecated
                 sweep_table = SweepTable.__new__(SweepTable, parent=self, in_construct_mode=True)
                 sweep_table.__init__(name='sweep_table')
@@ -1152,3 +1152,10 @@ def TrialTable(name='trials', description='metadata about experimental trials'):
 
 def InvalidTimesTable(name='invalid_times', description='time intervals to be removed from analysis'):
     return _tablefunc(name, description, ['start_time', 'stop_time'])
+
+
+def ElectrodeTable(name='electrodes',
+                   description='metadata about extracellular electrodes'):
+    warn("The ElectrodeTable convenience function is deprecated. Please create a new instance of "
+         "the ElectrodesTable class instead.", DeprecationWarning)
+    return ElectrodesTable()

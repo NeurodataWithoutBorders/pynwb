@@ -13,6 +13,7 @@ from pynwb.ecephys import (
     SpikeEventSeries,
     EventDetection,
     FeatureExtraction,
+    ElectrodesTable
 )
 from pynwb.device import Device
 from pynwb.ecephys import ElectrodesTable as get_electrode_table
@@ -26,6 +27,7 @@ class TestElectrodesTableBackCompat(TestCase):
         """
         io = NWBHDF5IO("tests/back_compat/2.6.0_DynamicTableElectrodes.nwb", mode="r")
         nwbfile = io.read()
+        assert isinstance(nwbfile.electrodes, ElectrodesTable)
 
 
 class TestElectrodeGroupIO(NWBH5IOMixin, TestCase):
