@@ -1,5 +1,3 @@
-import numpy as np
-
 from pynwb.base import ExternalImage, Images, ImageReferences
 from pynwb.testing import TestCase
 
