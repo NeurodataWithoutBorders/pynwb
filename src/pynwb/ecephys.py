@@ -3,7 +3,7 @@ import numpy as np
 from collections.abc import Iterable
 
 from hdmf.common import DynamicTableRegion, DynamicTable, VectorData
-from hdmf.data_utils import DataChunkIterator, assertEqualShape
+from hdmf.data_utils import assertEqualShape
 from hdmf.utils import docval, popargs, get_docval, popargs_to_dict, get_data_shape, AllowPositional
 
 from . import register_class, CORE_NAMESPACE
@@ -205,12 +205,18 @@ class SpikeEventSeries(ElectricalSeries):
         data = kwargs['data']
         timestamps = kwargs['timestamps']
         if not (isinstance(data, TimeSeries) or isinstance(timestamps, TimeSeries)):
-            if not (isinstance(data, DataChunkIterator) or isinstance(timestamps, DataChunkIterator)):
-                if len(data) != len(timestamps):
+            # Validate the shape of the inputs. Use get_data_shape to also handle the
+            # case where the data is a AbstractDataChunkIterator
+            data_shape = get_data_shape(kwargs['data'], strict_no_data_load=True)
+            timestamps_shape = get_data_shape(kwargs['timestamps'], strict_no_data_load=True)
+            if (data_shape is not None and
+                timestamps_shape is not None and
+                len(data_shape) > 0 and
+                len(timestamps_shape) > 0):
+                if (data_shape[0] != timestamps_shape[0] and
+                    data_shape[0] is not None and
+                    timestamps_shape[0] is not None):
                     raise ValueError('Must provide the same number of timestamps and spike events')
-            else:
-                # TODO: add check when we have DataChunkIterators
-                pass
         super().__init__(**kwargs)
 
 
@@ -262,7 +268,7 @@ class EventWaveform(MultiContainerInterface):
     }
 
     def __init__(self, **kwargs):
-        if not self._in_construct_mode:
+        if not self._in_construct_mode:  # pragma: no cover
             raise ValueError(
                 "The EventWaveform neurodata type is deprecated. If you are interested in using it, "
                 "please create an issue on https://github.com/NeurodataWithoutBorders/nwb-schema/issues."
