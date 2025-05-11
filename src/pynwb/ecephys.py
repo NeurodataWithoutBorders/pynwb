@@ -2,7 +2,7 @@ import warnings
 import numpy as np
 from collections.abc import Iterable
 
-from hdmf.common import DynamicTableRegion, DynamicTable, VectorData
+from hdmf.common import DynamicTableRegion, DynamicTable
 from hdmf.data_utils import assertEqualShape
 from hdmf.utils import docval, popargs, get_docval, popargs_to_dict, get_data_shape, AllowPositional
 
@@ -76,41 +76,23 @@ class ElectrodesTable(DynamicTable):
     __columns__ = (
         {'name': 'location', 'description': 'Location of the electrode (channel).', 'required': True},
         {'name': 'group', 'description': 'Reference to the ElectrodeGroup.', 'required': True},
-        {'name': 'group_name', 'description': 'Name of the ElectrodeGroup.', 'required': False })
+        {'name': 'group_name', 'description': 'Name of the ElectrodeGroup.', 'required': False},
+        {'name': 'x', 'description': 'x coordinate of the channel location in the brain.', 'required': False},
+        {'name': 'y', 'description': 'y coordinate of the channel location in the brain.', 'required': False},
+        {'name': 'z', 'description': 'z coordinate of the channel location in the brain.', 'required': False},
+        {'name': 'imp', 'description': 'Impedance of the channel, in ohms.', 'required': False},
+        {'name': 'filtering', 'description': 'Description of hardware filtering.', 'required': False},
+        {'name': 'rel_x', 'description': 'x coordinate in electrode group.', 'required': False},
+        {'name': 'rel_y', 'description': 'xy coordinate in electrode group.', 'required': False},
+        {'name': 'rel_z', 'description': 'z coordinate in electrode group.', 'required': False},
+        {'name': 'reference', 'description': ('Description of the reference electrode and/or reference scheme used '
+                                              'for this electrode.'), 'required': False}
+    )
 
-    @docval({'name': 'x', 'type': VectorData, 'doc':'x coordinate of the channel location in the brain',
-             'default': None},
-            {'name': 'y', 'type': VectorData, 'doc':'y coordinate of the channel location in the brain',
-             'default': None},
-            {'name': 'z', 'type': VectorData, 'doc':'z coordinate of the channel location in the brain',
-             'default': None},
-            {'name': 'imp', 'type': VectorData, 'doc':'Impedance of the channel, in ohms.', 'default': None},
-            {'name': 'filtering', 'type': VectorData, 'doc':'Description of hardware filtering.', 'default': None},
-            {'name': 'rel_x', 'type': VectorData, 'doc':'x coordinate in electrode group', 'default': None},
-            {'name': 'rel_y', 'type': VectorData, 'doc':'xy coordinate in electrode group', 'default': None},
-            {'name': 'rel_z', 'type': VectorData, 'doc':'z coordinate in electrode group', 'default': None},
-            {'name': 'reference', 'type': VectorData, 'default': None,
-             'doc':'Description of the reference electrode and/or reference scheme used for this electrode'},
-            *get_docval(DynamicTable.__init__, 'id', 'columns', 'colnames'))
+    @docval(*get_docval(DynamicTable.__init__, 'id', 'columns', 'colnames'))
     def __init__(self, **kwargs):
         kwargs['name'] = 'electrodes'
         kwargs['description'] = 'metadata about extracellular electrodes'
-
-        # optional fields
-        keys_to_set = (
-            'x',
-            'y',
-            'z',
-            'imp',
-            'filtering',
-            'rel_x',
-            'rel_y',
-            'rel_z',
-            'reference')
-        args_to_set = popargs_to_dict(keys_to_set, kwargs)
-        for key, val in args_to_set.items():
-            setattr(self, key, val)
-
         super().__init__(**kwargs)
 
     def copy(self):

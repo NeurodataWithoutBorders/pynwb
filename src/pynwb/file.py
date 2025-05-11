@@ -666,31 +666,15 @@ class NWBFile(MultiContainerInterface, HERDManager):
         # are not allowed
         if not d['location']:
             raise ValueError("The 'location' argument is required when creating an electrode.")
-        if not kwargs['group']:
+        if not d['group']:
             raise ValueError("The 'group' argument is required when creating an electrode.")
         if d.get('group_name', None) is None:
             d['group_name'] = d['group'].name
 
-        new_cols = [('x', 'the x coordinate of the position (+x is posterior)'),
-                    ('y', 'the y coordinate of the position (+y is inferior)'),
-                    ('z', 'the z coordinate of the position (+z is right)'),
-                    ('imp', 'the impedance of the electrode, in ohms'),
-                    ('filtering', 'description of hardware filtering, including the filter name and frequency cutoffs'),
-                    ('rel_x', 'the x coordinate within the electrode group'),
-                    ('rel_y', 'the y coordinate within the electrode group'),
-                    ('rel_z', 'the z coordinate within the electrode group'),
-                    ('reference', 'Description of the reference electrode and/or reference scheme used for this \
-                        electrode, e.g.,"stainless steel skull screw" or "online common average referencing".')
-                    ]
-
-        # add column if the arg is supplied and column does not yet exist
-        # do not pass arg to add_row if arg is not supplied
-        for col_name, col_doc in new_cols:
-            if kwargs[col_name] is not None:
-                if col_name not in self.electrodes:
-                    self.electrodes.add_column(col_name, col_doc)
-            else:
-                d.pop(col_name)  # remove args from d if not set
+        # remove keys that are None
+        for key in list(d.keys()):
+            if d[key] is None:
+                d.pop(key)
 
         self.electrodes.add_row(**d)
 
