@@ -2,7 +2,7 @@ import warnings
 import numpy as np
 from collections.abc import Iterable
 
-from hdmf.common import DynamicTableRegion, DynamicTable, VectorData
+from hdmf.common import DynamicTableRegion, DynamicTable
 from hdmf.data_utils import assertEqualShape
 from hdmf.utils import docval, popargs, get_docval, popargs_to_dict, get_data_shape, AllowPositional
 
