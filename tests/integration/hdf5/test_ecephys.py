@@ -1,7 +1,7 @@
 import numpy as np
 
 from hdmf.common import DynamicTableRegion
-from pynwb import NWBFile, NWBHDF5IO
+from pynwb import NWBFile
 
 from pynwb.ecephys import (
     ElectrodeGroup,
@@ -13,21 +13,10 @@ from pynwb.ecephys import (
     SpikeEventSeries,
     EventDetection,
     FeatureExtraction,
-    ElectrodesTable
+    ElectrodesTable,
 )
 from pynwb.device import Device
-from pynwb.ecephys import ElectrodesTable as get_electrode_table
 from pynwb.testing import NWBH5IOMixin, AcquisitionH5IOMixin, NWBH5IOFlexMixin, TestCase
-
-
-class TestElectrodesTableBackCompat(TestCase):
-    def test_read_nwbfile(self):
-        """
-        Test that reads an NWBFile with an DynamicTable ElectrodesTable.
-        """
-        io = NWBHDF5IO("tests/back_compat/2.6.0_DynamicTableElectrodes.nwb", mode="r")
-        nwbfile = io.read()
-        assert isinstance(nwbfile.electrodes, ElectrodesTable)
 
 
 class TestElectrodeGroupIO(NWBH5IOMixin, TestCase):
@@ -54,7 +43,7 @@ class TestElectrodeGroupIO(NWBH5IOMixin, TestCase):
 
 
 def setup_electrode_table():
-    table = get_electrode_table()
+    table = ElectrodesTable()
     dev1 = Device(name='dev1')
     group = ElectrodeGroup(
         name='tetrode1',

@@ -5,7 +5,7 @@ from hdmf.common import DynamicTable, VectorData, DynamicTableRegion
 from pynwb.misc import AnnotationSeries, AbstractFeatureSeries, IntervalSeries, Units, DecompositionSeries
 from pynwb.file import TimeSeries
 from pynwb.device import Device
-from pynwb.ecephys import ElectrodeGroup, ElectrodesTable as get_electrode_table
+from pynwb.ecephys import ElectrodeGroup, ElectrodesTable
 from pynwb.testing import TestCase
 
 
@@ -18,9 +18,9 @@ class AnnotationSeriesConstructor(TestCase):
 
 class AbstractFeatureSeriesConstructor(TestCase):
     def test_init(self):
-        aFS = AbstractFeatureSeries(name='test_aFS', 
-                                    feature_units=['feature units'], 
-                                    features=['features'], 
+        aFS = AbstractFeatureSeries(name='test_aFS',
+                                    feature_units=['feature units'],
+                                    features=['features'],
                                     timestamps=list())
         self.assertEqual(aFS.name, 'test_aFS')
         self.assertEqual(aFS.feature_units, ['feature units'])
@@ -88,7 +88,7 @@ class DecompositionSeriesConstructor(TestCase):
     @staticmethod
     def make_electrode_table(self):
         """ Make an electrode table, electrode group, and device """
-        self.table = get_electrode_table()
+        self.table = ElectrodesTable()
         self.dev1 = Device(name='dev1')
         self.group = ElectrodeGroup(name='tetrode1',
                                     description='tetrode description',
@@ -251,9 +251,9 @@ class UnitsTests(TestCase):
     def test_electrode_group(self):
         ut = Units()
         device = Device(name='test_device')
-        electrode_group = ElectrodeGroup(name='test_electrode_group', 
-                                         description='description', 
-                                         location='location', 
+        electrode_group = ElectrodeGroup(name='test_electrode_group',
+                                         description='description',
+                                         location='location',
                                          device=device)
         ut.add_unit(electrode_group=electrode_group)
         self.assertEqual(ut['electrode_group'][0], electrode_group)

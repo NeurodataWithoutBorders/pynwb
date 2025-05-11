@@ -4,9 +4,8 @@ from hdmf.common import DynamicTable, VectorData, DynamicTableRegion
 from pynwb import TimeSeries
 from pynwb.misc import Units, DecompositionSeries
 from pynwb.testing import NWBH5IOMixin, AcquisitionH5IOMixin, TestCase
-from pynwb.ecephys import ElectrodeGroup
+from pynwb.ecephys import ElectrodeGroup, ElectrodesTable
 from pynwb.device import Device
-from pynwb.ecephys import ElectrodesTable as get_electrode_table
 
 
 class TestUnitsIO(AcquisitionH5IOMixin, TestCase):
@@ -158,7 +157,7 @@ class TestDecompositionSeriesWithSourceChannelsIO(AcquisitionH5IOMixin, TestCase
     @staticmethod
     def make_electrode_table(self):
         """ Make an electrode table, electrode group, and device """
-        self.table = get_electrode_table()
+        self.table = ElectrodesTable()
         self.dev1 = Device(name='dev1')
         self.group = ElectrodeGroup(
             name='tetrode1',
