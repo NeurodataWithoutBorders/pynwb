@@ -7,7 +7,7 @@ from pynwb.misc import (
 )
 from pynwb.file import TimeSeries
 from pynwb.device import Device
-from pynwb.ecephys import ElectrodeGroup, ElectrodesTable as get_electrode_table
+from pynwb.ecephys import ElectrodeGroup, ElectrodesTable
 from pynwb.testing import TestCase
 
 
@@ -119,7 +119,7 @@ class DecompositionSeriesConstructor(TestCase):
     @staticmethod
     def make_electrode_table(self):
         """ Make an electrode table, electrode group, and device """
-        self.table = get_electrode_table()
+        self.table = ElectrodesTable()
         self.dev1 = Device(name='dev1')
         self.group = ElectrodeGroup(name='tetrode1',
                                     description='tetrode description',
