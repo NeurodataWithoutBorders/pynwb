@@ -2,7 +2,9 @@ import numpy as np
 
 from hdmf.common import VectorData, DynamicTableRegion
 
-from pynwb.misc import AnnotationSeries, AbstractFeatureSeries, IntervalSeries, Units, DecompositionSeries
+from pynwb.misc import (
+    AnnotationSeries, AbstractFeatureSeries, IntervalSeries, Units, DecompositionSeries, FrequencyBandsTable
+)
 from pynwb.file import TimeSeries
 from pynwb.device import Device
 from pynwb.ecephys import ElectrodeGroup, ElectrodesTable as get_electrode_table
