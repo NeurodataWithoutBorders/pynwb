@@ -15,7 +15,7 @@ from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries, ProcessingModule
 from .device import Device
 from .epoch import TimeIntervals
-from .ecephys import ElectrodeGroup
+from .ecephys import ElectrodeGroup, ElectrodesTable
 from .icephys import (IntracellularElectrode, SweepTable, PatchClampSeries, IntracellularRecordingsTable,
                       SimultaneousRecordingsTable, SequentialRecordingsTable, RepetitionsTable,
                       ExperimentalConditionsTable)
@@ -385,12 +385,12 @@ class NWBFile(MultiContainerInterface, HERDManager):
             {'name': 'lab_meta_data', 'type': (list, tuple), 'default': None,
              'doc': 'an extension that contains lab-specific meta-data'},
             {'name': 'electrodes', 'type': DynamicTable,
-             'doc': 'the ElectrodeTable that belongs to this NWBFile', 'default': None},
+             'doc': 'the ElectrodesTable that belongs to this NWBFile', 'default': None},
             {'name': 'electrode_groups', 'type': Iterable,
              'doc': 'the ElectrodeGroups that belong to this NWBFile', 'default': None},
             {'name': 'ic_electrodes', 'type': (list, tuple),
              'doc': 'DEPRECATED use icephys_electrodes parameter instead. '
-                    'IntracellularElectrodes that belong to this NWBFile', 'default': None},  
+                    'IntracellularElectrodes that belong to this NWBFile', 'default': None},
                     # TODO remove this arg in PyNWB 4.0
             {'name': 'sweep_table', 'type': SweepTable,
              'doc': '[DEPRECATED] Use IntracellularRecordingsTable instead. '
@@ -611,7 +611,7 @@ class NWBFile(MultiContainerInterface, HERDManager):
 
     def __check_electrodes(self):
         if self.electrodes is None:
-            self.electrodes = ElectrodeTable()
+            self.electrodes = ElectrodesTable()
 
     @docval(*get_docval(DynamicTable.add_column), allow_extra=True)
     def add_electrode_column(self, **kwargs):
@@ -705,7 +705,7 @@ class NWBFile(MultiContainerInterface, HERDManager):
         for idx in region:
             if idx < 0 or idx >= len(self.electrodes):
                 raise IndexError('The index ' + str(idx) +
-                                 ' is out of range for the ElectrodeTable of length '
+                                 ' is out of range for the ElectrodesTable of length '
                                  + str(len(self.electrodes)))
         desc = getargs('description', kwargs)
         name = getargs('name', kwargs)
@@ -787,13 +787,13 @@ class NWBFile(MultiContainerInterface, HERDManager):
         self.__check_invalid_times()
         self.invalid_times.add_interval(**kwargs)
 
-    @docval({'name': 'electrode_table', 'type': DynamicTable, 'doc': 'the ElectrodeTable for this file'})
+    @docval({'name': 'electrode_table', 'type': ElectrodesTable, 'doc': 'the ElectrodesTable for this file'})
     def set_electrode_table(self, **kwargs):
         """
-        Set the electrode table of this NWBFile to an existing ElectrodeTable
+        Set the electrode table of this NWBFile to an existing ElectrodesTable
         """
         if self.electrodes is not None:
-            msg = 'ElectrodeTable already exists, cannot overwrite'
+            msg = 'ElectrodesTable already exists, cannot overwrite'
             raise ValueError(msg)
         electrode_table = getargs('electrode_table', kwargs)
         self.electrodes = electrode_table
@@ -804,7 +804,7 @@ class NWBFile(MultiContainerInterface, HERDManager):
         """
         if self.sweep_table is None:
             if self._in_construct_mode:
-                # Construct the SweepTable without triggering errors in construct mode because 
+                # Construct the SweepTable without triggering errors in construct mode because
                 # SweepTable has been deprecated
                 sweep_table = SweepTable.__new__(SweepTable, parent=self, in_construct_mode=True)
                 sweep_table.__init__(name='sweep_table')
@@ -1146,19 +1146,16 @@ def _tablefunc(table_name, description, columns):
     return t
 
 
-def ElectrodeTable(name='electrodes',
-                   description='metadata about extracellular electrodes'):
-    return _tablefunc(name, description,
-                      [('location', 'the location of channel within the subject e.g. brain region'),
-                       ('group', 'a reference to the ElectrodeGroup this electrode is a part of'),
-                       ('group_name', 'the name of the ElectrodeGroup this electrode is a part of')
-                       ]
-                      )
-
-
 def TrialTable(name='trials', description='metadata about experimental trials'):
     return _tablefunc(name, description, ['start_time', 'stop_time'])
 
 
 def InvalidTimesTable(name='invalid_times', description='time intervals to be removed from analysis'):
     return _tablefunc(name, description, ['start_time', 'stop_time'])
+
+
+def ElectrodeTable(name='electrodes',
+                   description='metadata about extracellular electrodes'):
+    warn("The ElectrodeTable convenience function is deprecated. Please create a new instance of "
+         "the ElectrodesTable class instead.", DeprecationWarning)
+    return ElectrodesTable()

@@ -2,7 +2,7 @@ import warnings
 import numpy as np
 from collections.abc import Iterable
 
-from hdmf.common import DynamicTableRegion
+from hdmf.common import DynamicTableRegion, DynamicTable, VectorData
 from hdmf.data_utils import assertEqualShape
 from hdmf.utils import docval, popargs, get_docval, popargs_to_dict, get_data_shape, AllowPositional
 
@@ -18,7 +18,8 @@ __all__ = [
     'EventDetection',
     'LFP',
     'FilteredEphys',
-    'FeatureExtraction'
+    'FeatureExtraction',
+    'ElectrodesTable',
 ]
 
 
@@ -65,6 +66,60 @@ class ElectrodeGroup(NWBContainer):
 
         for key, val in args_to_set.items():
             setattr(self, key, val)
+
+
+@register_class('ElectrodesTable', CORE_NAMESPACE)
+class ElectrodesTable(DynamicTable):
+    """A table of all electrodes (i.e. channels) used for recording. Introduced in NWB 3.0.0. Replaces the "electrodes"
+    table (neurodata_type_inc DynamicTable, no neurodata_type_def) that is part of NWBFile."""
+
+    __columns__ = (
+        {'name': 'location', 'description': 'Location of the electrode (channel).', 'required': True},
+        {'name': 'group', 'description': 'Reference to the ElectrodeGroup.', 'required': True},
+        {'name': 'group_name', 'description': 'Name of the ElectrodeGroup.', 'required': False })
+
+    @docval({'name': 'x', 'type': VectorData, 'doc':'x coordinate of the channel location in the brain',
+             'default': None},
+            {'name': 'y', 'type': VectorData, 'doc':'y coordinate of the channel location in the brain',
+             'default': None},
+            {'name': 'z', 'type': VectorData, 'doc':'z coordinate of the channel location in the brain',
+             'default': None},
+            {'name': 'imp', 'type': VectorData, 'doc':'Impedance of the channel, in ohms.', 'default': None},
+            {'name': 'filtering', 'type': VectorData, 'doc':'Description of hardware filtering.', 'default': None},
+            {'name': 'rel_x', 'type': VectorData, 'doc':'x coordinate in electrode group', 'default': None},
+            {'name': 'rel_y', 'type': VectorData, 'doc':'xy coordinate in electrode group', 'default': None},
+            {'name': 'rel_z', 'type': VectorData, 'doc':'z coordinate in electrode group', 'default': None},
+            {'name': 'reference', 'type': VectorData, 'default': None,
+             'doc':'Description of the reference electrode and/or reference scheme used for this electrode'},
+            *get_docval(DynamicTable.__init__, 'id', 'columns', 'colnames'))
+    def __init__(self, **kwargs):
+        kwargs['name'] = 'electrodes'
+        kwargs['description'] = 'metadata about extracellular electrodes'
+
+        # optional fields
+        keys_to_set = (
+            'x',
+            'y',
+            'z',
+            'imp',
+            'filtering',
+            'rel_x',
+            'rel_y',
+            'rel_z',
+            'reference')
+        args_to_set = popargs_to_dict(keys_to_set, kwargs)
+        for key, val in args_to_set.items():
+            setattr(self, key, val)
+
+        super().__init__(**kwargs)
+
+    def copy(self):
+        """
+        Return a copy of this ElectrodesTable.
+        This is useful for linking.
+        """
+        kwargs = dict(id=self.id, columns=self.columns, colnames=self.colnames)
+        return self.__class__(**kwargs)
 
 
 @register_class('ElectricalSeries', CORE_NAMESPACE)
@@ -155,12 +210,12 @@ class SpikeEventSeries(ElectricalSeries):
             # case where the data is a AbstractDataChunkIterator
             data_shape = get_data_shape(kwargs['data'], strict_no_data_load=True)
             timestamps_shape = get_data_shape(kwargs['timestamps'], strict_no_data_load=True)
-            if (data_shape is not None and 
-                timestamps_shape is not None and 
-                len(data_shape) > 0 and 
+            if (data_shape is not None and
+                timestamps_shape is not None and
+                len(data_shape) > 0 and
                 len(timestamps_shape) > 0):
-                if (data_shape[0] != timestamps_shape[0] and 
-                    data_shape[0] is not None and 
+                if (data_shape[0] != timestamps_shape[0] and
+                    data_shape[0] is not None and
                     timestamps_shape[0] is not None):
                     raise ValueError('Must provide the same number of timestamps and spike events')
         super().__init__(**kwargs)

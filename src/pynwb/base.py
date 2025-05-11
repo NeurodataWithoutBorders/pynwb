@@ -1,5 +1,6 @@
 from warnings import warn
 from collections.abc import Iterable
+from abc import ABC
 from typing import NamedTuple
 
 import numpy as np
@@ -402,7 +403,7 @@ class TimeSeries(NWBDataInterface):
         .. math::
             out = data * conversion + offset
 
-        If the field 'channel_conversion' is present, the conversion factor for each channel is additionally applied 
+        If the field 'channel_conversion' is present, the conversion factor for each channel is additionally applied
         to each channel:
 
         .. math::
@@ -422,26 +423,59 @@ class TimeSeries(NWBDataInterface):
         return np.asarray(self.data) * scale_factor + self.offset
 
 
-@register_class('Image', CORE_NAMESPACE)
-class Image(NWBData):
+@register_class('BaseImage', CORE_NAMESPACE)
+class BaseImage(NWBData, ABC):
     """
-    Abstract image class. It is recommended to instead use pynwb.image.GrayscaleImage or pynwb.image.RGPImage where
-    appropriate.
+    An abstract base type for image data. Parent type for Image and ExternalImage types.
     """
-    __nwbfields__ = ('data', 'resolution', 'description')
+    __nwbfields__ = ('description', )
 
-    @docval({'name': 'name', 'type': str, 'doc': 'The name of this image'},
-            {'name': 'data', 'type': ('array_data', 'data'), 'doc': 'data of image. Dimensions: x, y [, r,g,b[,a]]',
-             'shape': ((None, None), (None, None, 3), (None, None, 4))},
-            {'name': 'resolution', 'type': float, 'doc': 'pixels / cm', 'default': None},
-            {'name': 'description', 'type': str, 'doc': 'description of image', 'default': None},
+    @docval({'name': 'name', 'type': str, 'doc': 'The name of the image'},
+            {'name': 'data', 'type': None, 'doc': 'The image data (any type) as specified by a subclass.'},
+            {'name': 'description', 'type': str, 'doc': 'Description of the image', 'default': None},
             allow_positional=AllowPositional.WARNING,)
     def __init__(self, **kwargs):
-        args_to_set = popargs_to_dict(("resolution", "description"), kwargs)
+        description = kwargs.pop('description')
         super().__init__(**kwargs)
 
-        for key, val in args_to_set.items():
-            setattr(self, key, val)
+        self.description = description
+
+
+@register_class('Image', CORE_NAMESPACE)
+class Image(BaseImage):
+    """
+    A base type for storing image data directly. Shape can be 2-D (x, y), or 3-D where the
+    third dimension can have three or four elements, e.g. (x, y, (r, g, b)) or
+    (x, y, (r, g, b, a)).
+    """
+    __nwbfields__ = ('resolution', )
+
+    @docval(*get_docval(BaseImage.__init__, 'name'),
+            {'name': 'data', 'type': ('array_data', 'data'),
+             'doc': 'Data of image. Shape can be (x, y), (x, y, 3), or (x, y, 4).',
+             'shape': ((None, None), (None, None, 3), (None, None, 4))},
+            {'name': 'resolution', 'type': float, 'doc': 'pixels / cm', 'default': None},
+            *get_docval(BaseImage.__init__, 'description'),
+            allow_positional=AllowPositional.WARNING,)
+    def __init__(self, **kwargs):
+        resolution = kwargs.pop('resolution')
+        super().__init__(**kwargs)
+
+        self.resolution = resolution
+
+
+@register_class('ExternalImage', CORE_NAMESPACE)
+class ExternalImage(BaseImage):
+    """
+    A type for referencing an external image file.
+    """
+
+    @docval(*get_docval(BaseImage.__init__, 'name'),
+            {'name': 'data', 'type': str, 'doc': 'Path or URL to the external image file.'},
+            *get_docval(BaseImage.__init__, 'description'),
+            allow_positional=AllowPositional.WARNING,)
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
 
 
 @register_class('ImageReferences', CORE_NAMESPACE)
@@ -455,11 +489,9 @@ class ImageReferences(NWBData):
             {'name': 'data', 'type': 'array_data', 'doc': 'The images in order.'},
             allow_positional=AllowPositional.WARNING,)
     def __init__(self, **kwargs):
-        # NOTE we do not use the docval shape validator here because it will recognize a list of P MxN images as
-        # having shape (P, M, N)
-        # check type and dimensionality
         for image in kwargs['data']:
-            assert isinstance(image, Image), "Images used in ImageReferences must have type Image, not %s" % type(image)
+            assert isinstance(image, BaseImage), \
+                "Images used in ImageReferences must have type BaseImage, not %s" % type(image)
         super().__init__(**kwargs)
 
 
@@ -476,7 +508,7 @@ class Images(MultiContainerInterface):
     __clsconf__ = {
         'attr': 'images',
         'add': 'add_image',
-        'type': Image,
+        'type': BaseImage,
         'get': 'get_image',
         'create': 'create_image'
     }
@@ -485,7 +517,7 @@ class Images(MultiContainerInterface):
             {'name': 'images', 'type': 'array_data', 'doc': 'image objects', 'default': None},
             {'name': 'description', 'type': str, 'doc': 'description of images', 'default': 'no description'},
             {'name': 'order_of_images', 'type': ImageReferences,
-             'doc': 'Ordered dataset of references to Image objects stored in the parent group.', 'default': None},
+             'doc': 'Ordered dataset of references to BaseImage objects stored in the parent group.', 'default': None},
              allow_positional=AllowPositional.WARNING,)
     def __init__(self, **kwargs):
 
