@@ -140,7 +140,7 @@ class TestReadOldVersions(TestCase):
 
     def test_read_electrodes_table_as_dynamic_table(self):
         """Test that an "electrodes" table written as a DynamicTable is read as an ElectrodesTable"""
-        f = Path(__file__).parent / '2.6.0_DynamicTableElectrodes.nwb'
+        f = Path(__file__).parent / '3.0.0_electrodes_dynamic_table.nwb'
         with self.get_io(f) as io:
             read_nwbfile = io.read()
             assert isinstance(read_nwbfile.electrodes, ElectrodesTable)
