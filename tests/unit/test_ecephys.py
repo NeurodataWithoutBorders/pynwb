@@ -16,6 +16,7 @@ from pynwb.ecephys import (
     ElectrodeGroup,
     ElectrodesTable
 )
+from pynwb.file import ElectrodeTable
 from pynwb.device import Device
 from pynwb.testing import TestCase
 from pynwb.testing.mock.ecephys import mock_ElectricalSeries
@@ -507,3 +508,11 @@ class FeatureExtractionConstructor(TestCase):
                               description=description,
                               times=event_times,
                               features=features)
+
+class ElectrodesTableConstructor(TestCase):
+
+    def test_backwards_compatibility(self):
+        warn_msg = ("The ElectrodeTable convenience function is deprecated. Please create a new instance of "
+                    "the ElectrodesTable class instead.")
+        with self.assertWarnsWith(DeprecationWarning, warn_msg):
+            ElectrodeTable()
