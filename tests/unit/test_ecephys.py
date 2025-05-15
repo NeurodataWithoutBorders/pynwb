@@ -26,8 +26,11 @@ from hdmf.data_utils import DataChunkIterator
 
 def make_electrode_table():
     table = ElectrodesTable()
-    dev1 = Device('dev1')
-    group = ElectrodeGroup('tetrode1', 'tetrode description', 'tetrode location', dev1)
+    dev1 = Device(name='dev1')
+    group = ElectrodeGroup(name='tetrode1',
+                           description='tetrode description',
+                           location='tetrode location',
+                           device=dev1)
     table.add_row(location='CA1', group=group, group_name='tetrode1')
     table.add_row(location='CA1', group=group, group_name='tetrode1')
     table.add_row(location='CA1', group=group, group_name='tetrode1')
