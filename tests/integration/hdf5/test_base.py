@@ -84,9 +84,9 @@ class TestExternalImageInImagesIO(AcquisitionH5IOMixin, TestCase):
 
     def setUpContainer(self):
         """ Return the test Images with ExternalImage to read/write """
-        ext_img1 = ExternalImage(name='test_external_image1', data='path/to/image1.jpg')
-        ext_img2 = ExternalImage(name='test_external_image2', data='path/to/image2.jpg',
-                                description='An external image')
+        ext_img1 = ExternalImage(name='test_external_image1', data='path/to/image1.jpg', image_format='JPEG')
+        ext_img2 = ExternalImage(name='test_external_image2.jpg', data='path/to/image2.jpg',
+                                description='An external image', image_format="JPEG", image_mode='RGB')
 
         # Create an Images container with the ExternalImage objects
         images = Images(name='test_images', images=[ext_img1, ext_img2])
@@ -98,14 +98,15 @@ class TestExternalImageWithReferencesIO(AcquisitionH5IOMixin, TestCase):
 
     def setUpContainer(self):
         """ Return the test Images with ExternalImage and ImageReferences to read/write """
-        ext_img1 = ExternalImage(name='test_external_image1', data='path/to/image1.jpg')
-        ext_img2 = ExternalImage(name='test_external_image2', data='path/to/image2.jpg')
+        ext_img1 = ExternalImage(name="test_external_image1", data="path/to/image1.jpg", image_format="JPEG")
+        ext_img2 = ExternalImage(name="test_external_image2", data="path/to/image2.png", image_format="PNG")
+        ext_img3 = ExternalImage(name="test_external_image3", data="path/to/image3.gif", image_format="GIF")
 
         # Create ImageReferences with the ExternalImage objects
-        image_references = ImageReferences(name='order_of_images', data=[ext_img2, ext_img1])
+        image_references = ImageReferences(name="order_of_images", data=[ext_img3, ext_img2, ext_img1])
 
         # Create an Images container with the ExternalImage objects and ImageReferences
-        images = Images(name='test_images', images=[ext_img1, ext_img2], order_of_images=image_references)
+        images = Images(name="test_images", images=[ext_img1, ext_img2, ext_img3], order_of_images=image_references)
 
         return images
 
@@ -119,7 +120,7 @@ class TestMixedImagesIO(AcquisitionH5IOMixin, TestCase):
         image1 = Image(name='test_image', data=np.ones((10, 10)))
 
         # Create an ExternalImage
-        ext_img = ExternalImage(name='test_external_image', data='path/to/image.jpg')
+        ext_img = ExternalImage(name='test_external_image', data='path/to/image.jpg', image_format='JPEG')
 
         # Create ImageReferences with both types of images
         image_references = ImageReferences(name='order_of_images', data=[ext_img, image1])

@@ -16,6 +16,8 @@ from .core import NWBDataInterface, MultiContainerInterface, NWBData
 __all__ = [
     'ProcessingModule',
     'TimeSeries',
+    'BaseImage',
+    'ExternalImage',
     'Image',
     'ImageReferences',
     'Images',
@@ -469,13 +471,34 @@ class ExternalImage(BaseImage):
     """
     A type for referencing an external image file.
     """
+    __nwbfields__ = ('image_format', 'image_mode')
 
     @docval(*get_docval(BaseImage.__init__, 'name'),
             {'name': 'data', 'type': str, 'doc': 'Path or URL to the external image file.'},
             *get_docval(BaseImage.__init__, 'description'),
+            {
+                'name': 'image_format',
+                'type': str,
+                'doc': (
+                    'Common name of the image file format. Only widely readable, open file formats are allowed.'
+                    'Allowed values are "PNG", "JPEG", and "GIF".'
+                ),
+                'enum': ['PNG', 'JPEG', 'GIF'],
+            },
+            {
+                'name': 'image_mode',
+                'type': str,
+                'doc': 'Image mode (color mode) of the image, e.g., "RGB", "RGBA", "grayscale", and "LA".',
+                'default': None,
+            },
             allow_positional=AllowPositional.WARNING,)
     def __init__(self, **kwargs):
+        image_format = kwargs.pop('image_format')
+        image_mode = kwargs.pop('image_mode')
         super().__init__(**kwargs)
+
+        self.image_format = image_format
+        self.image_mode = image_mode
 
 
 @register_class('ImageReferences', CORE_NAMESPACE)
