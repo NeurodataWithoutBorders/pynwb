@@ -195,7 +195,6 @@ class NWBFileMap(ObjectMapper):
             electrodes_builder.attributes['namespace'] = 'core'
             manager.clear_cache()
             new_container =  manager.construct(electrodes_builder)
-            # breakpoint()
             return new_container
         else:
             return None
