@@ -192,7 +192,7 @@ class SpikeEventSeriesConstructor(TestCase):
         # check creation with bad DataChunkIterators fails
         with self.assertRaisesWith(ValueError, "Must provide the same number of timestamps and spike events"):
             SpikeEventSeries(name='test_sES', data=data, electrodes=region, timestamps=bad_timestamps)
-
+        
 
 class ElectrodeGroupConstructor(TestCase):
 
