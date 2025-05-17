@@ -13,9 +13,9 @@ from pynwb.ecephys import (
     SpikeEventSeries,
     EventDetection,
     FeatureExtraction,
+    ElectrodesTable,
 )
 from pynwb.device import Device
-from pynwb.file import ElectrodeTable as get_electrode_table
 from pynwb.testing import NWBH5IOMixin, AcquisitionH5IOMixin, NWBH5IOFlexMixin, TestCase
 
 
@@ -43,7 +43,7 @@ class TestElectrodeGroupIO(NWBH5IOMixin, TestCase):
 
 
 def setup_electrode_table():
-    table = get_electrode_table()
+    table = ElectrodesTable()
     dev1 = Device(name='dev1')
     group = ElectrodeGroup(
         name='tetrode1',
@@ -175,10 +175,10 @@ class TestClusteringIO(AcquisitionH5IOMixin, TestCase):
         # raise error on write
         error_msg = "The Clustering neurodata type is deprecated. Use pynwb.misc.Units or NWBFile.units instead"
         kwargs = dict(description="A fake Clustering interface",
-                      num=[0, 1, 2, 0, 1, 2], 
-                      peak_over_rms=[100., 101., 102.], 
+                      num=[0, 1, 2, 0, 1, 2],
+                      peak_over_rms=[100., 101., 102.],
                       times=[float(i) for i in range(10, 61, 10)])
-        
+
         # create object with deprecated argument
         with self.assertRaisesWith(ValueError, error_msg):
             Clustering(**kwargs)
@@ -187,7 +187,7 @@ class TestClusteringIO(AcquisitionH5IOMixin, TestCase):
         # no warning should be raised
         obj = Clustering.__new__(Clustering, in_construct_mode=True)
         obj.__init__(**kwargs)
-        
+
         return obj
 
     def roundtripContainer(self, cache_spec=False):
@@ -247,7 +247,7 @@ class ClusterWaveformsConstructor(AcquisitionH5IOMixin, TestCase):
         with self.assertRaisesWith(ValueError, msg):
             cw = ClusterWaveforms(self.clustering, 'filtering', means, stdevs)
 
-        # create object in construct mode, modeling the behavior of the ObjectMapper on read 
+        # create object in construct mode, modeling the behavior of the ObjectMapper on read
         # no warning should be raised
         cw = ClusterWaveforms.__new__(ClusterWaveforms,
                                         container_source=None,

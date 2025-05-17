@@ -214,6 +214,30 @@ def _make_subject_without_age_reference():
     test_name = 'subject_no_age__reference'
     _write(test_name, nwbfile)
 
+def _make_electrodes_dynamic_table():
+    """Create a test file where electrodes is a dynamic table and not its own type."""
+    nwbfile = NWBFile(session_description='ADDME',
+                      identifier='ADDME',
+                      session_start_time=datetime.now().astimezone())
+    device = nwbfile.create_device(name="array", description="an array", manufacturer="company")
+    nwbfile.add_electrode_column(name="label", description="label of electrode")
+
+    for i in range(4):
+        electrode_group = nwbfile.create_electrode_group(
+            name=f"shank{i}",
+            description=f"electrode group for shank {i}",
+            device=device,
+            location="brain area",
+        )
+        for j in range(3):
+            nwbfile.add_electrode(
+                group=electrode_group,
+                location="brain area",
+                label=f"shank{i}electrode{j}",
+            )
+    
+    test_name = 'electrodes_dynamic_table'
+    _write(test_name, nwbfile)
 
 if __name__ == '__main__':
     # install these versions of PyNWB and run this script to generate new files
@@ -242,3 +266,6 @@ if __name__ == '__main__':
 
     if __version__ == "2.2.0":
         _make_subject_without_age_reference()
+
+    if __version__ == "3.0.0":
+        _make_electrodes_dynamic_table()
