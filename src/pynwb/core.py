@@ -28,6 +28,10 @@ class NWBMixin(AbstractContainer):
 
     _data_type_attr = 'neurodata_type'
 
+    _fieldsname = '__nwbfields__'
+
+    __nwbfields__ = tuple()
+
     @docval({'name': 'neurodata_type', 'type': str, 'doc': 'the data_type to search for', 'default': None})
     def get_ancestor(self, **kwargs):
         """
@@ -72,9 +76,7 @@ class NWBMixin(AbstractContainer):
 @register_class('NWBContainer', CORE_NAMESPACE)
 class NWBContainer(NWBMixin, Container):
 
-    _fieldsname = '__nwbfields__'
-
-    __nwbfields__ = tuple()
+    pass
 
 
 @register_class('NWBDataInterface', CORE_NAMESPACE)
@@ -110,8 +112,8 @@ class NWBData(NWBMixin, Data):
     def append(self, arg):
         """
         Append a single element to the data
-        
-        Note: The arg to append should be 1 dimension less than the data. 
+
+        Note: The arg to append should be 1 dimension less than the data.
         For example, if the data is a 2D array, arg should be a 1D array.
         Appending to scalar data is not supported. To append multiple
         elements, use extend.
@@ -172,7 +174,7 @@ class ScratchData(NWBData):
         warn(("Use of ScratchData.notes has been deprecated and will be removed in PyNWB 4.0. "
               "Use ScratchData.description instead."), DeprecationWarning)
         return self.description
-    
+
     @notes.setter
     def notes(self, value):
         """

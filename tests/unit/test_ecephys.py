@@ -16,6 +16,7 @@ from pynwb.ecephys import (
     ElectrodeGroup,
     ElectrodesTable
 )
+from pynwb.file import ElectrodeTable
 from pynwb.device import Device
 from pynwb.testing import TestCase
 from pynwb.testing.mock.ecephys import mock_ElectricalSeries
@@ -26,8 +27,11 @@ from hdmf.data_utils import DataChunkIterator
 
 def make_electrode_table():
     table = ElectrodesTable()
-    dev1 = Device('dev1')
-    group = ElectrodeGroup('tetrode1', 'tetrode description', 'tetrode location', dev1)
+    dev1 = Device(name='dev1')
+    group = ElectrodeGroup(name='tetrode1',
+                           description='tetrode description',
+                           location='tetrode location',
+                           device=dev1)
     table.add_row(location='CA1', group=group, group_name='tetrode1')
     table.add_row(location='CA1', group=group, group_name='tetrode1')
     table.add_row(location='CA1', group=group, group_name='tetrode1')
@@ -188,7 +192,7 @@ class SpikeEventSeriesConstructor(TestCase):
         # check creation with bad DataChunkIterators fails
         with self.assertRaisesWith(ValueError, "Must provide the same number of timestamps and spike events"):
             SpikeEventSeries(name='test_sES', data=data, electrodes=region, timestamps=bad_timestamps)
-        
+
 
 class ElectrodeGroupConstructor(TestCase):
 
@@ -504,3 +508,11 @@ class FeatureExtractionConstructor(TestCase):
                               description=description,
                               times=event_times,
                               features=features)
+
+class ElectrodesTableConstructor(TestCase):
+
+    def test_backwards_compatibility(self):
+        warn_msg = ("The ElectrodeTable convenience function is deprecated. Please create a new instance of "
+                    "the ElectrodesTable class instead.")
+        with self.assertWarnsWith(DeprecationWarning, warn_msg):
+            ElectrodeTable()
