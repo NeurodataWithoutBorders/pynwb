@@ -191,7 +191,7 @@ class Units(DynamicTable):
             self.__has_spike_times = False
         self.__electrode_table = electrode_table
 
-    @docval({'name': 'spike_times', 'type': 'array_data', 'doc': 'the spike times for each unit',
+    @docval({'name': 'spike_times', 'type': 'array_data', 'doc': 'the spike times for each unit (in seconds)',
              'default': None, 'shape': (None,)},
             {'name': 'obs_intervals', 'type': 'array_data',
              'doc': 'the observation intervals (valid times) for each unit. All spike_times for a given unit ' +
