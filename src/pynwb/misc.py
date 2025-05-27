@@ -153,7 +153,7 @@ class Units(DynamicTable):
                       'are associated with this unit, and the electrodes dimension here should be in the same order as'
                       ' the electrodes referenced in the `electrodes` column of this table.')
     __columns__ = (
-        {'name': 'spike_times', 'description': 'the spike times for each unit', 'index': True},
+        {'name': 'spike_times', 'description': 'the spike times for each unit in seconds', 'index': True},
         {'name': 'obs_intervals', 'description': 'the observation intervals for each unit',
          'index': True},
         {'name': 'electrodes', 'description': 'the electrodes that each spike unit came from',
@@ -191,7 +191,7 @@ class Units(DynamicTable):
             self.__has_spike_times = False
         self.__electrode_table = electrode_table
 
-    @docval({'name': 'spike_times', 'type': 'array_data', 'doc': 'the spike times for each unit (in seconds)',
+    @docval({'name': 'spike_times', 'type': 'array_data', 'doc': 'the spike times for each unit in seconds',
              'default': None, 'shape': (None,)},
             {'name': 'obs_intervals', 'type': 'array_data',
              'doc': 'the observation intervals (valid times) for each unit. All spike_times for a given unit ' +
