@@ -262,32 +262,25 @@ class FrequencyBandsTable(DynamicTable):
         {'name': 'band_name', 'description': 'Name of the band, e.g. theta.', 'required': True},
         {'name': 'band_limits', 'description': 'Low and high limit of each band in Hz.', 'required': True},
         {'name': 'band_mean', 'description': 'The mean Gaussian filters, in Hz.', 'required': False},
-        {'name': 'band_stdev', 'description': 'The standard deviation Gaussian filters, in Hz.', 'required': False})
+        {'name': 'band_stdev', 'description': 'The standard deviation Gaussian filters, in Hz.', 'required': False}
+    )
 
-    @docval({'name': 'band_mean', 'type': VectorData, 'doc': 'The mean Gaussian filters, in Hz.', 'default': None},
-            {'name': 'band_stdev', 'type': VectorData, 'doc': 'The standard deviation Gaussian filters, in Hz.',
-             'default': None},
-            *get_docval(DynamicTable.__init__, 'id', 'columns', 'colnames'))
+    @docval(*get_docval(DynamicTable.__init__, 'id', 'columns', 'colnames'))
     def __init__(self, **kwargs):
         kwargs['name'] = 'bands'
         kwargs['description'] = 'Table for describing the bands that DecompositionSeries was generated from.'
-
-        # optional fields
-        keys_to_set = ('band_mean', 'band_stdev')
-        args_to_set = popargs_to_dict(keys_to_set, kwargs)
-        for key, val in args_to_set.items():
-            setattr(self, key, val)
-
         super().__init__(**kwargs)
 
-    @docval({'name': 'band_name', 'type': str, 'doc': 'Name of the band, e.g. theta.'},
-            {'name': 'band_limits', 'type': ('array_data', 'data'), 'shape': (2, ),
-             'doc': 'Low and high limit of each band in Hz.'},
-            {'name': 'band_mean', 'type': float, 'doc': 'The mean Gaussian filters, in Hz.',
-             'default': None},
-            {'name': 'band_stdev', 'type': float, 'doc': 'The standard deviation Gaussian filters, in Hz.',
-             'default': None},
-            allow_extra=True)
+    @docval(
+        {'name': 'band_name', 'type': str, 'doc': 'Name of the band, e.g. theta.'},
+        {'name': 'band_limits', 'type': ('array_data', 'data'), 'shape': (2, ),
+            'doc': 'Low and high limit of each band in Hz.'},
+        {'name': 'band_mean', 'type': float, 'doc': 'The mean Gaussian filters, in Hz.',
+            'default': None},
+        {'name': 'band_stdev', 'type': float, 'doc': 'The standard deviation Gaussian filters, in Hz.',
+            'default': None},
+        allow_extra=True
+    )
     def add_band(self, **kwargs):
         super().add_row(**kwargs)
 
@@ -342,23 +335,16 @@ class DecompositionSeries(TimeSeries):
             bands = FrequencyBandsTable()
         self.bands = bands
 
-    @docval({'name': 'band_name', 'type': str, 'doc': 'the name of the frequency band',
-             'default': None},
-            {'name': 'band_limits', 'type': ('array_data', 'data'), 'default': None,
-             'doc': 'low and high frequencies of bandpass filter in Hz'},
-            {'name': 'band_mean', 'type': float, 'doc': 'the mean of Gaussian filters in Hz',
-             'default': None},
-            {'name': 'band_stdev', 'type': float, 'doc': 'the standard deviation of Gaussian filters in Hz',
-             'default': None},
-            allow_extra=True)
+    @docval(
+        {'name': 'band_name', 'type': str, 'doc': 'the name of the frequency band'},
+        {'name': 'band_limits', 'type': ('array_data', 'data'),
+         'doc': 'low and high frequencies of bandpass filter in Hz'},
+        {'name': 'band_mean', 'type': float, 'doc': 'the mean of Gaussian filters in Hz',
+         'default': None},
+        {'name': 'band_stdev', 'type': float, 'doc': 'the standard deviation of Gaussian filters in Hz',
+         'default': None},
+        allow_extra=True
+    )
     def add_band(self, **kwargs):
-        """
-        Add ROI data to this
-        """
-        band_name, band_limits, band_mean, band_stdev = getargs('band_name', 'band_limits', 'band_mean', 'band_stdev',
-                                                                kwargs)
-
-        self.bands.add_band(band_name=band_name,
-                            band_limits=band_limits,
-                            band_mean=band_mean,
-                            band_stdev=band_stdev)
+        """Add a frequency band to the bands table of this DecompositionSeries."""
+        self.bands.add_band(**kwargs)
