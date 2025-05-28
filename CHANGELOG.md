@@ -10,12 +10,14 @@
   - Added `BaseImage` and `ExternalImage` as new neurodata types. The first so both `Image` and `ExternalImage` can inherit from it. The second to store external images. @rly [#2079](https://github.com/NeurodataWithoutBorders/pynwb/pull/2079)
   - Added new `ElectrodesTable` neurodata type. @mavaylon1 [#1890](https://github.com/NeurodataWithoutBorders/pynwb/pull/1890)
   - Formally defined and renamed `ElectrodeTable` as the `ElectrodesTable` neurodata type. @mavaylon1 [#1890](https://github.com/NeurodataWithoutBorders/pynwb/pull/1890)
+  - Formally defined bands within `DecompositionSeries` as the neurodatatype `FrequencyBandsTable`. @mavaylon1 @rly [#2063](https://github.com/NeurodataWithoutBorders/pynwb/pull/2063)
 - Automatically add timezone information to timestamps reference time if no timezone information is specified. @stephprince [#2056](https://github.com/NeurodataWithoutBorders/pynwb/pull/2056)
 - Added option to disable typemap caching and updated type map cache location. @stephprince [#2057](https://github.com/NeurodataWithoutBorders/pynwb/pull/2057)
 - Added dictionary-like operations directly on `ProcessingModule` objects (e.g., `len(processing_module)`). @bendichter [#2020](https://github.com/NeurodataWithoutBorders/pynwb/pull/2020)
 - When an external file is detected when initializing an ImageSeries and no format is provided, automatically set format to "external" instead of raising an error. @stephprince [#2060](https://github.com/NeurodataWithoutBorders/pynwb/pull/2060)
 - Added mask_type option to `mock_PlaneSegmentation`. @pauladkisson [#2067](https://github.com/NeurodataWithoutBorders/pynwb/pull/2067)
 - Improved the documentation of the `spike_times` in the Units table methods @h-mayorquin [#2085](https://github.com/NeurodataWithoutBorders/pynwb/pull/2085)
+- Updated minimum HDMF version to 4.1.0. @mavaylon1 @rly [#2063](https://github.com/NeurodataWithoutBorders/pynwb/pull/2063)
 
 ### Bug fixes
 - Fixed `add_data_interface` functionality that was mistakenly removed in PyNWB 3.0. @stephprince [#2052](https://github.com/NeurodataWithoutBorders/pynwb/pull/2052)

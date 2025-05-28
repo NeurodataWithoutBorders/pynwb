@@ -1,8 +1,8 @@
 import numpy as np
 
-from hdmf.common import DynamicTable, VectorData, DynamicTableRegion
+from hdmf.common import VectorData, DynamicTableRegion
 from pynwb import TimeSeries
-from pynwb.misc import Units, DecompositionSeries
+from pynwb.misc import Units, DecompositionSeries, FrequencyBandsTable
 from pynwb.testing import NWBH5IOMixin, AcquisitionH5IOMixin, TestCase
 from pynwb.ecephys import ElectrodeGroup, ElectrodesTable
 from pynwb.device import Device
@@ -115,9 +115,7 @@ class TestDecompositionSeriesIO(NWBH5IOMixin, TestCase):
             unit='flibs',
             timestamps=np.ones((3,)),
         )
-        bands = DynamicTable(
-            name='bands',
-            description='band info for LFPSpectralAnalysis',
+        bands = FrequencyBandsTable(
             columns=[
                 VectorData(name='band_name', description='name of bands', data=['alpha', 'beta', 'gamma']),
                 VectorData(name='band_limits', description='low and high cutoffs in Hz', data=np.ones((3, 2))),
@@ -179,9 +177,7 @@ class TestDecompositionSeriesWithSourceChannelsIO(AcquisitionH5IOMixin, TestCase
         )
         data = np.random.randn(100, 2, 30)
         timestamps = np.arange(100)/100
-        bands = DynamicTable(
-            name='bands',
-            description='band info for LFPSpectralAnalysis',
+        bands = FrequencyBandsTable(
             columns=[
                 VectorData(name='band_name', description='name of bands', data=['alpha', 'beta', 'gamma']),
                 VectorData(name='band_limits', description='low and high cutoffs in Hz', data=np.ones((3, 2))),
