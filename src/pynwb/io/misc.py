@@ -7,8 +7,6 @@ from pynwb.misc import Units, DecompositionSeries
 
 @register_map(DecompositionSeries)
 class DecompositionSeriesMap(TimeSeriesMap):
-    def __init__(self, spec):
-        super().__init__(spec)
 
     @TimeSeriesMap.constructor_arg('bands')
     def bands(self, builder, manager):
@@ -22,9 +20,6 @@ class DecompositionSeriesMap(TimeSeriesMap):
 
 @register_map(Units)
 class UnitsMap(DynamicTableMap):
-
-    def __init__(self, spec):
-        super().__init__(spec)
 
     @DynamicTableMap.constructor_arg('resolution')
     def resolution_carg(self, builder, manager):
