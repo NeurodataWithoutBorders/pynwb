@@ -4,6 +4,7 @@ from pathlib import Path
 from pynwb import NWBFile, NWBHDF5IO, __version__, TimeSeries, get_class, load_namespaces
 from pynwb.file import Subject
 from pynwb.image import ImageSeries
+from pynwb.misc import DecompositionSeries
 from pynwb.spec import NWBNamespaceBuilder, export_spec, NWBGroupSpec, NWBAttributeSpec
 
 
@@ -235,8 +236,37 @@ def _make_electrodes_dynamic_table():
                 location="brain area",
                 label=f"shank{i}electrode{j}",
             )
-    
+
     test_name = 'electrodes_dynamic_table'
+    _write(test_name, nwbfile)
+
+def _make_bands_dynamic_table():
+    """Create a test file where electrodes is a dynamic table and not its own type."""
+    nwbfile = NWBFile(session_description='ADDME',
+                      identifier='ADDME',
+                      session_start_time=datetime.now().astimezone())
+    mod = nwbfile.create_processing_module(name="test_mod", description="a test module")
+    ts = TimeSeries(
+        name='dummy timeseries',
+        description='desc',
+        data=np.ones((3, 3)),
+        unit='Volts',
+        timestamps=np.ones((3,))
+    )
+    ds = DecompositionSeries(
+        name='LFPSpectralAnalysis',
+        description='my description',
+        data=np.ones((3, 3, 3)),
+        timestamps=[1., 2., 3.],
+        source_timeseries=ts,
+        metric='amplitude'
+    )
+    for band_name in ['alpha', 'beta', 'gamma']:
+        ds.add_band(band_name=band_name, band_limits=np.array([1., 1.]), band_mean=1., band_stdev=1.)
+    mod.add(ts)
+    mod.add(ds)
+
+    test_name = 'decompositionseries_bands_dynamic_table'
     _write(test_name, nwbfile)
 
 if __name__ == '__main__':
@@ -269,3 +299,4 @@ if __name__ == '__main__':
 
     if __version__ == "3.0.0":
         _make_electrodes_dynamic_table()
+        _make_bands_dynamic_table()

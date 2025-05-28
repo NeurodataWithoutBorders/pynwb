@@ -53,8 +53,13 @@ class FrequencyBandsTableConstructor(TestCase):
         np.testing.assert_equal(self.bands['band_stdev'].data, np.ones((3,)))
 
     def test_add_row(self):
-        self.bands.add_band(band_name='band_name', band_limits=np.array([[1., 1.]]), band_mean=1., band_stdev=1.)
-        np.testing.assert_equal(self.bands['band_limits'].data, np.ones((4, 2)))
+        self.bands.add_band(band_name='band_name1', band_limits=np.array([1., 2.]), band_mean=1., band_stdev=1.)
+        self.bands.add_band(band_name='band_name2', band_limits=(3., 4.), band_mean=3., band_stdev=1.)
+        self.bands.add_band(band_name='band_name3', band_limits=[5., 6.], band_mean=3., band_stdev=1.)
+        np.testing.assert_equal(
+            self.bands['band_limits'].data,
+            [[1., 1.], [1., 1.], [1., 1.], [1., 2.,], [3., 4.], [5., 6.]]
+        )
         np.testing.assert_equal(self.bands['band_mean'].data, np.ones((4,)))
         np.testing.assert_equal(self.bands['band_stdev'].data, np.ones((4,)))
 
@@ -106,7 +111,7 @@ class DecompositionSeriesConstructor(TestCase):
                                         source_timeseries=timeseries,
                                         metric='amplitude')
         for band_name in ['alpha', 'beta', 'gamma']:
-            spec_anal.add_band(band_name=band_name, band_limits=np.array([[1., 1.]]), band_mean=1., band_stdev=1.)
+            spec_anal.add_band(band_name=band_name, band_limits=np.array([1., 1.]), band_mean=1., band_stdev=1.)
         self.assertEqual(spec_anal.name, 'LFPSpectralAnalysis')
         self.assertEqual(spec_anal.description, 'my description')
         np.testing.assert_equal(spec_anal.data, np.ones((3, 3, 3)))
@@ -114,7 +119,7 @@ class DecompositionSeriesConstructor(TestCase):
         self.assertEqual(spec_anal.source_timeseries, timeseries)
         self.assertEqual(spec_anal.metric, 'amplitude')
         self.assertEqual(spec_anal.bands['band_name'].data, ['alpha', 'beta', 'gamma'])
-        np.testing.assert_equal(spec_anal.bands['band_limits'].data, [np.array([[1., 1.]]) for _ in range(3)])
+        np.testing.assert_equal(spec_anal.bands['band_limits'].data, [np.array([1., 1.]) for _ in range(3)])
 
     @staticmethod
     def make_electrode_table(self):

@@ -104,18 +104,6 @@ class TestUnitsFileIO(NWBH5IOMixin, TestCase):
         units.to_dataframe()
 
 
-class TestBackCompatDecompositionSeries(TestCase):
-    def test_read_nwbfile(self):
-        """
-        Test that reads an NWBFile with a DecompositionSeries that has a DynamicTable for bands.
-        """
-        io = NWBHDF5IO("tests/back_compat/3.0.0_DecompositionSeries.nwb", mode="r")
-        nwbfile = io.read()
-        # Read FrequencyBandsTable to ensure it uses the schema type
-        bands = nwbfile.processing['test_mod']['LFPSpectralAnalysis'].bands
-        self.assertTrue(isinstance(bands, FrequencyBandsTable))
-
-
 class TestDecompositionSeriesIO(NWBH5IOMixin, TestCase):
 
     def setUpContainer(self):
