@@ -281,7 +281,7 @@ class FrequencyBandsTable(DynamicTable):
         super().__init__(**kwargs)
 
     @docval({'name': 'band_name', 'type': str, 'doc': 'Name of the band, e.g. theta.'},
-            {'name': 'band_limits', 'type': ('array_data', 'data'), 'shape': [None, 2],
+            {'name': 'band_limits', 'type': ('array_data', 'data'), 'shape': (2, ),
              'doc': 'Low and high limit of each band in Hz.'},
             {'name': 'band_mean', 'type': float, 'doc': 'The mean Gaussian filters, in Hz.',
              'default': None},
