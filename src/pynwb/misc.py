@@ -9,7 +9,7 @@ from hdmf.utils import docval, getargs, popargs, popargs_to_dict, get_docval, Al
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries
 from .ecephys import ElectrodeGroup
-from hdmf.common import DynamicTable, DynamicTableRegion, VectorData
+from hdmf.common import DynamicTable, DynamicTableRegion
 
 __all__ = [
     'AnnotationSeries',

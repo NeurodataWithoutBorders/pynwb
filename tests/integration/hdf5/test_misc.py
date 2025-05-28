@@ -1,7 +1,7 @@
 import numpy as np
 
 from hdmf.common import VectorData, DynamicTableRegion
-from pynwb import TimeSeries, NWBHDF5IO
+from pynwb import TimeSeries
 from pynwb.misc import Units, DecompositionSeries, FrequencyBandsTable
 from pynwb.testing import NWBH5IOMixin, AcquisitionH5IOMixin, TestCase
 from pynwb.ecephys import ElectrodeGroup, ElectrodesTable
