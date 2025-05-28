@@ -1,8 +1,10 @@
 import numpy as np
 
-from hdmf.common import DynamicTable, VectorData, DynamicTableRegion
+from hdmf.common import VectorData, DynamicTableRegion
 
-from pynwb.misc import AnnotationSeries, AbstractFeatureSeries, IntervalSeries, Units, DecompositionSeries
+from pynwb.misc import (
+    AnnotationSeries, AbstractFeatureSeries, IntervalSeries, Units, DecompositionSeries, FrequencyBandsTable
+)
 from pynwb.file import TimeSeries
 from pynwb.device import Device
 from pynwb.ecephys import ElectrodeGroup, ElectrodesTable
@@ -29,21 +31,56 @@ class AbstractFeatureSeriesConstructor(TestCase):
         aFS.add_features(2.0, [1.])
 
 
+class FrequencyBandsTableConstructor(TestCase):
+    def setUp(self):
+        self.bands = FrequencyBandsTable(
+            columns=[
+                VectorData(name='band_name', description='name of bands', data=['alpha', 'beta', 'gamma']),
+                VectorData(name='band_limits', description='low and high cutoffs in Hz', data=np.ones((3, 2))),
+                VectorData(name='band_mean', description='mean gaussian filters in Hz', data=np.ones((3,))),
+                VectorData(
+                    name='band_stdev',
+                    description='standard deviation of gaussian filters in Hz',
+                    data=np.ones((3,))
+                ),
+            ],
+        )
+
+    def test_init(self):
+        self.assertEqual(self.bands['band_name'].data, ['alpha', 'beta', 'gamma'])
+        np.testing.assert_equal(self.bands['band_limits'].data, np.ones((3, 2)))
+        np.testing.assert_equal(self.bands['band_mean'].data, np.ones((3,)))
+        np.testing.assert_equal(self.bands['band_stdev'].data, np.ones((3,)))
+
+    def test_add_row(self):
+        self.bands.add_band(band_name='band_name1', band_limits=np.array([1., 2.]), band_mean=1., band_stdev=1.)
+        self.bands.add_band(band_name='band_name2', band_limits=(3., 4.), band_mean=1., band_stdev=1.)
+        self.bands.add_band(band_name='band_name3', band_limits=[5., 6.], band_mean=1., band_stdev=1.)
+        np.testing.assert_equal(
+            self.bands['band_limits'].data,
+            [[1., 1.], [1., 1.], [1., 1.], [1., 2.,], [3., 4.], [5., 6.]]
+        )
+        np.testing.assert_equal(self.bands['band_mean'].data, np.ones((6,)))
+        np.testing.assert_equal(self.bands['band_stdev'].data, np.ones((6,)))
+
+
 class DecompositionSeriesConstructor(TestCase):
     def test_init(self):
         timeseries = TimeSeries(name='dummy timeseries', description='desc',
                                 data=np.ones((3, 3)), unit='Volts',
                                 timestamps=[1., 2., 3.])
-        bands = DynamicTable(name='bands', description='band info for LFPSpectralAnalysis', columns=[
-            VectorData(name='band_name', description='name of bands', data=['alpha', 'beta', 'gamma']),
-            VectorData(name='band_limits', description='low and high cutoffs in Hz', data=np.ones((3, 2))),
-            VectorData(name='band_mean', description='mean gaussian filters in Hz', data=np.ones((3,))),
-            VectorData(
-                name='band_stdev',
-                description='standard deviation of gaussian filters in Hz',
-                data=np.ones((3,))
-            ),
-        ])
+        bands = FrequencyBandsTable(
+            columns=[
+                VectorData(name='band_name', description='name of bands', data=['alpha', 'beta', 'gamma']),
+                VectorData(name='band_limits', description='low and high cutoffs in Hz', data=np.ones((3, 2))),
+                VectorData(name='band_mean', description='mean gaussian filters in Hz', data=np.ones((3,))),
+                VectorData(
+                    name='band_stdev',
+                    description='standard deviation of gaussian filters in Hz',
+                    data=np.ones((3,))
+                ),
+            ],
+        )
         spec_anal = DecompositionSeries(name='LFPSpectralAnalysis',
                                         description='my description',
                                         data=np.ones((3, 3, 3)),
@@ -74,16 +111,15 @@ class DecompositionSeriesConstructor(TestCase):
                                         source_timeseries=timeseries,
                                         metric='amplitude')
         for band_name in ['alpha', 'beta', 'gamma']:
-            spec_anal.add_band(band_name=band_name, band_limits=(1., 1.), band_mean=1., band_stdev=1.)
-
+            spec_anal.add_band(band_name=band_name, band_limits=np.array([1., 1.]), band_mean=1., band_stdev=1.)
         self.assertEqual(spec_anal.name, 'LFPSpectralAnalysis')
         self.assertEqual(spec_anal.description, 'my description')
         np.testing.assert_equal(spec_anal.data, np.ones((3, 3, 3)))
         np.testing.assert_equal(spec_anal.timestamps, [1., 2., 3.])
-        self.assertEqual(spec_anal.bands['band_name'].data, ['alpha', 'beta', 'gamma'])
-        np.testing.assert_equal(spec_anal.bands['band_limits'].data, np.ones((3, 2)))
         self.assertEqual(spec_anal.source_timeseries, timeseries)
         self.assertEqual(spec_anal.metric, 'amplitude')
+        self.assertEqual(spec_anal.bands['band_name'].data, ['alpha', 'beta', 'gamma'])
+        np.testing.assert_equal(spec_anal.bands['band_limits'].data, [np.array([1., 1.]) for _ in range(3)])
 
     @staticmethod
     def make_electrode_table(self):

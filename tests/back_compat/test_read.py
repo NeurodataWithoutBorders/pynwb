@@ -5,6 +5,7 @@ import warnings
 from pynwb import NWBHDF5IO, validate, TimeSeries
 from pynwb.ecephys import ElectrodesTable
 from pynwb.image import ImageSeries
+from pynwb.misc import FrequencyBandsTable
 from pynwb.testing import TestCase
 
 
@@ -138,9 +139,16 @@ class TestReadOldVersions(TestCase):
             read_nwbfile = io.read()
             self.assertIsNone(read_nwbfile.subject.age__reference)
 
-    def test_read_electrodes_table_as_dynamic_table(self):
+    def test_read_electrodes_table_as_neurodata_type(self):
         """Test that an "electrodes" table written as a DynamicTable is read as an ElectrodesTable"""
         f = Path(__file__).parent / '3.0.0_electrodes_dynamic_table.nwb'
         with self.get_io(f) as io:
             read_nwbfile = io.read()
             assert isinstance(read_nwbfile.electrodes, ElectrodesTable)
+
+    def test_read_bands_table_as_neurodata_type(self):
+        """Test that a "bands" table written as a DynamicTable is read as an FrequencyBandsTable"""
+        f = Path(__file__).parent / '3.0.0_decompositionseries_bands_dynamic_table.nwb'
+        with self.get_io(f) as io:
+            read_nwbfile = io.read()
+            assert isinstance(read_nwbfile.processing['test_mod']['LFPSpectralAnalysis'].bands, FrequencyBandsTable)
