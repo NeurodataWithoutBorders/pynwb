@@ -21,6 +21,7 @@
 - Added unit tests to enhance coverage of `core.py`, `image.py`, `spec.py`, `icephys.py`, `epoch.py` and others. @oruebel [#2031](https://github.com/NeurodataWithoutBorders/pynwb/pull/2031)
 - Fixed missing `IndexSeries.indexed_images`. @rly [#2074](https://github.com/NeurodataWithoutBorders/pynwb/pull/2074)
 - Fixed missing `__nwbfields__` and `_fieldsname` for `NWBData` and its subclasses. @rly [#2082](https://github.com/NeurodataWithoutBorders/pynwb/pull/2082)
+- Fixed caching of the type map when using HDMF 4.1.0. @rly [#2087](https://github.com/NeurodataWithoutBorders/pynwb/pull/2087)
 
 ## PyNWB 3.0.0 (February 26, 2025)
 
