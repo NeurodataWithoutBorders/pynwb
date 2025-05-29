@@ -14,6 +14,7 @@
 - Added mask_type option to `mock_PlaneSegmentation`. @pauladkisson [#2067](https://github.com/NeurodataWithoutBorders/pynwb/pull/2067)
 - Improved the documentation of the `spike_times` in the Units table methods @h-mayorquin [#2085](https://github.com/NeurodataWithoutBorders/pynwb/pull/2085)
 - Removed core namespace warning unless cached version is newer. @stephprince [#2077](https://github.com/NeurodataWithoutBorders/pynwb/pull/2077)
+- Bumped minimum HDMF version to 4.1.0. @stephprince [#2077](https://github.com/NeurodataWithoutBorders/pynwb/pull/2077)
 
 ### Bug fixes
 - Fixed `add_data_interface` functionality that was mistakenly removed in PyNWB 3.0. @stephprince [#2052](https://github.com/NeurodataWithoutBorders/pynwb/pull/2052)
