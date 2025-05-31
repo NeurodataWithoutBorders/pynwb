@@ -11,6 +11,8 @@
   - Added new `ElectrodesTable` neurodata type. @mavaylon1 [#1890](https://github.com/NeurodataWithoutBorders/pynwb/pull/1890)
   - Formally defined and renamed `ElectrodeTable` as the `ElectrodesTable` neurodata type. @mavaylon1 [#1890](https://github.com/NeurodataWithoutBorders/pynwb/pull/1890)
   - Formally defined bands within `DecompositionSeries` as the neurodatatype `FrequencyBandsTable`. @mavaylon1 @rly [#2063](https://github.com/NeurodataWithoutBorders/pynwb/pull/2063)
+  - Added new `DeviceModel` neurodata type to store device model information. @rly [#2088](https://github.com/NeurodataWithoutBorders/pynwb/pull/2088)
+  - Deprecated `Device.model_name`, `Device.model_number`, and `Device.manufacturer` fields in favor of `DeviceModel`. @rly [#2088](https://github.com/NeurodataWithoutBorders/pynwb/pull/2088)
 - Automatically add timezone information to timestamps reference time if no timezone information is specified. @stephprince [#2056](https://github.com/NeurodataWithoutBorders/pynwb/pull/2056)
 - Added option to disable typemap caching and updated type map cache location. @stephprince [#2057](https://github.com/NeurodataWithoutBorders/pynwb/pull/2057)
 - Added dictionary-like operations directly on `ProcessingModule` objects (e.g., `len(processing_module)`). @bendichter [#2020](https://github.com/NeurodataWithoutBorders/pynwb/pull/2020)
