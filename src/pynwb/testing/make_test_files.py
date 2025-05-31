@@ -220,7 +220,7 @@ def _make_electrodes_dynamic_table():
     nwbfile = NWBFile(session_description='ADDME',
                       identifier='ADDME',
                       session_start_time=datetime.now().astimezone())
-    device = nwbfile.create_device(name="array", description="an array", manufacturer="company")
+    device = nwbfile.create_device(name="array", description="an array")
     nwbfile.add_electrode_column(name="label", description="label of electrode")
 
     for i in range(4):
