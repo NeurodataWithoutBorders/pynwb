@@ -1,7 +1,7 @@
 from typing import Optional
 
 from ... import NWBFile
-from ...device import Device
+from ...device import Device, DeviceModel
 
 from .utils import name_generator
 
@@ -20,5 +20,25 @@ def mock_Device(
 
     if nwbfile is not None:
         nwbfile.add_device(device)
+
+    return device
+
+
+def mock_DeviceModel(
+    name: Optional[str] = None,
+    manufacturer: str = None,
+    model_number: Optional[str] = None,
+    description: str = "description",
+    nwbfile: Optional[NWBFile] = None,
+) -> DeviceModel:
+    device = DeviceModel(
+        name=name or name_generator("DeviceModel"),
+        manufacturer=manufacturer,
+        model_number=model_number,
+        description=description,
+    )
+
+    if nwbfile is not None:
+        nwbfile.add_device_model(device)
 
     return device
