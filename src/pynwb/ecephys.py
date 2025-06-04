@@ -237,14 +237,12 @@ class EventDetection(NWBDataInterface):
         source_idx = args_to_set['source_idx']
         source_idx_shape = get_data_shape(source_idx, strict_no_data_load=True)
         if source_idx_shape is not None:
-            if len(source_idx_shape) == 2:
-                # 2D array must have shape (num_events, 2) for [time_index, channel_index]
-                if source_idx_shape[1] != 2:
-                    raise ValueError(f"EventDetection source_idx: 2D source_idx must have shape (num_events, 2) "
-                                     f"for [time_index, channel_index], but got shape {source_idx_shape}")
+            if len(source_idx_shape) == 2 and source_idx_shape[1] != 2:
+                raise ValueError(f"EventDetection source_idx: 2D source_idx must have shape (num_events, 2) "
+                                    f"for [time_index, channel_index], but got shape {source_idx_shape}")
             elif len(source_idx_shape) > 2:
                 raise ValueError(f"EventDetection source_idx: source_idx must be 1D or 2D array, "
-                                f"but got {len(source_idx_shape)}D array with shape {source_idx_shape}")
+                                 f"but got {len(source_idx_shape)}D array with shape {source_idx_shape}")
 
         for key, val in args_to_set.items():
             setattr(self, key, val)

@@ -381,7 +381,7 @@ event_detection = EventDetection(
     name="threshold_events",
     detection_method="thresholding, 1.5 * std",
     source_electricalseries=raw_electrical_series,
-    source_idx=[[1000, 0], [2000, 4], [3000, 8]],  # indicates the event and channel indices
+    source_idx=[[1000, 0], [2000, 4], [3000, 8]],  # indicates the time and channel indices
     times=[.033, .066, .099],
 )
 
