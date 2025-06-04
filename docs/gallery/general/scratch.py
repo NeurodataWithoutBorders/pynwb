@@ -147,12 +147,13 @@ nwb_scratch = nwb_proc_in.copy()
 
 filt_ts = nwb_scratch.processing["filtering_module"]["filtered_timeseries"]
 
-fft = np.fft.fft(filt_ts.data)
+# simple power spectrum without normalization
+ps = np.abs(np.fft.fft(filt_ts.data))**2
 
 nwb_scratch.add_scratch(
-    fft,
-    name="dft_filtered",
-    description="discrete Fourier transform from filtered data",
+    ps,
+    name="power_spectrum",
+    description="power spectrum from filtered data",
 )
 
 
@@ -171,9 +172,9 @@ with NWBHDF5IO("scratch_analysis.nwb", "w", manager=proc_io.manager) as io:
 scratch_io = NWBHDF5IO("scratch_analysis.nwb", "r")
 nwb_scratch_in = scratch_io.read()
 
-fft_in = nwb_scratch_in.scratch["dft_filtered"]
+fft_in = nwb_scratch_in.scratch["power_spectrum"]
 
-fft_in = nwb_scratch_in.get_scratch("dft_filtered")
+fft_in = nwb_scratch_in.get_scratch("power_spectrum")
 
 ####################
 #
