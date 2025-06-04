@@ -292,14 +292,14 @@ class EventDetectionConstructor(TestCase):
 
     def test_init_2d_source_idx(self):
         """Test EventDetection with 2D source_idx containing time and channel indices"""
-        data = np.random.rand(10, 2)  # 10 time points, 4 channels
+        data = np.random.rand(10, 2)  # 10 time points, 2 channels
         ts = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
         _, region = self._create_table_and_region()
         eS = ElectricalSeries(name='test_eS', data=data, electrodes=region, timestamps=ts)
         
         # 2D source_idx with shape (num_events, 2) for [time_index, channel_index]
-        source_idx_2d = np.array([[1, 0], [2, 1], [3, 0],])  # 4 events
-        times = (0.1, 0.2, 0.3)  # Corresponding times for the events
+        source_idx_2d = np.array([[1, 0], [2, 1], [3, 0],])  # 3 events
+        times = (0.1, 0.2, 0.3)
         
         eD = EventDetection(detection_method='threshold detection',
                             source_electricalseries=eS,
@@ -319,7 +319,6 @@ class EventDetectionConstructor(TestCase):
         _, region = self._create_table_and_region()
         eS = ElectricalSeries(name='test_eS', data=data, electrodes=region, timestamps=ts)
         
-        # Test with times=None (should not set unit attribute)
         eD = EventDetection(detection_method='detection_method',
                             source_electricalseries=eS,
                             source_idx=(1, 2, 3))
@@ -353,7 +352,8 @@ class EventDetectionConstructor(TestCase):
         ts = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
         _, region = self._create_table_and_region()
         eS = ElectricalSeries(name='test_eS', data=data, electrodes=region, timestamps=ts)
-        # Test with 3D array - should fail
+
+        # test with 3D array - should raise ValueError
         invalid_source_idx = np.array([[[1, 0], [2, 1]], [[3, 0], [4, 1]]])
         
         msg = (f"EventDetection source_idx: source_idx must be 1D or 2D array, "

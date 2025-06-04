@@ -225,7 +225,8 @@ class EventDetection(NWBDataInterface):
                     '[time_index, channel_index] for each event. Module description should define what is meant '
                     'by time of event (e.g., .25msec before action potential peak, zero-crossing time, etc). '
                     'The index points to each event from the raw data'},
-            {'name': 'times', 'type': ('array_data', 'data'), 'doc': 'Timestamps of events, in Seconds', 'default': None},
+            {'name': 'times', 'type': ('array_data', 'data'), 'doc': 'Timestamps of events, in Seconds', 
+             'default': None},
             {'name': 'name', 'type': str, 'doc': 'the name of this container', 'default': 'EventDetection'},
             allow_positional=AllowPositional.WARNING,)
     def __init__(self, **kwargs):
