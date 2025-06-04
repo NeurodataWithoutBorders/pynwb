@@ -83,14 +83,12 @@ nwb_proc = nwb_in.copy()
 # Now that we have a copy, lets process some data, and add the results as a :py:class:`~pynwb.base.ProcessingModule`
 # to our copy of the file. [#]_
 
-import scipy.signal as sps
-
 mod = nwb_proc.create_processing_module(
     "filtering_module", "a module to store filtering results"
 )
 
 ts1 = nwb_in.acquisition["raw_timeseries"]
-filt_data = sps.correlate(ts1.data, np.ones(128), mode="same") / 128
+filt_data = np.convolve(ts1.data, np.ones(128), mode="same") / 128
 ts2 = TimeSeries(name="filtered_timeseries", data=filt_data, unit="m", timestamps=ts1)
 
 mod.add_container(ts2)
