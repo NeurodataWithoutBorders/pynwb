@@ -263,6 +263,7 @@ html_theme_options = {
 # or fully qualified paths (eg. https://...)
 html_css_files = [
     'css/custom.css',
+    'css/nwb_assistant.css'
 ]
 
 # The name for this set of Sphinx documents.  If None, it defaults to

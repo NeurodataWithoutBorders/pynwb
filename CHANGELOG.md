@@ -24,6 +24,9 @@
 - Fixed caching of the type map when using HDMF 4.1.0. @rly [#2087](https://github.com/NeurodataWithoutBorders/pynwb/pull/2087)
 - Removed use of complex numbers in scratch tutorial because of incompatibilities with HDMF 4.1.0. @stephprince [#2090](https://github.com/NeurodataWithoutBorders/pynwb/pull/2090/) 
 
+### Documentation and tutorial enhancements
+- Added NWB AI assistant to the home page of the documentation. @magland [#2076](https://github.com/NeurodataWithoutBorders/pynwb/pull/2076)
+
 ## PyNWB 3.0.0 (February 26, 2025)
 
 ### Breaking changes
