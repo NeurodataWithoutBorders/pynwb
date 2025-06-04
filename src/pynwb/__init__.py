@@ -10,6 +10,7 @@ from warnings import warn
 from platformdirs import PlatformDirs
 import h5py
 
+import hdmf
 from hdmf.spec import NamespaceCatalog
 from hdmf.utils import docval, getargs, popargs, get_docval
 from hdmf.backends.io import HDMFIO
@@ -72,7 +73,7 @@ def __get_resources() -> dict:
     __schema_dir = 'nwb-schema/core'
 
     # create a cache directory for the core typemap
-    dirs = PlatformDirs(appname="pynwb", version=__version__, ensure_exists=True)
+    dirs = PlatformDirs(appname="pynwb-hdmf", version=f"{__version__}-{hdmf.__version__}", ensure_exists=True)
     cache_dir = dirs.user_cache_path
     cached_core_typemap = cache_dir / 'pynwb_core_typemap.pkl'
 
