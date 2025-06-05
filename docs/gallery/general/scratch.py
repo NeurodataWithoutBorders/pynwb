@@ -83,14 +83,12 @@ nwb_proc = nwb_in.copy()
 # Now that we have a copy, lets process some data, and add the results as a :py:class:`~pynwb.base.ProcessingModule`
 # to our copy of the file. [#]_
 
-import scipy.signal as sps
-
 mod = nwb_proc.create_processing_module(
     "filtering_module", "a module to store filtering results"
 )
 
 ts1 = nwb_in.acquisition["raw_timeseries"]
-filt_data = sps.correlate(ts1.data, np.ones(128), mode="same") / 128
+filt_data = np.convolve(ts1.data, np.ones(128), mode="same") / 128
 ts2 = TimeSeries(name="filtered_timeseries", data=filt_data, unit="m", timestamps=ts1)
 
 mod.add_container(ts2)
@@ -147,12 +145,13 @@ nwb_scratch = nwb_proc_in.copy()
 
 filt_ts = nwb_scratch.processing["filtering_module"]["filtered_timeseries"]
 
-fft = np.fft.fft(filt_ts.data)
+# simple power spectrum without normalization
+ps = np.abs(np.fft.fft(filt_ts.data))**2
 
 nwb_scratch.add_scratch(
-    fft,
-    name="dft_filtered",
-    description="discrete Fourier transform from filtered data",
+    ps,
+    name="power_spectrum",
+    description="power spectrum from filtered data",
 )
 
 
@@ -171,9 +170,9 @@ with NWBHDF5IO("scratch_analysis.nwb", "w", manager=proc_io.manager) as io:
 scratch_io = NWBHDF5IO("scratch_analysis.nwb", "r")
 nwb_scratch_in = scratch_io.read()
 
-fft_in = nwb_scratch_in.scratch["dft_filtered"]
+fft_in = nwb_scratch_in.scratch["power_spectrum"]
 
-fft_in = nwb_scratch_in.get_scratch("dft_filtered")
+fft_in = nwb_scratch_in.get_scratch("power_spectrum")
 
 ####################
 #
