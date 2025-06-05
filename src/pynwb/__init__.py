@@ -88,7 +88,7 @@ def __get_resources() -> dict:
 # a global type map
 global __TYPE_MAP
 
-__ns_catalog = NamespaceCatalog(NWBGroupSpec, NWBDatasetSpec, NWBNamespace)
+__ns_catalog = NamespaceCatalog(NWBGroupSpec, NWBDatasetSpec, NWBNamespace, core_namespaces=[CORE_NAMESPACE])
 
 hdmf_typemap = hdmf.common.get_type_map()
 __TYPE_MAP = TypeMap(__ns_catalog)
