@@ -1,11 +1,12 @@
 import os
 import random
 import string
+import warnings
 from datetime import datetime
 from dateutil.tz import tzlocal
 from tempfile import gettempdir
 
-from hdmf.spec import RefSpec
+from hdmf.spec import RefSpec, NamespaceCatalog
 from hdmf.utils import get_docval, docval, popargs
 from pynwb import get_type_map, TimeSeries, NWBFile, register_class, load_namespaces, get_class
 from pynwb.spec import NWBNamespaceBuilder, NWBGroupSpec, NWBAttributeSpec, NWBDatasetSpec
@@ -143,6 +144,10 @@ class TestCatchDupNS(TestCase):
         self.ext_source2 = '%s_extension2.yaml' % self.prefix
         self.ns_path2 = '%s_namespace2.yaml' % self.prefix
 
+        self.ns_catalog = get_type_map().namespace_catalog
+        self.core_ns = 'core'
+        self.core_ns_version = self.ns_catalog.get_namespace(self.core_ns)['version']
+
     def tearDown(self):
         files = (self.ext_source1,
                  self.ns_path1,
@@ -169,3 +174,48 @@ class TestCatchDupNS(TestCase):
         ns_builder2.export(self.ns_path2, outdir=self.tempdir)
         type_map = get_type_map(extensions=os.path.join(self.tempdir, self.ns_path1))
         type_map.load_namespaces(os.path.join(self.tempdir, self.ns_path2))
+
+    def test_catch_dup_name_core_newer(self):
+        new_ns_version = '100.0.0'
+        ns_builder1 = NWBNamespaceBuilder('Extension for us in my Lab', self.core_ns, version=new_ns_version)
+        ext1 = NWBGroupSpec('A custom ElectricalSeries for my lab',
+                            attributes=[NWBAttributeSpec(name='trode_id', doc='the tetrode id', dtype='int')],
+                            neurodata_type_inc='ElectricalSeries',
+                            neurodata_type_def='TetrodeSeries')
+        ns_builder1.add_spec(self.ext_source1, ext1)
+        ns_builder1.export(self.ns_path1, outdir=self.tempdir)
+
+        # create new catalog and merge the loaded core namespace catalog
+        ns_catalog = NamespaceCatalog()
+        ns_catalog.merge(self.ns_catalog)
+
+        # test loading newer namespace than one already loaded will warn
+        msg = (f'Ignoring the following cached namespace(s) because another version is already loaded:\n'
+               f'{self.core_ns} - cached version: {new_ns_version}, loaded version: {self.core_ns_version}\n'
+               f'Please update to the latest package versions.')
+        with self.assertWarnsWith(UserWarning, msg):
+            ns_catalog.load_namespaces(os.path.join(self.tempdir, self.ns_path1))
+
+    def test_catch_dup_name_core_older(self):
+        new_ns_version = '0.0.0'
+        ns_builder1 = NWBNamespaceBuilder('Extension for us in my Lab', self.core_ns, version=new_ns_version)
+        ext1 = NWBGroupSpec('A custom ElectricalSeries for my lab',
+                            attributes=[NWBAttributeSpec(name='trode_id', doc='the tetrode id', dtype='int')],
+                            neurodata_type_inc='ElectricalSeries',
+                            neurodata_type_def='TetrodeSeries')
+        ns_builder1.add_spec(self.ext_source1, ext1)
+        ns_builder1.export(self.ns_path1, outdir=self.tempdir)
+
+        # create new catalog and merge the loaded core namespace catalog
+        ns_catalog = NamespaceCatalog()
+        ns_catalog.merge(self.ns_catalog)
+
+        # test no warning if loading older namespace than one already loaded
+        msg = (f'Ignoring the following cached namespace(s) because another version is already loaded:\n'
+               f'{self.core_ns} - cached version: {new_ns_version}, loaded version: {self.core_ns_version}\n'
+               f'Please update to the latest package versions.')
+        with warnings.catch_warnings(record=True) as ws:
+            ns_catalog.load_namespaces(os.path.join(self.tempdir, self.ns_path1))
+        for w in ws:
+            self.assertTrue(str(w.message) != msg)
+            warnings.warn(str(w.message), w.category)
