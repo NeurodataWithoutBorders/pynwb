@@ -17,7 +17,8 @@
 - When an external file is detected when initializing an ImageSeries and no format is provided, automatically set format to "external" instead of raising an error. @stephprince [#2060](https://github.com/NeurodataWithoutBorders/pynwb/pull/2060)
 - Added mask_type option to `mock_PlaneSegmentation`. @pauladkisson [#2067](https://github.com/NeurodataWithoutBorders/pynwb/pull/2067)
 - Improved the documentation of the `spike_times` in the Units table methods @h-mayorquin [#2085](https://github.com/NeurodataWithoutBorders/pynwb/pull/2085)
-- Updated minimum HDMF version to 4.1.0. @mavaylon1 @rly [#2063](https://github.com/NeurodataWithoutBorders/pynwb/pull/2063)
+- Removed core namespace warning unless cached version is newer. @stephprince [#2077](https://github.com/NeurodataWithoutBorders/pynwb/pull/2077)
+- Bumped minimum HDMF version to 4.1.0. @stephprince [#2077](https://github.com/NeurodataWithoutBorders/pynwb/pull/2077)
 
 ### Bug fixes
 - Fixed `add_data_interface` functionality that was mistakenly removed in PyNWB 3.0. @stephprince [#2052](https://github.com/NeurodataWithoutBorders/pynwb/pull/2052)
@@ -27,6 +28,10 @@
 - Fixed missing `IndexSeries.indexed_images`. @rly [#2074](https://github.com/NeurodataWithoutBorders/pynwb/pull/2074)
 - Fixed missing `__nwbfields__` and `_fieldsname` for `NWBData` and its subclasses. @rly [#2082](https://github.com/NeurodataWithoutBorders/pynwb/pull/2082)
 - Fixed caching of the type map when using HDMF 4.1.0. @rly [#2087](https://github.com/NeurodataWithoutBorders/pynwb/pull/2087)
+- Removed use of complex numbers in scratch tutorial because of incompatibilities with HDMF 4.1.0. @stephprince [#2090](https://github.com/NeurodataWithoutBorders/pynwb/pull/2090/)
+
+### Documentation and tutorial enhancements
+- Added NWB AI assistant to the home page of the documentation. @magland [#2076](https://github.com/NeurodataWithoutBorders/pynwb/pull/2076)
 
 ## PyNWB 3.0.0 (February 26, 2025)
 
