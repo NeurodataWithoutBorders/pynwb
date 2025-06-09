@@ -7,7 +7,7 @@ import copy as _copy
 import numpy as np
 import pandas as pd
 
-from hdmf.common import DynamicTableRegion, DynamicTable
+from hdmf.common import DynamicTableRegion, DynamicTable, HERD
 from hdmf.container import HERDManager
 from hdmf.utils import docval, getargs, get_docval, popargs, popargs_to_dict, AllowPositional
 
@@ -164,6 +164,12 @@ class NWBFile(MultiContainerInterface, HERDManager):
     """
 
     __clsconf__ = [
+        {
+            'attr': 'resources',
+            'add': 'add_resources',
+            'type': HERD,
+            'get': 'get_resources'
+        },
         {
             'attr': 'acquisition',
             'add': '_add_acquisition_internal',
@@ -361,6 +367,7 @@ class NWBFile(MultiContainerInterface, HERDManager):
             {'name': 'stimulus_notes', 'type': str,
              'doc': 'Notes about stimuli, such as how and where presented.', 'default': None},
             {'name': 'lab', 'type': str, 'doc': 'lab where experiment was performed', 'default': None},
+            {'name': 'resources', 'type': HERD, 'doc': 'The HERD instance for this file.', 'default': None},
             {'name': 'acquisition', 'type': (list, tuple),
              'doc': 'Raw TimeSeries objects belonging to this NWBFile', 'default': None},
             {'name': 'analysis', 'type': (list, tuple),
@@ -390,7 +397,7 @@ class NWBFile(MultiContainerInterface, HERDManager):
              'doc': 'the ElectrodeGroups that belong to this NWBFile', 'default': None},
             {'name': 'ic_electrodes', 'type': (list, tuple),
              'doc': 'DEPRECATED use icephys_electrodes parameter instead. '
-                    'IntracellularElectrodes that belong to this NWBFile', 'default': None},  
+                    'IntracellularElectrodes that belong to this NWBFile', 'default': None},
                     # TODO remove this arg in PyNWB 4.0
             {'name': 'sweep_table', 'type': SweepTable,
              'doc': '[DEPRECATED] Use IntracellularRecordingsTable instead. '
@@ -430,6 +437,7 @@ class NWBFile(MultiContainerInterface, HERDManager):
             'icephys_electrodes',
             'related_publications',
             'timestamps_reference_time',
+            'resources',
             'acquisition',
             'analysis',
             'stimulus',
@@ -804,7 +812,7 @@ class NWBFile(MultiContainerInterface, HERDManager):
         """
         if self.sweep_table is None:
             if self._in_construct_mode:
-                # Construct the SweepTable without triggering errors in construct mode because 
+                # Construct the SweepTable without triggering errors in construct mode because
                 # SweepTable has been deprecated
                 sweep_table = SweepTable.__new__(SweepTable, parent=self, in_construct_mode=True)
                 sweep_table.__init__(name='sweep_table')
