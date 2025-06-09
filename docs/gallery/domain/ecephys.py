@@ -80,7 +80,7 @@ nwbfile = NWBFile(
 # The electrodes table references a required :py:class:`~pynwb.ecephys.ElectrodeGroup`, which is used to represent a
 # group of electrodes. Before creating an :py:class:`~pynwb.ecephys.ElectrodeGroup`, you must define a
 # :py:class:`~pynwb.device.Device` object using the method :py:meth:`.NWBFile.create_device`. The fields
-# ``description``, ``serial_number``, and ``model`` are optional, but recommended. The `~pynwb.device.DeviceModel`
+# ``description``, ``serial_number``, and ``model`` are optional, but recommended. The :py:class:`~pynwb.device.DeviceModel`
 # object stores information about the device model, which can be useful when searching a set of NWB files or a
 # data archive for all files that use a specific device model (e.g., Neuropixels probe).
 device_model = nwbfile.create_device_model(
