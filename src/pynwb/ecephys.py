@@ -220,15 +220,30 @@ class EventDetection(NWBDataInterface):
             {'name': 'source_electricalseries', 'type': ElectricalSeries, 'doc': 'The source electrophysiology data'},
             {'name': 'source_idx', 'type': ('array_data', 'data'),
              'doc': 'Indices (zero-based) into source ElectricalSeries::data array corresponding '
-                    'to time of event. Module description should define what is meant by time of event '
-                    '(e.g., .25msec before action potential peak, zero-crossing time, etc). '
+                    'to time of event or time and channel of event. For 1D arrays, specifies the time '
+                    'index for each event. For 2D arrays with shape (num_events, 2), specifies '
+                    '[time_index, channel_index] for each event. Module description should define what is meant '
+                    'by time of event (e.g., .25msec before action potential peak, zero-crossing time, etc). '
                     'The index points to each event from the raw data'},
-            {'name': 'times', 'type': ('array_data', 'data'), 'doc': 'Timestamps of events, in Seconds'},
+            {'name': 'times', 'type': ('array_data', 'data'), 'doc': 'Timestamps of events, in Seconds', 
+             'default': None},
             {'name': 'name', 'type': str, 'doc': 'the name of this container', 'default': 'EventDetection'},
             allow_positional=AllowPositional.WARNING,)
     def __init__(self, **kwargs):
         args_to_set = popargs_to_dict(('detection_method', 'source_electricalseries', 'source_idx', 'times'), kwargs)
         super().__init__(**kwargs)
+
+        # Validate source_idx shape
+        source_idx = args_to_set['source_idx']
+        source_idx_shape = get_data_shape(source_idx, strict_no_data_load=True)
+        if source_idx_shape is not None:
+            if len(source_idx_shape) == 2 and source_idx_shape[1] != 2:
+                raise ValueError(f"EventDetection source_idx: 2D source_idx must have shape (num_events, 2) "
+                                    f"for [time_index, channel_index], but got shape {source_idx_shape}")
+            elif len(source_idx_shape) > 2:
+                raise ValueError(f"EventDetection source_idx: source_idx must be 1D or 2D array, "
+                                 f"but got {len(source_idx_shape)}D array with shape {source_idx_shape}")
+
         for key, val in args_to_set.items():
             setattr(self, key, val)
         self.unit = 'seconds'  # fixed value
