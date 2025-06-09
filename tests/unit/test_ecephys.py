@@ -290,6 +290,79 @@ class EventDetectionConstructor(TestCase):
         self.assertEqual(eD.times, (0.1, 0.2, 0.3))
         self.assertEqual(eD.unit, 'seconds')
 
+    def test_init_2d_source_idx(self):
+        """Test EventDetection with 2D source_idx containing time and channel indices"""
+        data = np.random.rand(10, 2)  # 10 time points, 2 channels
+        ts = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
+        _, region = self._create_table_and_region()
+        eS = ElectricalSeries(name='test_eS', data=data, electrodes=region, timestamps=ts)
+        
+        # 2D source_idx with shape (num_events, 2) for [time_index, channel_index]
+        source_idx_2d = np.array([[1, 0], [2, 1], [3, 0],])  # 3 events
+        times = (0.1, 0.2, 0.3)
+        
+        eD = EventDetection(detection_method='threshold detection',
+                            source_electricalseries=eS,
+                            source_idx=source_idx_2d,
+                            times=times)
+        
+        self.assertEqual(eD.detection_method, 'threshold detection')
+        self.assertEqual(eD.source_electricalseries, eS)
+        np.testing.assert_array_equal(eD.source_idx, source_idx_2d)
+        self.assertEqual(eD.times, times)
+        self.assertEqual(eD.unit, 'seconds')
+
+    def test_init_optional_times(self):
+        """Test EventDetection with optional times parameter (times=None)"""
+        data = list(range(10))
+        ts = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
+        _, region = self._create_table_and_region()
+        eS = ElectricalSeries(name='test_eS', data=data, electrodes=region, timestamps=ts)
+        
+        eD = EventDetection(detection_method='detection_method',
+                            source_electricalseries=eS,
+                            source_idx=(1, 2, 3))
+        
+        self.assertEqual(eD.detection_method, 'detection_method')
+        self.assertEqual(eD.source_electricalseries, eS)
+        self.assertEqual(eD.source_idx, (1, 2, 3))
+        self.assertIsNone(eD.times)
+
+    def test_invalid_2d_source_idx_shape(self):
+        """Test error handling for invalid 2D source_idx shapes"""
+        data = list(range(10))
+        ts = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
+        _, region = self._create_table_and_region()
+        eS = ElectricalSeries(name='test_eS', data=data, electrodes=region, timestamps=ts)
+        
+        # Test with invalid 2D shape (num_events, 3) - should be (num_events, 2)
+        invalid_source_idx = np.array([[1, 0, 5], [2, 1, 6]])
+        
+        msg = (f"EventDetection source_idx: 2D source_idx must have shape (num_events, 2) "
+               f"for [time_index, channel_index], but got shape {invalid_source_idx.shape}")
+        with self.assertRaisesWith(ValueError, msg):
+            EventDetection(detection_method='detection_method',
+                           source_electricalseries=eS,
+                           source_idx=invalid_source_idx,
+                           times=(0.1, 0.2))
+
+    def test_invalid_3d_source_idx(self):
+        """Test error handling for 3D source_idx arrays"""
+        data = list(range(10))
+        ts = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
+        _, region = self._create_table_and_region()
+        eS = ElectricalSeries(name='test_eS', data=data, electrodes=region, timestamps=ts)
+
+        # test with 3D array - should raise ValueError
+        invalid_source_idx = np.array([[[1, 0], [2, 1]], [[3, 0], [4, 1]]])
+        
+        msg = (f"EventDetection source_idx: source_idx must be 1D or 2D array, "
+               f"but got {len(invalid_source_idx.shape)}D array with shape {invalid_source_idx.shape}")
+        with self.assertRaisesWith(ValueError, msg):
+            EventDetection(detection_method='detection_method',
+                           source_electricalseries=eS,
+                           source_idx=invalid_source_idx,
+                           times=(0.1, 0.2))
 
 class EventWaveformConstructor(TestCase):
 
