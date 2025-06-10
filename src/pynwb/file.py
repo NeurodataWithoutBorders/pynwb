@@ -13,7 +13,7 @@ from hdmf.utils import docval, getargs, get_docval, popargs, popargs_to_dict, Al
 
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries, ProcessingModule
-from .device import Device
+from .device import Device, DeviceModel
 from .epoch import TimeIntervals
 from .ecephys import ElectrodeGroup, ElectrodesTable
 from .icephys import (IntracellularElectrode, SweepTable, PatchClampSeries, IntracellularRecordingsTable,
@@ -209,6 +209,13 @@ class NWBFile(MultiContainerInterface, HERDManager):
             'get': 'get_device'
         },
         {
+            'attr': 'device_models',
+            'add': 'add_device_model',
+            'type': DeviceModel,
+            'create': 'create_device_model',
+            'get': 'get_device_model'
+        },
+        {
             'attr': 'electrode_groups',
             'add': 'add_electrode_group',
             'type': ElectrodeGroup,
@@ -401,6 +408,8 @@ class NWBFile(MultiContainerInterface, HERDManager):
              'doc': 'OptogeneticStimulusSites that belong to this NWBFile', 'default': None},
             {'name': 'devices', 'type': (list, tuple),
              'doc': 'Device objects belonging to this NWBFile', 'default': None},
+            {'name': 'device_models', 'type': (list, tuple),
+             'doc': ' Device models used in this NWBFile', 'default': None},
             {'name': 'subject', 'type': Subject,
              'doc': 'subject metadata', 'default': None},
             {'name': 'scratch', 'type': (list, tuple),
@@ -439,6 +448,7 @@ class NWBFile(MultiContainerInterface, HERDManager):
             'electrodes',
             'electrode_groups',
             'devices',
+            'device_models',
             'imaging_planes',
             'ogen_sites',
             'intervals',

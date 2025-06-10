@@ -114,6 +114,10 @@ class NWBFileMap(ObjectMapper):
         self.unmap(device_spec)
         self.map_spec('devices', device_spec.get_neurodata_type('Device'))
 
+        device_model_spec = general_spec.get_group('devices').get_group('models')
+        self.unmap(device_model_spec)
+        self.map_spec('device_models', device_model_spec.get_neurodata_type('DeviceModel'))
+
         self.map_spec('lab_meta_data', general_spec.get_neurodata_type('LabMetaData'))
 
         proc_spec = self.spec.get_group('processing')
