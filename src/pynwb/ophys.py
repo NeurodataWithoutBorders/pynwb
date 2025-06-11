@@ -331,7 +331,7 @@ class PlaneSegmentation(DynamicTable):
             {'name': 'name', 'type': str, 'doc': 'name of PlaneSegmentation.', 'default': None},
             {'name': 'reference_images', 'type': (ImageSeries, list, dict, tuple), 'default': None,
              'doc': 'One or more image stacks that the masks apply to (can be oneelement stack).'},
-            *get_docval(DynamicTable.__init__, 'id', 'columns', 'colnames'),
+            *get_docval(DynamicTable.__init__, 'id', 'columns', 'colnames', 'target_tables'),
             allow_positional=AllowPositional.WARNING,)
     def __init__(self, **kwargs):
         imaging_plane, reference_images = popargs('imaging_plane', 'reference_images', kwargs)

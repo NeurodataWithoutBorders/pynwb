@@ -165,7 +165,7 @@ class Units(DynamicTable):
     )
 
     @docval({'name': 'name', 'type': str, 'doc': 'Name of this Units interface', 'default': 'Units'},
-            *get_docval(DynamicTable.__init__, 'id', 'columns', 'colnames'),
+            *get_docval(DynamicTable.__init__, 'id', 'columns', 'colnames', 'target_tables'),
             {'name': 'description', 'type': str, 'doc': 'a description of what is in this table', 'default': None},
             {'name': 'electrode_table', 'type': DynamicTable,
              'doc': 'the table that the *electrodes* column indexes', 'default': None},
