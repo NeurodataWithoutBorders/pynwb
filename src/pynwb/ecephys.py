@@ -225,13 +225,20 @@ class EventDetection(NWBDataInterface):
                     '[time_index, channel_index] for each event. Module description should define what is meant '
                     'by time of event (e.g., .25msec before action potential peak, zero-crossing time, etc). '
                     'The index points to each event from the raw data'},
-            {'name': 'times', 'type': ('array_data', 'data'), 'doc': 'Timestamps of events, in Seconds', 
+            {'name': 'times', 'type': ('array_data', 'data'), 'doc': 'DEPRECATED. Timestamps of events, in Seconds', 
              'default': None},
             {'name': 'name', 'type': str, 'doc': 'the name of this container', 'default': 'EventDetection'},
             allow_positional=AllowPositional.WARNING,)
     def __init__(self, **kwargs):
         args_to_set = popargs_to_dict(('detection_method', 'source_electricalseries', 'source_idx', 'times'), kwargs)
         super().__init__(**kwargs)
+
+        if args_to_set['times'] is not None:
+            warnings.warn(
+                "The 'times' argument is deprecated and will be removed in a future version. " \
+                "Use 'source_idx' instead to specify the time of events.",
+                DeprecationWarning,
+            )
 
         # Validate source_idx shape
         source_idx = args_to_set['source_idx']
