@@ -15,6 +15,7 @@
   - Deprecated `Device.model_name`, `Device.model_number`, and `Device.manufacturer` fields in favor of `DeviceModel`. @rly [#2088](https://github.com/NeurodataWithoutBorders/pynwb/pull/2088)
   - Added support for 2D `EventDetection.source_index` to indicate [time_index, channel_index]. @stephprince [#2091](https://github.com/NeurodataWithoutBorders/pynwb/pull/2091)
   - Made `EventDetection.times` optional. @stephprince [#2091](https://github.com/NeurodataWithoutBorders/pynwb/pull/2091)
+  - Deprecated `EventDetection.times`. @stephprince [#2101](https://github.com/NeurodataWithoutBorders/pynwb/pull/2101)
 - Automatically add timezone information to timestamps reference time if no timezone information is specified. @stephprince [#2056](https://github.com/NeurodataWithoutBorders/pynwb/pull/2056)
 - Added option to disable typemap caching and updated type map cache location. @stephprince [#2057](https://github.com/NeurodataWithoutBorders/pynwb/pull/2057)
 - Added dictionary-like operations directly on `ProcessingModule` objects (e.g., `len(processing_module)`). @bendichter [#2020](https://github.com/NeurodataWithoutBorders/pynwb/pull/2020)
