@@ -532,6 +532,42 @@ class PlaneSegmentationConstructor(TestCase):
         )
         self.assertEqual(pS.name, ip.name)
 
+    def test_init_missing_roi_col_with_ids(self):
+        """If no roi column is provided and ids were provided, an error should be raised"""
+        msg = "Must provide at least one of 'image_mask', 'pixel_mask', or 'voxel_mask' columns"
+        with self.assertRaises(ValueError, msg=msg):
+            PlaneSegmentation(
+                description='description',
+                imaging_plane=ip,
+                name='test_name',
+                reference_images=iSS,
+                id=[1, 2, 3],
+            )
+
+    def test_init_missing_roi_col_with_columns(self):
+        """If no roi column is provided and other non-empty columns are provided, an error should be raised"""
+        msg = "Must provide at least one of 'image_mask', 'pixel_mask', or 'voxel_mask' columns"
+        with self.assertRaises(ValueError, msg=msg):
+            PlaneSegmentation(
+                description='description',
+                imaging_plane=ip,
+                name='test_name',
+                reference_images=iSS,
+                columns=[VectorData(name="custom_col", description="custom col", data=[1, 2, 3])],
+                id=[1, 2, 3],
+            )
+
+    def test_init_missing_roi_col_with_empty_columns(self):
+        """If no roi column is provided and other non-empty columns are provided, no error should be raised"""
+        pS = PlaneSegmentation(
+            description='description',
+            imaging_plane=ip,
+            name='test_name',
+            reference_images=iSS,
+            columns=[VectorData(name="custom_col", description="custom col")],
+        )
+        self.assertEqual(len(ps), 0)
+
     def test_add_pixel_mask(self):
         pix_mask = [[1, 2, 1.0], [3, 4, 1.0], [5, 6, 1.0],
                     [7, 8, 2.0], [9, 10, 2.0]]
@@ -596,7 +632,6 @@ class PlaneSegmentationConstructor(TestCase):
         msg = "Must provide at least one of 'image_mask', 'pixel_mask', or 'voxel_mask'"
         with self.assertRaises(ValueError, msg=msg):
             pS.add_roi()
-
 
     def test_conversion_of_2d_pixel_mask_to_image_mask(self):
         pixel_mask = [[0, 0, 1.0], [1, 0, 2.0], [2, 0, 2.0]]
