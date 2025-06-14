@@ -76,8 +76,6 @@ def mock_ImagingPlane(
     )
 
     if nwbfile is not None:
-        if "ophys" not in nwbfile.processing:
-            nwbfile.create_processing_module("ophys", "ophys")
         nwbfile.add_imaging_plane(imaging_plane)
 
     return imaging_plane
