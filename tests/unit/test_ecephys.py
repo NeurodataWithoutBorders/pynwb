@@ -282,12 +282,10 @@ class EventDetectionConstructor(TestCase):
         eS = ElectricalSeries(name='test_eS', data=data, electrodes=region, timestamps=ts)
         eD = EventDetection(detection_method='detection_method',
                             source_electricalseries=eS,
-                            source_idx=(1, 2, 3),
-                            times=(0.1, 0.2, 0.3))
+                            source_idx=(1, 2, 3))
         self.assertEqual(eD.detection_method, 'detection_method')
         self.assertEqual(eD.source_electricalseries, eS)
         self.assertEqual(eD.source_idx, (1, 2, 3))
-        self.assertEqual(eD.times, (0.1, 0.2, 0.3))
         self.assertEqual(eD.unit, 'seconds')
 
     def test_init_2d_source_idx(self):
@@ -299,17 +297,14 @@ class EventDetectionConstructor(TestCase):
         
         # 2D source_idx with shape (num_events, 2) for [time_index, channel_index]
         source_idx_2d = np.array([[1, 0], [2, 1], [3, 0],])  # 3 events
-        times = (0.1, 0.2, 0.3)
         
         eD = EventDetection(detection_method='threshold detection',
                             source_electricalseries=eS,
-                            source_idx=source_idx_2d,
-                            times=times)
+                            source_idx=source_idx_2d)
         
         self.assertEqual(eD.detection_method, 'threshold detection')
         self.assertEqual(eD.source_electricalseries, eS)
         np.testing.assert_array_equal(eD.source_idx, source_idx_2d)
-        self.assertEqual(eD.times, times)
         self.assertEqual(eD.unit, 'seconds')
 
     def test_init_optional_times(self):
@@ -328,6 +323,22 @@ class EventDetectionConstructor(TestCase):
         self.assertEqual(eD.source_idx, (1, 2, 3))
         self.assertIsNone(eD.times)
 
+    def test_times_deprecation_warning(self):
+        """Test that using times parameter raises deprecation warning"""
+        data = list(range(10))
+        ts = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
+        _, region = self._create_table_and_region()
+        eS = ElectricalSeries(name='test_eS', data=data, electrodes=region, timestamps=ts)
+        
+        # Test that deprecation warning is raised when times is provided
+        msg = ("The 'times' argument is deprecated and will be removed in a future version. "
+               "Use 'source_idx' instead to specify the time of events.")
+        with self.assertWarnsWith(DeprecationWarning, msg):
+            EventDetection(detection_method='test_method',
+                           source_electricalseries=eS,
+                           source_idx=(1, 2, 3),
+                           times=(0.1, 0.2, 0.3))
+
     def test_invalid_2d_source_idx_shape(self):
         """Test error handling for invalid 2D source_idx shapes"""
         data = list(range(10))
@@ -343,8 +354,7 @@ class EventDetectionConstructor(TestCase):
         with self.assertRaisesWith(ValueError, msg):
             EventDetection(detection_method='detection_method',
                            source_electricalseries=eS,
-                           source_idx=invalid_source_idx,
-                           times=(0.1, 0.2))
+                           source_idx=invalid_source_idx)
 
     def test_invalid_3d_source_idx(self):
         """Test error handling for 3D source_idx arrays"""
@@ -361,8 +371,7 @@ class EventDetectionConstructor(TestCase):
         with self.assertRaisesWith(ValueError, msg):
             EventDetection(detection_method='detection_method',
                            source_electricalseries=eS,
-                           source_idx=invalid_source_idx,
-                           times=(0.1, 0.2))
+                           source_idx=invalid_source_idx)
 
 class EventWaveformConstructor(TestCase):
 

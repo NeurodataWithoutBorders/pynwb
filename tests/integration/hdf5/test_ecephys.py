@@ -326,7 +326,6 @@ class EventDetectionConstructor(NWBH5IOFlexMixin, TestCase):
             detection_method='detection_method',
             source_electricalseries=eS,
             source_idx=(1, 2, 3),
-            times=(0.1, 0.2, 0.3)
         )
 
         self.nwbfile.add_acquisition(eS)
