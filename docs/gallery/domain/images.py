@@ -310,7 +310,6 @@ idx_series = IndexSeries(
     name="stimuli",
     data=[0, 1, 0, 1],
     indexed_images=images,
-    unit="N/A",
     timestamps=[0.1, 0.2, 0.3, 0.4],
 )
 

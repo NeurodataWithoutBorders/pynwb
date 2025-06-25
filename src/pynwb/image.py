@@ -13,7 +13,7 @@ The following classes are available:
 - :class:`~pynwb.base.Images`: Container for storing a collection of images (imported from :mod:`pynwb.base`)
 - :class:`~pynwb.base.Image`: Base class for image data (imported from :mod:`pynwb.base`)
 
-Note: While the :class:`~pynwb.base.Image` and :class:`~pynwb.base.Images` classes are defined in :mod:`pynwb.base`, 
+Note: While the :class:`~pynwb.base.Image` and :class:`~pynwb.base.Images` classes are defined in :mod:`pynwb.base`,
 they can be imported directly from this module:
 
 .. code-block:: python
@@ -243,6 +243,11 @@ class IndexSeries(TimeSeries):
     # # value used when an ImageSeries is read and missing data
     # DEFAULT_UNIT = 'N/A'
 
+    DEFAULT_RESOLUTION = -1.0
+    DEFAULT_CONVERSION = 1.0
+    DEFAULT_OFFSET = 0.0
+
+
     @docval(
         *get_docval(TimeSeries.__init__, 'name'),  # required
         {
@@ -251,7 +256,15 @@ class IndexSeries(TimeSeries):
             'shape': (None,),  # required
             'doc': 'The data values. Must be 1D, where the first dimension must be time (frame)',
         },
-        *get_docval(TimeSeries.__init__, 'unit'),  # required
+        {
+            'name': 'unit',
+            'type': str,
+            'doc': (
+                'The base unit of measurement (should be SI unit). Setting this to a value other than "N/A" is deprecated as of '
+                'NWB 2.5.0.'
+            ),
+            'default': "N/A",
+        },
         {
             'name': 'indexed_timeseries', 'type': TimeSeries,  # required
             'doc': 'Link to TimeSeries containing images that are indexed.',
@@ -266,8 +279,6 @@ class IndexSeries(TimeSeries):
         },
         *get_docval(
             TimeSeries.__init__,
-            'resolution',
-            'conversion',
             'timestamps',
             'starting_time',
             'rate',
@@ -275,7 +286,6 @@ class IndexSeries(TimeSeries):
             'description',
             'control',
             'control_description',
-            'offset',
         ),
         allow_positional=AllowPositional.WARNING,
     )
@@ -291,21 +301,20 @@ class IndexSeries(TimeSeries):
             self._error_on_new_pass_on_construct("The indexed_timeseries field of IndexSeries is deprecated. "
                                                  "Use the indexed_images field instead.")
         kwargs['unit'] = 'N/A'  # fixed value starting in NWB 2.5
+        # NOTE: attributes "resolution", "conversion", and "offset" from TimeSeries are unused by IndexSeries
+        # and should not be set, so IndexSeries does not allow the user to set them
+        kwargs['resolution'] = None
+        kwargs['conversion'] = None
+        kwargs['offset'] = None
         super().__init__(**kwargs)
         self.indexed_timeseries = indexed_timeseries
         self.indexed_images = indexed_images
-        if kwargs['conversion'] and kwargs['conversion'] != self.DEFAULT_CONVERSION:
-            warnings.warn("The conversion attribute is not used by IndexSeries.")
-        if kwargs['resolution'] and kwargs['resolution'] != self.DEFAULT_RESOLUTION:
-            warnings.warn("The resolution attribute is not used by IndexSeries.")
-        if kwargs['offset'] and kwargs['offset'] != self.DEFAULT_OFFSET:
-            warnings.warn("The offset attribute is not used by IndexSeries.")
 
 
 @register_class('ImageMaskSeries', CORE_NAMESPACE)
 class ImageMaskSeries(ImageSeries):
     '''
-    DEPRECATED as of NWB 2.8.0 and PyNWB 3.0.0. 
+    DEPRECATED as of NWB 2.8.0 and PyNWB 3.0.0.
     An alpha mask that is applied to a presented visual stimulus. The data[] array contains an array
     of mask values that are applied to the displayed image. Mask values are stored as RGBA. Mask
     can vary with time. The timestamps array indicates the starting time of a mask, and that mask
