@@ -243,6 +243,11 @@ class IndexSeries(TimeSeries):
     # # value used when an ImageSeries is read and missing data
     # DEFAULT_UNIT = 'N/A'
 
+    DEFAULT_RESOLUTION = -1.0
+    DEFAULT_CONVERSION = 1.0
+    DEFAULT_OFFSET = 0.0
+
+
     @docval(
         *get_docval(TimeSeries.__init__, 'name'),  # required
         {
@@ -251,7 +256,15 @@ class IndexSeries(TimeSeries):
             'shape': (None,),  # required
             'doc': 'The data values. Must be 1D, where the first dimension must be time (frame)',
         },
-        *get_docval(TimeSeries.__init__, 'unit'),  # required
+        {
+            'name': 'unit',
+            'type': str,
+            'doc': (
+                'The base unit of measurement (should be SI unit). Setting this to a value other than "N/A" is deprecated as of '
+                'NWB 2.5.0.'
+            ),
+            'default': "N/A",
+        },
         {
             'name': 'indexed_timeseries', 'type': TimeSeries,  # required
             'doc': 'Link to TimeSeries containing images that are indexed.',
@@ -266,8 +279,6 @@ class IndexSeries(TimeSeries):
         },
         *get_docval(
             TimeSeries.__init__,
-            'resolution',
-            'conversion',
             'timestamps',
             'starting_time',
             'rate',
@@ -275,11 +286,12 @@ class IndexSeries(TimeSeries):
             'description',
             'control',
             'control_description',
-            'offset',
         ),
         allow_positional=AllowPositional.WARNING,
     )
     def __init__(self, **kwargs):
+        # NOTE: attributes "resolution", "conversion", and "offset" from TimeSeries are unused by IndexSeries
+        # and should not be set, so IndexSeries does not allow the user to set them
         indexed_timeseries, indexed_images = popargs('indexed_timeseries', 'indexed_images', kwargs)
         if kwargs['unit'] and kwargs['unit'] != 'N/A':
             self._error_on_new_pass_on_construct(error_msg=("The 'unit' field of IndexSeries is "
@@ -294,12 +306,6 @@ class IndexSeries(TimeSeries):
         super().__init__(**kwargs)
         self.indexed_timeseries = indexed_timeseries
         self.indexed_images = indexed_images
-        if kwargs['conversion'] and kwargs['conversion'] != self.DEFAULT_CONVERSION:
-            warnings.warn("The conversion attribute is not used by IndexSeries.")
-        if kwargs['resolution'] and kwargs['resolution'] != self.DEFAULT_RESOLUTION:
-            warnings.warn("The resolution attribute is not used by IndexSeries.")
-        if kwargs['offset'] and kwargs['offset'] != self.DEFAULT_OFFSET:
-            warnings.warn("The offset attribute is not used by IndexSeries.")
 
 
 @register_class('ImageMaskSeries', CORE_NAMESPACE)
