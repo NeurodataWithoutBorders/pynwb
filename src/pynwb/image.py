@@ -13,7 +13,7 @@ The following classes are available:
 - :class:`~pynwb.base.Images`: Container for storing a collection of images (imported from :mod:`pynwb.base`)
 - :class:`~pynwb.base.Image`: Base class for image data (imported from :mod:`pynwb.base`)
 
-Note: While the :class:`~pynwb.base.Image` and :class:`~pynwb.base.Images` classes are defined in :mod:`pynwb.base`, 
+Note: While the :class:`~pynwb.base.Image` and :class:`~pynwb.base.Images` classes are defined in :mod:`pynwb.base`,
 they can be imported directly from this module:
 
 .. code-block:: python
@@ -290,8 +290,6 @@ class IndexSeries(TimeSeries):
         allow_positional=AllowPositional.WARNING,
     )
     def __init__(self, **kwargs):
-        # NOTE: attributes "resolution", "conversion", and "offset" from TimeSeries are unused by IndexSeries
-        # and should not be set, so IndexSeries does not allow the user to set them
         indexed_timeseries, indexed_images = popargs('indexed_timeseries', 'indexed_images', kwargs)
         if kwargs['unit'] and kwargs['unit'] != 'N/A':
             self._error_on_new_pass_on_construct(error_msg=("The 'unit' field of IndexSeries is "
@@ -303,6 +301,11 @@ class IndexSeries(TimeSeries):
             self._error_on_new_pass_on_construct("The indexed_timeseries field of IndexSeries is deprecated. "
                                                  "Use the indexed_images field instead.")
         kwargs['unit'] = 'N/A'  # fixed value starting in NWB 2.5
+        # NOTE: attributes "resolution", "conversion", and "offset" from TimeSeries are unused by IndexSeries
+        # and should not be set, so IndexSeries does not allow the user to set them
+        kwargs['resolution'] = None
+        kwargs['conversion'] = None
+        kwargs['offset'] = None
         super().__init__(**kwargs)
         self.indexed_timeseries = indexed_timeseries
         self.indexed_images = indexed_images
@@ -311,7 +314,7 @@ class IndexSeries(TimeSeries):
 @register_class('ImageMaskSeries', CORE_NAMESPACE)
 class ImageMaskSeries(ImageSeries):
     '''
-    DEPRECATED as of NWB 2.8.0 and PyNWB 3.0.0. 
+    DEPRECATED as of NWB 2.8.0 and PyNWB 3.0.0.
     An alpha mask that is applied to a presented visual stimulus. The data[] array contains an array
     of mask values that are applied to the displayed image. Mask values are stored as RGBA. Mask
     can vary with time. The timestamps array indicates the starting time of a mask, and that mask
