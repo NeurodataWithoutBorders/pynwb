@@ -26,11 +26,6 @@ class VoltageClampSeriesMap(TimeSeriesMap):
 
 @register_map(IntracellularRecordingsTable)
 class IntracellularRecordingsTableMap(AlignedDynamicTableMap):
-    """
-    Customize the mapping for AlignedDynamicTable
-    """
-    def __init__(self, spec):
-        super().__init__(spec)
 
     @DynamicTableMap.object_attr('electrodes')
     def electrodes(self, container, manager):

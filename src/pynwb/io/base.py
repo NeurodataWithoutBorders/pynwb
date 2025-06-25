@@ -2,7 +2,7 @@ from hdmf.build import LinkBuilder
 
 from .core import NWBContainerMapper
 from .. import register_map
-from ..base import TimeSeries, ProcessingModule
+from ..base import TimeSeries, ProcessingModule, Images
 
 
 @register_map(ProcessingModule)
@@ -125,3 +125,13 @@ class TimeSeriesMap(NWBContainerMapper):
         if unit_value is None:
             return timeseries_cls.DEFAULT_UNIT
         return unit_value
+
+
+@register_map(Images)
+class ImagesMap(NWBContainerMapper):
+
+    def __init__(self, spec):
+        super().__init__(spec)
+
+        # Map the images attribute to the BaseImage neurodata type
+        self.map_spec('images', spec.get_neurodata_type('BaseImage'))
