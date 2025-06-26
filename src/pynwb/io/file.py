@@ -109,6 +109,8 @@ class NWBFileMap(ObjectMapper):
         self.map_spec('source_script_file_name', general_spec.get_dataset('source_script').get_attribute('file_name'))
 
         self.map_spec('subject', general_spec.get_group('subject'))
+        breakpoint()
+        self.map_spec('external_resources', general_spec.get_group('external_resources'))
 
         device_spec = general_spec.get_group('devices')
         self.unmap(device_spec)

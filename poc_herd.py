@@ -26,6 +26,39 @@ nwbfile = NWBFile(
     keywords=["behavior", "exploration", "wanderlust"],  # optional
     related_publications="doi:10.1016/j.neuron.2016.12.011",  # optional
 )
-herd = HERD()
 
+subject = Subject(
+    subject_id="001",
+    age="P90D",
+    description="mouse 5",
+    species="Mus musculus",
+    sex="M",
+)
+
+nwbfile.subject = subject
+
+
+herd = HERD()
+nwbfile.external_resources = herd
+
+nwbfile.external_resources.add_ref(container=nwbfile.subject,
+                          key=nwbfile.subject.species,
+                          entity_id="sadf",
+                          entity_uri='asdf')
+breakpoint()
+io = NWBHDF5IO("basics_tutorial.nwb", mode="w")
+io.write(nwbfile)
+io.close()
+
+
+import h5py
+
+# Open the file
+f= h5py.File('basics_tutorial.nwb', 'r')
+breakpoint()
+
+
+with NWBHDF5IO("basics_tutorial.nwb", "r") as io:
+    read_nwbfile = io.read()
+    read_nwbfile.external_resources
 breakpoint()

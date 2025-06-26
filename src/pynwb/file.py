@@ -8,7 +8,6 @@ import numpy as np
 import pandas as pd
 
 from hdmf.common import DynamicTableRegion, DynamicTable, HERD
-from hdmf.container import HERDManager
 from hdmf.utils import docval, getargs, get_docval, popargs, popargs_to_dict, AllowPositional
 
 from . import register_class, CORE_NAMESPACE
@@ -158,18 +157,12 @@ class Subject(NWBContainer):
 
 
 @register_class('NWBFile', CORE_NAMESPACE)
-class NWBFile(MultiContainerInterface, HERDManager):
+class NWBFile(MultiContainerInterface):
     """
     A representation of an NWB file.
     """
 
     __clsconf__ = [
-        {
-            'attr': 'resources',
-            'add': 'add_resources',
-            'type': HERD,
-            'get': 'get_resources'
-        },
         {
             'attr': 'acquisition',
             'add': '_add_acquisition_internal',
@@ -281,7 +274,8 @@ class NWBFile(MultiContainerInterface, HERDManager):
                      'virus',
                      'stimulus_notes',
                      'lab',
-                     {'name': 'electrodes', 'child': True,  'required_name': 'electrodes'},
+                     {'name': 'external_resources', 'child': True, 'required_name': 'external_resources'},
+                     {'name': 'electrodes', 'child': True, 'required_name': 'electrodes'},
                      {'name': 'epochs', 'child': True, 'required_name': 'epochs'},
                      {'name': 'trials', 'child': True, 'required_name': 'trials'},
                      {'name': 'units', 'child': True, 'required_name': 'units'},
@@ -367,7 +361,7 @@ class NWBFile(MultiContainerInterface, HERDManager):
             {'name': 'stimulus_notes', 'type': str,
              'doc': 'Notes about stimuli, such as how and where presented.', 'default': None},
             {'name': 'lab', 'type': str, 'doc': 'lab where experiment was performed', 'default': None},
-            {'name': 'resources', 'type': HERD, 'doc': 'The HERD instance for this file.', 'default': None},
+            {'name': 'external_resources', 'type': HERD, 'doc': 'The HERD instance for this file.', 'default': None},
             {'name': 'acquisition', 'type': (list, tuple),
              'doc': 'Raw TimeSeries objects belonging to this NWBFile', 'default': None},
             {'name': 'analysis', 'type': (list, tuple),
@@ -437,7 +431,7 @@ class NWBFile(MultiContainerInterface, HERDManager):
             'icephys_electrodes',
             'related_publications',
             'timestamps_reference_time',
-            'resources',
+            'external_resources',
             'acquisition',
             'analysis',
             'stimulus',
