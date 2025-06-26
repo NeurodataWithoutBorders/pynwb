@@ -7,6 +7,7 @@ import copy as _copy
 import numpy as np
 import pandas as pd
 
+from hdmf.container import HERDManager
 from hdmf.common import DynamicTableRegion, DynamicTable, HERD
 from hdmf.utils import docval, getargs, get_docval, popargs, popargs_to_dict, AllowPositional
 
@@ -157,7 +158,7 @@ class Subject(NWBContainer):
 
 
 @register_class('NWBFile', CORE_NAMESPACE)
-class NWBFile(MultiContainerInterface):
+class NWBFile(MultiContainerInterface, HERDManager):
     """
     A representation of an NWB file.
     """
