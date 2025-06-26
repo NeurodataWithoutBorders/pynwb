@@ -4,7 +4,7 @@ oaklib==0.6.18
 
 # for streaming tests
 fsspec==2024.12.0
-requests==2.32.3
+requests==2.32.4
 aiohttp==3.11.11
 
 # For read_nwb tests
