@@ -432,7 +432,6 @@ class NWBFile(MultiContainerInterface, HERDManager):
             'icephys_electrodes',
             'related_publications',
             'timestamps_reference_time',
-            'external_resources',
             'acquisition',
             'analysis',
             'stimulus',
@@ -476,8 +475,12 @@ class NWBFile(MultiContainerInterface, HERDManager):
             'icephys_experimental_conditions'
         ]
         args_to_set = popargs_to_dict(keys_to_set, kwargs)
+        args_to_set['internal_herd'] = popargs('external_resources', kwargs)
         kwargs['name'] = 'root'
         super().__init__(**kwargs)
+
+        self.reset_herd = False
+        self.external_herd = None
 
         # add timezone to session_start_time if missing
         session_start_time = args_to_set['session_start_time']
@@ -562,6 +565,26 @@ class NWBFile(MultiContainerInterface, HERDManager):
                 for c in n.children:
                     stack.append(c)
         return ret
+
+    def set_resources(self, herd):
+        """
+        This method is to set an external HERD file as the external resources for this file.
+        This will not persist on export. # TODO: This could change in the future with further development.
+        """
+        self.external_herd = herd
+        self.reset_herd =True
+
+    @property
+    def external_resources(self):
+        if self.reset_herd:
+            return self.external_herd
+        else:
+            return self.internal_herd
+
+    @external_resources.setter
+    def external_resources(self, herd):
+        self.internal_herd = herd
+        self.internal_herd.parent = self
 
     @property
     def objects(self):
