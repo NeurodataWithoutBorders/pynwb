@@ -114,6 +114,10 @@ class NWBFileMap(ObjectMapper):
         self.unmap(device_spec)
         self.map_spec('devices', device_spec.get_neurodata_type('Device'))
 
+        device_model_spec = general_spec.get_group('devices').get_group('models')
+        self.unmap(device_model_spec)
+        self.map_spec('device_models', device_model_spec.get_neurodata_type('DeviceModel'))
+
         self.map_spec('lab_meta_data', general_spec.get_neurodata_type('LabMetaData'))
 
         proc_spec = self.spec.get_group('processing')
@@ -180,6 +184,24 @@ class NWBFileMap(ObjectMapper):
             for d in scratch.datasets.values():
                 ret.append(manager.construct(d))
         return tuple(ret) if len(ret) > 0 else None
+
+    @ObjectMapper.constructor_arg('electrodes')
+    def electrodes(self, builder, manager):
+        try:
+            electrodes_builder = builder['general']['extracellular_ephys']['electrodes']
+        except KeyError:
+            # Note: This is here because the ObjectMapper pulls argname from docval and checks to see
+            # if there is an override even if the file doesn't have what is looking for. In this case,
+            # electrodes for NWBFile.
+            electrodes_builder = None
+        if (electrodes_builder is not None and electrodes_builder.attributes['neurodata_type'] != 'ElectrodesTable'):
+            electrodes_builder.attributes['neurodata_type'] = 'ElectrodesTable'
+            electrodes_builder.attributes['namespace'] = 'core'
+            manager.clear_cache()
+            new_container =  manager.construct(electrodes_builder)
+            return new_container
+        else:
+            return None
 
     @ObjectMapper.constructor_arg('session_start_time')
     def dateconversion(self, builder, manager):
