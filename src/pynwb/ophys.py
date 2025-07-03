@@ -69,8 +69,10 @@ class ImagingPlane(NWBContainer):
             {'name': 'optical_channel', 'type': (list, OpticalChannel),  # required
              'doc': 'One of possibly many groups storing channel-specific data.'},
             {'name': 'description', 'type': str, 'doc': 'Description of this ImagingPlane.', 'default': None},
-            {'name': 'device', 'type': Device, 'doc': 'the device that was used to record', 'default': None},  # required
-            {'name': 'excitation_lambda', 'type': float, 'doc': 'Excitation wavelength in nm.',  'default': None},  # required
+            {'name': 'device', 'type': Device, 'doc': 'the device that was used to record', 
+             'default': None},  # required
+            {'name': 'excitation_lambda', 'type': float, 'doc': 'Excitation wavelength in nm.', 
+             'default': None},  # required
             {'name': 'indicator', 'type': str, 'doc': 'Calcium indicator',  'default': None},  # required
             {'name': 'location', 'type': str, 'doc': 'Location of image plane.', 'default': None},  # required
             {'name': 'imaging_rate', 'type': float,
@@ -130,8 +132,8 @@ class ImagingPlane(NWBContainer):
             args_to_set['optical_channel'] = [args_to_set['optical_channel']]
 
         # Note: device, excitation_lambda, indicator, and location are required arguments.
-        # Description was made to be optional in PyNWB 3.1.0, however to avoid breaking API changes, 
-        # the order of the arguments needs to be maintained even though the optional arguments came before the required ones.
+        # Description was made to be optional in PyNWB 3.1.0, however to avoid breaking API changes the order of
+        # the arguments needs to be maintained even though the optional arguments came before the required ones.
         # So in docval these required arguments are displayed as optional when really they are required. 
         # This section can be removed when positional arguments are no longer allowed.
         if args_to_set['device'] is None:

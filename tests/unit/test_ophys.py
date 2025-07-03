@@ -217,7 +217,7 @@ class ImagingPlaneConstructor(TestCase):
         self.assertIsNone(ip.description)
 
         # description is still required to be provided when using positional arguments
-        with warnings.catch_warnings(record=True) as w:  # catch positional argument deprecation warning
+        with warnings.catch_warnings(record=True):  # catch positional argument deprecation warning
             with self.assertRaises(TypeError):
                 ImagingPlane(
                     'test_imaging_plane',
