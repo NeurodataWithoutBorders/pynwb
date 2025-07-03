@@ -6,21 +6,12 @@ from hdmf.build import BuildManager
 
 from .. import register_map
 
-from pynwb.file import NWBFile
 from pynwb.core import NWBData, NWBContainer, ScratchData
 from pynwb.misc import Units
 
 
 class NWBBaseTypeMapper(ObjectMapper):
-
-    @staticmethod
-    def get_nwb_file(container):
-        curr = container
-        while curr is not None:
-            if isinstance(curr, NWBFile):
-                return curr
-            curr = container.parent
-
+    pass
 
 @register_map(NWBContainer)
 class NWBContainerMapper(NWBBaseTypeMapper):

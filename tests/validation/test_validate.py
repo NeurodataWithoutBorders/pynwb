@@ -4,7 +4,6 @@ import os
 import sys
 from unittest.mock import patch
 from io import StringIO
-import warnings
 
 from pynwb.testing import TestCase
 from pynwb import validate, NWBHDF5IO
@@ -202,13 +201,7 @@ class TestValidateFunction(TestCase):
 
     def get_io(self, path):
         """Get an NWBHDF5IO object for the given path, ignoring the warning about ignoring cached namespaces."""
-        with warnings.catch_warnings():
-            warnings.filterwarnings(
-                "ignore",
-                message=r"Ignoring cached namespace .*",
-                category=UserWarning,
-            )
-            return NWBHDF5IO(str(path), 'r')
+        return NWBHDF5IO(str(path), 'r')
 
     def test_validate_io_no_cache(self):
         """Test that validating a file with no cached spec against the core namespace succeeds."""

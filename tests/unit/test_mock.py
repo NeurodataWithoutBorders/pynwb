@@ -32,7 +32,7 @@ from pynwb.testing.mock.behavior import (
 
 from pynwb.testing.mock.ecephys import (
     mock_ElectrodeGroup,
-    mock_ElectrodeTable,
+    mock_ElectrodesTable,
     mock_ElectricalSeries,
     mock_SpikeEventSeries,
     mock_Units,
@@ -70,7 +70,7 @@ mock_functions = [
     mock_CompassDirection,
     mock_SpatialSeries,
     mock_ElectrodeGroup,
-    mock_ElectrodeTable,
+    mock_ElectrodesTable,
     mock_ElectricalSeries,
     mock_SpikeEventSeries,
     mock_Subject,
@@ -116,9 +116,13 @@ def test_mock_write(mock_function, tmp_path):
 
 
 def test_name_generator():
-
     name_generator_registry.clear()  # reset registry
-
     assert name_generator("TimeSeries") == "TimeSeries"
     assert name_generator("TimeSeries") == "TimeSeries2"
+
+
+@pytest.mark.parametrize("mask_type", ["image_mask", "pixel_mask", "voxel_mask"])
+def test_mock_PlaneSegmentation_mask_type(mask_type):
+    plane_segmentation = mock_PlaneSegmentation(mask_type=mask_type)
+    assert getattr(plane_segmentation, mask_type) is not None
 

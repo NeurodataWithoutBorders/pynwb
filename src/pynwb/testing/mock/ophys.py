@@ -1,4 +1,4 @@
-from typing import Optional, Sequence
+from typing import Optional, Sequence, Literal
 
 import numpy as np
 
@@ -76,8 +76,6 @@ def mock_ImagingPlane(
     )
 
     if nwbfile is not None:
-        if "ophys" not in nwbfile.processing:
-            nwbfile.create_processing_module("ophys", "ophys")
         nwbfile.add_imaging_plane(imaging_plane)
 
     return imaging_plane
@@ -211,8 +209,11 @@ def mock_PlaneSegmentation(
     name: Optional[str] = None,
     reference_images=None,
     n_rois: int = 5,
+    mask_type: Literal["image_mask", "pixel_mask", "voxel_mask"] = "image_mask",
     nwbfile: Optional[NWBFile] = None,
 ) -> PlaneSegmentation:
+    assert mask_type in ["image_mask", "pixel_mask", "voxel_mask"], \
+        f"mask_type must be one of ['image_mask', 'pixel_mask', 'voxel_mask'] but got {mask_type}"
     plane_segmentation = PlaneSegmentation(
         description=description,
         imaging_plane=imaging_plane or mock_ImagingPlane(nwbfile=nwbfile),
@@ -221,7 +222,15 @@ def mock_PlaneSegmentation(
     )
 
     for _ in range(n_rois):
-        plane_segmentation.add_roi(image_mask=np.zeros((10, 10)))
+        if mask_type == "image_mask":
+            image_mask = np.zeros((10, 10))
+            plane_segmentation.add_roi(image_mask=image_mask)
+        elif mask_type == "pixel_mask":
+            pixel_mask = [(x, x, 1.0) for x in range(10)]
+            plane_segmentation.add_roi(pixel_mask=pixel_mask)
+        elif mask_type == "voxel_mask":
+            voxel_mask = [(x, x, x, 1.0) for x in range(10)]
+            plane_segmentation.add_roi(voxel_mask=voxel_mask)
 
     if nwbfile is not None:
         if "ophys" not in nwbfile.processing:

@@ -153,7 +153,7 @@ class Units(DynamicTable):
                       'are associated with this unit, and the electrodes dimension here should be in the same order as'
                       ' the electrodes referenced in the `electrodes` column of this table.')
     __columns__ = (
-        {'name': 'spike_times', 'description': 'the spike times for each unit', 'index': True},
+        {'name': 'spike_times', 'description': 'the spike times for each unit in seconds', 'index': True},
         {'name': 'obs_intervals', 'description': 'the observation intervals for each unit',
          'index': True},
         {'name': 'electrodes', 'description': 'the electrodes that each spike unit came from',
@@ -191,7 +191,7 @@ class Units(DynamicTable):
             self.__has_spike_times = False
         self.__electrode_table = electrode_table
 
-    @docval({'name': 'spike_times', 'type': 'array_data', 'doc': 'the spike times for each unit',
+    @docval({'name': 'spike_times', 'type': 'array_data', 'doc': 'the spike times for each unit in seconds',
              'default': None, 'shape': (None,)},
             {'name': 'obs_intervals', 'type': 'array_data',
              'doc': 'the observation intervals (valid times) for each unit. All spike_times for a given unit ' +
@@ -253,13 +253,43 @@ class Units(DynamicTable):
         index = getargs('index', kwargs)
         return np.asarray(self['obs_intervals'][index])
 
+@register_class('FrequencyBandsTable', CORE_NAMESPACE)
+class FrequencyBandsTable(DynamicTable):
+    """
+    Table for describing the bands that DecompositionSeries was generated from.
+    """
+    __columns__ = (
+        {'name': 'band_name', 'description': 'Name of the band, e.g. theta.', 'required': True},
+        {'name': 'band_limits', 'description': 'Low and high limit of each band in Hz.', 'required': True},
+        {'name': 'band_mean', 'description': 'The mean Gaussian filters, in Hz.', 'required': False},
+        {'name': 'band_stdev', 'description': 'The standard deviation Gaussian filters, in Hz.', 'required': False}
+    )
+
+    @docval(*get_docval(DynamicTable.__init__, 'id', 'columns', 'colnames'))
+    def __init__(self, **kwargs):
+        kwargs['name'] = 'bands'
+        kwargs['description'] = 'Table for describing the bands that DecompositionSeries was generated from.'
+        super().__init__(**kwargs)
+
+    @docval(
+        {'name': 'band_name', 'type': str, 'doc': 'Name of the band, e.g. theta.'},
+        {'name': 'band_limits', 'type': ('array_data', 'data'), 'shape': (2, ),
+            'doc': 'Low and high limit of each band in Hz.'},
+        {'name': 'band_mean', 'type': float, 'doc': 'The mean Gaussian filters, in Hz.',
+            'default': None},
+        {'name': 'band_stdev', 'type': float, 'doc': 'The standard deviation Gaussian filters, in Hz.',
+            'default': None},
+        allow_extra=True
+    )
+    def add_band(self, **kwargs):
+        super().add_row(**kwargs)
+
 
 @register_class('DecompositionSeries', CORE_NAMESPACE)
 class DecompositionSeries(TimeSeries):
     """
     Stores product of spectral analysis
     """
-
     __nwbfields__ = ('metric',
                      {'name': 'source_timeseries', 'child': False, 'doc': 'the input TimeSeries from this analysis'},
                      {'name': 'source_channels', 'child': True, 'doc': 'the channels that provided the source data'},
@@ -278,7 +308,7 @@ class DecompositionSeries(TimeSeries):
             {'name': 'metric', 'type': str,  # required
              'doc': "metric of analysis. recommended - 'phase', 'amplitude', 'power'"},
             {'name': 'unit', 'type': str, 'doc': 'SI unit of measurement', 'default': 'no unit'},
-            {'name': 'bands', 'type': DynamicTable,
+            {'name': 'bands', 'type': FrequencyBandsTable,
              'doc': 'a table for describing the frequency bands that the signal was decomposed into', 'default': None},
             {'name': 'source_timeseries', 'type': TimeSeries,
              'doc': 'the input TimeSeries from this analysis', 'default': None},
@@ -302,39 +332,19 @@ class DecompositionSeries(TimeSeries):
                           "corresponding source_channels. (Optional)")
         self.metric = metric
         if bands is None:
-            bands = DynamicTable(
-                name="bands",
-                description="data about the frequency bands that the signal was decomposed into"
-            )
+            bands = FrequencyBandsTable()
         self.bands = bands
 
-    def __check_column(self, name, desc):
-        if name not in self.bands.colnames:
-            self.bands.add_column(name, desc)
-
-    @docval({'name': 'band_name', 'type': str, 'doc': 'the name of the frequency band',
-             'default': None},
-            {'name': 'band_limits', 'type': ('array_data', 'data'), 'default': None,
-             'doc': 'low and high frequencies of bandpass filter in Hz'},
-            {'name': 'band_mean', 'type': float, 'doc': 'the mean of Gaussian filters in Hz',
-             'default': None},
-            {'name': 'band_stdev', 'type': float, 'doc': 'the standard deviation of Gaussian filters in Hz',
-             'default': None},
-            allow_extra=True)
+    @docval(
+        {'name': 'band_name', 'type': str, 'doc': 'the name of the frequency band'},
+        {'name': 'band_limits', 'type': ('array_data', 'data'),
+         'doc': 'low and high frequencies of bandpass filter in Hz'},
+        {'name': 'band_mean', 'type': float, 'doc': 'the mean of Gaussian filters in Hz',
+         'default': None},
+        {'name': 'band_stdev', 'type': float, 'doc': 'the standard deviation of Gaussian filters in Hz',
+         'default': None},
+        allow_extra=True
+    )
     def add_band(self, **kwargs):
-        """
-        Add ROI data to this
-        """
-        band_name, band_limits, band_mean, band_stdev = getargs('band_name', 'band_limits', 'band_mean', 'band_stdev',
-                                                                kwargs)
-        if band_name is not None:
-            self.__check_column('band_name', "the name of the frequency band (recommended: 'alpha', 'beta', 'gamma', "
-                                             "'delta', 'high gamma'")
-        if band_name is not None:
-            self.__check_column('band_limits', 'low and high frequencies of bandpass filter in Hz')
-        if band_mean is not None:
-            self.__check_column('band_mean', 'the mean of Gaussian filters in Hz')
-        if band_stdev is not None:
-            self.__check_column('band_stdev', 'the standard deviation of Gaussian filters in Hz')
-
-        self.bands.add_row({k: v for k, v in kwargs.items() if v is not None})
+        """Add a frequency band to the bands table of this DecompositionSeries."""
+        self.bands.add_band(**kwargs)

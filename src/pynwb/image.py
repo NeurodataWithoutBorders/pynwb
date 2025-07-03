@@ -1,3 +1,26 @@
+"""
+Module for image data in NWB files.
+
+This module provides classes for storing and manipulating image data in NWB files.
+The following classes are available:
+
+- :class:`~pynwb.image.ImageSeries`: General image data that is common between acquisition and stimulus time series
+- :class:`~pynwb.image.IndexSeries`: Stores indices to image frames stored in an ImageSeries
+- :class:`~pynwb.image.OpticalSeries`: Image data that is presented or recorded
+- :class:`~pynwb.image.GrayscaleImage`: Single-channel (grayscale) image data
+- :class:`~pynwb.image.RGBImage`: Three-channel (RGB) image data
+- :class:`~pynwb.image.RGBAImage`: Four-channel (RGBA) image data with transparency
+- :class:`~pynwb.base.Images`: Container for storing a collection of images (imported from :mod:`pynwb.base`)
+- :class:`~pynwb.base.Image`: Base class for image data (imported from :mod:`pynwb.base`)
+
+Note: While the :class:`~pynwb.base.Image` and :class:`~pynwb.base.Images` classes are defined in :mod:`pynwb.base`, 
+they can be imported directly from this module:
+
+.. code-block:: python
+
+    from pynwb.image import Image, Images
+"""
+
 import warnings
 from collections.abc import Iterable
 
@@ -105,11 +128,7 @@ class ImageSeries(TimeSeries):
         for key, val in args_to_set.items():
             setattr(self, key, val)
 
-        if self._change_external_file_format():
-            self._error_on_new_warn_on_construct(error_msg=f"{self.__class__.__name__} '{self.name}': "
-                                                "The value for 'format' has been changed to 'external'. "
-                                                "If an external file is detected, setting a value for "
-                                                "'format' other than 'external' is deprecated.")
+        self._change_external_file_format()
 
         error_msg = self._check_image_series_dimension()
         if error_msg:
@@ -137,9 +156,6 @@ class ImageSeries(TimeSeries):
             and self.format is None
         ):
             self.format = "external"
-            return True
-
-        return False
 
     def _check_time_series_dimension(self):
         """Override _check_time_series_dimension to do nothing.
@@ -222,7 +238,7 @@ class IndexSeries(TimeSeries):
     array indicates when that image was displayed.
     '''
 
-    __nwbfields__ = ("indexed_timeseries",)
+    __nwbfields__ = ("indexed_timeseries", "indexed_images")
 
     # # value used when an ImageSeries is read and missing data
     # DEFAULT_UNIT = 'N/A'
@@ -315,9 +331,9 @@ class ImageMaskSeries(ImageSeries):
                 "The ImageMaskSeries neurodata type is deprecated. If you are interested in using it, "
                 "please create an issue on https://github.com/NeurodataWithoutBorders/nwb-schema/issues."
             )
-        masked_imageseries = popargs('masked_imageseries', kwargs)
-        super().__init__(**kwargs)
-        self.masked_imageseries = masked_imageseries
+        masked_imageseries = popargs('masked_imageseries', kwargs)  # pragma: no cover
+        super().__init__(**kwargs)  # pragma: no cover
+        self.masked_imageseries = masked_imageseries  # pragma: no cover
 
 
 @register_class('OpticalSeries', CORE_NAMESPACE)

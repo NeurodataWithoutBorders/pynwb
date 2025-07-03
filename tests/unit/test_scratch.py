@@ -62,7 +62,7 @@ class TestScratchData(TestCase):
         data = ScratchData.__new__(ScratchData, in_construct_mode=True)
         with self.assertRaisesWith(ValueError, msg):
             data.__init__(name='test', data=[1, 2, 3, 4, 5], notes='test notes',
-                        description='test description')
+                          description='test description')
 
     def test_add_scratch_int(self):
         ret = self.nwbfile.add_scratch(2, name='test', description='test data')

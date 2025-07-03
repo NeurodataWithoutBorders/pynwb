@@ -24,17 +24,13 @@ __all__ = [
 ]
 
 
-def _not_parent(arg):
-    return arg['name'] != 'parent'
-
-
-def prepend_string(string, prepend='    '):
-    return prepend + prepend.join(string.splitlines(True))
-
-
 class NWBMixin(AbstractContainer):
 
     _data_type_attr = 'neurodata_type'
+
+    _fieldsname = '__nwbfields__'
+
+    __nwbfields__ = tuple()
 
     @docval({'name': 'neurodata_type', 'type': str, 'doc': 'the data_type to search for', 'default': None})
     def get_ancestor(self, **kwargs):
@@ -80,9 +76,7 @@ class NWBMixin(AbstractContainer):
 @register_class('NWBContainer', CORE_NAMESPACE)
 class NWBContainer(NWBMixin, Container):
 
-    _fieldsname = '__nwbfields__'
-
-    __nwbfields__ = tuple()
+    pass
 
 
 @register_class('NWBDataInterface', CORE_NAMESPACE)
@@ -103,9 +97,11 @@ class NWBData(NWBMixin, Data):
 
     @property
     def data(self):
+        """The data managed by this object"""
         return self.__data
 
     def __len__(self):
+        """Size of the data. Same as len(self.data)"""
         return len(self.__data)
 
     def __getitem__(self, args):
@@ -114,6 +110,14 @@ class NWBData(NWBMixin, Data):
         return self.data[args]
 
     def append(self, arg):
+        """
+        Append a single element to the data
+
+        Note: The arg to append should be 1 dimension less than the data.
+        For example, if the data is a 2D array, arg should be a 1D array.
+        Appending to scalar data is not supported. To append multiple
+        elements, use extend.
+        """
         if isinstance(self.data, list):
             self.data.append(arg)
         elif isinstance(self.data, np.ndarray):
@@ -123,6 +127,9 @@ class NWBData(NWBMixin, Data):
             raise ValueError(msg)
 
     def extend(self, arg):
+        """
+        Extend the data with multiple elements.
+        """
         if isinstance(self.data, list):
             self.data.extend(arg)
         elif isinstance(self.data, np.ndarray):
@@ -140,18 +147,18 @@ class ScratchData(NWBData):
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this container'},
             {'name': 'data', 'type': ('scalar_data', 'array_data', 'data', Data), 'doc': 'the source of the data'},
             {'name': 'notes', 'type': str,
-             'doc': 'notes about the data. This argument will be deprecated. Use description instead', 'default': ''},
+             'doc': 'notes about the data. This argument will be deprecated. Use description instead', 'default': None},
             {'name': 'description', 'type': str, 'doc': 'notes about the data', 'default': None},
             allow_positional=AllowPositional.WARNING,)
     def __init__(self, **kwargs):
         notes, description = popargs('notes', 'description', kwargs)
         super().__init__(**kwargs)
-        if notes != '':
+        if notes is not None:
             self._error_on_new_pass_on_construct(
                     error_msg=("The `notes` argument of ScratchData.__init__ has been deprecated and "
                                "will be removed in PyNWB 4.0. Use description instead.")
                     )
-            if description is not None:
+            if notes is not None and description is not None:
                 raise ValueError('Cannot provide both notes and description to ScratchData.__init__. The description '
                                  'argument is recommended.')
             description = notes
@@ -161,12 +168,18 @@ class ScratchData(NWBData):
 
     @property
     def notes(self):
+        """
+        Get the notes attribute. Use of ScratchData.notes has been deprecated and will be removed in PyNWB 4.0.
+        """
         warn(("Use of ScratchData.notes has been deprecated and will be removed in PyNWB 4.0. "
               "Use ScratchData.description instead."), DeprecationWarning)
         return self.description
-    
+
     @notes.setter
     def notes(self, value):
+        """
+        Set the notes attribute. Use of ScratchData.notes has been deprecated and will be removed in PyNWB 4.0.
+        """
         self._error_on_new_pass_on_construct(
                     error_msg=("Use of ScratchData.notes has been deprecated and will be removed in PyNWB 4.0. "
                                "Use ScratchData.description instead."))
