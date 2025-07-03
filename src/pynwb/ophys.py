@@ -69,10 +69,10 @@ class ImagingPlane(NWBContainer):
             {'name': 'optical_channel', 'type': (list, OpticalChannel),  # required
              'doc': 'One of possibly many groups storing channel-specific data.'},
             {'name': 'description', 'type': str, 'doc': 'Description of this ImagingPlane.', 'default': None},
-            {'name': 'device', 'type': Device, 'doc': 'the device that was used to record'},  # required
-            {'name': 'excitation_lambda', 'type': float, 'doc': 'Excitation wavelength in nm.'},  # required
-            {'name': 'indicator', 'type': str, 'doc': 'Calcium indicator'},  # required
-            {'name': 'location', 'type': str, 'doc': 'Location of image plane.'},  # required
+            {'name': 'device', 'type': Device, 'doc': 'the device that was used to record', 'default': None},  # required
+            {'name': 'excitation_lambda', 'type': float, 'doc': 'Excitation wavelength in nm.',  'default': None},  # required
+            {'name': 'indicator', 'type': str, 'doc': 'Calcium indicator',  'default': None},  # required
+            {'name': 'location', 'type': str, 'doc': 'Location of image plane.', 'default': None},  # required
             {'name': 'imaging_rate', 'type': float,
              'doc': 'Rate images are acquired, in Hz. If the corresponding TimeSeries is present, the rate should be '
                     'stored there instead.', 'default': None},
@@ -128,6 +128,21 @@ class ImagingPlane(NWBContainer):
 
         if not isinstance(args_to_set['optical_channel'], list):
             args_to_set['optical_channel'] = [args_to_set['optical_channel']]
+
+        # Note: device, excitation_lambda, indicator, and location are required arguments.
+        # Description was made to be optional in PyNWB 3.1.0, however to avoid breaking API changes, 
+        # the order of the arguments needs to be maintained even though the optional arguments came before the required ones.
+        # So in docval these required arguments are displayed as optional when really they are required. 
+        # This section can be removed when positional arguments are no longer allowed.
+        if args_to_set['device'] is None:
+            raise ValueError("The 'device' argument is required for ImagingPlane.")
+        if args_to_set['excitation_lambda'] is None:
+            raise ValueError("The 'excitation_lambda' argument is required for ImagingPlane.")
+        if args_to_set['indicator'] is None:
+            raise ValueError("The 'indicator' argument is required for ImagingPlane.")
+        if args_to_set['location'] is None:
+            raise ValueError("The 'location' argument is required for ImagingPlane.")
+
         if args_to_set['manifold'] is not None:
             error_msg = "The 'manifold' argument is deprecated in favor of 'origin_coords' and 'grid_spacing'."
             self._error_on_new_pass_on_construct(error_msg=error_msg)

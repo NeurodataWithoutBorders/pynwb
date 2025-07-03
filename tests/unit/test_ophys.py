@@ -197,25 +197,67 @@ class ImagingPlaneConstructor(TestCase):
         obj = ImagingPlane.__new__(ImagingPlane, in_construct_mode=True)
         obj.__init__(**kwargs)
 
-    def test_init_pos_args(self):
-        """Check creation of ImagingPlane with only required dependencies and positional kwargs.
+    def test_init_description_optional(self):
+        """Check creation of ImagingPlane with only required dependencies.
 
         This is to check how creation of an ImagingPlane changes when the "description" argument moves from a
         required arg in the middle of the required args section to an optional arg, in alignment with the schema.
         """
         oc, device = self.set_up_dependencies()
 
+        # description is now optional
         ip = ImagingPlane(
-            'test_imaging_plane',
-            oc,
-            device,
-            600.,
-            'indicator',
-            'location',
-        )
+                name='test_imaging_plane',
+                optical_channel=oc,
+                device=device,
+                excitation_lambda=600.,
+                indicator='indicator',
+                location='location',
+            )
         self.assertIsNone(ip.description)
-        self.assertIs(ip.device, device)
 
+        # description is still required to be provided when using positional arguments
+        with warnings.catch_warnings(record=True) as w:  # catch positional argument deprecation warning
+            with self.assertRaises(TypeError):
+                ImagingPlane(
+                    'test_imaging_plane',
+                    oc,
+                    device,
+                    600.,
+                    'indicator',
+                    'location',
+                )
+    
+    def test_init_missing_required_args(self):
+        """Check that ImagingPlane raises an error if required args are missing."""
+        oc, device = self.set_up_dependencies()
+
+        with self.assertRaisesWith(ValueError, "The 'device' argument is required for ImagingPlane."):
+            ImagingPlane(
+                name='test_imaging_plane',
+                optical_channel=oc,
+            )
+        with self.assertRaisesWith(ValueError, "The 'excitation_lambda' argument is required for ImagingPlane."):
+            ImagingPlane(
+                name='test_imaging_plane',
+                optical_channel=oc,
+                device=device,
+            )
+        with self.assertRaisesWith(ValueError, "The 'indicator' argument is required for ImagingPlane."):
+            ImagingPlane(
+                name='test_imaging_plane',
+                optical_channel=oc,
+                device=device,
+                excitation_lambda=600.,
+            )
+        with self.assertRaisesWith(ValueError, "The 'location' argument is required for ImagingPlane."):
+            ImagingPlane(
+                name='test_imaging_plane',
+                optical_channel=oc,
+                device=device,
+                excitation_lambda=600.,
+                indicator='indicator',
+            )
 
 class OnePhotonSeriesConstructor(TestCase):
 
