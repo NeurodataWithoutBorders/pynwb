@@ -566,13 +566,13 @@ class NWBFile(MultiContainerInterface, HERDManager):
                     stack.append(c)
         return ret
 
-    def set_resources(self, herd):
+    def link_resources(self, herd):
         """
         This method is to set an external HERD file as the external resources for this file.
         This will not persist on export. # TODO: This could change in the future with further development.
         """
         self.external_herd = herd
-        self.reset_herd =True
+        self.reset_herd = True
 
     @property
     def external_resources(self):
@@ -583,6 +583,9 @@ class NWBFile(MultiContainerInterface, HERDManager):
 
     @external_resources.setter
     def external_resources(self, herd):
+        """
+        This is here to set HERD for the file if the user did not do so using __init__.
+        """
         self.internal_herd = herd
         self.internal_herd.parent = self
 
