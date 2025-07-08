@@ -339,6 +339,7 @@ class NWBFile(MultiContainerInterface, HERDManager):
             {'name': 'keywords', 'type': 'array_data', 'doc': 'Terms to search over', 'default': None},
             {'name': 'notes', 'type': str,
              'doc': 'Notes about the experiment.', 'default': None},
+            {'name': 'external_resources', 'child': True, 'required_name': 'external_resources'},
             {'name': 'pharmacology', 'type': str,
              'doc': 'Description of drugs used, including how and when they were administered. '
                     'Anesthesia(s), painkiller(s), etc., plus dosage, concentration, etc.', 'default': None},
@@ -483,8 +484,12 @@ class NWBFile(MultiContainerInterface, HERDManager):
             'icephys_experimental_conditions'
         ]
         args_to_set = popargs_to_dict(keys_to_set, kwargs)
+        args_to_set['internal_herd'] = popargs('external_resources', kwargs)
         kwargs['name'] = 'root'
         super().__init__(**kwargs)
+
+        self.reset_herd = False
+        self.external_herd = None
 
         # add timezone to session_start_time if missing
         session_start_time = args_to_set['session_start_time']
@@ -569,6 +574,29 @@ class NWBFile(MultiContainerInterface, HERDManager):
                 for c in n.children:
                     stack.append(c)
         return ret
+
+    def link_resources(self, herd):
+        """
+        This method is to set an external HERD file as the external resources for this file.
+        This will not persist on export. # TODO: This could change in the future with further development.
+        """
+        self.external_herd = herd
+        self.reset_herd = True
+
+    @property
+    def external_resources(self):
+        if self.reset_herd:
+            return self.external_herd
+        else:
+            return self.internal_herd
+
+    @external_resources.setter
+    def external_resources(self, herd):
+        """
+        This is here to set HERD for the file if the user did not do so using __init__.
+        """
+        self.internal_herd = herd
+        self.internal_herd.parent = self
 
     @property
     def objects(self):
