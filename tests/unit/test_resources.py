@@ -88,7 +88,6 @@ class TestNWBContainer(TestCase):
 
         with NWBHDF5IO(self.path, "r") as io:
             read_nwbfile = io.read()
-            # breakpoint()
             self.assertEqual(
                 read_nwbfile.external_resources.keys[:],
                 np.array(
@@ -159,7 +158,7 @@ class TestNWBContainer(TestCase):
         with NWBHDF5IO(self.path, "w") as io:
             io.write(nwbfile)
 
-        with NWBHDF5IO(self.read_path, mode='r') as read_io:
+        with NWBHDF5IO(self.path, mode='r') as read_io:
             read_nwbfile = read_io.read()
             read_nwbfile.link_resources(HERD())
 
@@ -168,8 +167,45 @@ class TestNWBContainer(TestCase):
             self.assertEqual(read_nwbfile.external_resources.objects.data, [])
 
             with NWBHDF5IO(self.export_path, mode='w') as export_io:
-                export_io.export(src_io=read_io, nwbfile=nwbfile)
+                export_io.export(src_io=read_io, nwbfile=read_nwbfile)
 
             with NWBHDF5IO(self.export_path, mode='r') as read_export_io:
                 read_export_nwbfile = read_export_io.read()
-                self.assertEqual(read_export_nwbfile.external_resources, herd)
+                self.assertEqual(
+                    read_export_nwbfile.external_resources.keys[:],
+                    np.array(
+                        [[(b'Homo sapiens',)]],
+                        dtype=[('key', 'O')]
+                    )
+                )
+
+                self.assertEqual(
+                    read_export_nwbfile.external_resources.entities[:],
+                    np.array(
+                        [
+                            ('NCBI_TAXON:9606',
+                             'https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?mode=Info&id=9606')
+                        ],
+                        dtype=[('entity_id', 'O'), ('entity_uri', 'O')]
+                    )
+                )
+
+                self.assertEqual(
+                    read_export_nwbfile.external_resources.objects[:],
+                    np.array(
+                        [
+                            (0,
+                             subject.object_id,
+                             'Subject',
+                             '',
+                             '')
+                        ],
+                        dtype=[
+                            ('files_idx', '<u4'),
+                            ('object_id', 'O'),
+                            ('object_type', 'O'),
+                            ('relative_path', 'O'),
+                            ('field', 'O')
+                        ]
+                    )
+                )
