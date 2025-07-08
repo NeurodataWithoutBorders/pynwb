@@ -1,5 +1,9 @@
 # PyNWB Changelog
 
+## PyNWB 3.1.0 (Upcoming)
+### Enhancements and minor changes
+- Added HERD to to `general` within the the `NWBFile`. (https://github.com/NeurodataWithoutBorders/pynwb/pull/2111)
+
 ## PyNWB 3.1.0 (July 8, 2025)
 
 ### Breaking changes
