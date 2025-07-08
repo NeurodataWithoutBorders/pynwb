@@ -34,7 +34,8 @@
 - Fixed missing `__nwbfields__` and `_fieldsname` for `NWBData` and its subclasses. @rly [#2082](https://github.com/NeurodataWithoutBorders/pynwb/pull/2082)
 - Fixed caching of the type map when using HDMF 4.1.0. @rly [#2087](https://github.com/NeurodataWithoutBorders/pynwb/pull/2087)
 - Removed use of complex numbers in scratch tutorial because of incompatibilities with HDMF 4.1.0. @stephprince [#2090](https://github.com/NeurodataWithoutBorders/pynwb/pull/2090/)
-
+- Made `ImagingPlane.description` optional to conform with the NWB Schema. @rly [#2051](https://github.com/NeurodataWithoutBorders/pynwb/pull/2051)
+  
 ### Documentation and tutorial enhancements
 - Added NWB AI assistant to the home page of the documentation. @magland [#2076](https://github.com/NeurodataWithoutBorders/pynwb/pull/2076)
 
