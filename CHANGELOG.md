@@ -1,6 +1,6 @@
 # PyNWB Changelog
 
-## Upcoming
+## PyNWB 3.1.0 (July 8, 2025)
 
 ### Breaking changes
 - Removed unused functions `prepend_string` and `_not_parent` in `core.py`, `_not_parent` in `file.py`, and `NWBBaseTypeMapper.get_nwb_file` in `io/core.py` @oruebel [#2036](https://github.com/NeurodataWithoutBorders/pynwb/pull/2036)
