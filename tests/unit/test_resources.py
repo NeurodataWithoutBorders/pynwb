@@ -2,10 +2,9 @@ import warnings
 from datetime import datetime
 from uuid import uuid4
 import os
+import numpy as np
 
 from dateutil import tz
-
-from hdmf import Data
 
 from pynwb.resources import HERD
 from pynwb.file import Subject
@@ -89,11 +88,45 @@ class TestNWBContainer(TestCase):
 
         with NWBHDF5IO(self.path, "r") as io:
             read_nwbfile = io.read()
-            breakpoint()
-            # self.assertEqual(read_nwbfile.external_resources.keys.data, [('Homo sapiens',)])
-            # self.assertEqual(read_nwbfile.external_resources.entities.data, [('NCBI_TAXON:9606',
-            # 'https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?mode=Info&id=9606')])
-            # self.assertEqual(read_nwbfile.external_resources.objects.data, [(0, col1.object_id, 'VectorData', '', '')])
+            # breakpoint()
+            self.assertEqual(
+                read_nwbfile.external_resources.keys[:],
+                np.array(
+                    [[(b'Homo sapiens',)]],
+                    dtype=[('key', 'O')]
+                )
+            )
+
+            self.assertEqual(
+                read_nwbfile.external_resources.entities[:],
+                np.array(
+                    [
+                        ('NCBI_TAXON:9606',
+                         'https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?mode=Info&id=9606')
+                    ],
+                    dtype=[('entity_id', 'O'), ('entity_uri', 'O')]
+                )
+            )
+
+            self.assertEqual(
+                read_nwbfile.external_resources.objects[:],
+                np.array(
+                    [
+                        (0,
+                         subject.object_id,
+                         'Subject',
+                         '',
+                         '')
+                    ],
+                    dtype=[
+                        ('files_idx', '<u4'),
+                        ('object_id', 'O'),
+                        ('object_type', 'O'),
+                        ('relative_path', 'O'),
+                        ('field', 'O')
+                    ]
+                )
+            )
 
     def test_link_resources(self):
         """
