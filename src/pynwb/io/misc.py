@@ -5,19 +5,6 @@ from .. import register_map
 from pynwb.misc import Units, DecompositionSeries
 
 
-@register_map(DecompositionSeries)
-class DecompositionSeriesMap(TimeSeriesMap):
-
-    @TimeSeriesMap.constructor_arg('bands')
-    def bands(self, builder, manager):
-        if builder.groups['bands'].attributes['neurodata_type'] != 'FrequencyBandsTable':
-            builder.groups['bands'].attributes['neurodata_type'] = 'FrequencyBandsTable'
-            builder.groups['bands'].attributes['namespace'] = 'core'
-        manager.clear_cache()
-        new_container =  manager.construct(builder.groups['bands'])
-        return new_container
-
-
 @register_map(Units)
 class UnitsMap(DynamicTableMap):
 
