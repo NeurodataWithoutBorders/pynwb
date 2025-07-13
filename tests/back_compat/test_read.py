@@ -1,5 +1,6 @@
 import numpy as np
 from pathlib import Path
+import tempfile
 import warnings
 
 from pynwb import NWBHDF5IO, validate, TimeSeries
@@ -139,6 +140,25 @@ class TestReadOldVersions(TestCase):
         with self.get_io(f) as io:
             read_nwbfile = io.read()
             assert isinstance(read_nwbfile.electrodes, ElectrodesTable)
+            breakpoint()
+
+            # test that references to the electrodes table are also ElectrodesTable
+            assert read_nwbfile.units.electrodes.table is read_nwbfile.electrodes
+            assert read_nwbfile.acquisition["ElectricalSeries"].electrodes.table is read_nwbfile.electrodes
+
+            # test that export writes the correct builders
+            temp_dir = tempfile.TemporaryDirectory()
+            export_file = Path(temp_dir.name) / "3.0.0_electrodes_dynamic_table_export.nwb"
+            with NWBHDF5IO(export_file, 'w') as export_io:
+                export_io.export(io)
+
+            with self.get_io(export_file) as read_export_io:
+                read_export_nwbfile = read_export_io.read()
+                assert isinstance(read_export_nwbfile.electrodes, ElectrodesTable)
+
+                # test that references to the electrodes table are also ElectrodesTable
+                assert read_export_nwbfile.units.electrodes.table is read_export_nwbfile.electrodes
+                assert read_export_nwbfile.acquisition["ElectricalSeries"].electrodes.table is read_export_nwbfile.electrodes
 
     def test_read_bands_table_as_neurodata_type(self):
         """Test that a "bands" table written as a DynamicTable is read as an FrequencyBandsTable"""
