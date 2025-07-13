@@ -1,8 +1,7 @@
 from hdmf.common.io.table import DynamicTableMap
-from .base import TimeSeriesMap
 
 from .. import register_map
-from pynwb.misc import Units, DecompositionSeries
+from pynwb.misc import Units
 
 
 @register_map(Units)

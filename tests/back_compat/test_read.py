@@ -140,7 +140,6 @@ class TestReadOldVersions(TestCase):
         with self.get_io(f) as io:
             read_nwbfile = io.read()
             assert isinstance(read_nwbfile.electrodes, ElectrodesTable)
-            breakpoint()
 
             # test that references to the electrodes table are also ElectrodesTable
             assert read_nwbfile.units.electrodes.table is read_nwbfile.electrodes
@@ -157,8 +156,10 @@ class TestReadOldVersions(TestCase):
                 assert isinstance(read_export_nwbfile.electrodes, ElectrodesTable)
 
                 # test that references to the electrodes table are also ElectrodesTable
-                assert read_export_nwbfile.units.electrodes.table is read_export_nwbfile.electrodes
-                assert read_export_nwbfile.acquisition["ElectricalSeries"].electrodes.table is read_export_nwbfile.electrodes
+                units_table_ref = read_export_nwbfile.units.electrodes.table
+                assert units_table_ref is read_export_nwbfile.electrodes
+                eseries_table_ref = read_export_nwbfile.acquisition["ElectricalSeries"].electrodes.table
+                assert eseries_table_ref is read_export_nwbfile.electrodes
 
     def test_read_bands_table_as_neurodata_type(self):
         """Test that a "bands" table written as a DynamicTable is read as an FrequencyBandsTable"""
