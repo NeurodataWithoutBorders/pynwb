@@ -4,6 +4,7 @@ import numpy as np
 from h5py import File
 from pathlib import Path
 import tempfile
+import urllib.request
 
 from pynwb import NWBFile, TimeSeries, get_manager, NWBHDF5IO, validate
 
@@ -624,9 +625,11 @@ class TestNWBHDF5IO(TestCase):
     @unittest.skipIf(not HAVE_FSSPEC, "fsspec library not available")
     def test_read_nwb_method_s3_path(self):
         s3_test_path = "https://dandiarchive.s3.amazonaws.com/blobs/11e/c89/11ec8933-1456-4942-922b-94e5878bb991"
-        try:
-            read_nwbfile = NWBHDF5IO.read_nwb(path=s3_test_path)
-            assert read_nwbfile.identifier == "3f77c586-6139-4777-a05d-f603e90b1330"
-            assert read_nwbfile.subject.subject_id == "1"
-        except FileNotFoundError:
-            self.skipTest("Internet access to DANDI failed. Skipping test.")
+        try: 
+	        urllib.request.urlopen(s3_test_path, timeout=1)
+	    except urllib.request.URLError: 
+	        self.skipTest("Internet access to DANDI failed. Skipping streaming tests.")
+
+        read_nwbfile = NWBHDF5IO.read_nwb(path=s3_test_path)
+        assert read_nwbfile.identifier == "3f77c586-6139-4777-a05d-f603e90b1330"
+        assert read_nwbfile.subject.subject_id == "1"
