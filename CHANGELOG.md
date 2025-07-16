@@ -4,6 +4,7 @@
 
 ### Bug fixes
 - Fixed reading and exporting of files written with NWB Schema < 2.9.0 that contained a reference to the electrodes table. @rly [#2112](https://github.com/NeurodataWithoutBorders/pynwb/pull/2112)
+- Skip streaming tests gracefully if offline. @rly [#2113](https://github.com/NeurodataWithoutBorders/pynwb/pull/2113)
 
 
 ## PyNWB 3.1.0 (July 8, 2025)
