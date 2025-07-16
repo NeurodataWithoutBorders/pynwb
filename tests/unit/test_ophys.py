@@ -623,7 +623,7 @@ class PlaneSegmentationConstructor(TestCase):
             )
 
     def test_init_missing_roi_col_with_empty_columns(self):
-        """If no roi column is provided and other non-empty columns are provided, no error should be raised"""
+        """If no roi column is provided and other columns are empty, no error should be raised"""
         iSS, ip = self.set_up_dependencies()
         pS = PlaneSegmentation(
             description='description',
