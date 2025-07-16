@@ -1,5 +1,11 @@
 # PyNWB Changelog
 
+## PyNWB 3.1.1 (July 14, 2025)
+
+### Bug fixes
+
+- Skip streaming tests gracefully if offline. @rly [#2113](https://github.com/NeurodataWithoutBorders/pynwb/pull/2113)
+
 ## PyNWB 3.1.0 (July 8, 2025)
 
 ### Breaking changes
