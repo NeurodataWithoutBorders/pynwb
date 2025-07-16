@@ -2,6 +2,7 @@ from datetime import datetime
 import numpy as np
 from pathlib import Path
 from pynwb import NWBFile, NWBHDF5IO, __version__, TimeSeries, get_class, load_namespaces
+from pynwb.ecephys import ElectricalSeries
 from pynwb.file import Subject
 from pynwb.image import ImageSeries
 from pynwb.misc import DecompositionSeries
@@ -236,6 +237,20 @@ def _make_electrodes_dynamic_table():
                 location="brain area",
                 label=f"shank{i}electrode{j}",
             )
+
+    nwbfile.add_unit(
+        spike_times=[0.1, 0.2, 0.3],
+        electrodes=[0, 1],
+    )
+
+    eseries = ElectricalSeries(
+        name="ElectricalSeries",
+        description="Test electrodes reference",
+        data=[[0.1, 0.2], [0.3, 0.4], [0.5, 0.6]],
+        timestamps=[0.1, 0.2, 0.3],
+        electrodes=nwbfile.create_electrode_table_region(region=[2, 3], description="electrodes table indices 2 and 3"),
+    )
+    nwbfile.add_acquisition(eseries)
 
     test_name = 'electrodes_dynamic_table'
     _write(test_name, nwbfile)

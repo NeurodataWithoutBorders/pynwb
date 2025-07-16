@@ -1,10 +1,11 @@
 # PyNWB Changelog
 
-## PyNWB 3.1.1 (July 14, 2025)
+## PyNWB 3.1.1 (July 16, 2025)
 
 ### Bug fixes
-
+- Fixed reading and exporting of files written with NWB Schema < 2.9.0 that contained a reference to the electrodes table. @rly [#2112](https://github.com/NeurodataWithoutBorders/pynwb/pull/2112)
 - Skip streaming tests gracefully if offline. @rly [#2113](https://github.com/NeurodataWithoutBorders/pynwb/pull/2113)
+
 
 ## PyNWB 3.1.0 (July 8, 2025)
 
@@ -41,7 +42,7 @@
 - Fixed caching of the type map when using HDMF 4.1.0. @rly [#2087](https://github.com/NeurodataWithoutBorders/pynwb/pull/2087)
 - Removed use of complex numbers in scratch tutorial because of incompatibilities with HDMF 4.1.0. @stephprince [#2090](https://github.com/NeurodataWithoutBorders/pynwb/pull/2090/)
 - Made `ImagingPlane.description` optional to conform with the NWB Schema. @rly [#2051](https://github.com/NeurodataWithoutBorders/pynwb/pull/2051)
-  
+
 ### Documentation and tutorial enhancements
 - Added NWB AI assistant to the home page of the documentation. @magland [#2076](https://github.com/NeurodataWithoutBorders/pynwb/pull/2076)
 
