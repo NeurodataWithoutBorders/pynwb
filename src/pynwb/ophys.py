@@ -354,12 +354,24 @@ class PlaneSegmentation(DynamicTable):
         imaging_plane, reference_images = popargs('imaging_plane', 'reference_images', kwargs)
         if kwargs['name'] is None:
             kwargs['name'] = imaging_plane.name
+
+        if kwargs["columns"]:
+            # check for required ROI columns if table is initialized with non-empty columns 
+            if any(len(c) > 0 for c in kwargs["columns"]):
+                for c in kwargs["columns"]:
+                    if c.name in ("image_mask", "pixel_mask", "voxel_mask"):
+                        break
+                else:
+                    raise ValueError("Must provide at least one of 'image_mask', 'pixel_mask', or 'voxel_mask' columns")
+        elif kwargs["id"]:  # there are also no columns
+            raise ValueError("Must provide at least one of 'image_mask', 'pixel_mask', or 'voxel_mask' columns")
+
         super().__init__(**kwargs)
         self.imaging_plane = imaging_plane
         if isinstance(reference_images, ImageSeries):
             reference_images = (reference_images,)
         self.reference_images = reference_images
-
+        
     @docval({'name': 'pixel_mask', 'type': 'array_data', 'default': None,
              'doc': 'pixel mask for 2D ROIs: [(x1, y1, weight1), (x2, y2, weight2), ...]',
              'shape': (None, 3)},
