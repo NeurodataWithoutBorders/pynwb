@@ -7,9 +7,6 @@ from pynwb.misc import Units
 @register_map(Units)
 class UnitsMap(DynamicTableMap):
 
-    def __init__(self, spec):
-        super().__init__(spec)
-
     @DynamicTableMap.constructor_arg('resolution')
     def resolution_carg(self, builder, manager):
         if 'spike_times' in builder:

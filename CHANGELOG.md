@@ -1,12 +1,28 @@
 # PyNWB Changelog
 
-## Upcoming
+## PyNWB 3.1.1 (July 16, 2025)
+
+### Bug fixes
+- Fixed reading and exporting of files written with NWB Schema < 2.9.0 that contained a reference to the electrodes table. @rly [#2112](https://github.com/NeurodataWithoutBorders/pynwb/pull/2112)
+- Skip streaming tests gracefully if offline. @rly [#2113](https://github.com/NeurodataWithoutBorders/pynwb/pull/2113)
+
+
+## PyNWB 3.1.0 (July 8, 2025)
 
 ### Breaking changes
-
 - Removed unused functions `prepend_string` and `_not_parent` in `core.py`, `_not_parent` in `file.py`, and `NWBBaseTypeMapper.get_nwb_file` in `io/core.py` @oruebel [#2036](https://github.com/NeurodataWithoutBorders/pynwb/pull/2036)
 
 ### Enhancements and minor changes
+- Added support for NWB Schema 2.9.0.
+  - Added `BaseImage` and `ExternalImage` as new neurodata types. The first so both `Image` and `ExternalImage` can inherit from it. The second to store external images. @rly [#2079](https://github.com/NeurodataWithoutBorders/pynwb/pull/2079)
+  - Added new `ElectrodesTable` neurodata type. @mavaylon1 [#1890](https://github.com/NeurodataWithoutBorders/pynwb/pull/1890)
+  - Formally defined and renamed `ElectrodeTable` as the `ElectrodesTable` neurodata type. @mavaylon1 [#1890](https://github.com/NeurodataWithoutBorders/pynwb/pull/1890)
+  - Formally defined bands within `DecompositionSeries` as the neurodatatype `FrequencyBandsTable`. @mavaylon1 @rly [#2063](https://github.com/NeurodataWithoutBorders/pynwb/pull/2063)
+  - Added new `DeviceModel` neurodata type to store device model information. @rly [#2088](https://github.com/NeurodataWithoutBorders/pynwb/pull/2088)
+  - Deprecated `Device.model_name`, `Device.model_number`, and `Device.manufacturer` fields in favor of `DeviceModel`. @rly [#2088](https://github.com/NeurodataWithoutBorders/pynwb/pull/2088)
+  - Added support for 2D `EventDetection.source_index` to indicate [time_index, channel_index]. @stephprince [#2091](https://github.com/NeurodataWithoutBorders/pynwb/pull/2091)
+  - Made `EventDetection.times` optional. @stephprince [#2091](https://github.com/NeurodataWithoutBorders/pynwb/pull/2091)
+  - Deprecated `EventDetection.times`. @stephprince [#2101](https://github.com/NeurodataWithoutBorders/pynwb/pull/2101)
 - Automatically add timezone information to timestamps reference time if no timezone information is specified. @stephprince [#2056](https://github.com/NeurodataWithoutBorders/pynwb/pull/2056)
 - Added option to disable typemap caching and updated type map cache location. @stephprince [#2057](https://github.com/NeurodataWithoutBorders/pynwb/pull/2057)
 - Added dictionary-like operations directly on `ProcessingModule` objects (e.g., `len(processing_module)`). @bendichter [#2020](https://github.com/NeurodataWithoutBorders/pynwb/pull/2020)
@@ -24,7 +40,8 @@
 - Fixed missing `IndexSeries.indexed_images`. @rly [#2074](https://github.com/NeurodataWithoutBorders/pynwb/pull/2074)
 - Fixed missing `__nwbfields__` and `_fieldsname` for `NWBData` and its subclasses. @rly [#2082](https://github.com/NeurodataWithoutBorders/pynwb/pull/2082)
 - Fixed caching of the type map when using HDMF 4.1.0. @rly [#2087](https://github.com/NeurodataWithoutBorders/pynwb/pull/2087)
-- Removed use of complex numbers in scratch tutorial because of incompatibilities with HDMF 4.1.0. @stephprince [#2090](https://github.com/NeurodataWithoutBorders/pynwb/pull/2090/) 
+- Removed use of complex numbers in scratch tutorial because of incompatibilities with HDMF 4.1.0. @stephprince [#2090](https://github.com/NeurodataWithoutBorders/pynwb/pull/2090/)
+- Made `ImagingPlane.description` optional to conform with the NWB Schema. @rly [#2051](https://github.com/NeurodataWithoutBorders/pynwb/pull/2051)
 
 ### Documentation and tutorial enhancements
 - Added NWB AI assistant to the home page of the documentation. @magland [#2076](https://github.com/NeurodataWithoutBorders/pynwb/pull/2076)

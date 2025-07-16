@@ -14,6 +14,9 @@ class TimeIntervalsMap(DynamicTableMap):
     def columns_carg(self, builder, manager):
         # handle the case when a TimeIntervals is read with a non-TimeSeriesReferenceVectorData "timeseries" column
         # this is the case for NWB schema v2.4 and earlier, where the timeseries column was a regular VectorData.
+        # NOTE: the below machinery might be movable into the NWBFileMap.construct override which might better
+        # handle the rare edge case where the "timeseries" column is referenced in another field elsewhere in the file.
+
         timeseries_builder = builder.get('timeseries')
 
         # handle the case when the TimeIntervals has a "timeseries" column that is a link (e.g., it exists in
