@@ -1,6 +1,6 @@
 # PyNWB Changelog
 
-## PyNWB 3.1.1 (July 16, 2025)
+## PyNWB 3.1.1 (July 22, 2025)
 
 ### Bug fixes
 - Fixed reading and exporting of files written with NWB Schema < 2.9.0 that contained a reference to the electrodes table. @rly [#2112](https://github.com/NeurodataWithoutBorders/pynwb/pull/2112)
