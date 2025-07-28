@@ -297,7 +297,7 @@ def get_nwbfile_version(**kwargs):
         nwb_version_string = nwb_version_string.decode()
 
     # Parse the version string
-    nwb_version_parts = nwb_version_string.replace("-", ".").replace("_", ".").split(".")
+    nwb_version_parts = nwb_version_string.replace("NWB-", "").replace("-", ".").replace("_", ".").split(".")
     nwb_version = tuple([int(i) if i.isnumeric() else i
                          for i in nwb_version_parts])
     return nwb_version_string, nwb_version

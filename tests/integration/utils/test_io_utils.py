@@ -57,6 +57,13 @@ class TestGetNWBVersion(TestCase):
         assert get_nwb_version(builder1) == (2, 0, 0)
         assert get_nwb_version(builder1, include_prerelease=True) == (2, 0, 0, "b")
 
+    def test_get_nwb_version_NWB_prefix(self):
+        """Get the NWB version from a builder where version == "NWB-2.1.3"."""
+        builder1 = GroupBuilder(name="root")
+        builder1.set_attribute(name="nwb_version", value="NWB-2.1.3")
+        assert get_nwb_version(builder1) == (2, 1, 3)
+        assert get_nwb_version(builder1, include_prerelease=False) == (2, 1, 3)
+
 class TestGetNWBBackend(TestCase):
     def setUp(self):
         self.nwbfile = NWBFile(session_description='a test NWB File',
