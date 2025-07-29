@@ -1,5 +1,10 @@
 # PyNWB Changelog
 
+## Unreleased
+
+- Fixed parsing of the nwb_version attribute which followed the previous suggestion to have  a `NWB-` prefix.
+  @t-b [#2116](https://github.com/NeurodataWithoutBorders/pynwb/pull/2116)
+
 ## PyNWB 3.1.1 (July 22, 2025)
 
 ### Bug fixes
