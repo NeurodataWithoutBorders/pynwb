@@ -356,8 +356,17 @@ def get_class(**kwargs):
 
 @docval({'name': 'path', 'type': str, 'doc': 'Path to the NWB file which can be an HDF5 file or a Zarr store.'},
         {"name": "method", "type": str, "doc": "the method to use when opening the file", 'default': None},
+        returns="an HDMFIO object for the given path (currently NWBHDF5IO or NWBZarrIO)", rtype=HDMFIO,
         is_method=False)
-def _get_backend(path: str, method: str = None):
+def _get_backend(path: str, method: str = None) -> HDMFIO:
+    """Get the appropriate HDMFIO object for the given path.
+
+    If the path is an HDF5 file or method is "ros3", return NWBHDF5IO. If the path is a Zarr store, return NWBZarrIO.
+
+    :param path: Path to the NWB file which can be an HDF5 file or a Zarr store.
+    :param method: The method to use when opening the file. If "ros3", return NWBHDF5IO.
+    :return: An HDMFIO object for the given path (currently NWBHDF5IO or NWBZarrIO).
+    """
     if method == "ros3":
         return NWBHDF5IO  # TODO - add additional conditions for other streaming methods
 
@@ -538,7 +547,7 @@ class NWBHDF5IO(_HDF5IO):
         # Retrieve the filepath
         path = popargs('path', kwargs)
         file = popargs('file', kwargs)
-        
+
         path = str(path) if path is not None else None
 
         # Streaming case
@@ -556,18 +565,18 @@ class NWBHDF5IO(_HDF5IO):
 
         return nwbfile
 
-@docval({'name': 'path', 'type': (str, Path), 
+@docval({'name': 'path', 'type': (str, Path),
          'doc': 'Path to the NWB file. Can be either a local filesystem path to '
-                'an HDF5 (.nwb) or Zarr (.zarr) file.'}, 
+                'an HDF5 (.nwb) or Zarr (.zarr) file.'},
         is_method=False)
 def read_nwb(**kwargs):
     """Read an NWB file from a local path.
 
-    High-level interface for reading NWB files. Automatically handles both HDF5 
-    and Zarr formats. For advanced use cases (parallel I/O, custom namespaces), 
+    High-level interface for reading NWB files. Automatically handles both HDF5
+    and Zarr formats. For advanced use cases (parallel I/O, custom namespaces),
     use NWBHDF5IO or NWBZarrIO.
 
-    See also 
+    See also
         * :py:class:`~pynwb.NWBHDF5IO`: Core I/O class for HDF5 files with advanced options.
         * :py:class:`~hdmf_zarr.nwb.NWBZarrIO`: Core I/O class for Zarr files with advanced options.
 
@@ -585,17 +594,17 @@ def read_nwb(**kwargs):
             * Write or append modes
             * Pre-opened HDF5 file objects or Zarr stores
             * Remote file access configuration
- 
+
     Example usage reading a local NWB file:
 
     .. code-block:: python
 
         from pynwb import read_nwb
-        nwbfile = read_nwb("path/to/file.nwb")    
+        nwbfile = read_nwb("path/to/file.nwb")
 
     :Returns: pynwb.NWBFile The loaded NWB file object.
     """
-    
+
     path = popargs('path', kwargs)
     # HDF5 is always available so we try that first
     backend_is_hdf5 = NWBHDF5IO.can_read(path=path)
@@ -607,18 +616,18 @@ def read_nwb(**kwargs):
             from hdmf_zarr import NWBZarrIO
             backend_is_zarr = NWBZarrIO.can_read(path=path)
             if backend_is_zarr:
-                return NWBZarrIO.read_nwb(path=path) 
+                return NWBZarrIO.read_nwb(path=path)
             else:
                 raise ValueError(
                     f"Unable to read file: '{path}'. The file is not recognized as "
                     "either a valid HDF5 or Zarr NWB file. Please ensure the file exists and contains valid NWB data."
-                )     
+                )
         except ImportError:
             raise ValueError(
                 f"Unable to read file: '{path}'. The file is not recognized as an HDF5 NWB file. "
                 "If you are trying to read a Zarr file, please install hdmf-zarr using: pip install hdmf-zarr"
             )
-    
+
 
 
 from . import io as __io  # noqa: F401,E402
@@ -642,7 +651,7 @@ __all__ = [
     # Functions
     'get_type_map',
     'get_manager',
-    'load_namespaces', 
+    'load_namespaces',
     'available_namespaces',
     'clear_cache_dir',
     'register_class',
@@ -653,11 +662,11 @@ __all__ = [
     'unload_type_config',
     'read_nwb',
     'get_nwbfile_version',
-    
+
     # Classes
     'NWBHDF5IO',
     'NWBContainer',
-    'NWBData', 
+    'NWBData',
     'TimeSeries',
     'ProcessingModule',
     'NWBFile',
