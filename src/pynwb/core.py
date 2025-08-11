@@ -32,6 +32,8 @@ class NWBMixin(AbstractContainer):
 
     __nwbfields__ = tuple()
 
+    __type_map = get_type_map()  # static type map created at module import
+
     @docval({'name': 'neurodata_type', 'type': str, 'doc': 'the data_type to search for', 'default': None})
     def get_ancestor(self, **kwargs):
         """
@@ -61,7 +63,7 @@ class NWBMixin(AbstractContainer):
             raise ValueError(error_msg)
 
     def _get_type_map(self):
-        return get_type_map()
+        return self.__type_map
 
     @property
     def data_type(self):
