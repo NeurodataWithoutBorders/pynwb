@@ -67,7 +67,7 @@ def get_cached_namespaces_to_validate(
         namespace_dependencies = io.load_namespaces_io(namespace_catalog=catalog)
     else:
         from pynwb import _get_backend
-        backend_io_cls = _get_backend(path, method=driver)
+        backend_io_cls = _get_backend(path, **kwargs)
         namespace_dependencies = backend_io_cls.load_namespaces(
             namespace_catalog=catalog,
             path=path,

@@ -355,20 +355,21 @@ def get_class(**kwargs):
 
 
 @docval({'name': 'path', 'type': str, 'doc': 'Path to the NWB file which can be an HDF5 file or a Zarr store.'},
-        {"name": "method", "type": str, "doc": "the method to use when opening the file", 'default': None},
+        allow_extra=True,
         returns="an HDMFIO object for the given path (currently NWBHDF5IO or NWBZarrIO)", rtype=HDMFIO,
         is_method=False)
-def _get_backend(path: str, method: str = None) -> HDMFIO:
+def _get_backend(**kwargs) -> HDMFIO:
     """Get the appropriate HDMFIO object for the given path.
 
-    If the path is an HDF5 file or method is "ros3", return NWBHDF5IO. If the path is a Zarr store, return NWBZarrIO.
+    If the path is an HDF5 file or driver is "ros3", return NWBHDF5IO. If the path is a Zarr store, return NWBZarrIO.
 
     :param path: Path to the NWB file which can be an HDF5 file or a Zarr store.
-    :param method: The method to use when opening the file. If "ros3", return NWBHDF5IO.
+    :param kwargs: Additional keyword arguments specific to a backend
     :return: An HDMFIO object for the given path (currently NWBHDF5IO or NWBZarrIO).
     """
-    if method == "ros3":
-        return NWBHDF5IO  # TODO - add additional conditions for other streaming methods
+    path = kwargs.pop("path")
+    if kwargs.get("driver") == "ros3":
+        return NWBHDF5IO  # TODO - clean this up / add additional conditions for other streaming methods
 
     try:
         from hdmf_zarr import NWBZarrIO
