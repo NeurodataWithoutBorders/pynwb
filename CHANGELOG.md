@@ -1,6 +1,6 @@
 # PyNWB Changelog
 
-## Unreleased
+## PyNWB 3.1.2 (August 13, 2025)
 
 ### Fixed
 - Fixed parsing of the nwb_version attribute which followed the previous suggestion to have a `NWB-` prefix.
