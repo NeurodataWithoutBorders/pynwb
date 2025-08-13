@@ -146,20 +146,20 @@ class TestReadOldVersions(TestCase):
             assert read_nwbfile.acquisition["ElectricalSeries"].electrodes.table is read_nwbfile.electrodes
 
             # test that export writes the correct builders
-            temp_dir = tempfile.TemporaryDirectory()
-            export_file = Path(temp_dir.name) / "3.0.0_electrodes_dynamic_table_export.nwb"
-            with NWBHDF5IO(export_file, 'w') as export_io:
-                export_io.export(io)
+            with tempfile.TemporaryDirectory() as temp_dir:
+                export_file = Path(temp_dir) / "3.0.0_electrodes_dynamic_table_export.nwb"
+                with NWBHDF5IO(export_file, 'w') as export_io:
+                    export_io.export(io)
 
-            with self.get_io(export_file) as read_export_io:
-                read_export_nwbfile = read_export_io.read()
-                assert isinstance(read_export_nwbfile.electrodes, ElectrodesTable)
+                with self.get_io(export_file) as read_export_io:
+                    read_export_nwbfile = read_export_io.read()
+                    assert isinstance(read_export_nwbfile.electrodes, ElectrodesTable)
 
-                # test that references to the electrodes table are also ElectrodesTable
-                units_table_ref = read_export_nwbfile.units.electrodes.table
-                assert units_table_ref is read_export_nwbfile.electrodes
-                eseries_table_ref = read_export_nwbfile.acquisition["ElectricalSeries"].electrodes.table
-                assert eseries_table_ref is read_export_nwbfile.electrodes
+                    # test that references to the electrodes table are also ElectrodesTable
+                    units_table_ref = read_export_nwbfile.units.electrodes.table
+                    assert units_table_ref is read_export_nwbfile.electrodes
+                    eseries_table_ref = read_export_nwbfile.acquisition["ElectricalSeries"].electrodes.table
+                    assert eseries_table_ref is read_export_nwbfile.electrodes
 
     def test_read_bands_table_as_neurodata_type(self):
         """Test that a "bands" table written as a DynamicTable is read as an FrequencyBandsTable"""
