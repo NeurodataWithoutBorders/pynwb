@@ -122,7 +122,7 @@ def get_type_map(**kwargs):
         else:
             type_map = __TYPE_MAP
     else:
-        warn("The 'extensions' argument is deprecated and will be removed in HDMF 5.0", DeprecationWarning)
+        warn("The 'extensions' argument is deprecated and will be removed in PyNWB 4.0", DeprecationWarning)
         if isinstance(extensions, TypeMap):
             type_map = extensions
         else:
