@@ -107,7 +107,7 @@ __resources = __get_resources()
             'If False, a direct reference may be returned (use with caution).',
             'default': True
         },
-        returns="TypeMap loaded for the given extension or NWB core namespace", rtype=tuple,
+        returns="TypeMap loaded for the given extension or NWB core namespace", rtype=TypeMap,
         is_method=False)
 def get_type_map(**kwargs):
     '''
