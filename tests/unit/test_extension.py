@@ -45,11 +45,13 @@ class TestExtension(TestCase):
 
     def test_load_namespace(self):
         self.test_export()
-        get_type_map(extensions=os.path.join(self.tempdir, self.ns_path))
+        type_map = get_type_map()
+        type_map.load_namespaces(os.path.join(self.tempdir, self.ns_path))
 
     def test_get_class(self):
         self.test_export()
-        type_map = get_type_map(extensions=os.path.join(self.tempdir, self.ns_path))
+        type_map = get_type_map()
+        type_map.load_namespaces(os.path.join(self.tempdir, self.ns_path))
         type_map.get_dt_container_cls('TetrodeSeries', self.prefix)
 
     def test_load_namespace_with_reftype_attribute(self):
@@ -62,7 +64,8 @@ class TestExtension(TestCase):
                                      neurodata_type_def='my_new_type')
         ns_builder.add_spec(self.ext_source, test_ds_ext)
         ns_builder.export(self.ns_path, outdir=self.tempdir)
-        get_type_map(extensions=os.path.join(self.tempdir, self.ns_path))
+        type_map = get_type_map()
+        type_map.load_namespaces(os.path.join(self.tempdir, self.ns_path))
 
     def test_load_namespace_with_reftype_attribute_check_autoclass_const(self):
         ns_builder = NWBNamespaceBuilder('Extension for use in my Lab', self.prefix, version='0.1.0')
@@ -74,7 +77,8 @@ class TestExtension(TestCase):
                                      neurodata_type_def='my_new_type')
         ns_builder.add_spec(self.ext_source, test_ds_ext)
         ns_builder.export(self.ns_path, outdir=self.tempdir)
-        type_map = get_type_map(extensions=os.path.join(self.tempdir, self.ns_path))
+        type_map = get_type_map()
+        type_map.load_namespaces(os.path.join(self.tempdir, self.ns_path))
         my_new_type = type_map.get_dt_container_cls('my_new_type', self.prefix)
         docval = None
         for tmp in get_docval(my_new_type.__init__):
@@ -172,7 +176,8 @@ class TestCatchDupNS(TestCase):
                             neurodata_type_def='TetrodeSeries')
         ns_builder2.add_spec(self.ext_source2, ext2)
         ns_builder2.export(self.ns_path2, outdir=self.tempdir)
-        type_map = get_type_map(extensions=os.path.join(self.tempdir, self.ns_path1))
+        type_map = get_type_map()
+        type_map.load_namespaces(os.path.join(self.tempdir, self.ns_path1))
         type_map.load_namespaces(os.path.join(self.tempdir, self.ns_path2))
 
     def test_catch_dup_name_core_newer(self):

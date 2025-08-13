@@ -5,6 +5,17 @@
 ### Fixed
 - Fixed parsing of the nwb_version attribute which followed the previous suggestion to have a `NWB-` prefix.
   @t-b [#2118](https://github.com/NeurodataWithoutBorders/pynwb/pull/2118)
+- Fixed a performance regression introduced in pynwb 2.8.0 that affected reading NWB files with a large
+  number of objects or fields of objects. @rly [#2121](https://github.com/NeurodataWithoutBorders/pynwb/pull/2121)
+- Fixed `load_type_config`, `unload_type_config`, and `get_loaded_type_config` acting on a copy of the global type map
+  instead of the global type map itself. @rly [#2121](https://github.com/NeurodataWithoutBorders/pynwb/pull/2121)
+
+### Changed
+- Added an argument `copy` to `get_type_map` to control whether a copy of the type map is returned or not.
+  If `copy=False`, the returned type map will be a direct reference to the global type map. @rly
+  [#2121](https://github.com/NeurodataWithoutBorders/pynwb/pull/2121)
+- Deprecated calling `get_type_map` with the `extensions` argument. Call `load_namespaces` on the returned `TypeMap`
+  instead. @rly [#2121](https://github.com/NeurodataWithoutBorders/pynwb/pull/2121)
 
 ## PyNWB 3.1.1 (July 22, 2025)
 
