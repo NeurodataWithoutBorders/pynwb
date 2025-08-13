@@ -101,6 +101,12 @@ __resources = __get_resources()
 @docval({'name': 'extensions', 'type': (str, TypeMap, list),
          'doc': 'a path to a namespace, a TypeMap, or a list consisting of paths to namespaces and TypeMaps',
          'default': None},
+        {
+            'name': 'copy', 'type': bool,
+            'doc': 'Whether to return a deepcopy of the TypeMap. '
+            'If False, a direct reference may be returned (use with caution).',
+            'default': True
+        },
         returns="TypeMap loaded for the given extension or NWB core namespace", rtype=tuple,
         is_method=False)
 def get_type_map(**kwargs):
@@ -108,12 +114,15 @@ def get_type_map(**kwargs):
     Get the TypeMap for the given extensions. If no extensions are provided,
     return the TypeMap for the core namespace
     '''
-    extensions = getargs('extensions', kwargs)
+    extensions, copy_map = getargs('extensions', 'copy', kwargs)
     type_map = None
     if extensions is None:
-        type_map = deepcopy(__TYPE_MAP)
+        if copy_map:
+            type_map = deepcopy(__TYPE_MAP)
+        else:
+            type_map = __TYPE_MAP
     else:
-        warnings.warn("The 'extensions' argument is deprecated and will be removed in HDMF 5.0", DeprecationWarning)
+        warn("The 'extensions' argument is deprecated and will be removed in HDMF 5.0", DeprecationWarning)
         if isinstance(extensions, TypeMap):
             type_map = extensions
         else:
