@@ -1,10 +1,9 @@
 from hdmf.utils import docval, getargs
 from .. import get_type_map, NWBContainer
-from copy import deepcopy
 from .map import ObjectMapperLegacy as ObjectMapper
 
 
-__TYPE_MAP = deepcopy(get_type_map())
+__TYPE_MAP = get_type_map()
 
 # Register new ObjectMapper with the new TypeMap:
 __TYPE_MAP.register_map(NWBContainer, ObjectMapper)
