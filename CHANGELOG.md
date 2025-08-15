@@ -1,5 +1,10 @@
 # PyNWB Changelog
 
+## PyNWB 3.1.3 (Unreleased)
+
+### Documentation and tutorial enhancements
+- Change UI if assistant to be an accordion that is always visible. [#2124](https://github.com/NeurodataWithoutBorders/pynwb/pull/2124)
+
 ## PyNWB 3.1.2 (August 13, 2025)
 
 ### Fixed
