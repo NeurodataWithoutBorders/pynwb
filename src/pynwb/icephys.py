@@ -746,17 +746,20 @@ class IntracellularRecordingsTable(AlignedDynamicTable):
         """Convert the collection of tables to a single pandas DataFrame"""
         res = super().to_dataframe(ignore_category_ids=getargs('ignore_category_ids', kwargs))
         if getargs('electrode_refs_as_objectids', kwargs):
-            res[('electrodes', 'electrode')] = [e.object_id for e in res[('electrodes', 'electrode')]]
+            electrode_col = res[('electrodes', 'electrode')].copy()
+            res[('electrodes', 'electrode')] = [e.object_id for e in electrode_col]
         if getargs('stimulus_refs_as_objectids', kwargs):
+            stimulus_col = res[('stimuli', 'stimulus')].copy()
             res[('stimuli', 'stimulus')] = \
                 [e if e[2] is None
                  else TimeSeriesReferenceVectorData.TIME_SERIES_REFERENCE_TUPLE(e[0], e[1],  e[2].object_id)
-                 for e in res[('stimuli', 'stimulus')]]
+                 for e in stimulus_col]
         if getargs('response_refs_as_objectids', kwargs):
+            response_col = res[('responses', 'response')].copy()
             res[('responses', 'response')] = \
                 [e if e[2] is None else
                  TimeSeriesReferenceVectorData.TIME_SERIES_REFERENCE_TUPLE(e[0], e[1],  e[2].object_id)
-                 for e in res[('responses', 'response')]]
+                 for e in response_col]
         return res
 
 
