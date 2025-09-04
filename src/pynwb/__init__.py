@@ -428,7 +428,7 @@ class NWBHDF5IO(_HDF5IO):
         if mode in io_modes_that_create_file or manager is not None or extensions is not None:
             load_namespaces = False
 
-        if mode in io_modes_that_create_file and not str(path).endswith('.nwb'):
+        if mode in io_modes_that_create_file and path is not None and not str(path).endswith('.nwb'):
             warn(f"The file path provided: {path} does not end in '.nwb'. "
                  "It is recommended that NWB files using the HDF5 backend use the '.nwb' extension.", UserWarning)
 
