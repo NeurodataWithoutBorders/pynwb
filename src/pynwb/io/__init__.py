@@ -1,5 +1,6 @@
 from . import base as __base
 from . import core as __core
+from . import device as __device
 from . import file as __file
 from . import behavior as __behavior
 from . import ecephys as __ecephys
