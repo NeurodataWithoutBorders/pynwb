@@ -29,7 +29,8 @@ class DeviceMapper(NWBContainerMapper):
         """
         model_builder = builder.get('model')
         if isinstance(model_builder, str):
-            warn(f'Device.model was detected as a string. Remapping {model_builder} to a DeviceModel')
+            warn(f'Device.model was detected as a string. Remapping {model_builder} to a DeviceModel',
+                 stacklevel=3)
 
             # replace the model string with a DeviceModel object using the model name and device attributes 
             device_model_attributes = dict(name=model_builder,
@@ -56,7 +57,8 @@ class DeviceMapper(NWBContainerMapper):
             # add the conflicting Device.model object as a new attribute on Device
             # e.g. Device.model in the file -> Device.ndx_optogenetics_model in the python object
             warn('Device.model was detected as a non-DeviceModel object. '
-                 f'Adding it as a new attribute at Device.{model.namespace.replace("-", "_")}_model')
+                 f'Adding it as a new attribute at Device.{model.namespace.replace("-", "_")}_model',
+                 stacklevel=2)
             setattr(device_obj, f"{model.namespace.replace('-', '_')}_model", model)
 
         return device_obj
