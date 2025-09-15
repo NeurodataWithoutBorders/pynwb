@@ -206,7 +206,7 @@ class TestReadOldVersions(TestCase):
             self.assertEqual(device.ndx_optogenetics_model.description, 'Lambda fiber (tapered fiber) from Optogenix.')
             self.assertEqual(device.ndx_optogenetics_model.numerical_aperture, 0.39)
 
-    def test_read_device_model_link_to_extension_devce_model(self):
+    def test_read_device_model_link_to_extension_device_model(self):
         """Test that a Device.model written as a link to an extension DeviceModel object is read successfully"""
         f = Path(__file__).parent / '3.0.0_ophys_devices_extension.nwb'
         with self.get_io(f) as io:
