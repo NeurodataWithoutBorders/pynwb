@@ -4,9 +4,10 @@
 
 ### Fixed
 - Fixed incorrect warning for path not ending in `.nwb` when no path argument was provided. @t-b [#2130](https://github.com/NeurodataWithoutBorders/pynwb/pull/2130)
+- Fixed inability to read extensions that had schema conflicts with DeviceModel introduced in NWB Schema 2.9.0. @stephprince [#2132](https://github.com/NeurodataWithoutBorders/pynwb/pull/2132)
 
-### Documentation and tutorial enhancements
-- Change UI of assistant to be an accordion that is always visible. [#2124](https://github.com/NeurodataWithoutBorders/pynwb/pull/2124)
+### Changed
+- Change UI of documentation assistant to be an accordion that is always visible. @bendichter [#2124](https://github.com/NeurodataWithoutBorders/pynwb/pull/2124)
 
 
 ## PyNWB 3.1.2 (August 13, 2025)
