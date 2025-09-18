@@ -13,6 +13,8 @@ Latest Release
 .. image:: https://anaconda.org/conda-forge/pynwb/badges/version.svg
      :target: https://anaconda.org/conda-forge/pynwb
 
+.. image:: https://zenodo.org/badge/99273369.svg
+  :target: https://doi.org/10.5281/zenodo.10582180
 
 Overall Health
 ==============
