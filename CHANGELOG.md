@@ -4,6 +4,7 @@
 
 ### Fixed
 - Fixed incorrect warning for path not ending in `.nwb` when no path argument was provided. @t-b [#2130](https://github.com/NeurodataWithoutBorders/pynwb/pull/2130)
+- Fixed issue with setting `neurodata_type_inc` when reading NWB files with cached schema versions less than 2.2.0. @rly [#2135](https://github.com/NeurodataWithoutBorders/pynwb/pull/2135)
 
 ### Documentation and tutorial enhancements
 - Change UI of assistant to be an accordion that is always visible. [#2124](https://github.com/NeurodataWithoutBorders/pynwb/pull/2124)
