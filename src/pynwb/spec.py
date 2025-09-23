@@ -150,7 +150,8 @@ class NWBDatasetSpec(BaseStorageOverride, DatasetSpec):
     def __init__(self, **kwargs):
         kwargs = self._translate_kwargs(kwargs)
         # set data_type_inc to NWBData only if it is not specified and the type is not an HDMF base type
-        if kwargs['data_type_inc'] is None and kwargs['data_type_def'] not in (None, 'Data'):
+        exclude_set_data_type_inc_types = (None, 'Data', 'NWBData')
+        if kwargs['data_type_inc'] is None and kwargs['data_type_def'] not in exclude_set_data_type_inc_types:
             kwargs['data_type_inc'] = 'NWBData'
         super().__init__(**kwargs)
 
