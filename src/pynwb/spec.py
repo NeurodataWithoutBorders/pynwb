@@ -150,7 +150,8 @@ class NWBDatasetSpec(BaseStorageOverride, DatasetSpec):
     def __init__(self, **kwargs):
         kwargs = self._translate_kwargs(kwargs)
         # set data_type_inc to NWBData only if it is not specified and the type is not an HDMF base type
-        if kwargs['data_type_inc'] is None and kwargs['data_type_def'] not in (None, 'Data'):
+        exclude_set_data_type_inc_types = (None, 'Data', 'NWBData')
+        if kwargs['data_type_inc'] is None and kwargs['data_type_def'] not in exclude_set_data_type_inc_types:
             kwargs['data_type_inc'] = 'NWBData'
         super().__init__(**kwargs)
 
@@ -167,10 +168,13 @@ class NWBGroupSpec(BaseStorageOverride, GroupSpec):
     @docval(*deepcopy(_group_docval))
     def __init__(self, **kwargs):
         kwargs = self._translate_kwargs(kwargs)
-        # set data_type_inc to NWBData only if it is not specified and the type is not an HDMF base type
-        # NOTE: CSRMatrix in hdmf-common-schema does not have a data_type_inc but should not inherit from
-        # NWBContainer. This will be fixed in hdmf-common-schema 1.2.1.
-        if kwargs['data_type_inc'] is None and kwargs['data_type_def'] not in (None, 'Container', 'CSRMatrix'):
+        # set data_type_inc to NWBContainer only if it is not specified or special cases
+        # NOTE: NWBContainer in nwb-schema < 2.2.0 had no neurodata_type_inc, so we need to exclude it here to avoid
+        # setting data_type_inc to NWBContainer for NWBContainer itself
+        # NOTE: CSRMatrix in hdmf-common-schema < 1.2.1 had no data_type_inc, but should not inherit from
+        # NWBContainer.
+        exclude_set_data_type_inc_types = (None, 'Container', 'NWBContainer', 'CSRMatrix')
+        if kwargs['data_type_inc'] is None and kwargs['data_type_def'] not in exclude_set_data_type_inc_types:
             kwargs['data_type_inc'] = 'NWBContainer'
         super().__init__(**kwargs)
 

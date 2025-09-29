@@ -7,11 +7,11 @@ gets mapped appropriately when constructors and methods are invoked
 import json
 
 from pynwb.spec import (
-    NWBNamespaceBuilder, 
-    NWBRefSpec, 
-    NWBLinkSpec, 
+    NWBNamespaceBuilder,
+    NWBRefSpec,
+    NWBLinkSpec,
     NWBDtypeSpec,
-    NWBGroupSpec, 
+    NWBGroupSpec,
     NWBDatasetSpec
 )
 from pynwb.testing import TestCase
@@ -116,3 +116,74 @@ class NWBGroupSpecTest(TestCase):
         self.assertEqual(len(spec.datasets), 1)
         self.assertEqual(spec.datasets[0].name, 'dataset1')
         self.assertIsInstance(spec.datasets[0], NWBDatasetSpec)
+
+    def test_set_neurodata_type_inc(self):
+        # neurodata_type_inc should be set to NWBContainer if not specified and neurodata_type_def is not a base type
+        spec = NWBGroupSpec(
+            doc='A test group',
+            neurodata_type_def='MyCustomType',
+            name='Group1',
+        )
+        self.assertEqual(spec.neurodata_type_inc, 'NWBContainer')
+
+        # neurodata_type_inc should not be set to NWBContainer if neurodata_type_def is a base type
+        spec = NWBGroupSpec(
+            doc='A test group',
+            neurodata_type_def='Container',
+            name='Group1',
+        )
+        self.assertIsNone(spec.neurodata_type_inc)
+
+        # neurodata_type_inc should not be set to NWBContainer if neurodata_type_def is a base type
+        spec = NWBGroupSpec(
+            doc='A test group',
+            neurodata_type_def='NWBContainer',
+            name='Group1',
+        )
+        self.assertIsNone(spec.neurodata_type_inc)
+
+        # neurodata_type_inc should not be set to NWBContainer if it is explicitly specified
+        spec = NWBGroupSpec(
+            doc='A test group',
+            neurodata_type_def='MyCustomType',
+            neurodata_type_inc='SomeOtherType',
+            name='Group1',
+        )
+        self.assertEqual(spec.neurodata_type_inc, 'SomeOtherType')
+
+
+class NWBDatasetSpecTest(TestCase):
+
+    def test_set_neurodata_type_inc(self):
+        # neurodata_type_inc should be set to NWBData if not specified and neurodata_type_def is not a base type
+        spec = NWBDatasetSpec(
+            doc='A test dataset',
+            neurodata_type_def='MyCustomType',
+            name='dataset1',
+        )
+        self.assertEqual(spec.neurodata_type_inc, 'NWBData')
+
+        # neurodata_type_inc should not be set to NWBData if neurodata_type_def is a base type
+        spec = NWBDatasetSpec(
+            doc='A test dataset',
+            neurodata_type_def='Data',
+            name='dataset1',
+        )
+        self.assertIsNone(spec.neurodata_type_inc)
+
+        # neurodata_type_inc should not be set to NWBDataset if neurodata_type_def is a base type
+        spec = NWBDatasetSpec(
+            doc='A test dataset',
+            neurodata_type_def='NWBData',
+            name='dataset1',
+        )
+        self.assertIsNone(spec.neurodata_type_inc)
+
+        # neurodata_type_inc should not be set to NWBData if it is explicitly specified
+        spec = NWBDatasetSpec(
+            doc='A test dataset',
+            neurodata_type_def='MyCustomType',
+            neurodata_type_inc='SomeOtherType',
+            name='dataset1',
+        )
+        self.assertEqual(spec.neurodata_type_inc, 'SomeOtherType')
