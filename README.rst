@@ -43,6 +43,9 @@ Overall Health
 .. image:: https://github.com/NeurodataWithoutBorders/pynwb/actions/workflows/deploy_release.yml/badge.svg
     :target: https://github.com/NeurodataWithoutBorders/pynwb/actions/workflows/deploy_release.yml
 
+.. image:: https://codecov.io/gh/NeurodataWithoutBorders/pynwb/branch/dev/graph/badge.svg
+    :target: https://codecov.io/gh/NeurodataWithoutBorders/pynwb
+
 .. image:: https://readthedocs.org/projects/pynwb/badge/?version=latest
      :target: https://pynwb.readthedocs.io/en/latest/?badge=latest
      :alt: Documentation Status
