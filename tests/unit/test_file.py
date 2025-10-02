@@ -1,6 +1,10 @@
 import numpy as np
 import pandas as pd
 
+import h5py
+import io
+import warnings
+
 from datetime import datetime, timedelta
 from dateutil.tz import tzlocal, tzutc
 from hdmf.common import DynamicTable
@@ -9,9 +13,9 @@ from hdmf.common import VectorData
 from hdmf.utils import docval, get_docval, popargs
 from pynwb import NWBFile, TimeSeries, NWBHDF5IO
 from pynwb.base import Image, Images
-from pynwb.file import Subject, ElectrodeTable, _add_missing_timezone
+from pynwb.file import Subject, _add_missing_timezone
 from pynwb.epoch import TimeIntervals
-from pynwb.ecephys import ElectricalSeries
+from pynwb.ecephys import ElectricalSeries, ElectrodesTable
 from pynwb.testing import TestCase, remove_test_file
 
 
@@ -261,7 +265,7 @@ class NWBFileTest(TestCase):
             self.nwbfile.get_acquisition("TEST_TS")
 
     def test_set_electrode_table(self):
-        table = ElectrodeTable()
+        table = ElectrodesTable()
         dev1 = self.nwbfile.create_device('dev1')
         group = self.nwbfile.create_electrode_group('tetrode1', 'tetrode description', 'tetrode location', dev1)
 
@@ -711,3 +715,12 @@ class TestTimezone(TestCase):
     def test_raise_warning__add_missing_timezone(self):
         with self.assertWarnsWith(UserWarning, "Date is missing timezone information. Updating to local timezone."):
             _add_missing_timezone(datetime(2017, 5, 1, 12))
+
+class TestNoWarningWithoutPath(TestCase):
+    def test_raise_warning(self):
+        with warnings.catch_warnings():
+            warnings.simplefilter("error")
+
+            data = io.BytesIO()
+            h5file = h5py.File(data, "w")
+            NWBHDF5IO(mode = "w", file = h5file)

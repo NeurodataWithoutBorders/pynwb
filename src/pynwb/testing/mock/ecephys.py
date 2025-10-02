@@ -1,12 +1,13 @@
 from typing import Optional
+import warnings
 
 import numpy as np
 
 from hdmf.common.table import DynamicTableRegion, DynamicTable
 
 from ...device import Device
-from ...file import ElectrodeTable, NWBFile
-from ...ecephys import ElectricalSeries, ElectrodeGroup, SpikeEventSeries
+from ...file import NWBFile
+from ...ecephys import ElectricalSeries, ElectrodeGroup, SpikeEventSeries, ElectrodesTable
 from .device import mock_Device
 from .utils import name_generator
 from ...misc import Units
@@ -35,10 +36,10 @@ def mock_ElectrodeGroup(
     return electrode_group
 
 
-def mock_ElectrodeTable(
+def mock_ElectrodesTable(
         n_rows: int = 5, group: Optional[ElectrodeGroup] = None, nwbfile: Optional[NWBFile] = None
-) -> DynamicTable:
-    electrodes_table = ElectrodeTable()
+) -> ElectrodesTable:
+    electrodes_table = ElectrodesTable()
     group = group if group is not None else mock_ElectrodeGroup(nwbfile=nwbfile)
     for i in range(n_rows):
         electrodes_table.add_row(
@@ -53,11 +54,18 @@ def mock_ElectrodeTable(
     return electrodes_table
 
 
+def mock_ElectrodeTable(
+        n_rows: int = 5, group: Optional[ElectrodeGroup] = None, nwbfile: Optional[NWBFile] = None
+) -> ElectrodesTable:
+    warnings.warn("mock_ElectrodeTable() is deprecated. Use mock_ElectrodesTable() instead.", DeprecationWarning)
+    return mock_ElectrodesTable(n_rows=n_rows, group=group, nwbfile=nwbfile)
+
+
 def mock_electrodes(
         n_electrodes: int = 5, table: Optional[DynamicTable] = None, nwbfile: Optional[NWBFile] = None
 ) -> DynamicTableRegion:
 
-    table = table or mock_ElectrodeTable(n_rows=5, nwbfile=nwbfile)
+    table = table or mock_ElectrodesTable(n_rows=5, nwbfile=nwbfile)
     return DynamicTableRegion(
         name="electrodes",
         data=list(range(n_electrodes)),
@@ -80,7 +88,7 @@ def mock_ElectricalSeries(
     conversion: float = 1.0,
     offset: float = 0.,
 ) -> ElectricalSeries:
-    
+
     # Set a default rate if timestamps are not provided
     rate = 30_000.0 if (timestamps is None and rate is None) else rate
     n_electrodes = data.shape[1] if data is not None else 5

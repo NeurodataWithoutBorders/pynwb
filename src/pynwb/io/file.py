@@ -1,6 +1,8 @@
 from dateutil.parser import parse as dateutil_parse
+import typing
 
-from hdmf.build import ObjectMapper
+from hdmf.build import ObjectMapper, Builder, GroupBuilder
+from hdmf.utils import docval, get_docval
 
 from .. import register_map
 from ..file import NWBFile, Subject
@@ -114,6 +116,10 @@ class NWBFileMap(ObjectMapper):
         self.unmap(device_spec)
         self.map_spec('devices', device_spec.get_neurodata_type('Device'))
 
+        device_model_spec = general_spec.get_group('devices').get_group('models')
+        self.unmap(device_model_spec)
+        self.map_spec('device_models', device_model_spec.get_neurodata_type('DeviceModel'))
+
         self.map_spec('lab_meta_data', general_spec.get_neurodata_type('LabMetaData'))
 
         proc_spec = self.spec.get_group('processing')
@@ -125,6 +131,34 @@ class NWBFileMap(ObjectMapper):
         self.map_spec('scratch_datas', scratch_spec.get_neurodata_type('ScratchData'))
         self.map_spec('scratch_containers', scratch_spec.get_neurodata_type('NWBContainer'))
         self.map_spec('scratch_containers', scratch_spec.get_neurodata_type('DynamicTable'))
+
+    @docval(*get_docval(ObjectMapper.construct))
+    def construct(self, **kwargs):
+        nwbfile_builder = kwargs["builder"]
+        electrodes_builder = nwbfile_builder.get("general", dict()).get("extracellular_ephys", dict()).get("electrodes")
+        if (electrodes_builder is not None and electrodes_builder.attributes['neurodata_type'] != 'ElectrodesTable'):
+            electrodes_builder.attributes['neurodata_type'] = 'ElectrodesTable'
+            electrodes_builder.attributes['namespace'] = 'core'
+
+        def apply_to_child_builders(builder: Builder, funcs: list[typing.Callable]):
+            # iterate recursively through each builder (which is just a dict of dicts) and make migration changes
+            for bchild_value in builder.values():
+                if isinstance(bchild_value, Builder):
+                    for func in funcs:
+                        func(bchild_value)
+                    apply_to_child_builders(bchild_value, funcs)
+
+        def update_builder_frequency_bands_table(builder: Builder):
+            if (isinstance(builder, GroupBuilder) and
+                builder.attributes.get('namespace') == 'core' and
+                builder.attributes.get('neurodata_type') == 'DecompositionSeries' and
+                builder.groups['bands'].attributes['neurodata_type'] == 'DynamicTable'):
+                builder.groups['bands'].attributes['neurodata_type'] = 'FrequencyBandsTable'
+                builder.groups['bands'].attributes['namespace'] = 'core'
+
+        apply_to_child_builders(nwbfile_builder, [update_builder_frequency_bands_table])
+
+        return super().construct(**kwargs)
 
     @ObjectMapper.object_attr('scratch_datas')
     def scratch_datas(self, container, manager):

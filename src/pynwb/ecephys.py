@@ -2,7 +2,7 @@ import warnings
 import numpy as np
 from collections.abc import Iterable
 
-from hdmf.common import DynamicTableRegion
+from hdmf.common import DynamicTableRegion, DynamicTable
 from hdmf.data_utils import assertEqualShape
 from hdmf.utils import docval, popargs, get_docval, popargs_to_dict, get_data_shape, AllowPositional
 
@@ -18,7 +18,8 @@ __all__ = [
     'EventDetection',
     'LFP',
     'FilteredEphys',
-    'FeatureExtraction'
+    'FeatureExtraction',
+    'ElectrodesTable',
 ]
 
 
@@ -65,6 +66,42 @@ class ElectrodeGroup(NWBContainer):
 
         for key, val in args_to_set.items():
             setattr(self, key, val)
+
+
+@register_class('ElectrodesTable', CORE_NAMESPACE)
+class ElectrodesTable(DynamicTable):
+    """A table of all electrodes (i.e. channels) used for recording. Introduced in NWB 3.0.0. Replaces the "electrodes"
+    table (neurodata_type_inc DynamicTable, no neurodata_type_def) that is part of NWBFile."""
+
+    __columns__ = (
+        {'name': 'location', 'description': 'Location of the electrode (channel).', 'required': True},
+        {'name': 'group', 'description': 'Reference to the ElectrodeGroup.', 'required': True},
+        {'name': 'group_name', 'description': 'Name of the ElectrodeGroup.', 'required': False},
+        {'name': 'x', 'description': 'x coordinate of the channel location in the brain.', 'required': False},
+        {'name': 'y', 'description': 'y coordinate of the channel location in the brain.', 'required': False},
+        {'name': 'z', 'description': 'z coordinate of the channel location in the brain.', 'required': False},
+        {'name': 'imp', 'description': 'Impedance of the channel, in ohms.', 'required': False},
+        {'name': 'filtering', 'description': 'Description of hardware filtering.', 'required': False},
+        {'name': 'rel_x', 'description': 'x coordinate in electrode group.', 'required': False},
+        {'name': 'rel_y', 'description': 'xy coordinate in electrode group.', 'required': False},
+        {'name': 'rel_z', 'description': 'z coordinate in electrode group.', 'required': False},
+        {'name': 'reference', 'description': ('Description of the reference electrode and/or reference scheme used '
+                                              'for this electrode.'), 'required': False}
+    )
+
+    @docval(*get_docval(DynamicTable.__init__, 'id', 'columns', 'colnames'))
+    def __init__(self, **kwargs):
+        kwargs['name'] = 'electrodes'
+        kwargs['description'] = 'metadata about extracellular electrodes'
+        super().__init__(**kwargs)
+
+    def copy(self):
+        """
+        Return a copy of this ElectrodesTable.
+        This is useful for linking.
+        """
+        kwargs = dict(id=self.id, columns=self.columns, colnames=self.colnames)
+        return self.__class__(**kwargs)
 
 
 @register_class('ElectricalSeries', CORE_NAMESPACE)
@@ -155,12 +192,12 @@ class SpikeEventSeries(ElectricalSeries):
             # case where the data is a AbstractDataChunkIterator
             data_shape = get_data_shape(kwargs['data'], strict_no_data_load=True)
             timestamps_shape = get_data_shape(kwargs['timestamps'], strict_no_data_load=True)
-            if (data_shape is not None and 
-                timestamps_shape is not None and 
-                len(data_shape) > 0 and 
+            if (data_shape is not None and
+                timestamps_shape is not None and
+                len(data_shape) > 0 and
                 len(timestamps_shape) > 0):
-                if (data_shape[0] != timestamps_shape[0] and 
-                    data_shape[0] is not None and 
+                if (data_shape[0] != timestamps_shape[0] and
+                    data_shape[0] is not None and
                     timestamps_shape[0] is not None):
                     raise ValueError('Must provide the same number of timestamps and spike events')
         super().__init__(**kwargs)
@@ -183,15 +220,37 @@ class EventDetection(NWBDataInterface):
             {'name': 'source_electricalseries', 'type': ElectricalSeries, 'doc': 'The source electrophysiology data'},
             {'name': 'source_idx', 'type': ('array_data', 'data'),
              'doc': 'Indices (zero-based) into source ElectricalSeries::data array corresponding '
-                    'to time of event. Module description should define what is meant by time of event '
-                    '(e.g., .25msec before action potential peak, zero-crossing time, etc). '
+                    'to time of event or time and channel of event. For 1D arrays, specifies the time '
+                    'index for each event. For 2D arrays with shape (num_events, 2), specifies '
+                    '[time_index, channel_index] for each event. Module description should define what is meant '
+                    'by time of event (e.g., .25msec before action potential peak, zero-crossing time, etc). '
                     'The index points to each event from the raw data'},
-            {'name': 'times', 'type': ('array_data', 'data'), 'doc': 'Timestamps of events, in Seconds'},
+            {'name': 'times', 'type': ('array_data', 'data'), 'doc': 'DEPRECATED. Timestamps of events, in Seconds', 
+             'default': None},
             {'name': 'name', 'type': str, 'doc': 'the name of this container', 'default': 'EventDetection'},
             allow_positional=AllowPositional.WARNING,)
     def __init__(self, **kwargs):
         args_to_set = popargs_to_dict(('detection_method', 'source_electricalseries', 'source_idx', 'times'), kwargs)
         super().__init__(**kwargs)
+
+        if args_to_set['times'] is not None:
+            warnings.warn(
+                "The 'times' argument is deprecated and will be removed in a future version. " \
+                "Use 'source_idx' instead to specify the time of events.",
+                DeprecationWarning,
+            )
+
+        # Validate source_idx shape
+        source_idx = args_to_set['source_idx']
+        source_idx_shape = get_data_shape(source_idx, strict_no_data_load=True)
+        if source_idx_shape is not None:
+            if len(source_idx_shape) == 2 and source_idx_shape[1] != 2:
+                raise ValueError(f"EventDetection source_idx: 2D source_idx must have shape (num_events, 2) "
+                                    f"for [time_index, channel_index], but got shape {source_idx_shape}")
+            elif len(source_idx_shape) > 2:
+                raise ValueError(f"EventDetection source_idx: source_idx must be 1D or 2D array, "
+                                 f"but got {len(source_idx_shape)}D array with shape {source_idx_shape}")
+
         for key, val in args_to_set.items():
             setattr(self, key, val)
         self.unit = 'seconds'  # fixed value

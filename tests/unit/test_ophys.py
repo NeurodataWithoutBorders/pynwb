@@ -1,6 +1,7 @@
 import warnings
 
 import numpy as np
+from hdmf.common import VectorData
 
 from pynwb.base import TimeSeries, ProcessingModule
 from pynwb.device import Device
@@ -118,6 +119,7 @@ class ImagingPlaneConstructor(TestCase):
             grid_spacing_unit='gs_unit'
         )
         self.assertEqual(ip.optical_channel[0], oc)
+        self.assertEqual(ip.description, 'description')
         self.assertEqual(ip.device, device)
         self.assertEqual(ip.excitation_lambda, 600.)
         self.assertEqual(ip.imaging_rate, 300.)
@@ -141,7 +143,7 @@ class ImagingPlaneConstructor(TestCase):
                 indicator='indicator',
                 location='location',
                 manifold=(1, 1, (2, 2, 2)))
-        
+
         # create object with deprecated argument
         with self.assertRaisesWith(ValueError, msg):
             ImagingPlane(**kwargs)
@@ -196,6 +198,67 @@ class ImagingPlaneConstructor(TestCase):
         obj = ImagingPlane.__new__(ImagingPlane, in_construct_mode=True)
         obj.__init__(**kwargs)
 
+    def test_init_description_optional(self):
+        """Check creation of ImagingPlane with only required dependencies.
+
+        This is to check how creation of an ImagingPlane changes when the "description" argument moves from a
+        required arg in the middle of the required args section to an optional arg, in alignment with the schema.
+        """
+        oc, device = self.set_up_dependencies()
+
+        # description is now optional
+        ip = ImagingPlane(
+                name='test_imaging_plane',
+                optical_channel=oc,
+                device=device,
+                excitation_lambda=600.,
+                indicator='indicator',
+                location='location',
+            )
+        self.assertIsNone(ip.description)
+
+        # description is still required to be provided when using positional arguments
+        with warnings.catch_warnings(record=True):  # catch positional argument deprecation warning
+            with self.assertRaises(TypeError):
+                ImagingPlane(
+                    'test_imaging_plane',
+                    oc,
+                    device,
+                    600.,
+                    'indicator',
+                    'location',
+                )
+
+    def test_init_missing_required_args(self):
+        """Check that ImagingPlane raises an error if required args are missing."""
+        oc, device = self.set_up_dependencies()
+
+        with self.assertRaisesWith(ValueError, "The 'device' argument is required for ImagingPlane."):
+            ImagingPlane(
+                name='test_imaging_plane',
+                optical_channel=oc,
+            )
+        with self.assertRaisesWith(ValueError, "The 'excitation_lambda' argument is required for ImagingPlane."):
+            ImagingPlane(
+                name='test_imaging_plane',
+                optical_channel=oc,
+                device=device,
+            )
+        with self.assertRaisesWith(ValueError, "The 'indicator' argument is required for ImagingPlane."):
+            ImagingPlane(
+                name='test_imaging_plane',
+                optical_channel=oc,
+                device=device,
+                excitation_lambda=600.,
+            )
+        with self.assertRaisesWith(ValueError, "The 'location' argument is required for ImagingPlane."):
+            ImagingPlane(
+                name='test_imaging_plane',
+                optical_channel=oc,
+                device=device,
+                excitation_lambda=600.,
+                indicator='indicator',
+            )
 
 class OnePhotonSeriesConstructor(TestCase):
 
@@ -465,7 +528,7 @@ class ImageSegmentationConstructor(TestCase):
         self.assertEqual(iS.name, 'test_iS')
         self.assertEqual(iS.plane_segmentations[ps.name], ps)
         self.assertEqual(iS[ps.name], iS.plane_segmentations[ps.name])
-    
+
     def test_add_segementation(self):
         ps = create_plane_segmentation()
         iS = ImageSegmentation(name='test_iS')
@@ -532,6 +595,45 @@ class PlaneSegmentationConstructor(TestCase):
         )
         self.assertEqual(pS.name, ip.name)
 
+    def test_init_missing_roi_col_with_ids(self):
+        """If no roi column is provided and ids were provided, an error should be raised"""
+        iSS, ip = self.set_up_dependencies()
+        msg = "Must provide at least one of 'image_mask', 'pixel_mask', or 'voxel_mask' columns"
+        with self.assertRaises(ValueError, msg=msg):
+            PlaneSegmentation(
+                description='description',
+                imaging_plane=ip,
+                name='test_name',
+                reference_images=iSS,
+                id=[1, 2, 3],
+            )
+
+    def test_init_missing_roi_col_with_columns(self):
+        """If no roi column is provided and other non-empty columns are provided, an error should be raised"""
+        iSS, ip = self.set_up_dependencies()
+        msg = "Must provide at least one of 'image_mask', 'pixel_mask', or 'voxel_mask' columns"
+        with self.assertRaises(ValueError, msg=msg):
+            PlaneSegmentation(
+                description='description',
+                imaging_plane=ip,
+                name='test_name',
+                reference_images=iSS,
+                columns=[VectorData(name="custom_col", description="custom col", data=[1, 2, 3])],
+                id=[1, 2, 3],
+            )
+
+    def test_init_missing_roi_col_with_empty_columns(self):
+        """If no roi column is provided and other columns are empty, no error should be raised"""
+        iSS, ip = self.set_up_dependencies()
+        pS = PlaneSegmentation(
+            description='description',
+            imaging_plane=ip,
+            name='test_name',
+            reference_images=iSS,
+            columns=[VectorData(name="custom_col", description="custom col")],
+        )
+        self.assertEqual(len(pS), 0)
+
     def test_add_pixel_mask(self):
         pix_mask = [[1, 2, 1.0], [3, 4, 1.0], [5, 6, 1.0],
                     [7, 8, 2.0], [9, 10, 2.0]]
@@ -596,7 +698,6 @@ class PlaneSegmentationConstructor(TestCase):
         msg = "Must provide at least one of 'image_mask', 'pixel_mask', or 'voxel_mask'"
         with self.assertRaises(ValueError, msg=msg):
             pS.add_roi()
-
 
     def test_conversion_of_2d_pixel_mask_to_image_mask(self):
         pixel_mask = [[0, 0, 1.0], [1, 0, 2.0], [2, 0, 2.0]]

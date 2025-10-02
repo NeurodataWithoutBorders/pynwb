@@ -68,11 +68,13 @@ class ImagingPlane(NWBContainer):
     @docval(*get_docval(NWBContainer.__init__, 'name'),  # required
             {'name': 'optical_channel', 'type': (list, OpticalChannel),  # required
              'doc': 'One of possibly many groups storing channel-specific data.'},
-            {'name': 'description', 'type': str, 'doc': 'Description of this ImagingPlane.'},  # required
-            {'name': 'device', 'type': Device, 'doc': 'the device that was used to record'},  # required
-            {'name': 'excitation_lambda', 'type': float, 'doc': 'Excitation wavelength in nm.'},  # required
-            {'name': 'indicator', 'type': str, 'doc': 'Calcium indicator'},  # required
-            {'name': 'location', 'type': str, 'doc': 'Location of image plane.'},  # required
+            {'name': 'description', 'type': str, 'doc': 'Description of this ImagingPlane.', 'default': None},
+            {'name': 'device', 'type': Device, 'doc': 'the device that was used to record', 
+             'default': None},  # required
+            {'name': 'excitation_lambda', 'type': float, 'doc': 'Excitation wavelength in nm.', 
+             'default': None},  # required
+            {'name': 'indicator', 'type': str, 'doc': 'Calcium indicator',  'default': None},  # required
+            {'name': 'location', 'type': str, 'doc': 'Location of image plane.', 'default': None},  # required
             {'name': 'imaging_rate', 'type': float,
              'doc': 'Rate images are acquired, in Hz. If the corresponding TimeSeries is present, the rate should be '
                     'stored there instead.', 'default': None},
@@ -128,6 +130,21 @@ class ImagingPlane(NWBContainer):
 
         if not isinstance(args_to_set['optical_channel'], list):
             args_to_set['optical_channel'] = [args_to_set['optical_channel']]
+
+        # Note: device, excitation_lambda, indicator, and location are required arguments.
+        # Description was made to be optional in PyNWB 3.1.0, however to avoid breaking API changes the order of
+        # the arguments needs to be maintained even though the optional arguments came before the required ones.
+        # So in docval these required arguments are displayed as optional when really they are required. 
+        # This section can be removed when positional arguments are no longer allowed.
+        if args_to_set['device'] is None:
+            raise ValueError("The 'device' argument is required for ImagingPlane.")
+        if args_to_set['excitation_lambda'] is None:
+            raise ValueError("The 'excitation_lambda' argument is required for ImagingPlane.")
+        if args_to_set['indicator'] is None:
+            raise ValueError("The 'indicator' argument is required for ImagingPlane.")
+        if args_to_set['location'] is None:
+            raise ValueError("The 'location' argument is required for ImagingPlane.")
+
         if args_to_set['manifold'] is not None:
             error_msg = "The 'manifold' argument is deprecated in favor of 'origin_coords' and 'grid_spacing'."
             self._error_on_new_pass_on_construct(error_msg=error_msg)
@@ -337,12 +354,24 @@ class PlaneSegmentation(DynamicTable):
         imaging_plane, reference_images = popargs('imaging_plane', 'reference_images', kwargs)
         if kwargs['name'] is None:
             kwargs['name'] = imaging_plane.name
+
+        if kwargs["columns"]:
+            # check for required ROI columns if table is initialized with non-empty columns 
+            if any(len(c) > 0 for c in kwargs["columns"]):
+                for c in kwargs["columns"]:
+                    if c.name in ("image_mask", "pixel_mask", "voxel_mask"):
+                        break
+                else:
+                    raise ValueError("Must provide at least one of 'image_mask', 'pixel_mask', or 'voxel_mask' columns")
+        elif kwargs["id"]:  # there are also no columns
+            raise ValueError("Must provide at least one of 'image_mask', 'pixel_mask', or 'voxel_mask' columns")
+
         super().__init__(**kwargs)
         self.imaging_plane = imaging_plane
         if isinstance(reference_images, ImageSeries):
             reference_images = (reference_images,)
         self.reference_images = reference_images
-
+        
     @docval({'name': 'pixel_mask', 'type': 'array_data', 'default': None,
              'doc': 'pixel mask for 2D ROIs: [(x1, y1, weight1), (x2, y2, weight2), ...]',
              'shape': (None, 3)},
