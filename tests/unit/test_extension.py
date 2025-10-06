@@ -136,7 +136,42 @@ class TestExtension(TestCase):
         nwbfile = NWBFile("a file with header data", "NB123A", datetime(2017, 5, 1, 12, 0, 0, tzinfo=tzlocal()))
 
         nwbfile.add_lab_meta_data(MyTestMetaData(name='test_name', test_attr=5.))
+    
+    def test_custom_target_table(self):
+        ns_builder = NWBNamespaceBuilder('Extension for custom target table', self.prefix, version='0.1.0')
+        test_epochs_table_ext = NWBGroupSpec(
+            neurodata_type_def="MyEpochsTable",
+            neurodata_type_inc="TimeIntervals",
+            doc=("Custom table for storing my epochs. Inherits from TimeIntervals."),
+            datasets=[
+                NWBDatasetSpec(
+                    name="my_locations",
+                    doc="References row(s) of MyLocationsTable.",
+                    neurodata_type_inc="DynamicTableRegion",
+                ),
+            ] 
+        )
+        test_locations_table_ext = NWBGroupSpec(
+            neurodata_type_def="MyLocationsTable",
+            neurodata_type_inc="DynamicTable",
+            doc=("Table to reference."),
+            default_name="my_locations_table",
+        )
+    
+        ns_builder.add_spec(self.ext_source, test_epochs_table_ext)
+        ns_builder.add_spec(self.ext_source, test_locations_table_ext)
+        ns_builder.export(self.ns_path, outdir=self.tempdir)
+        ns_abs_path = os.path.join(self.tempdir, self.ns_path)
 
+        load_namespaces(ns_abs_path)
+
+        MyLocationsTable = get_class('MyLocationsTable', self.prefix)
+        MyEpochsTable = get_class('MyEpochsTable', self.prefix)
+        my_locations_table = MyLocationsTable(name='test_name', description='test desc')
+        my_epochs_table = MyEpochsTable(name='test_name', 
+                                        description='test desc',
+                                        target_tables={'my_locations': my_locations_table})
+        self.assertIs(my_epochs_table['my_locations'].table, my_locations_table)
 
 class TestCatchDupNS(TestCase):
 
