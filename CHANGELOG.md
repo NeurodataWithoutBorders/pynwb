@@ -1,5 +1,10 @@
 # PyNWB Changelog
 
+## PyNWB 4.0.0 (Unreleased)
+
+## Changed
+- Deprecated `NWBGroupSpec.add_group` and `NWBGroupSpec.add_dataset`. Use `NWBGroupSpec.set_group`, `NWBGroupSpec.set_dataset`, or pass the group or dataset to the `NWBGroupSpec` constructor. @rly [#2138](https://github.com/NeurodataWithoutBorders/pynwb/issues/2138)
+
 ## PyNWB 3.1.3 (Unreleased)
 
 ### Added
