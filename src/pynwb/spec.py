@@ -192,7 +192,8 @@ class NWBGroupSpec(BaseStorageOverride, GroupSpec):
     def add_group(self, **kwargs):
         ''' Add a new specification for a subgroup to this group specification '''
         warn(
-            "NWBGroupSpec.add_group is deprecated and will be removed in PyNWB 5.0. Use NWBGroupSpec.set_group instead.",
+            "NWBGroupSpec.add_group is deprecated and will be removed in PyNWB 5.0. "
+            "Use NWBGroupSpec.set_group instead.",
             DeprecationWarning, 
             stacklevel=2
         )
@@ -205,7 +206,8 @@ class NWBGroupSpec(BaseStorageOverride, GroupSpec):
     def add_dataset(self, **kwargs):
         ''' Add a new specification for a subgroup to this group specification '''
         warn(
-            "NWBGroupSpec.add_dataset is deprecated and will be removed in PyNWB 5.0. Use NWBGroupSpec.set_dataset instead.",
+            "NWBGroupSpec.add_dataset is deprecated and will be removed in PyNWB 5.0. "
+            "Use NWBGroupSpec.set_dataset instead.",
             DeprecationWarning, 
             stacklevel=2
         )
