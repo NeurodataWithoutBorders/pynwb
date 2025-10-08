@@ -1,4 +1,5 @@
 from copy import copy, deepcopy
+from warnings import warn
 
 from hdmf.spec import (LinkSpec, GroupSpec, DatasetSpec, SpecNamespace, NamespaceBuilder,
                        AttributeSpec, DtypeSpec, RefSpec)
@@ -190,6 +191,11 @@ class NWBGroupSpec(BaseStorageOverride, GroupSpec):
     @docval(*deepcopy(_group_docval))
     def add_group(self, **kwargs):
         ''' Add a new specification for a subgroup to this group specification '''
+        warn(
+            "NWBGroupSpec.add_group is deprecated and will be removed in PyNWB 5.0. Use NWBGroupSpec.set_group instead.",
+            DeprecationWarning, 
+            stacklevel=2
+        )
         doc = kwargs.pop('doc')
         spec = NWBGroupSpec(doc, **kwargs)
         self.set_group(spec)
@@ -198,6 +204,11 @@ class NWBGroupSpec(BaseStorageOverride, GroupSpec):
     @docval(*deepcopy(_dataset_docval))
     def add_dataset(self, **kwargs):
         ''' Add a new specification for a subgroup to this group specification '''
+        warn(
+            "NWBGroupSpec.add_dataset is deprecated and will be removed in PyNWB 5.0. Use NWBGroupSpec.set_dataset instead.",
+            DeprecationWarning, 
+            stacklevel=2
+        )
         doc = kwargs.pop('doc')
         spec = NWBDatasetSpec(doc, **kwargs)
         self.set_dataset(spec)
