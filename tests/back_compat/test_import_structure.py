@@ -73,7 +73,6 @@ class TestImportStructure(TestCase):
             "register_class",
             "register_map",
             "spec",
-            "testing",
             "validate",
         ]
         for member in expected_structure:
