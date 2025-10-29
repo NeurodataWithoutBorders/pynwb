@@ -46,6 +46,10 @@ class DeviceMapper(NWBContainerMapper):
     
       
     def __new_container__(self, cls, container_source, parent, object_id, **kwargs):
+        # Override ObjectMapper.__new_container__ to handle the case where the Device.model argument
+        # is not a DeviceModel, which can happen in extensions written to be compatible with NWB<2.9.
+        # The original Device.model object will be accessible under a new attribute name based on the
+        # extension namespace. 
         model = kwargs.get('model', None)
         
         if model is None or isinstance(model, DeviceModel):
