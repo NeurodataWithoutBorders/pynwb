@@ -28,7 +28,9 @@ class DeviceMapper(NWBContainerMapper):
         """
         model_builder = builder.get('model')
         if isinstance(model_builder, str):
-            warn(f'Device.model was detected as a string. Remapping "{model_builder}" to a DeviceModel',
+            warn(
+                'Device.model was detected as a string, but NWB 2.9 specifies Device.model as a link to a DeviceModel. '
+                f'Remapping "{model_builder}" to a new DeviceModel.',
                  stacklevel=3)
 
             # replace the model string with a DeviceModel object using the model name and device attributes 
