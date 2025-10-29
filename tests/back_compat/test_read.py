@@ -175,8 +175,9 @@ class TestReadOldVersions(TestCase):
         with self.get_io(f) as io:
             # assert warning is issued to inform user the attribute is being remapped
             with self.assertWarnsWith(UserWarning,
-                                      'Device.model was detected as a string. ' \
-                                      'Remapping "dichroic mirror model" to a DeviceModel'):
+                                      'Device.model was detected as a string, ' \
+                                      'but NWB 2.9 specifies Device.model as a link to a DeviceModel. '
+                                      'Remapping "dichroic mirror model" to a new DeviceModel.'):
                 read_nwbfile = io.read()
 
             # assert data was remapped correctly
