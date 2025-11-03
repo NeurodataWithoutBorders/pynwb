@@ -61,7 +61,6 @@ body:
       label: Python Version
       options:
         - "lower version (unsupported)"
-        - "3.9"
         - "3.10"
         - "3.11"
         - "3.12"
