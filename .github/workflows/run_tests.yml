@@ -19,12 +19,12 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { name: linux-python3.9-minimum      , test-tox-env: test-py39-minimum    , build-tox-env: build-py39-minimum   , python-ver: "3.9" , os: ubuntu-latest }
+          - { name: linux-python3.10-minimum      , test-tox-env: test-py310-minimum    , build-tox-env: build-py310-minimum   , python-ver: "3.10" , os: ubuntu-latest }
           # NOTE config below with "upload-wheels: true" specifies that wheels should be uploaded as an artifact
           - { name: linux-python3.13-upgraded    , test-tox-env: test-py313-upgraded  , build-tox-env: build-py313-upgraded , python-ver: "3.13", os: ubuntu-latest , upload-wheels: true }
-          - { name: windows-python3.9-minimum    , test-tox-env: test-py39-minimum    , build-tox-env: build-py39-minimum   , python-ver: "3.9" , os: windows-latest }
+          - { name: windows-python3.10-minimum    , test-tox-env: test-py310-minimum    , build-tox-env: build-py310-minimum   , python-ver: "3.10" , os: windows-latest }
           - { name: windows-python3.13-upgraded  , test-tox-env: test-py313-upgraded  , build-tox-env: build-py313-upgraded , python-ver: "3.13", os: windows-latest }
-          - { name: macos-python3.9-minimum      , test-tox-env: test-py39-minimum    , build-tox-env: build-py39-minimum   , python-ver: "3.9" , os: macos-13 }
+          - { name: macos-python3.10-minimum      , test-tox-env: test-py310-minimum    , build-tox-env: build-py310-minimum   , python-ver: "3.10" , os: macos-13 }
           - { name: macos-python3.13-upgraded    , test-tox-env: test-py313-upgraded  , build-tox-env: build-py313-upgraded , python-ver: "3.13" , os: macos-latest }
     steps:
       - name: Cancel non-latest runs
@@ -79,9 +79,9 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { name: linux-gallery-python3.9-minimum    , test-tox-env: gallery-py39-minimum  , python-ver: "3.9" , os: ubuntu-latest }
+          - { name: linux-gallery-python3.10-minimum    , test-tox-env: gallery-py310-minimum  , python-ver: "3.10" , os: ubuntu-latest }
           - { name: linux-gallery-python3.13-upgraded  , test-tox-env: gallery-py313-upgraded, python-ver: "3.13", os: ubuntu-latest }
-          - { name: windows-gallery-python3.9-minimum  , test-tox-env: gallery-py39-minimum  , python-ver: "3.9" , os: windows-latest }
+          - { name: windows-gallery-python3.10-minimum  , test-tox-env: gallery-py310-minimum  , python-ver: "3.10" , os: windows-latest }
           - { name: windows-gallery-python3.13-upgraded, test-tox-env: gallery-py313-upgraded, python-ver: "3.13", os: windows-latest }
     steps:
       - name: Cancel non-latest runs
@@ -120,7 +120,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { name: conda-linux-python3.9-minimum    , test-tox-env: test-py39-minimum    , build-tox-env: build-py39-minimum    , python-ver: "3.9" , os: ubuntu-latest }
+          - { name: conda-linux-python3.10-minimum    , test-tox-env: test-py310-minimum    , build-tox-env: build-py310-minimum    , python-ver: "3.10" , os: ubuntu-latest }
           - { name: conda-linux-python3.13-upgraded  , test-tox-env: test-py313-upgraded  , build-tox-env: build-py313-upgraded  , python-ver: "3.13", os: ubuntu-latest }
     steps:
       - name: Cancel non-latest runs
