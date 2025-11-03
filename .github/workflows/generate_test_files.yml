@@ -15,7 +15,7 @@ jobs:
       matrix:
         include:
           - { name: pynwb-1.5.1, pynwb-version: "1.5.1", python-version: "3.8"}
-          - { name: pynwb-2.1.0, pynwb-version: "2.1.0", python-version: "3.10"}
+          - { name: pynwb-2.1.0, pynwb-version: "2.1.0", python-version: "3.9"}
     steps:
       - uses: actions/checkout@v4
         with:
