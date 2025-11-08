@@ -13,6 +13,7 @@
 
 ### Changed
 - Change UI of documentation assistant to be an accordion that is always visible. @bendichter [#2124](https://github.com/NeurodataWithoutBorders/pynwb/pull/2124)
+- Updated minimum HDMF version to 4.1.2 and updated tests accordingly. @rly []()
 
 
 ## PyNWB 3.1.2 (August 13, 2025)
