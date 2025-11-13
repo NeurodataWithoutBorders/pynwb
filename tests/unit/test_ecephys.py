@@ -86,8 +86,11 @@ class ElectricalSeriesConstructor(TestCase):
 
     def test_invalid_data_shape(self):
         table, region = self._create_table_and_region()
-        with self.assertRaisesWith(ValueError, ("ElectricalSeries.__init__: incorrect shape for 'data' (got '(2, 2, 2, "
-                                                "2)', expected '((None,), (None, None), (None, None, None))')")):
+        msg = (
+            "ElectricalSeries.__init__: incorrect shape for data: got (2, 2, 2, 2), "
+            "and expected (*,) or (*, *) or (*, *, *)"
+        )
+        with self.assertRaisesWith(ValueError, msg):
             ElectricalSeries(name='test_ts1', data=np.ones((2, 2, 2, 2)), electrodes=region,
                              timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5])
 
