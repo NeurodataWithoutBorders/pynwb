@@ -40,7 +40,7 @@ import numpy as np
 #
 # Download the data
 # -----------------
-# First, we will demonstrate how to download an NWB data file from `DANDI https://dandiarchive.org/>`_
+# First, we will demonstrate how to download an NWB data file from `DANDI <https://dandiarchive.org/>`_
 # to your machine.
 #
 # Download using the DANDI Web UI
