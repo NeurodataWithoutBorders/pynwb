@@ -10,7 +10,7 @@ an NWB File using different tools.
 An :py:class:`~pynwb.file.NWBFile` represents a single session of an experiment.
 It contains all the data of that session and the metadata required to understand the data.
 
-We will demonstrate how to use the `DANDI <https://dandiarchive.org>`_ neurophysiology data archive to access
+We will demonstrate how to use the `DANDI <https://dandiarchive.org/>`_ neurophysiology data archive to access
 the data in two different ways: (1) by downloading it to your computer and (2) streaming it.
 
 We will briefly show tools for exploring NWB Files interactively and refer the reader to the
@@ -32,7 +32,7 @@ import numpy as np
 
 
 ####################
-# We will access NWB data on the `DANDI Archive <https://dandiarchive.org>`_,
+# We will access NWB data on the `DANDI Archive <https://dandiarchive.org/>`_,
 # and demonstrate reading one session of an experiment by
 # `Chandravadia et al. (2020) <https://www.nature.com/articles/s41597-020-0415-9>`_. In this study,
 # the authors recorded single neuron activity from the medial temporal lobes of human subjects
