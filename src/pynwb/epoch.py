@@ -94,6 +94,7 @@ class TimeIntervals(DynamicTable):
         if len(self) == 0:
             return None
         import numpy as np
+        # NOTE: Could be optimized to self['start_time'].data[0] if intervals are guaranteed sorted
         return float(np.min(self['start_time'].data[:]))
 
     def get_duration(self):
@@ -113,8 +114,7 @@ class TimeIntervals(DynamicTable):
         if len(self) == 0:
             return None
         import numpy as np
-        start_times = np.array(self['start_time'].data[:])
-        stop_times = np.array(self['stop_time'].data[:])
-        min_start = float(np.min(start_times))
-        max_stop = float(np.max(stop_times))
-        return max_stop - min_start
+        starting_time = self.get_starting_time()
+        # NOTE: Could be optimized to self['stop_time'].data[-1] if intervals are guaranteed sorted
+        stopping_time = float(np.max(self['stop_time'].data[:]))
+        return stopping_time - starting_time
