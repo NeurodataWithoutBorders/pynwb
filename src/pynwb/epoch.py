@@ -81,3 +81,40 @@ class TimeIntervals(DynamicTable):
         count = stop_idx - start_idx
         idx_start = start_idx
         return int(idx_start), int(count)
+
+    def get_starting_time(self):
+        """
+        Get the earliest start time across all intervals in this TimeIntervals table.
+
+        Returns
+        -------
+        float or None
+            The earliest start time in seconds, or None if the table is empty.
+        """
+        if len(self) == 0:
+            return None
+        import numpy as np
+        return float(np.min(self['start_time'].data[:]))
+
+    def get_duration(self):
+        """
+        Get the total duration from the earliest start time to the latest stop time.
+
+        Returns
+        -------
+        float or None
+            The duration in seconds, or None if the table is empty.
+
+        Notes
+        -----
+        The duration represents the time span from the earliest interval start to the
+        latest interval stop, not the sum of individual interval durations.
+        """
+        if len(self) == 0:
+            return None
+        import numpy as np
+        start_times = np.array(self['start_time'].data[:])
+        stop_times = np.array(self['stop_time'].data[:])
+        min_start = float(np.min(start_times))
+        max_stop = float(np.max(stop_times))
+        return max_stop - min_start
