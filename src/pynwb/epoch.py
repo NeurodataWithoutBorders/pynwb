@@ -1,5 +1,7 @@
 from bisect import bisect_left
 
+import numpy as np
+
 from hdmf.data_utils import DataIO
 from hdmf.common import DynamicTable
 from hdmf.utils import docval, getargs, popargs, get_docval, AllowPositional
@@ -93,7 +95,6 @@ class TimeIntervals(DynamicTable):
         """
         if len(self) == 0:
             return None
-        import numpy as np
         # NOTE: Could be optimized to self['start_time'].data[0] if intervals are guaranteed sorted
         return float(np.min(self['start_time'].data[:]))
 
