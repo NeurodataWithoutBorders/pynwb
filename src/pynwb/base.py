@@ -405,26 +405,29 @@ class TimeSeries(NWBDataInterface):
         Returns
         -------
         float or None
-            The starting time in seconds, or None if the TimeSeries has no data.
+            The starting time in seconds, or None if no starting time is defined
+            and there is no data.
         """
-        if self.num_samples is None or self.num_samples == 0:
-            return None
-        if self.fields.get('timestamps'):
+        if self.starting_time is not None:
+            return self.starting_time
+        elif self.num_samples is not None and self.num_samples > 0:
             return float(self.timestamps[0])
         else:
-            return self.starting_time
+            # No starting_time defined and no data (e.g., empty timestamps-based TimeSeries)
+            return None
 
     def get_duration(self):
         """
         Get the duration of this TimeSeries in seconds.
 
         Returns the time span from the first sample to the last sample.
-        For a single sample, returns 0.
+        For a single sample or empty TimeSeries with a defined starting_time, returns 0.
 
         Returns
         -------
         float or None
-            The duration in seconds, or None if the TimeSeries has no data.
+            The duration in seconds, or None if the TimeSeries has no data and
+            no starting_time defined.
 
         Notes
         -----
@@ -435,11 +438,13 @@ class TimeSeries(NWBDataInterface):
         recording time. If you need to account for the last sample's duration
         (e.g., for continuous recordings), add 1/rate manually.
         """
-        n = self.num_samples
-        if n is None or n == 0:
+        if self.num_samples is None or self.num_samples == 0:
+            # Empty TimeSeries with a starting_time has duration 0
+            if self.starting_time is not None:
+                return 0.0
             return None
 
-        if n == 1:
+        if self.num_samples == 1:
             return 0.0
 
         if self.fields.get('timestamps'):
@@ -447,7 +452,7 @@ class TimeSeries(NWBDataInterface):
             return float(timestamps[-1] - timestamps[0])
         else:
             # Rate-based
-            return (n - 1) / self.rate
+            return (self.num_samples - 1) / self.rate
 
     def get_data_in_units(self):
         """
