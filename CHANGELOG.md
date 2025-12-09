@@ -1,6 +1,6 @@
 # PyNWB Changelog
 
-## PyNWB 3.1.3 (Unreleased)
+## PyNWB 3.1.3 (December 9, 2025)
 
 ### Added
 - Added 'target_tables' kwarg to DynamicTable subclasses to allow classes that extend DynamicTable subclasses to specify the mapping of DynamicTableRegion columns to the target tables. @rly, @stephprince [#2096](https://github.com/NeurodataWithoutBorders/pynwb/issues/2096)
