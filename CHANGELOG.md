@@ -14,6 +14,7 @@
 ### Changed
 - Change UI of documentation assistant to be an accordion that is always visible. @bendichter [#2124](https://github.com/NeurodataWithoutBorders/pynwb/pull/2124)
 - Updated minimum HDMF version to 4.1.2 and updated tests accordingly. @rly [#2144](https://github.com/NeurodataWithoutBorders/pynwb/pull/2144)
+- Flattened `ProcessingModule` HTML representation to render data interfaces directly without the redundant `data_interfaces` wrapper. @h-mayorquin [#2149](https://github.com/NeurodataWithoutBorders/pynwb/pull/2149)
 
 
 ## PyNWB 3.1.2 (August 13, 2025)

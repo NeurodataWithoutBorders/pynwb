@@ -127,6 +127,16 @@ class TestProcessingModule(TestCase):
         items = self.pm.items()
         self.assertEqual(set(items), {("test_ts", ts), ("test_ts2", ts2)})
 
+    def test_repr_html_data_interfaces_flattened(self):
+        """Test that html representation flattens data_interfaces without extra nesting."""
+        ts = self._create_time_series()
+        self.pm.add(ts)
+        html = self.pm._repr_html_()
+        # The TimeSeries name should appear directly, not nested under 'data_interfaces'
+        self.assertIn('test_ts', html)
+        # 'data_interfaces' should not appear as a separate section header
+        self.assertNotIn('>data_interfaces<', html)
+
 
 class TestTimeSeries(TestCase):
     def test_init_no_parent(self):
