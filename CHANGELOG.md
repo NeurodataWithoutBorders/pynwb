@@ -10,6 +10,7 @@
 - Fixed inability to read files created with extensions that had schema conflicts with the DeviceModel type introduced in NWB Schema 2.9.0. @stephprince [#2132](https://github.com/NeurodataWithoutBorders/pynwb/pull/2132)
 - Fixed issue with setting `neurodata_type_inc` when reading NWB files with cached schema versions less than 2.2.0. @rly [#2135](https://github.com/NeurodataWithoutBorders/pynwb/pull/2135)
 - Fixed import structure test. @rly [#2136](https://github.com/NeurodataWithoutBorders/pynwb/pull/2136)
+- Fixed invalid CSS properties in documentation assistant toggle that prevented proper positioning on displays ≥1400px wide. @rly [#2151](https://github.com/NeurodataWithoutBorders/pynwb/pull/2151)
 
 ### Changed
 - Change UI of documentation assistant to be an accordion that is always visible. @bendichter [#2124](https://github.com/NeurodataWithoutBorders/pynwb/pull/2124)
