@@ -171,22 +171,18 @@
 /* For very large screens, use more space */
 @media (min-width: 1400px) {
     .assistant-container.show {
-        width: calc(100vw - 1140px);
-        max-width: 600px;
+        width: min(calc(100vw - 1140px), 600px);
     }
     
     .assistant-iframe {
-        width: calc(100vw - 1140px);
-        max-width: 600px;
+        width: min(calc(100vw - 1140px), 600px);
     }
     
     .assistant-container.show ~ .wy-nav-content {
-        margin-right: calc(100vw - 1140px);
-        max-margin-right: 600px;
+        margin-right: min(calc(100vw - 1140px), 600px);
     }
     
     .assistant-container.show ~ .assistant-toggle {
-        right: calc(100vw - 1140px);
-        max-right: 600px;
+        right: min(calc(100vw - 1140px), 600px);
     }
 }
