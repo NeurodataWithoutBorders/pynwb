@@ -38,12 +38,20 @@ nwbfile = NWBFile(
 # :py:class:`~pynwb.ogen.OptogeneticStimulusSite`, which contains metadata about the stimulus site, and
 # :py:class:`~pynwb.ogen.OptogeneticSeries`, which contains the power applied by the laser over time, in watts.
 #
-# First, you need to create a :py:class:`~pynwb.device.Device` object linked to the :py:class:`~pynwb.file.NWBFile`:
+# First, you need to create a :py:class:`~pynwb.device.Device` object linked to the :py:class:`~pynwb.file.NWBFile`.
+# The :py:class:`~pynwb.device.DeviceModel` object stores information about the device model, which can be useful
+# when searching a set of NWB files or a data archive for all files that use a specific device model.
+# The fields ``manufacturer``, ``model_number``, and ``description`` are optional, but recommended.
 
+device_model = nwbfile.create_device_model(
+    name="Optogenetic Device Model",
+    manufacturer="Example Manufacturer",
+    description="Example optogenetic stimulation device",
+)
 device = nwbfile.create_device(
     name="device",
     description="description of device",
-    manufacturer="optional but recommended",
+    model=device_model,
 )
 
 ####################
