@@ -54,6 +54,10 @@ class NWBFileMap(ObjectMapper):
         invalid_times_spec = intervals_spec.get_group('invalid_times')
         self.map_spec('invalid_times', invalid_times_spec)
 
+        events_spec = self.spec.get_group('events')
+        self.unmap(events_spec)
+        self.map_spec('events', events_spec.get_neurodata_type('EventsTable'))
+
         general_spec = self.spec.get_group('general')
         self.unmap(general_spec)
 
