@@ -59,11 +59,34 @@ class BehavioralEpochsConstructor(TestCase):
 
 
 class BehavioralEventsConstructor(TestCase):
-    def test_init(self):
+    def test_init_deprecated(self):
+        """Test that BehavioralEvents raises a ValueError on creation due to deprecation."""
+        msg = (
+            "BehavioralEvents is deprecated. Use an EventsTable in NWBFile.events instead for event data. "
+            "Creating a new BehavioralEvents will not be allowed in a future version of PyNWB."
+        )
         ts = TimeSeries(name='test_ts', data=np.ones((3, 2)), unit='unit', timestamps=[1., 2., 3.])
+        with self.assertRaisesWith(ValueError, msg):
+            BehavioralEvents(ts)
 
-        bE = BehavioralEvents(ts)
-        self.assertEqual(bE.time_series['test_ts'], ts)
+    def test_init_deprecated_in_construct_mode(self):
+        """Test that BehavioralEvents warns in construct mode (during read)."""
+        msg = (
+            "BehavioralEvents is deprecated. Use an EventsTable in NWBFile.events instead for event data. "
+            "Creating a new BehavioralEvents will not be allowed in a future version of PyNWB."
+        )
+        ts = TimeSeries(name='test_ts', data=np.ones((3, 2)), unit='unit', timestamps=[1., 2., 3.])
+        obj = BehavioralEvents.__new__(
+            BehavioralEvents,
+            container_source=None,
+            parent=None,
+            object_id="test",
+            in_construct_mode=True,
+        )
+        with self.assertWarnsWith(UserWarning, msg):
+            obj.__init__(ts)
+        self.assertEqual(obj.time_series['test_ts'], ts)
+        obj._in_construct_mode = False
 
 
 class BehavioralTimeSeriesConstructor(TestCase):

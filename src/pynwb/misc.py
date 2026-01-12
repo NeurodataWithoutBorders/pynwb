@@ -21,7 +21,11 @@ __all__ = [
 
 @register_class('AnnotationSeries', CORE_NAMESPACE)
 class AnnotationSeries(TimeSeries):
-    """Stores text-based records about the experiment.
+    """DEPRECATED. Stores text-based records about the experiment.
+
+    AnnotationSeries is deprecated. Use an EventsTable with an 'annotation' column instead.
+    See :py:class:`~pynwb.event.EventsTable`.
+
     To use the AnnotationSeries, add records individually through add_annotation(). Alternatively, if all annotations
     are already stored in a list or numpy array, set the data and timestamps in the constructor.
     """
@@ -37,6 +41,10 @@ class AnnotationSeries(TimeSeries):
     def __init__(self, **kwargs):
         name, data, timestamps = popargs('name', 'data', 'timestamps', kwargs)
         super().__init__(name=name, data=data, unit='n/a', resolution=-1.0, timestamps=timestamps, **kwargs)
+        self._error_on_new_warn_on_construct(
+            "AnnotationSeries is deprecated. Use an EventsTable with an 'annotation' column instead. "
+            "Creating a new AnnotationSeries will not be allowed in a future version of PyNWB."
+        )
 
     @docval({'name': 'time', 'type': float, 'doc': 'The time for the annotation'},
             {'name': 'annotation', 'type': str, 'doc': 'the annotation'})

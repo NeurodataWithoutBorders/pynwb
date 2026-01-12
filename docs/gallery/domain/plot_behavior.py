@@ -24,10 +24,10 @@ The examples below follow this general workflow for adding behavior data to an :
   * :py:class:`~pynwb.behavior.Position` for position measured over time
   * :py:class:`~pynwb.behavior.CompassDirection` for view angle measured over time
   * :py:class:`~pynwb.behavior.BehavioralTimeSeries` for continuous time series data
-  * :py:class:`~pynwb.behavior.BehavioralEvents` for behavioral events (e.g. reward amount)
   * :py:class:`~pynwb.behavior.BehavioralEpochs` for behavioral intervals (e.g. sleep intervals)
   * :py:class:`~pynwb.behavior.PupilTracking` for eye-tracking data of pupil size
   * :py:class:`~pynwb.behavior.EyeTracking` for eye-tracking data of gaze direction
+  * :py:class:`~pynwb.event.EventsTable` for behavioral events (e.g. reward times)
 
 * create a behavior processing module for the :py:class:`~pynwb.file.NWBFile` and add the interface object(s) to it
 
@@ -46,7 +46,6 @@ from dateutil.tz import tzlocal
 from pynwb import NWBHDF5IO, NWBFile, TimeSeries
 from pynwb.behavior import (
     BehavioralEpochs,
-    BehavioralEvents,
     BehavioralTimeSeries,
     CompassDirection,
     EyeTracking,
@@ -219,34 +218,18 @@ behavioral_time_series = BehavioralTimeSeries(
 behavior_module.add(behavioral_time_series)
 
 ####################
-# BehavioralEvents: Storing behavioral events
-# -------------------------------------------
+# EventsTable: Storing behavioral events
+# --------------------------------------
 #
-# :py:class:`~pynwb.behavior.BehavioralEvents` is an interface for storing behavioral events.
-# We can use it for storing the timing and amount of rewards (e.g. water amount) or lever press times.
-
-reward_amount = [1.0, 1.5, 1.0, 1.5]
-events_timestamps = [1.0, 2.0, 5.0, 6.0]
-
-time_series = TimeSeries(
-    name="lever_presses",
-    data=reward_amount,
-    timestamps=events_timestamps,
-    description="The water amount the subject received as a reward.",
-    unit="ml",
-)
-
-behavioral_events = BehavioralEvents(time_series=time_series, name="BehavioralEvents")
-
-behavior_module.add(behavioral_events)
-
-####################
-# Storing only the timestamps of the events is possible with the `ndx-events <https://pypi.org/project/ndx-events/>`_
-# NWB extension. You can also add labels associated with the events with this extension.
-# You can find information about installation and example usage :nwb_extension:`here <ndx-events-record>`.
+# :py:class:`~pynwb.event.EventsTable` is for storing behavioral events such as the timing
+# and amount of rewards (e.g., water amount) or lever press times. EventsTable is stored
+# in ``NWBFile.events``.
 #
-# .. seealso::
-#    You can learn more about using extensions in the :ref:`tutorial-extending-nwb` tutorial.
+# .. note::
+#    :py:class:`~pynwb.behavior.BehavioralEvents` is deprecated. Use
+#    :py:class:`~pynwb.event.EventsTable` instead.
+#
+# TODO: Add EventsTable example
 
 ####################
 # BehavioralEpochs: Storing intervals of behavior data

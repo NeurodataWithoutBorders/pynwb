@@ -12,10 +12,33 @@ from pynwb.testing import TestCase
 
 
 class AnnotationSeriesConstructor(TestCase):
-    def test_init(self):
-        aS = AnnotationSeries(name='test_aS', data=[1, 2, 3], timestamps=[1., 2., 3.])
-        self.assertEqual(aS.name, 'test_aS')
-        aS.add_annotation(2.0, 'comment')
+    def test_init_deprecated(self):
+        """Test that AnnotationSeries raises a ValueError on creation due to deprecation."""
+        msg = (
+            "AnnotationSeries is deprecated. Use an EventsTable with an 'annotation' column instead. "
+            "Creating a new AnnotationSeries will not be allowed in a future version of PyNWB."
+        )
+        with self.assertRaisesWith(ValueError, msg):
+            AnnotationSeries(name='test_aS', data=[1, 2, 3], timestamps=[1., 2., 3.])
+
+    def test_init_deprecated_in_construct_mode(self):
+        """Test that AnnotationSeries warns in construct mode (during read)."""
+        msg = (
+            "AnnotationSeries is deprecated. Use an EventsTable with an 'annotation' column instead. "
+            "Creating a new AnnotationSeries will not be allowed in a future version of PyNWB."
+        )
+        obj = AnnotationSeries.__new__(
+            AnnotationSeries,
+            container_source=None,
+            parent=None,
+            object_id="test",
+            in_construct_mode=True,
+        )
+        with self.assertWarnsWith(UserWarning, msg):
+            obj.__init__(name='test_aS', data=['a', 'b', 'c'], timestamps=[1., 2., 3.])
+        self.assertEqual(obj.name, 'test_aS')
+        obj.add_annotation(2.0, 'comment')
+        obj._in_construct_mode = False
 
 
 class AbstractFeatureSeriesConstructor(TestCase):
