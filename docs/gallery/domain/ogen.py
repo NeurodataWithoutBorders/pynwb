@@ -47,14 +47,17 @@ nwbfile = NWBFile(
    # :py:class:`~pynwb.device.DeviceModel` and the fields ``description``, ``model``, and ``serial_number`` for
    # :py:class:`~pynwb.device.Device` are optional, but recommended. ``DeviceModel.manufacturer`` is required.
 device_model = nwbfile.create_device_model(
-    name="Optogenetic Device Model",
-    manufacturer="Example Manufacturer",
-    description="Example optogenetic stimulation device",
+    name="Thorlabs M470F3 Model",
+    description="470nm fiber-coupled LED, 17.2mW output for channelrhodopsin activation",
+    manufacturer="Thorlabs",
+    model_number="M470F3",
 )
+
 device = nwbfile.create_device(
-    name="device",
-    description="description of device",
+    name="Thorlabs M470F3",
+    description="470nm fiber-coupled LED used for optogenetic stimulation",
     model=device_model,
+    serial_number="SN-00123456",
 )
 
 ####################
