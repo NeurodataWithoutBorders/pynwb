@@ -85,13 +85,13 @@ nwbfile = NWBFile(
 #     :alt: imaging plane UML diagram
 #     :align: center
 #
-# Create a :py:class:`~pynwb.device.Device` named ``"Thorlabs Bergamo II"`` in the :py:class:`~pynwb.file.NWBFile` object.
-# The fields
+# Create a :py:class:`~pynwb.device.Device` named ``"Thorlabs Bergamo II"`` in the
+# :py:class:`~pynwb.file.NWBFile` object. The fields
 # ``description``, ``serial_number``, and ``model`` are optional, but recommended. The
 # :py:class:`~pynwb.device.DeviceModel` object stores information about the device model, which can be useful
 # when searching a set of NWB files or a data archive for all files that use a specific device model
 # (e.g., specific microscope model).
-# Then create an :py:class:`~pynwb.ophys.OpticalChannel` named ``"OpticalChannel"``. 
+# Then create an :py:class:`~pynwb.ophys.OpticalChannel` named ``"OpticalChannel"``.
 
 device_model = nwbfile.create_device_model(
     name="Thorlabs Bergamo II Model",
