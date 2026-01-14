@@ -92,6 +92,20 @@ nwbfile = NWBFile(
 # when searching a set of NWB files or a data archive for all files that use a specific device model
 # (e.g., specific microscope model).
 
+device_model = nwbfile.create_device_model(
+    name="Thorlabs Bergamo II Model",
+    description="Two-photon microscope for in vivo imaging",
+    manufacturer="Thorlabs",
+    model_number="Bergamo II",
+)
+
+device = nwbfile.create_device(
+    name="Thorlabs Bergamo II",
+    description="Two-photon microscope for in vivo imaging",
+    model=device_model,
+    serial_number="SN-123456789",
+)
+
 optical_channel = OpticalChannel(
     name="OpticalChannel",
     description="an optical channel",
