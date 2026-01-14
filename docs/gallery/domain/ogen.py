@@ -37,12 +37,15 @@ nwbfile = NWBFile(
 # The :py:mod:`~pynwb.ogen` module contains two data types that you will need to write optogenetics data,
 # :py:class:`~pynwb.ogen.OptogeneticStimulusSite`, which contains metadata about the stimulus site, and
 # :py:class:`~pynwb.ogen.OptogeneticSeries`, which contains the power applied by the laser over time, in watts.
-#
-# First, you need to create a :py:class:`~pynwb.device.Device` object linked to the :py:class:`~pynwb.file.NWBFile`.
-# The :py:class:`~pynwb.device.DeviceModel` object stores information about the device model, which can be useful
-# when searching a set of NWB files or a data archive for all files that use a specific device model.
-# The fields ``manufacturer``, ``model_number``, and ``description`` are optional, but recommended.
-
+## First, you need to create a :py:class:`~pynwb.device.Device` object linked to the :py:class:`~pynwb.file.NWBFile`
+   # to represent the optogenetic stimulation system. It is recommended to add as much metadata about the
+   # system/device as possible to inform others using the data. A :py:class:`~pynwb.device.Device` object has
+   # an optional ``model`` field that points to a :py:class:`~pynwb.device.DeviceModel` object, which stores
+   # information about the device model. This can be useful when searching a set of NWB files or a data archive
+   # for all files that use a specific device model, or expressing that multiple devices in a session use the
+   # same device model. The fields ``description`` and ``model_number`` for
+   # :py:class:`~pynwb.device.DeviceModel` and the fields ``description``, ``model``, and ``serial_number`` for
+   # :py:class:`~pynwb.device.Device` are optional, but recommended. ``DeviceModel.manufacturer`` is required.
 device_model = nwbfile.create_device_model(
     name="Optogenetic Device Model",
     manufacturer="Example Manufacturer",
