@@ -91,18 +91,7 @@ nwbfile = NWBFile(
 # :py:class:`~pynwb.device.DeviceModel` object stores information about the device model, which can be useful
 # when searching a set of NWB files or a data archive for all files that use a specific device model
 # (e.g., specific microscope model).
-device_model = nwbfile.create_device_model(
-    name="Loki 1.0",
-    manufacturer="Loki Labs",
-    model_number="ABC-123",
-    description="Two-photon microscope model",
-)
-device = nwbfile.create_device(
-    name="Microscope",
-    description="My two-photon microscope",
-    serial_number="1234567890",
-    model=device_model,
-)
+
 optical_channel = OpticalChannel(
     name="OpticalChannel",
     description="an optical channel",
