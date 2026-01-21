@@ -16,6 +16,7 @@ related to the experiment. This tutorial focuses in particular on the usage of:
 * :py:class:`~pynwb.image.ImageSeries`, for series of images (movie segments);
 * :py:class:`~pynwb.image.GrayscaleImage`, :py:class:`~pynwb.image.RGBImage`,
   :py:class:`~pynwb.image.RGBAImage`, for static images;
+* :py:class:`~pynwb.base.ExternalImage`, for referencing external image files without embedding data;
 
 The following examples will reference variables that may not be defined within the block they are used in. For
 clarity, we define them here:
@@ -31,7 +32,7 @@ from dateutil import tz
 from PIL import Image
 
 from pynwb import NWBHDF5IO, NWBFile
-from pynwb.base import Images
+from pynwb.base import Images, ExternalImage
 from pynwb.image import GrayscaleImage, ImageSeries, OpticalSeries, RGBAImage, RGBImage
 from pynwb.misc import AbstractFeatureSeries
 
@@ -266,6 +267,51 @@ gs_logo = GrayscaleImage(
     description="Grayscale version of the PyNWB logo.",
     resolution=35.433071,
 )
+
+####################
+# ExternalImage: for referencing external image files
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+#
+# :py:class:`~pynwb.base.ExternalImage` stores a reference to an external image file
+# (PNG, JPEG, or GIF) rather than embedding the image data in the NWB file.
+# This is useful when:
+#
+# * You have many large images (e.g., thousands of stimulus images) that would
+#   consume excessive memory if converted to arrays
+# * You want to preserve the original image compression and metadata
+# * Multiple NWB files need to reference the same image set without duplication
+#
+# The ``data`` field contains the file path or URL to the external image.
+# The ``image_format`` is required and must be one of: "PNG", "JPEG", or "GIF".
+# The optional ``image_mode`` describes the color mode (e.g., "RGB", "RGBA", "grayscale").
+#
+
+external_stimulus = ExternalImage(
+    name="stimulus_image_001",
+    data="stimuli/images/natural_scene_001.png",  # path relative to NWB file
+    image_format="PNG",
+    image_mode="RGB",
+    description="Natural scene image used as visual stimulus.",
+)
+
+####################
+# You can also reference images via URL (per the schema specification which
+# states "file path or URI"):
+#
+
+external_reference = ExternalImage(
+    name="reference_image",
+    data="https://example.com/images/calibration_target.jpg",
+    image_format="JPEG",
+    description="Calibration target image from external repository.",
+)
+
+####################
+# .. note::
+#    :py:class:`~pynwb.base.ExternalImage` is for **static images** stored in an
+#    :py:class:`~pynwb.base.Images` container. For **time series of video frames**
+#    from external files, use :py:class:`~pynwb.image.ImageSeries` with the
+#    ``external_file`` parameter instead (see the "External Files" section above).
 
 ####################
 # Images: a container for images
