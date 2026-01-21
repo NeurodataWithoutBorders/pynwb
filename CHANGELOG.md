@@ -4,7 +4,8 @@
 
 ### Fixed
 - Fixed invalid CSS properties in documentation assistant toggle that prevented proper positioning on displays ≥1400px wide. @rly [#2151](https://github.com/NeurodataWithoutBorders/pynwb/pull/2151)
-- 
+- Expanded documentation for the 'age' parameter to include age range examples and clarify usage. @rly [#2161](https://github.com/NeurodataWithoutBorders/pynwb/pull/2161)
+
 
 ## PyNWB 3.1.3 (December 9, 2025)
 

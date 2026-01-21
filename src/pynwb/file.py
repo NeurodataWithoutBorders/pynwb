@@ -78,8 +78,14 @@ class Subject(NWBContainer):
         {
             "name": "age",
             "type": (str, timedelta),
-            "doc": 'The age of the subject. The ISO 8601 Duration format is recommended, e.g., "P90D" for 90 days old.'
-                   'A timedelta will automatically be converted to The ISO 8601 Duration format.',
+            "doc": (
+              'The age of the subject. The ISO 8601 Duration format is recommended, e.g., "P90D" for 90 days old.'
+              'A timedelta will automatically be converted to The ISO 8601 Duration format. '
+              'If the precise age is unknown, an age range can be given by "[lower bound]/[upper bound]" e.g. '
+              '"P10D/P20D" would mean that the age is in between 10 and 20 days. If only the lower bound is known, '
+              'then including only the slash after that lower bound can be used to indicate a missing bound. '
+              'For instance, "P90Y/" would indicate that the age is 90 years or older.'
+            ),
             "default": None,
         },
         {
