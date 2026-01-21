@@ -2,9 +2,11 @@
 
 ## PyNWB 3.2.0 (Upcoming)
 
+### Documentation and tutorial enhancements
+- Added documentation for `ExternalImage` to the images tutorial. @<your-github-username> [#XXXX](https://github.com/NeurodataWithoutBorders/pynwb/pull/XXXX)
+
 ### Fixed
-- Fixed invalid CSS properties in documentation assistant toggle that prevented proper positioning on displays ≥1400px wide. @rly [#2151](https://github.com/NeurodataWithoutBorders/pynwb/pull/2151)
-- 
+- Fixed invalid CSS properties in documentation assistant toggle that prevented proper positioning on displays ≥1400px wide. @rly [#2151](https://github.com/NeurodataWithoutBorders/pynwb/pull/2151) 
 
 ## PyNWB 3.1.3 (December 9, 2025)
 
