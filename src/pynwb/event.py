@@ -13,13 +13,12 @@ __all__ = [
 @register_class('TimestampVectorData', CORE_NAMESPACE)
 class TimestampVectorData(VectorData):
     """
-    A 1-dimensional VectorData that stores timestamps in seconds.
+    A 1-dimensional VectorData that stores timestamps in seconds from the session start time.
     """
 
     @docval(
         {'name': 'name', 'type': str, 'doc': 'Name of this TimestampVectorData'},
-        {'name': 'description', 'type': str, 'doc': 'Description of this TimestampVectorData',
-         'default': 'timestamps in seconds'},
+        {'name': 'description', 'type': str, 'doc': 'Description of this TimestampVectorData'},
         *get_docval(VectorData.__init__, 'data'),
         {'name': 'resolution', 'type': float,
          'doc': ('The smallest possible difference between two timestamps. Usually 1 divided by the '
