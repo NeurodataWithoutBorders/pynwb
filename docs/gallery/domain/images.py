@@ -305,6 +305,12 @@ external_reference = ExternalImage(
     image_format="JPEG",
     description="Calibration target image from external repository.",
 )
+####################
+# .. note::
+#    When sharing or publishing your data, it's important to avoid
+#    referencing images through URLs unless you can ensure that the image will
+#    remain accessible long-term. For example, links with Digital Object 
+#    Identifiers (DOIs) are generally reliable and can be used confidently.
 
 ####################
 # .. note::
