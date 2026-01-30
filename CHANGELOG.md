@@ -5,15 +5,18 @@
 ### Documentation and tutorial enhancements
 - Added documentation for `ExternalImage` to the images tutorial. @h-mayorquin [#2159](https://github.com/NeurodataWithoutBorders/pynwb/pull/2159)
 
+### Added
+- Added `get_starting_time()` and `get_duration()` methods to `TimeSeries` to get the starting time and duration of the time series. @h-mayorquin [#2146](https://github.com/NeurodataWithoutBorders/pynwb/pull/2146)
+- Added `get_starting_time()` and `get_duration()` methods to `TimeIntervals` to get the earliest start time and total duration (span from earliest start to latest stop) of all intervals. @h-mayorquin [#2146](https://github.com/NeurodataWithoutBorders/pynwb/pull/2146)
+
 ### Fixed
 - Fixed invalid CSS properties in documentation assistant toggle that prevented proper positioning on displays ≥1400px wide. @rly [#2151](https://github.com/NeurodataWithoutBorders/pynwb/pull/2151) 
+
 
 ## PyNWB 3.1.3 (December 9, 2025)
 
 ### Added
 - Added 'target_tables' kwarg to DynamicTable subclasses to allow classes that extend DynamicTable subclasses to specify the mapping of DynamicTableRegion columns to the target tables. @rly, @stephprince [#2096](https://github.com/NeurodataWithoutBorders/pynwb/issues/2096)
-- Added `get_starting_time()` and `get_duration()` methods to `TimeSeries` to get the starting time and duration of the time series. @h-mayorquin [#2146](https://github.com/NeurodataWithoutBorders/pynwb/pull/2146)
-- Added `get_starting_time()` and `get_duration()` methods to `TimeIntervals` to get the earliest start time and total duration (span from earliest start to latest stop) of all intervals. @h-mayorquin [#2146](https://github.com/NeurodataWithoutBorders/pynwb/pull/2146)
 
 ### Fixed
 - Fixed incorrect warning for path not ending in `.nwb` when no path argument was provided. @t-b [#2130](https://github.com/NeurodataWithoutBorders/pynwb/pull/2130)
