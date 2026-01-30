@@ -114,7 +114,6 @@ class TimeIntervals(DynamicTable):
         """
         if len(self) == 0:
             return None
-        import numpy as np
         starting_time = self.get_starting_time()
         # NOTE: Could be optimized to self['stop_time'].data[-1] if intervals are guaranteed sorted
         stopping_time = float(np.max(self['stop_time'].data[:]))
