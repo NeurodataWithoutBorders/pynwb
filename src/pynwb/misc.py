@@ -253,7 +253,7 @@ class Units(DynamicTable):
         index = getargs('index', kwargs)
         return np.asarray(self['obs_intervals'][index])
 
-    def get_starting_time(self) -> float | None:
+    def get_starting_time(self):
         """
         Get the earliest spike time across all units in this Units table.
 
@@ -305,7 +305,7 @@ class Units(DynamicTable):
         first_spike_times = spike_times_data[first_spike_indices]
         return float(np.min(first_spike_times))
 
-    def get_duration(self) -> float | None:
+    def get_duration(self):
         """
         Get the duration from the earliest to the latest spike time across all units.
 
