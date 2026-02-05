@@ -404,3 +404,59 @@ class UnitsTests(TestCase):
         ut.add_unit(spike_times=[])
         ut.add_unit(spike_times=[])
         self.assertIsNone(ut.get_duration())
+
+    def test_get_starting_time_empty_first_unit(self):
+        """Test get_starting_time when first unit is empty."""
+        ut = Units()
+        ut.add_unit(spike_times=[])  # empty first unit
+        ut.add_unit(spike_times=[5.0, 6.0])
+        ut.add_unit(spike_times=[2.0, 3.0])
+        self.assertEqual(ut.get_starting_time(), 2.0)
+
+    def test_get_duration_empty_first_unit(self):
+        """Test get_duration when first unit is empty."""
+        ut = Units()
+        ut.add_unit(spike_times=[])  # empty first unit
+        ut.add_unit(spike_times=[2.0, 3.0])
+        ut.add_unit(spike_times=[10.0, 15.0])
+        self.assertEqual(ut.get_duration(), 13.0)
+
+    def test_get_starting_time_empty_last_unit(self):
+        """Test get_starting_time when last unit is empty."""
+        ut = Units()
+        ut.add_unit(spike_times=[5.0, 6.0])
+        ut.add_unit(spike_times=[2.0, 3.0])
+        ut.add_unit(spike_times=[])  # empty last unit
+        self.assertEqual(ut.get_starting_time(), 2.0)
+
+    def test_get_duration_empty_last_unit(self):
+        """Test get_duration when last unit is empty."""
+        ut = Units()
+        ut.add_unit(spike_times=[2.0, 3.0])
+        ut.add_unit(spike_times=[10.0, 15.0])
+        ut.add_unit(spike_times=[])  # empty last unit
+        self.assertEqual(ut.get_duration(), 13.0)
+
+    def test_get_starting_time_multiple_empty_units(self):
+        """Test get_starting_time with multiple consecutive empty units."""
+        ut = Units()
+        ut.add_unit(spike_times=[])  # empty
+        ut.add_unit(spike_times=[])  # empty
+        ut.add_unit(spike_times=[5.0, 6.0])
+        ut.add_unit(spike_times=[])  # empty
+        ut.add_unit(spike_times=[2.0, 3.0])
+        ut.add_unit(spike_times=[])  # empty
+        ut.add_unit(spike_times=[])  # empty
+        self.assertEqual(ut.get_starting_time(), 2.0)
+
+    def test_get_duration_multiple_empty_units(self):
+        """Test get_duration with multiple consecutive empty units."""
+        ut = Units()
+        ut.add_unit(spike_times=[])  # empty
+        ut.add_unit(spike_times=[])  # empty
+        ut.add_unit(spike_times=[2.0, 3.0])
+        ut.add_unit(spike_times=[])  # empty
+        ut.add_unit(spike_times=[10.0, 15.0])
+        ut.add_unit(spike_times=[])  # empty
+        ut.add_unit(spike_times=[])  # empty
+        self.assertEqual(ut.get_duration(), 13.0)
