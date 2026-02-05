@@ -390,3 +390,17 @@ class UnitsTests(TestCase):
         ut.add_unit(spike_times=[10.0, 11.0, 12.0])
         # Duration from earliest (1.0) to latest (20.0) = 19.0
         self.assertEqual(ut.get_duration(), 19.0)
+
+    def test_get_starting_time_all_units_empty(self):
+        """Test get_starting_time returns None when all units have empty spike_times."""
+        ut = Units()
+        ut.add_unit(spike_times=[])
+        ut.add_unit(spike_times=[])
+        self.assertIsNone(ut.get_starting_time())
+
+    def test_get_duration_all_units_empty(self):
+        """Test get_duration returns None when all units have empty spike_times."""
+        ut = Units()
+        ut.add_unit(spike_times=[])
+        ut.add_unit(spike_times=[])
+        self.assertIsNone(ut.get_duration())

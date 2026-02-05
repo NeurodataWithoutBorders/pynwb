@@ -282,9 +282,6 @@ class Units(DynamicTable):
         spike_times_col = self['spike_times']
         indices = np.asarray(spike_times_col.data[:])  # Cumulative end positions
 
-        if len(indices) == 0:
-            return None
-
         # First spike indices: unit 0 starts at 0, unit i starts at indices[i-1]
         first_spike_indices = np.concatenate([[0], indices[:-1]])
         # Filter out empty units where start index == end index (no spikes)
@@ -298,7 +295,6 @@ class Units(DynamicTable):
         if isinstance(spike_times_data, list):
             spike_times_data = np.array(spike_times_data)
 
-        # Edge case: no spike data
         if len(spike_times_data) == 0:
             return None
 
@@ -338,9 +334,6 @@ class Units(DynamicTable):
 
         spike_times_col = self['spike_times']
         indices = np.asarray(spike_times_col.data[:])  # Cumulative end positions
-
-        if len(indices) == 0:
-            return None
 
         # First spike indices: unit 0 starts at 0, unit i starts at indices[i-1]
         first_spike_indices = np.concatenate([[0], indices[:-1]])
