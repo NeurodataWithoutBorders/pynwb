@@ -292,6 +292,7 @@ class Units(DynamicTable):
             return None
 
         spike_times_data = spike_times_col.target.data
+        # In-memory data might be stored as a list which doesn't support numpy operations below
         if isinstance(spike_times_data, list):
             spike_times_data = np.array(spike_times_data)
 
@@ -347,6 +348,7 @@ class Units(DynamicTable):
         all_indices = np.unique(np.concatenate([first_spike_indices, last_spike_indices]))
 
         spike_times_data = spike_times_col.target.data
+        # In-memory data might be stored as a list which doesn't support numpy operations below
         if isinstance(spike_times_data, list):
             spike_times_data = np.array(spike_times_data)
 
@@ -354,9 +356,6 @@ class Units(DynamicTable):
             return None
 
         boundary_spike_times = spike_times_data[all_indices]
-
-        if len(boundary_spike_times) == 0:
-            return None
 
         first_spike_time = float(np.min(boundary_spike_times))
         last_spike_time = float(np.max(boundary_spike_times))
