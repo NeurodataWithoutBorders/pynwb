@@ -237,7 +237,7 @@ def _validate_single_file(**kwargs):
             )
 
     # validate against namespaces
-    validation_reports = []
+    validation_errors = []
 
     for validation_namespace in namespaces_to_validate:
         if verbose:
@@ -247,16 +247,9 @@ def _validate_single_file(**kwargs):
             )
 
         raw_errors = _validate_helper(io=io, namespace=validation_namespace)
-
-        report = ValidationReport(
-            path=path,
-            namespace=validation_namespace,
-            errors=raw_errors,
-        )
-
-        validation_reports.append(report)
+        validation_errors.extend(raw_errors)
 
     if path is not None:
         io.close()
 
-    return validation_reports
+    return validation_errors
