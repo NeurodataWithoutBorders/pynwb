@@ -37,6 +37,8 @@ def get_nwb_version(builder: Builder, include_prerelease=False) -> Tuple[int, ..
             return (2, 0, 0)
         else:
             return (2, 0, 0, "b")
+
+    nwb_version = nwb_version.removeprefix("NWB-")
     nwb_version_match = re.match(r"(\d+\.\d+\.\d+)", nwb_version)[0]  # trim off any non-numeric symbols at end
     version_list = [int(i) for i in nwb_version_match.split(".")]
     if include_prerelease:

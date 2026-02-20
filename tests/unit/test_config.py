@@ -20,7 +20,7 @@ class TestPyNWBTypeConfig(TestCase):
     def setUp(self):
         if not REQUIREMENTS_INSTALLED:
             self.skipTest("optional LinkML module is not installed")
-        CUR_DIR = os.path.dirname(os.path.realpath(__file__))    
+        CUR_DIR = os.path.dirname(os.path.realpath(__file__))
         path_to_config = os.path.join(CUR_DIR, 'test_config/test_nwb_config.yaml')
         load_type_config(config_path=path_to_config)
 

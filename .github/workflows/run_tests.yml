@@ -24,7 +24,7 @@ jobs:
           - { name: linux-python3.13-upgraded    , test-tox-env: test-py313-upgraded  , build-tox-env: build-py313-upgraded , python-ver: "3.13", os: ubuntu-latest , upload-wheels: true }
           - { name: windows-python3.9-minimum    , test-tox-env: test-py39-minimum    , build-tox-env: build-py39-minimum   , python-ver: "3.9" , os: windows-latest }
           - { name: windows-python3.13-upgraded  , test-tox-env: test-py313-upgraded  , build-tox-env: build-py313-upgraded , python-ver: "3.13", os: windows-latest }
-          - { name: macos-python3.9-minimum      , test-tox-env: test-py39-minimum    , build-tox-env: build-py39-minimum   , python-ver: "3.9" , os: macos-13 }
+          - { name: macos-python3.9-minimum      , test-tox-env: test-py39-minimum    , build-tox-env: build-py39-minimum   , python-ver: "3.9" , os: macos-15-intel }
           - { name: macos-python3.13-upgraded    , test-tox-env: test-py313-upgraded  , build-tox-env: build-py313-upgraded , python-ver: "3.13" , os: macos-latest }
     steps:
       - name: Cancel non-latest runs

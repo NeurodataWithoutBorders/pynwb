@@ -1,8 +1,59 @@
 # PyNWB Changelog
 
-## PyNWB 3.1.0 (Upcoming)
-### Enhancements and minor changes
+## PyNWB 3.2.0 (Upcoming)
+
+### Documentation and tutorial enhancements
+- Added documentation for `ExternalImage` to the images tutorial. @h-mayorquin [#2159](https://github.com/NeurodataWithoutBorders/pynwb/pull/2159)
+
+### Added
 - Added HERD to to `general` within the the `NWBFile`. @mavaylon1 [#2111](https://github.com/NeurodataWithoutBorders/pynwb/pull/2111)
+- Added `get_starting_time()` and `get_duration()` methods to `TimeSeries` to get the starting time and duration of the time series. @h-mayorquin [#2146](https://github.com/NeurodataWithoutBorders/pynwb/pull/2146)
+- Added `get_starting_time()` and `get_duration()` methods to `TimeIntervals` to get the earliest start time and total duration (span from earliest start to latest stop) of all intervals. @h-mayorquin [#2146](https://github.com/NeurodataWithoutBorders/pynwb/pull/2146)
+- Added `get_starting_time()` and `get_duration()` methods to `Units` to get the earliest spike time and total duration (span from earliest to latest spike) across all units. @h-mayorquin [#2164](https://github.com/NeurodataWithoutBorders/pynwb/pull/2164)
+
+### Fixed
+- Fixed invalid CSS properties in documentation assistant toggle that prevented proper positioning on displays ≥1400px wide. @rly [#2151](https://github.com/NeurodataWithoutBorders/pynwb/pull/2151) 
+
+
+## PyNWB 3.1.3 (December 9, 2025)
+
+### Added
+- Added 'target_tables' kwarg to DynamicTable subclasses to allow classes that extend DynamicTable subclasses to specify the mapping of DynamicTableRegion columns to the target tables. @rly, @stephprince [#2096](https://github.com/NeurodataWithoutBorders/pynwb/issues/2096)
+
+### Fixed
+- Fixed incorrect warning for path not ending in `.nwb` when no path argument was provided. @t-b [#2130](https://github.com/NeurodataWithoutBorders/pynwb/pull/2130)
+- Fixed inability to read files created with extensions that had schema conflicts with the DeviceModel type introduced in NWB Schema 2.9.0. @stephprince [#2132](https://github.com/NeurodataWithoutBorders/pynwb/pull/2132)
+- Fixed issue with setting `neurodata_type_inc` when reading NWB files with cached schema versions less than 2.2.0. @rly [#2135](https://github.com/NeurodataWithoutBorders/pynwb/pull/2135)
+- Fixed import structure test. @rly [#2136](https://github.com/NeurodataWithoutBorders/pynwb/pull/2136)
+
+### Changed
+- Change UI of documentation assistant to be an accordion that is always visible. @bendichter [#2124](https://github.com/NeurodataWithoutBorders/pynwb/pull/2124)
+- Updated minimum HDMF version to 4.1.2 and updated tests accordingly. @rly [#2144](https://github.com/NeurodataWithoutBorders/pynwb/pull/2144)
+
+
+## PyNWB 3.1.2 (August 13, 2025)
+
+### Fixed
+- Fixed parsing of the nwb_version attribute which followed the previous suggestion to have a `NWB-` prefix.
+  @t-b [#2118](https://github.com/NeurodataWithoutBorders/pynwb/pull/2118)
+- Fixed a performance regression introduced in pynwb 2.8.0 that affected reading NWB files with a large
+  number of objects or fields of objects. @rly [#2121](https://github.com/NeurodataWithoutBorders/pynwb/pull/2121)
+- Fixed `load_type_config`, `unload_type_config`, and `get_loaded_type_config` acting on a copy of the global type map
+  instead of the global type map itself. @rly [#2121](https://github.com/NeurodataWithoutBorders/pynwb/pull/2121)
+
+### Changed
+- Added an argument `copy` to `get_type_map` to control whether a copy of the type map is returned or not.
+  If `copy=False`, the returned type map will be a direct reference to the global type map. @rly
+  [#2121](https://github.com/NeurodataWithoutBorders/pynwb/pull/2121)
+- Deprecated calling `get_type_map` with the `extensions` argument. Call `load_namespaces` on the returned `TypeMap`
+  instead. @rly [#2121](https://github.com/NeurodataWithoutBorders/pynwb/pull/2121)
+
+## PyNWB 3.1.1 (July 22, 2025)
+
+### Bug fixes
+- Fixed reading and exporting of files written with NWB Schema < 2.9.0 that contained a reference to the electrodes table. @rly [#2112](https://github.com/NeurodataWithoutBorders/pynwb/pull/2112)
+- Updated tests to skip streaming tests gracefully if offline. @rly [#2113](https://github.com/NeurodataWithoutBorders/pynwb/pull/2113)
+- Added check in `PlaneSegmentation` constructor for required columns. @rly [#2102](https://github.com/NeurodataWithoutBorders/pynwb/pull/2102)
 
 ## PyNWB 3.1.0 (July 8, 2025)
 
@@ -39,7 +90,7 @@
 - Fixed caching of the type map when using HDMF 4.1.0. @rly [#2087](https://github.com/NeurodataWithoutBorders/pynwb/pull/2087)
 - Removed use of complex numbers in scratch tutorial because of incompatibilities with HDMF 4.1.0. @stephprince [#2090](https://github.com/NeurodataWithoutBorders/pynwb/pull/2090/)
 - Made `ImagingPlane.description` optional to conform with the NWB Schema. @rly [#2051](https://github.com/NeurodataWithoutBorders/pynwb/pull/2051)
-  
+
 ### Documentation and tutorial enhancements
 - Added NWB AI assistant to the home page of the documentation. @magland [#2076](https://github.com/NeurodataWithoutBorders/pynwb/pull/2076)
 

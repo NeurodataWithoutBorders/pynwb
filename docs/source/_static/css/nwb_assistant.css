@@ -1,66 +1,188 @@
+/* Accordion-style assistant toggle tab */
 .assistant-toggle {
-    display: none;
     position: fixed;
-    right: 20px;
-    top: 20px;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
     z-index: 1001;
-    padding: 8px 16px;
+    padding: 12px 8px;
     background-color: #2980b9;
     color: white;
     border: none;
-    border-radius: 4px;
+    border-radius: 8px 0 0 8px;
     cursor: pointer;
     font-size: 14px;
-}
-
-/* Hide button when assistant is open */
-.assistant-container.show ~ .assistant-toggle {
-    display: none !important;
+    font-weight: bold;
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    box-shadow: -2px 0 5px rgba(0,0,0,0.2);
+    transition: background-color 0.3s ease-in-out, transform 0.3s ease-in-out, right 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+    min-height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .assistant-toggle:hover {
     background-color: #3498db;
+    transform: translateY(-50%) translateX(-2px);
+    box-shadow: -4px 0 8px rgba(0,0,0,0.3);
+}
+
+/* Change tab appearance when assistant is open */
+.assistant-container.show ~ .assistant-toggle {
+    background-color: #e74c3c;
+    right: 400px;
+}
+
+.assistant-container.show ~ .assistant-toggle {
+    font-size: 0; /* Hide original text */
+}
+
+.assistant-container.show ~ .assistant-toggle::before {
+    content: "Close Assistant";
+    font-size: 14px; /* Restore font size for the pseudo-element */
+}
+
+.assistant-container.show ~ .assistant-toggle:hover {
+    background-color: #c0392b;
 }
 
 .assistant-container {
-    display: none;
+    position: fixed;
+    right: 0;
+    top: 0;
+    width: 0;
+    height: 100vh;
+    z-index: 1000;
+    background: white;
+    border-left: 1px solid #ddd;
+    box-shadow: -2px 0 10px rgba(0,0,0,0.1);
+    transition: width 0.3s ease-in-out;
+    overflow: hidden;
 }
 
-@media (min-width: 1300px) {
+.assistant-container.show {
+    width: 400px;
+}
+
+.assistant-iframe {
+    width: 400px;
+    height: 100%;
+    border: none;
+    background: white;
+}
+
+/* Add close button inside the assistant */
+.assistant-close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: #e74c3c;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    cursor: pointer;
+    font-size: 18px;
+    line-height: 1;
+    z-index: 1002;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.assistant-close:hover {
+    background: #c0392b;
+}
+
+/* Adjust main content when assistant is open */
+.wy-nav-content {
+    transition: margin-right 0.3s ease-in-out;
+}
+
+.assistant-container.show ~ .wy-nav-content {
+    margin-right: 400px;
+}
+
+/* Tablet and medium screens */
+@media (max-width: 1200px) and (min-width: 768px) {
+    .assistant-container.show {
+        width: 350px;
+    }
+    
+    .assistant-iframe {
+        width: 350px;
+    }
+    
+    .assistant-container.show ~ .wy-nav-content {
+        margin-right: 350px;
+    }
+    
+    .assistant-container.show ~ .assistant-toggle {
+        right: 350px;
+    }
+}
+
+/* Mobile devices - full overlay */
+@media (max-width: 767px) {
     .assistant-toggle {
-        display: block;
+        right: 10px;
+        top: 20px;
+        transform: none;
+        writing-mode: horizontal-tb;
+        text-orientation: unset;
+        border-radius: 4px;
+        padding: 8px 12px;
+        min-height: auto;
+    }
+
+    .assistant-toggle:hover {
+        transform: translateX(-2px);
+    }
+
+    .assistant-container.show ~ .assistant-toggle {
+        position: fixed;
+        right: 10px;
+        top: 20px;
+        transform: none;
+        z-index: 1003;
     }
 
     .assistant-container {
-        display: block;
-        visibility: hidden;
-        position: fixed;
-        right: 0;
-        top: 0;
-        width: calc(100vw - 1140px);
-        height: 100vh;
-        z-index: 1000;
-        transform: translateX(100%);
-        transition: transform 0.3s ease-in-out, visibility 0.3s ease-in-out;
+        width: 0;
+        border-left: none;
     }
 
     .assistant-container.show {
-        visibility: visible;
-        transform: translateX(0);
+        width: 100vw;
     }
 
     .assistant-iframe {
-        width: 100%;
-        height: 100%;
-        border: none;
-        background: white;
-    }
-
-    .wy-nav-content {
-        transition: margin-right 0.3s ease-in-out;
+        width: 100vw;
     }
 
     .assistant-container.show ~ .wy-nav-content {
-        margin-right: calc(100vw - 1140px);
+        margin-right: 0;
+    }
+}
+
+/* For very large screens, use more space */
+@media (min-width: 1400px) {
+    .assistant-container.show {
+        width: min(calc(100vw - 1140px), 600px);
+    }
+    
+    .assistant-iframe {
+        width: min(calc(100vw - 1140px), 600px);
+    }
+    
+    .assistant-container.show ~ .wy-nav-content {
+        margin-right: min(calc(100vw - 1140px), 600px);
+    }
+    
+    .assistant-container.show ~ .assistant-toggle {
+        right: min(calc(100vw - 1140px), 600px);
     }
 }

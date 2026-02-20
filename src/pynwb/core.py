@@ -61,7 +61,7 @@ class NWBMixin(AbstractContainer):
             raise ValueError(error_msg)
 
     def _get_type_map(self):
-        return get_type_map()
+        return get_type_map(copy=False)
 
     @property
     def data_type(self):

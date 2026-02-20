@@ -1,8 +1,10 @@
 import numpy as np
 from pathlib import Path
+import tempfile
 import warnings
 
 from pynwb import NWBHDF5IO, validate, TimeSeries
+from pynwb.device import DeviceModel
 from pynwb.ecephys import ElectrodesTable
 from pynwb.image import ImageSeries
 from pynwb.misc import FrequencyBandsTable
@@ -140,9 +142,80 @@ class TestReadOldVersions(TestCase):
             read_nwbfile = io.read()
             assert isinstance(read_nwbfile.electrodes, ElectrodesTable)
 
+            # test that references to the electrodes table are also ElectrodesTable
+            assert read_nwbfile.units.electrodes.table is read_nwbfile.electrodes
+            assert read_nwbfile.acquisition["ElectricalSeries"].electrodes.table is read_nwbfile.electrodes
+
+            # test that export writes the correct builders
+            with tempfile.TemporaryDirectory() as temp_dir:
+                export_file = Path(temp_dir) / "3.0.0_electrodes_dynamic_table_export.nwb"
+                with NWBHDF5IO(export_file, 'w') as export_io:
+                    export_io.export(io)
+
+                with self.get_io(export_file) as read_export_io:
+                    read_export_nwbfile = read_export_io.read()
+                    assert isinstance(read_export_nwbfile.electrodes, ElectrodesTable)
+
+                    # test that references to the electrodes table are also ElectrodesTable
+                    units_table_ref = read_export_nwbfile.units.electrodes.table
+                    assert units_table_ref is read_export_nwbfile.electrodes
+                    eseries_table_ref = read_export_nwbfile.acquisition["ElectricalSeries"].electrodes.table
+                    assert eseries_table_ref is read_export_nwbfile.electrodes
+
     def test_read_bands_table_as_neurodata_type(self):
         """Test that a "bands" table written as a DynamicTable is read as an FrequencyBandsTable"""
         f = Path(__file__).parent / '3.0.0_decompositionseries_bands_dynamic_table.nwb'
         with self.get_io(f) as io:
             read_nwbfile = io.read()
             assert isinstance(read_nwbfile.processing['test_mod']['LFPSpectralAnalysis'].bands, FrequencyBandsTable)
+    
+    def test_read_device_model_str_attribute(self):
+        """Test that a Device.model written as a string attribute is read and remapped to a DeviceModel object"""
+        f = Path(__file__).parent / '3.0.0_fiber_photometry_extension.nwb'
+        with self.get_io(f) as io:
+            # assert warning is issued to inform user the attribute is being remapped
+            with self.assertWarnsWith(UserWarning,
+                                      'Device.model was detected as a string, ' \
+                                      'but NWB 2.9 specifies Device.model as a link to a DeviceModel. '
+                                      'Remapping "dichroic mirror model" to a new DeviceModel.'):
+                read_nwbfile = io.read()
+
+            # assert data was remapped correctly
+            device = read_nwbfile.devices['dichroic_mirror_1']
+            self.assertIsInstance(device.model, DeviceModel)
+            self.assertEqual(device.model.name, 'dichroic mirror model')
+            self.assertEqual(device.model.description, 'Dichroic mirror for green indicator')
+            self.assertEqual(device.model.manufacturer, '')
+            self.assertEqual(device.model.model_number, None)
+    
+    def test_read_device_model_link_to_other_object(self):
+        """Test that a Device.model written as a link to another object is read and remapped to a new attribute"""
+        f = Path(__file__).parent / '3.0.0_optogenetics_extension.nwb'
+        with self.get_io(f) as io:
+            # assert warning is issued to inform user where old data is being remapped
+            with self.assertWarnsWith(UserWarning,
+                                      'The model attribute of the Device "Lambda" was detected as a non-DeviceModel '
+                                      'object. Data associated with this object can be accessed at '
+                                      '\"nwbfile.devices["Lambda"].ndx_optogenetics_model\"'):
+                read_nwbfile = io.read()
+
+            # assert data was remapped correctly
+            device = read_nwbfile.devices['Lambda']
+            self.assertIsNone(device.model)
+            self.assertIsNotNone(device.ndx_optogenetics_model)
+            self.assertEqual(device.ndx_optogenetics_model.name, 'Lambda Model')
+            self.assertEqual(device.ndx_optogenetics_model.description, 'Lambda fiber (tapered fiber) from Optogenix.')
+            self.assertEqual(device.ndx_optogenetics_model.numerical_aperture, 0.39)
+
+    def test_read_device_model_link_to_extension_device_model(self):
+        """Test that a Device.model written as a link to an extension DeviceModel object is read successfully"""
+        f = Path(__file__).parent / '3.0.0_ophys_devices_extension.nwb'
+        with self.get_io(f) as io:
+            read_nwbfile = io.read()
+
+            # assert model is read correct
+            band_optical_filter = read_nwbfile.devices['band_optical_filter']
+            self.assertIsInstance(band_optical_filter.model, DeviceModel)
+            self.assertEqual(band_optical_filter.model.name, 'band_optical_filter_model')
+            self.assertEqual(band_optical_filter.model.description, 'Band optical filter model for green indicator')
+            self.assertEqual(band_optical_filter.model.bandwidth_in_nm, 30.0)

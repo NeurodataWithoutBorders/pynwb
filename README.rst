@@ -13,6 +13,8 @@ Latest Release
 .. image:: https://anaconda.org/conda-forge/pynwb/badges/version.svg
      :target: https://anaconda.org/conda-forge/pynwb
 
+.. image:: https://zenodo.org/badge/99273369.svg
+  :target: https://doi.org/10.5281/zenodo.10582180
 
 Overall Health
 ==============
@@ -40,6 +42,9 @@ Overall Health
 
 .. image:: https://github.com/NeurodataWithoutBorders/pynwb/actions/workflows/deploy_release.yml/badge.svg
     :target: https://github.com/NeurodataWithoutBorders/pynwb/actions/workflows/deploy_release.yml
+
+.. image:: https://codecov.io/gh/NeurodataWithoutBorders/pynwb/branch/dev/graph/badge.svg
+    :target: https://codecov.io/gh/NeurodataWithoutBorders/pynwb
 
 .. image:: https://readthedocs.org/projects/pynwb/badge/?version=latest
      :target: https://pynwb.readthedocs.io/en/latest/?badge=latest

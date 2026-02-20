@@ -38,7 +38,7 @@ breaking down the barriers to data sharing in neuroscience.
 
          // Load iframe content only when first opened
          if (isShowing && !iframeLoaded) {
-           iframe.src = 'https://magland.github.io/nwb-assistant/chat';
+           iframe.src = 'https://nwb-assistant.neurosift.app/';
            iframeLoaded = true;
          }
        });

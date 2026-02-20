@@ -19,7 +19,8 @@ def create_test_extension(specs, container_classes, mappers=None):
     export_spec(ns_builder, specs, output_dir.name)
 
     # this will copy the global pynwb TypeMap and add the extension types to the copy
-    type_map = get_type_map(f"{output_dir.name}/{NAMESPACE_NAME}.namespace.yaml")
+    type_map = get_type_map()
+    type_map.load_namespaces(f"{output_dir.name}/{NAMESPACE_NAME}.namespace.yaml")
     for type_name, container_cls in container_classes.items():
         type_map.register_container_type(NAMESPACE_NAME, type_name, container_cls)
     if mappers:

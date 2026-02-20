@@ -89,7 +89,8 @@ class ElectrodesTable(DynamicTable):
                                               'for this electrode.'), 'required': False}
     )
 
-    @docval(*get_docval(DynamicTable.__init__, 'id', 'columns', 'colnames'))
+    @docval(*get_docval(DynamicTable.__init__, 'id', 'columns', 'colnames', 'target_tables'),
+            allow_positional=AllowPositional.WARNING,)
     def __init__(self, **kwargs):
         kwargs['name'] = 'electrodes'
         kwargs['description'] = 'metadata about extracellular electrodes'
