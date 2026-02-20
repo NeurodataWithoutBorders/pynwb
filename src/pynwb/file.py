@@ -9,6 +9,7 @@ import pandas as pd
 
 from hdmf.common import DynamicTableRegion, DynamicTable
 from hdmf.container import HERDManager
+from hdmf.common import HERD
 from hdmf.utils import docval, getargs, get_docval, popargs, popargs_to_dict, AllowPositional
 
 from . import register_class, CORE_NAMESPACE
@@ -287,6 +288,7 @@ class NWBFile(MultiContainerInterface, HERDManager):
                      {'name': 'trials', 'child': True, 'required_name': 'trials'},
                      {'name': 'units', 'child': True, 'required_name': 'units'},
                      {'name': 'subject', 'child': True, 'required_name': 'subject'},
+                     {'name': 'external_resources', 'child': True, 'required_name': 'external_resources'},
                      {'name': 'sweep_table', 'child': True, 'required_name': 'sweep_table'},
                      {'name': 'invalid_times', 'child': True, 'required_name': 'invalid_times'},
                      # icephys_filtering is temporary. /intracellular_ephys/filtering dataset will be deprecated
@@ -339,7 +341,8 @@ class NWBFile(MultiContainerInterface, HERDManager):
             {'name': 'keywords', 'type': 'array_data', 'doc': 'Terms to search over', 'default': None},
             {'name': 'notes', 'type': str,
              'doc': 'Notes about the experiment.', 'default': None},
-            {'name': 'external_resources', 'child': True, 'required_name': 'external_resources'},
+            {'name': 'external_resources', 'type': HERD,
+             'doc': 'the HERD external resources object for this NWBFile', 'default': None},
             {'name': 'pharmacology', 'type': str,
              'doc': 'Description of drugs used, including how and when they were administered. '
                     'Anesthesia(s), painkiller(s), etc., plus dosage, concentration, etc.', 'default': None},
