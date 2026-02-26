@@ -37,9 +37,12 @@ nwbfile = NWBFile(
 # The :py:mod:`~pynwb.ogen` module contains two data types that you will need to write optogenetics data,
 # :py:class:`~pynwb.ogen.OptogeneticStimulusSite`, which contains metadata about the stimulus site, and
 # :py:class:`~pynwb.ogen.OptogeneticSeries`, which contains the power applied by the laser over time, in watts.
+#
 # In pynwb, device-related metadata is split into two levels:
-# ``DeviceModel`` stores metadata shared across devices of the same type (e.g., manufacturer, model number),
-# while ``Device`` represents the specific physical device used in an experiment.
+# :py:class:`~pynwb.device.DeviceModel` stores metadata shared across devices of the same type (e.g., manufacturer,
+# model number), while :py:class:`~pynwb.device.Device` represents the specific physical device used in an
+# experiment.
+#
 # First, you need to create a :py:class:`~pynwb.device.Device` object linked to the :py:class:`~pynwb.file.NWBFile`
 # to represent the optogenetic stimulation system. It is recommended to add as much metadata about the
 # system/device as possible to inform others using the data. A :py:class:`~pynwb.device.Device` object has

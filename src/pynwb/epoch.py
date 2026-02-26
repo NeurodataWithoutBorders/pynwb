@@ -1,5 +1,7 @@
 from bisect import bisect_left
 
+import numpy as np
+
 from hdmf.data_utils import DataIO
 from hdmf.common import DynamicTable
 from hdmf.utils import docval, getargs, popargs, get_docval, AllowPositional
@@ -81,3 +83,38 @@ class TimeIntervals(DynamicTable):
         count = stop_idx - start_idx
         idx_start = start_idx
         return int(idx_start), int(count)
+
+    def get_starting_time(self):
+        """
+        Get the earliest start time across all intervals in this TimeIntervals table.
+
+        Returns
+        -------
+        float or None
+            The earliest start time in seconds, or None if the table is empty.
+        """
+        if len(self) == 0:
+            return None
+        # NOTE: Could be optimized to self['start_time'].data[0] if intervals are guaranteed sorted
+        return float(np.min(self['start_time'].data[:]))
+
+    def get_duration(self):
+        """
+        Get the total duration from the earliest start time to the latest stop time.
+
+        Returns
+        -------
+        float or None
+            The duration in seconds, or None if the table is empty.
+
+        Notes
+        -----
+        The duration represents the time span from the earliest interval start to the
+        latest interval stop, not the sum of individual interval durations.
+        """
+        if len(self) == 0:
+            return None
+        starting_time = self.get_starting_time()
+        # NOTE: Could be optimized to self['stop_time'].data[-1] if intervals are guaranteed sorted
+        stopping_time = float(np.max(self['stop_time'].data[:]))
+        return stopping_time - starting_time

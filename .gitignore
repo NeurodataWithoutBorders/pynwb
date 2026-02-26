@@ -87,3 +87,4 @@ _version.py
 core_typemap.pkl
 
 venv/
+uv.lock
