@@ -35,7 +35,7 @@ Install release from Conda-forge
 --------------------------------
 
 `Conda-forge <https://conda-forge.org>`_ is a community led collection of recipes, build infrastructure
-and distributions for the `conda <https://conda.io/docs/>`_ package manager.
+and distributions for the `conda <https://docs.conda.io/projects/conda/en/latest/>`_ package manager.
 
 To install or update PyNWB distribution from conda-forge using conda simply run:
 

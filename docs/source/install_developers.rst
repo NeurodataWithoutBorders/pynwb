@@ -18,7 +18,7 @@ the virtualenv_ tool to create a new virtual environment. Or you can use the
 `conda package and environment management system`_ for managing virtual environments.
 
 .. _virtualenv: https://virtualenv.pypa.io/en/stable/
-.. _conda package and environment management system: https://conda.io/projects/conda/en/latest/index.html
+.. _conda package and environment management system: https://docs.conda.io/projects/conda/en/latest/index.html
 
 Option 1: Using virtualenv
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -69,7 +69,7 @@ in a conda environment.
 Activate your newly created virtual environment using the above command whenever you want to work on HDMF. You can also
 deactivate it using the ``conda deactivate`` command to return to the base environment.
 
-.. _Anaconda: https://www.anaconda.com/distribution
+.. _Anaconda: https://www.anaconda.com/download
 
 
 Install from Git repository
