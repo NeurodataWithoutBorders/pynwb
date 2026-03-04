@@ -85,19 +85,28 @@ nwbfile = NWBFile(
 #     :alt: imaging plane UML diagram
 #     :align: center
 #
-# Create a :py:class:`~pynwb.device.Device` named ``"Microscope"`` in the :py:class:`~pynwb.file.NWBFile` object. Then
-# create an  :py:class:`~pynwb.ophys.OpticalChannel` named ``"OpticalChannel"``. The fields
-# ``description``, ``manufacturer``, ``model_number``, ``model_name``, and ``serial_number`` are optional, but
-# recommended.
+# Create a :py:class:`~pynwb.device.Device` named ``"Thorlabs Bergamo II"`` in the
+# :py:class:`~pynwb.file.NWBFile` object. The fields
+# ``description``, ``serial_number``, and ``model`` are optional, but recommended. The
+# :py:class:`~pynwb.device.DeviceModel` object stores information about the device model, which can be useful
+# when searching a set of NWB files or a data archive for all files that use a specific device model
+# (e.g., specific microscope model).
+# Then create an :py:class:`~pynwb.ophys.OpticalChannel` named ``"OpticalChannel"``.
+
+device_model = nwbfile.create_device_model(
+    name="Thorlabs Bergamo II Model",
+    description="Two-photon microscope for in vivo imaging",
+    manufacturer="Thorlabs",
+    model_number="Bergamo II",
+)
 
 device = nwbfile.create_device(
-    name="Microscope",
-    description="My two-photon microscope",
-    manufacturer="Loki Labs",
-    model_number="ABC-123",
-    model_name="Loki 1.0",
-    serial_number="1234567890",
+    name="Thorlabs Bergamo II",
+    description="Two-photon microscope for in vivo imaging",
+    model=device_model,
+    serial_number="SN-123456789",
 )
+
 optical_channel = OpticalChannel(
     name="OpticalChannel",
     description="an optical channel",
