@@ -81,7 +81,7 @@ ns_builder.export(ns_path)
 # .. tip::
 #
 #     Detailed documentation of all components and `neurodata_types` that are part of the core schema of NWB:N are
-#     available in the schema docs at `https://nwb-schema.readthedocs.io/en/latest/ <https://nwb-schema.readthedocs.io/en/latest/>`_ .
+#     available in the `schema docs <https://nwb-schema.readthedocs.io/en/latest/>`_ .
 #     Before creating a new type from scratch, please have a look at the schema docs to see if using or extending an
 #     existing type may solve your problem. Also, the schema docs are helpful when extending an existing type to
 #     better understand the design and structure of the neurodata_type you are using.
