@@ -13,6 +13,8 @@
 ### Fixed
 - Fixed invalid CSS properties in documentation assistant toggle that prevented proper positioning on displays ≥1400px wide. @rly [#2151](https://github.com/NeurodataWithoutBorders/pynwb/pull/2151) 
 
+### Changed
+- Added Python 3.14 support. @bendichter
 
 ## PyNWB 3.1.3 (December 9, 2025)
 

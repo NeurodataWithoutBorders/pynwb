@@ -66,6 +66,7 @@ body:
         - "3.11"
         - "3.12"
         - "3.13"
+        - "3.14"
         - "higher version (not yet supported)"
     validations:
       required: true
