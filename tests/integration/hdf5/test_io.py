@@ -440,6 +440,7 @@ class TestNWBHDF5IO(TestCase):
 
     def tearDown(self):
         remove_test_file(self.path)
+        remove_test_file(Path(self.path).with_suffix('.h5'))
 
     def test_nwb_version_property(self):
         """Test reading of files with missing nwb_version"""
