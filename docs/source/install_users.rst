@@ -6,7 +6,7 @@ Installing PyNWB
 
 PyNWB has the following minimum requirements, which must be installed before you can get started using PyNWB.
 
-#. Python 3.9, 3.10, 3.11, 3.12, or 3.13
+#. Python 3.10, 3.11, 3.12, or 3.13
 #. pip
 
 .. note:: If you are a developer then please see the :ref:`install_developers` installation instructions instead.
@@ -53,5 +53,3 @@ own project against the latest version of PyNWB.
 .. code::
 
    $ pip install -U pynwb --find-links https://github.com/NeurodataWithoutBorders/pynwb/releases/tag/latest  --no-index
-
-
