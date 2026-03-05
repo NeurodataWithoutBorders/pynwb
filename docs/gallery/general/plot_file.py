@@ -14,7 +14,7 @@ a brief overview of the basic concepts of NWB.
 Background: Basic concepts
 --------------------------
 
-In the `NWB Format <https://nwb-schema.readthedocs.io>`_, each experiment session is typically
+In the `NWB Format <https://nwb-schema.readthedocs.io/en/latest/>`_, each experiment session is typically
 represented by a separate NWB file. NWB files are represented in PyNWB by :py:class:`~pynwb.file.NWBFile`
 objects which provide functionality for creating and retrieving:
 

@@ -175,7 +175,7 @@ Publish release on PyPI: Step-by-step
 
 
 .. _GPG signing key: https://docs.github.com/en/authentication/managing-commit-signature-verification/generating-a-new-gpg-key
-.. _ReadTheDocs project: https://readthedocs.org/projects/pynwb/builds/
+.. _ReadTheDocs project: https://app.readthedocs.org/projects/pynwb/builds/
 .. _PyNWB PyPI project page: https://pypi.org/project/pynwb
 .. _Python instructions for creating a virtual environment: https://docs.python.org/3/library/venv.html#creating-virtual-environments
 .. _PyPI: https://pypi.org/project/pynwb
@@ -239,8 +239,8 @@ In order to release a new version on conda-forge manually, follow the steps belo
 
 6. Modify ``meta.yaml``.
 
-   Update the `version string (line 2) <https://github.com/conda-forge/pynwb-feedstock/blob/master/recipe/meta.yaml>`_ and
-   `sha256 (line 3) <https://github.com/conda-forge/pynwb-feedstock/blob/master/recipe/meta.yaml>`_.
+   Update the `version string (line 2) <https://github.com/conda-forge/pynwb-feedstock/blob/main/recipe/meta.yaml>`_ and
+   `sha256 (line 3) <https://github.com/conda-forge/pynwb-feedstock/blob/main/recipe/meta.yaml>`_.
 
    We have to modify the sha and the version string in the ``meta.yaml`` file.
 
