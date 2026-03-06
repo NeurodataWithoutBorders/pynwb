@@ -46,7 +46,7 @@ Overall Health
 .. image:: https://codecov.io/gh/NeurodataWithoutBorders/pynwb/branch/dev/graph/badge.svg
     :target: https://codecov.io/gh/NeurodataWithoutBorders/pynwb
 
-.. image:: https://readthedocs.org/projects/pynwb/badge/?version=latest
+.. image:: https://app.readthedocs.org/projects/pynwb/badge/?version=latest
      :target: https://pynwb.readthedocs.io/en/latest/?badge=latest
      :alt: Documentation Status
 
@@ -64,9 +64,9 @@ NWB Format API
 ==============
 
 PyNWB is a Python package for working with NWB files. It provides a high-level API for
-efficiently working with Neurodata stored in the `NWB format <https://nwb-schema.readthedocs.io>`_.
+efficiently working with Neurodata stored in the `NWB format <https://nwb-schema.readthedocs.io/en/latest/>`_.
 
-`Neurodata Without Borders (NWB) <http://www.nwb.org/>`_ is a project to develop a
+`Neurodata Without Borders (NWB) <https://nwb.org/>`_ is a project to develop a
 unified data format for cellular-based neurophysiology data, focused on the
 dynamics of groups of neurons measured under a large range of experimental
 conditions.

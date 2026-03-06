@@ -14,11 +14,10 @@ authors = [
 ]
 description= "Package for working with Neurodata stored in the NWB format."
 readme = "README.rst"
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 license = {text = "BSD-3-Clause"}
 classifiers = [
         "Programming Language :: Python",
-        "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
         "Programming Language :: Python :: 3.12",
@@ -33,10 +32,10 @@ classifiers = [
         "Topic :: Scientific/Engineering :: Medical Science Apps."
 ]
 dependencies = [
-    "h5py>=3.2.0",
+    "h5py>=3.6.0",
     "hdmf>=5.0.0,<6",
     "numpy>=1.24.0",
-    "pandas>=1.2.0",
+    "pandas>=1.3.5",
     "python-dateutil>=2.8.2",
     "platformdirs>=4.1.0"
 ]
@@ -122,4 +121,3 @@ line-length = 120
 
 [tool.ruff.lint.mccabe]
 max-complexity = 17
-
