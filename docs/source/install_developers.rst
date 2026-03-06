@@ -6,7 +6,7 @@ Installing PyNWB for Developers
 
 PyNWB has the following minimum requirements, which must be installed before you can get started using PyNWB.
 
-#. Python 3.9, 3.10, 3.11, 3.12, or 3.13
+#. Python 3.10, 3.11, 3.12, or 3.13
 #. pip
 
 
@@ -18,7 +18,7 @@ the virtualenv_ tool to create a new virtual environment. Or you can use the
 `conda package and environment management system`_ for managing virtual environments.
 
 .. _virtualenv: https://virtualenv.pypa.io/en/stable/
-.. _conda package and environment management system: https://conda.io/projects/conda/en/latest/index.html
+.. _conda package and environment management system: https://docs.conda.io/projects/conda/en/latest/index.html
 
 Option 1: Using virtualenv
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -54,11 +54,11 @@ Option 2: Using conda
 ^^^^^^^^^^^^^^^^^^^^^
 
 First, install Anaconda_ to install the ``conda`` tool. Then create and
-activate a new virtual environment called "venv" with Python 3.9 installed.
+activate a new virtual environment called "venv" with Python 3.10 installed.
 
 .. code:: bash
 
-    conda create --name venv python=3.9
+    conda create --name venv python=3.10
     conda activate venv
 
 Similar to a virtual environment created with ``virtualenv``, a conda environment
@@ -69,7 +69,7 @@ in a conda environment.
 Activate your newly created virtual environment using the above command whenever you want to work on HDMF. You can also
 deactivate it using the ``conda deactivate`` command to return to the base environment.
 
-.. _Anaconda: https://www.anaconda.com/distribution
+.. _Anaconda: https://www.anaconda.com/download
 
 
 Install from Git repository

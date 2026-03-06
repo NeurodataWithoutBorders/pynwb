@@ -545,6 +545,56 @@ class TestTimeSeries(TestCase):
                 # the test later on.
                 obj._in_construct_mode = False
 
+    def test_get_starting_time_with_rate(self):
+        """Test get_starting_time with rate-based TimeSeries"""
+        ts = mock_TimeSeries(data=[1, 2, 3], rate=10.0, starting_time=5.0)
+        self.assertEqual(ts.get_starting_time(), 5.0)
+
+    def test_get_starting_time_with_timestamps(self):
+        """Test get_starting_time with timestamp-based TimeSeries"""
+        ts = mock_TimeSeries(data=[1, 2, 3], timestamps=[2.5, 3.5, 4.5])
+        self.assertEqual(ts.get_starting_time(), 2.5)
+
+    def test_get_starting_time_empty_data_with_starting_time(self):
+        """Test get_starting_time with empty data but defined starting_time"""
+        ts = mock_TimeSeries(data=[], rate=10.0, starting_time=5.0)
+        self.assertEqual(ts.get_starting_time(), 5.0)
+
+    def test_get_starting_time_empty_data_no_starting_time(self):
+        """Test get_starting_time with empty data and no starting_time returns None"""
+        ts = mock_TimeSeries(data=[], timestamps=[])
+        self.assertIsNone(ts.get_starting_time())
+
+    def test_get_duration_with_rate(self):
+        """Test get_duration with rate-based TimeSeries"""
+        ts = mock_TimeSeries(data=[1, 2, 3, 4, 5], rate=10.0)
+        # (5-1) samples at 10 Hz = 4/10 = 0.4 seconds
+        self.assertEqual(ts.get_duration(), 0.4)
+
+    def test_get_duration_with_timestamps(self):
+        """Test get_duration with timestamp-based TimeSeries"""
+        ts = mock_TimeSeries(data=[1, 2, 3, 4], timestamps=[0.0, 1.0, 2.0, 3.0])
+        # Duration from 0 to 3 seconds = 3 seconds
+        self.assertEqual(ts.get_duration(), 3.0)
+
+    def test_get_duration_single_sample(self):
+        """Test get_duration with single sample returns 0"""
+        ts_rate = mock_TimeSeries(data=[1], rate=10.0)
+        self.assertEqual(ts_rate.get_duration(), 0.0)
+
+        ts_timestamps = mock_TimeSeries(data=[1], timestamps=[5.0])
+        self.assertEqual(ts_timestamps.get_duration(), 0.0)
+
+    def test_get_duration_empty_data_with_starting_time(self):
+        """Test get_duration with empty data but defined starting_time returns 0"""
+        ts = mock_TimeSeries(data=[], rate=10.0, starting_time=5.0)
+        self.assertEqual(ts.get_duration(), 0.0)
+
+    def test_get_duration_empty_data_no_starting_time(self):
+        """Test get_duration with empty data and no starting_time returns None"""
+        ts = mock_TimeSeries(data=[], timestamps=[])
+        self.assertIsNone(ts.get_duration())
+
 
 class TestImage(TestCase):
     def test_init(self):

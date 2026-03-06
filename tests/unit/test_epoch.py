@@ -203,3 +203,43 @@ class TimeIntervalsTest(TestCase):
         df = pd.DataFrame({'start_time': [1., 2., 3.], 'stop_time': [2., 3., 4.], 'label': ['a', 'b', 'c']})
         with self.assertRaises(ValueError):
             TimeIntervals.from_dataframe(df, name='ti_name', columns=[{'name': 'not there'}])
+
+    def test_get_starting_time(self):
+        """Test get_starting_time returns the earliest start time"""
+        ti = TimeIntervals(name='ti_name')
+        ti.add_interval(start_time=5.0, stop_time=10.0)
+        ti.add_interval(start_time=2.0, stop_time=7.0)
+        ti.add_interval(start_time=8.0, stop_time=12.0)
+        self.assertEqual(ti.get_starting_time(), 2.0)
+
+    def test_get_starting_time_empty_table(self):
+        """Test get_starting_time returns None for empty table"""
+        ti = TimeIntervals(name='ti_name')
+        self.assertIsNone(ti.get_starting_time())
+
+    def test_get_starting_time_single_interval(self):
+        """Test get_starting_time with single interval"""
+        ti = TimeIntervals(name='ti_name')
+        ti.add_interval(start_time=3.5, stop_time=7.5)
+        self.assertEqual(ti.get_starting_time(), 3.5)
+
+    def test_get_duration(self):
+        """Test get_duration returns span from earliest start to latest stop"""
+        ti = TimeIntervals(name='ti_name')
+        ti.add_interval(start_time=2.0, stop_time=5.0)
+        ti.add_interval(start_time=7.0, stop_time=10.0)
+        ti.add_interval(start_time=12.0, stop_time=18.0)
+        # Duration from earliest start (2.0) to latest stop (18.0) = 16.0
+        self.assertEqual(ti.get_duration(), 16.0)
+
+    def test_get_duration_empty_table(self):
+        """Test get_duration returns None for empty table"""
+        ti = TimeIntervals(name='ti_name')
+        self.assertIsNone(ti.get_duration())
+
+    def test_get_duration_single_interval(self):
+        """Test get_duration with single interval"""
+        ti = TimeIntervals(name='ti_name')
+        ti.add_interval(start_time=5.0, stop_time=10.0)
+        # Duration: 10.0 - 5.0 = 5.0
+        self.assertEqual(ti.get_duration(), 5.0)

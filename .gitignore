@@ -20,6 +20,7 @@ docs/source/modules/generated
 mylab.*.yaml
 *.npy
 *.nwb
+*.h5
 !/tests/back_compat/*.nwb
 manifest.json
 
@@ -87,3 +88,4 @@ _version.py
 core_typemap.pkl
 
 venv/
+uv.lock
