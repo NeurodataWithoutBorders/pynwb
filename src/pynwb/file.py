@@ -487,12 +487,15 @@ class NWBFile(MultiContainerInterface, HERDManager):
             'icephys_experimental_conditions'
         ]
         args_to_set = popargs_to_dict(keys_to_set, kwargs)
-        args_to_set['internal_herd'] = popargs('external_resources', kwargs)
+        external_resources = popargs('external_resources', kwargs)
         kwargs['name'] = 'root'
         super().__init__(**kwargs)
 
-        self.reset_herd = False
-        self.external_herd = None
+        self._external_herd = None
+        self._internal_herd = None
+
+        if external_resources is not None:
+            self.external_resources = external_resources
 
         # add timezone to session_start_time if missing
         session_start_time = args_to_set['session_start_time']
@@ -579,27 +582,31 @@ class NWBFile(MultiContainerInterface, HERDManager):
         return ret
 
     def link_resources(self, herd):
+        """Link an external HERD object as the external resources for this file.
+
+        The linked HERD will be returned by the ``external_resources`` property
+        but will not be written on export; the original internal HERD (if any)
+        is preserved in the exported file.
         """
-        This method is to set an external HERD file as the external resources for this file.
-        This will not persist on export. # TODO: This could change in the future with further development.
-        """
-        self.external_herd = herd
-        self.reset_herd = True
+        self._external_herd = herd
 
     @property
     def external_resources(self):
-        if self.reset_herd:
-            return self.external_herd
-        else:
-            return self.internal_herd
+        """Return the HERD external resources object for this NWBFile.
+
+        If an external HERD has been linked via ``link_resources``, that object
+        is returned. Otherwise, the internal HERD set via ``__init__`` or the
+        setter is returned.
+        """
+        if self._external_herd is not None:
+            return self._external_herd
+        return self._internal_herd
 
     @external_resources.setter
     def external_resources(self, herd):
-        """
-        This is here to set HERD for the file if the user did not do so using __init__.
-        """
-        self.internal_herd = herd
-        self.internal_herd.parent = self
+        """Set the internal HERD external resources object for this NWBFile."""
+        self._internal_herd = herd
+        self._internal_herd.parent = self
 
     @property
     def objects(self):

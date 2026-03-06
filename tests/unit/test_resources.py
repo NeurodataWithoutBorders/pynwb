@@ -91,7 +91,7 @@ class TestNWBContainer(TestCase):
             self.assertEqual(
                 read_nwbfile.external_resources.keys[:],
                 np.array(
-                    [[(b'Homo sapiens',)]],
+                    [('Homo sapiens',)],
                     dtype=[('key', 'O')]
                 )
             )
@@ -174,7 +174,7 @@ class TestNWBContainer(TestCase):
                 self.assertEqual(
                     read_export_nwbfile.external_resources.keys[:],
                     np.array(
-                        [[(b'Homo sapiens',)]],
+                        [('Homo sapiens',)],
                         dtype=[('key', 'O')]
                     )
                 )
