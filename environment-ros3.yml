@@ -6,7 +6,6 @@ channels:
 dependencies:
   - python==3.13
   - h5py==3.12.1
-  - hdmf==4.1.2
   - matplotlib==3.9.2
   - numpy==2.1.3
   - pandas==2.2.3
@@ -18,5 +17,6 @@ dependencies:
   - aiohttp==3.12.13
   - pip
   - pip:
+    - hdmf==5.0.0  # not yet available on conda-forge
     - remfile==0.1.13
     - dandi==0.62.1  # NOTE: dandi is not available on conda for osx-arm64
