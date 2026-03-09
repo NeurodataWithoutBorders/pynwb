@@ -6,7 +6,7 @@ Installing PyNWB
 
 PyNWB has the following minimum requirements, which must be installed before you can get started using PyNWB.
 
-#. Python 3.9, 3.10, 3.11, 3.12, 3.13, or 3.14
+#. Python 3.10, 3.11, 3.12, 3.13, or 3.14
 #. pip
 
 .. note:: If you are a developer then please see the :ref:`install_developers` installation instructions instead.
@@ -35,7 +35,7 @@ Install release from Conda-forge
 --------------------------------
 
 `Conda-forge <https://conda-forge.org>`_ is a community led collection of recipes, build infrastructure
-and distributions for the `conda <https://conda.io/docs/>`_ package manager.
+and distributions for the `conda <https://docs.conda.io/projects/conda/en/latest/>`_ package manager.
 
 To install or update PyNWB distribution from conda-forge using conda simply run:
 
@@ -53,5 +53,3 @@ own project against the latest version of PyNWB.
 .. code::
 
    $ pip install -U pynwb --find-links https://github.com/NeurodataWithoutBorders/pynwb/releases/tag/latest  --no-index
-
-
