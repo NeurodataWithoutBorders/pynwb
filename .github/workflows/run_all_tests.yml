@@ -99,8 +99,9 @@ jobs:
           - { name: windows-gallery-python3.14-upgraded  , test-tox-env: gallery-py314-upgraded  , python-ver: "3.14", os: windows-latest }
           - { name: windows-gallery-python3.14-prerelease, test-tox-env: gallery-py314-prerelease, python-ver: "3.14", os: windows-latest }
           - { name: macos-gallery-python3.10-minimum     , test-tox-env: gallery-py310-minimum   , python-ver: "3.10", os: macos-15-intel }
-          - { name: macos-gallery-python3.14-upgraded    , test-tox-env: gallery-py314-upgraded  , python-ver: "3.14", os: macos-latest }
-          - { name: macos-gallery-python3.14-prerelease  , test-tox-env: gallery-py314-prerelease, python-ver: "3.14", os: macos-latest }
+          # macOS gallery uses py313: dandi pins numcodecs<0.16, which lacks py314 macOS wheels
+          - { name: macos-gallery-python3.13-upgraded    , test-tox-env: gallery-py313-upgraded  , python-ver: "3.13", os: macos-latest }
+          - { name: macos-gallery-python3.13-prerelease  , test-tox-env: gallery-py313-prerelease, python-ver: "3.13", os: macos-latest }
     steps:
       - name: Cancel non-latest runs
         uses: styfle/cancel-workflow-action@0.11.0
