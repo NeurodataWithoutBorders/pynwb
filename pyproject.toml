@@ -38,7 +38,7 @@ dependencies = [
     "numpy>=1.24.0",
     "pandas>=1.4.0",
     "python-dateutil>=2.8.2",
-    "platformdirs>=4.1.0"
+    "platformdirs>=4.2.2"
 ]
 dynamic = ["version"] # the build backend will compute the version dynamically from git tag (or a __version__)
 
