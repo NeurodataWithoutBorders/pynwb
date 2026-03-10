@@ -18,7 +18,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.13'
+          python-version: '3.14'
 
       - name: Install build dependencies
         run: |
@@ -28,11 +28,11 @@ jobs:
 
       - name: Run tox tests
         run: |
-          tox -e py312-upgraded
+          tox -e py314-upgraded
 
       - name: Build wheel and source distribution
         run: |
-          tox -e build-py312-upgraded
+          tox -e build-py314-upgraded
           ls -1 dist
 
       - name: Test installation from a wheel

@@ -15,9 +15,9 @@
 - Fixed invalid CSS properties in documentation assistant toggle that prevented proper positioning on displays ≥1400px wide. @rly [#2151](https://github.com/NeurodataWithoutBorders/pynwb/pull/2151) 
 
 ### Changed
+- Added Python 3.14 support. @bendichter, @rly [#2168](https://github.com/NeurodataWithoutBorders/pynwb/pull/2168)
 - Updated HDMF dependency to >=5.0.0, <6. @rly [#2171](https://github.com/NeurodataWithoutBorders/pynwb/issues/2171)
 - Deprecated Python 3.9 support. (EOL was Oct 31, 2025) @bendichter [#2141](https://github.com/NeurodataWithoutBorders/pynwb/pull/2141)
-
 
 ## PyNWB 3.1.3 (December 9, 2025)
 
