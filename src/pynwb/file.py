@@ -7,9 +7,8 @@ import copy as _copy
 import numpy as np
 import pandas as pd
 
-from hdmf.common import DynamicTableRegion, DynamicTable
+from hdmf.common import DynamicTableRegion, DynamicTable, HERD
 from hdmf.container import HERDManager
-from hdmf.common import HERD
 from hdmf.utils import docval, getargs, get_docval, popargs, popargs_to_dict, AllowPositional
 
 from . import register_class, CORE_NAMESPACE

@@ -1,15 +1,15 @@
+import os
 import tempfile
 import warnings
 from datetime import datetime
 from uuid import uuid4
-import os
-import numpy as np
 
+import numpy as np
 from dateutil import tz
 
-from pynwb.resources import HERD
-from pynwb.file import Subject
 from pynwb import NWBHDF5IO, NWBFile
+from pynwb.file import Subject
+from pynwb.resources import HERD
 from pynwb.testing import TestCase
 
 
@@ -21,6 +21,32 @@ class TestNWBContainer(TestCase):
 
     def tearDown(self):
         self.tmpdir.cleanup()
+
+    def _create_nwbfile_with_herd(self):
+        """Create an NWBFile with a Subject and HERD containing a species annotation."""
+        session_start_time = datetime(2018, 4, 25, 2, 30, 3, tzinfo=tz.gettz("US/Pacific"))
+        nwbfile = NWBFile(
+            session_description="ECoG recording during audio speech perception task",
+            identifier=str(uuid4()),
+            session_start_time=session_start_time,
+        )
+        subject = Subject(
+            subject_id="001",
+            age="P26Y",
+            description="human subject",
+            species="Homo sapiens",
+            sex="M",
+        )
+        nwbfile.subject = subject
+        herd = HERD()
+        nwbfile.external_resources = herd
+        nwbfile.external_resources.add_ref(
+            container=nwbfile.subject,
+            key=nwbfile.subject.species,
+            entity_id="NCBI_TAXON:9606",
+            entity_uri="https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?mode=Info&id=9606",
+        )
+        return nwbfile, subject
 
     def test_constructor(self):
         """
@@ -42,9 +68,9 @@ class TestNWBContainer(TestCase):
             session_description="ECoG recording during audio speech perception task",
             identifier=str(uuid4()),
             session_start_time=session_start_time,
-            external_resources=herd
+            external_resources=herd,
         )
-        self.assertTrue(isinstance(nwbfile.external_resources, HERD))
+        self.assertIsInstance(nwbfile.external_resources, HERD)
 
     def test_nwbfile_set_herd(self):
         session_start_time = datetime(2018, 4, 25, 2, 30, 3, tzinfo=tz.gettz("US/Pacific"))
@@ -55,33 +81,11 @@ class TestNWBContainer(TestCase):
             session_start_time=session_start_time,
         )
         nwbfile.external_resources = herd
-        self.assertTrue(isinstance(nwbfile.external_resources, HERD))
+        self.assertIsInstance(nwbfile.external_resources, HERD)
         self.assertEqual(nwbfile.external_resources.parent, nwbfile)
 
     def test_resources_roundtrip(self):
-        session_start_time = datetime(2018, 4, 25, 2, 30, 3, tzinfo=tz.gettz("US/Pacific"))
-
-        nwbfile = NWBFile(
-            session_description="ECoG recording during audio speech perception task",
-            identifier=str(uuid4()),
-            session_start_time=session_start_time,
-        )
-        subject = Subject(
-            subject_id="001",
-            age="26",
-            description="human 5",
-            species='Homo sapiens',
-            sex="M",
-        )
-
-        nwbfile.subject = subject
-        herd = HERD()
-        nwbfile.external_resources = herd
-
-        nwbfile.external_resources.add_ref(container=nwbfile.subject,
-                                  key=nwbfile.subject.species,
-                                  entity_id="NCBI_TAXON:9606",
-                                  entity_uri='https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?mode=Info&id=9606')
+        nwbfile, subject = self._create_nwbfile_with_herd()
 
         with NWBHDF5IO(self.path, "w") as io:
             io.write(nwbfile)
@@ -91,74 +95,44 @@ class TestNWBContainer(TestCase):
             self.assertEqual(
                 read_nwbfile.external_resources.keys[:],
                 np.array(
-                    [('Homo sapiens',)],
-                    dtype=[('key', 'O')]
-                )
+                    [("Homo sapiens",)],
+                    dtype=[("key", "O")],
+                ),
             )
-
             self.assertEqual(
                 read_nwbfile.external_resources.entities[:],
                 np.array(
                     [
-                        ('NCBI_TAXON:9606',
-                         'https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?mode=Info&id=9606')
+                        (
+                            "NCBI_TAXON:9606",
+                            "https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?mode=Info&id=9606",
+                        )
                     ],
-                    dtype=[('entity_id', 'O'), ('entity_uri', 'O')]
-                )
+                    dtype=[("entity_id", "O"), ("entity_uri", "O")],
+                ),
             )
-
             self.assertEqual(
                 read_nwbfile.external_resources.objects[:],
                 np.array(
-                    [
-                        (0,
-                         subject.object_id,
-                         'Subject',
-                         '',
-                         '')
-                    ],
+                    [(0, subject.object_id, "Subject", "", "")],
                     dtype=[
-                        ('files_idx', '<u4'),
-                        ('object_id', 'O'),
-                        ('object_type', 'O'),
-                        ('relative_path', 'O'),
-                        ('field', 'O')
-                    ]
-                )
+                        ("files_idx", "<u4"),
+                        ("object_id", "O"),
+                        ("object_type", "O"),
+                        ("relative_path", "O"),
+                        ("field", "O"),
+                    ],
+                ),
             )
 
     def test_link_resources(self):
-        """
-        Note: Make sure that the internal HERD is not overwritten on export.
-        """
-        session_start_time = datetime(2018, 4, 25, 2, 30, 3, tzinfo=tz.gettz("US/Pacific"))
-
-        nwbfile = NWBFile(
-            session_description="ECoG recording during audio speech perception task",
-            identifier=str(uuid4()),
-            session_start_time=session_start_time,
-        )
-        subject = Subject(
-            subject_id="001",
-            age="26",
-            description="human 5",
-            species='Homo sapiens',
-            sex="M",
-        )
-
-        nwbfile.subject = subject
-        herd = HERD()
-        nwbfile.external_resources = herd
-
-        nwbfile.external_resources.add_ref(container=nwbfile.subject,
-                                  key=nwbfile.subject.species,
-                                  entity_id="NCBI_TAXON:9606",
-                                  entity_uri='https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?mode=Info&id=9606')
+        """Make sure that the internal HERD is not overwritten on export."""
+        nwbfile, subject = self._create_nwbfile_with_herd()
 
         with NWBHDF5IO(self.path, "w") as io:
             io.write(nwbfile)
 
-        with NWBHDF5IO(self.path, mode='r') as read_io:
+        with NWBHDF5IO(self.path, mode="r") as read_io:
             read_nwbfile = read_io.read()
             read_nwbfile.link_resources(HERD())
 
@@ -166,46 +140,40 @@ class TestNWBContainer(TestCase):
             self.assertEqual(read_nwbfile.external_resources.entities.data, [])
             self.assertEqual(read_nwbfile.external_resources.objects.data, [])
 
-            with NWBHDF5IO(self.export_path, mode='w') as export_io:
+            with NWBHDF5IO(self.export_path, mode="w") as export_io:
                 export_io.export(src_io=read_io, nwbfile=read_nwbfile)
 
-            with NWBHDF5IO(self.export_path, mode='r') as read_export_io:
+            with NWBHDF5IO(self.export_path, mode="r") as read_export_io:
                 read_export_nwbfile = read_export_io.read()
                 self.assertEqual(
                     read_export_nwbfile.external_resources.keys[:],
                     np.array(
-                        [('Homo sapiens',)],
-                        dtype=[('key', 'O')]
-                    )
+                        [("Homo sapiens",)],
+                        dtype=[("key", "O")],
+                    ),
                 )
-
                 self.assertEqual(
                     read_export_nwbfile.external_resources.entities[:],
                     np.array(
                         [
-                            ('NCBI_TAXON:9606',
-                             'https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?mode=Info&id=9606')
+                            (
+                                "NCBI_TAXON:9606",
+                                "https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?mode=Info&id=9606",
+                            )
                         ],
-                        dtype=[('entity_id', 'O'), ('entity_uri', 'O')]
-                    )
+                        dtype=[("entity_id", "O"), ("entity_uri", "O")],
+                    ),
                 )
-
                 self.assertEqual(
                     read_export_nwbfile.external_resources.objects[:],
                     np.array(
-                        [
-                            (0,
-                             subject.object_id,
-                             'Subject',
-                             '',
-                             '')
-                        ],
+                        [(0, subject.object_id, "Subject", "", "")],
                         dtype=[
-                            ('files_idx', '<u4'),
-                            ('object_id', 'O'),
-                            ('object_type', 'O'),
-                            ('relative_path', 'O'),
-                            ('field', 'O')
-                        ]
-                    )
+                            ("files_idx", "<u4"),
+                            ("object_id", "O"),
+                            ("object_type", "O"),
+                            ("relative_path", "O"),
+                            ("field", "O"),
+                        ],
+                    ),
                 )
