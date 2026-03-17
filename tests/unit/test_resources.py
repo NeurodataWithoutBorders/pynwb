@@ -1,3 +1,4 @@
+import tempfile
 import warnings
 from datetime import datetime
 from uuid import uuid4
@@ -14,13 +15,12 @@ from pynwb.testing import TestCase
 
 class TestNWBContainer(TestCase):
     def setUp(self):
-        self.path = "resources_file.nwb"
-        self.export_path = "export_file.nwb"
+        self.tmpdir = tempfile.TemporaryDirectory()
+        self.path = os.path.join(self.tmpdir.name, "resources_file.nwb")
+        self.export_path = os.path.join(self.tmpdir.name, "export_file.nwb")
 
     def tearDown(self):
-        for path in [self.path, self.export_path]:
-            if os.path.isfile(path):
-                os.remove(path)
+        self.tmpdir.cleanup()
 
     def test_constructor(self):
         """
@@ -39,7 +39,7 @@ class TestNWBContainer(TestCase):
         session_start_time = datetime(2018, 4, 25, 2, 30, 3, tzinfo=tz.gettz("US/Pacific"))
         herd = HERD()
         nwbfile = NWBFile(
-            session_description="A Person undergoing brain pokes.",
+            session_description="ECoG recording during audio speech perception task",
             identifier=str(uuid4()),
             session_start_time=session_start_time,
             external_resources=herd
@@ -50,7 +50,7 @@ class TestNWBContainer(TestCase):
         session_start_time = datetime(2018, 4, 25, 2, 30, 3, tzinfo=tz.gettz("US/Pacific"))
         herd = HERD()
         nwbfile = NWBFile(
-            session_description="A Person undergoing brain pokes.",
+            session_description="ECoG recording during audio speech perception task",
             identifier=str(uuid4()),
             session_start_time=session_start_time,
         )
@@ -62,7 +62,7 @@ class TestNWBContainer(TestCase):
         session_start_time = datetime(2018, 4, 25, 2, 30, 3, tzinfo=tz.gettz("US/Pacific"))
 
         nwbfile = NWBFile(
-            session_description="A Person undergoing brain pokes.",
+            session_description="ECoG recording during audio speech perception task",
             identifier=str(uuid4()),
             session_start_time=session_start_time,
         )
@@ -134,7 +134,7 @@ class TestNWBContainer(TestCase):
         session_start_time = datetime(2018, 4, 25, 2, 30, 3, tzinfo=tz.gettz("US/Pacific"))
 
         nwbfile = NWBFile(
-            session_description="A Person undergoing brain pokes.",
+            session_description="ECoG recording during audio speech perception task",
             identifier=str(uuid4()),
             session_start_time=session_start_time,
         )
