@@ -495,6 +495,7 @@ class NWBFile(MultiContainerInterface, HERDManager):
         self._internal_herd = None
 
         if external_resources is not None:
+            # NOTE: this sets self._internal_herd
             self.external_resources = external_resources
 
         # add timezone to session_start_time if missing
