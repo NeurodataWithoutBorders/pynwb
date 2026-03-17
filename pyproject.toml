@@ -36,7 +36,7 @@ dependencies = [
     "h5py>=3.6.0",
     "hdmf>=5.0.1,<6",
     "numpy>=1.24.0",
-    "pandas>=1.4.0",
+    "pandas>=1.4.0,<3",
     "python-dateutil>=2.8.2",
     "platformdirs>=4.2.2"
 ]
