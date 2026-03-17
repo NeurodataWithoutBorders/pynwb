@@ -1,7 +1,7 @@
 # minimum versions of package dependencies for installing PyNWB
-h5py==3.2.0
-hdmf==4.1.2
+h5py==3.6.0
+hdmf==5.0.0
 numpy==1.24.0
-pandas==1.2.0
+pandas==1.4.0
 python-dateutil==2.8.2
-platformdirs==4.1.0
+platformdirs==4.2.2

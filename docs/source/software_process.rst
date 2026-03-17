@@ -72,7 +72,7 @@ for PyNWB.
 Both this file and :pynwb:`requirements.txt <blob/dev/requirements.txt>` are used by ReadTheDocs_ to initialize the
 local environment for Sphinx to run.
 
-.. _ReadTheDocs: https://readthedocs.org/projects/pynwb/
+.. _ReadTheDocs: https://app.readthedocs.org/projects/pynwb/
 
 -------------------------
 Versioning and Releasing
@@ -90,7 +90,7 @@ attaches those files to all releases as an asset. These files currently do not c
 thus do not serve as a complete installation. For a complete source code archive, use the source distribution generated
 by CircleCI, typically named `pynwb-{version}.tar.gz`.
 
-.. _versioneer: https://github.com/warner/python-versioneer
+.. _versioneer: https://github.com/python-versioneer/python-versioneer
 
 ----------------------------------------------------
 Coordinating with nwb-schema Repository and Releases
