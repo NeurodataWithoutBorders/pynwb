@@ -125,8 +125,21 @@ class TestNWBContainer(TestCase):
                 ),
             )
 
+    def test_get_external_resources(self):
+        """Test get_external_resources returns the correct HERD based on the linked parameter."""
+        nwbfile, subject = self._create_nwbfile_with_herd()
+        original_herd = nwbfile.external_resources
+
+        linked_herd = HERD()
+        nwbfile.link_resources(linked_herd)
+
+        self.assertIs(nwbfile.get_external_resources(linked=False), original_herd)
+        self.assertIs(nwbfile.get_external_resources(linked=True), linked_herd)
+        # property returns linked when available
+        self.assertIs(nwbfile.external_resources, linked_herd)
+
     def test_link_resources(self):
-        """Make sure that the internal HERD is not overwritten on export."""
+        """Make sure that the original HERD is not overwritten on export."""
         nwbfile, subject = self._create_nwbfile_with_herd()
 
         with NWBHDF5IO(self.path, "w") as io:
