@@ -135,8 +135,8 @@ class TestNWBContainer(TestCase):
 
         self.assertIs(nwbfile.get_external_resources(linked=False), original_herd)
         self.assertIs(nwbfile.get_external_resources(linked=True), linked_herd)
-        # property returns linked when available
-        self.assertIs(nwbfile.external_resources, linked_herd)
+        # attribute returns the original, not the linked one
+        self.assertIs(nwbfile.external_resources, original_herd)
 
     def test_link_resources(self):
         """Make sure that the original HERD is not overwritten on export."""
@@ -149,9 +149,10 @@ class TestNWBContainer(TestCase):
             read_nwbfile = read_io.read()
             read_nwbfile.link_resources(HERD())
 
-            self.assertEqual(read_nwbfile.external_resources.keys.data, [])
-            self.assertEqual(read_nwbfile.external_resources.entities.data, [])
-            self.assertEqual(read_nwbfile.external_resources.objects.data, [])
+            linked = read_nwbfile.get_external_resources(linked=True)
+            self.assertEqual(linked.keys.data, [])
+            self.assertEqual(linked.entities.data, [])
+            self.assertEqual(linked.objects.data, [])
 
             with NWBHDF5IO(self.export_path, mode="w") as export_io:
                 export_io.export(src_io=read_io, nwbfile=read_nwbfile)

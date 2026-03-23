@@ -483,19 +483,14 @@ class NWBFile(MultiContainerInterface, HERDManager):
             'icephys_simultaneous_recordings',
             'icephys_sequential_recordings',
             'icephys_repetitions',
-            'icephys_experimental_conditions'
+            'icephys_experimental_conditions',
+            'external_resources'
         ]
         args_to_set = popargs_to_dict(keys_to_set, kwargs)
-        external_resources = popargs('external_resources', kwargs)
         kwargs['name'] = 'root'
         super().__init__(**kwargs)
 
         self._linked_external_resources = None
-        self._external_resources = None
-
-        if external_resources is not None:
-            # NOTE: this sets self._external_resources via the property setter
-            self.external_resources = external_resources
 
         # add timezone to session_start_time if missing
         session_start_time = args_to_set['session_start_time']
@@ -584,9 +579,9 @@ class NWBFile(MultiContainerInterface, HERDManager):
     def link_resources(self, external_resources):
         """Link an external HERD object as the external resources for this file.
 
-        The linked HERD will be returned by the ``external_resources`` property
-        but will not be written on export; the original HERD (if any) is
-        preserved in the exported file.
+        The linked HERD will not be written on export; the original HERD
+        (if any) is preserved in the exported file. Use
+        ``get_external_resources(linked=True)`` to access the linked HERD.
         """
         self._linked_external_resources = external_resources
 
@@ -598,29 +593,11 @@ class NWBFile(MultiContainerInterface, HERDManager):
         linked : bool, optional
             If True, return the linked HERD set via ``link_resources``.
             If False (default), return the HERD set via ``__init__`` or the
-            ``external_resources`` setter.
+            ``external_resources`` attribute.
         """
         if linked:
             return self._linked_external_resources
-        return self._external_resources
-
-    @property
-    def external_resources(self):
-        """Return the HERD external resources object for this NWBFile.
-
-        If a HERD has been linked via ``link_resources``, that object is
-        returned. Otherwise, the HERD set via ``__init__`` or the setter is
-        returned. Use ``get_external_resources`` to access a specific one.
-        """
-        if self._linked_external_resources is not None:
-            return self._linked_external_resources
-        return self._external_resources
-
-    @external_resources.setter
-    def external_resources(self, external_resources):
-        """Set the HERD external resources object for this NWBFile."""
-        self._external_resources = external_resources
-        self._external_resources.parent = self
+        return self.external_resources
 
     @property
     def objects(self):
