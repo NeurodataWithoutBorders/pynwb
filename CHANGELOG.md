@@ -7,7 +7,7 @@
 - Fixed broken and redirecting links in documentation. @bendichter [#2165](https://github.com/NeurodataWithoutBorders/pynwb/pull/2165)
 
 ### Added
-- Added support for HERD (HDMF External Resources Data Structure) as the `external_resources` field on `NWBFile`, enabling users to associate external resource annotations (e.g., ontology term mappings) with their NWB files. Also added `NWBFile.link_resources` for linking an external HERD object. @mavaylon1, @rly [#2111](https://github.com/NeurodataWithoutBorders/pynwb/pull/2111)
+- Added support for HERD (HDMF External Resources Data Structure) as the `external_resources` field on `NWBFile`, enabling users to associate external resource annotations (e.g., ontology term mappings) with their NWB files. `link_resources` and `get_external_resources` are inherited from `HERDManager` in hdmf. @mavaylon1, @rly [#2111](https://github.com/NeurodataWithoutBorders/pynwb/pull/2111)
 - Added `get_starting_time()` and `get_duration()` methods to `TimeSeries` to get the starting time and duration of the time series. @h-mayorquin [#2146](https://github.com/NeurodataWithoutBorders/pynwb/pull/2146)
 - Added `get_starting_time()` and `get_duration()` methods to `TimeIntervals` to get the earliest start time and total duration (span from earliest start to latest stop) of all intervals. @h-mayorquin [#2146](https://github.com/NeurodataWithoutBorders/pynwb/pull/2146)
 - Added `get_starting_time()` and `get_duration()` methods to `Units` to get the earliest spike time and total duration (span from earliest to latest spike) across all units. @h-mayorquin [#2164](https://github.com/NeurodataWithoutBorders/pynwb/pull/2164)

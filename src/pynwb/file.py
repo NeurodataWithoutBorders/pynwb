@@ -490,8 +490,6 @@ class NWBFile(MultiContainerInterface, HERDManager):
         kwargs['name'] = 'root'
         super().__init__(**kwargs)
 
-        self._linked_external_resources = None
-
         # add timezone to session_start_time if missing
         session_start_time = args_to_set['session_start_time']
         if session_start_time.tzinfo is None:
@@ -575,29 +573,6 @@ class NWBFile(MultiContainerInterface, HERDManager):
                 for c in n.children:
                     stack.append(c)
         return ret
-
-    def link_resources(self, external_resources):
-        """Link an external HERD object as the external resources for this file.
-
-        The linked HERD will not be written on export; the original HERD
-        (if any) is preserved in the exported file. Use
-        ``get_external_resources(linked=True)`` to access the linked HERD.
-        """
-        self._linked_external_resources = external_resources
-
-    def get_external_resources(self, linked=False):
-        """Return the HERD external resources object for this NWBFile.
-
-        Parameters
-        ----------
-        linked : bool, optional
-            If True, return the linked HERD set via ``link_resources``.
-            If False (default), return the HERD set via ``__init__`` or the
-            ``external_resources`` attribute.
-        """
-        if linked:
-            return self._linked_external_resources
-        return self.external_resources
 
     @property
     def objects(self):
