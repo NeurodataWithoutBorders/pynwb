@@ -45,8 +45,7 @@ class DurationVectorData(VectorData):
 
     @docval(
         {'name': 'name', 'type': str, 'doc': 'Name of this DurationVectorData'},
-        {'name': 'description', 'type': str, 'doc': 'Description of this DurationVectorData',
-         'default': 'durations in seconds'},
+        {'name': 'description', 'type': str, 'doc': 'Description of this DurationVectorData'},
         *get_docval(VectorData.__init__, 'data'),
         {'name': 'resolution', 'type': float,
          'doc': ('The smallest possible difference between two durations. Usually 1 divided by the '

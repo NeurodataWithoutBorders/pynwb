@@ -9,7 +9,7 @@ class TestTimestampVectorData(TestCase):
 
     def test_init(self):
         """Test basic initialization"""
-        ts = TimestampVectorData(name='timestamps', data=[1.0, 2.0, 3.0])
+        ts = TimestampVectorData(name='timestamps', description='timestamps in seconds', data=[1.0, 2.0, 3.0])
         self.assertEqual(ts.name, 'timestamps')
         self.assertListEqual(ts.data, [1.0, 2.0, 3.0])
         self.assertEqual(ts.unit, 'seconds')
@@ -18,13 +18,9 @@ class TestTimestampVectorData(TestCase):
 
     def test_init_with_resolution(self):
         """Test initialization with resolution"""
-        ts = TimestampVectorData(name='timestamps', data=[1.0, 2.0], resolution=0.001)
+        ts = TimestampVectorData(name='timestamps', description='timestamps in seconds', data=[1.0, 2.0],
+                                resolution=0.001)
         self.assertEqual(ts.resolution, 0.001)
-
-    def test_init_with_description(self):
-        """Test initialization with custom description"""
-        ts = TimestampVectorData(name='timestamps', description='custom description', data=[1.0])
-        self.assertEqual(ts.description, 'custom description')
 
 
 class TestDurationVectorData(TestCase):
@@ -32,7 +28,7 @@ class TestDurationVectorData(TestCase):
 
     def test_init(self):
         """Test basic initialization"""
-        dur = DurationVectorData(name='durations', data=[0.5, 1.0, 1.5])
+        dur = DurationVectorData(name='durations', description='durations in seconds', data=[0.5, 1.0, 1.5])
         self.assertEqual(dur.name, 'durations')
         self.assertListEqual(dur.data, [0.5, 1.0, 1.5])
         self.assertEqual(dur.unit, 'seconds')
@@ -41,13 +37,8 @@ class TestDurationVectorData(TestCase):
 
     def test_init_with_resolution(self):
         """Test initialization with resolution"""
-        dur = DurationVectorData(name='durations', data=[0.5], resolution=0.001)
+        dur = DurationVectorData(name='durations', description='durations in seconds', data=[0.5], resolution=0.001)
         self.assertEqual(dur.resolution, 0.001)
-
-    def test_init_with_description(self):
-        """Test initialization with custom description"""
-        dur = DurationVectorData(name='durations', description='custom description', data=[0.5])
-        self.assertEqual(dur.description, 'custom description')
 
 
 class TestEventsTable(TestCase):
