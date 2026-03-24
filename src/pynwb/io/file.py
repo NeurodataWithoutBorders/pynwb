@@ -112,6 +112,8 @@ class NWBFileMap(ObjectMapper):
 
         self.map_spec('subject', general_spec.get_group('subject'))
 
+        self.map_spec('external_resources', general_spec.get_group('external_resources'))
+
         device_spec = general_spec.get_group('devices')
         self.unmap(device_spec)
         self.map_spec('devices', device_spec.get_neurodata_type('Device'))
