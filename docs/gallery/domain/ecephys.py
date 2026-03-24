@@ -348,6 +348,14 @@ for n_units_per_shank in range(n_units):
 # data, typically ``1 / sampling_rate`` of the acquisition system (i.e., the smallest measurable difference
 # between two spike times, in seconds). Setting it helps downstream users judge whether fine-timescale
 # analyses are appropriate for the dataset.
+#
+# When creating the :py:class:`~pynwb.misc.Units` table directly, you can pass it to the constructor:
+#
+# .. code-block:: python
+#
+#     units = Units(name="units", resolution=1 / 30000)  # 30 kHz recording system
+#
+# Since the tutorial uses :py:meth:`.NWBFile.add_unit`, we set it after the fact:
 
 nwbfile.units.resolution = 1 / res  # resolution in seconds (1 / sampling rate)
 
