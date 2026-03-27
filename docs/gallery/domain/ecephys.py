@@ -341,7 +341,8 @@ res = 1000
 duration = 20
 for n_units_per_shank in range(n_units):
     spike_times = np.where(np.random.rand((res * duration)) < (firing_rate / res))[0] / res
-    nwbfile.add_unit(spike_times=spike_times, quality="good")  # custom column data, e.g., quality, are specified with keyword arguments
+    # custom column data, e.g., quality, are specified with keyword arguments to `add_unit`
+    nwbfile.add_unit(spike_times=spike_times, quality="good")
 
 #######################
 # The :py:class:`~pynwb.misc.Units` table can also be converted to a pandas :py:class:`~pandas.DataFrame`.
