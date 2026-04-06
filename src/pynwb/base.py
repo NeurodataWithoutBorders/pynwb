@@ -393,7 +393,7 @@ class TimeSeries(NWBDataInterface):
         """
         Get the timestamps of this TimeSeries. If timestamps are not stored in this TimeSeries, generate timestamps.
         """
-        if self.fields.get('timestamps'):
+        if self.fields.get('timestamps') is not None:
             return self.timestamps
         else:
             return np.arange(len(self.data)) / self.rate + self.starting_time
