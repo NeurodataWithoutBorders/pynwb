@@ -447,7 +447,7 @@ class TimeSeries(NWBDataInterface):
         if self.num_samples == 1:
             return 0.0
 
-        if self.fields.get('timestamps'):
+        if self.fields.get('timestamps') is not None:
             timestamps = self.timestamps
             return float(timestamps[-1] - timestamps[0])
         else:
