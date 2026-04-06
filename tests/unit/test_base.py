@@ -580,6 +580,9 @@ class TestTimeSeries(TestCase):
         # Duration from 0 to 3 seconds = 3 seconds
         self.assertEqual(ts.get_duration(), 3.0)
 
+        ts = mock_TimeSeries(data=[1, 2, 3, 4], timestamps=np.array([0.0, 1.0, 2.0, 3.0]))
+        self.assertEqual(ts.get_duration(), 3.0)
+
     def test_get_duration_single_sample(self):
         """Test get_duration with single sample returns 0"""
         ts_rate = mock_TimeSeries(data=[1], rate=10.0)
