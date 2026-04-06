@@ -429,6 +429,9 @@ class TestTimeSeries(TestCase):
         time_series = mock_TimeSeries(data=[1, 2, 3], timestamps=[3, 4, 5], rate=None)
         assert_array_equal(time_series.get_timestamps(), [3, 4, 5])
 
+        time_series = mock_TimeSeries(data=[1, 2, 3], timestamps=np.array([3, 4, 5]), rate=None)
+        assert_array_equal(time_series.get_timestamps(), [3, 4, 5])
+
     def test_get_data_in_units(self):
         ts = mock_TimeSeries(data=[1., 2., 3.], conversion=2., offset=3.)
         assert_array_equal(ts.get_data_in_units(), [5., 7., 9.])
