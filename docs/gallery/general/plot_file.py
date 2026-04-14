@@ -128,6 +128,7 @@ from dateutil import tz
 
 from pynwb import NWBHDF5IO, NWBFile, TimeSeries
 from pynwb.behavior import Position, SpatialSeries
+from pynwb.event import EventsTable
 from pynwb.file import Subject
 
 ####################
@@ -292,10 +293,22 @@ nwbfile.get_acquisition("test_timeseries")
 # to the appropriate :py:class:`~pynwb.file.NWBFile` group can be used for all subtypes of
 # :py:class:`~pynwb.base.TimeSeries` data.
 #
-# For storing events with annotations (e.g., stimulus events), use :py:class:`~pynwb.event.EventsTable`
-# in ``NWBFile.events``.
-#
-# TODO: Add EventsTable example
+# For storing events with annotations (e.g., behaviors scored from video), use
+# :py:class:`~pynwb.event.EventsTable` in ``NWBFile.events``. The required ``timestamp``
+# column stores the time of each event in seconds from the session start time. The
+# optional built-in ``duration`` column stores the length of each event in seconds, and
+# the optional built-in ``annotation`` column can be used to store a text label for each
+# event.
+
+behavior_events = EventsTable(
+    name="scored_behaviors",
+    description="Behaviors of the animal scored from video recordings.",
+)
+behavior_events.add_event(timestamp=10.2, duration=1.4, annotation="grooming")
+behavior_events.add_event(timestamp=18.7, duration=0.6, annotation="rearing")
+behavior_events.add_event(timestamp=25.0, duration=2.1, annotation="grooming")
+
+nwbfile.add_events_table(behavior_events)
 
 ####################
 # .. _basic_spatialseries:

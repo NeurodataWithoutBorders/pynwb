@@ -54,6 +54,7 @@ from pynwb.behavior import (
     SpatialSeries,
 )
 from pynwb.epoch import TimeIntervals
+from pynwb.event import EventsTable
 from pynwb.misc import IntervalSeries
 
 ####################
@@ -229,7 +230,27 @@ behavior_module.add(behavioral_time_series)
 #    :py:class:`~pynwb.behavior.BehavioralEvents` is deprecated. Use
 #    :py:class:`~pynwb.event.EventsTable` instead.
 #
-# TODO: Add EventsTable example
+# Create an :py:class:`~pynwb.event.EventsTable` to store reward delivery events.
+# The required ``timestamp`` column stores the time of each event in seconds from the
+# session start time. Additional columns can be added to store metadata about each
+# event, such as the amount of reward delivered.
+
+reward_events = EventsTable(
+    name="reward_events",
+    description="Times and amounts of water rewards delivered to the animal.",
+)
+reward_events.add_column(name="amount_ml", description="Volume of water reward in mL.")
+
+reward_events.add_event(timestamp=12.5, amount_ml=0.05)
+reward_events.add_event(timestamp=27.3, amount_ml=0.05)
+reward_events.add_event(timestamp=44.1, amount_ml=0.10)
+
+####################
+# Add the :py:class:`~pynwb.event.EventsTable` to the :py:class:`~pynwb.file.NWBFile`
+# using :py:meth:`~pynwb.file.NWBFile.add_events_table`. Events tables are stored in
+# ``NWBFile.events``.
+
+nwbfile.add_events_table(reward_events)
 
 ####################
 # BehavioralEpochs: Storing intervals of behavior data
