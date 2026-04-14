@@ -41,7 +41,7 @@ class AnnotationSeries(TimeSeries):
     def __init__(self, **kwargs):
         name, data, timestamps = popargs('name', 'data', 'timestamps', kwargs)
         super().__init__(name=name, data=data, unit='n/a', resolution=-1.0, timestamps=timestamps, **kwargs)
-        self._error_on_new_warn_on_construct(
+        self._warn_on_new_pass_on_construct(
             "AnnotationSeries is deprecated. Use an EventsTable with an 'annotation' column instead. "
             "Creating a new AnnotationSeries will not be allowed in a future version of PyNWB."
         )

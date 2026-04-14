@@ -118,7 +118,7 @@ class BehavioralEvents(MultiContainerInterface):
         time_series = popargs('time_series', kwargs)
         super().__init__(**kwargs)
         self.add_timeseries(time_series)
-        self._error_on_new_warn_on_construct(
+        self._warn_on_new_pass_on_construct(
             "BehavioralEvents is deprecated. Use an EventsTable in NWBFile.events instead for event data. "
             "Creating a new BehavioralEvents will not be allowed in a future version of PyNWB."
         )

@@ -1,3 +1,5 @@
+import warnings
+
 import numpy as np
 
 from hdmf.common import VectorData, DynamicTableRegion
@@ -13,20 +15,17 @@ from pynwb.testing import TestCase
 
 class AnnotationSeriesConstructor(TestCase):
     def test_init_deprecated(self):
-        """Test that AnnotationSeries raises a ValueError on creation due to deprecation."""
+        """Test that creating an AnnotationSeries warns about deprecation."""
         msg = (
             "AnnotationSeries is deprecated. Use an EventsTable with an 'annotation' column instead. "
             "Creating a new AnnotationSeries will not be allowed in a future version of PyNWB."
         )
-        with self.assertRaisesWith(ValueError, msg):
-            AnnotationSeries(name='test_aS', data=[1, 2, 3], timestamps=[1., 2., 3.])
+        with self.assertWarnsWith(UserWarning, msg):
+            aS = AnnotationSeries(name='test_aS', data=['a', 'b', 'c'], timestamps=[1., 2., 3.])
+        self.assertEqual(aS.name, 'test_aS')
 
     def test_init_deprecated_in_construct_mode(self):
-        """Test that AnnotationSeries warns in construct mode (during read)."""
-        msg = (
-            "AnnotationSeries is deprecated. Use an EventsTable with an 'annotation' column instead. "
-            "Creating a new AnnotationSeries will not be allowed in a future version of PyNWB."
-        )
+        """Test that AnnotationSeries does not warn in construct mode (during read)."""
         obj = AnnotationSeries.__new__(
             AnnotationSeries,
             container_source=None,
@@ -34,7 +33,8 @@ class AnnotationSeriesConstructor(TestCase):
             object_id="test",
             in_construct_mode=True,
         )
-        with self.assertWarnsWith(UserWarning, msg):
+        with warnings.catch_warnings():
+            warnings.simplefilter("error")
             obj.__init__(name='test_aS', data=['a', 'b', 'c'], timestamps=[1., 2., 3.])
         self.assertEqual(obj.name, 'test_aS')
         obj.add_annotation(2.0, 'comment')

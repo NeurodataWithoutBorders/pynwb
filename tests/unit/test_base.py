@@ -243,45 +243,16 @@ class TestTimeSeries(TestCase):
         )
         self.assertEqual(ts.continuity, "continuous")
 
-    def test_deprecated_instantaneous_continuity(self):
-        """Test that using continuity='instantaneous' raises a ValueError."""
-        msg = (
-            "The 'instantaneous' value for TimeSeries.continuity is deprecated. "
-            "Use an EventsTable in NWBFile.events instead for event data. "
-            "This value will not be allowed to be set in a future version of PyNWB."
+    def test_instantaneous_continuity(self):
+        """Test that continuity='instantaneous' is allowed."""
+        ts = TimeSeries(
+            name="test_ts1",
+            data=[0, 1, 2, 3, 4, 5],
+            unit="grams",
+            timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5],
+            continuity="instantaneous",
         )
-        with self.assertRaisesWith(ValueError, msg):
-            TimeSeries(
-                name="test_ts1",
-                data=[0, 1, 2, 3, 4, 5],
-                unit="grams",
-                timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5],
-                continuity="instantaneous",
-            )
-
-    def test_deprecated_instantaneous_continuity_in_construct_mode(self):
-        """Test that continuity='instantaneous' warns in construct mode (during read)."""
-        msg = (
-            "The 'instantaneous' value for TimeSeries.continuity is deprecated. "
-            "Use an EventsTable in NWBFile.events instead for event data. "
-            "This value will not be allowed to be set in a future version of PyNWB."
-        )
-        obj = TimeSeries.__new__(
-            TimeSeries,
-            container_source=None,
-            parent=None,
-            object_id="test",
-            in_construct_mode=True,
-        )
-        with self.assertWarnsWith(UserWarning, msg):
-            obj.__init__(
-                name="test_ts1",
-                data=[0, 1, 2, 3, 4, 5],
-                unit="grams",
-                timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5],
-                continuity="instantaneous",
-            )
-        obj._in_construct_mode = False
+        self.assertEqual(ts.continuity, "instantaneous")
 
     def test_bad_continuity_timeseries(self):
         msg = (
