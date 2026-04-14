@@ -1,7 +1,7 @@
 """Integration tests for EventsTable roundtrip through NWBFile.events."""
-import os
 import tempfile
 from datetime import datetime
+from pathlib import Path
 
 import numpy as np
 from dateutil.tz import tzlocal
@@ -16,7 +16,7 @@ class TestEventsTableRoundtrip(TestCase):
 
     def setUp(self):
         self.tmpdir = tempfile.TemporaryDirectory()
-        self.path = os.path.join(self.tmpdir.name, 'test_events.nwb')
+        self.path = Path(self.tmpdir.name) / 'test_events.nwb'
 
     def tearDown(self):
         self.tmpdir.cleanup()
