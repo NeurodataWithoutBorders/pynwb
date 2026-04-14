@@ -1,24 +1,25 @@
 """Integration tests for EventsTable roundtrip through NWBFile.events."""
-import numpy as np
-import tempfile
 import os
+import tempfile
+from datetime import datetime
+
+import numpy as np
+from dateutil.tz import tzlocal
 
 from pynwb import NWBHDF5IO, NWBFile
 from pynwb.event import TimestampVectorData, DurationVectorData, EventsTable
 from pynwb.testing import TestCase
-from datetime import datetime
-from dateutil.tz import tzlocal
 
 
 class TestEventsTableRoundtrip(TestCase):
     """Test roundtrip for EventsTable through HDF5"""
 
     def setUp(self):
-        self.path = tempfile.mktemp(suffix='.nwb')
+        self.tmpdir = tempfile.TemporaryDirectory()
+        self.path = os.path.join(self.tmpdir.name, 'test_events.nwb')
 
     def tearDown(self):
-        if os.path.exists(self.path):
-            os.remove(self.path)
+        self.tmpdir.cleanup()
 
     def _create_nwbfile(self):
         return NWBFile(
