@@ -49,7 +49,7 @@ class DurationVectorData(VectorData):
         *get_docval(VectorData.__init__, 'data'),
         {'name': 'resolution', 'type': float,
          'doc': ('The smallest possible difference between two durations. Usually 1 divided by the '
-                 'sampling rate for timestamps of the data acquisition system.'),
+                 'sampling rate for the timing of the data acquisition system.'),
          'default': None},
         allow_positional=AllowPositional.ERROR,
     )

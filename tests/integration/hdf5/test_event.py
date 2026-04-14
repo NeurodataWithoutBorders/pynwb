@@ -1,9 +1,4 @@
-"""Integration tests for EventsTable.
-
-Note: EventsTable is designed to be stored in NWBFile/events, but this functionality
-is not yet implemented in PyNWB. These tests verify roundtrip functionality by
-storing EventsTable in acquisition, which is valid since DynamicTable can be stored there.
-"""
+"""Integration tests for EventsTable roundtrip through NWBFile.events."""
 import numpy as np
 import tempfile
 import os
