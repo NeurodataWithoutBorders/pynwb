@@ -8,6 +8,7 @@
 - Added `EventsTable` examples to the NWB file basics and behavior tutorials. @rly
 
 ### Added
+- Added support for NWB Schema 2.10.0 ([NWBEP001](https://nwb-schema.readthedocs.io/)), which introduces the `EventsTable`, `TimestampVectorData`, and `DurationVectorData` neurodata types and a new `events` group on `NWBFile` for storing `EventsTable` instances. Use `NWBFile.add_events_table()` to add an `EventsTable` and `NWBFile.get_events_table()` to retrieve one. @rly
 - Added support for HERD (HDMF External Resources Data Structure) as the `external_resources` field on `NWBFile`, enabling users to associate external resource annotations (e.g., ontology term mappings) with their NWB files. `link_resources` and `get_external_resources` are inherited from `HERDManager` in hdmf. @mavaylon1, @rly [#2111](https://github.com/NeurodataWithoutBorders/pynwb/pull/2111)
 - Added `get_starting_time()` and `get_duration()` methods to `TimeSeries` to get the starting time and duration of the time series. @h-mayorquin [#2146](https://github.com/NeurodataWithoutBorders/pynwb/pull/2146)
 - Added `get_starting_time()` and `get_duration()` methods to `TimeIntervals` to get the earliest start time and total duration (span from earliest start to latest stop) of all intervals. @h-mayorquin [#2146](https://github.com/NeurodataWithoutBorders/pynwb/pull/2146)
@@ -20,6 +21,7 @@
 - Added Python 3.14 support. @bendichter, @rly [#2168](https://github.com/NeurodataWithoutBorders/pynwb/pull/2168)
 - Updated HDMF dependency to >=5.0.0, <6. @rly [#2171](https://github.com/NeurodataWithoutBorders/pynwb/issues/2171)
 - Deprecated Python 3.9 support. (EOL was Oct 31, 2025) @bendichter [#2141](https://github.com/NeurodataWithoutBorders/pynwb/pull/2141)
+- Deprecated `BehavioralEvents` and `AnnotationSeries` in favor of using an `EventsTable` in `NWBFile.events`. Creating a new instance of either type now emits a `UserWarning`; reading existing files containing these types continues to work without warnings. @rly
 
 ## PyNWB 3.1.3 (December 9, 2025)
 
