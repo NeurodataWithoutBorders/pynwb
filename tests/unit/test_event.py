@@ -1,5 +1,7 @@
 import numpy as np
 
+from hdmf.common import MeaningsTable, VectorData
+
 from pynwb.event import TimestampVectorData, DurationVectorData, EventsTable
 from pynwb.testing import TestCase
 
@@ -125,3 +127,27 @@ class TestEventsTable(TestCase):
         table.add_column(name='event_type', description='type of event')
         table.add_event(timestamp=1.0, event_type='stimulus')
         self.assertEqual(table['event_type'][0], 'stimulus')
+
+    def test_init_with_meanings_tables(self):
+        """Test that meanings_tables is forwarded through EventsTable.__init__."""
+        timestamp_col = TimestampVectorData(
+            name='timestamp', description='ts', data=[1.0, 2.0]
+        )
+        annotation_col = VectorData(
+            name='annotation', description='annotations', data=['go', 'stop']
+        )
+        meanings = MeaningsTable(
+            target=annotation_col,
+            description='Meanings of the annotation values.',
+        )
+        meanings.add_row(value='go', meaning='start trial')
+        meanings.add_row(value='stop', meaning='end trial')
+
+        table = EventsTable(
+            name='events',
+            description='test events',
+            columns=[timestamp_col, annotation_col],
+            meanings_tables=[meanings],
+        )
+        self.assertIn('annotation_meanings', table.meanings_tables)
+        self.assertIs(table.meanings_tables['annotation_meanings'], meanings)

@@ -1,6 +1,6 @@
 # PyNWB Changelog
 
-## PyNWB 3.2.0 (Upcoming)
+## PyNWB 4.0.0 (Upcoming)
 
 ### Documentation and tutorial enhancements
 - Added documentation for `ExternalImage` to the images tutorial. @h-mayorquin [#2159](https://github.com/NeurodataWithoutBorders/pynwb/pull/2159)

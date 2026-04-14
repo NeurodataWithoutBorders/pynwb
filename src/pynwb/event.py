@@ -80,6 +80,9 @@ class EventsTable(DynamicTable):
         {'name': 'annotation', 'description': 'User annotations about events.'},
     )
 
+    # The override exists to give EventsTable an explicit, narrowed docval signature
+    # (required name/description, AllowPositional.ERROR, and a curated subset of
+    # DynamicTable kwargs) rather than to add init-time logic.
     @docval(
         {'name': 'name', 'type': str, 'doc': 'Name of this EventsTable'},
         {'name': 'description', 'type': str,
