@@ -173,7 +173,7 @@ class Units(DynamicTable):
     )
 
     @docval({'name': 'name', 'type': str, 'doc': 'Name of this Units interface', 'default': 'Units'},
-            *get_docval(DynamicTable.__init__, 'id', 'columns', 'colnames', 'target_tables'),
+            *get_docval(DynamicTable.__init__, 'id', 'columns', 'colnames', 'target_tables', 'meanings_tables'),
             {'name': 'description', 'type': str, 'doc': 'a description of what is in this table', 'default': None},
             {'name': 'electrode_table', 'type': DynamicTable,
              'doc': 'the table that the *electrodes* column indexes', 'default': None},
@@ -382,7 +382,7 @@ class FrequencyBandsTable(DynamicTable):
         {'name': 'band_stdev', 'description': 'The standard deviation Gaussian filters, in Hz.', 'required': False}
     )
 
-    @docval(*get_docval(DynamicTable.__init__, 'id', 'columns', 'colnames', 'target_tables'),
+    @docval(*get_docval(DynamicTable.__init__, 'id', 'columns', 'colnames', 'target_tables', 'meanings_tables'),
             allow_positional=AllowPositional.WARNING,)
     def __init__(self, **kwargs):
         kwargs['name'] = 'bands'

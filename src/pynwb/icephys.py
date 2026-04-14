@@ -422,7 +422,7 @@ class IntracellularElectrodesTable(DynamicTable):
          'table': False},
     )
 
-    @docval(*get_docval(DynamicTable.__init__, 'id', 'columns', 'colnames', 'target_tables'),
+    @docval(*get_docval(DynamicTable.__init__, 'id', 'columns', 'colnames', 'target_tables', 'meanings_tables'),
             allow_positional=AllowPositional.WARNING,)
     def __init__(self, **kwargs):
         # Define defaultb name and description settings
@@ -452,7 +452,7 @@ class IntracellularStimuliTable(DynamicTable):
          'class': TimeSeriesReferenceVectorData},
     )
 
-    @docval(*get_docval(DynamicTable.__init__, 'id', 'columns', 'colnames', 'target_tables'),
+    @docval(*get_docval(DynamicTable.__init__, 'id', 'columns', 'colnames', 'target_tables', 'meanings_tables'),
             allow_positional=AllowPositional.WARNING,)
     def __init__(self, **kwargs):
         # Define defaultb name and description settings
@@ -476,7 +476,7 @@ class IntracellularResponsesTable(DynamicTable):
          'class': TimeSeriesReferenceVectorData},
     )
 
-    @docval(*get_docval(DynamicTable.__init__, 'id', 'columns', 'colnames', 'target_tables'),
+    @docval(*get_docval(DynamicTable.__init__, 'id', 'columns', 'colnames', 'target_tables', 'meanings_tables'),
             allow_positional=AllowPositional.WARNING,)
     def __init__(self, **kwargs):
         # Define defaultb name and description settings
@@ -783,7 +783,7 @@ class SimultaneousRecordingsTable(DynamicTable):
                     'reading the Container from file as the table attribute is already populated in this case '
                     'but otherwise this is required.',
              'default': None},
-            *get_docval(DynamicTable.__init__, 'id', 'columns', 'colnames', 'target_tables'),
+            *get_docval(DynamicTable.__init__, 'id', 'columns', 'colnames', 'target_tables', 'meanings_tables'),
             allow_positional=AllowPositional.WARNING,)
     def __init__(self, **kwargs):
         intracellular_recordings_table = popargs('intracellular_recordings_table', kwargs)
@@ -843,7 +843,7 @@ class SequentialRecordingsTable(DynamicTable):
                     'column indexes. May be None when reading the Container from file as the '
                     'table attribute is already populated in this case but otherwise this is required.',
              'default': None},
-            *get_docval(DynamicTable.__init__, 'id', 'columns', 'colnames', 'target_tables'),
+            *get_docval(DynamicTable.__init__, 'id', 'columns', 'colnames', 'target_tables', 'meanings_tables'),
             allow_positional=AllowPositional.WARNING,)
     def __init__(self, **kwargs):
         simultaneous_recordings_table = popargs('simultaneous_recordings_table', kwargs)
@@ -901,7 +901,7 @@ class RepetitionsTable(DynamicTable):
                     'be None when reading the Container from file as the table attribute is already populated '
                     'in this case but otherwise this is required.',
              'default': None},
-            *get_docval(DynamicTable.__init__, 'id', 'columns', 'colnames', 'target_tables'),
+            *get_docval(DynamicTable.__init__, 'id', 'columns', 'colnames', 'target_tables', 'meanings_tables'),
             allow_positional=AllowPositional.WARNING,)
     def __init__(self, **kwargs):
         sequential_recordings_table = popargs('sequential_recordings_table', kwargs)
@@ -954,7 +954,7 @@ class ExperimentalConditionsTable(DynamicTable):
              'type': RepetitionsTable,
              'doc': 'the RepetitionsTable table that the repetitions column indexes',
              'default': None},
-            *get_docval(DynamicTable.__init__, 'id', 'columns', 'colnames', 'target_tables'),
+            *get_docval(DynamicTable.__init__, 'id', 'columns', 'colnames', 'target_tables', 'meanings_tables'),
             allow_positional=AllowPositional.WARNING,)
     def __init__(self, **kwargs):
         repetitions_table = popargs('repetitions_table', kwargs)

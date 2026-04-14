@@ -85,7 +85,7 @@ class EventsTable(DynamicTable):
         {'name': 'description', 'type': str,
          'doc': ('A description of the events stored in the table, including information about '
                  'how the event times were computed.')},
-        *get_docval(DynamicTable.__init__, 'id', 'columns', 'colnames', 'target_tables'),
+        *get_docval(DynamicTable.__init__, 'id', 'columns', 'colnames', 'target_tables', 'meanings_tables'),
         allow_positional=AllowPositional.ERROR,
     )
     def __init__(self, **kwargs):
