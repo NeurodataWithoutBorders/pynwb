@@ -5,38 +5,38 @@
 ### Documentation and tutorial enhancements
 - Added documentation for `ExternalImage` to the images tutorial. @h-mayorquin [#2159](https://github.com/NeurodataWithoutBorders/pynwb/pull/2159)
 - Fixed broken and redirecting links in documentation. @bendichter [#2165](https://github.com/NeurodataWithoutBorders/pynwb/pull/2165)
-- Added `EventsTable` examples to the NWB file basics and behavior tutorials. @rly
+- Added `EventsTable` examples to the NWB file basics and behavior tutorials. @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156)
 
 ### Added
-- Added support for NWB Schema 2.10.0 ([NWBEP001](https://nwb-schema.readthedocs.io/)), which introduces the `EventsTable`, `TimestampVectorData`, and `DurationVectorData` neurodata types and a new `events` group on `NWBFile` for storing `EventsTable` instances. Use `NWBFile.add_events_table()` to add an `EventsTable` and `NWBFile.get_events_table()` to retrieve one. @rly
-- Added support for HERD (HDMF External Resources Data Structure) as the `external_resources` field on `NWBFile`, enabling users to associate external resource annotations (e.g., ontology term mappings) with their NWB files. `link_resources` and `get_external_resources` are inherited from `HERDManager` in hdmf. @mavaylon1, @rly [#2111](https://github.com/NeurodataWithoutBorders/pynwb/pull/2111)
+- Added support for NWB Schema 2.10.0 ([NWBEP001](https://nwb-schema.readthedocs.io/)), which introduces the `EventsTable`, `TimestampVectorData`, and `DurationVectorData` neurodata types and a new `events` group on `NWBFile` for storing `EventsTable` instances. Use `NWBFile.add_events_table()` to add an `EventsTable` and `NWBFile.get_events_table()` to retrieve one. @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156)
+- Added support for HERD (HDMF External Resources Data Structure) as the `external_resources` field on `NWBFile`, enabling users to associate external resource annotations (e.g., ontology term mappings) with their NWB files. `link_resources` and `get_external_resources` are inherited from `HERDManager` in hdmf. @mavaylon1, @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156) [#2111](https://github.com/NeurodataWithoutBorders/pynwb/pull/2111)
 - Added `get_starting_time()` and `get_duration()` methods to `TimeSeries` to get the starting time and duration of the time series. @h-mayorquin [#2146](https://github.com/NeurodataWithoutBorders/pynwb/pull/2146)
 - Added `get_starting_time()` and `get_duration()` methods to `TimeIntervals` to get the earliest start time and total duration (span from earliest start to latest stop) of all intervals. @h-mayorquin [#2146](https://github.com/NeurodataWithoutBorders/pynwb/pull/2146)
 - Added `get_starting_time()` and `get_duration()` methods to `Units` to get the earliest spike time and total duration (span from earliest to latest spike) across all units. @h-mayorquin [#2164](https://github.com/NeurodataWithoutBorders/pynwb/pull/2164)
 
 ### Fixed
-- Fixed invalid CSS properties in documentation assistant toggle that prevented proper positioning on displays ≥1400px wide. @rly [#2151](https://github.com/NeurodataWithoutBorders/pynwb/pull/2151) 
+- Fixed invalid CSS properties in documentation assistant toggle that prevented proper positioning on displays ≥1400px wide. @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156) [#2151](https://github.com/NeurodataWithoutBorders/pynwb/pull/2151) 
 
 ### Changed
-- Added Python 3.14 support. @bendichter, @rly [#2168](https://github.com/NeurodataWithoutBorders/pynwb/pull/2168)
-- Updated HDMF dependency to >=5.0.0, <6. @rly [#2171](https://github.com/NeurodataWithoutBorders/pynwb/issues/2171)
+- Added Python 3.14 support. @bendichter, @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156) [#2168](https://github.com/NeurodataWithoutBorders/pynwb/pull/2168)
+- Updated HDMF dependency to >=5.0.0, <6. @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156) [#2171](https://github.com/NeurodataWithoutBorders/pynwb/issues/2171)
 - Deprecated Python 3.9 support. (EOL was Oct 31, 2025) @bendichter [#2141](https://github.com/NeurodataWithoutBorders/pynwb/pull/2141)
-- Deprecated `BehavioralEvents` and `AnnotationSeries` in favor of using an `EventsTable` in `NWBFile.events`. Creating a new instance of either type now emits a `UserWarning`; reading existing files containing these types continues to work without warnings. @rly
+- Deprecated `BehavioralEvents` and `AnnotationSeries` in favor of using an `EventsTable` in `NWBFile.events`. Creating a new instance of either type now emits a `UserWarning`; reading existing files containing these types continues to work without warnings. @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156)
 
 ## PyNWB 3.1.3 (December 9, 2025)
 
 ### Added
-- Added 'target_tables' kwarg to DynamicTable subclasses to allow classes that extend DynamicTable subclasses to specify the mapping of DynamicTableRegion columns to the target tables. @rly, @stephprince [#2096](https://github.com/NeurodataWithoutBorders/pynwb/issues/2096)
+- Added 'target_tables' kwarg to DynamicTable subclasses to allow classes that extend DynamicTable subclasses to specify the mapping of DynamicTableRegion columns to the target tables. @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156), @stephprince [#2096](https://github.com/NeurodataWithoutBorders/pynwb/issues/2096)
 
 ### Fixed
 - Fixed incorrect warning for path not ending in `.nwb` when no path argument was provided. @t-b [#2130](https://github.com/NeurodataWithoutBorders/pynwb/pull/2130)
 - Fixed inability to read files created with extensions that had schema conflicts with the DeviceModel type introduced in NWB Schema 2.9.0. @stephprince [#2132](https://github.com/NeurodataWithoutBorders/pynwb/pull/2132)
-- Fixed issue with setting `neurodata_type_inc` when reading NWB files with cached schema versions less than 2.2.0. @rly [#2135](https://github.com/NeurodataWithoutBorders/pynwb/pull/2135)
-- Fixed import structure test. @rly [#2136](https://github.com/NeurodataWithoutBorders/pynwb/pull/2136)
+- Fixed issue with setting `neurodata_type_inc` when reading NWB files with cached schema versions less than 2.2.0. @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156) [#2135](https://github.com/NeurodataWithoutBorders/pynwb/pull/2135)
+- Fixed import structure test. @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156) [#2136](https://github.com/NeurodataWithoutBorders/pynwb/pull/2136)
 
 ### Changed
 - Changed UI of documentation assistant to be an accordion that is always visible. @bendichter [#2124](https://github.com/NeurodataWithoutBorders/pynwb/pull/2124)
-- Updated minimum HDMF version to 4.1.2 and updated tests accordingly. @rly [#2144](https://github.com/NeurodataWithoutBorders/pynwb/pull/2144)
+- Updated minimum HDMF version to 4.1.2 and updated tests accordingly. @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156) [#2144](https://github.com/NeurodataWithoutBorders/pynwb/pull/2144)
 
 
 ## PyNWB 3.1.2 (August 13, 2025)
@@ -45,23 +45,23 @@
 - Fixed parsing of the nwb_version attribute which followed the previous suggestion to have a `NWB-` prefix.
   @t-b [#2118](https://github.com/NeurodataWithoutBorders/pynwb/pull/2118)
 - Fixed a performance regression introduced in pynwb 2.8.0 that affected reading NWB files with a large
-  number of objects or fields of objects. @rly [#2121](https://github.com/NeurodataWithoutBorders/pynwb/pull/2121)
+  number of objects or fields of objects. @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156) [#2121](https://github.com/NeurodataWithoutBorders/pynwb/pull/2121)
 - Fixed `load_type_config`, `unload_type_config`, and `get_loaded_type_config` acting on a copy of the global type map
-  instead of the global type map itself. @rly [#2121](https://github.com/NeurodataWithoutBorders/pynwb/pull/2121)
+  instead of the global type map itself. @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156) [#2121](https://github.com/NeurodataWithoutBorders/pynwb/pull/2121)
 
 ### Changed
 - Added an argument `copy` to `get_type_map` to control whether a copy of the type map is returned or not.
-  If `copy=False`, the returned type map will be a direct reference to the global type map. @rly
+  If `copy=False`, the returned type map will be a direct reference to the global type map. @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156)
   [#2121](https://github.com/NeurodataWithoutBorders/pynwb/pull/2121)
 - Deprecated calling `get_type_map` with the `extensions` argument. Call `load_namespaces` on the returned `TypeMap`
-  instead. @rly [#2121](https://github.com/NeurodataWithoutBorders/pynwb/pull/2121)
+  instead. @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156) [#2121](https://github.com/NeurodataWithoutBorders/pynwb/pull/2121)
 
 ## PyNWB 3.1.1 (July 22, 2025)
 
 ### Bug fixes
-- Fixed reading and exporting of files written with NWB Schema < 2.9.0 that contained a reference to the electrodes table. @rly [#2112](https://github.com/NeurodataWithoutBorders/pynwb/pull/2112)
-- Updated tests to skip streaming tests gracefully if offline. @rly [#2113](https://github.com/NeurodataWithoutBorders/pynwb/pull/2113)
-- Added check in `PlaneSegmentation` constructor for required columns. @rly [#2102](https://github.com/NeurodataWithoutBorders/pynwb/pull/2102)
+- Fixed reading and exporting of files written with NWB Schema < 2.9.0 that contained a reference to the electrodes table. @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156) [#2112](https://github.com/NeurodataWithoutBorders/pynwb/pull/2112)
+- Updated tests to skip streaming tests gracefully if offline. @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156) [#2113](https://github.com/NeurodataWithoutBorders/pynwb/pull/2113)
+- Added check in `PlaneSegmentation` constructor for required columns. @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156) [#2102](https://github.com/NeurodataWithoutBorders/pynwb/pull/2102)
 
 
 ## PyNWB 3.1.0 (July 8, 2025)
@@ -71,12 +71,12 @@
 
 ### Enhancements and minor changes
 - Added support for NWB Schema 2.9.0.
-  - Added `BaseImage` and `ExternalImage` as new neurodata types. The first so both `Image` and `ExternalImage` can inherit from it. The second to store external images. @rly [#2079](https://github.com/NeurodataWithoutBorders/pynwb/pull/2079)
+  - Added `BaseImage` and `ExternalImage` as new neurodata types. The first so both `Image` and `ExternalImage` can inherit from it. The second to store external images. @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156) [#2079](https://github.com/NeurodataWithoutBorders/pynwb/pull/2079)
   - Added new `ElectrodesTable` neurodata type. @mavaylon1 [#1890](https://github.com/NeurodataWithoutBorders/pynwb/pull/1890)
   - Formally defined and renamed `ElectrodeTable` as the `ElectrodesTable` neurodata type. @mavaylon1 [#1890](https://github.com/NeurodataWithoutBorders/pynwb/pull/1890)
-  - Formally defined bands within `DecompositionSeries` as the neurodatatype `FrequencyBandsTable`. @mavaylon1 @rly [#2063](https://github.com/NeurodataWithoutBorders/pynwb/pull/2063)
-  - Added new `DeviceModel` neurodata type to store device model information. @rly [#2088](https://github.com/NeurodataWithoutBorders/pynwb/pull/2088)
-  - Deprecated `Device.model_name`, `Device.model_number`, and `Device.manufacturer` fields in favor of `DeviceModel`. @rly [#2088](https://github.com/NeurodataWithoutBorders/pynwb/pull/2088)
+  - Formally defined bands within `DecompositionSeries` as the neurodatatype `FrequencyBandsTable`. @mavaylon1 @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156) [#2063](https://github.com/NeurodataWithoutBorders/pynwb/pull/2063)
+  - Added new `DeviceModel` neurodata type to store device model information. @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156) [#2088](https://github.com/NeurodataWithoutBorders/pynwb/pull/2088)
+  - Deprecated `Device.model_name`, `Device.model_number`, and `Device.manufacturer` fields in favor of `DeviceModel`. @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156) [#2088](https://github.com/NeurodataWithoutBorders/pynwb/pull/2088)
   - Added support for 2D `EventDetection.source_index` to indicate [time_index, channel_index]. @stephprince [#2091](https://github.com/NeurodataWithoutBorders/pynwb/pull/2091)
   - Made `EventDetection.times` optional. @stephprince [#2091](https://github.com/NeurodataWithoutBorders/pynwb/pull/2091)
   - Deprecated `EventDetection.times`. @stephprince [#2101](https://github.com/NeurodataWithoutBorders/pynwb/pull/2101)
@@ -94,11 +94,11 @@
 - Fixed bug in `IntracellularRecordingsTable.__init__` were `IntracellularResponsesTable` wasn't created correctly when custom category tables were provided @oruebel. [#2031](https://github.com/NeurodataWithoutBorders/pynwb/pull/2031)
 - Fixed shape check in `SpikeEventSeries.__init__` to support `AbstractDataChunkIterator` for timestamps/data. @oruebel [#2031](https://github.com/NeurodataWithoutBorders/pynwb/pull/2031)
 - Added unit tests to enhance coverage of `core.py`, `image.py`, `spec.py`, `icephys.py`, `epoch.py` and others. @oruebel [#2031](https://github.com/NeurodataWithoutBorders/pynwb/pull/2031)
-- Fixed missing `IndexSeries.indexed_images`. @rly [#2074](https://github.com/NeurodataWithoutBorders/pynwb/pull/2074)
-- Fixed missing `__nwbfields__` and `_fieldsname` for `NWBData` and its subclasses. @rly [#2082](https://github.com/NeurodataWithoutBorders/pynwb/pull/2082)
-- Fixed caching of the type map when using HDMF 4.1.0. @rly [#2087](https://github.com/NeurodataWithoutBorders/pynwb/pull/2087)
+- Fixed missing `IndexSeries.indexed_images`. @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156) [#2074](https://github.com/NeurodataWithoutBorders/pynwb/pull/2074)
+- Fixed missing `__nwbfields__` and `_fieldsname` for `NWBData` and its subclasses. @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156) [#2082](https://github.com/NeurodataWithoutBorders/pynwb/pull/2082)
+- Fixed caching of the type map when using HDMF 4.1.0. @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156) [#2087](https://github.com/NeurodataWithoutBorders/pynwb/pull/2087)
 - Removed use of complex numbers in scratch tutorial because of incompatibilities with HDMF 4.1.0. @stephprince [#2090](https://github.com/NeurodataWithoutBorders/pynwb/pull/2090/)
-- Made `ImagingPlane.description` optional to conform with the NWB Schema. @rly [#2051](https://github.com/NeurodataWithoutBorders/pynwb/pull/2051)
+- Made `ImagingPlane.description` optional to conform with the NWB Schema. @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156) [#2051](https://github.com/NeurodataWithoutBorders/pynwb/pull/2051)
 
 ### Documentation and tutorial enhancements
 - Added NWB AI assistant to the home page of the documentation. @magland [#2076](https://github.com/NeurodataWithoutBorders/pynwb/pull/2076)
@@ -141,12 +141,12 @@
 
 ### Bug fixes
 - Made distance, orientation, and field_of_view optional in OpticalSeries to match schema @bendichter [#2023](https://github.com/NeurodataWithoutBorders/pynwb/pull/2023)
-- Added support for NWB schema 2.8.0. @rly [#2001](https://github.com/NeurodataWithoutBorders/pynwb/pull/2001)
-  - Removed `SpatialSeries.bounds` field that was not functional. This will be fixed in a future release. @rly [#1907](https://github.com/NeurodataWithoutBorders/pynwb/pull/1907), [#1996](https://github.com/NeurodataWithoutBorders/pynwb/pull/1996)
+- Added support for NWB schema 2.8.0. @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156) [#2001](https://github.com/NeurodataWithoutBorders/pynwb/pull/2001)
+  - Removed `SpatialSeries.bounds` field that was not functional. This will be fixed in a future release. @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156) [#1907](https://github.com/NeurodataWithoutBorders/pynwb/pull/1907), [#1996](https://github.com/NeurodataWithoutBorders/pynwb/pull/1996)
   - Added support for `NWBFile.was_generated_by` field. @stephprince [#1924](https://github.com/NeurodataWithoutBorders/pynwb/pull/1924)
   - Added support for `model_number`, `model_name`, and `serial_number` fields to `Device`. @stephprince [#1997](https://github.com/NeurodataWithoutBorders/pynwb/pull/1997)
-  - Deprecated `EventWaveform` neurodata type. @rly [#1940](https://github.com/NeurodataWithoutBorders/pynwb/pull/1940)
-  - Deprecated `ImageMaskSeries` neurodata type. @rly [#1941](https://github.com/NeurodataWithoutBorders/pynwb/pull/1941)
+  - Deprecated `EventWaveform` neurodata type. @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156) [#1940](https://github.com/NeurodataWithoutBorders/pynwb/pull/1940)
+  - Deprecated `ImageMaskSeries` neurodata type. @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156) [#1941](https://github.com/NeurodataWithoutBorders/pynwb/pull/1941)
 - Added enhancements to the validation CLI. @stephprince [#1911](https://github.com/NeurodataWithoutBorders/pynwb/pull/1911)
   - Added an entry point for the validation module. You can now use `pynwb-validate "file.nwb"`.
   - Added the `--json-outpath-path` CLI argument to output validation results in a machine readable format.
@@ -157,20 +157,20 @@
 ### Documentation and tutorial enhancements
 - Updated `SpikeEventSeries`, `DecompositionSeries`, and `FilteredEphys` examples. @stephprince [#2012](https://github.com/NeurodataWithoutBorders/pynwb/pull/2012)
 - Replaced deprecated `scipy.misc.face` dataset in the images tutorial with another example. @stephprince [#2016](https://github.com/NeurodataWithoutBorders/pynwb/pull/2016)
-- Removed Allen Brain Observatory example which was unnecessary and difficult to maintain. @rly [#2026](https://github.com/NeurodataWithoutBorders/pynwb/pull/2026)
+- Removed Allen Brain Observatory example which was unnecessary and difficult to maintain. @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156) [#2026](https://github.com/NeurodataWithoutBorders/pynwb/pull/2026)
 
 ## PyNWB 2.8.3 (November 19, 2024)
 
 ### Enhancements and minor changes
 - Added `NWBHDF5IO.read_nwb` convenience method to simplify reading an NWB file. @h-mayorquin [#1979](https://github.com/NeurodataWithoutBorders/pynwb/pull/1979)
-- Removed unused references to region references and builders in preparation for changes in HDMF 4.0. @rly [#1991](https://github.com/NeurodataWithoutBorders/pynwb/pull/1991)
+- Removed unused references to region references and builders in preparation for changes in HDMF 4.0. @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156) [#1991](https://github.com/NeurodataWithoutBorders/pynwb/pull/1991)
 - Made gain an optional argument for PatchClampSeries to match the schema. @stephprince [#1975](https://github.com/NeurodataWithoutBorders/pynwb/pull/1975)
 - Added warning when writing files with `NWBHDF5IO` without the `.nwb` extension. @stephprince [#1978](https://github.com/NeurodataWithoutBorders/pynwb/pull/1978)
 - Cache global type map to speed import 3X. @sneakers-the-rat [#1931](https://github.com/NeurodataWithoutBorders/pynwb/pull/1931)
 
 ### Bug fixes
 - Fixed bug in how `ElectrodeGroup.__init__` validates its `position` argument. @oruebel [#1770](https://github.com/NeurodataWithoutBorders/pynwb/pull/1770)
-- Changed `SpatialSeries.reference_frame` from required to optional as specified in the schema. @rly [#1986](https://github.com/NeurodataWithoutBorders/pynwb/pull/1986)
+- Changed `SpatialSeries.reference_frame` from required to optional as specified in the schema. @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156) [#1986](https://github.com/NeurodataWithoutBorders/pynwb/pull/1986)
 
 ### Documentation and tutorial enhancements
 - Added documentation example for `SpikeEventSeries`. @stephprince [#1983](https://github.com/NeurodataWithoutBorders/pynwb/pull/1983)
@@ -190,14 +190,14 @@
 ### Bug fixes
 - Fixed `can_read` method to return False if no nwbfile version can be found @stephprince [#1934](https://github.com/NeurodataWithoutBorders/pynwb/pull/1934)
 - Changed `epoch_tags` to be a NWBFile property instead of constructor argument. @stephprince [#1935](https://github.com/NeurodataWithoutBorders/pynwb/pull/1935)
-- Exposed option to not cache the spec in `NWBHDF5IO.export`. @rly [#1959](https://github.com/NeurodataWithoutBorders/pynwb/pull/1959)
+- Exposed option to not cache the spec in `NWBHDF5IO.export`. @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156) [#1959](https://github.com/NeurodataWithoutBorders/pynwb/pull/1959)
 
 ## PyNWB 2.8.1 (July 3, 2024)
 
 ### Documentation and tutorial enhancements
-- Simplified the introduction to NWB tutorial. @rly [#1914](https://github.com/NeurodataWithoutBorders/pynwb/pull/1914)
+- Simplified the introduction to NWB tutorial. @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156) [#1914](https://github.com/NeurodataWithoutBorders/pynwb/pull/1914)
 - Simplified the ecephys and ophys tutorials. [#1915](https://github.com/NeurodataWithoutBorders/pynwb/pull/1915)
-- Add comments to `src/pynwb/io/file.py` to improve developer documentation. @rly [#1925](https://github.com/NeurodataWithoutBorders/pynwb/pull/1925)
+- Add comments to `src/pynwb/io/file.py` to improve developer documentation. @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156) [#1925](https://github.com/NeurodataWithoutBorders/pynwb/pull/1925)
 
 ### Bug fixes
 - Fixed use of `channel_conversion` in `TimeSeries` `get_data_in_units`. @rohanshah [1923](https://github.com/NeurodataWithoutBorders/pynwb/pull/1923)
@@ -207,30 +207,30 @@
 ### Enhancements and minor changes
 - Set rate default value inside `mock_ElectricalSeries` to avoid having to set `rate=None` explicitly when passing timestamps. @h-mayorquin [#1894](https://github.com/NeurodataWithoutBorders/pynwb/pull/1894)
 - Integrate validation through the `TypeConfigurator`. @mavaylon1 [#1829](https://github.com/NeurodataWithoutBorders/pynwb/pull/1829)
-- Exposed `aws_region` to `NWBHDF5IO`. @rly [#1903](https://github.com/NeurodataWithoutBorders/pynwb/pull/1903)
+- Exposed `aws_region` to `NWBHDF5IO`. @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156) [#1903](https://github.com/NeurodataWithoutBorders/pynwb/pull/1903)
 
 ### Bug fixes
-- Revert changes in PyNWB 2.7.0 that allow datetimes without a timezone and without a time while issues with DANDI upload of NWB files missing timezone are resolved. @rly [#1908](https://github.com/NeurodataWithoutBorders/pynwb/pull/1908)
+- Revert changes in PyNWB 2.7.0 that allow datetimes without a timezone and without a time while issues with DANDI upload of NWB files missing timezone are resolved. @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156) [#1908](https://github.com/NeurodataWithoutBorders/pynwb/pull/1908)
 
 ## PyNWB 2.7.0 (May 2, 2024)
 
 ### Enhancements and minor changes
 - Added `bounds` field to `SpatialSeries` to set optional boundary range (min, max) for each dimension of data. @mavaylon1 [#1869](https://github.com/NeurodataWithoutBorders/pynwb/pull/1869)
 - Added support for NWB schema 2.7.0. See [2.7.0 release notes](https://nwb-schema.readthedocs.io/en/latest/format_release_notes.html) for details
-- Deprecated `ImagingRetinotopy` neurodata type. @rly [#1813](https://github.com/NeurodataWithoutBorders/pynwb/pull/1813)
-- Modified `OptogeneticSeries` to allow 2D data, primarily in extensions of `OptogeneticSeries`. @rly [#1812](https://github.com/NeurodataWithoutBorders/pynwb/pull/1812)
+- Deprecated `ImagingRetinotopy` neurodata type. @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156) [#1813](https://github.com/NeurodataWithoutBorders/pynwb/pull/1813)
+- Modified `OptogeneticSeries` to allow 2D data, primarily in extensions of `OptogeneticSeries`. @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156) [#1812](https://github.com/NeurodataWithoutBorders/pynwb/pull/1812)
 - Support `stimulus_template` as optional predefined column in `IntracellularStimuliTable`. @stephprince [#1815](https://github.com/NeurodataWithoutBorders/pynwb/pull/1815)
-- Support `NWBDataInterface` and `DynamicTable` in `NWBFile.stimulus`. @rly [#1842](https://github.com/NeurodataWithoutBorders/pynwb/pull/1842)
+- Support `NWBDataInterface` and `DynamicTable` in `NWBFile.stimulus`. @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156) [#1842](https://github.com/NeurodataWithoutBorders/pynwb/pull/1842)
 - Added support for python 3.12 and upgraded dependency versions. This also includes infrastructure updates for developers. @mavaylon1 [#1853](https://github.com/NeurodataWithoutBorders/pynwb/pull/1853)
 - Added `grid_spacing`, `grid_spacing_unit`, `origin_coords`, `origin_coords_unit` to `ImagingPlane` fields. @h-mayorquin [#1892](https://github.com/NeurodataWithoutBorders/pynwb/pull/1892)
 - Added `mock_Units` for generating Units tables. @h-mayorquin [#1875](https://github.com/NeurodataWithoutBorders/pynwb/pull/1875) and [#1883](https://github.com/NeurodataWithoutBorders/pynwb/pull/1883)
-- Allow datetimes without a timezone and without a time. @rly [#1886](https://github.com/NeurodataWithoutBorders/pynwb/pull/1886)
+- Allow datetimes without a timezone and without a time. @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156) [#1886](https://github.com/NeurodataWithoutBorders/pynwb/pull/1886)
 - No longer automatically set the timezone to the local timezone when not provided. [#1886](https://github.com/NeurodataWithoutBorders/pynwb/pull/1886)
 - Updated testing to not install in editable mode and not run `coverage` by default. [#1897](https://github.com/NeurodataWithoutBorders/pynwb/pull/1897)
 
 ### Bug fixes
-- Fix bug with reading file with linked `TimeSeriesReferenceVectorData` @rly [#1865](https://github.com/NeurodataWithoutBorders/pynwb/pull/1865)
-- Fix bug where extra keyword arguments could not be passed to `NWBFile.add_{x}_column` for use in custom `VectorData` classes. @rly [#1861](https://github.com/NeurodataWithoutBorders/pynwb/pull/1861)
+- Fix bug with reading file with linked `TimeSeriesReferenceVectorData` @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156) [#1865](https://github.com/NeurodataWithoutBorders/pynwb/pull/1865)
+- Fix bug where extra keyword arguments could not be passed to `NWBFile.add_{x}_column` for use in custom `VectorData` classes. @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156) [#1861](https://github.com/NeurodataWithoutBorders/pynwb/pull/1861)
 
 ## PyNWB 2.6.0 (February 21, 2024)
 
@@ -238,13 +238,13 @@
 - For `NWBHDF5IO()`, change the default of arg `load_namespaces` from `False` to `True`. @bendichter [#1748](https://github.com/NeurodataWithoutBorders/pynwb/pull/1748)
 - Add `NWBHDF5IO.can_read()`. @bendichter [#1703](https://github.com/NeurodataWithoutBorders/pynwb/pull/1703)
 - Add `pynwb.get_nwbfile_version()`. @bendichter [#1703](https://github.com/NeurodataWithoutBorders/pynwb/pull/1703)
-- Fix usage of the `validate` function in the `pynwb.testing.testh5io` classes and cache the spec by default in those classes. @rly [#1782](https://github.com/NeurodataWithoutBorders/pynwb/pull/1782)
+- Fix usage of the `validate` function in the `pynwb.testing.testh5io` classes and cache the spec by default in those classes. @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156) [#1782](https://github.com/NeurodataWithoutBorders/pynwb/pull/1782)
 - Updated timeseries data checks to warn instead of error when reading invalid files. @stephprince [#1793](https://github.com/NeurodataWithoutBorders/pynwb/pull/1793) and [#1809](https://github.com/NeurodataWithoutBorders/pynwb/pull/1809)
 - Expose the offset, conversion and channel conversion parameters in `mock_ElectricalSeries`. @h-mayorquin [#1796](https://github.com/NeurodataWithoutBorders/pynwb/pull/1796)
 - Expose `starting_time` in `mock_ElectricalSeries`. @h-mayorquin [#1805](https://github.com/NeurodataWithoutBorders/pynwb/pull/1805)
 - Enhance `get_data_in_units()` to work with objects that have a `channel_conversion` attribute like the `ElectricalSeries`. @h-mayorquin [#1806](https://github.com/NeurodataWithoutBorders/pynwb/pull/1806)
 - Refactor validation CLI tests to use `{sys.executable} -m coverage` to use the same Python version and run correctly on Debian systems. @yarikoptic [#1811](https://github.com/NeurodataWithoutBorders/pynwb/pull/1811)
-- Fixed tests to address newly caught validation errors. @rly [#1839](https://github.com/NeurodataWithoutBorders/pynwb/pull/1839)
+- Fixed tests to address newly caught validation errors. @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156) [#1839](https://github.com/NeurodataWithoutBorders/pynwb/pull/1839)
 
 ### Bug fixes
 - Fix bug where namespaces were loaded in "w-" mode. @h-mayorquin [#1795](https://github.com/NeurodataWithoutBorders/pynwb/pull/1795)
@@ -270,7 +270,7 @@
 - Fixed minor documentation build warnings and broken links to `basic_trials` tutorial  @oruebel [#1762](https://github.com/NeurodataWithoutBorders/pynwb/pull/1762)
 
 ## PyNWB 2.4.1 (July 26, 2023)
-- Stop running validation tests as part of integration tests. They cause issues in CI and can be run separately. @rly [#1740](https://github.com/NeurodataWithoutBorders/pynwb/pull/1740)
+- Stop running validation tests as part of integration tests. They cause issues in CI and can be run separately. @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156) [#1740](https://github.com/NeurodataWithoutBorders/pynwb/pull/1740)
 
 ## PyNWB 2.4.0 (July 23, 2023)
 
@@ -288,17 +288,17 @@
 ## PyNWB 2.3.3 (June 26, 2023)
 
 ### Enhancements and minor changes
-- Add testing support for Python 3.11. @rly [#1687](https://github.com/NeurodataWithoutBorders/pynwb/pull/1687)
-- Add CI testing of NWB files on DANDI. @rly [#1695](https://github.com/NeurodataWithoutBorders/pynwb/pull/1695)
+- Add testing support for Python 3.11. @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156) [#1687](https://github.com/NeurodataWithoutBorders/pynwb/pull/1687)
+- Add CI testing of NWB files on DANDI. @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156) [#1695](https://github.com/NeurodataWithoutBorders/pynwb/pull/1695)
 
 ### Bug fixes
-- Remove unused, deprecated `codecov` package from dev installation requirements. @rly
+- Remove unused, deprecated `codecov` package from dev installation requirements. @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156)
   [#1688](https://github.com/NeurodataWithoutBorders/pynwb/pull/1688)
-- Remove references to discontinued `requires.io` service in documentation. @rly
+- Remove references to discontinued `requires.io` service in documentation. @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156)
   [#1690](https://github.com/NeurodataWithoutBorders/pynwb/pull/1690)
-- Update `requirements-doc.txt` to resolve Python 3.7 incompatibility. @rly
+- Update `requirements-doc.txt` to resolve Python 3.7 incompatibility. @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156)
   [#1694](https://github.com/NeurodataWithoutBorders/pynwb/pull/1694)
-- Fixed test battery to show and check for warnings appropriately. @rly
+- Fixed test battery to show and check for warnings appropriately. @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156)
   [#1698](https://github.com/NeurodataWithoutBorders/pynwb/pull/1698)
 
 ## PyNWB 2.3.2 (April 10, 2023)
@@ -316,15 +316,15 @@
 ### Bug fixes
 - Fixed bug when initializing ``OnePhotonSeries`` with no value for ``binning``. @bendichter [#1660](https://github.com/NeurodataWithoutBorders/pynwb/pull/1660)
 - Fixed bug in ``NWBHDF5IO.nwb_version`` property to support files written by third-party software with a fixed-length ``nwb_version`` attribute. @oruebel [#1669](https://github.com/NeurodataWithoutBorders/pynwb/pull/1669)
-- Fixed search bar and missing jquery in ReadTheDocs documentation. @rly [#1671](https://github.com/NeurodataWithoutBorders/pynwb/pull/1671)
-- Requires [HDMF 3.5.4](https://github.com/hdmf-dev/hdmf/releases/tag/3.5.4) which includes bug fixes. @rly [#1672](https://github.com/NeurodataWithoutBorders/pynwb/pull/1672)
-- Fixed issue with deprecated pkg_resources. @rly [#1678](https://github.com/NeurodataWithoutBorders/pynwb/pull/1678)
+- Fixed search bar and missing jquery in ReadTheDocs documentation. @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156) [#1671](https://github.com/NeurodataWithoutBorders/pynwb/pull/1671)
+- Requires [HDMF 3.5.4](https://github.com/hdmf-dev/hdmf/releases/tag/3.5.4) which includes bug fixes. @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156) [#1672](https://github.com/NeurodataWithoutBorders/pynwb/pull/1672)
+- Fixed issue with deprecated pkg_resources. @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156) [#1678](https://github.com/NeurodataWithoutBorders/pynwb/pull/1678)
 
 ## PyNWB 2.3.1 (February 24, 2023)
 
 ### Bug fixes
 - Fixed an issue where  NWB files with version "2.0b" could not be read.
-  @rly [#1651](https://github.com/NeurodataWithoutBorders/pynwb/pull/1651)
+  @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156) [#1651](https://github.com/NeurodataWithoutBorders/pynwb/pull/1651)
 
 ## PyNWB 2.3.0 (February 23, 2023)
 
@@ -337,8 +337,8 @@
   [#1597](https://github.com/NeurodataWithoutBorders/pynwb/pull/1597)
 - Added module `pynwb.testing.mock.icephys` and corresponding tests. @bendichter
   [1595](https://github.com/NeurodataWithoutBorders/pynwb/pull/1595)
-- Removed redundant object mapper code. @rly [#1600](https://github.com/NeurodataWithoutBorders/pynwb/pull/1600)
-- Fixed pending deprecations and issues in CI. @rly [#1594](https://github.com/NeurodataWithoutBorders/pynwb/pull/1594)
+- Removed redundant object mapper code. @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156) [#1600](https://github.com/NeurodataWithoutBorders/pynwb/pull/1600)
+- Fixed pending deprecations and issues in CI. @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156) [#1594](https://github.com/NeurodataWithoutBorders/pynwb/pull/1594)
 - Added ``NWBHDF5IO.nwb_version`` property to get the NWB version from an NWB HDF5 file @oruebel [#1612](https://github.com/NeurodataWithoutBorders/pynwb/pull/1612)
 - Updated ``NWBHDF5IO.read`` to check NWB version before read and raise more informative error if an unsupported version is found @oruebel [#1612](https://github.com/NeurodataWithoutBorders/pynwb/pull/1612)
 - Added the `driver` keyword argument to the `pynwb.validate` function as well as the corresponding namespace caching. @CodyCBakerPhD [#1588](https://github.com/NeurodataWithoutBorders/pynwb/pull/1588)
@@ -351,7 +351,7 @@
   [#1583](https://github.com/NeurodataWithoutBorders/pynwb/pull/1583)
 - Updated round trip tutorial to the newer ``NWBH5IOMixin`` and ``AcquisitionH5IOMixin`` classes. @bendichter
   [#1586](https://github.com/NeurodataWithoutBorders/pynwb/pull/1586)
-- Added more informative error message for common installation error. @bendichter, @rly
+- Added more informative error message for common installation error. @bendichter, @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156)
   [#1591](https://github.com/NeurodataWithoutBorders/pynwb/pull/1591)
 - Updated citation for PyNWB in docs and duecredit to use the eLife NWB paper. @oruebel [#1604](https://github.com/NeurodataWithoutBorders/pynwb/pull/1604)
 - Fixed docs build warnings due to use of hardcoded links. @oruebel [#1604](https://github.com/NeurodataWithoutBorders/pynwb/pull/1604)
@@ -363,8 +363,8 @@
   [#1596](https://github.com/NeurodataWithoutBorders/pynwb/pull/1596)
 - Updated the [images tutorial](https://pynwb.readthedocs.io/en/stable/tutorials/domain/images.html) to provide example usage of an ``IndexSeries``
   with a reference to ``Images``. @bendichter [#1602](https://github.com/NeurodataWithoutBorders/pynwb/pull/1602)
-- Fixed an issue with the `tox` tool when upgrading to tox 4. @rly [#1608](https://github.com/NeurodataWithoutBorders/pynwb/pull/1608)
-- Fixed an issue where `Images` were not allowed as stimulus templates. @rly [#1638](https://github.com/NeurodataWithoutBorders/pynwb/pull/1638)
+- Fixed an issue with the `tox` tool when upgrading to tox 4. @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156) [#1608](https://github.com/NeurodataWithoutBorders/pynwb/pull/1608)
+- Fixed an issue where `Images` were not allowed as stimulus templates. @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156) [#1638](https://github.com/NeurodataWithoutBorders/pynwb/pull/1638)
 
 ## PyNWB 2.2.0 (October 19, 2022)
 
@@ -374,13 +374,13 @@
   [#1511](https://github.com/NeurodataWithoutBorders/pynwb/pull/1511)
 
 ### Internal enhancements
-- Moved CI to GitHub Actions. @rly [#1560](https://github.com/NeurodataWithoutBorders/pynwb/pull/1560),
+- Moved CI to GitHub Actions. @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156) [#1560](https://github.com/NeurodataWithoutBorders/pynwb/pull/1560),
   [#1566](https://github.com/NeurodataWithoutBorders/pynwb/pull/1566)
 
 ### Bug fixes
 - Fixed bug in ``pynwb.testing.mock.file.mock_NWBFile`` to identifier UUID to string. @oruebel
   [#1557](https://github.com/NeurodataWithoutBorders/pynwb/pull/1557)
-- Minor fixes to test suite to prevent warnings. @rly
+- Minor fixes to test suite to prevent warnings. @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156)
   [#1571](https://github.com/NeurodataWithoutBorders/pynwb/pull/1571)
 - Made build wheel python 3 only. @mavaylon1
   [#1572](https://github.com/NeurodataWithoutBorders/pynwb/pull/1572)
@@ -402,9 +402,9 @@
 - Add voxel_mask tutorial. @codycbakerphd (#1544)
 
 ### Enhancements and minor changes
-- Updated coverage workflow, report separate unit vs integration coverage. @rly
+- Updated coverage workflow, report separate unit vs integration coverage. @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156)
   [#1509](https://github.com/NeurodataWithoutBorders/pynwb/pull/1509)
-- Deleted test files generated from running sphinx gallery examples. @rly
+- Deleted test files generated from running sphinx gallery examples. @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156)
   [#1517](https://github.com/NeurodataWithoutBorders/pynwb/pull/1517)
 - Enabled passing an S3File created through s3fs, which provides a method for reading an NWB file directly
   from s3 that is an alternative to ros3. This required relaxing of `NWBHDF5IO` input validation. The `path`
@@ -416,9 +416,9 @@
   is provided is used with this method to ensure that that files with invalid data can be read, but prohibits
   the user from creating new instances when these checks are violated. @weiglszonja
   [#1516](https://github.com/NeurodataWithoutBorders/pynwb/pull/1516)
-- Created a GitHub Actions workflow to generate test files for testing backward compatibility. @rly
+- Created a GitHub Actions workflow to generate test files for testing backward compatibility. @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156)
   [#1548](https://github.com/NeurodataWithoutBorders/pynwb/pull/1548)
-- Updated requirements, including allowing numpy 1.23. @rly
+- Updated requirements, including allowing numpy 1.23. @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156)
   [#1550](https://github.com/NeurodataWithoutBorders/pynwb/pull/1550)
 - Enhanced docs for ``LabMetaData`` to clarify its usage. @oruebel
   [#1546](https://github.com/NeurodataWithoutBorders/pynwb/pull/1546)
@@ -437,25 +437,25 @@
   consistent API for existing and new files. This change affects all existing ``TimeIntervals`` tables
   e.g., ``NBWFile.epochs``, ``NWBFile.trials``, and ``NWBFile.invalid_times``. While this is technically a breaking
   change, the impact user codes should be minimal as this change primarily adds functionality while the overall
-  behavior of the API is largely consistent with existing behavior. @oruebel, @rly (#1390)
+  behavior of the API is largely consistent with existing behavior. @oruebel, @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156) (#1390)
 
 ### Enhancements and minor changes
-- A warning is now raised if `SpatialSeries.data` has more than 3 columns. @bendichter, @rly (#1455, #1480)
+- A warning is now raised if `SpatialSeries.data` has more than 3 columns. @bendichter, @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156) (#1455, #1480)
 - The arguments x, y, z, imp, location, filtering are no longer required in the electrodes table.
-  @h-mayorquin, @rly (#1448)
+  @h-mayorquin, @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156) (#1448)
 - Added `cell_id` attribute to `IntracellularElectrode`. @bendichter (#1459)
 - Added `offset` field to `TimeSeries` and its subtypes. @codycbakerphd (#1424)
 - Added support for NWB 2.5.0.
   - Added support for updated ``IndexSeries`` type, new ``order_of_images`` field in ``Images``, and new neurodata_type
-    ``ImageReferences``. @rly (#1483)
+    ``ImageReferences``. @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156) (#1483)
 - Added support for HDMF 3.3.1. This is now the minimum version of HDMF supported. Importantly, HDMF 3.3 introduces
   warnings when the constructor of a class mapped to an HDMF-common data type or an autogenerated data type class
-  is passed positional arguments instead of all keyword arguments. @rly (#1484)
+  is passed positional arguments instead of all keyword arguments. @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156) (#1484)
 - Moved logic that checks the 0th dimension of TimeSeries data equals the length of timestamps to a private method in the
   ``TimeSeries`` class. This is to avoid raising a warning when an ImageSeries is used with external file.
   @weiglszonja (#1486)
 - Improved warning text when dimensions are not matched in `TimeSeries`, `ElectricalSeries`, and `RoiResponseSeries`.
-  @rly (#1491)
+  @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156) (#1491)
 
 ### Documentation and tutorial enhancements:
 - Added tutorial on annotating data via ``TimeIntervals``. @oruebel (#1390)
@@ -471,17 +471,17 @@
 - Fixed input data types to allow only `float` for fields `conversion` and `offset` in definition of
   ``TimeSeries``. @codycbakerphd (#1424)
 - Fixed incorrect warning in `RoiResponseSeries.__init__` about mismatch between the second dimension of data and
-  the length of rois. @rly (#1491)
+  the length of rois. @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156) (#1491)
 
 
 ## PyNWB 2.0.1 (March 16, 2022)
 
 ### Bug fixes:
-- Added `environment-ros3.yml` to `MANIFEST.in` for inclusion in source distributions. @rly (#1398)
+- Added `environment-ros3.yml` to `MANIFEST.in` for inclusion in source distributions. @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156) (#1398)
 - Fixed bad error check in ``IntracellularRecordingsTable.add_recording`` when adding ``IZeroClampSeries``.
   @oruebel (#1410)
 - Skipped ros3 tests if internet access or the ros3 driver are not available. @oruebel (#1414)
-- Fixed CI issues. @rly (#1427)
+- Fixed CI issues. @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156) (#1427)
 
 ### Documentation and tutorial enhancements:
 - Enhanced ordering of sphinx gallery tutorials to use alphabetic ordering based on tutorial headings. @oruebel (#1399)
@@ -493,7 +493,7 @@
 - Extended the general tutorial with more data types (e.g., ``Subject``, ``SpatialSeries``, ``Position``).
   @weiglszonja (#1403)
 - Improved constructor docstrings for Image types. @weiglszonja (#1418)
-- Added documentation for exporting NWB files. @rly (#1417)
+- Added documentation for exporting NWB files. @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156) (#1417)
 - Improved documentation formatting. @bendichter (#1438)
 - Minor text fixes. @bendichter (#1437, #1400)
 
@@ -513,10 +513,10 @@
 - ``TimeSeries.__init__`` now requires the ``data`` argument because the 'data' dataset is required by the schema.
   If a ``TimeSeries`` is read without a value for ``data``, it will be set to a default value. For most
   ``TimeSeries``, this is a 1-dimensional empty array with dtype uint8. For ``ImageSeries`` and
-  ``DecompositionSeries``, this is a 3-dimensional empty array with dtype uint8. @rly (#1274)
+  ``DecompositionSeries``, this is a 3-dimensional empty array with dtype uint8. @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156) (#1274)
 - ``TimeSeries.__init__`` now requires the ``unit`` argument because the 'unit' attribute is required by the schema.
   If a ``TimeSeries`` is read without a value for ``unit``, it will be set to a default value. For most
-  ``TimeSeries``, this is "unknown". For ``IndexSeries``, this is "N/A" according to the NWB 2.4.0 schema. @rly (#1274)
+  ``TimeSeries``, this is "unknown". For ``IndexSeries``, this is "N/A" according to the NWB 2.4.0 schema. @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156) (#1274)
 
 ### New features:
 - Added new intracellular electrophysiology hierarchical table structure from ndx-icephys-meta to NWB core.
@@ -525,9 +525,9 @@
   ``ExperimentalConditionsTable`` as well as corresponding updates to ``NWBFile`` to support interaction
    with the new tables. @oruebel  (#1349)
 - Added support for NWB 2.4.0. See [Release Notes](https://nwb-schema.readthedocs.io/en/latest/format_release_notes.html)
-  for more details. @oruebel, @rly (#1349)
-- Dropped Python 3.6 support, added Python 3.9 support. @rly (#1377)
-- Updated requirements to allow compatibility with HDMF 3 and h5py 3. @rly (#1377)
+  for more details. @oruebel, @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156) (#1349)
+- Dropped Python 3.6 support, added Python 3.9 support. @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156) (#1377)
+- Updated requirements to allow compatibility with HDMF 3 and h5py 3. @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156) (#1377)
   - When using HDMF 3 and h5py 3, users can now stream NWB files from an S3 bucket.
 
 ### Tutorial enhancements:
@@ -538,58 +538,58 @@
 - Added thumbnails for tutorials to improve presentation of online docs.  @oruebel (#1349)
 - Used `sphinx.ext.extlinks` extension in docs to simplify linking to common targets. @oruebel (#1349)
 - Created new section for advanced I/O tutorials and moved parallel I/O tutorial to its own file. @oruebel (#1349)
-- Overhauled documentation on extensions. @bendichter, @rly, @oruebel (#1350)
+- Overhauled documentation on extensions. @bendichter, @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156), @oruebel (#1350)
 - Updated the optical physiology / Calcium imaging tutorial. @bendichter, @weiglszonja (#1375)
-- Added a tutorial on streaming using the ROS3 driver. @rly (#1393)
+- Added a tutorial on streaming using the ROS3 driver. @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156) (#1393)
 
 ### Minor new features:
 - Added RRID for citing PyNWB to the docs. @oruebel (#1372)
-- Updated CI and tests to handle deprecations in libraries. @rly (#1377)
+- Updated CI and tests to handle deprecations in libraries. @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156) (#1377)
 - Added test utilities for icephys (``pynwb.testing.icephys_testutils``) to ease creation of test data
   for tests and tutorials. @oruebel (#1349, #1383)
-- Added on-push and nightly tests of streaming using the ROS3 driver. @rly (#1393)
+- Added on-push and nightly tests of streaming using the ROS3 driver. @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156) (#1393)
   - These tests make use of a new dandiset for testing the API: https://gui.dandiarchive.org/#/dandiset/000126
-- Improve documentation and test for ``CorrectedImageStack``, ``MotionCorrection``. @rly, @bendichter (#1306, #1374)
+- Improve documentation and test for ``CorrectedImageStack``, ``MotionCorrection``. @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156), @bendichter (#1306, #1374)
 
 ### Bug fixes:
 - Updated behavior of ``make clean`` command for docs to ensure tutorial files are cleaned up.  @oruebel (#1349)
 - Enforced electrode ID uniqueness during insertion into table. @CodyCBakerPhD (#1344)
 - Fixed integration tests with invalid test data that will be caught by future hdmf validator version.
-  @dsleiter, @rly (#1366, #1376)
+  @dsleiter, @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156) (#1366, #1376)
 - Fixed build warnings in docs. @oruebel (#1380)
 - Fix intersphinx links in docs for numpy. @oruebel (#1386)
 - Previously, the ``data`` argument was required in ``OpticalSeries.__init__`` even though ``external_file`` could
   be provided in place of ``data``. ``OpticalSeries.__init__`` now makes ``data`` optional. However, this has the
   side effect of moving the position of ``data`` to later in the argument list, which may break code that relies
-  on positional arguments for ``OpticalSeries.__init__``. @rly (#1274)
+  on positional arguments for ``OpticalSeries.__init__``. @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156) (#1274)
 - Fixed `setup.py` not being able to import `versioneer` when installing in an embedded Python environment. @ikhramts
   (#1395)
-- Removed broken option to validate against a given namespace file and updated associated documentation. @rly (#1397)
+- Removed broken option to validate against a given namespace file and updated associated documentation. @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156) (#1397)
 
 ## PyNWB 1.5.1 (May 24, 2021)
 
 ### Bug fixes:
 - Raise minimum version of pandas from 0.23 to 1.0.5 to be compatible with numpy 1.20, and raise minimum version of
-  HDMF to use the corresponding change in HDMF. @rly (#1363)
-- Update documentation and update structure of requirements files. @rly (#1363)
+  HDMF to use the corresponding change in HDMF. @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156) (#1363)
+- Update documentation and update structure of requirements files. @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156) (#1363)
 
 ## PyNWB 1.5.0 (May 17, 2021)
 
 ### New features:
 - `NWBFile.add_scratch(...)` and `ScratchData.__init__(...)` now accept scalar data in addition to the currently
-  accepted types. @rly (#1309)
+  accepted types. @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156) (#1309)
 - Support `pathlib.Path` paths when opening files with `NWBHDF5IO`. @dsleiter (#1314)
 - Use HDMF 2.5.1. See the [HDMF release notes](https://github.com/hdmf-dev/hdmf/releases/tag/2.5.1) for details.
 - Support `driver='ros3'` in `NWBHDF5IO` for streaming NWB files directly from s3. @bendichter (#1331)
-- Update documentation, CI GitHub processes. @oruebel @yarikoptic, @bendichter, @TomDonoghue, @rly
+- Update documentation, CI GitHub processes. @oruebel @yarikoptic, @bendichter, @TomDonoghue, @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156)
   (#1311, #1336, #1351, #1352, #1345, #1340, #1327)
-- Set default `neurodata_type_inc` for `NWBGroupSpec`, `NWBDatasetSpec`. @rly (#1295)
+- Set default `neurodata_type_inc` for `NWBGroupSpec`, `NWBDatasetSpec`. @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156) (#1295)
 - Block usage of h5py 3+ for now. h5py>=2.9, <3 is supported. (#1355)
-- Fix incompatibility issue with downstream github-release tool used to deploy releases to GitHub. @rly (#1245)
-- Fix issue with Sphinx gallery. @rly
-- Add citation information to documentation and support for duecredit tool. @rly
-- Remove use of ColoredTestRunner for more readable verbose test output. @rly
-- Add support for nwb-schema 2.3.0. @rly (#1245, #1330)
+- Fix incompatibility issue with downstream github-release tool used to deploy releases to GitHub. @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156) (#1245)
+- Fix issue with Sphinx gallery. @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156)
+- Add citation information to documentation and support for duecredit tool. @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156)
+- Remove use of ColoredTestRunner for more readable verbose test output. @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156)
+- Add support for nwb-schema 2.3.0. @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156) (#1245, #1330)
   - Add optional `waveforms` column to the `Units` table.
   - Add optional `strain` field to `Subject`.
   - Add to `DecompositionSeries` an optional `DynamicTableRegion` called `source_channels`.
@@ -599,7 +599,7 @@
   - Clarify documentation for electrode impedance and filtering.
   - Set the `stimulus_description` for `IZeroCurrentClamp` to have the fixed value "N/A".
   - See https://nwb-schema.readthedocs.io/en/latest/format_release_notes.html for full schema release notes.
-- Add support for HDMF 2.5.5 and upgrade HDMF requirement from 2.1.0 to 2.5.5. @rly @ajtritt
+- Add support for HDMF 2.5.5 and upgrade HDMF requirement from 2.1.0 to 2.5.5. @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156) @ajtritt
   (#1325, #1355, #1360, #1245, #1287). This includes several relevant features and bug fixes, including:
   - Fix issue where dependencies of included types were not being loaded in namespaces / extensions.
   - Add `HDF5IO.get_namespaces(path=path, file=file)` method which returns a dict of namespace name mapped to the
@@ -623,7 +623,7 @@
 ## PyNWB 1.4.0 (August 12, 2020)
 
 Users can now add/remove containers from a written NWB file and export the modified NWBFile to a new file path.
-@rly (#1280)
+@rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156) (#1280)
 - See https://pynwb.readthedocs.io/en/stable/tutorials/general/add-remove-containers.html for examples and more
   information.
 
@@ -638,117 +638,117 @@ match the name of the contained `Container`. This update patches this bug such t
 brackets *must* match the name of the contained `Container` or else an error will be raised.
 
 ### Internal improvements:
-- Update requirements to use HDMF 2.1.0. @rly (#1256)
-- Start FAQ section in documentation. @rly (#1249)
-- Improve deprecation warnings. @rly (#1261)
-- Update CI to test Python 3.8, update requirements. @rly (#1267, #1275)
-- Make use of `MultiContainerInterface` and `LabelledDict` that have been moved to HDMF. @bendichter @rly (#1260)
+- Update requirements to use HDMF 2.1.0. @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156) (#1256)
+- Start FAQ section in documentation. @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156) (#1249)
+- Improve deprecation warnings. @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156) (#1261)
+- Update CI to test Python 3.8, update requirements. @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156) (#1267, #1275)
+- Make use of `MultiContainerInterface` and `LabelledDict` that have been moved to HDMF. @bendichter @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156) (#1260)
 
 ### Bug fixes:
-- For `ImageSeries`, add check if `external_file` is provided without `starting_frame` in `__init__`. @rly (#1264)
-- Improve docstrings for `TimeSeries.data` and for the electrode table. @rly (#1271, #1272)
-- Fix Azure Pipelines configuration. @rly (#1281)
+- For `ImageSeries`, add check if `external_file` is provided without `starting_frame` in `__init__`. @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156) (#1264)
+- Improve docstrings for `TimeSeries.data` and for the electrode table. @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156) (#1271, #1272)
+- Fix Azure Pipelines configuration. @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156) (#1281)
 
 ## PyNWB 1.3.3 (June 26, 2020)
 
 ### Internal improvements:
-- Update requirements to use HDMF 1.6.4. @rly (#1256)
+- Update requirements to use HDMF 1.6.4. @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156) (#1256)
 
 ### Bug fixes:
-- Fix writing optional args to electrodes table. @rly (#1246)
-- Fix missing method UnitsMap.get_nwb_file. @rly (#1227)
+- Fix writing optional args to electrodes table. @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156) (#1246)
+- Fix missing method UnitsMap.get_nwb_file. @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156) (#1227)
 
 ## PyNWB 1.3.2 (June 1, 2020)
 
 ### Bug fixes:
-- Add support for nwb-schema 2.2.5. @rly (#1243)
+- Add support for nwb-schema 2.2.5. @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156) (#1243)
   - This schema version fixes incorrect dims and shape for `ImagingPlane.origin_coords` and `ImagingPlane.grid_spacing`,
    and fixes incorrect dims for `TwoPhotonSeries.field_of_view`.
 
 ## PyNWB 1.3.1 (May 28, 2020)
 
 ### Bug fixes:
-- Fix bugged `Device` constructor. @rly (#1209)
-- Fix link to code of conduct page in docs. @rly (#1229)
+- Fix bugged `Device` constructor. @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156) (#1209)
+- Fix link to code of conduct page in docs. @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156) (#1229)
 - Fix docs for `get_type_map`. @oruebel (#1233)
 - Pass file object to parent when loading namespaces. @NileGraddis (#1242)
 
 ### Internal improvements:
-- Update CI to use supported MacOS version. @rly (#1211)
-- Clean up tests to remove conversion warnings and use keyword args. @rly (#1202)
-- Fix flake8 errors. @rly (#1235)
-- Add changelog. @rly (#1215)
-- Update release process with notes about coordinating with nwb-schema. @rly (#1214)
+- Update CI to use supported MacOS version. @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156) (#1211)
+- Clean up tests to remove conversion warnings and use keyword args. @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156) (#1202)
+- Fix flake8 errors. @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156) (#1235)
+- Add changelog. @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156) (#1215)
+- Update release process with notes about coordinating with nwb-schema. @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156) (#1214)
 - Inform which unit value is actually overwritten. @yarikoptic (#1219)
-- Do not print out logging.DEBUG statements to stdout for test.py. @rly (#1240)
-- Add support for nwb-schema 2.2.4. @rly (#1213)
+- Do not print out logging.DEBUG statements to stdout for test.py. @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156) (#1240)
+- Add support for nwb-schema 2.2.4. @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156) (#1213)
   - Make `ImagingPlane.imaging_rate` optional. This moves the `imaging_rate` argument down the list of constructor arguments for `ImagingPlane.__init__`. This will break existing code that calls the constructor of `ImagingPlane` with at least 6 positional arguments, such that one positional argument matches `imaging_rate`.
 
 ## PyNWB 1.3.0 (Mar. 4, 2020)
 
 ### New features:
-- Add support for nwb-schema 2.2.2. @rly (#1146)
+- Add support for nwb-schema 2.2.2. @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156) (#1146)
   - This is a large change. See the PR and [schema release notes](http://nwb-schema.readthedocs.io/en/latest/format_release_notes.html#march-2-2020) for more information.
-- Validate against most specific namespace. @t-b, @rly (#1094)
+- Validate against most specific namespace. @t-b, @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156) (#1094)
 - Replace 'ic_electrode' with 'icephys_electrode' in `NWBFile`. @oruebel (#1200)
 - Integrate minor enhancements and bug fixes introduced in HDMF 1.6.0 and 1.6.1, including improved handling of namespaces that lack a version key,
 
 ### Internal improvements:
-- Add nightly testing of validation CLI. @t-b, @rly (#1164, #1195, #1197)
+- Add nightly testing of validation CLI. @t-b, @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156) (#1164, #1195, #1197)
 - Treat ipython notebooks as binary in git. @t-b (#1168)
 - Use proper file removal in tests. @t-b (#1165)
 - Use hdmf-docutils instead of nwb-docutils for documentation. @jcfr (#1176)
-- Run minimum requirements testing n Python 3.6. @rly (#1194)
+- Run minimum requirements testing n Python 3.6. @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156) (#1194)
 
 ### Bug fixes:
 - Fix API documentation. @bendichter (#1159)
-- Fix unit testing output. @rly (#1158)
-- Fix copying files with Subject. @rly (#1171)
-- Add "unit" attribute back as an optional attribute in icephys classes. @rly (#1188)
-- Fix reported development status in `setup.py`. @rly (#1201)
+- Fix unit testing output. @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156) (#1158)
+- Fix copying files with Subject. @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156) (#1171)
+- Add "unit" attribute back as an optional attribute in icephys classes. @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156) (#1188)
+- Fix reported development status in `setup.py`. @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156) (#1201)
 
 ## PyNWB 1.2.1 (Jan. 22, 2020)
 
 ### Bug fixes:
-- Fix ReadTheDocs build. @rly (#1155)
-- Update manifest to fix conda build. @rly (#1156)
+- Fix ReadTheDocs build. @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156) (#1155)
+- Update manifest to fix conda build. @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156) (#1156)
 
 ## PyNWB 1.2.0 (Jan. 21, 2020)
 
 ### Minor enhancements:
-- Add new logo to docs. @rly (#1096)
+- Add new logo to docs. @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156) (#1096)
 - Add warning when referencing electrode table before it exists. @ajtritt (#1098)
-- Refactor internal calls to docval. @rly (#1104)
+- Refactor internal calls to docval. @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156) (#1104)
 - Enhance icephys example and documentation. @t-b (#1081)
 - Add multi index and time bounds to get_unit_spikes. @bendichter (#1001)
 - Improve ophys docstrings. @bendichter (#1126)
 - Improve icephys docstrings for gain. @bendichter (#1129)
-- Update legal information. @rly (#1131)
-- Add support for device description and manufacturer. @rly (#1135)
-- Update dependencies and remove explicit six, unittest2 dependency. @rly (#1136, #1138, #1142, #1137, #1154)
-- Add object ID tutorial. @rly (#1140)
-- Update CI. @rly (#1141)
-- Catch critical warnings and throw errors in unit tests. @rly (#1112)
-- Create and use testing module, remove builder tests, clean up test code. @rly (#1117)
-- Add and test minimum requirements for PyNWB. @rly (#1148)
+- Update legal information. @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156) (#1131)
+- Add support for device description and manufacturer. @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156) (#1135)
+- Update dependencies and remove explicit six, unittest2 dependency. @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156) (#1136, #1138, #1142, #1137, #1154)
+- Add object ID tutorial. @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156) (#1140)
+- Update CI. @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156) (#1141)
+- Catch critical warnings and throw errors in unit tests. @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156) (#1112)
+- Create and use testing module, remove builder tests, clean up test code. @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156) (#1117)
+- Add and test minimum requirements for PyNWB. @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156) (#1148)
 - Improve docs for get_class. @bendichter (#1149)
 
 ### Bug fixes:
-- Fix versioneer reporting version. @rly (#1100)
+- Fix versioneer reporting version. @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156) (#1100)
 - Fix `DynamicTable` import after move to hdmf.common. @bendichter (#1103)
-- Fix handling of unmapped attributes. @rly (#1105)
+- Fix handling of unmapped attributes. @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156) (#1105)
 - Update tests and documentation to reflect new selection behavior of `DynamicTable`. @oruebel (#1106)
-- Fix reference images not being mapped in PlaneSegmentation. @rly (#1109)
-- Fix legacy import of `ObjectMapper`. @rly (#1124)
+- Fix reference images not being mapped in PlaneSegmentation. @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156) (#1109)
+- Fix legacy import of `ObjectMapper`. @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156) (#1124)
 - Fix extensions documentation typo: 'str' -> 'text'. @bendichter (#1132)
 - Revert "PatchClampSeries: Force sweep_number to uint64". @t-b (#1123)
-- Fix sphinx code to use latest sphinx. @rly (#1139)
+- Fix sphinx code to use latest sphinx. @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156) (#1139)
 
 ## PyNWB 1.1.2 (Oct. 15, 2019)
 
 ### Minor features:
-- Use latest HDMF 1.3.3. #1093 (@rly)
-- Expose HDMF export_spec utility function for use by extensions. #1092 (@rly)
+- Use latest HDMF 1.3.3. #1093 (@rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156))
+- Expose HDMF export_spec utility function for use by extensions. #1092 (@rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156))
 
 ### Bug fixes:
 - Fix bug in writing SpikeEventSeries data or timestamps datasets with a DataChunkIterator. #1089 (@bendichter)
@@ -760,35 +760,35 @@ PyNWB 1.1.0 does not work with HDMF>=1.3. This release will work with HDMF>=1.3.
 ### Minor improvements:
 - Support newly added channel-specific conversion factor for ElectricalSeries #1072 (@bendichter)
 - Move generic types out of PyNWB into hdmf-common. #1061 (@ajtritt)
-- Update documentation to reflect the above changes. #1078 (@rly)
+- Update documentation to reflect the above changes. #1078 (@rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156))
 - Add new case to the iterative write tutorial. #1029 (@oruebel)
-- Improve CI. #1079 (@rly)
-- Pin the current latest version of HDMF to requirements for setup.py. #1083 (@rly)
+- Improve CI. #1079 (@rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156))
+- Pin the current latest version of HDMF to requirements for setup.py. #1083 (@rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156))
 
 ## PyNWB 1.1.0 (Sep. 17, 2019)
 
 ### New features:
-- Add object ID to all neurodata types #991 (@ajtritt, @rly)
-- Add NWBFile shallow copy method #994 (@ajtritt, @rly)
-- Drop official Python 2.7 support #1028 (@rly)
-- Add scratch space #1027 #1038 (@ajtritt, @rly)
-- Support multiple experimenters #988 #1035 (@ajtritt, @rly)
-- Support multiple related publications #1047 (@rly)
-- Update schema to 2.1.0 (see release notes in https://nwb-schema.readthedocs.io/en/latest/format_release_notes.html) (@rly, @bendichter, @ajtritt, @oruebel, @t-b)
+- Add object ID to all neurodata types #991 (@ajtritt, @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156))
+- Add NWBFile shallow copy method #994 (@ajtritt, @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156))
+- Drop official Python 2.7 support #1028 (@rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156))
+- Add scratch space #1027 #1038 (@ajtritt, @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156))
+- Support multiple experimenters #988 #1035 (@ajtritt, @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156))
+- Support multiple related publications #1047 (@rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156))
+- Update schema to 2.1.0 (see release notes in https://nwb-schema.readthedocs.io/en/latest/format_release_notes.html) (@rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156), @bendichter, @ajtritt, @oruebel, @t-b)
 
 ### Minor enhancements:
 - Add iterative write check for TimeSeries timestamps #1012 (@bendichter, @oruebel)
 - Add functions to convert between pixel mask and image mask for ophys data #766 (@mamelara)
 - Add cortical surface extension example #1040 (@bendichter)
-- Match API with schema defaults #1033 (@rly)
+- Match API with schema defaults #1033 (@rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156))
 - Core schema is now a git submodule #1045 (@ajtritt)
-- Implement better support for floating point data for Python 3.5 on Windows #1043 (@rly)
+- Implement better support for floating point data for Python 3.5 on Windows #1043 (@rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156))
 - Enhance iterative write tutorial #1029 (@oruebel)
 - Allow empty data in DynamicTable with non-empty VectorIndex #887 (@ajtritt)
 - Allow OpticalSeries constructor argument 'field_of_view' to be H5Dataset #1063 (@bendichter)
-- Clarify documentation for deprecated ImageSeries constructor arg 'bits_per_pixel' #1065 (@rly)
-- Adjust code to explicitly map properties after changes made in HDMF 1.2 #1048 #1069 (@rly)
-- Improvements to CI, documentation, and GitHub repo structure #1055 (@rly)
+- Clarify documentation for deprecated ImageSeries constructor arg 'bits_per_pixel' #1065 (@rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156))
+- Adjust code to explicitly map properties after changes made in HDMF 1.2 #1048 #1069 (@rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156))
+- Improvements to CI, documentation, and GitHub repo structure #1055 (@rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156))
 
 ## PyNWB 1.0.3 (Jul. 18, 2019)
 
@@ -798,13 +798,13 @@ PyNWB 1.1.0 does not work with HDMF>=1.3. This release will work with HDMF>=1.3.
 - Remove ability to add DecompositionSeries to LFP (@bendichter)
 - Remove num_samples from TimeSeries (@NileGraddis)
 - Automatically detect ragged arrays in from_dataframe (@bendichter)
-- Cache the spec by default on write (@rly)
-- Improve printing of NWB objects (@rly)
+- Cache the spec by default on write (@rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156))
+- Improve printing of NWB objects (@rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156))
 - Change ProcessingModule.add_data_interface() to .add(), ProcessingModule.get_data_interface() to .get(), NWBFile.modules to NWBFile.processing (@bendichter)
 - Remove unused SpecFile type (@oruebel)
 - Add ability to validate files against the cached spec (@t-b)
 - Make CurrentClampSeries/VoltageClampSeries parameters optional (@t-b)
-- Update documentation (@t-b, @rly)
+- Update documentation (@t-b, @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156))
 - Update copyright/license
 - Improve tests and CI
 - Update requirements
@@ -814,15 +814,15 @@ PyNWB 1.1.0 does not work with HDMF>=1.3. This release will work with HDMF>=1.3.
 - Fix dynamictableregion iteration failure after roundtrip (@NileGraddis)
 - Fix from_dataframe for children of DynamicTable (@bendichter)
 - Fix for modular (cross-file) storage of timeseries timestamps (@NileGraddis)
-- Fix bug on loading lists of strings from hdmf 1.0.4 (@rly)
+- Fix bug on loading lists of strings from hdmf 1.0.4 (@rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156))
 - Fix IO for intervals (@bendichter)
 - Fix round trip for Subject.date_of_birth (@bendichter)
 
 ### Schema changes:
 - DecompositionSeries "source_timeseries" link is no longer required (@bendichter)
-- Reorder keys (@rly)
+- Reorder keys (@rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156))
 - Remove NWBFile "specifications" group (@oruebel)
-- CorrectedImageStack and ImagingRetinotopy inherits from NWBDataInterface instead of NWBContainer (@rly)
+- CorrectedImageStack and ImagingRetinotopy inherits from NWBDataInterface instead of NWBContainer (@rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156))
 - Fix typo in unit of resistance_comp_prediction/correction (@t-b)
 - Add option for third dimension for Units "waveforms" dataset to represent different electrodes (@bendichter)
 - Update NWBFile.nwb_version to 2.0.2
