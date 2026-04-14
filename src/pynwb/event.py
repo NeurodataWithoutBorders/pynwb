@@ -21,8 +21,9 @@ class TimestampVectorData(VectorData):
         {'name': 'description', 'type': str, 'doc': 'Description of this TimestampVectorData'},
         *get_docval(VectorData.__init__, 'data'),
         {'name': 'resolution', 'type': float,
-         'doc': ('The smallest possible difference between two timestamps. Usually 1 divided by the '
-                 'sampling rate for timestamps of the data acquisition system.'),
+         'doc': ('The temporal resolution of the timestamps, in seconds. This is typically the sampling '
+                 'period (1 / sampling_rate), also known as the clock period, of the data acquisition '
+                 'system from which the timestamps were recorded or derived.'),
          'default': None},
         allow_positional=AllowPositional.ERROR,
     )
@@ -48,8 +49,9 @@ class DurationVectorData(VectorData):
         {'name': 'description', 'type': str, 'doc': 'Description of this DurationVectorData'},
         *get_docval(VectorData.__init__, 'data'),
         {'name': 'resolution', 'type': float,
-         'doc': ('The smallest possible difference between two durations. Usually 1 divided by the '
-                 'sampling rate for the timing of the data acquisition system.'),
+         'doc': ('The temporal resolution of the durations, in seconds. This is typically the sampling '
+                 'period (1 / sampling_rate), also known as the clock period, of the data acquisition '
+                 'system from which the durations were recorded or derived.'),
          'default': None},
         allow_positional=AllowPositional.ERROR,
     )
