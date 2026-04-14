@@ -8,11 +8,27 @@ from dateutil.tz import tzlocal
 
 from pynwb import NWBHDF5IO, NWBFile
 from pynwb.event import TimestampVectorData, DurationVectorData, EventsTable
-from pynwb.testing import TestCase
+from pynwb.testing import NWBH5IOFlexMixin, TestCase
+
+
+class TestEventsTableIO(NWBH5IOFlexMixin, TestCase):
+    """Roundtrip + export-roundtrip + validation for a basic EventsTable."""
+
+    def getContainerType(self):
+        return "EventsTable"
+
+    def addContainer(self):
+        table = EventsTable(name='test_events', description='Test events table')
+        table.add_event(timestamp=1.0, duration=0.5, annotation='event 1')
+        table.add_event(timestamp=2.0, duration=1.0, annotation='event 2')
+        self.nwbfile.add_events_table(table)
+
+    def getContainer(self, nwbfile):
+        return nwbfile.events['test_events']
 
 
 class TestEventsTableRoundtrip(TestCase):
-    """Test roundtrip for EventsTable through HDF5"""
+    """Edge-case roundtrip tests for EventsTable."""
 
     def setUp(self):
         self.tmpdir = tempfile.TemporaryDirectory()
@@ -27,34 +43,6 @@ class TestEventsTableRoundtrip(TestCase):
             identifier='test_events_001',
             session_start_time=datetime(2021, 1, 1, tzinfo=tzlocal())
         )
-
-    def test_basic_roundtrip(self):
-        """Test basic EventsTable roundtrip through NWBFile"""
-        # Create table
-        table = EventsTable(
-            name='test_events',
-            description='Test events table'
-        )
-        table.add_event(timestamp=1.0, duration=0.5, annotation='event 1')
-        table.add_event(timestamp=2.0, duration=1.0, annotation='event 2')
-
-        # Write
-        nwbfile = self._create_nwbfile()
-        nwbfile.add_events_table(table)
-        with NWBHDF5IO(self.path, 'w') as io:
-            io.write(nwbfile)
-
-        # Read back
-        with NWBHDF5IO(self.path, 'r') as io:
-            read_nwbfile = io.read()
-            read_table = read_nwbfile.events['test_events']
-
-            # Verify
-            self.assertEqual(len(read_table), 2)
-            np.testing.assert_array_equal(read_table['timestamp'].data[:], [1.0, 2.0])
-            np.testing.assert_array_equal(read_table['duration'].data[:], [0.5, 1.0])
-            self.assertEqual(read_table['annotation'].data[0], 'event 1')
-            self.assertEqual(read_table['annotation'].data[1], 'event 2')
 
     def test_roundtrip_column_types(self):
         """Test that column types are preserved after roundtrip"""
