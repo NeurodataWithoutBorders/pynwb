@@ -5,6 +5,13 @@ from ..device import Device, DeviceModel
 from .core import NWBContainerMapper
 
 
+def _construct_legacy_device_model(**kwargs):
+    model = DeviceModel.__new__(DeviceModel, in_construct_mode=True)
+    model.__init__(**kwargs)
+    model._in_construct_mode = False
+    return model
+
+
 @register_map(Device)
 class DeviceMapper(NWBContainerMapper):
     """
@@ -38,7 +45,7 @@ class DeviceMapper(NWBContainerMapper):
                                            description=builder.attributes.get('description'),
                                            manufacturer=builder.attributes.get('manufacturer', ''),
                                            model_number=builder.attributes.get('model_number'))
-            model = DeviceModel(**device_model_attributes)
+            model = _construct_legacy_device_model(**device_model_attributes)
         
             return model
 

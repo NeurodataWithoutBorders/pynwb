@@ -1,5 +1,15 @@
 from pynwb.device import Device, DeviceModel
+from pynwb.io.device import DeviceMapper
 from pynwb.testing import TestCase
+
+
+class DeviceBuilder(dict):
+
+    attributes = {
+        'description': 'device description',
+        'manufacturer': 'manufacturer',
+        'model_number': 'model_number',
+    }
 
 
 class TestDevice(TestCase):
@@ -77,3 +87,21 @@ class TestDeviceModel(TestCase):
         self.assertEqual(device_model.manufacturer, 'manufacturer')
         self.assertEqual(device_model.model_number, 'model_number')
         self.assertEqual(device_model.description, 'description')
+
+
+class TestDeviceMapper(TestCase):
+
+    def test_model_carg_preserves_legacy_model_name(self):
+        builder = DeviceBuilder(model='MFC_200/250-0.66_40mm_MF2.5:FLT')
+        msg = (
+            'Device.model was detected as a string, but NWB 2.9 specifies Device.model as a link to a DeviceModel. '
+            'Remapping "MFC_200/250-0.66_40mm_MF2.5:FLT" to a new DeviceModel.'
+        )
+        with self.assertWarnsWith(UserWarning, msg):
+            device_model = DeviceMapper.model_carg(None, builder, None)
+
+        self.assertIsInstance(device_model, DeviceModel)
+        self.assertEqual(device_model.name, 'MFC_200/250-0.66_40mm_MF2.5:FLT')
+        self.assertEqual(device_model.description, 'device description')
+        self.assertEqual(device_model.manufacturer, 'manufacturer')
+        self.assertEqual(device_model.model_number, 'model_number')
