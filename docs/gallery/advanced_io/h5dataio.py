@@ -84,7 +84,7 @@ nwbfile.add_acquisition(test_ts)
 # .. tip::
 #
 #    For an introduction to chunking and compression in HDF5 and h5py in particular see also the online book
-#    `Python and HDF5 <https://www.safaribooksonline.com/library/view/python-and-hdf5/9781491944981/ch04.html>`__
+#    `Python and HDF5 <https://www.oreilly.com/library/view/python-and-hdf5/9781491944981/ch04.html>`__
 #    by Andrew Collette.
 
 

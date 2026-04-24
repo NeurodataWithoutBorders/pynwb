@@ -7,7 +7,7 @@ import copy as _copy
 import numpy as np
 import pandas as pd
 
-from hdmf.common import DynamicTableRegion, DynamicTable
+from hdmf.common import DynamicTableRegion, DynamicTable, HERD
 from hdmf.container import HERDManager
 from hdmf.utils import docval, getargs, get_docval, popargs, popargs_to_dict, AllowPositional
 
@@ -287,6 +287,7 @@ class NWBFile(MultiContainerInterface, HERDManager):
                      {'name': 'trials', 'child': True, 'required_name': 'trials'},
                      {'name': 'units', 'child': True, 'required_name': 'units'},
                      {'name': 'subject', 'child': True, 'required_name': 'subject'},
+                     {'name': 'external_resources', 'child': True, 'required_name': 'external_resources'},
                      {'name': 'sweep_table', 'child': True, 'required_name': 'sweep_table'},
                      {'name': 'invalid_times', 'child': True, 'required_name': 'invalid_times'},
                      # icephys_filtering is temporary. /intracellular_ephys/filtering dataset will be deprecated
@@ -339,6 +340,8 @@ class NWBFile(MultiContainerInterface, HERDManager):
             {'name': 'keywords', 'type': 'array_data', 'doc': 'Terms to search over', 'default': None},
             {'name': 'notes', 'type': str,
              'doc': 'Notes about the experiment.', 'default': None},
+            {'name': 'external_resources', 'type': HERD,
+             'doc': 'the HERD external resources object for this NWBFile', 'default': None},
             {'name': 'pharmacology', 'type': str,
              'doc': 'Description of drugs used, including how and when they were administered. '
                     'Anesthesia(s), painkiller(s), etc., plus dosage, concentration, etc.', 'default': None},
@@ -480,7 +483,8 @@ class NWBFile(MultiContainerInterface, HERDManager):
             'icephys_simultaneous_recordings',
             'icephys_sequential_recordings',
             'icephys_repetitions',
-            'icephys_experimental_conditions'
+            'icephys_experimental_conditions',
+            'external_resources'
         ]
         args_to_set = popargs_to_dict(keys_to_set, kwargs)
         kwargs['name'] = 'root'

@@ -61,11 +61,11 @@ body:
       label: Python Version
       options:
         - "lower version (unsupported)"
-        - "3.9"
         - "3.10"
         - "3.11"
         - "3.12"
         - "3.13"
+        - "3.14"
         - "higher version (not yet supported)"
     validations:
       required: true

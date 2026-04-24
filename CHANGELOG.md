@@ -4,8 +4,10 @@
 
 ### Documentation and tutorial enhancements
 - Added documentation for `ExternalImage` to the images tutorial. @h-mayorquin [#2159](https://github.com/NeurodataWithoutBorders/pynwb/pull/2159)
+- Fixed broken and redirecting links in documentation. @bendichter [#2165](https://github.com/NeurodataWithoutBorders/pynwb/pull/2165)
 
 ### Added
+- Added support for HERD (HDMF External Resources Data Structure) as the `external_resources` field on `NWBFile`, enabling users to associate external resource annotations (e.g., ontology term mappings) with their NWB files. `link_resources` and `get_external_resources` are inherited from `HERDManager` in hdmf. @mavaylon1, @rly [#2111](https://github.com/NeurodataWithoutBorders/pynwb/pull/2111)
 - Added `get_starting_time()` and `get_duration()` methods to `TimeSeries` to get the starting time and duration of the time series. @h-mayorquin [#2146](https://github.com/NeurodataWithoutBorders/pynwb/pull/2146)
 - Added `get_starting_time()` and `get_duration()` methods to `TimeIntervals` to get the earliest start time and total duration (span from earliest start to latest stop) of all intervals. @h-mayorquin [#2146](https://github.com/NeurodataWithoutBorders/pynwb/pull/2146)
 - Added `get_starting_time()` and `get_duration()` methods to `Units` to get the earliest spike time and total duration (span from earliest to latest spike) across all units. @h-mayorquin [#2164](https://github.com/NeurodataWithoutBorders/pynwb/pull/2164)
@@ -13,6 +15,10 @@
 ### Fixed
 - Fixed invalid CSS properties in documentation assistant toggle that prevented proper positioning on displays ≥1400px wide. @rly [#2151](https://github.com/NeurodataWithoutBorders/pynwb/pull/2151) 
 
+### Changed
+- Added Python 3.14 support. @bendichter, @rly [#2168](https://github.com/NeurodataWithoutBorders/pynwb/pull/2168)
+- Updated HDMF dependency to >=5.0.0, <6. @rly [#2171](https://github.com/NeurodataWithoutBorders/pynwb/issues/2171)
+- Deprecated Python 3.9 support. (EOL was Oct 31, 2025) @bendichter [#2141](https://github.com/NeurodataWithoutBorders/pynwb/pull/2141)
 
 ## PyNWB 3.1.3 (December 9, 2025)
 
@@ -26,7 +32,7 @@
 - Fixed import structure test. @rly [#2136](https://github.com/NeurodataWithoutBorders/pynwb/pull/2136)
 
 ### Changed
-- Change UI of documentation assistant to be an accordion that is always visible. @bendichter [#2124](https://github.com/NeurodataWithoutBorders/pynwb/pull/2124)
+- Changed UI of documentation assistant to be an accordion that is always visible. @bendichter [#2124](https://github.com/NeurodataWithoutBorders/pynwb/pull/2124)
 - Updated minimum HDMF version to 4.1.2 and updated tests accordingly. @rly [#2144](https://github.com/NeurodataWithoutBorders/pynwb/pull/2144)
 
 

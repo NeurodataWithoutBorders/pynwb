@@ -14,15 +14,15 @@ authors = [
 ]
 description= "Package for working with Neurodata stored in the NWB format."
 readme = "README.rst"
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 license = {text = "BSD-3-Clause"}
 classifiers = [
         "Programming Language :: Python",
-        "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
         "Programming Language :: Python :: 3.12",
         "Programming Language :: Python :: 3.13",
+        "Programming Language :: Python :: 3.14",
         "License :: OSI Approved :: BSD License",
         "Development Status :: 5 - Production/Stable",
         "Intended Audience :: Developers",
@@ -33,12 +33,12 @@ classifiers = [
         "Topic :: Scientific/Engineering :: Medical Science Apps."
 ]
 dependencies = [
-    "h5py>=3.2.0",
-    "hdmf>=4.1.2,<5",
+    "h5py>=3.6.0",
+    "hdmf>=5.1.0,<6",
     "numpy>=1.24.0",
-    "pandas>=1.2.0",
+    "pandas>=1.4.0,<3",
     "python-dateutil>=2.8.2",
-    "platformdirs>=4.1.0"
+    "platformdirs>=4.2.2"
 ]
 dynamic = ["version"] # the build backend will compute the version dynamically from git tag (or a __version__)
 
@@ -122,4 +122,3 @@ line-length = 120
 
 [tool.ruff.lint.mccabe]
 max-complexity = 17
-
