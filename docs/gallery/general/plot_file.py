@@ -126,6 +126,8 @@ from uuid import uuid4
 import numpy as np
 from dateutil import tz
 
+from hdmf.common import MeaningsTable
+
 from pynwb import NWBHDF5IO, NWBFile, TimeSeries
 from pynwb.behavior import Position, SpatialSeries
 from pynwb.event import EventsTable
@@ -307,6 +309,21 @@ behavior_events = EventsTable(
 behavior_events.add_event(timestamp=10.2, duration=1.4, annotation="grooming")
 behavior_events.add_event(timestamp=18.7, duration=0.6, annotation="rearing")
 behavior_events.add_event(timestamp=25.0, duration=2.1, annotation="grooming")
+
+####################
+# To define what each value in the ``annotation`` column means, attach an optional
+# :py:class:`~hdmf.common.table.MeaningsTable` to the :py:class:`~pynwb.event.EventsTable`.
+# The ``MeaningsTable`` is named ``{column_name}_meanings`` automatically and should
+# include one row per possible value of the target column, even if the value does not
+# appear in the data.
+
+annotation_meanings = MeaningsTable(
+    target=behavior_events["annotation"],
+    description="Meanings of the values in the 'annotation' column.",
+)
+annotation_meanings.add_row(value="grooming", meaning="Self-grooming with the forepaws.")
+annotation_meanings.add_row(value="rearing", meaning="Rearing up on the hind legs.")
+behavior_events.add_meanings_table(annotation_meanings)
 
 nwbfile.add_events_table(behavior_events)
 
