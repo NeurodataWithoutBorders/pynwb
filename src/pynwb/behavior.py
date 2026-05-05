@@ -98,7 +98,9 @@ class BehavioralEpochs(MultiContainerInterface):
 @register_class('BehavioralEvents', CORE_NAMESPACE)
 class BehavioralEvents(MultiContainerInterface):
     """
-    TimeSeries for storing behavioral events. See description of BehavioralEpochs for more details.
+    DEPRECATED. TimeSeries for storing behavioral events. See description of BehavioralEpochs for more details.
+
+    BehavioralEvents is deprecated. Use an EventsTable in NWBFile.events instead for event data.
     """
 
     __clsconf__ = {
@@ -108,6 +110,18 @@ class BehavioralEvents(MultiContainerInterface):
         'type': TimeSeries,
         'attr': 'time_series'
     }
+
+    @docval({'name': 'time_series', 'type': (list, tuple, dict, TimeSeries),
+             'doc': 'TimeSeries to store in this interface', 'default': dict()},
+            {'name': 'name', 'type': str, 'doc': 'the name of this container', 'default': 'BehavioralEvents'})
+    def __init__(self, **kwargs):
+        time_series = popargs('time_series', kwargs)
+        super().__init__(**kwargs)
+        self.add_timeseries(time_series)
+        self._warn_on_new_pass_on_construct(
+            "BehavioralEvents is deprecated. Use an EventsTable in NWBFile.events instead for event data. "
+            "Creating a new BehavioralEvents will not be allowed in a future version of PyNWB."
+        )
 
 
 @register_class('BehavioralTimeSeries', CORE_NAMESPACE)
