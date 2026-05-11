@@ -30,7 +30,7 @@ class TimeIntervals(DynamicTable):
     @docval({'name': 'name', 'type': str, 'doc': 'name of this TimeIntervals'},  # required
             {'name': 'description', 'type': str, 'doc': 'Description of this TimeIntervals',
              'default': "experimental intervals"},
-            *get_docval(DynamicTable.__init__, 'id', 'columns', 'colnames', 'target_tables'),
+            *get_docval(DynamicTable.__init__, 'id', 'columns', 'colnames', 'target_tables', 'meanings_tables'),
             allow_positional=AllowPositional.WARNING,)
     def __init__(self, **kwargs):
         super().__init__(**kwargs)

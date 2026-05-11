@@ -639,6 +639,7 @@ from . import behavior  # noqa: F401,E402
 from . import device  # noqa: F401,E402
 from . import ecephys  # noqa: F401,E402
 from . import epoch  # noqa: F401,E402
+from . import event  # noqa: F401,E402
 from . import icephys  # noqa: F401,E402
 from . import image  # noqa: F401,E402
 from . import misc  # noqa: F401,E402
