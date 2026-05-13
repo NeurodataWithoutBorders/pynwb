@@ -17,6 +17,7 @@
 ### Fixed
 - Fixed invalid CSS properties in documentation assistant toggle that prevented proper positioning on displays ≥1400px wide. @rly [#2151](https://github.com/NeurodataWithoutBorders/pynwb/pull/2151)
 - Fixed `TimeSeries.get_timestamps()` to handle numpy array timestamps when they are set. @pauladkisson [#2181](https://github.com/NeurodataWithoutBorders/pynwb/pull/2181)
+- Fixed `pynwb.validate(path=...)` raising `TypeError` on Zarr-backed NWB files because HDF5-only kwargs (`driver`, `aws_region`, `load_namespaces`) were forwarded into `NWBZarrIO`. Backend dispatch is now centralized in a single opener helper, and namespace loading uses `HDMFIO.load_namespaces_io` on the open IO, which also retires the `io._file` access in the validator. Added `storage_options` to the `validate()` API for the Zarr backend. @h-mayorquin [#2187](https://github.com/NeurodataWithoutBorders/pynwb/pull/2187)
 
 ### Changed
 - Added Python 3.14 support. @bendichter, @rly [#2168](https://github.com/NeurodataWithoutBorders/pynwb/pull/2168)

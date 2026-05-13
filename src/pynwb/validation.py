@@ -24,10 +24,36 @@ def _validate_helper(io: HDMFIO, namespace: str = CORE_NAMESPACE) -> list:
     return validator.validate(builder)
 
 
-def get_cached_namespaces_to_validate(path: Optional[str] = None, 
-                                      driver: Optional[str] = None, 
+HDF5_OPEN_KEYS = frozenset({"driver", "aws_region", "load_namespaces"})
+ZARR_OPEN_KEYS = frozenset({"storage_options"})
+
+
+def _open_backend_io(path: str,
+                     *,
+                     backend_kwargs: Optional[dict] = None,
+                     manager: Optional[BuildManager] = None) -> HDMFIO:
+    # Open an HDMFIO for `path`. `backend_kwargs` may contain a union of
+    # HDF5 (Hierarchical Data Format 5) and Zarr open options; this helper
+    # resolves the backend via _get_backend and keeps only the keys that apply.
+    # Keys whose value is None are dropped, so callers can include all keys
+    # unconditionally.
+    from pynwb import _get_backend, NWBHDF5IO
+    backend_kwargs = backend_kwargs or {}
+    backend_io_cls = _get_backend(path, method=backend_kwargs.get("driver"))
+    valid_keys = HDF5_OPEN_KEYS if backend_io_cls is NWBHDF5IO else ZARR_OPEN_KEYS
+    io_kwargs = {"path": path, "mode": "r"}
+    if manager is not None:
+        io_kwargs["manager"] = manager
+    io_kwargs.update({k: v for k, v in backend_kwargs.items()
+                      if k in valid_keys and v is not None})
+    return backend_io_cls(**io_kwargs)
+
+
+def get_cached_namespaces_to_validate(path: Optional[str] = None,
+                                      driver: Optional[str] = None,
                                       aws_region: Optional[str] = None,
-                                      io: Optional[HDMFIO] = None 
+                                      storage_options: Optional[dict] = None,
+                                      io: Optional[HDMFIO] = None,
 ) -> Tuple[List[str], BuildManager, Dict[str, str]]:
     """
     Determine the most specific namespace(s) that are cached in the given NWBFile that can be used for validation.
@@ -60,17 +86,15 @@ def get_cached_namespaces_to_validate(path: Optional[str] = None,
     )
 
     if io is not None:
-        # TODO update HDF5IO to have .file property to make consistent with ZarrIO
-        # then update input arguments here
-        namespace_dependencies = io.load_namespaces(namespace_catalog=catalog, 
-                                                    file=io._file)
+        namespace_dependencies = io.load_namespaces_io(namespace_catalog=catalog)
     else:
-        from pynwb import _get_backend
-        backend_io = _get_backend(path, method=driver)
-        namespace_dependencies = backend_io.load_namespaces(namespace_catalog=catalog, 
-                                                            path=path, 
-                                                            driver=driver, 
-                                                            aws_region=aws_region)
+        opened_io = _open_backend_io(path, backend_kwargs={
+            "driver": driver,
+            "aws_region": aws_region,
+            "storage_options": storage_options,
+        })
+        namespace_dependencies = opened_io.load_namespaces_io(namespace_catalog=catalog)
+        opened_io.close()
 
     # Determine which namespaces are the most specific (i.e. extensions) and validate against those
     candidate_namespaces = set(namespace_dependencies.keys())
@@ -132,7 +156,13 @@ def get_cached_namespaces_to_validate(path: Optional[str] = None,
         "type": str,
         "doc": "Driver for h5py to use when opening the HDF5 file.",
         "default": None,
-    }, 
+    },
+    {
+        "name": "storage_options",
+        "type": dict,
+        "doc": "Zarr storage options for remote stores (used by the Zarr backend).",
+        "default": None,
+    },
     returns="Validation errors in the file.",
     rtype=list,
     is_method=False,
@@ -169,21 +199,20 @@ def validate(**kwargs):
 
 def _validate_single_file(**kwargs):
 
-    io, path, use_cached_namespaces, namespace, verbose, driver = getargs(
-        "io", "path", "use_cached_namespaces", "namespace", "verbose", "driver", kwargs
+    io, path, use_cached_namespaces, namespace, verbose, driver, storage_options = getargs(
+        "io", "path", "use_cached_namespaces", "namespace", "verbose", "driver", "storage_options", kwargs
     )
     assert io != path, "Both 'io' and 'path' were specified! Please choose only one."
     path = str(path) if isinstance(path, Path) else path
 
     # get namespaces to validate
     namespace_message = "PyNWB namespace information"
-    io_kwargs = dict(path=path, mode="r", driver=driver)
-        
+    manager = None
+
     if use_cached_namespaces:
-        cached_namespaces, manager, namespace_dependencies = get_cached_namespaces_to_validate(path=path, 
-                                                                                               driver=driver, 
-                                                                                               io=io)
-        io_kwargs.update(manager=manager)
+        cached_namespaces, manager, namespace_dependencies = get_cached_namespaces_to_validate(
+            path=path, driver=driver, storage_options=storage_options, io=io,
+        )
 
         if any(cached_namespaces):
             namespaces_to_validate = cached_namespaces
@@ -194,14 +223,15 @@ def _validate_single_file(**kwargs):
                 warn(f"The file {f'{path} ' if path is not None else ''}has no cached namespace information. "
                      f"Falling back to {namespace_message}.", UserWarning)
     else:
-        io_kwargs.update(load_namespaces=False)
         namespaces_to_validate = [CORE_NAMESPACE]
 
     # get io object if not provided
     if path is not None:
-        from pynwb import _get_backend
-        backend_io = _get_backend(path, method=driver)
-        io = backend_io(**io_kwargs)
+        io = _open_backend_io(path, backend_kwargs={
+            "driver": driver,
+            "storage_options": storage_options,
+            "load_namespaces": False if not use_cached_namespaces else None,
+        }, manager=manager)
 
     # check namespaces are accurate
     if namespace is not None:

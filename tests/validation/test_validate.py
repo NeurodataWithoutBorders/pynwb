@@ -2,11 +2,21 @@ import subprocess
 import re
 import os
 import sys
+import tempfile
+import unittest
+from pathlib import Path
 from unittest.mock import patch
 from io import StringIO
 
 from pynwb.testing import TestCase
+from pynwb.testing.mock.file import mock_NWBFile
 from pynwb import validate, NWBHDF5IO
+
+try:
+    from hdmf_zarr import NWBZarrIO  # noqa: F401
+    HAVE_NWBZarrIO = True
+except ImportError:
+    HAVE_NWBZarrIO = False
 
 
 # NOTE we use "coverage run -m pynwb.validate" instead of "python -m pynwb.validate"
@@ -344,3 +354,38 @@ class TestValidateFunction(TestCase):
             with self.assertRaisesWith(ValueError, expected_error):
                 validate(paths=['tests/back_compat/1.0.2_nwbfile.nwb'],
                          path='tests/back_compat/1.0.2_nwbfile.nwb')
+
+
+@unittest.skipIf(not HAVE_NWBZarrIO, "hdmf-zarr is not installed")
+class TestValidateZarr(TestCase):
+    # Regression tests for https://github.com/NeurodataWithoutBorders/pynwb/issues/2131:
+    # validate(path=...) on a Zarr-backed NWB file used to raise TypeError because
+    # HDF5-only kwargs leaked into NWBZarrIO. The validator now opens via a
+    # backend-aware factory and uses load_namespaces_io on the open IO.
+
+    def _write_zarr_nwbfile(self, path):
+        nwbfile = mock_NWBFile()
+        with NWBZarrIO(str(path), 'w') as io:
+            io.write(nwbfile)
+
+    def test_validate_zarr_path_cached_namespaces(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            path = Path(temp_dir) / "test.nwb.zarr"
+            self._write_zarr_nwbfile(path)
+            errors = validate(path=str(path))
+            self.assertEqual(errors, [])
+
+    def test_validate_zarr_path_no_cached_namespaces(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            path = Path(temp_dir) / "test.nwb.zarr"
+            self._write_zarr_nwbfile(path)
+            errors = validate(path=str(path), use_cached_namespaces=False)
+            self.assertEqual(errors, [])
+
+    def test_validate_zarr_io(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            path = Path(temp_dir) / "test.nwb.zarr"
+            self._write_zarr_nwbfile(path)
+            with NWBZarrIO(str(path), 'r') as io:
+                errors = validate(io=io)
+            self.assertEqual(errors, [])
