@@ -94,12 +94,7 @@ class NWBContainer(NWBMixin, Container):
 
         Walks the entire subtree of this container and returns every descendant that is an
         instance of the given class. Subclasses are included. ``self`` is excluded from the
-        result.
-
-        Returns
-        -------
-        list
-            Matching descendant containers. Empty list if no matches.
+        result. Returns an empty list if there are no matches.
         """
         neurodata_type = kwargs['neurodata_type']
         if isinstance(neurodata_type, str):
