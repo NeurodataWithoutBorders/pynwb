@@ -1090,10 +1090,16 @@ class NWBFile(MultiContainerInterface, HERDManager):
     def merge_events_tables(self, tables: list) -> pd.DataFrame:
         """Merge a list of EventsTable objects into a single DataFrame indexed by timestamp.
 
-        Each table is converted to a DataFrame with the timestamp column as the index. Columns
-        present in only some tables are filled with NaN for rows from tables that lack them.
+        Each table is converted to a DataFrame with the timestamp column as the index. A
+        ``source_events_table`` column is added to identify which table each row came from.
+        Columns present in only some tables are filled with NaN. Rows are sorted by timestamp.
         """
-        return pd.concat([table.to_dataframe().set_index("timestamp") for table in tables], sort=True)
+        frames = []
+        for table in tables:
+            df = table.to_dataframe().set_index("timestamp")
+            df.insert(0, "source_events_table", table.name)
+            frames.append(df)
+        return pd.concat(frames, sort=True).sort_index()
 
     def get_all_events(self) -> pd.DataFrame:
         """Merge all EventsTable objects in ``NWBFile.events`` into a single DataFrame indexed by timestamp.
