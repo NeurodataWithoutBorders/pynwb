@@ -1,5 +1,5 @@
 from hdmf.common import DynamicTable, VectorData
-from hdmf.utils import docval, get_docval, popargs_to_dict, AllowPositional
+from hdmf.utils import docval, get_docval, AllowPositional
 
 from . import register_class, CORE_NAMESPACE
 
@@ -97,10 +97,9 @@ class EventsTable(DynamicTable):
         allow_positional=AllowPositional.ERROR,
     )
     def __init__(self, **kwargs):
-        args_to_set = popargs_to_dict(('source_description',), kwargs)
+        source_description = kwargs.pop('source_description')
         super().__init__(**kwargs)
-        for key, val in args_to_set.items():
-            setattr(self, key, val)
+        self.source_description = source_description
 
     @docval(
         {'name': 'timestamp', 'type': float,
