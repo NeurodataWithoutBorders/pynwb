@@ -68,10 +68,14 @@ class DurationVectorData(VectorData):
 
 @register_class('EventsTable', CORE_NAMESPACE)
 class EventsTable(DynamicTable):
-    """
-    A column-based table to store information about events (event instances), one
-    event per row. Additional columns may be added to store metadata about each event,
-    such as the duration of the event.
+    """A column-based table to store information about events, one event per row.
+
+    Use EventsTable when each row is anchored at a single timestamp and duration is absent, optional, or
+    mixed across rows. Additional columns may be added to store metadata about each event, such as the
+    duration of the event. Examples include TTL pulses, licks, rewards, stimulus onsets, and detected
+    ripples. Each EventsTable should hold events of a single type, so that all rows share the same set
+    of per-event metadata columns. Events of different types (e.g., licks and stimulus presentations)
+    should be stored in separate EventsTable instances.
     """
 
     __columns__ = (

@@ -21,13 +21,14 @@ __all__ = [
 
 @register_class('AnnotationSeries', CORE_NAMESPACE)
 class AnnotationSeries(TimeSeries):
-    """DEPRECATED. Stores text-based records about the experiment.
-
-    AnnotationSeries is deprecated. Use an EventsTable with an 'annotation' column instead.
-    See :py:class:`~pynwb.event.EventsTable`.
-
-    To use the AnnotationSeries, add records individually through add_annotation(). Alternatively, if all annotations
-    are already stored in a list or numpy array, set the data and timestamps in the constructor.
+    """DEPRECATED. Use an :py:class:`~pynwb.event.EventsTable` instead, placed in the top-level ``/events``
+    group of the NWBFile. The ``timestamps`` field maps to the ``timestamp`` column, and the ``data`` field
+    (annotation strings) maps to the ``annotation`` column on EventsTable. Use the ``source_description``
+    attribute on the EventsTable to record where the events came from (e.g., "Acquisition system",
+    "Thresholding of analog signal ANALOG1 at 3 V", "Manual video review"). Original definition: Stores
+    user annotations made during an experiment. The data[] field stores a text array, and timestamps are
+    stored for each annotation (i.e., interval=1). This is largely an alias to a standard TimeSeries
+    storing a text array but that is identifiable as storing annotations in a machine-readable way.
     """
 
     __nwbfields__ = ()
