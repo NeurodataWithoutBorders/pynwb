@@ -1,5 +1,5 @@
 from hdmf.common import DynamicTable, VectorData
-from hdmf.utils import docval, get_docval, AllowPositional
+from hdmf.utils import docval, get_docval, popargs_to_dict, AllowPositional
 
 from . import register_class, CORE_NAMESPACE
 
@@ -82,19 +82,25 @@ class EventsTable(DynamicTable):
         {'name': 'annotation', 'description': 'User annotations about events.'},
     )
 
-    # The override exists to give EventsTable an explicit, narrowed docval signature
-    # (required name/description, AllowPositional.ERROR, and a curated subset of
-    # DynamicTable kwargs) rather than to add init-time logic.
     @docval(
         {'name': 'name', 'type': str, 'doc': 'Name of this EventsTable'},
         {'name': 'description', 'type': str,
          'doc': ('A description of the events stored in the table, including information about '
                  'how the event times were computed.')},
+        {'name': 'source_description', 'type': str,
+         'doc': ('Optional short text description of where the events came from, applying to every row '
+                 'in the table. For example, "Acquisition system" for events emitted directly by the '
+                 'acquisition system, "Thresholding of analog signal ANALOG1 at 3 V" for events produced '
+                 'by a detection algorithm, or "Manual video review" for events added by a human annotator.'),
+         'default': None},
         *get_docval(DynamicTable.__init__, 'id', 'columns', 'colnames', 'target_tables', 'meanings_tables'),
         allow_positional=AllowPositional.ERROR,
     )
     def __init__(self, **kwargs):
+        args_to_set = popargs_to_dict(('source_description',), kwargs)
         super().__init__(**kwargs)
+        for key, val in args_to_set.items():
+            setattr(self, key, val)
 
     @docval(
         {'name': 'timestamp', 'type': float,

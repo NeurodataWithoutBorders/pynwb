@@ -51,7 +51,14 @@ class TestEventsTable(TestCase):
         table = EventsTable(name='events', description='test events')
         self.assertEqual(table.name, 'events')
         self.assertEqual(table.description, 'test events')
+        self.assertIsNone(table.source_description)
         self.assertEqual(len(table), 0)
+
+    def test_init_with_source_description(self):
+        """Test initialization with source_description"""
+        table = EventsTable(name='events', description='test events',
+                            source_description='Acquisition system')
+        self.assertEqual(table.source_description, 'Acquisition system')
 
     def test_add_event_timestamp_only(self):
         """Test adding event with only timestamp"""
