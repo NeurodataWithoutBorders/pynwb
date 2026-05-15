@@ -1,7 +1,10 @@
 import numpy as np
+from datetime import datetime
+from dateutil.tz import tzlocal
 
 from hdmf.common import MeaningsTable, VectorData
 
+from pynwb import NWBFile
 from pynwb.event import TimestampVectorData, DurationVectorData, EventsTable
 from pynwb.testing import TestCase
 
@@ -158,3 +161,62 @@ class TestEventsTable(TestCase):
         )
         self.assertIn('annotation_meanings', table.meanings_tables)
         self.assertIs(table.meanings_tables['annotation_meanings'], meanings)
+
+
+class TestNWBFileMergeEvents(TestCase):
+    """Unit tests for NWBFile.merge_events_tables and NWBFile.get_all_events"""
+
+    def _make_nwbfile(self):
+        return NWBFile(
+            session_description='test',
+            identifier='test_merge_events',
+            session_start_time=datetime(2021, 1, 1, tzinfo=tzlocal()),
+        )
+
+    def _make_table(self, name, timestamps, **extra_cols):
+        table = EventsTable(name=name, description=f'{name} events')
+        for col_name in extra_cols:
+            table.add_column(name=col_name, description=col_name)
+        for i, ts in enumerate(timestamps):
+            row = {'timestamp': ts}
+            for col_name, values in extra_cols.items():
+                row[col_name] = values[i]
+            table.add_event(**row)
+        return table
+
+    def test_merge_events_tables(self):
+        """merge_events_tables returns a DataFrame indexed by timestamp with all rows."""
+        t1 = self._make_table('licks', [1.0, 2.0])
+        t2 = self._make_table('rewards', [3.0, 4.0])
+        nwbfile = self._make_nwbfile()
+        result = nwbfile.merge_events_tables([t1, t2])
+        self.assertEqual(result.index.name, 'timestamp')
+        np.testing.assert_array_equal(sorted(result.index), [1.0, 2.0, 3.0, 4.0])
+
+    def test_merge_events_tables_fills_missing_columns_with_nan(self):
+        """Columns absent from some tables are filled with NaN."""
+        t1 = self._make_table('licks', [1.0], annotation=['lick'])
+        t2 = self._make_table('rewards', [2.0])
+        nwbfile = self._make_nwbfile()
+        result = nwbfile.merge_events_tables([t1, t2])
+        self.assertIn('annotation', result.columns)
+        self.assertEqual(result.loc[1.0, 'annotation'], 'lick')
+        self.assertTrue(np.isnan(result.loc[2.0, 'annotation']))
+
+    def test_get_all_events(self):
+        """get_all_events merges all tables in NWBFile.events."""
+        t1 = self._make_table('licks', [1.0, 2.0])
+        t2 = self._make_table('rewards', [3.0])
+        nwbfile = self._make_nwbfile()
+        nwbfile.add_events_table(t1)
+        nwbfile.add_events_table(t2)
+        result = nwbfile.get_all_events()
+        self.assertEqual(result.index.name, 'timestamp')
+        self.assertEqual(len(result), 3)
+
+    def test_get_all_events_empty(self):
+        """get_all_events returns an empty DataFrame when no events tables exist."""
+        nwbfile = self._make_nwbfile()
+        result = nwbfile.get_all_events()
+        self.assertIsInstance(result, type(result))
+        self.assertEqual(len(result), 0)

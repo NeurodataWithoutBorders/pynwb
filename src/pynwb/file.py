@@ -1087,6 +1087,23 @@ class NWBFile(MultiContainerInterface, HERDManager):
                      'DynamicTable to scratch.')
         return self._add_scratch(data)
 
+    def merge_events_tables(self, tables: list) -> pd.DataFrame:
+        """Merge a list of EventsTable objects into a single DataFrame indexed by timestamp.
+
+        Each table is converted to a DataFrame with the timestamp column as the index. Columns
+        present in only some tables are filled with NaN for rows from tables that lack them.
+        """
+        return pd.concat([table.to_dataframe().set_index("timestamp") for table in tables], sort=True)
+
+    def get_all_events(self) -> pd.DataFrame:
+        """Merge all EventsTable objects in ``NWBFile.events`` into a single DataFrame indexed by timestamp.
+
+        Returns an empty DataFrame if no events tables exist.
+        """
+        if not self.events:
+            return pd.DataFrame()
+        return self.merge_events_tables(list(self.events.values()))
+
     @docval({'name': 'name', 'type': str, 'doc': 'the name of the object to get'},
             {'name': 'convert', 'type': bool, 'doc': 'return the original data, not the NWB object', 'default': True})
     def get_scratch(self, **kwargs):
