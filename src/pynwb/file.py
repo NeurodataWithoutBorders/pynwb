@@ -254,6 +254,7 @@ class NWBFile(MultiContainerInterface, HERDManager):
         {
             'attr': 'events',
             'add': 'add_events_table',
+            'create': 'create_events_table',
             'type': EventsTable,
             'get': 'get_events_table'
         },
@@ -1087,7 +1088,7 @@ class NWBFile(MultiContainerInterface, HERDManager):
                      'DynamicTable to scratch.')
         return self._add_scratch(data)
 
-    def merge_events_tables(self, tables: list) -> pd.DataFrame:
+    def merge_events_tables(self, tables: list[EventsTable]) -> pd.DataFrame:
         """Merge a list of EventsTable objects into a single DataFrame indexed by timestamp.
 
         Each table is converted to a DataFrame with the timestamp column as the index. A

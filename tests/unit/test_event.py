@@ -240,3 +240,11 @@ class TestNWBFileMergeEvents(TestCase):
         nwbfile = self._make_nwbfile()
         result = nwbfile.get_all_events()
         self.assertEqual(len(result), 0)
+
+    def test_create_events_table(self):
+        """NWBFile.create_events_table instantiates and registers an EventsTable."""
+        nwbfile = self._make_nwbfile()
+        table = nwbfile.create_events_table(name='licks', description='Lick times')
+        self.assertIsInstance(table, EventsTable)
+        self.assertIn('licks', nwbfile.events)
+        self.assertIs(nwbfile.events['licks'], table)
