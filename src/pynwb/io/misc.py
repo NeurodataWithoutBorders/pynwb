@@ -22,19 +22,17 @@ class UnitsMap(DynamicTableMap):
         return self._get_waveform_stat(builder, 'unit')
 
     def _get_waveform_stat(self, builder, attribute):
-        if 'waveform_mean' not in builder and 'waveform_sd' not in builder:
+        waveform_columns = ('waveform_mean', 'waveform_sd', 'waveforms')
+        stats = [builder[column].attributes.get(attribute) for column in waveform_columns if column in builder]
+        if not stats:
             return None
-        mean_stat = None
-        sd_stat = None
-        if 'waveform_mean' in builder:
-            mean_stat = builder['waveform_mean'].attributes.get(attribute)
-        if 'waveform_sd' in builder:
-            sd_stat = builder['waveform_sd'].attributes.get(attribute)
-        if mean_stat is not None and sd_stat is not None:
-            if mean_stat != sd_stat:
-                # throw warning
-                pass
-        return mean_stat
+        populated_stats = [stat for stat in stats if stat is not None]
+        if len(set(populated_stats)) > 1:
+            # throw warning
+            pass
+        if populated_stats:
+            return populated_stats[0]
+        return None
 
     @DynamicTableMap.object_attr("electrodes")
     def electrodes_column(self, container, manager):
