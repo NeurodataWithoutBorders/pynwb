@@ -6,6 +6,7 @@
 - Added documentation for `ExternalImage` to the images tutorial. @h-mayorquin [#2159](https://github.com/NeurodataWithoutBorders/pynwb/pull/2159)
 - Fixed broken and redirecting links in documentation. @bendichter [#2165](https://github.com/NeurodataWithoutBorders/pynwb/pull/2165)
 - Added `EventsTable` examples to the NWB file basics and behavior tutorials. @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156)
+- Added example of setting `Units.resolution` in the ecephys tutorial. @h-mayorquin [#2174](https://github.com/NeurodataWithoutBorders/pynwb/pull/2174)
 
 ### Added
 - Added support for NWB Schema 2.10.0 ([NWBEP001](https://nwb-schema.readthedocs.io/)), which introduces the `EventsTable`, `TimestampVectorData`, and `DurationVectorData` neurodata types and a new `events` group on `NWBFile` for storing `EventsTable` instances. Use `NWBFile.add_events_table()` to add an `EventsTable` and `NWBFile.get_events_table()` to retrieve one. NWB Schema 2.10.0 also incorporates hdmf-common-schema 1.9.0, which adds the `MeaningsTable` neurodata type (re-exported via `hdmf.common`) and support for attaching one or more `MeaningsTable` instances to a `DynamicTable` to document the meanings of values in a column. See the [NWB Schema release notes](https://nwb-schema.readthedocs.io/en/latest/format_release_notes.html) and the [hdmf-common-schema release notes](https://hdmf-common-schema.readthedocs.io/en/latest/format_release_notes.html) for the full list of changes. @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156)
