@@ -42,9 +42,9 @@ class VectorDataMap(ObjectMapper):
         ''' Get the value of the attribute corresponding to this spec from the given container '''
         spec, container, manager = getargs('spec', 'container', 'manager', kwargs)
 
-        # handle custom mapping of container Units.waveform_rate -> spec Units.waveform_mean.sampling_rate
+        # handle custom mapping of Units waveform metadata onto waveform-bearing columns
         if isinstance(container.parent, Units):
-            if container.name == 'waveform_mean' or container.name == 'waveform_sd':
+            if container.name in ('waveform_mean', 'waveform_sd', 'waveforms'):
                 if spec.name == 'sampling_rate':
                     return container.parent.waveform_rate
                 if spec.name == 'unit':
