@@ -18,10 +18,11 @@
 
 ### Fixed
 - Fixed invalid CSS properties in documentation assistant toggle that prevented proper positioning on displays ≥1400px wide. @rly [#2151](https://github.com/NeurodataWithoutBorders/pynwb/pull/2151)
+
+## Changed
+- Deprecated `NWBGroupSpec.add_group` and `NWBGroupSpec.add_dataset`. Use `NWBGroupSpec.set_group`, `NWBGroupSpec.set_dataset`, or pass the group or dataset to the `NWBGroupSpec` constructor. @rly [#2138](https://github.com/NeurodataWithoutBorders/pynwb/issues/2138)
 - Fixed `TimeSeries.get_timestamps()` to handle numpy array timestamps when they are set. @pauladkisson [#2181](https://github.com/NeurodataWithoutBorders/pynwb/pull/2181)
 - Fixed `Units.waveform_rate` and `Units.waveform_unit` to also map to the `sampling_rate` and `unit` attributes of the `waveforms` column on write and read, so waveform sampling metadata round-trips for `Units` tables that contain only `waveforms` (without `waveform_mean` or `waveform_sd`). @ehennestad [#2183](https://github.com/NeurodataWithoutBorders/pynwb/pull/2183)
-
-### Changed
 - Added Python 3.14 support. @bendichter, @rly [#2168](https://github.com/NeurodataWithoutBorders/pynwb/pull/2168)
 - Updated HDMF dependency to >=6.0.1, <7. @rly [#2171](https://github.com/NeurodataWithoutBorders/pynwb/issues/2171)
 - Deprecated Python 3.9 support. (EOL was Oct 31, 2025) @bendichter [#2141](https://github.com/NeurodataWithoutBorders/pynwb/pull/2141)
