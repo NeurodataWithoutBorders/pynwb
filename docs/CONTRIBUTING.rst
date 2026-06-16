@@ -53,7 +53,7 @@ The https://nwb-users.slack.com slack is currently used mainly for informal disc
 Contributing Patches and Changes
 --------------------------------
 
-The ``dev`` branches of `PyNWB <https://github.com/NeurodataWithoutBorders/pynwb>`_ and `nwb-schema <https://github.com/NeurodataWithoutBorders/nwb-schema/>`_, are protected; you cannot push to them directly. You must upload your changes by pushing a new branch, then submit your changes to the ``dev`` branch via a `Pull Request <https://help.github.com/articles/creating-a-pull-request>`_. This allows us to conduct automated testing of your contribution, and gives us a space for developers to discuss the contribution and request changes. If you decide to tackle an issue, please make yourself an assignee on the issue to communicate this to the team. Don't worry - this does not commit you to solving this issue. It just lets others know who they should talk to about it.
+The ``dev`` branches of `PyNWB <https://github.com/NeurodataWithoutBorders/pynwb>`_ and `nwb-schema <https://github.com/NeurodataWithoutBorders/nwb-schema/>`_, are protected; you cannot push to them directly. You must upload your changes by pushing a new branch, then submit your changes to the ``dev`` branch via a `Pull Request <https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request>`_. This allows us to conduct automated testing of your contribution, and gives us a space for developers to discuss the contribution and request changes. If you decide to tackle an issue, please make yourself an assignee on the issue to communicate this to the team. Don't worry - this does not commit you to solving this issue. It just lets others know who they should talk to about it.
 
 From your local copy directory, use the following commands.
 
@@ -155,7 +155,7 @@ conforms to PEP8 standards, while using the codespell_ tool to check spelling.
 ``ruff`` and ``codespell`` are installed when you follow the developer installation instructions. See
 :ref:`install_developers`.
 
-.. _ruff: https://beta.ruff.rs/docs/
+.. _ruff: https://docs.astral.sh/ruff/
 .. _codespell: https://github.com/codespell-project/codespell
 
 .. code::

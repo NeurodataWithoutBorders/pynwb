@@ -171,7 +171,9 @@ nitpick_ignore = [('py:class', 'Intracomm'),
                   ('py:class', 'BaseStorageSpec')]
 
 linkcheck_ignore = [
-    r'https://training.incf.org/*'  # temporary ignore until SSL certificate issue is resolved
+    r'https://training.incf.org/*',  # temporary ignore until SSL certificate issue is resolved
+    r'https://scicrunch.org/*',  # scicrunch.org blocks automated requests with 403
+    r'https://app\.readthedocs\.org/projects/pynwb/.*',  # readthedocs blocks CI runner IPs (intermittent 403)
 ]
 
 suppress_warnings = ["config.cache"]

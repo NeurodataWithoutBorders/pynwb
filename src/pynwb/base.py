@@ -192,13 +192,15 @@ class TimeSeries(NWBDataInterface):
             {'name': 'control_description', 'type': Iterable, 'doc': 'Description of each control value',
              'default': None},
             {'name': 'continuity', 'type': str, 'default': None, 'enum': ["continuous", "instantaneous", "step"],
-             'doc': 'Optionally describe the continuity of the data. Can be "continuous", "instantaneous", or'
-                    '"step". For example, a voltage trace would be "continuous", because samples are recorded from a '
-                    'continuous process. An array of lick times would be "instantaneous", because the data represents '
-                    'distinct moments in time. Times of image presentations would be  "step" because the picture '
-                    'remains the same until the next time-point. This field is optional, but is useful in providing '
-                    'information about the underlying data. It may inform the way this data is interpreted, the way it '
-                    'is visualized, and what analysis methods are applicable.'},
+             'doc': 'Optionally describe the continuity of the data. Can be "continuous", "instantaneous", or '
+                    '"step". For example, a voltage trace would be "continuous", because samples are recorded from '
+                    'a continuous process. An array of lick times would be "instantaneous", because the data '
+                    'represents distinct moments in time. Times of image presentations would be "step" because the '
+                    'picture remains the same until the next time-point. This field is optional, but is useful in '
+                    'providing information about the underlying data. It may inform the way this data is '
+                    'interpreted, the way it is visualized, and what analysis methods are applicable. '
+                    'For storing instantaneous event information, it is recommended to use an EventsTable instead '
+                    'of a TimeSeries with continuity set to "instantaneous".'},
               allow_positional=AllowPositional.WARNING,)
     def __init__(self, **kwargs):
         """Create a TimeSeries object
@@ -393,10 +395,66 @@ class TimeSeries(NWBDataInterface):
         """
         Get the timestamps of this TimeSeries. If timestamps are not stored in this TimeSeries, generate timestamps.
         """
-        if self.fields.get('timestamps'):
+        if self.fields.get('timestamps') is not None:
             return self.timestamps
         else:
             return np.arange(len(self.data)) / self.rate + self.starting_time
+
+    def get_starting_time(self):
+        """
+        Get the starting time of this TimeSeries in seconds.
+
+        Returns
+        -------
+        float or None
+            The starting time in seconds, or None if no starting time is defined
+            and there is no data.
+        """
+        if self.starting_time is not None:
+            return self.starting_time
+        elif self.num_samples is not None and self.num_samples > 0:
+            return float(self.timestamps[0])
+        else:
+            # No starting_time defined and no data (e.g., empty timestamps-based TimeSeries)
+            return None
+
+    def get_duration(self):
+        """
+        Get the duration of this TimeSeries in seconds.
+
+        Returns the time span from the first sample to the last sample.
+        For a single sample or empty TimeSeries with a defined starting_time, returns 0.
+
+        Returns
+        -------
+        float or None
+            The duration in seconds, or None if the TimeSeries has no data and
+            no starting_time defined.
+
+        Notes
+        -----
+        For rate-based TimeSeries: duration = (n - 1) / rate
+        For timestamp-based TimeSeries: duration = timestamps[-1] - timestamps[0]
+
+        The duration represents the time span between sample times, not the total
+        recording time. If you need to account for the last sample's duration
+        (e.g., for continuous recordings), add 1/rate manually.
+        """
+        if self.num_samples is None or self.num_samples == 0:
+            # Empty TimeSeries with a starting_time has duration 0
+            if self.starting_time is not None:
+                return 0.0
+            return None
+
+        if self.num_samples == 1:
+            return 0.0
+
+        if self.fields.get('timestamps') is not None:
+            timestamps = self.timestamps
+            return float(timestamps[-1] - timestamps[0])
+        else:
+            # Rate-based
+            return (self.num_samples - 1) / self.rate
 
     def get_data_in_units(self):
         """

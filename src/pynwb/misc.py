@@ -21,7 +21,11 @@ __all__ = [
 
 @register_class('AnnotationSeries', CORE_NAMESPACE)
 class AnnotationSeries(TimeSeries):
-    """Stores text-based records about the experiment.
+    """DEPRECATED. Stores text-based records about the experiment.
+
+    AnnotationSeries is deprecated. Use an EventsTable with an 'annotation' column instead.
+    See :py:class:`~pynwb.event.EventsTable`.
+
     To use the AnnotationSeries, add records individually through add_annotation(). Alternatively, if all annotations
     are already stored in a list or numpy array, set the data and timestamps in the constructor.
     """
@@ -37,6 +41,10 @@ class AnnotationSeries(TimeSeries):
     def __init__(self, **kwargs):
         name, data, timestamps = popargs('name', 'data', 'timestamps', kwargs)
         super().__init__(name=name, data=data, unit='n/a', resolution=-1.0, timestamps=timestamps, **kwargs)
+        self._warn_on_new_pass_on_construct(
+            "AnnotationSeries is deprecated. Use an EventsTable with an 'annotation' column instead. "
+            "Creating a new AnnotationSeries will not be allowed in a future version of PyNWB."
+        )
 
     @docval({'name': 'time', 'type': float, 'doc': 'The time for the annotation'},
             {'name': 'annotation', 'type': str, 'doc': 'the annotation'})
@@ -165,7 +173,7 @@ class Units(DynamicTable):
     )
 
     @docval({'name': 'name', 'type': str, 'doc': 'Name of this Units interface', 'default': 'Units'},
-            *get_docval(DynamicTable.__init__, 'id', 'columns', 'colnames', 'target_tables'),
+            *get_docval(DynamicTable.__init__, 'id', 'columns', 'colnames', 'target_tables', 'meanings_tables'),
             {'name': 'description', 'type': str, 'doc': 'a description of what is in this table', 'default': None},
             {'name': 'electrode_table', 'type': DynamicTable,
              'doc': 'the table that the *electrodes* column indexes', 'default': None},
@@ -253,6 +261,115 @@ class Units(DynamicTable):
         index = getargs('index', kwargs)
         return np.asarray(self['obs_intervals'][index])
 
+    def get_starting_time(self):
+        """
+        Get the earliest spike time across all units in this Units table.
+
+        Returns
+        -------
+        float or None
+            The earliest spike time in seconds, or None if the table is empty,
+            has no spike_times column, or has no spike data.
+
+        Notes
+        -----
+        This method checks the first spike of every unit because units are not
+        assumed to be in chronological order (the earliest spike may be in any unit).
+
+        Edge cases:
+        - Returns None if the table is empty (no units)
+        - Returns None if the spike_times column does not exist
+        - Returns None if all units have empty spike_times arrays
+        """
+        if len(self) == 0:
+            return None
+
+        if 'spike_times' not in self:
+            return None
+
+        spike_times_col = self['spike_times']
+        indices = np.asarray(spike_times_col.data[:])  # Cumulative end positions
+
+        # First spike indices: unit 0 starts at 0, unit i starts at indices[i-1]
+        first_spike_indices = np.concatenate([[0], indices[:-1]])
+        # Filter out empty units where start index == end index (no spikes)
+        has_spikes = first_spike_indices != indices
+        first_spike_indices = first_spike_indices[has_spikes]
+
+        if len(first_spike_indices) == 0:
+            return None
+
+        spike_times_data = spike_times_col.target.data
+        # In-memory data might be stored as a list which doesn't support numpy operations below
+        if isinstance(spike_times_data, list):
+            spike_times_data = np.array(spike_times_data)
+
+        if len(spike_times_data) == 0:
+            return None
+
+        first_spike_times = spike_times_data[first_spike_indices]
+        return float(np.min(first_spike_times))
+
+    def get_duration(self):
+        """
+        Get the duration from the earliest to the latest spike time across all units.
+
+        Returns
+        -------
+        float or None
+            The duration in seconds, or None if the table is empty, has no
+            spike_times column, or has no spike data.
+
+        Notes
+        -----
+        The duration represents the time span from the earliest spike to the latest
+        spike across all units, not the sum of individual unit recording durations.
+
+        This method checks the first and last spike of every unit because units are
+        not assumed to be in chronological order (the earliest or latest spike may
+        be in any unit).
+
+        Edge cases:
+        - Returns None if the table is empty (no units)
+        - Returns None if the spike_times column does not exist
+        - Returns None if all units have empty spike_times arrays
+        - Returns 0.0 if there is only one spike across all units
+        """
+        if len(self) == 0:
+            return None
+
+        if 'spike_times' not in self:
+            return None
+
+        spike_times_col = self['spike_times']
+        indices = np.asarray(spike_times_col.data[:])  # Cumulative end positions
+
+        # First spike indices: unit 0 starts at 0, unit i starts at indices[i-1]
+        first_spike_indices = np.concatenate([[0], indices[:-1]])
+        # Last spike indices: unit i ends at indices[i], so last spike is at indices[i] - 1
+        last_spike_indices = indices - 1
+        # Filter out empty units where start index == end index (no spikes)
+        has_spikes = first_spike_indices != indices
+        first_spike_indices = first_spike_indices[has_spikes]
+        last_spike_indices = last_spike_indices[has_spikes]
+        # Combine and deduplicate for efficient reading
+        all_indices = np.unique(np.concatenate([first_spike_indices, last_spike_indices]))
+
+        spike_times_data = spike_times_col.target.data
+        # In-memory data might be stored as a list which doesn't support numpy operations below
+        if isinstance(spike_times_data, list):
+            spike_times_data = np.array(spike_times_data)
+
+        if len(spike_times_data) == 0:
+            return None
+
+        boundary_spike_times = spike_times_data[all_indices]
+
+        first_spike_time = float(np.min(boundary_spike_times))
+        last_spike_time = float(np.max(boundary_spike_times))
+        return last_spike_time - first_spike_time
+
+
 @register_class('FrequencyBandsTable', CORE_NAMESPACE)
 class FrequencyBandsTable(DynamicTable):
     """
@@ -265,7 +382,7 @@ class FrequencyBandsTable(DynamicTable):
         {'name': 'band_stdev', 'description': 'The standard deviation Gaussian filters, in Hz.', 'required': False}
     )
 
-    @docval(*get_docval(DynamicTable.__init__, 'id', 'columns', 'colnames', 'target_tables'),
+    @docval(*get_docval(DynamicTable.__init__, 'id', 'columns', 'colnames', 'target_tables', 'meanings_tables'),
             allow_positional=AllowPositional.WARNING,)
     def __init__(self, **kwargs):
         kwargs['name'] = 'bands'

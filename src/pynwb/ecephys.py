@@ -89,7 +89,7 @@ class ElectrodesTable(DynamicTable):
                                               'for this electrode.'), 'required': False}
     )
 
-    @docval(*get_docval(DynamicTable.__init__, 'id', 'columns', 'colnames', 'target_tables'),
+    @docval(*get_docval(DynamicTable.__init__, 'id', 'columns', 'colnames', 'target_tables', 'meanings_tables'),
             allow_positional=AllowPositional.WARNING,)
     def __init__(self, **kwargs):
         kwargs['name'] = 'electrodes'

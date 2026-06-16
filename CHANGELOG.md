@@ -1,13 +1,32 @@
 # PyNWB Changelog
 
-## PyNWB 3.2.0 (Upcoming)
+## PyNWB 4.0.0 (Upcoming)
+
+### Documentation and tutorial enhancements
+- Added `app.readthedocs.org/projects/pynwb/*` to `linkcheck_ignore` to stop the Sphinx linkcheck CI job from intermittently failing when GitHub Actions runners get throttled by readthedocs. @h-mayorquin [#2191](https://github.com/NeurodataWithoutBorders/pynwb/pull/2191)
+- Added documentation for `ExternalImage` to the images tutorial. @h-mayorquin [#2159](https://github.com/NeurodataWithoutBorders/pynwb/pull/2159)
+- Fixed broken and redirecting links in documentation. @bendichter [#2165](https://github.com/NeurodataWithoutBorders/pynwb/pull/2165)
+- Added `EventsTable` examples to the NWB file basics and behavior tutorials. @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156)
+- Added example of setting `Units.resolution` in the ecephys tutorial. @h-mayorquin [#2174](https://github.com/NeurodataWithoutBorders/pynwb/pull/2174)
+
+### Added
+- Added support for NWB Schema 2.10.0 ([NWBEP001](https://nwb-schema.readthedocs.io/)), which introduces the `EventsTable`, `TimestampVectorData`, and `DurationVectorData` neurodata types and a new `events` group on `NWBFile` for storing `EventsTable` instances. Use `NWBFile.add_events_table()` to add an `EventsTable` and `NWBFile.get_events_table()` to retrieve one. NWB Schema 2.10.0 also incorporates hdmf-common-schema 1.9.0, which adds the `MeaningsTable` neurodata type (re-exported via `hdmf.common`) and support for attaching one or more `MeaningsTable` instances to a `DynamicTable` to document the meanings of values in a column. See the [NWB Schema release notes](https://nwb-schema.readthedocs.io/en/latest/format_release_notes.html) and the [hdmf-common-schema release notes](https://hdmf-common-schema.readthedocs.io/en/latest/format_release_notes.html) for the full list of changes. @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156)
+- Added support for HERD (HDMF External Resources Data Structure) as the `external_resources` field on `NWBFile`, enabling users to associate external resource annotations (e.g., ontology term mappings) with their NWB files. `link_resources` and `get_external_resources` are inherited from `HERDManager` in hdmf. @mavaylon1, @rly [#2111](https://github.com/NeurodataWithoutBorders/pynwb/pull/2111)
+- Added `get_starting_time()` and `get_duration()` methods to `TimeSeries` to get the starting time and duration of the time series. @h-mayorquin [#2146](https://github.com/NeurodataWithoutBorders/pynwb/pull/2146)
+- Added `get_starting_time()` and `get_duration()` methods to `TimeIntervals` to get the earliest start time and total duration (span from earliest start to latest stop) of all intervals. @h-mayorquin [#2146](https://github.com/NeurodataWithoutBorders/pynwb/pull/2146)
+- Added `get_starting_time()` and `get_duration()` methods to `Units` to get the earliest spike time and total duration (span from earliest to latest spike) across all units. @h-mayorquin [#2164](https://github.com/NeurodataWithoutBorders/pynwb/pull/2164)
 
 ### Fixed
 - Fixed invalid CSS properties in documentation assistant toggle that prevented proper positioning on displays ≥1400px wide. @rly [#2151](https://github.com/NeurodataWithoutBorders/pynwb/pull/2151)
 
 ## Changed
 - Deprecated `NWBGroupSpec.add_group` and `NWBGroupSpec.add_dataset`. Use `NWBGroupSpec.set_group`, `NWBGroupSpec.set_dataset`, or pass the group or dataset to the `NWBGroupSpec` constructor. @rly [#2138](https://github.com/NeurodataWithoutBorders/pynwb/issues/2138)
-
+- Fixed `TimeSeries.get_timestamps()` to handle numpy array timestamps when they are set. @pauladkisson [#2181](https://github.com/NeurodataWithoutBorders/pynwb/pull/2181)
+- Fixed `Units.waveform_rate` and `Units.waveform_unit` to also map to the `sampling_rate` and `unit` attributes of the `waveforms` column on write and read, so waveform sampling metadata round-trips for `Units` tables that contain only `waveforms` (without `waveform_mean` or `waveform_sd`). @ehennestad [#2183](https://github.com/NeurodataWithoutBorders/pynwb/pull/2183)
+- Added Python 3.14 support. @bendichter, @rly [#2168](https://github.com/NeurodataWithoutBorders/pynwb/pull/2168)
+- Updated HDMF dependency to >=6.0.1, <7. @rly [#2171](https://github.com/NeurodataWithoutBorders/pynwb/issues/2171)
+- Deprecated Python 3.9 support. (EOL was Oct 31, 2025) @bendichter [#2141](https://github.com/NeurodataWithoutBorders/pynwb/pull/2141)
+- Deprecated `BehavioralEvents` and `AnnotationSeries` in favor of using an `EventsTable` in `NWBFile.events`. Creating a new instance of either type now emits a `UserWarning`; reading existing files containing these types continues to work without warnings. @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156)
 
 ## PyNWB 3.1.3 (December 9, 2025)
 
@@ -21,7 +40,7 @@
 - Fixed import structure test. @rly [#2136](https://github.com/NeurodataWithoutBorders/pynwb/pull/2136)
 
 ### Changed
-- Change UI of documentation assistant to be an accordion that is always visible. @bendichter [#2124](https://github.com/NeurodataWithoutBorders/pynwb/pull/2124)
+- Changed UI of documentation assistant to be an accordion that is always visible. @bendichter [#2124](https://github.com/NeurodataWithoutBorders/pynwb/pull/2124)
 - Updated minimum HDMF version to 4.1.2 and updated tests accordingly. @rly [#2144](https://github.com/NeurodataWithoutBorders/pynwb/pull/2144)
 
 
