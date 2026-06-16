@@ -86,13 +86,14 @@ class NWBGroupSpecTest(TestCase):
             linkable=True,
             name='Group1',
         )
-        spec.add_group(
-            doc='A test group',
-            neurodata_type_def='TimeSeries',
-            neurodata_type_inc='NWBData',
-            linkable=True,
-            name='Group2',
-        )
+        with self.assertWarns(DeprecationWarning):
+            spec.add_group(
+                doc='A test group',
+                neurodata_type_def='TimeSeries',
+                neurodata_type_inc='NWBData',
+                linkable=True,
+                name='Group2',
+            )
         self.assertEqual(len(spec.groups), 1)
         self.assertEqual(spec.groups[0].name, 'Group2')
         self.assertIsInstance(spec.groups[0], NWBGroupSpec)
@@ -105,14 +106,15 @@ class NWBGroupSpecTest(TestCase):
             linkable=True,
             name='Group1',
         )
-        spec.add_dataset(
-            doc='A test dataset',
-            name='dataset1',
-            dtype='int',
-            shape=(None,),
-            dims=('time',),
-            quantity='?',
-        )
+        with self.assertWarns(DeprecationWarning):
+            spec.add_dataset(
+                doc='A test dataset',
+                name='dataset1',
+                dtype='int',
+                shape=(None,),
+                dims=('time',),
+                quantity='?',
+            )
         self.assertEqual(len(spec.datasets), 1)
         self.assertEqual(spec.datasets[0].name, 'dataset1')
         self.assertIsInstance(spec.datasets[0], NWBDatasetSpec)

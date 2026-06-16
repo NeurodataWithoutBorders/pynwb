@@ -3,9 +3,11 @@
 ## PyNWB 4.0.0 (Upcoming)
 
 ### Documentation and tutorial enhancements
+- Added `app.readthedocs.org/projects/pynwb/*` to `linkcheck_ignore` to stop the Sphinx linkcheck CI job from intermittently failing when GitHub Actions runners get throttled by readthedocs. @h-mayorquin [#2191](https://github.com/NeurodataWithoutBorders/pynwb/pull/2191)
 - Added documentation for `ExternalImage` to the images tutorial. @h-mayorquin [#2159](https://github.com/NeurodataWithoutBorders/pynwb/pull/2159)
 - Fixed broken and redirecting links in documentation. @bendichter [#2165](https://github.com/NeurodataWithoutBorders/pynwb/pull/2165)
 - Added `EventsTable` examples to the NWB file basics and behavior tutorials. @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156)
+- Added example of setting `Units.resolution` in the ecephys tutorial. @h-mayorquin [#2174](https://github.com/NeurodataWithoutBorders/pynwb/pull/2174)
 
 ### Added
 - Added optional `source_description` attribute to `EventsTable` for a short free-text label of where events originated (e.g., `"Acquisition system"`, `"Manual video review"`). Added `NWBFile.merge_events_tables()` to merge a list of `EventsTable` objects into a single DataFrame sorted by timestamp with a `source_events_table` column. Added `NWBFile.get_all_events()` to merge all tables in `NWBFile.events`. @rly [#2192](https://github.com/NeurodataWithoutBorders/pynwb/pull/2192)
@@ -17,9 +19,11 @@
 
 ### Fixed
 - Fixed invalid CSS properties in documentation assistant toggle that prevented proper positioning on displays ≥1400px wide. @rly [#2151](https://github.com/NeurodataWithoutBorders/pynwb/pull/2151)
-- Fixed `TimeSeries.get_timestamps()` to handle numpy array timestamps when they are set. @pauladkisson [#2181](https://github.com/NeurodataWithoutBorders/pynwb/pull/2181)
 
-### Changed
+## Changed
+- Deprecated `NWBGroupSpec.add_group` and `NWBGroupSpec.add_dataset`. Use `NWBGroupSpec.set_group`, `NWBGroupSpec.set_dataset`, or pass the group or dataset to the `NWBGroupSpec` constructor. @rly [#2138](https://github.com/NeurodataWithoutBorders/pynwb/issues/2138)
+- Fixed `TimeSeries.get_timestamps()` to handle numpy array timestamps when they are set. @pauladkisson [#2181](https://github.com/NeurodataWithoutBorders/pynwb/pull/2181)
+- Fixed `Units.waveform_rate` and `Units.waveform_unit` to also map to the `sampling_rate` and `unit` attributes of the `waveforms` column on write and read, so waveform sampling metadata round-trips for `Units` tables that contain only `waveforms` (without `waveform_mean` or `waveform_sd`). @ehennestad [#2183](https://github.com/NeurodataWithoutBorders/pynwb/pull/2183)
 - Added Python 3.14 support. @bendichter, @rly [#2168](https://github.com/NeurodataWithoutBorders/pynwb/pull/2168)
 - Updated HDMF dependency to >=6.0.1, <7. @rly [#2171](https://github.com/NeurodataWithoutBorders/pynwb/issues/2171)
 - Deprecated Python 3.9 support. (EOL was Oct 31, 2025) @bendichter [#2141](https://github.com/NeurodataWithoutBorders/pynwb/pull/2141)

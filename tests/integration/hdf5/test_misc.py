@@ -1,3 +1,4 @@
+import h5py
 import numpy as np
 
 from hdmf.common import VectorData, DynamicTableRegion
@@ -68,6 +69,58 @@ class TestUnitsIO(AcquisitionH5IOMixin, TestCase):
         received = ut.get_unit_obs_intervals(1)
         np.testing.assert_array_equal(received, [[2., 5.], [6., 7.]])
         np.testing.assert_array_equal(ut['obs_intervals'][:], [[[0., 1.], [2., 3.]], [[2., 5.], [6., 7.]]])
+
+
+class TestUnitsWaveformsOnlyIO(AcquisitionH5IOMixin, TestCase):
+    """Test roundtripping waveform metadata when only waveforms are present."""
+
+    def setUpContainer(self):
+        ut = Units(name='UnitsWaveformsOnlyTest', description='a simple table for testing Units waveforms')
+        ut.add_unit(
+            spike_times=[0., 1., 2.],
+            waveforms=[
+                [
+                    [1, 2, 3],
+                    [1, 2, 3],
+                    [1, 2, 3]
+                ], [
+                    [1, 2, 3],
+                    [1, 2, 3],
+                    [1, 2, 3]
+                ]
+            ]
+        )
+        ut.add_unit(
+            spike_times=[3., 4., 5.],
+            waveforms=np.array([
+                [
+                    [1, 2, 3],
+                    [1, 2, 3],
+                    [1, 2, 3]
+                ], [
+                    [1, 2, 3],
+                    [1, 2, 3],
+                    [1, 2, 3]
+                ]
+            ])
+        )
+        ut.waveform_rate = 40000.
+        return ut
+
+    def test_waveform_metadata_roundtrip(self):
+        ut = self.roundtripContainer()
+        self.assertEqual(ut.waveform_rate, 40000.)
+        self.assertEqual(ut.waveform_unit, 'volts')
+
+    def test_waveforms_attributes_written(self):
+        self.roundtripContainer()
+        with h5py.File(self.filename, 'r') as infile:
+            waveforms = infile['acquisition'][self.container.name]['waveforms']
+            self.assertEqual(waveforms.attrs['sampling_rate'], 40000.)
+            unit = waveforms.attrs['unit']
+            if isinstance(unit, bytes):
+                unit = unit.decode('utf-8')
+            self.assertEqual(unit, 'volts')
 
 
 class TestUnitsFileIO(NWBH5IOMixin, TestCase):
