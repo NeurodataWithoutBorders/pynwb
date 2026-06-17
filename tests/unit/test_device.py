@@ -1,6 +1,6 @@
 from pynwb import NWBHDF5IO
 from pynwb.device import Device, DeviceModel
-from pynwb.io.device import DeviceMapper, DEVICE_MODEL_TUTORIAL_URL, _construct_legacy_device_model
+from pynwb.io.device import DeviceMapper, _construct_legacy_device_model
 from pynwb.testing import TestCase, remove_test_file
 from pynwb.testing.mock.file import mock_NWBFile
 
@@ -116,7 +116,8 @@ class TestDeviceMapper(TestCase):
             'Because the model name contains a "/" or ":", which are not allowed in NWB object names, the '
             'remapped DeviceModel is read-only and the file cannot be written or exported until it is '
             'replaced. To write/export the data, create a new DeviceModel with a valid name and assign it to '
-            'Device.model. See ' + DEVICE_MODEL_TUTORIAL_URL + ' for an example.'
+            'Device.model. See the "Adding/Removing Containers from an NWB File" tutorial in the '
+            'PyNWB documentation for an example.'
         )
         with self.assertWarnsWith(UserWarning, msg):
             device_model = DeviceMapper.model_carg(None, builder, None)
@@ -153,7 +154,8 @@ class TestDeviceModelWriteGuard(TestCase):
             'which are not allowed in NWB object names. This DeviceModel was likely remapped '
             'from a legacy Device.model string when reading an older file and is read-only. To '
             'write or export the data, create a new DeviceModel with a valid name and assign it to '
-            'Device.model. See ' + DEVICE_MODEL_TUTORIAL_URL + ' for an example.'
+            'Device.model. See the "Adding/Removing Containers from an NWB File" tutorial in the '
+            'PyNWB documentation for an example.'
         )
         with NWBHDF5IO(self.filename, 'w') as io:
             with self.assertRaisesWith(ValueError, msg):

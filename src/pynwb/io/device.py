@@ -4,14 +4,6 @@ from .. import register_map
 from ..device import Device, DeviceModel
 from .core import NWBContainerMapper
 
-# Tutorial section that demonstrates replacing a read-only remapped DeviceModel (whose name contains
-# characters not allowed in NWB object names) with a new DeviceModel that has a valid name.
-DEVICE_MODEL_TUTORIAL_URL = (
-    "https://pynwb.readthedocs.io/en/stable/tutorials/general/add_remove_containers.html"
-    "#upgrading-a-legacy-device-model-string-to-a-devicemodel"
-)
-
-
 def _name_has_invalid_chars(name):
     """Return True if ``name`` contains a character that is not allowed in an NWB object name."""
     return "/" in name or ":" in name
@@ -51,7 +43,8 @@ class DeviceModelMapper(NWBContainerMapper):
                 "which are not allowed in NWB object names. This DeviceModel was likely remapped "
                 "from a legacy Device.model string when reading an older file and is read-only. To "
                 "write or export the data, create a new DeviceModel with a valid name and assign it to "
-                f"Device.model. See {DEVICE_MODEL_TUTORIAL_URL} for an example."
+                'Device.model. See the "Adding/Removing Containers from an NWB File" tutorial in the '
+                "PyNWB documentation for an example."
             )
         return super().build(*args, **kwargs)
 
@@ -88,7 +81,8 @@ class DeviceMapper(NWBContainerMapper):
                     ' Because the model name contains a "/" or ":", which are not allowed in NWB object names, the '
                     'remapped DeviceModel is read-only and the file cannot be written or exported until it is '
                     'replaced. To write/export the data, create a new DeviceModel with a valid name and assign it to '
-                    f'Device.model. See {DEVICE_MODEL_TUTORIAL_URL} for an example.'
+                    'Device.model. See the "Adding/Removing Containers from an NWB File" tutorial in the '
+                    'PyNWB documentation for an example.'
                 )
             warn(msg, stacklevel=3)
 

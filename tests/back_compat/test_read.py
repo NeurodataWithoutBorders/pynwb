@@ -7,7 +7,6 @@ from pynwb import NWBHDF5IO, validate, TimeSeries
 from pynwb.device import DeviceModel
 from pynwb.ecephys import ElectrodesTable
 from pynwb.image import ImageSeries
-from pynwb.io.device import DEVICE_MODEL_TUTORIAL_URL
 from pynwb.misc import FrequencyBandsTable
 from pynwb.testing import TestCase
 
@@ -209,7 +208,8 @@ class TestReadOldVersions(TestCase):
                 'Because the model name contains a "/" or ":", which are not allowed in NWB object names, the '
                 'remapped DeviceModel is read-only and the file cannot be written or exported until it is '
                 'replaced. To write/export the data, create a new DeviceModel with a valid name and assign it to '
-                f'Device.model. See {DEVICE_MODEL_TUTORIAL_URL} for an example.'
+                'Device.model. See the "Adding/Removing Containers from an NWB File" tutorial in the '
+                'PyNWB documentation for an example.'
             )
             with self.assertWarnsWith(UserWarning, msg):
                 read_nwbfile = io.read()
@@ -266,8 +266,8 @@ class TestReadOldVersions(TestCase):
                 f'Cannot write DeviceModel "{legacy_name}": its name contains a "/" or ":", which are not '
                 'allowed in NWB object names. This DeviceModel was likely remapped from a legacy Device.model '
                 'string when reading an older file and is read-only. To write or export the data, create a new '
-                f'DeviceModel with a valid name and assign it to Device.model. See {DEVICE_MODEL_TUTORIAL_URL} '
-                'for an example.'
+                'DeviceModel with a valid name and assign it to Device.model. See the "Adding/Removing Containers '
+                'from an NWB File" tutorial in the PyNWB documentation for an example.'
             )
             with tempfile.TemporaryDirectory() as temp_dir:
                 export_file = Path(temp_dir) / "export_fail.nwb"
