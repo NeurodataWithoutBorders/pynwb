@@ -24,10 +24,10 @@ The examples below follow this general workflow for adding behavior data to an :
   * :py:class:`~pynwb.behavior.Position` for position measured over time
   * :py:class:`~pynwb.behavior.CompassDirection` for view angle measured over time
   * :py:class:`~pynwb.behavior.BehavioralTimeSeries` for continuous time series data
-  * :py:class:`~pynwb.behavior.BehavioralEvents` for behavioral events (e.g. reward amount)
   * :py:class:`~pynwb.behavior.BehavioralEpochs` for behavioral intervals (e.g. sleep intervals)
   * :py:class:`~pynwb.behavior.PupilTracking` for eye-tracking data of pupil size
   * :py:class:`~pynwb.behavior.EyeTracking` for eye-tracking data of gaze direction
+  * :py:class:`~pynwb.event.EventsTable` for behavioral events (e.g. reward times)
 
 * create a behavior processing module for the :py:class:`~pynwb.file.NWBFile` and add the interface object(s) to it
 
@@ -46,7 +46,6 @@ from dateutil.tz import tzlocal
 from pynwb import NWBHDF5IO, NWBFile, TimeSeries
 from pynwb.behavior import (
     BehavioralEpochs,
-    BehavioralEvents,
     BehavioralTimeSeries,
     CompassDirection,
     EyeTracking,
@@ -55,6 +54,7 @@ from pynwb.behavior import (
     SpatialSeries,
 )
 from pynwb.epoch import TimeIntervals
+from pynwb.event import EventsTable
 from pynwb.misc import IntervalSeries
 
 ####################
@@ -219,34 +219,38 @@ behavioral_time_series = BehavioralTimeSeries(
 behavior_module.add(behavioral_time_series)
 
 ####################
-# BehavioralEvents: Storing behavioral events
-# -------------------------------------------
+# EventsTable: Storing behavioral events
+# --------------------------------------
 #
-# :py:class:`~pynwb.behavior.BehavioralEvents` is an interface for storing behavioral events.
-# We can use it for storing the timing and amount of rewards (e.g. water amount) or lever press times.
+# :py:class:`~pynwb.event.EventsTable` is for storing behavioral events such as the timing
+# and amount of rewards (e.g., water amount) or lever press times. EventsTable is stored
+# in ``NWBFile.events``.
+#
+# .. note::
+#    :py:class:`~pynwb.behavior.BehavioralEvents` is deprecated. Use
+#    :py:class:`~pynwb.event.EventsTable` instead.
+#
+# Create an :py:class:`~pynwb.event.EventsTable` to store reward delivery events.
+# The required ``timestamp`` column stores the time of each event in seconds from the
+# session start time. Additional columns can be added to store metadata about each
+# event, such as the amount of reward delivered.
 
-reward_amount = [1.0, 1.5, 1.0, 1.5]
-events_timestamps = [1.0, 2.0, 5.0, 6.0]
-
-time_series = TimeSeries(
-    name="lever_presses",
-    data=reward_amount,
-    timestamps=events_timestamps,
-    description="The water amount the subject received as a reward.",
-    unit="ml",
+reward_events = EventsTable(
+    name="reward_events",
+    description="Times and amounts of water rewards delivered to the animal.",
 )
+reward_events.add_column(name="amount_ml", description="Volume of water reward in mL.")
 
-behavioral_events = BehavioralEvents(time_series=time_series, name="BehavioralEvents")
-
-behavior_module.add(behavioral_events)
+reward_events.add_event(timestamp=12.5, amount_ml=0.05)
+reward_events.add_event(timestamp=27.3, amount_ml=0.05)
+reward_events.add_event(timestamp=44.1, amount_ml=0.10)
 
 ####################
-# Storing only the timestamps of the events is possible with the `ndx-events <https://pypi.org/project/ndx-events/>`_
-# NWB extension. You can also add labels associated with the events with this extension.
-# You can find information about installation and example usage :nwb_extension:`here <ndx-events-record>`.
-#
-# .. seealso::
-#    You can learn more about using extensions in the :ref:`tutorial-extending-nwb` tutorial.
+# Add the :py:class:`~pynwb.event.EventsTable` to the :py:class:`~pynwb.file.NWBFile`
+# using :py:meth:`~pynwb.file.NWBFile.add_events_table`. Events tables are stored in
+# ``NWBFile.events``.
+
+nwbfile.add_events_table(reward_events)
 
 ####################
 # BehavioralEpochs: Storing intervals of behavior data

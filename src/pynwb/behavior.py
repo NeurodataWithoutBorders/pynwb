@@ -97,8 +97,14 @@ class BehavioralEpochs(MultiContainerInterface):
 
 @register_class('BehavioralEvents', CORE_NAMESPACE)
 class BehavioralEvents(MultiContainerInterface):
-    """
-    TimeSeries for storing behavioral events. See description of BehavioralEpochs for more details.
+    """DEPRECATED. Use an :py:class:`~pynwb.event.EventsTable` instead, placed in the top-level ``/events``
+    group of the NWBFile. Each TimeSeries formerly stored under BehavioralEvents becomes one EventsTable.
+    The ``timestamps`` field maps to the ``timestamp`` column, and the ``data`` field maps to an additional
+    column named after the event marker (e.g., ``reward_magnitude``, ``port_number``); for multi-dimensional
+    ``data``, use one column per field. Any other per-event metadata becomes additional columns. Use the
+    ``source_description`` attribute on the EventsTable to record where the events came from (e.g.,
+    "Acquisition system", "Thresholding of analog signal ANALOG1 at 3 V", "Manual video review"). Original
+    definition: TimeSeries for storing behavioral events. See description of BehavioralEpochs for more details.
     """
 
     __clsconf__ = {
@@ -108,6 +114,19 @@ class BehavioralEvents(MultiContainerInterface):
         'type': TimeSeries,
         'attr': 'time_series'
     }
+
+    @docval({'name': 'time_series', 'type': (list, tuple, dict, TimeSeries),
+             'doc': 'TimeSeries to store in this interface', 'default': dict()},
+            {'name': 'name', 'type': str, 'doc': 'the name of this container', 'default': 'BehavioralEvents'})
+    def __init__(self, **kwargs):
+        time_series = popargs('time_series', kwargs)
+        super().__init__(**kwargs)
+        self.add_timeseries(time_series)
+        self._warn_on_new_pass_on_construct(
+            "BehavioralEvents is deprecated. Use an EventsTable instead, added to the NWBFile via "
+            "nwbfile.add_events_table() or nwbfile.create_events_table(). "
+            "Creating a new BehavioralEvents will not be allowed in a future version of PyNWB."
+        )
 
 
 @register_class('BehavioralTimeSeries', CORE_NAMESPACE)

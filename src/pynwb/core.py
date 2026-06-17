@@ -60,6 +60,15 @@ class NWBMixin(AbstractContainer):
         if not self._in_construct_mode:
             raise ValueError(error_msg)
 
+    def _warn_on_new_pass_on_construct(self, warn_msg: str):
+        """
+        Issue a warning when a check is violated on instance creation.
+        When reading from a file, do nothing, ensuring that files with
+        deprecated neurodata types can be read without warnings.
+        """
+        if not self._in_construct_mode:
+            warn(warn_msg)
+
     def _get_type_map(self):
         return get_type_map(copy=False)
 

@@ -21,9 +21,14 @@ __all__ = [
 
 @register_class('AnnotationSeries', CORE_NAMESPACE)
 class AnnotationSeries(TimeSeries):
-    """Stores text-based records about the experiment.
-    To use the AnnotationSeries, add records individually through add_annotation(). Alternatively, if all annotations
-    are already stored in a list or numpy array, set the data and timestamps in the constructor.
+    """DEPRECATED. Use an :py:class:`~pynwb.event.EventsTable` instead, placed in the top-level ``/events``
+    group of the NWBFile. The ``timestamps`` field maps to the ``timestamp`` column, and the ``data`` field
+    (annotation strings) maps to the ``annotation`` column on EventsTable. Use the ``source_description``
+    attribute on the EventsTable to record where the events came from (e.g., "Acquisition system",
+    "Thresholding of analog signal ANALOG1 at 3 V", "Manual video review"). Original definition: Stores
+    user annotations made during an experiment. The data[] field stores a text array, and timestamps are
+    stored for each annotation (i.e., interval=1). This is largely an alias to a standard TimeSeries
+    storing a text array but that is identifiable as storing annotations in a machine-readable way.
     """
 
     __nwbfields__ = ()
@@ -37,6 +42,11 @@ class AnnotationSeries(TimeSeries):
     def __init__(self, **kwargs):
         name, data, timestamps = popargs('name', 'data', 'timestamps', kwargs)
         super().__init__(name=name, data=data, unit='n/a', resolution=-1.0, timestamps=timestamps, **kwargs)
+        self._warn_on_new_pass_on_construct(
+            "AnnotationSeries is deprecated. Use an EventsTable with an 'annotation' column instead, "
+            "added to the NWBFile via nwbfile.add_events_table() or nwbfile.create_events_table(). "
+            "Creating a new AnnotationSeries will not be allowed in a future version of PyNWB."
+        )
 
     @docval({'name': 'time', 'type': float, 'doc': 'The time for the annotation'},
             {'name': 'annotation', 'type': str, 'doc': 'the annotation'})
@@ -165,7 +175,7 @@ class Units(DynamicTable):
     )
 
     @docval({'name': 'name', 'type': str, 'doc': 'Name of this Units interface', 'default': 'Units'},
-            *get_docval(DynamicTable.__init__, 'id', 'columns', 'colnames', 'target_tables'),
+            *get_docval(DynamicTable.__init__, 'id', 'columns', 'colnames', 'target_tables', 'meanings_tables'),
             {'name': 'description', 'type': str, 'doc': 'a description of what is in this table', 'default': None},
             {'name': 'electrode_table', 'type': DynamicTable,
              'doc': 'the table that the *electrodes* column indexes', 'default': None},
@@ -374,7 +384,7 @@ class FrequencyBandsTable(DynamicTable):
         {'name': 'band_stdev', 'description': 'The standard deviation Gaussian filters, in Hz.', 'required': False}
     )
 
-    @docval(*get_docval(DynamicTable.__init__, 'id', 'columns', 'colnames', 'target_tables'),
+    @docval(*get_docval(DynamicTable.__init__, 'id', 'columns', 'colnames', 'target_tables', 'meanings_tables'),
             allow_positional=AllowPositional.WARNING,)
     def __init__(self, **kwargs):
         kwargs['name'] = 'bands'

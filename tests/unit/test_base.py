@@ -243,6 +243,17 @@ class TestTimeSeries(TestCase):
         )
         self.assertEqual(ts.continuity, "continuous")
 
+    def test_instantaneous_continuity(self):
+        """Test that continuity='instantaneous' is allowed."""
+        ts = TimeSeries(
+            name="test_ts1",
+            data=[0, 1, 2, 3, 4, 5],
+            unit="grams",
+            timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5],
+            continuity="instantaneous",
+        )
+        self.assertEqual(ts.continuity, "instantaneous")
+
     def test_bad_continuity_timeseries(self):
         msg = (
             "TimeSeries.__init__: forbidden value for 'continuity' (got 'wrong', "
@@ -429,6 +440,9 @@ class TestTimeSeries(TestCase):
         time_series = mock_TimeSeries(data=[1, 2, 3], timestamps=[3, 4, 5], rate=None)
         assert_array_equal(time_series.get_timestamps(), [3, 4, 5])
 
+        time_series = mock_TimeSeries(data=[1, 2, 3], timestamps=np.array([3, 4, 5]), rate=None)
+        assert_array_equal(time_series.get_timestamps(), [3, 4, 5])
+
     def test_get_data_in_units(self):
         ts = mock_TimeSeries(data=[1., 2., 3.], conversion=2., offset=3.)
         assert_array_equal(ts.get_data_in_units(), [5., 7., 9.])
@@ -575,6 +589,9 @@ class TestTimeSeries(TestCase):
         """Test get_duration with timestamp-based TimeSeries"""
         ts = mock_TimeSeries(data=[1, 2, 3, 4], timestamps=[0.0, 1.0, 2.0, 3.0])
         # Duration from 0 to 3 seconds = 3 seconds
+        self.assertEqual(ts.get_duration(), 3.0)
+
+        ts = mock_TimeSeries(data=[1, 2, 3, 4], timestamps=np.array([0.0, 1.0, 2.0, 3.0]))
         self.assertEqual(ts.get_duration(), 3.0)
 
     def test_get_duration_single_sample(self):
