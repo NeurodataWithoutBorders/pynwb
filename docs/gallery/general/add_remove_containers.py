@@ -182,6 +182,88 @@ with NWBHDF5IO(filename, mode="r") as read_io:
         export_io.export(src_io=read_io, nwbfile=read_nwbfile)
 
 ###############################################################################
+# Upgrading a legacy Device.model string to a DeviceModel
+# -------------------------------------------------------
+# NWB Schema 2.9 changed ``Device.model`` from a string to a link to a
+# :py:class:`~pynwb.device.DeviceModel`. When you read a file written with an older version of the
+# schema, a string ``Device.model`` is upgraded to a :py:class:`~pynwb.device.DeviceModel` whose name
+# is the original string, so that it conforms to the latest schema. PyNWB issues a warning when this
+# upgrade happens.
+#
+# NWB object names cannot contain ``/`` or ``:``. If the legacy model string contained either
+# character (e.g., ``"MFC_200/250-0.66_40mm_MF2.5:FLT"``), the upgraded
+# :py:class:`~pynwb.device.DeviceModel` is read-only: building it for write or export raises an error,
+# because the invalid name would otherwise be interpreted as nested HDF5 groups and corrupt the file.
+#
+# The example below first synthesizes a legacy file by writing a :py:class:`~pynwb.device.Device` and
+# then adding the string ``model`` attribute directly with h5py (PyNWB cannot write a string
+# ``model`` under the current schema). It then reads the file and replaces the read-only model.
+
+import h5py
+
+from pynwb.device import DeviceModel
+
+nwbfile = NWBFile(
+    session_description="demonstrate upgrading a legacy device model",
+    identifier="NWB123",
+    session_start_time=datetime.datetime.now(datetime.timezone.utc),
+)
+nwbfile.create_device(name="my_device", description="a mass flow controller")
+
+filename = "legacy_device_model.nwb"
+with NWBHDF5IO(filename, "w") as io:
+    io.write(nwbfile)
+
+# add the legacy Device.model string attribute that schema versions before 2.9 used
+with h5py.File(filename, "r+") as f:
+    f["general/devices/my_device"].attrs["model"] = "MFC_200/250-0.66_40mm_MF2.5:FLT"
+
+###############################################################################
+# Read the file and replace the read-only model with a new
+# :py:class:`~pynwb.device.DeviceModel` that has a valid name, copying the metadata from the original
+# model. The example builds a valid name by replacing ``/`` and ``:`` with ``_``.
+#
+# The legacy file stores ``model`` as a string attribute, so it cannot be modified in place
+# (``mode="r+"``) or written to a new path with :py:meth:`~pynwb.NWBHDF5IO.write`. Use
+# :py:meth:`~pynwb.NWBHDF5IO.export` instead, and call
+# :py:meth:`~hdmf.container.AbstractContainer.set_modified` on the :py:class:`~pynwb.device.Device` so
+# that export rewrites it, dropping the legacy string attribute and writing a link to the new
+# :py:class:`~pynwb.device.DeviceModel`.
+
+with NWBHDF5IO(filename, mode="r") as read_io:
+    read_nwbfile = read_io.read()
+    device = read_nwbfile.devices["my_device"]
+    read_only_model = device.model
+
+    # build a valid name by replacing the characters that are not allowed in NWB object names
+    valid_name = read_only_model.name.replace("/", "_").replace(":", "_")
+
+    # create a new DeviceModel with a valid name, copying the metadata from the read-only model
+    new_model = DeviceModel(
+        name=valid_name,
+        manufacturer=read_only_model.manufacturer,
+        model_number=read_only_model.model_number,
+        description=read_only_model.description,
+    )
+
+    # Device.model is write-once, so clear it with fields.pop before assigning the new model
+    device.fields.pop("model")
+    device.model = new_model
+    read_nwbfile.add_device_model(new_model)
+
+    # mark the Device as modified so export rewrites it without the legacy string attribute
+    device.set_modified(True)
+
+    export_filename = "upgraded_device_model.nwb"
+    with NWBHDF5IO(export_filename, mode="w") as export_io:
+        export_io.export(src_io=read_io, nwbfile=read_nwbfile)
+
+# the exported file reads back with a valid, writable DeviceModel and no upgrade warning
+with NWBHDF5IO(export_filename, "r") as io:
+    read_nwbfile = io.read()
+    print(read_nwbfile.devices["my_device"].model)
+
+###############################################################################
 # For more information about the export functionality, see :ref:`export`
 # and the PyNWB documentation for :py:meth:`NWBHDF5IO.export <pynwb.NWBHDF5IO.export>`.
 #

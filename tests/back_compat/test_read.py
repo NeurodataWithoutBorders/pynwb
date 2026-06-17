@@ -7,6 +7,7 @@ from pynwb import NWBHDF5IO, validate, TimeSeries
 from pynwb.device import DeviceModel
 from pynwb.ecephys import ElectrodesTable
 from pynwb.image import ImageSeries
+from pynwb.io.device import DEVICE_MODEL_TUTORIAL_URL
 from pynwb.misc import FrequencyBandsTable
 from pynwb.testing import TestCase
 
@@ -187,7 +188,93 @@ class TestReadOldVersions(TestCase):
             self.assertEqual(device.model.description, 'Dichroic mirror for green indicator')
             self.assertEqual(device.model.manufacturer, '')
             self.assertEqual(device.model.model_number, None)
-    
+
+    def test_read_device_model_str_attribute_special_chars(self):
+        """Test reading and upgrading a Device.model string that contains characters not allowed in names.
+
+        A Device.model string containing '/' or ':' is remapped to a read-only DeviceModel that
+        preserves the original name. Following the process in the "Adding/Removing Containers from an
+        NWB File" tutorial (replace the read-only model with a DeviceModel that has a valid name, then
+        export) produces a file that reads back with a valid, writable DeviceModel.
+        """
+        f = Path(__file__).parent / '3.0.0_device_model_str_special_chars.nwb'
+        legacy_name = 'MFC_200/250-0.66_40mm_MF2.5:FLT'
+        valid_name = 'MFC_200_250-0.66_40mm_MF2.5_FLT'
+        with self.get_io(f) as io:
+            # the legacy string is remapped to a read-only DeviceModel, with a warning explaining
+            # that the file cannot be written or exported until the model is replaced
+            msg = (
+                'Device.model was detected as a string, but NWB 2.9 specifies Device.model as a link to a '
+                f'DeviceModel. Remapping "{legacy_name}" to a new DeviceModel. '
+                'Because the model name contains a "/" or ":", which are not allowed in NWB object names, the '
+                'remapped DeviceModel is read-only and the file cannot be written or exported until it is '
+                'replaced. To write/export the data, create a new DeviceModel with a valid name and assign it to '
+                f'Device.model. See {DEVICE_MODEL_TUTORIAL_URL} for an example.'
+            )
+            with self.assertWarnsWith(UserWarning, msg):
+                read_nwbfile = io.read()
+
+            device = read_nwbfile.devices['my_device']
+            self.assertIsInstance(device.model, DeviceModel)
+            self.assertEqual(device.model.name, legacy_name)
+
+            # replace the read-only model with one that has a valid name, copying the metadata, then
+            # export. Device.model is write-once, so clear it with fields.pop before reassigning, and
+            # mark the Device modified so export rewrites it without the legacy string attribute.
+            read_only_model = device.model
+            new_model = DeviceModel(
+                name=valid_name,
+                manufacturer=read_only_model.manufacturer,
+                model_number=read_only_model.model_number,
+                description=read_only_model.description,
+            )
+            device.fields.pop('model')
+            device.model = new_model
+            read_nwbfile.add_device_model(new_model)
+            device.set_modified(True)
+
+            with tempfile.TemporaryDirectory() as temp_dir:
+                export_file = Path(temp_dir) / "3.0.0_device_model_str_special_chars_export.nwb"
+                with NWBHDF5IO(export_file, 'w') as export_io:
+                    export_io.export(src_io=io, nwbfile=read_nwbfile)
+
+                # the exported file reads back with a valid DeviceModel and no remapping warning
+                with warnings.catch_warnings():
+                    warnings.simplefilter("error", UserWarning)
+                    with self.get_io(export_file) as read_export_io:
+                        read_export_nwbfile = read_export_io.read()
+                        model = read_export_nwbfile.devices['my_device'].model
+                        self.assertEqual(model.name, valid_name)
+                        self.assertEqual(model.description, 'a mass flow controller')
+
+    def test_export_read_only_device_model_raises(self):
+        """Exporting a read-only DeviceModel (invalid name) without replacing it raises a clear error."""
+        f = Path(__file__).parent / '3.0.0_device_model_str_special_chars.nwb'
+        legacy_name = 'MFC_200/250-0.66_40mm_MF2.5:FLT'
+        with self.get_io(f) as io:
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore", UserWarning)
+                read_nwbfile = io.read()
+
+            # force the read-only model to be built as a group on export rather than reusing the
+            # legacy string attribute from the source file
+            device = read_nwbfile.devices['my_device']
+            read_nwbfile.add_device_model(device.model)
+            device.set_modified(True)
+
+            guard_msg = (
+                f'Cannot write DeviceModel "{legacy_name}": its name contains a "/" or ":", which are not '
+                'allowed in NWB object names. This DeviceModel was likely remapped from a legacy Device.model '
+                'string when reading an older file and is read-only. To write or export the data, create a new '
+                f'DeviceModel with a valid name and assign it to Device.model. See {DEVICE_MODEL_TUTORIAL_URL} '
+                'for an example.'
+            )
+            with tempfile.TemporaryDirectory() as temp_dir:
+                export_file = Path(temp_dir) / "export_fail.nwb"
+                with NWBHDF5IO(export_file, 'w') as export_io:
+                    with self.assertRaisesWith(ValueError, guard_msg):
+                        export_io.export(src_io=io, nwbfile=read_nwbfile)
+
     def test_read_device_model_link_to_other_object(self):
         """Test that a Device.model written as a link to another object is read and remapped to a new attribute"""
         f = Path(__file__).parent / '3.0.0_optogenetics_extension.nwb'

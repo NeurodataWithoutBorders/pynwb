@@ -284,6 +284,36 @@ def _make_bands_dynamic_table():
     test_name = 'decompositionseries_bands_dynamic_table'
     _write(test_name, nwbfile)
 
+def _make_device_model_str_special_chars():
+    """Create a test file where ``Device.model`` is a string attribute containing ``/`` and ``:``.
+
+    Files written before NWB Schema 2.9 stored ``Device.model`` as a text attribute rather than a
+    link to a ``DeviceModel``. The current schema defines ``Device.model`` as a link, so PyNWB
+    cannot write such a file directly. The file is synthesized by writing a ``Device`` and then
+    adding the legacy ``model`` text attribute with h5py. The model string contains ``/`` and ``:``,
+    which are not allowed in NWB object names, so on read the string is remapped to a read-only
+    ``DeviceModel``. The file name is prefixed ``3.0.0`` to group it with the other Device.model
+    back-compatibility fixtures, even though it is synthesized rather than written by that release.
+    """
+    import h5py  # only needed to synthesize the legacy model attribute
+
+    nwbfile = NWBFile(session_description='ADDME',
+                      identifier='ADDME',
+                      session_start_time=datetime.now().astimezone())
+    nwbfile.create_device(name='my_device', description='a mass flow controller')
+
+    filename = str(Path(__file__).parent / '3.0.0_device_model_str_special_chars.nwb')
+    with NWBHDF5IO(filename, 'w') as io:
+        io.write(nwbfile)
+
+    # add the legacy Device.model text attribute that schema versions before 2.9 used
+    with h5py.File(filename, 'r+') as f:
+        device_group = f['general/devices/my_device']
+        device_group.attrs['model'] = 'MFC_200/250-0.66_40mm_MF2.5:FLT'
+
+    return filename
+
+
 if __name__ == '__main__':
     # install these versions of PyNWB and run this script to generate new files
     # python src/pynwb/testing/make_test_files.py
@@ -291,6 +321,11 @@ if __name__ == '__main__':
     # files should be moved to tests/back_compat/
 
     # NOTE: this script is run in the GitHub Actions workflow generate_test_files.yml
+
+    # _make_device_model_str_special_chars synthesizes a legacy file and requires a current PyNWB
+    # (the one being developed), not one of the old versions installed by the CI matrix.
+    if __version__.startswith(('3.', '4.')):
+        _make_device_model_str_special_chars()
 
     if __version__ == '1.1.2':
         _make_empty()
