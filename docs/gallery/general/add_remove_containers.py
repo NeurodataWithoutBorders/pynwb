@@ -224,7 +224,7 @@ with h5py.File(filename, "r+") as f:
 # model. The example builds a valid name by replacing ``/`` and ``:`` with ``_``.
 #
 # The legacy file stores ``model`` as a string attribute, so it cannot be modified in place
-# (``mode="r+"``) or written to a new path with :py:meth:`~pynwb.NWBHDF5IO.write`. Use
+# (``mode="r+"``) or written to a new path with :py:meth:`~hdmf.backends.hdf5.h5tools.HDF5IO.write`. Use
 # :py:meth:`~pynwb.NWBHDF5IO.export` instead, and call
 # :py:meth:`~hdmf.container.AbstractContainer.set_modified` on the :py:class:`~pynwb.device.Device` so
 # that export rewrites it, dropping the legacy string attribute and writing a link to the new

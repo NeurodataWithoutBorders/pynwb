@@ -168,7 +168,11 @@ extlinks = {
 
 nitpicky = True
 nitpick_ignore = [('py:class', 'Intracomm'),
-                  ('py:class', 'BaseStorageSpec')]
+                  ('py:class', 'BaseStorageSpec'),
+                  # pandas publishes ``pandas.DataFrame`` but autodoc renders the return
+                  # annotation as its qualname ``pandas.core.frame.DataFrame``, which has no
+                  # intersphinx target.
+                  ('py:class', 'pandas.core.frame.DataFrame')]
 
 linkcheck_ignore = [
     r'https://training.incf.org/*',  # temporary ignore until SSL certificate issue is resolved
