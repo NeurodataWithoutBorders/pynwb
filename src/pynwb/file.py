@@ -15,6 +15,7 @@ from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries, ProcessingModule
 from .device import Device, DeviceModel
 from .epoch import TimeIntervals
+from .event import EventsTable
 from .ecephys import ElectrodeGroup, ElectrodesTable
 from .icephys import (IntracellularElectrode, SweepTable, PatchClampSeries, IntracellularRecordingsTable,
                       SimultaneousRecordingsTable, SequentialRecordingsTable, RepetitionsTable,
@@ -251,6 +252,13 @@ class NWBFile(MultiContainerInterface, HERDManager):
             'get': 'get_time_intervals'
         },
         {
+            'attr': 'events',
+            'add': 'add_events_table',
+            'create': 'create_events_table',
+            'type': EventsTable,
+            'get': 'get_events_table'
+        },
+        {
             'attr': 'lab_meta_data',
             'add': 'add_lab_meta_data',
             'type': LabMetaData,
@@ -388,6 +396,8 @@ class NWBFile(MultiContainerInterface, HERDManager):
              'doc': 'A table containing times to be omitted from analysis', 'default': None},
             {'name': 'intervals', 'type': (list, tuple),
              'doc': 'any TimeIntervals tables storing time intervals', 'default': None},
+            {'name': 'events', 'type': (list, tuple),
+             'doc': 'EventsTable objects belonging to this NWBFile', 'default': None},
             {'name': 'units', 'type': Units,
              'doc': 'A table containing unit metadata', 'default': None},
             {'name': 'processing', 'type': (list, tuple),
@@ -455,6 +465,7 @@ class NWBFile(MultiContainerInterface, HERDManager):
             'imaging_planes',
             'ogen_sites',
             'intervals',
+            'events',
             'subject',
             'sweep_table',
             'lab_meta_data',
@@ -1076,6 +1087,29 @@ class NWBFile(MultiContainerInterface, HERDManager):
                 warn('The description argument is ignored when adding an NWBContainer, ScratchData, or '
                      'DynamicTable to scratch.')
         return self._add_scratch(data)
+
+    def merge_events_tables(self, tables: list[EventsTable]) -> pd.DataFrame:
+        """Merge a list of EventsTable objects into a single DataFrame indexed by timestamp.
+
+        Each table is converted to a DataFrame with the timestamp column as the index. A
+        ``source_events_table`` column is added to identify which table each row came from.
+        Columns present in only some tables are filled with NaN. Rows are sorted by timestamp.
+        """
+        frames = []
+        for table in tables:
+            df = table.to_dataframe().set_index("timestamp")
+            df.insert(0, "source_events_table", table.name)
+            frames.append(df)
+        return pd.concat(frames, sort=True).sort_index()
+
+    def get_all_events(self) -> pd.DataFrame:
+        """Merge all EventsTable objects in ``NWBFile.events`` into a single DataFrame indexed by timestamp.
+
+        Returns an empty DataFrame if no events tables exist.
+        """
+        if not self.events:
+            return pd.DataFrame()
+        return self.merge_events_tables(list(self.events.values()))
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of the object to get'},
             {'name': 'convert', 'type': bool, 'doc': 'return the original data, not the NWB object', 'default': True})

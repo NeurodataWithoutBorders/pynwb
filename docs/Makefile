@@ -46,7 +46,7 @@ help:
 	@echo "  apidoc     to build RST from source code"
 
 clean:
-	-rm -rf $(BUILDDIR)/* $(RSTDIR)/$(PKGNAME)*.rst $(RSTDIR)/tutorials $(GALLERYDIR)/advanced_io/*.npy $(GALLERYDIR)/advanced_io/*.nwb
+	-rm -rf $(BUILDDIR)/* $(RSTDIR)/$(PKGNAME)*.rst $(RSTDIR)/tutorials $(RSTDIR)/sg_execution_times.rst $(GALLERYDIR)/advanced_io/*.npy $(GALLERYDIR)/advanced_io/*.nwb
 
 html:
 	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(BUILDDIR)/html

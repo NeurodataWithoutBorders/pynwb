@@ -4,8 +4,8 @@ oaklib==0.6.23
 
 # for streaming tests
 fsspec==2025.5.1
-requests==2.32.4
-aiohttp==3.13.3
+requests==2.33.0
+aiohttp==3.14.1
 
 # For read_nwb tests
 hdmf-zarr

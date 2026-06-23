@@ -65,7 +65,6 @@ serves as the base class for all other :py:class:`~pynwb.base.TimeSeries` types,
     * **Others:** :py:class:`~pynwb.ogen.OptogeneticSeries`,
       :py:class:`~pynwb.behavior.SpatialSeries`,
       :py:class:`~pynwb.misc.DecompositionSeries`,
-      :py:class:`~pynwb.misc.AnnotationSeries`,
       :py:class:`~pynwb.misc.AbstractFeatureSeries`,
       :py:class:`~pynwb.misc.IntervalSeries`.
 
@@ -83,12 +82,13 @@ often hold data of different processing/analysis data types.
     For your reference, NWB defines the following main processing/analysis data types:
 
     * **Behavior:** :py:class:`~pynwb.behavior.BehavioralEpochs`,
-      :py:class:`~pynwb.behavior.BehavioralEvents`,
       :py:class:`~pynwb.behavior.BehavioralTimeSeries`,
       :py:class:`~pynwb.behavior.CompassDirection`,
       :py:class:`~pynwb.behavior.PupilTracking`,
       :py:class:`~pynwb.behavior.Position`,
       :py:class:`~pynwb.behavior.EyeTracking`.
+
+    * **Events:** :py:class:`~pynwb.event.EventsTable`.
 
     * **Extracellular electrophysiology:** :py:class:`~pynwb.ecephys.EventDetection`,
       :py:class:`~pynwb.ecephys.FeatureExtraction`,
@@ -126,10 +126,12 @@ from uuid import uuid4
 import numpy as np
 from dateutil import tz
 
+from hdmf.common import MeaningsTable
+
 from pynwb import NWBHDF5IO, NWBFile, TimeSeries
 from pynwb.behavior import Position, SpatialSeries
+from pynwb.event import EventsTable
 from pynwb.file import Subject
-from pynwb.misc import AnnotationSeries
 
 ####################
 # .. _basics_nwbfile:
@@ -289,24 +291,41 @@ nwbfile.get_acquisition("test_timeseries")
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^
 #
 # As mentioned previously, there are many subtypes of :py:class:`~pynwb.base.TimeSeries` that are used to store
-# different kinds of data. One example is :py:class:`~pynwb.misc.AnnotationSeries`, a subclass of 
-# :py:class:`~pynwb.base.TimeSeries` that stores text-based records about the experiment. Similarly to our
-# :py:class:`~pynwb.base.TimeSeries` example above, we can create an :py:class:`~pynwb.misc.AnnotationSeries` 
-# object with text information about a stimulus and add it to the stimulus group in 
-# the :py:class:`~pynwb.file.NWBFile`. 
+# different kinds of data. The approach of creating a :py:class:`~pynwb.base.TimeSeries` object and adding it
+# to the appropriate :py:class:`~pynwb.file.NWBFile` group can be used for all subtypes of
+# :py:class:`~pynwb.base.TimeSeries` data.
+#
+# For storing events with annotations (e.g., behaviors scored from video), use
+# :py:class:`~pynwb.event.EventsTable` in ``NWBFile.events``. The required ``timestamp``
+# column stores the time of each event in seconds from the session start time. The
+# optional built-in ``duration`` column stores the length of each event in seconds, and
+# the optional built-in ``annotation`` column can be used to store a text label for each
+# event.
 
-annotations = AnnotationSeries(
-    name='airpuffs',
-    data=['Left Airpuff', 'Right Airpuff', 'Right Airpuff'],
-    description='Airpuff events delivered to the animal',
-    timestamps=[1.0, 3.0, 8.0],
+behavior_events = EventsTable(
+    name="scored_behaviors",
+    description="Behaviors of the animal scored from video recordings.",
 )
-
-nwbfile.add_stimulus(annotations)
+behavior_events.add_event(timestamp=10.2, duration=1.4, annotation="grooming")
+behavior_events.add_event(timestamp=18.7, duration=0.6, annotation="rearing")
+behavior_events.add_event(timestamp=25.0, duration=2.1, annotation="grooming")
 
 ####################
-# This approach of creating a :py:class:`~pynwb.base.TimeSeries` object and adding it to the appropriate 
-# :py:class:`~pynwb.file.NWBFile` group can be used for all subtypes of :py:class:`~pynwb.base.TimeSeries` data.
+# To define what each value in the ``annotation`` column means, attach an optional
+# :py:class:`~hdmf.common.table.MeaningsTable` to the :py:class:`~pynwb.event.EventsTable`.
+# The ``MeaningsTable`` is named ``{column_name}_meanings`` automatically and should
+# include one row per possible value of the target column, even if the value does not
+# appear in the data.
+
+annotation_meanings = MeaningsTable(
+    target=behavior_events["annotation"],
+    description="Meanings of the values in the 'annotation' column.",
+)
+annotation_meanings.add_row(value="grooming", meaning="Self-grooming with the forepaws.")
+annotation_meanings.add_row(value="rearing", meaning="Rearing up on the hind legs.")
+behavior_events.add_meanings_table(annotation_meanings)
+
+nwbfile.add_events_table(behavior_events)
 
 ####################
 # .. _basic_spatialseries:

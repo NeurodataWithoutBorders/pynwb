@@ -344,6 +344,14 @@ for n_units_per_shank in range(n_units):
     # custom column data, e.g., quality, are specified with keyword arguments to `add_unit`
     nwbfile.add_unit(spike_times=spike_times, quality="good")
 
+####################
+# The ``resolution`` field on the :py:class:`~pynwb.misc.Units` table documents the precision of spike timing
+# data, typically ``1 / sampling_rate`` of the acquisition system (i.e., the smallest measurable difference
+# between two spike times, in seconds). Setting it helps downstream users judge whether fine-timescale
+# analyses are appropriate for the dataset.
+
+nwbfile.units.resolution = 1 / res  # resolution in seconds (1 / sampling rate)
+
 #######################
 # The :py:class:`~pynwb.misc.Units` table can also be converted to a pandas :py:class:`~pandas.DataFrame`.
 #
