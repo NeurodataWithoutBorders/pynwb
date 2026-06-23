@@ -28,6 +28,28 @@ class TestImageSeriesIO(AcquisitionH5IOMixin, TestCase):
         super().addContainer(nwbfile)
 
 
+class TestImageSeriesWithNumSamplesIO(AcquisitionH5IOMixin, TestCase):
+    """Roundtrip test for ImageSeries with num_samples (external file + rate timing)."""
+
+    def setUpContainer(self):
+        self.dev1 = Device(name='dev1')
+        iS = ImageSeries(
+            name='test_iS_num_samples',
+            unit='Frames',
+            external_file=['external_file'],
+            starting_frame=[0],
+            format='external',
+            rate=30.0,
+            num_samples=900,
+            device=self.dev1,
+        )
+        return iS
+
+    def addContainer(self, nwbfile):
+        nwbfile.add_device(self.dev1)
+        super().addContainer(nwbfile)
+
+
 class TestIndexSeriesIO(AcquisitionH5IOMixin, TestCase):
 
     def setUpContainer(self):

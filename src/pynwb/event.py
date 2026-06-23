@@ -68,10 +68,14 @@ class DurationVectorData(VectorData):
 
 @register_class('EventsTable', CORE_NAMESPACE)
 class EventsTable(DynamicTable):
-    """
-    A column-based table to store information about events (event instances), one
-    event per row. Additional columns may be added to store metadata about each event,
-    such as the duration of the event.
+    """A column-based table to store information about events, one event per row.
+
+    Use EventsTable when each row is anchored at a single timestamp and duration is absent, optional, or
+    mixed across rows. Additional columns may be added to store metadata about each event, such as the
+    duration of the event. Examples include TTL pulses, licks, rewards, stimulus onsets, and detected
+    ripples. Each EventsTable should hold events of a single type, so that all rows share the same set
+    of per-event metadata columns. Events of different types (e.g., licks and stimulus presentations)
+    should be stored in separate EventsTable instances.
     """
 
     __columns__ = (
@@ -82,19 +86,24 @@ class EventsTable(DynamicTable):
         {'name': 'annotation', 'description': 'User annotations about events.'},
     )
 
-    # The override exists to give EventsTable an explicit, narrowed docval signature
-    # (required name/description, AllowPositional.ERROR, and a curated subset of
-    # DynamicTable kwargs) rather than to add init-time logic.
     @docval(
         {'name': 'name', 'type': str, 'doc': 'Name of this EventsTable'},
         {'name': 'description', 'type': str,
          'doc': ('A description of the events stored in the table, including information about '
                  'how the event times were computed.')},
+        {'name': 'source_description', 'type': str,
+         'doc': ('Optional short text description of where the events came from, applying to every row '
+                 'in the table. For example, "Acquisition system" for events emitted directly by the '
+                 'acquisition system, "Thresholding of analog signal ANALOG1 at 3 V" for events produced '
+                 'by a detection algorithm, or "Manual video review" for events added by a human annotator.'),
+         'default': None},
         *get_docval(DynamicTable.__init__, 'id', 'columns', 'colnames', 'target_tables', 'meanings_tables'),
         allow_positional=AllowPositional.ERROR,
     )
     def __init__(self, **kwargs):
+        source_description = kwargs.pop('source_description')
         super().__init__(**kwargs)
+        self.source_description = source_description
 
     @docval(
         {'name': 'timestamp', 'type': float,

@@ -174,9 +174,11 @@ nwbfile.add_acquisition(behavior_images)
 # Either ``external_file`` or ``data`` must be specified, but not both.
 #
 # If the sampling rate is constant, use :py:attr:`~pynwb.base.TimeSeries.rate` and
-# :py:attr:`~pynwb.base.TimeSeries.starting_time` to specify time.
+# :py:attr:`~pynwb.base.TimeSeries.starting_time` to specify time. When using ``rate``, you must also set
+# :py:attr:`~pynwb.image.ImageSeries.num_samples` to the total number of frames across all external files,
+# because the data array is empty and its length cannot be used to determine the frame count.
 # For irregularly sampled recordings, use :py:attr:`~pynwb.base.TimeSeries.timestamps` to specify time for each sample
-# image.
+# image. When using ``timestamps``, ``num_samples`` is not required because ``len(timestamps)`` serves this purpose.
 #
 # Each external image may contain one or more consecutive frames of the full :py:class:`~pynwb.image.ImageSeries`.
 # The :py:attr:`~pynwb.image.ImageSeries.starting_frame` attribute serves as an index to indicate which frame

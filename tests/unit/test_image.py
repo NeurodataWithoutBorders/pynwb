@@ -121,7 +121,7 @@ class ImageSeriesConstructor(TestCase):
         obj._in_construct_mode = False
 
     def test_dimension_warning_external_file_with_rate(self):
-        """Test that a warning is not raised when external file is used with rate."""
+        """Test that no warnings are raised when external file is used with rate and num_samples."""
         with warnings.catch_warnings(record=True) as w:
             ImageSeries(
                 name='test_iS',
@@ -130,6 +130,7 @@ class ImageSeriesConstructor(TestCase):
                 unit='Frames',
                 starting_frame=[0],
                 rate=0.2,
+                num_samples=10,
             )
             self.assertEqual(w, [])
 
@@ -195,18 +196,20 @@ class ImageSeriesConstructor(TestCase):
                 unit="n.a.",
                 starting_frame=[0, 15, 30],
                 rate=0.2,
+                num_samples=30,
             )
             self.assertEqual(w, [])
 
     def test_external_file_with_default_starting_frame(self):
         """Test that starting_frame is set to [0] if not provided, when external_file is has length 1."""
         iS = ImageSeries(
-                name="test_iS",
-                external_file=["external_file"],
-                format="external",
-                unit="n.a.",
-                starting_frame=None,
-                rate=0.2,
+            name="test_iS",
+            external_file=["external_file"],
+            format="external",
+            unit="n.a.",
+            starting_frame=None,
+            rate=0.2,
+            num_samples=10,
         )
         self.assertEqual(iS.starting_frame, [0])
 
@@ -250,12 +253,15 @@ class ImageSeriesConstructor(TestCase):
     def test_external_file_default_format(self):
         """Test that format is set to 'external' if not provided, when external_file is provided."""
 
-        kwargs = dict(name="test_iS",
-                external_file=["external_file", "external_file2"],
-                unit="n.a.",
-                starting_frame=[0, 10],
-                rate=0.2,)
-        
+        kwargs = dict(
+            name="test_iS",
+            external_file=["external_file", "external_file2"],
+            unit="n.a.",
+            starting_frame=[0, 10],
+            rate=0.2,
+            num_samples=20,
+        )
+
         iS = ImageSeries(**kwargs)
         self.assertEqual(iS.format, "external")
 
@@ -270,6 +276,7 @@ class ImageSeriesConstructor(TestCase):
                 unit="n.a.",
                 starting_frame=[0],
                 rate=0.2,
+                num_samples=10,
             )
             self.assertEqual(w, [])
 
@@ -312,6 +319,74 @@ class ImageSeriesConstructor(TestCase):
                 rate=0.2,
             )
 
+    def test_num_samples(self):
+        """Test that num_samples can be set on an external-file ImageSeries."""
+        iS = ImageSeries(
+            name='test_iS',
+            external_file=['external_file'],
+            format='external',
+            unit='Frames',
+            starting_frame=[0],
+            rate=30.0,
+            num_samples=900,
+        )
+        self.assertEqual(iS.num_samples, 900)
+
+    def test_num_samples_error_missing_with_rate(self):
+        """Test that a ValueError is raised when external_file + rate is used without num_samples."""
+        msg = (
+            "ImageSeries 'test_iS': num_samples should be set when format='external' and rate is used "
+            "for timing, because data is empty and its length cannot be used to determine the number of frames."
+        )
+        with self.assertRaisesWith(ValueError, msg):
+            ImageSeries(
+                name='test_iS',
+                external_file=['external_file'],
+                format='external',
+                unit='Frames',
+                starting_frame=[0],
+                rate=30.0,
+            )
+
+    def test_num_samples_not_required_with_timestamps(self):
+        """Test that num_samples is not required when timestamps are provided."""
+        with warnings.catch_warnings(record=True) as w:
+            warnings.simplefilter("always")
+            ImageSeries(
+                name='test_iS',
+                external_file=['external_file'],
+                format='external',
+                unit='Frames',
+                starting_frame=[0],
+                timestamps=[1.0, 2.0, 3.0],
+            )
+        num_samples_warnings = [x for x in w if 'num_samples' in str(x.message)]
+        self.assertEqual(num_samples_warnings, [])
+
+    def test_num_samples_missing_with_rate_construct_mode(self):
+        """Test that no error or warning is raised in construct mode when num_samples is absent.
+
+        Old files written without num_samples should be readable without any complaints.
+        """
+        obj = ImageSeries.__new__(
+            ImageSeries,
+            container_source=None,
+            parent=None,
+            object_id="test",
+            in_construct_mode=True,
+        )
+        with warnings.catch_warnings(record=True) as w:
+            warnings.simplefilter("always")
+            obj.__init__(
+                name='test_iS',
+                external_file=['external_file'],
+                format='external',
+                unit='Frames',
+                starting_frame=[0],
+                rate=30.0,
+            )
+        num_samples_warnings = [x for x in w if 'num_samples' in str(x.message)]
+        self.assertEqual(num_samples_warnings, [])
 
     def test_bits_per_pixel_deprecation(self):
         """Test that bits_per_pixel can be set and that a deprecated warning is raised."""
