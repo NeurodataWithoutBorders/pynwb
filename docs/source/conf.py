@@ -75,9 +75,9 @@ class CustomSphinxGallerySectionSortKey(ExampleTitleSortKey):
     """
     # Define a partial ordered list of galleries for all subsections. Galleries not
     # listed here will be added in alphabetical order based on title after the
-    # explicitly listed galleries
+    # explicitly listed galleries and before the galleries pinned to the end
     GALLERY_ORDER = {
-        'general': ['plot_file.py', 'plot_external_resources.py'],
+        'general': ['plot_file.py'],
         # Sort domain-specific tutorials based on domain to group tutorials belonging to the same domain
         'domain': [
             "ecephys.py",
@@ -89,6 +89,11 @@ class CustomSphinxGallerySectionSortKey(ExampleTitleSortKey):
             "images.py",
         ],
         'advanced_io': []
+    }
+
+    # Galleries pinned to the end of their subsection, after the alphabetically sorted galleries
+    GALLERY_ORDER_END = {
+        'general': ['plot_external_resources.py', 'resources_streaming.py'],
     }
 
     def __call__(self, filename):
@@ -104,9 +109,15 @@ class CustomSphinxGallerySectionSortKey(ExampleTitleSortKey):
 
         # Get the ordered list of gallery files for the current source dir
         explicit_order = self.GALLERY_ORDER.get(os.path.basename(self.src_dir), [])
+        end_order = self.GALLERY_ORDER_END.get(os.path.basename(self.src_dir), [])
         # If the file is in the explicit order then return its index
         if filename in explicit_order:
             sort_index = explicit_order.index(filename)
+        # If the file is pinned to the end, place it after the alphabetically sorted galleries.
+        # The alphabetical score below is always less than 1, so adding 1 to the base offset
+        # guarantees these galleries come last, in the order listed.
+        elif filename in end_order:
+            sort_index = len(explicit_order) + 1 + end_order.index(filename)
         # Else sort alphabetically based on the title by computing a corresponding
         # floating point index based on the characters of the titles
         else:
