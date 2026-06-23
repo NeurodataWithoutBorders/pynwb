@@ -3,6 +3,7 @@
 ## PyNWB 4.0.0 (Upcoming)
 
 ### Documentation and tutorial enhancements
+- Added a tutorial on using HERD to annotate an NWB file with external resources and store it at `/general/external_resources`, plus a companion example showing how to annotate multiple NWB files streamed from a DANDI dandiset with a single HERD. @rly, @mavaylon1 [#2200](https://github.com/NeurodataWithoutBorders/pynwb/pull/2200)
 - Added `app.readthedocs.org/projects/pynwb/*` to `linkcheck_ignore` to stop the Sphinx linkcheck CI job from intermittently failing when GitHub Actions runners get throttled by readthedocs. @h-mayorquin [#2191](https://github.com/NeurodataWithoutBorders/pynwb/pull/2191)
 - Added documentation for `ExternalImage` to the images tutorial. @h-mayorquin [#2159](https://github.com/NeurodataWithoutBorders/pynwb/pull/2159)
 - Fixed broken and redirecting links in documentation. @bendichter [#2165](https://github.com/NeurodataWithoutBorders/pynwb/pull/2165)

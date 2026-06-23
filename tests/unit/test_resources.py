@@ -1,6 +1,5 @@
 import os
 import tempfile
-import warnings
 from datetime import datetime
 from uuid import uuid4
 
@@ -52,14 +51,8 @@ class TestNWBContainer(TestCase):
         """
         Test constructor
         """
-        with warnings.catch_warnings(record=True):
-            warnings.filterwarnings(
-                "ignore",
-                message=r"HERD is experimental .*",
-                category=UserWarning,
-            )
-            er = HERD()
-            self.assertIsInstance(er, HERD)
+        er = HERD()
+        self.assertIsInstance(er, HERD)
 
     def test_nwbfile_init_herd(self):
         session_start_time = datetime(2018, 4, 25, 2, 30, 3, tzinfo=tz.gettz("US/Pacific"))
