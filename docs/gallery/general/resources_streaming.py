@@ -71,7 +71,7 @@ fs = CachingFileSystem(fs=filesystem("http"), cache_storage="nwb-cache")
 herd = HERD()
 for url in tqdm(urls):
     with fs.open(url, "rb") as f, h5py.File(f) as h5_file:
-        with NWBHDF5IO(file=h5_file, load_namespaces=True) as io:
+        with NWBHDF5IO(file=h5_file) as io:
             read_nwbfile = io.read()
 
             # reference the subject species
@@ -130,7 +130,7 @@ herd.to_zip(path="./dandiset_resources.zip")
 loaded_herd = HERD.from_zip(path="./dandiset_resources.zip")
 
 with fs.open(urls[0], "rb") as f, h5py.File(f) as h5_file:
-    with NWBHDF5IO(file=h5_file, load_namespaces=True) as io:
+    with NWBHDF5IO(file=h5_file) as io:
         read_nwbfile = io.read()
         institution = read_nwbfile.institution  # "Janelia Research Campus"
         loaded_herd.add_ref(
@@ -143,3 +143,10 @@ with fs.open(urls[0], "rb") as f, h5py.File(f) as h5_file:
         )
 
 loaded_herd.to_dataframe()
+
+###############################################################################
+# To view the annotations for a single object, use
+# :py:meth:`~hdmf.common.resources.HERD.get_object_entities`. Here we view the species annotation
+# stored for the subject of the file we just streamed:
+
+loaded_herd.get_object_entities(container=read_nwbfile.subject)
