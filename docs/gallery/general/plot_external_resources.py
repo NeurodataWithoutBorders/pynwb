@@ -25,7 +25,6 @@ and compound-data references), see the
 `HDMF HERD tutorial <https://hdmf.readthedocs.io/en/stable/tutorials/plot_external_resources.html>`_.
 """
 
-# sphinx_gallery_thumbnail_path = 'figures/gallery_thumbnails_external_resources.png'
 import os
 from datetime import datetime
 from uuid import uuid4

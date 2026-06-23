@@ -29,7 +29,6 @@ For storing a HERD inside a single NWB file at ``/general/external_resources``, 
       pip install dandi fsspec aiohttp requests
 """
 
-# sphinx_gallery_thumbnail_path = 'figures/gallery_thumbnails_external_resources.png'
 import h5py
 from dandi.dandiapi import DandiAPIClient
 from fsspec import filesystem
