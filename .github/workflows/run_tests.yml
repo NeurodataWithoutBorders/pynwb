@@ -244,7 +244,7 @@ jobs:
 
       - name: Install run dependencies
         run: |
-          pip install --group docs ".[all]"
+          pip install --group docs .
           pip list
 
       - name: Conda reporting

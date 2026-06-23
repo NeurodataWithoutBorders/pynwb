@@ -53,7 +53,7 @@ jobs:
 
       - name: Install optional dependencies
         if: ${{ matrix.opt_req }}
-        run: python -m pip install --group test ".[all]"
+        run: python -m pip install --group test --group optional .
 
       - name: Install package
         run: |

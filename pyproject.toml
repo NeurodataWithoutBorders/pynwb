@@ -43,25 +43,7 @@ dependencies = [
 dynamic = ["version"] # the build backend will compute the version dynamically from git tag (or a __version__)
 
 [project.optional-dependencies]
-termset = [
-    "linkml-runtime>=1.5.5",
-    "schemasheets>=0.4.0",
-    "oaklib>=0.5.12",
-    "pyyaml>=6.0.1",
-]
-zarr = [
-    "zarr>=2.12.0,<3",
-    "numcodecs<0.16.0",  # numcodecs 0.16.0 is not compatible with zarr<3
-    "hdmf-zarr>=0.11.0",
-]
-stream = [
-    "fsspec",
-    "requests",
-    "aiohttp",
-]
-
-# all runtime optional dependencies
-all = ["pynwb[termset,zarr,stream]"]
+# Add optional dependencies here
 
 [dependency-groups]
 # development dependencies
@@ -73,6 +55,19 @@ test = [
     "python-dateutil",
     "ruff",
     "tox",
+]
+
+# optional feature dependencies exercised by the optional test and gallery environments
+optional = [
+    "linkml-runtime>=1.5.5",
+    "schemasheets>=0.4.0",
+    "oaklib>=0.5.12",
+    "fsspec",
+    "requests",
+    "aiohttp",
+    "hdmf-zarr>=0.11.0",
+    "zarr>=2.12.0,<3",
+    "numcodecs<0.16.0",  # numcodecs 0.16.0 is not compatible with zarr<3
 ]
 
 # documentation dependencies
@@ -88,6 +83,7 @@ docs = [
     "hdf5plugin",
     "dandi>=0.46.6",
     "pooch",
+    {include-group = "optional"},
 ]
 
 [project.urls]
