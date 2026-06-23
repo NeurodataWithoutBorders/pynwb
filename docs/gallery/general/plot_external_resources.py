@@ -156,6 +156,15 @@ read_herd.keys.to_dataframe()
 read_herd.entities.to_dataframe()
 
 ###############################################################################
+# :py:meth:`~hdmf.common.resources.HERD.get_object_entities` returns the entities annotated on a
+# single object as a :py:class:`~pandas.DataFrame`. On a HERD read back from a file this accessor
+# currently requires the fix for
+# `hdmf #1496 <https://github.com/hdmf-dev/hdmf/issues/1496>`_, which will be resolved soon, so it is
+# shown here commented out:
+
+# read_herd.get_object_entities(container=read_nwbfile.subject)
+
+###############################################################################
 # Close the file once you are done reading from it.
 
 read_io.close()
