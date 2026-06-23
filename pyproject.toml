@@ -57,17 +57,19 @@ test = [
     "tox",
 ]
 
-# optional feature dependencies exercised by the optional test and gallery environments
+# optional feature dependencies exercised by the optional test and gallery environments.
+# all dependencies have a lower bound so that the "minimum" tox envs (uv --resolution
+# lowest-direct) resolve to sensible versions rather than the oldest release on PyPI.
 optional = [
     "linkml-runtime>=1.5.5",
     "schemasheets>=0.4.0",
     "oaklib>=0.5.12",
-    "fsspec",
-    "requests",
-    "aiohttp",
+    "fsspec>=2023.1.0",
+    "requests>=2.28.0",
+    "aiohttp>=3.8.3",
     "hdmf-zarr>=0.11.0",
     "zarr>=2.12.0,<3",
-    "numcodecs<0.16.0",  # numcodecs 0.16.0 is not compatible with zarr<3
+    "numcodecs>=0.10.0,<0.16.0",  # numcodecs 0.16.0 is not compatible with zarr<3
 ]
 
 # documentation dependencies
@@ -77,12 +79,12 @@ docs = [
     "sphinx_rtd_theme>=1",  # <1 does not work with docutils>=0.17
     "sphinx-gallery>=0.16",
     "sphinx-copybutton>=0.5",
-    "Pillow",
-    "dataframe_image",  # used to render large dataframe as image in the sphinx gallery to improve html display
-    "lxml",  # used by dataframe_image when using the matplotlib backend
-    "hdf5plugin",
+    "Pillow>=10.0.0",
+    "dataframe_image>=0.2.3",  # used to render large dataframe as image in the sphinx gallery to improve html display
+    "lxml>=4.9.3",  # used by dataframe_image when using the matplotlib backend
+    "hdf5plugin>=4.0.0",
     "dandi>=0.46.6",
-    "pooch",
+    "pooch>=1.6.0",
     {include-group = "optional"},
 ]
 
