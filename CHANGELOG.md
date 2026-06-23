@@ -3,6 +3,7 @@
 ## PyNWB 4.0.0 (Upcoming)
 
 ### Documentation and tutorial enhancements
+- Added a guide on choosing `entity_id` and `entity_uri` when adding HERD external resource references, recommending CURIEs registered with [bioregistry.io](https://bioregistry.io) (e.g. `NCBITaxon`, `ROR`, `ORCID`, `UBERON`, `MBA`, `HBA`, `DANDI`) and documenting how to handle resources whose terms have no individually resolvable URL. @bendichter
 - Added `app.readthedocs.org/projects/pynwb/*` to `linkcheck_ignore` to stop the Sphinx linkcheck CI job from intermittently failing when GitHub Actions runners get throttled by readthedocs. @h-mayorquin [#2191](https://github.com/NeurodataWithoutBorders/pynwb/pull/2191)
 - Added documentation for `ExternalImage` to the images tutorial. @h-mayorquin [#2159](https://github.com/NeurodataWithoutBorders/pynwb/pull/2159)
 - Fixed broken and redirecting links in documentation. @bendichter [#2165](https://github.com/NeurodataWithoutBorders/pynwb/pull/2165)

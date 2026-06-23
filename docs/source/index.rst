@@ -59,6 +59,7 @@ breaking down the barriers to data sharing in neuroscience.
 
    validation
    export
+   external_resources_entity_guide
    api_docs
 
 .. toctree::
