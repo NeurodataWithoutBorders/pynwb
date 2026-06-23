@@ -43,38 +43,46 @@ the canonical URL the example ``entity_id`` resolves to.
 
 .. list-table::
    :header-rows: 1
-   :widths: 12 26 26 36
+   :widths: 10 16 22 20 32
 
    * - Prefix
      - Use for
+     - Common NWB field(s)
      - Example ``entity_id``
      - Example ``entity_uri``
    * - ``NCBITaxon``
      - Species
+     - ``Subject.species``
      - ``NCBITaxon:10090``
      - ``http://purl.obolibrary.org/obo/NCBITaxon_10090``
    * - ``ROR``
      - Organizations / institutions
+     - ``NWBFile.institution``
      - ``ROR:013meh722``
      - ``https://ror.org/013meh722``
    * - ``ORCID``
      - People (researchers)
+     - ``NWBFile.experimenter``
      - ``ORCID:0000-0002-1825-0097``
      - ``https://orcid.org/0000-0002-1825-0097``
    * - ``UBERON``
      - Brain regions (cross-species)
+     - ``ElectrodeGroup.location``, ``ImagingPlane.location``, ``electrodes`` ``location`` column
      - ``UBERON:0001950``
      - ``http://purl.obolibrary.org/obo/UBERON_0001950``
    * - ``MBA``
      - Brain regions (Allen Mouse Brain Atlas)
+     - ``ElectrodeGroup.location``, ``ImagingPlane.location``, ``electrodes`` ``location`` column
      - ``MBA:385``
      - ``https://purl.brain-bican.org/ontology/mbao/MBA_385``
    * - ``HBA``
      - Brain regions (Allen Human Brain Atlas)
+     - ``ElectrodeGroup.location``, ``ImagingPlane.location``, ``electrodes`` ``location`` column
      - ``HBA:4005``
      - ``https://purl.brain-bican.org/ontology/hbao/HBA_4005``
    * - ``DANDI``
      - Dandisets
+     - (identifies the dataset as a whole)
      - ``DANDI:000015``
      - ``https://dandiarchive.org/dandiset/000015``
 
