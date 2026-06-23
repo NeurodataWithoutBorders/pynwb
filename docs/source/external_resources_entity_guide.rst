@@ -67,17 +67,17 @@ the canonical URL the example ``entity_id`` resolves to.
      - ``https://orcid.org/0000-0002-1825-0097``
    * - ``UBERON``
      - Brain regions (cross-species)
-     - ``ElectrodeGroup.location``, ``ImagingPlane.location``, ``electrodes`` ``location`` column
+     - Brain-region location fields [#loc]_
      - ``UBERON:0001950``
      - ``http://purl.obolibrary.org/obo/UBERON_0001950``
    * - ``MBA``
      - Brain regions (Allen Mouse Brain Atlas)
-     - ``ElectrodeGroup.location``, ``ImagingPlane.location``, ``electrodes`` ``location`` column
+     - Brain-region location fields [#loc]_
      - ``MBA:385``
      - ``https://purl.brain-bican.org/ontology/mbao/MBA_385``
    * - ``HBA``
      - Brain regions (Allen Human Brain Atlas)
-     - ``ElectrodeGroup.location``, ``ImagingPlane.location``, ``electrodes`` ``location`` column
+     - Brain-region location fields [#loc]_
      - ``HBA:4005``
      - ``https://purl.brain-bican.org/ontology/hbao/HBA_4005``
    * - ``DANDI``
@@ -85,6 +85,9 @@ the canonical URL the example ``entity_id`` resolves to.
      - (identifies the dataset as a whole)
      - ``DANDI:000015``
      - ``https://dandiarchive.org/dandiset/000015``
+
+.. [#loc] Brain-region annotations commonly apply to ``ElectrodeGroup.location``,
+   ``ImagingPlane.location``, and the ``location`` column of the ``electrodes`` table.
 
 Example
 -------
