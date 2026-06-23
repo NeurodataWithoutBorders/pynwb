@@ -150,3 +150,9 @@ loaded_herd.to_dataframe()
 # stored for the subject of the file we just streamed:
 
 loaded_herd.get_object_entities(container=read_nwbfile.subject)
+
+###############################################################################
+# Save the updated HERD as a new zip archive so the added institution annotation is persisted
+# alongside the original references.
+
+loaded_herd.to_zip(path="./dandiset_resources_updated.zip")
