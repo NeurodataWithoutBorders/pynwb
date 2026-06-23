@@ -16,8 +16,7 @@ experimenter (mapped to an `ORCID <https://orcid.org/>`_ iD). Because a HERD can
 independently of any one file with :py:meth:`~hdmf.common.resources.HERD.to_zip`, the resulting
 HERD can be distributed alongside the dandiset as a standalone annotation layer.
 
-For storing a HERD inside a single NWB file at ``/general/external_resources``, see
-:ref:`external_resources`.
+For storing a HERD inside a single NWB file, see :ref:`external_resources`.
 
 .. note::
 
