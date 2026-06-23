@@ -1,8 +1,8 @@
 """
 .. _external_resources:
 
-HERD: Annotating an NWB File with External Resources
-====================================================
+Linking to External Resources (HERD)
+====================================
 
 The :py:class:`~pynwb.resources.HERD` (HDMF External Resources Data Structure) class lets you map
 terms used in your data to entities defined in external, web-accessible resources such as
@@ -25,6 +25,7 @@ and compound-data references), see the
 `HDMF HERD tutorial <https://hdmf.readthedocs.io/en/stable/tutorials/plot_external_resources.html>`_.
 """
 
+# sphinx_gallery_thumbnail_path = 'figures/gallery_thumbnails_external_resources.png'
 import os
 from datetime import datetime
 from uuid import uuid4
