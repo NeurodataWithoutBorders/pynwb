@@ -76,7 +76,7 @@ for url in tqdm(urls):
 
             # reference the subject species
             species = read_nwbfile.subject.species  # "Mus musculus"
-            entity = herd.get_entity(entity_id="NCBI_TAXON:10090")
+            entity = herd.get_entity(entity_id="NCBITAXON:10090")
             if entity is not None:
                 # the entity is already in the HERD, so reuse it and keep its existing URI
                 entity_uri = None
