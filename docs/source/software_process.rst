@@ -46,12 +46,13 @@ running PyNWB. As a library, upper bound version constraints create more harm th
 Testing Requirements
 --------------------
 
-Development and testing dependencies are declared as `PEP 735 <https://peps.python.org/pep-0735/>`_
-``[dependency-groups]`` in :pynwb:`pyproject.toml <blob/dev/pyproject.toml>`: ``test`` (test and lint tooling),
-``optional`` (optional feature dependencies exercised by the optional test and gallery environments), and ``docs``
-(documentation dependencies, which include the ``optional`` group).
+Dependencies are declared in :pynwb:`pyproject.toml <blob/dev/pyproject.toml>`. User-facing optional features are
+``[project.optional-dependencies]`` extras (``zarr`` and ``termset``, installable with e.g.
+``pip install pynwb[zarr]``). Development dependencies are `PEP 735 <https://peps.python.org/pep-0735/>`_
+``[dependency-groups]``: ``test`` (test and lint tooling), ``stream`` (streaming dependencies for the optional
+tests), and ``docs`` (documentation dependencies).
 
-``tox`` selects these via the ``dependency_groups`` setting in :pynwb:`tox.ini <blob/dev/tox.ini>`.
+``tox`` selects these via the ``extras`` and ``dependency_groups`` settings in :pynwb:`tox.ini <blob/dev/tox.ini>`.
 The ``upgraded`` environments install the latest compatible dependencies, while the ``minimum`` environments use
 ``uv pip install --resolution lowest-direct`` to install the lowest compatible versions of the direct dependencies.
 
@@ -63,8 +64,8 @@ Documentation Requirements
 --------------------------
 
 The documentation dependencies are declared in the ``docs`` dependency group in
-:pynwb:`pyproject.toml <blob/dev/pyproject.toml>`, which includes the ``optional`` group so the gallery examples
-can run. ReadTheDocs_ installs them with ``pip install --group docs .``.
+:pynwb:`pyproject.toml <blob/dev/pyproject.toml>`. ReadTheDocs_ installs them together with the ``zarr`` and
+``termset`` feature extras (``pip install --group docs ".[zarr,termset]"``) so the gallery examples can run.
 
 .. _ReadTheDocs: https://app.readthedocs.org/projects/pynwb/
 

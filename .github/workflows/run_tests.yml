@@ -220,7 +220,7 @@ jobs:
 
       - name: Install run dependencies
         run: |
-          pip install --group docs .
+          pip install --group docs ".[zarr,termset]"
           pip list
 
       - name: Conda reporting

@@ -51,7 +51,7 @@ jobs:
 
       - name: Install optional dependencies
         if: ${{ matrix.opt_req }}
-        run: python -m pip install --group test --group optional .
+        run: python -m pip install --group test --group stream ".[zarr,termset]"
 
       - name: Install package
         run: |
