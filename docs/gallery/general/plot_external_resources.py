@@ -67,7 +67,7 @@ nwbfile.external_resources = HERD()
 nwbfile.external_resources.add_ref(
     container=nwbfile.subject,
     key=nwbfile.subject.species,
-    entity_id="NCBI_TAXON:10090",
+    entity_id="NCBITAXON:10090",
     entity_uri="https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?mode=Info&id=10090",
 )
 
