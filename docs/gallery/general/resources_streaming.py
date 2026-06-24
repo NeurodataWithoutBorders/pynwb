@@ -87,7 +87,7 @@ for url in tqdm(urls):
                 file=read_nwbfile,
                 container=read_nwbfile.subject,
                 key=species,
-                entity_id="NCBI_TAXON:10090",
+                entity_id="NCBITAXON:10090",
                 entity_uri=entity_uri,
             )
 
