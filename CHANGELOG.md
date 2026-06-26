@@ -3,6 +3,7 @@
 ## PyNWB 4.0.0 (Upcoming)
 
 ### Documentation and tutorial enhancements
+- Added `pandas.ExtensionArray` to `nitpick_ignore` so the Sphinx build does not fail on the unresolved cross-reference that HDMF's `array_data` docval macro renders for every type that accepts array data. @rly [#2209](https://github.com/NeurodataWithoutBorders/pynwb/pull/2209)
 - Added `app.readthedocs.org/projects/pynwb/*` to `linkcheck_ignore` to stop the Sphinx linkcheck CI job from intermittently failing when GitHub Actions runners get throttled by readthedocs. @h-mayorquin [#2191](https://github.com/NeurodataWithoutBorders/pynwb/pull/2191)
 - Added documentation for `ExternalImage` to the images tutorial. @h-mayorquin [#2159](https://github.com/NeurodataWithoutBorders/pynwb/pull/2159)
 - Fixed broken and redirecting links in documentation. @bendichter [#2165](https://github.com/NeurodataWithoutBorders/pynwb/pull/2165)
