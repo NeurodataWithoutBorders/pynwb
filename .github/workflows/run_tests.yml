@@ -23,13 +23,13 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { name: linux-python3.10-minimum      , test-tox-env: test-py310-minimum    , build-tox-env: build-py310-minimum   , python-ver: "3.10" , os: ubuntu-latest }
+          - { name: linux-python3.10-minimum      , test-tox-env: test-py310-minimum    , python-ver: "3.10" , os: ubuntu-latest }
           # NOTE config below with "upload-wheels: true" specifies that wheels should be uploaded as an artifact
-          - { name: linux-python3.14-upgraded    , test-tox-env: test-py314-upgraded  , build-tox-env: build-py314-upgraded , python-ver: "3.14", os: ubuntu-latest , upload-wheels: true }
-          - { name: windows-python3.10-minimum   , test-tox-env: test-py310-minimum   , build-tox-env: build-py310-minimum  , python-ver: "3.10", os: windows-latest }
-          - { name: windows-python3.14-upgraded  , test-tox-env: test-py314-upgraded  , build-tox-env: build-py314-upgraded , python-ver: "3.14", os: windows-latest }
-          - { name: macos-python3.10-minimum     , test-tox-env: test-py310-minimum   , build-tox-env: build-py310-minimum  , python-ver: "3.10", os: macos-15-intel }
-          - { name: macos-python3.14-upgraded    , test-tox-env: test-py314-upgraded  , build-tox-env: build-py314-upgraded , python-ver: "3.14", os: macos-latest }
+          - { name: linux-python3.14-upgraded    , test-tox-env: test-py314-upgraded  , python-ver: "3.14", os: ubuntu-latest , upload-wheels: true }
+          - { name: windows-python3.10-minimum   , test-tox-env: test-py310-minimum   , python-ver: "3.10", os: windows-latest }
+          - { name: windows-python3.14-upgraded  , test-tox-env: test-py314-upgraded  , python-ver: "3.14", os: windows-latest }
+          - { name: macos-python3.10-minimum     , test-tox-env: test-py310-minimum   , python-ver: "3.10", os: macos-15-intel }
+          - { name: macos-python3.14-upgraded    , test-tox-env: test-py314-upgraded  , python-ver: "3.14", os: macos-latest }
     steps:
       - uses: actions/checkout@v7
         with:
@@ -53,7 +53,7 @@ jobs:
 
       - name: Build wheel and source distribution
         run: |
-          tox -e ${{ matrix.build-tox-env }}
+          tox -e build
           ls -1 dist
 
       - name: Test installation from a wheel
@@ -112,8 +112,8 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { name: conda-linux-python3.10-minimum   , test-tox-env: test-py310-minimum   , build-tox-env: build-py310-minimum   , python-ver: "3.10", os: ubuntu-latest }
-          - { name: conda-linux-python3.14-upgraded  , test-tox-env: test-py314-upgraded  , build-tox-env: build-py314-upgraded  , python-ver: "3.14", os: ubuntu-latest }
+          - { name: conda-linux-python3.10-minimum   , test-tox-env: test-py310-minimum   , python-ver: "3.10", os: ubuntu-latest }
+          - { name: conda-linux-python3.14-upgraded  , test-tox-env: test-py314-upgraded  , python-ver: "3.14", os: ubuntu-latest }
     steps:
       - uses: actions/checkout@v7
         with:
@@ -144,7 +144,7 @@ jobs:
 
       - name: Build wheel and source distribution
         run: |
-          tox -e ${{ matrix.build-tox-env }}
+          tox -e build
           ls -1 dist
 
       - name: Test installation from a wheel
@@ -181,8 +181,7 @@ jobs:
 
       - name: Install run dependencies
         run: |
-          pip install -r requirements-dev.txt
-          pip install .
+          pip install --group test .
           conda info
           conda list
           pip list
@@ -221,8 +220,7 @@ jobs:
 
       - name: Install run dependencies
         run: |
-          pip install matplotlib
-          pip install .
+          pip install --group docs ".[zarr,termset]"
           pip list
 
       - name: Conda reporting

@@ -56,8 +56,8 @@ For example, ``https://github.com/NeurodataWithoutBorders/pynwb/compare/dev...re
 
   * Make sure all PRs to be included in this release have been merged to ``dev``.
 
-  * Update package versions in ``requirements.txt``, ``requirements-dev.txt``, ``requirements-opt.txt``,
-    ``requirements-doc.txt``, ``requirements-min.txt``, ``environment-ros3.yml``, and ``pyproject.toml``.
+  * Update the dependency version bounds in ``pyproject.toml`` and the pinned versions in
+    ``environment-ros3.yml`` to the latest as needed.
 
   * Check legal information and copyright dates in ``Legal.txt``, ``license.txt``, ``README.rst``,
     ``docs/source/conf.py``.
