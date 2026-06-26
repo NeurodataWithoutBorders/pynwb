@@ -67,7 +67,6 @@ breaking down the barriers to data sharing in neuroscience.
 
    install_developers
    overview_software_architecture
-   update_requirements
    software_process
    make_a_release
    testing/index
