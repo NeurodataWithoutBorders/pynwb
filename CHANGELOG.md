@@ -27,8 +27,7 @@
 - Fixed `TimeSeries.get_timestamps()` to handle numpy array timestamps when they are set. @pauladkisson [#2181](https://github.com/NeurodataWithoutBorders/pynwb/pull/2181)
 - Fixed `Units.waveform_rate` and `Units.waveform_unit` to also map to the `sampling_rate` and `unit` attributes of the `waveforms` column on write and read, so waveform sampling metadata round-trips for `Units` tables that contain only `waveforms` (without `waveform_mean` or `waveform_sd`). @ehennestad [#2183](https://github.com/NeurodataWithoutBorders/pynwb/pull/2183)
 - Added Python 3.14 support. @bendichter, @rly [#2168](https://github.com/NeurodataWithoutBorders/pynwb/pull/2168)
-- Updated HDMF dependency to >=6.0.1, <7. @rly [#2171](https://github.com/NeurodataWithoutBorders/pynwb/issues/2171)
-- Bumped the minimum HDMF dependency to >=6.1.0 for pandas 3.0 compatibility. See the [HDMF changelog](https://hdmf.readthedocs.io/en/stable/CHANGELOG.html) for the full list of changes in HDMF 6.1.0. @rly [#2208](https://github.com/NeurodataWithoutBorders/pynwb/pull/2208)
+- Bumped the minimum HDMF dependency to >=6.1.0 for pandas 3.0 compatibility. See the [HDMF changelog](https://hdmf.readthedocs.io/en/stable/CHANGELOG.html) for the full list of changes in HDMF 6.1.0. @rly [#2171](https://github.com/NeurodataWithoutBorders/pynwb/issues/2171), [#2208](https://github.com/NeurodataWithoutBorders/pynwb/pull/2208)
 - Deprecated Python 3.9 support. (EOL was Oct 31, 2025) @bendichter [#2141](https://github.com/NeurodataWithoutBorders/pynwb/pull/2141)
 - Deprecated `BehavioralEvents` and `AnnotationSeries` in favor of using an `EventsTable` in `NWBFile.events`. Creating a new instance of either type now emits a `UserWarning`; reading existing files containing these types continues to work without warnings. @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156)
 
