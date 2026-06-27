@@ -86,6 +86,12 @@ ros3_examples = [
     os.path.join('advanced_io', 'streaming.py'),
 ]
 
+# examples that stream data from the DANDI Archive. these are excluded from the offline example tests
+# and run separately by tests/read_dandi/read_dandi.py (the "Run DANDI read tests" workflow).
+dandi_read_examples = [
+    os.path.join('general', 'resources_streaming.py'),
+]
+
 
 def run_example_tests():
     """Run the Sphinx gallery example files, excluding ROS3-dependent ones, to check for errors."""
@@ -95,7 +101,7 @@ def run_example_tests():
         for f in files:
             if f.endswith(".py"):
                 name_with_parent_dir = os.path.join(os.path.basename(root), f)
-                if name_with_parent_dir in ros3_examples:
+                if name_with_parent_dir in ros3_examples or name_with_parent_dir in dandi_read_examples:
                     logging.info("Skipping %s" % name_with_parent_dir)
                     continue
                 examples_scripts.append(os.path.join(root, f))
@@ -284,6 +290,7 @@ def clean_up_tests():
         "exported_nwbfile.nwb",
         "external_linkcontainer_example.nwb",
         "external_linkdataset_example.nwb",
+        "external_resources_tutorial.nwb",
         "external1_example.nwb",
         "external2_example.nwb",
         "icephys_example.nwb",

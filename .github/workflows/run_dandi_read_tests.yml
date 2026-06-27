@@ -1,10 +1,7 @@
 name: Run DANDI read tests
 on:
-  # NOTE this is disabled until we can run this systematically instead of randomly
-  # so we don't get constant error notifications and waste compute cycles
-  # See https://github.com/NeurodataWithoutBorders/pynwb/issues/1804
-  # schedule:
-  #   - cron: '0 6 * * *'  # once per day at 1am ET
+  schedule:
+    - cron: '0 6 * * *'  # once per day at 1am ET
   workflow_dispatch:
 
 concurrency:
