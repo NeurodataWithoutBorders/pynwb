@@ -1,4 +1,6 @@
 from datetime import datetime
+import importlib.util
+import unittest
 from dateutil.tz import tzlocal
 import numpy as np
 from numpy.testing import assert_array_equal
@@ -7,6 +9,8 @@ import pandas as pd
 from pynwb import NWBFile, TimeSeries
 from pynwb.core import ScratchData, DynamicTable
 from pynwb.testing import TestCase
+
+PYARROW_AVAILABLE = importlib.util.find_spec('pyarrow') is not None
 
 
 class TestScratchData(TestCase):
@@ -83,13 +87,13 @@ class TestScratchData(TestCase):
 
     def test_add_scratch_list_no_name(self):
         msg = ('A name is required for NWBFile.add_scratch when adding a scalar, numpy.ndarray, '
-               'list, tuple, or pandas.DataFrame as scratch data.')
+               'list, tuple, pandas.Series, pandas extension array, or pandas.DataFrame as scratch data.')
         with self.assertRaisesWith(ValueError, msg):
             self.nwbfile.add_scratch([1, 2, 3, 4])
 
     def test_add_scratch_ndarray_no_description(self):
         msg = ('A description is required for NWBFile.add_scratch when adding a scalar, numpy.ndarray, '
-               'list, tuple, or pandas.DataFrame as scratch data.')
+               'list, tuple, pandas.Series, pandas extension array, or pandas.DataFrame as scratch data.')
         with self.assertRaisesWith(ValueError, msg):
             self.nwbfile.add_scratch(np.array([1, 2, 3, 4]), name='test')
 
@@ -102,9 +106,46 @@ class TestScratchData(TestCase):
     def test_add_scratch_dataframe_no_description(self):
         data = pd.DataFrame(data={'col1': [1, 2, 3, 4], 'col2': ['a', 'b', 'c', 'd']})
         msg = ('A description is required for NWBFile.add_scratch when adding a scalar, numpy.ndarray, '
-               'list, tuple, or pandas.DataFrame as scratch data.')
+               'list, tuple, pandas.Series, pandas extension array, or pandas.DataFrame as scratch data.')
         with self.assertRaisesWith(ValueError, msg):
             self.nwbfile.add_scratch(data, name='test')
+
+    def test_add_scratch_series_numeric(self):
+        data = pd.Series([1, 2, 3, 4])
+        self.nwbfile.add_scratch(data, name='test', description='test data')
+        ret = self.nwbfile.get_scratch('test')
+        self.assertIsInstance(ret, np.ndarray)
+        assert_array_equal(ret, np.array([1, 2, 3, 4]))
+
+    def test_add_scratch_series_string(self):
+        data = pd.Series(['a', 'b', 'c', 'd'])
+        self.nwbfile.add_scratch(data, name='test', description='test data')
+        ret = self.nwbfile.get_scratch('test')
+        self.assertIsInstance(ret, np.ndarray)
+        assert_array_equal(ret, np.array(['a', 'b', 'c', 'd']))
+
+    def test_add_scratch_extension_array_string(self):
+        # pandas StringArray, the dtype that pandas 3.0 uses for DataFrame string columns by default
+        data = pd.array(['a', 'b', 'c', 'd'], dtype='string')
+        self.nwbfile.add_scratch(data, name='test', description='test data')
+        ret = self.nwbfile.get_scratch('test')
+        self.assertIsInstance(ret, np.ndarray)
+        assert_array_equal(ret, np.array(['a', 'b', 'c', 'd']))
+
+    @unittest.skipUnless(PYARROW_AVAILABLE, 'pyarrow is not installed')
+    def test_add_scratch_arrow_extension_array_string(self):
+        # PyArrow-backed string array, the dtype that pandas 3.0 uses for df['col'].values on string columns
+        data = pd.array(['a', 'b', 'c', 'd'], dtype='string[pyarrow]')
+        self.nwbfile.add_scratch(data, name='test', description='test data')
+        ret = self.nwbfile.get_scratch('test')
+        self.assertIsInstance(ret, np.ndarray)
+        assert_array_equal(ret, np.array(['a', 'b', 'c', 'd']))
+
+    def test_add_scratch_series_no_name(self):
+        msg = ('A name is required for NWBFile.add_scratch when adding a scalar, numpy.ndarray, '
+               'list, tuple, pandas.Series, pandas extension array, or pandas.DataFrame as scratch data.')
+        with self.assertRaisesWith(ValueError, msg):
+            self.nwbfile.add_scratch(pd.Series([1, 2, 3, 4]))
 
     def test_add_scratch_notes_and_description(self):
         error_msg = 'Cannot call add_scratch with (notes or table_description) and description'
