@@ -6,6 +6,7 @@ import copy as _copy
 
 import numpy as np
 import pandas as pd
+from pandas.api.extensions import ExtensionArray as _PdExtensionArray
 
 from hdmf.common import DynamicTableRegion, DynamicTable, HERD
 from hdmf.container import HERDManager
@@ -1028,10 +1029,12 @@ class NWBFile(MultiContainerInterface, HERDManager):
             return None
 
     @docval({'name': 'data',
-             'type': ('scalar_data', np.ndarray, list, tuple, pd.DataFrame, DynamicTable, NWBContainer, ScratchData),
+             'type': ('scalar_data', np.ndarray, list, tuple, pd.Series, _PdExtensionArray, pd.DataFrame,
+                      DynamicTable, NWBContainer, ScratchData),
              'doc': 'The data to add to the scratch space.'},
             {'name': 'name', 'type': str,
-             'doc': 'The name of the data. Required only when passing in a scalar, numpy.ndarray, list, or tuple',
+             'doc': ('The name of the data. Required only when passing in a scalar, numpy.ndarray, list, tuple, '
+                     'pandas.Series, or pandas extension array'),
              'default': None},
             {'name': 'notes', 'type': str,
              'doc': ('[DEPRECATED] Notes to add to the data. '
@@ -1045,8 +1048,8 @@ class NWBFile(MultiContainerInterface, HERDManager):
              'default': ''},
             {'name': 'description', 'type': str,
              'doc': ('Description of the data. Required only when passing in a scalar, numpy.ndarray, '
-                     'list, tuple, or pandas.DataFrame. Ignored when passing in an NWBContainer, '
-                     'DynamicTable, or ScratchData object.'),
+                     'list, tuple, pandas.Series, pandas extension array, or pandas.DataFrame. Ignored '
+                     'when passing in an NWBContainer, DynamicTable, or ScratchData object.'),
              'default': None})
     def add_scratch(self, **kwargs):
         '''Add data to the scratch space'''
@@ -1058,17 +1061,18 @@ class NWBFile(MultiContainerInterface, HERDManager):
             if description is not None:
                 raise ValueError('Cannot call add_scratch with (notes or table_description) and description')
 
-        if isinstance(data, (str, int, float, bytes, np.ndarray, list, tuple, pd.DataFrame)):
+        if isinstance(data, (str, int, float, bytes, np.ndarray, list, tuple, pd.Series, _PdExtensionArray,
+                             pd.DataFrame)):
             if name is None:
                 msg = ('A name is required for NWBFile.add_scratch when adding a scalar, numpy.ndarray, '
-                       'list, tuple, or pandas.DataFrame as scratch data.')
+                       'list, tuple, pandas.Series, pandas extension array, or pandas.DataFrame as scratch data.')
                 raise ValueError(msg)
             if isinstance(data, pd.DataFrame):
                 if table_description != '':
                     description = table_description  # remove after deprecation
                 if description is None:
                     msg = ('A description is required for NWBFile.add_scratch when adding a scalar, numpy.ndarray, '
-                           'list, tuple, or pandas.DataFrame as scratch data.')
+                           'list, tuple, pandas.Series, pandas extension array, or pandas.DataFrame as scratch data.')
                     raise ValueError(msg)
                 data = DynamicTable.from_dataframe(df=data, name=name, table_description=description)
             else:
@@ -1076,7 +1080,7 @@ class NWBFile(MultiContainerInterface, HERDManager):
                     description = notes  # remove after deprecation
                 if description is None:
                     msg = ('A description is required for NWBFile.add_scratch when adding a scalar, numpy.ndarray, '
-                           'list, tuple, or pandas.DataFrame as scratch data.')
+                           'list, tuple, pandas.Series, pandas extension array, or pandas.DataFrame as scratch data.')
                     raise ValueError(msg)
                 data = ScratchData(name=name, data=data, description=description)
         else:

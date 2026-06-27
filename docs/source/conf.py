@@ -183,7 +183,11 @@ nitpick_ignore = [('py:class', 'Intracomm'),
                   # pandas publishes ``pandas.DataFrame`` but autodoc renders the return
                   # annotation as its qualname ``pandas.core.frame.DataFrame``, which has no
                   # intersphinx target.
-                  ('py:class', 'pandas.core.frame.DataFrame')]
+                  ('py:class', 'pandas.core.frame.DataFrame'),
+                  # HDMF's ``array_data`` docval macro renders ``pandas.ExtensionArray``, but
+                  # pandas publishes the class as ``pandas.api.extensions.ExtensionArray``, so
+                  # the short path has no intersphinx target.
+                  ('py:class', 'pandas.ExtensionArray')]
 
 linkcheck_ignore = [
     r'https://training.incf.org/*',  # temporary ignore until SSL certificate issue is resolved
