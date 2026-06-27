@@ -12,8 +12,8 @@ the value is standardized and easy to query.
 
 From a user's perspective, a HERD can be treated as a single table that associates a ``key`` (a term
 used on an ``object``, i.e. a dataset or attribute in the file) with an ``entity`` (a term in an
-external resource, identified by a compact URI and a full URI). Internally, HERD stores this in six
-interlinked tables (``keys``, ``files``, ``entities``, ``entity_keys``, ``objects``, and
+external resource, identified by an ``entity_id`` and an ``entity_uri``). Internally, HERD stores
+this in six interlinked tables (``keys``, ``files``, ``entities``, ``entity_keys``, ``objects``, and
 ``object_keys``) and provides convenience methods so you rarely need to interact with those tables
 directly.
 
@@ -25,7 +25,6 @@ and compound-data references), see the
 """
 
 # sphinx_gallery_thumbnail_path = 'figures/gallery_thumbnails_external_resources.png'
-import os
 from datetime import datetime
 from uuid import uuid4
 
@@ -61,24 +60,28 @@ nwbfile.external_resources = HERD()
 # -------------------------------
 # Use :py:meth:`~hdmf.common.resources.HERD.add_ref` to add a row that links a key on an object to an
 # external entity. Here we link the subject's species to the NCBI Taxonomy entry for *Mus musculus*.
-# Because the subject is already part of the file, the ``file`` argument is resolved automatically
-# from the parent hierarchy and can be omitted.
+# The subject must be part of a file before a reference is added to it.
+#
+# An entity is identified by an ``entity_id`` and an ``entity_uri``. The ``entity_id`` is a compact
+# URI (CURIE) of the form ``prefix:identifier`` whose prefix is registered with
+# `bioregistry.io <https://bioregistry.io/>`_, such as ``NCBITaxon`` for the NCBI Taxonomy. The
+# ``entity_uri`` is the persistent URL the CURIE resolves to, which you can look up at
+# ``https://bioregistry.io/<entity_id>``.
 
 nwbfile.external_resources.add_ref(
     container=nwbfile.subject,
     key=nwbfile.subject.species,
-    entity_id="NCBITAXON:10090",
-    entity_uri="https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?mode=Info&id=10090",
+    entity_id="NCBITaxon:10090",
+    entity_uri="http://purl.obolibrary.org/obo/NCBITaxon_10090",
 )
 
 ###############################################################################
 # References can also point to an attribute of an object, such as a column of a table. Here we record
 # the brain region of a set of electrodes in the electrodes table and link the region to the
 # corresponding structure in the
-# `Allen Mouse Brain Common Coordinate Framework (CCFv3) <https://atlas.brain-map.org/>`_. When the
-# target is a column, pass the table as the ``container`` and the column name as the ``attribute``;
-# HERD resolves the reference to the column object itself, which is the closest object that has a
-# data type.
+# `Allen Mouse Brain Atlas <https://atlas.brain-map.org/>`_. When the target is a column, pass the
+# table as the ``container`` and the column name as the ``attribute``; HERD resolves the reference to
+# the column object itself.
 
 device = nwbfile.create_device(name="probe")
 electrode_group = nwbfile.create_electrode_group(
@@ -94,8 +97,8 @@ nwbfile.external_resources.add_ref(
     container=nwbfile.electrodes,
     attribute="location",
     key="VISp",
-    entity_id="385",
-    entity_uri="https://api.brain-map.org/api/v2/data/Structure/385.json",
+    entity_id="MBA:385",
+    entity_uri="https://purl.brain-bican.org/ontology/mbao/MBA_385",
 )
 
 ###############################################################################
@@ -139,30 +142,24 @@ read_herd = read_nwbfile.external_resources
 ###############################################################################
 # Access the loaded data
 # -----------------------
-# In a Jupyter notebook, the default display of a read HERD shows collapsible sections that can
-# appear empty. To see the annotations, use the same accessors as above:
-# :py:meth:`~hdmf.common.resources.HERD.to_dataframe` for the flattened view, or the individual
-# tables for a focused view.
+# The loaded HERD provides the same accessors as before. In a Jupyter notebook, displaying the HERD
+# renders the flattened references as a table, and
+# :py:meth:`~hdmf.common.resources.HERD.to_dataframe` returns that same table as a
+# :py:class:`~pandas.DataFrame`. The individual tables give a more focused view.
 
 read_herd.to_dataframe()
 
 ###############################################################################
-# View the individual tables:
+# View the individual tables, for example:
 
 read_herd.keys.to_dataframe()
 
 ###############################################################################
-
-read_herd.entities.to_dataframe()
-
-###############################################################################
 # :py:meth:`~hdmf.common.resources.HERD.get_object_entities` returns the entities annotated on a
-# single object as a :py:class:`~pandas.DataFrame`. On a HERD read back from a file this accessor
-# currently requires the fix for
-# `hdmf #1496 <https://github.com/hdmf-dev/hdmf/issues/1496>`_, which will be resolved soon, so it is
-# shown here commented out:
+# single object as a :py:class:`~pandas.DataFrame`. Here we view the species annotation stored for
+# the subject:
 
-# read_herd.get_object_entities(container=read_nwbfile.subject)
+read_herd.get_object_entities(container=read_nwbfile.subject)
 
 ###############################################################################
 # Close the file once you are done reading from it.
@@ -178,5 +175,3 @@ read_io.close()
 # multiple files; see :ref:`external_resources_streaming` for an example that annotates many NWB
 # files with a single HERD. For the full HERD API, see the
 # `HDMF HERD tutorial <https://hdmf.readthedocs.io/en/stable/tutorials/plot_external_resources.html>`_.
-
-os.remove(filename)

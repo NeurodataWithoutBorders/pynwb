@@ -63,10 +63,14 @@ fs = CachingFileSystem(fs=filesystem("http"), cache_storage="nwb-cache")
 ###############################################################################
 # Populate a single HERD across all files
 # ---------------------------------------
-# Open each file in read mode and add references for its subject species and experimenter. Before
-# adding a reference, :py:meth:`~hdmf.common.resources.HERD.get_entity` checks whether the entity is
-# already in the HERD. If it is, the entity is reused by passing ``entity_uri=None`` (the existing
-# URI is kept); otherwise the URI is provided so the entity is created once.
+# Open each file in read mode and add references for its subject species and experimenter. Checking
+# the value read from each file before annotating it keeps a file with unexpected metadata from being
+# mislabeled. Passing the same ``entity_id`` across files reuses the existing entity instead of
+# creating a duplicate.
+#
+# Each entity is identified by an ``entity_id``, a compact URI (CURIE) whose prefix is registered with
+# `bioregistry.io <https://bioregistry.io/>`_, and an ``entity_uri``, the persistent URL the CURIE
+# resolves to.
 
 herd = HERD()
 for url in tqdm(urls):
@@ -75,39 +79,29 @@ for url in tqdm(urls):
             read_nwbfile = io.read()
 
             # reference the subject species
-            species = read_nwbfile.subject.species  # "Mus musculus"
-            entity = herd.get_entity(entity_id="NCBITAXON:10090")
-            if entity is not None:
-                # the entity is already in the HERD, so reuse it and keep its existing URI
-                entity_uri = None
+            species = read_nwbfile.subject.species
+            if species == "Mus musculus":
+                herd.add_ref(
+                    container=read_nwbfile.subject,
+                    key=species,
+                    entity_id="NCBITaxon:10090",
+                    entity_uri="http://purl.obolibrary.org/obo/NCBITaxon_10090",
+                )
             else:
-                # the entity is not yet in the HERD, so provide its URI to create it
-                entity_uri = "https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?mode=Info&id=10090"
-            herd.add_ref(
-                file=read_nwbfile,
-                container=read_nwbfile.subject,
-                key=species,
-                entity_id="NCBITAXON:10090",
-                entity_uri=entity_uri,
-            )
+                print(f"Unexpected species: {species}")
 
             # reference the experimenter, an attribute of the NWBFile itself
-            experimenter = read_nwbfile.experimenter[0]  # "Chen, Tsai-Wen"
-            entity = herd.get_entity(entity_id="0000-0001-6782-3819")
-            if entity is not None:
-                # the entity is already in the HERD, so reuse it and keep its existing URI
-                entity_uri = None
+            experimenter = read_nwbfile.experimenter[0]
+            if experimenter == "Chen, Tsai-Wen":
+                herd.add_ref(
+                    container=read_nwbfile,
+                    attribute="experimenter",
+                    key=experimenter,
+                    entity_id="ORCID:0000-0001-6782-3819",
+                    entity_uri="https://orcid.org/0000-0001-6782-3819",
+                )
             else:
-                # the entity is not yet in the HERD, so provide its URI to create it
-                entity_uri = "https://orcid.org/0000-0001-6782-3819"
-            herd.add_ref(
-                file=read_nwbfile,
-                container=read_nwbfile,
-                attribute="experimenter",
-                key=experimenter,
-                entity_id="0000-0001-6782-3819",
-                entity_uri=entity_uri,
-            )
+                print(f"Unexpected experimenter: {experimenter}")
 
 ###############################################################################
 # Inspect and save the combined HERD
@@ -132,15 +126,17 @@ loaded_herd = HERD.from_zip(path="./dandiset_resources.zip")
 with fs.open(urls[0], "rb") as f, h5py.File(f) as h5_file:
     with NWBHDF5IO(file=h5_file) as io:
         read_nwbfile = io.read()
-        institution = read_nwbfile.institution  # "Janelia Research Campus"
-        loaded_herd.add_ref(
-            file=read_nwbfile,
-            container=read_nwbfile,
-            attribute="institution",
-            key=institution,
-            entity_id="ROR:013sk6x84",
-            entity_uri="https://ror.org/013sk6x84",
-        )
+        institution = read_nwbfile.institution
+        if institution == "Janelia Research Campus":
+            loaded_herd.add_ref(
+                container=read_nwbfile,
+                attribute="institution",
+                key=institution,
+                entity_id="ROR:013sk6x84",
+                entity_uri="https://ror.org/013sk6x84",
+            )
+        else:
+            print(f"Unexpected institution: {institution}")
 
 loaded_herd.to_dataframe()
 
