@@ -132,7 +132,13 @@ def get_cached_namespaces_to_validate(path: Optional[str] = None,
         "type": str,
         "doc": "Driver for h5py to use when opening the HDF5 file.",
         "default": None,
-    }, 
+    },
+    {
+        "name": "aws_region",
+        "type": str,
+        "doc": "AWS region to use when opening the HDF5 file with the ros3 driver.",
+        "default": None,
+    },
     returns="Validation errors in the file.",
     rtype=list,
     is_method=False,
@@ -169,19 +175,20 @@ def validate(**kwargs):
 
 def _validate_single_file(**kwargs):
 
-    io, path, use_cached_namespaces, namespace, verbose, driver = getargs(
-        "io", "path", "use_cached_namespaces", "namespace", "verbose", "driver", kwargs
+    io, path, use_cached_namespaces, namespace, verbose, driver, aws_region = getargs(
+        "io", "path", "use_cached_namespaces", "namespace", "verbose", "driver", "aws_region", kwargs
     )
     assert io != path, "Both 'io' and 'path' were specified! Please choose only one."
     path = str(path) if isinstance(path, Path) else path
 
     # get namespaces to validate
     namespace_message = "PyNWB namespace information"
-    io_kwargs = dict(path=path, mode="r", driver=driver)
-        
+    io_kwargs = dict(path=path, mode="r", driver=driver, aws_region=aws_region)
+
     if use_cached_namespaces:
-        cached_namespaces, manager, namespace_dependencies = get_cached_namespaces_to_validate(path=path, 
-                                                                                               driver=driver, 
+        cached_namespaces, manager, namespace_dependencies = get_cached_namespaces_to_validate(path=path,
+                                                                                               driver=driver,
+                                                                                               aws_region=aws_region,
                                                                                                io=io)
         io_kwargs.update(manager=manager)
 
