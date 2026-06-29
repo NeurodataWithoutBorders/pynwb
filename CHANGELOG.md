@@ -2,6 +2,16 @@
 
 ## PyNWB 4.0.0 (Upcoming)
 
+### Removed
+- Removed functionality that was deprecated with a "will be removed in PyNWB 4.0" notice. @rly [#2210](https://github.com/NeurodataWithoutBorders/pynwb/issues/2210)
+  - `ProcessingModule.add_container`, `get_container`, `add_data_interface`, and `get_data_interface`. Use `add` and `get` instead.
+  - The `extensions` argument of `get_type_map`, `get_manager`, and `NWBHDF5IO`. Load cached namespaces from the file or pass a prebuilt `manager` instead.
+  - The `notes` argument and `notes` property of `ScratchData`. Use `description` instead.
+  - The `notes` and `table_description` arguments of `NWBFile.add_scratch`. Use `description` instead.
+  - The `ic_electrodes` argument of `NWBFile`. Use `icephys_electrodes` instead.
+  - The `paths` argument of `pynwb.validate`. Use `path` and call `validate` once per file instead.
+- Made `NWBFile.icephys_filtering` read-only. Use `IntracellularElectrode.filtering` instead. The legacy `/general/intracellular_ephys/filtering` value is still read from older files. @rly [#2210](https://github.com/NeurodataWithoutBorders/pynwb/issues/2210)
+
 ### Documentation and tutorial enhancements
 - Added a tutorial on using HERD to annotate an NWB file with external resources and store it at `/general/external_resources`, plus a companion example showing how to annotate multiple NWB files streamed from a DANDI dandiset with a single HERD. @rly, @mavaylon1 [#2200](https://github.com/NeurodataWithoutBorders/pynwb/pull/2200)
 - Added `pandas.ExtensionArray` to `nitpick_ignore` so the Sphinx build does not fail on the unresolved cross-reference that HDMF's `array_data` docval macro renders for every type that accepts array data. @rly [#2209](https://github.com/NeurodataWithoutBorders/pynwb/pull/2209)

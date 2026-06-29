@@ -4,6 +4,7 @@ Prepare for release of PyNWB [version]
 - [ ] Make sure all PRs to be included in this release have been merged to `dev`.
 - [ ] Major and minor releases: Update the dependency version bounds in `pyproject.toml` and the pinned
   versions in `environment-ros3.yml` to the latest as needed.
+- [ ] Major releases: Remove the deprecated functionality slated for removal in this version.
 - [ ] Check legal file dates and information in `Legal.txt`, `license.txt`, `README.rst`, `docs/source/conf.py`,
   and any other locations as needed
 - [ ] Update `pyproject.toml` as needed

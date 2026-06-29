@@ -23,7 +23,8 @@ class NWBFileMap(ObjectMapper):
 
         general_spec = self.spec.get_group('general')
         self.map_spec(
-            'ic_electrodes', general_spec.get_group('intracellular_ephys').get_neurodata_type('IntracellularElectrode'))
+            'icephys_electrodes',
+            general_spec.get_group('intracellular_ephys').get_neurodata_type('IntracellularElectrode'))
         self.map_spec(
             'ec_electrodes', general_spec.get_group('extracellular_ephys').get_neurodata_type('ElectrodeGroup'))
         self.map_spec(

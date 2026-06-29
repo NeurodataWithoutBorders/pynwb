@@ -347,7 +347,7 @@ nwbfile = NWBFile(
 )
 
 pmod = nwbfile.create_processing_module("module_name", "desc")
-pmod.add_container(potato_sack)
+pmod.add(potato_sack)
 
 
 with NWBHDF5IO("test_multicontainerinterface.nwb", "w") as io:
@@ -480,7 +480,7 @@ nwbfile = NWBFile("my first synthetic recording", "EXAMPLE_ID", datetime.now())
 cortex_module = nwbfile.create_processing_module(
     name="cortex", description="description"
 )
-cortex_module.add_container(cortical_surface)
+cortex_module.add(cortical_surface)
 
 
 with NWBHDF5IO("test_cortical_surface.nwb", "w") as io:
