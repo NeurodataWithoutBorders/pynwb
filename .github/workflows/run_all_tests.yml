@@ -261,3 +261,32 @@ jobs:
       - name: Run gallery ros3 tests
         run: |
           python test.py --example-ros3
+
+  # the streaming HERD gallery example is excluded from the offline example
+  # tests (it streams from the DANDI Archive), so run it once here
+  run-streaming-example:
+    name: linux-streaming-example-python3.14
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          submodules: 'recursive'
+          fetch-depth: 0  # tags are required for versioneer to determine the version
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.14"
+
+      - name: Install run dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install dandi fsspec tqdm aiohttp requests .
+          python -m pip list
+
+      - name: Run the DANDI streaming HERD example
+        run: |
+          python docs/gallery/general/resources_streaming.py
