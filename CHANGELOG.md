@@ -12,7 +12,7 @@
   - The `paths` argument of `pynwb.validate`. Use `path` and call `validate` once per file instead.
 - Made `NWBFile.icephys_filtering` read-only. Use `IntracellularElectrode.filtering` instead. The legacy `/general/intracellular_ephys/filtering` value is still read from older files. @rly [#2210](https://github.com/NeurodataWithoutBorders/pynwb/issues/2210)
 
-## Changed
+### Changed
 - Consolidated dependency declarations into `pyproject.toml` and removed the `requirements.txt`, `requirements-dev.txt`, `requirements-opt.txt`, `requirements-doc.txt`, and `requirements-min.txt` files. Added user-installable `zarr` and `termset` optional-dependency extras (e.g. `pip install pynwb[zarr]`), and declared development dependencies as PEP 735 `[dependency-groups]` (`test`, `stream`, `docs`). `tox` now installs dependencies via extras and dependency groups, with minimum-version testing using `uv pip install --resolution lowest-direct`. Install development dependencies with `pip install --group test --group docs -e ".[zarr,termset]"`. @rly [#2205](https://github.com/NeurodataWithoutBorders/pynwb/pull/2205)
 - Deprecated `NWBGroupSpec.add_group` and `NWBGroupSpec.add_dataset`. Use `NWBGroupSpec.set_group`, `NWBGroupSpec.set_dataset`, or pass the group or dataset to the `NWBGroupSpec` constructor. @rly [#2138](https://github.com/NeurodataWithoutBorders/pynwb/issues/2138)
 - Fixed `TimeSeries.get_timestamps()` to handle numpy array timestamps when they are set. @pauladkisson [#2181](https://github.com/NeurodataWithoutBorders/pynwb/pull/2181)
