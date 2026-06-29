@@ -1281,47 +1281,56 @@ class NWBFileTests(TestCase):
         stimulus = self.__get_stimulus(electrode=electrode)
         nwbfile.add_stimulus(stimulus, use_sweep_table=True)
 
-    def test_deprecation_icephys_filtering_on_init(self):
+    def test_icephys_filtering_on_init(self):
         kwargs = dict(session_description='my first synthetic recording',
                 identifier='EXAMPLE_ID',
                 session_start_time=datetime.now(tzlocal()),
                 icephys_filtering='test filtering')
-        msg = ("Use of icephys_filtering is deprecated and will be removed in PyNWB 4.0. "
-               "Use the IntracellularElectrode.filtering field instead")        
-        
-        with self.assertRaisesWith(ValueError, msg):
-            nwbfile = NWBFile(**kwargs)
+        msg = ("Use of icephys_filtering has been removed in PyNWB 4.0. "
+               "Use the IntracellularElectrode.filtering field instead.")
 
-        # create object in construct mode, modeling the behavior of the ObjectMapper on read
+        # passing icephys_filtering when creating a new file raises an error
+        with self.assertRaisesWith(ValueError, msg):
+            NWBFile(**kwargs)
+
+        # create object in construct mode, modeling the behavior of the ObjectMapper on read;
+        # the legacy value is read into the read-only icephys_filtering field with a warning
         nwbfile = NWBFile.__new__(NWBFile, in_construct_mode=True)
         with self.assertWarnsWith(warn_type=UserWarning, exc_msg=msg):
             nwbfile.__init__(**kwargs)
 
         self.assertEqual(nwbfile.icephys_filtering, 'test filtering')
 
-    def test_icephys_filtering_roundtrip(self):
-        # create the base file
+    def test_icephys_filtering_read_only(self):
+        # icephys_filtering is read-only and cannot be set on an existing file
         nwbfile = NWBFile(
             session_description='my first synthetic recording',
             identifier='EXAMPLE_ID',
             session_start_time=datetime.now(tzlocal())
         )
-        # set the icephys_filtering attribute and make sure we get a deprecation warning
-        msg = ("Use of icephys_filtering is deprecated and will be removed in PyNWB 4.0. "
-               "Use the IntracellularElectrode.filtering field instead")
-        with self.assertRaisesWith(ValueError, msg):
+        with self.assertRaises(AttributeError):
             nwbfile.icephys_filtering = 'test filtering'
 
-        # create object in construct mode, modeling the behavior of the ObjectMapper on read
-        nwbfile._in_construct_mode = True
+    def test_icephys_filtering_roundtrip(self):
+        msg = ("Use of icephys_filtering has been removed in PyNWB 4.0. "
+               "Use the IntracellularElectrode.filtering field instead.")
+
+        # model the behavior of the ObjectMapper on read: the legacy
+        # /general/intracellular_ephys/filtering value populates the read-only field in construct mode
+        nwbfile = NWBFile.__new__(NWBFile, in_construct_mode=True)
         with self.assertWarnsWith(warn_type=UserWarning, exc_msg=msg):
-            nwbfile.icephys_filtering = 'test filtering'
+            nwbfile.__init__(
+                session_description='my first synthetic recording',
+                identifier='EXAMPLE_ID',
+                session_start_time=datetime.now(tzlocal()),
+                icephys_filtering='test filtering'
+            )
         nwbfile._in_construct_mode = False
 
         # write the test file
         with NWBHDF5IO(self.path, 'w') as io:
             io.write(nwbfile)
-        # read the test file and confirm icephys_filtering has been written
+        # read the test file and confirm icephys_filtering is read back from the legacy location
         with NWBHDF5IO(self.path, 'r') as io:
             with self.assertWarnsWith(UserWarning, msg):
                 infile = io.read()
