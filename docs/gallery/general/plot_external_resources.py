@@ -51,9 +51,9 @@ nwbfile = NWBFile(
 # -------------------
 # Use :py:meth:`~pynwb.file.NWBFile.get_external_resources` to get the file's
 # :py:class:`~pynwb.resources.HERD`. A file has at most one HERD, so this returns the existing HERD if
-# the file already has one (for example, when the file was read from disk) and otherwise, it creates
-# and  attaches a new empty HERD. The :py:attr:`~pynwb.file.NWBFile.external_resources` attribute returns the
-# HERD without creating one, returning ``None`` when the file has no external resources.
+# the file already has one (for example, when the file was read from disk) and creates and attaches a
+# new empty HERD otherwise. The :py:attr:`~pynwb.file.NWBFile.external_resources` attribute returns
+# the HERD without creating one, returning ``None`` when the file has no external resources.
 
 herd = nwbfile.get_external_resources()
 

@@ -1137,10 +1137,12 @@ class NWBFile(MultiContainerInterface, HERDManager):
     def get_external_resources(self, **kwargs):
         """Get the HERD external resources for this NWBFile.
 
-        Create an empty HERD and attach it to the file if the file does not have one yet. There is at
-        most one HERD per file, so this returns the existing HERD when the file already has one, for
-        example when the file was read from disk. The NWBFile.external_resources attribute returns the
-        HERD without creating one, returning None when the file has no external resources.
+        With the default ``linked=False``, return the HERD stored on this file, first creating and
+        attaching a new empty HERD if the file does not have one yet (there is at most one HERD per
+        file, so an existing HERD is returned as-is, e.g. when the file was read from disk). With
+        ``linked=True``, return the linked HERD set via link_resources, or None if none is set,
+        without creating one. The NWBFile.external_resources attribute returns the stored HERD without
+        creating one, returning None when the file has no external resources.
         """
         linked = getargs('linked', kwargs)
         if linked:
