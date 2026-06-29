@@ -12,11 +12,24 @@ from hdmf.validate import ValidatorMap
 from pynwb import CORE_NAMESPACE
 from pynwb.spec import NWBDatasetSpec, NWBGroupSpec, NWBNamespace
 
+from dataclasses import dataclass, field
+from datetime import datetime
 
 __all__ = [
     'validate',
-    'get_cached_namespaces_to_validate'
+    'get_cached_namespaces_to_validate',
+    'ValidationReport',
 ]
+
+@dataclass
+class ValidationReport:
+    path: Optional[str]
+    namespace: str
+    errors: list
+    created_at: str = field(default_factory=lambda: datetime.utcnow().isoformat())
+
+    def is_valid(self) -> bool:
+        return len(self.errors) == 0
 
 def _validate_helper(io: HDMFIO, namespace: str = CORE_NAMESPACE) -> list:
     builder = io.read_builder()
@@ -133,7 +146,7 @@ def get_cached_namespaces_to_validate(path: Optional[str] = None,
         "doc": "Driver for h5py to use when opening the HDF5 file.",
         "default": None,
     }, 
-    returns="Validation errors in the file.",
+    returns="Validation reports in the file.",
     rtype=list,
     is_method=False,
     allow_positional=AllowPositional.WARNING,
@@ -180,9 +193,9 @@ def _validate_single_file(**kwargs):
     io_kwargs = dict(path=path, mode="r", driver=driver)
         
     if use_cached_namespaces:
-        cached_namespaces, manager, namespace_dependencies = get_cached_namespaces_to_validate(path=path, 
-                                                                                               driver=driver, 
-                                                                                               io=io)
+        cached_namespaces, manager, namespace_dependencies = get_cached_namespaces_to_validate(
+            path=path, driver=driver, io=io
+        )
         io_kwargs.update(manager=manager)
 
         if any(cached_namespaces):
@@ -191,8 +204,11 @@ def _validate_single_file(**kwargs):
         else:
             namespaces_to_validate = [CORE_NAMESPACE]
             if verbose:
-                warn(f"The file {f'{path} ' if path is not None else ''}has no cached namespace information. "
-                     f"Falling back to {namespace_message}.", UserWarning)
+                warn(
+                    f"The file {f'{path} ' if path is not None else ''}has no cached namespace information. "
+                    f"Falling back to {namespace_message}.",
+                    UserWarning,
+                )
     else:
         io_kwargs.update(load_namespaces=False)
         namespaces_to_validate = [CORE_NAMESPACE]
@@ -207,27 +223,33 @@ def _validate_single_file(**kwargs):
     if namespace is not None:
         if namespace in namespaces_to_validate:
             namespaces_to_validate = [namespace]
-        elif use_cached_namespaces and namespace in namespace_dependencies:  # validating against a dependency
+        elif use_cached_namespaces and namespace in namespace_dependencies:
             for namespace_dependency in namespace_dependencies:
                 if namespace in namespace_dependencies[namespace_dependency]:
                     raise ValueError(
                         f"The namespace '{namespace}' is included by the namespace "
-                        f"'{namespace_dependency}'. Please validate against that namespace instead.")
+                        f"'{namespace_dependency}'. Please validate against that namespace instead."
+                    )
         else:
             raise ValueError(
                 f"The namespace '{namespace}' could not be found in {namespace_message} as only "
-                f"{namespaces_to_validate} is present.",)
-  
+                f"{namespaces_to_validate} is present."
+            )
+
     # validate against namespaces
     validation_errors = []
+
     for validation_namespace in namespaces_to_validate:
         if verbose:
-            print(f"Validating {f'{path} ' if path is not None else ''}against "  # noqa: T201
-                  f"{namespace_message} using namespace '{validation_namespace}'.")  
-        validation_errors += _validate_helper(io=io, namespace=validation_namespace)
+            print(
+                f"Validating {f'{path} ' if path is not None else ''}against "
+                f"{namespace_message} using namespace '{validation_namespace}'."
+            )
+
+        raw_errors = _validate_helper(io=io, namespace=validation_namespace)
+        validation_errors.extend(raw_errors)
 
     if path is not None:
-        io.close()  # close the io object if it was created within this function, otherwise leave as is
-    
-    return validation_errors
+        io.close()
 
+    return validation_errors
