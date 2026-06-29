@@ -77,7 +77,18 @@ class CustomSphinxGallerySectionSortKey(ExampleTitleSortKey):
     # listed here will be added in alphabetical order based on title after the
     # explicitly listed galleries
     GALLERY_ORDER = {
-        'general': ['plot_file.py'],
+        'general': [
+            "plot_file.py",
+            "add_remove_containers.py",
+            "plot_timeintervals.py",
+            "scratch.py",
+            "extensions.py",
+            "plot_configurator.py",
+            "object_id.py",
+            "plot_read_basics.py",
+            "plot_external_resources.py",
+            "resources_streaming.py",
+        ],
         # Sort domain-specific tutorials based on domain to group tutorials belonging to the same domain
         'domain': [
             "ecephys.py",

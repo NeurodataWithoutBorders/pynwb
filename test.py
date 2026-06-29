@@ -82,8 +82,14 @@ warning_re = re.compile("Parent module '[a-zA-Z0-9]+' not found while handling a
 
 
 ros3_examples = [
-    os.path.join('general', 'read_basics.py'),
+    os.path.join('general', 'plot_read_basics.py'),
     os.path.join('advanced_io', 'streaming.py'),
+]
+
+# examples that stream data from the DANDI Archive over the network. these are excluded from the
+# example tests, which run offline, so that test.py --example does not depend on network access.
+streaming_examples = [
+    os.path.join('general', 'resources_streaming.py'),
 ]
 
 
@@ -95,7 +101,7 @@ def run_example_tests():
         for f in files:
             if f.endswith(".py"):
                 name_with_parent_dir = os.path.join(os.path.basename(root), f)
-                if name_with_parent_dir in ros3_examples:
+                if name_with_parent_dir in ros3_examples or name_with_parent_dir in streaming_examples:
                     logging.info("Skipping %s" % name_with_parent_dir)
                     continue
                 examples_scripts.append(os.path.join(root, f))
@@ -284,6 +290,7 @@ def clean_up_tests():
         "exported_nwbfile.nwb",
         "external_linkcontainer_example.nwb",
         "external_linkdataset_example.nwb",
+        "external_resources_tutorial.nwb",
         "external1_example.nwb",
         "external2_example.nwb",
         "icephys_example.nwb",
