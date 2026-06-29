@@ -30,14 +30,14 @@ class TestRos3Streaming(TestCase):
     def test_read(self):
         s3_path = 'https://dandiarchive.s3.amazonaws.com/ros3test.nwb'
         with warnings.catch_warnings():
-            with NWBHDF5IO(s3_path, mode='r', driver='ros3') as io:
+            with NWBHDF5IO(s3_path, mode='r', driver='ros3', aws_region="us-east-2") as io:
                 nwbfile = io.read()
                 test_data = nwbfile.acquisition['ts_name'].data[:]
                 self.assertEqual(len(test_data), 3)
 
     def test_dandi_read(self):
         with warnings.catch_warnings():
-            with NWBHDF5IO(path=self.s3_test_path, mode='r', driver='ros3') as io:
+            with NWBHDF5IO(path=self.s3_test_path, mode='r', driver='ros3', aws_region="us-east-2") as io:
                 nwbfile = io.read()
                 test_data = nwbfile.acquisition['TestData'].data[:]
                 self.assertEqual(len(test_data), 3)
@@ -76,13 +76,13 @@ class TestRos3Streaming(TestCase):
             }
         }
         found_namespaces, _, found_namespace_dependencies = get_cached_namespaces_to_validate(
-            path=self.s3_test_path, driver="ros3"
+            path=self.s3_test_path, driver="ros3", aws_region="us-east-2"
         )
 
         self.assertCountEqual(first=found_namespaces, second=expected_namespaces)
         self.assertDictEqual(d1=found_namespace_dependencies, d2=expected_namespace_dependencies)
 
     def test_dandi_validate(self):
-        result = validate(path=self.s3_test_path, driver="ros3")
+        result = validate(path=self.s3_test_path, driver="ros3", aws_region="us-east-2")
 
         assert result == []

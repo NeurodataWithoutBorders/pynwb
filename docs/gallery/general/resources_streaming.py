@@ -22,11 +22,11 @@ For storing a HERD inside a single NWB file, see :ref:`external_resources`.
 .. note::
 
    This example reads data over the network and is not run when the documentation is built. To run
-   it yourself, install the ``dandi`` and ``fsspec`` packages:
+   it yourself, install the streaming dependencies:
 
    .. code-block:: bash
 
-      pip install dandi fsspec aiohttp requests
+      pip install dandi fsspec tqdm aiohttp requests
 """
 
 # sphinx_gallery_thumbnail_path = 'figures/gallery_thumbnails_streaming_external_resources.png'
