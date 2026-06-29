@@ -489,7 +489,7 @@ class NWBFile(MultiContainerInterface, HERDManager):
             'surgery',
             'virus',
             'stimulus_notes',
-            'icephys_filtering',  # read-only; handled explicitly below so it is not set via the loop
+            'icephys_filtering',  # read-only; set explicitly below
             'intracellular_recordings',
             'icephys_simultaneous_recordings',
             'icephys_sequential_recordings',

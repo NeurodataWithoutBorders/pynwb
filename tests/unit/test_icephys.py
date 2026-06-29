@@ -73,14 +73,22 @@ class NWBFileICEphys(TestCase):
                 icephys_electrodes=[self.icephys_electrode, ])
         self.assertEqual(nwbfile.get_icephys_electrode('test_iS'), self.icephys_electrode)
 
-    def test_ic_electrodes_attribute_deprecation(self):
+    def test_ic_electrodes_argument_removed(self):
+        msg = ("NWBFile.__init__: unrecognized argument: 'ic_electrodes'")
+        with self.assertRaisesWith(TypeError, msg):
+            NWBFile(
+                session_description='NWBFile icephys test',
+                identifier='NWB123',  # required
+                session_start_time=datetime(2017, 4, 3, 11, tzinfo=tzlocal()),
+                ic_electrodes=[self.icephys_electrode, ])
+
+    def test_get_ic_electrode_removed(self):
         nwbfile = NWBFile(
             session_description='NWBFile icephys test',
             identifier='NWB123',  # required
             session_start_time=datetime(2017, 4, 3, 11, tzinfo=tzlocal()),
             icephys_electrodes=[self.icephys_electrode, ])
 
-        # make sure NWBFile.get_ic_electrode warns
         msg = "'NWBFile' object has no attribute 'get_ic_electrode'"
         with self.assertRaisesWith(AttributeError, msg):
             nwbfile.get_ic_electrode(self.icephys_electrode.name)
