@@ -26,6 +26,8 @@ from .ophys import ImagingPlane
 from .ogen import OptogeneticStimulusSite
 from .misc import Units
 from .core import NWBContainer, NWBDataInterface, MultiContainerInterface, ScratchData, LabelledDict
+# the pynwb HERD subclass injects the pynwb type map; HERD from hdmf.common (above) is the docval type
+from .resources import HERD as PyNWBHERD
 
 
 __all__ = [
@@ -1127,6 +1129,25 @@ class NWBFile(MultiContainerInterface, HERDManager):
             elif isinstance(ret, ScratchData):
                 ret = np.asarray(ret.data)
         return ret
+
+    @docval({'name': 'linked', 'type': bool, 'default': False,
+             'doc': 'If True, return the linked HERD set via link_resources instead of the HERD '
+                    'stored on this file.'},
+            returns='The HERD external resources object for this NWBFile', rtype=HERD)
+    def get_external_resources(self, **kwargs):
+        """Get the HERD external resources for this NWBFile.
+
+        Create an empty HERD and attach it to the file if the file does not have one yet. There is at
+        most one HERD per file, so this returns the existing HERD when the file already has one, for
+        example when the file was read from disk. The NWBFile.external_resources attribute returns the
+        HERD without creating one, returning None when the file has no external resources.
+        """
+        linked = getargs('linked', kwargs)
+        if linked:
+            return self._linked_external_resources
+        if self.external_resources is None:
+            self.external_resources = PyNWBHERD()
+        return self.external_resources
 
     def copy(self):
         """

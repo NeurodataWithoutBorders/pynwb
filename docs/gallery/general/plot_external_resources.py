@@ -32,7 +32,6 @@ from dateutil.tz import tzlocal
 
 from pynwb import NWBHDF5IO, NWBFile
 from pynwb.file import Subject
-from pynwb.resources import HERD
 
 ###############################################################################
 # Create an NWB file
@@ -48,12 +47,15 @@ nwbfile = NWBFile(
 )
 
 ###############################################################################
-# Create a HERD and attach it to the file
-# ---------------------------------------
-# Create a :py:class:`~pynwb.resources.HERD` and assign it to the ``external_resources`` field of the
-# :py:class:`~pynwb.file.NWBFile`.
+# Get the file's HERD
+# -------------------
+# Use :py:meth:`~pynwb.file.NWBFile.get_external_resources` to get the file's
+# :py:class:`~pynwb.resources.HERD`. A file has at most one HERD, so this returns the existing HERD if
+# the file already has one (for example, when the file was read from disk) and otherwise, it creates
+# and  attaches a new empty HERD. The :py:attr:`~pynwb.file.NWBFile.external_resources` attribute returns the
+# HERD without creating one, returning ``None`` when the file has no external resources.
 
-nwbfile.external_resources = HERD()
+herd = nwbfile.get_external_resources()
 
 ###############################################################################
 # Add references with ``add_ref``
@@ -68,7 +70,7 @@ nwbfile.external_resources = HERD()
 # ``entity_uri`` is the persistent URL the CURIE resolves to, which you can look up at
 # ``https://bioregistry.io/<entity_id>``.
 
-nwbfile.external_resources.add_ref(
+herd.add_ref(
     container=nwbfile.subject,
     key=nwbfile.subject.species,
     entity_id="NCBITaxon:10090",
@@ -82,6 +84,15 @@ nwbfile.external_resources.add_ref(
 # `Allen Mouse Brain Atlas <https://atlas.brain-map.org/>`_. When the target is a column, pass the
 # table as the ``container`` and the column name as the ``attribute``; HERD resolves the reference to
 # the column object itself.
+#
+# .. note::
+#    This same ``container`` plus ``attribute`` form also works for ragged columns (those backed by a
+#    :py:class:`~hdmf.common.table.VectorIndex`): ``add_ref(container=table, attribute="col", ...)``
+#    annotates the column's :py:class:`~hdmf.common.table.VectorData`, which holds the actual values
+#    used as keys. Do not annotate the column with ``add_ref(container=table["col"], attribute=None,
+#    ...)``: for a ragged column, ``table["col"]`` is the :py:class:`~hdmf.common.table.VectorIndex`
+#    (the integer offsets into the ``VectorData``), so HERD would annotate the index instead of the
+#    values.
 
 device = nwbfile.create_device(name="probe")
 electrode_group = nwbfile.create_electrode_group(
@@ -93,7 +104,7 @@ electrode_group = nwbfile.create_electrode_group(
 for _ in range(4):
     nwbfile.add_electrode(location="VISp", group=electrode_group)
 
-nwbfile.external_resources.add_ref(
+herd.add_ref(
     container=nwbfile.electrodes,
     attribute="location",
     key="VISp",
@@ -107,23 +118,23 @@ nwbfile.external_resources.add_ref(
 # :py:meth:`~hdmf.common.resources.HERD.to_dataframe` flattens the interlinked tables into a single
 # :py:class:`~pandas.DataFrame`, with one row per (object, key, entity) association.
 
-nwbfile.external_resources.to_dataframe()
+herd.to_dataframe()
 
 ###############################################################################
 # You can also view the individual tables. Each is a
 # :py:class:`~hdmf.common.table.DynamicTable` and has its own ``to_dataframe`` method.
 
-nwbfile.external_resources.keys.to_dataframe()
+herd.keys.to_dataframe()
 
 ###############################################################################
 
-nwbfile.external_resources.entities.to_dataframe()
+herd.entities.to_dataframe()
 
 ###############################################################################
 # :py:meth:`~hdmf.common.resources.HERD.get_object_type` returns all annotations for objects of a
 # given type, for example every annotated :py:class:`~pynwb.file.Subject`.
 
-nwbfile.external_resources.get_object_type(object_type="Subject")
+herd.get_object_type(object_type="Subject")
 
 ###############################################################################
 # Write and read the NWB file
