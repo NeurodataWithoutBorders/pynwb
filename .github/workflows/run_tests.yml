@@ -8,6 +8,10 @@ on:
       - 'latest-tmp'
   pull_request:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   run-tests:
     name: ${{ matrix.name }}
@@ -19,27 +23,21 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { name: linux-python3.10-minimum      , test-tox-env: test-py310-minimum    , build-tox-env: build-py310-minimum   , python-ver: "3.10" , os: ubuntu-latest }
+          - { name: linux-python3.10-minimum      , test-tox-env: test-py310-minimum    , python-ver: "3.10" , os: ubuntu-latest }
           # NOTE config below with "upload-wheels: true" specifies that wheels should be uploaded as an artifact
-          - { name: linux-python3.14-upgraded    , test-tox-env: test-py314-upgraded  , build-tox-env: build-py314-upgraded , python-ver: "3.14", os: ubuntu-latest , upload-wheels: true }
-          - { name: windows-python3.10-minimum   , test-tox-env: test-py310-minimum   , build-tox-env: build-py310-minimum  , python-ver: "3.10", os: windows-latest }
-          - { name: windows-python3.14-upgraded  , test-tox-env: test-py314-upgraded  , build-tox-env: build-py314-upgraded , python-ver: "3.14", os: windows-latest }
-          - { name: macos-python3.10-minimum     , test-tox-env: test-py310-minimum   , build-tox-env: build-py310-minimum  , python-ver: "3.10", os: macos-15-intel }
-          - { name: macos-python3.14-upgraded    , test-tox-env: test-py314-upgraded  , build-tox-env: build-py314-upgraded , python-ver: "3.14", os: macos-latest }
+          - { name: linux-python3.14-upgraded    , test-tox-env: test-py314-upgraded  , python-ver: "3.14", os: ubuntu-latest , upload-wheels: true }
+          - { name: windows-python3.10-minimum   , test-tox-env: test-py310-minimum   , python-ver: "3.10", os: windows-latest }
+          - { name: windows-python3.14-upgraded  , test-tox-env: test-py314-upgraded  , python-ver: "3.14", os: windows-latest }
+          - { name: macos-python3.10-minimum     , test-tox-env: test-py310-minimum   , python-ver: "3.10", os: macos-15-intel }
+          - { name: macos-python3.14-upgraded    , test-tox-env: test-py314-upgraded  , python-ver: "3.14", os: macos-latest }
     steps:
-      - name: Cancel non-latest runs
-        uses: styfle/cancel-workflow-action@0.11.0
-        with:
-          all_but_latest: true
-          access_token: ${{ github.token }}
-
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           submodules: 'recursive'
           fetch-depth: 0  # tags are required for versioneer to determine the version
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python-ver }}
 
@@ -55,7 +53,7 @@ jobs:
 
       - name: Build wheel and source distribution
         run: |
-          tox -e ${{ matrix.build-tox-env }}
+          tox -e build
           ls -1 dist
 
       - name: Test installation from a wheel
@@ -64,7 +62,7 @@ jobs:
 
       - name: Upload distribution as a workspace artifact
         if: ${{ matrix.upload-wheels }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: distributions
           path: dist
@@ -84,19 +82,13 @@ jobs:
           - { name: windows-gallery-python3.10-minimum , test-tox-env: gallery-py310-minimum , python-ver: "3.10", os: windows-latest }
           - { name: windows-gallery-python3.14-upgraded, test-tox-env: gallery-py314-upgraded, python-ver: "3.14", os: windows-latest }
     steps:
-      - name: Cancel non-latest runs
-        uses: styfle/cancel-workflow-action@0.11.0
-        with:
-          all_but_latest: true
-          access_token: ${{ github.token }}
-
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           submodules: 'recursive'
           fetch-depth: 0  # tags are required for versioneer to determine the version
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python-ver }}
 
@@ -120,22 +112,16 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { name: conda-linux-python3.10-minimum   , test-tox-env: test-py310-minimum   , build-tox-env: build-py310-minimum   , python-ver: "3.10", os: ubuntu-latest }
-          - { name: conda-linux-python3.14-upgraded  , test-tox-env: test-py314-upgraded  , build-tox-env: build-py314-upgraded  , python-ver: "3.14", os: ubuntu-latest }
+          - { name: conda-linux-python3.10-minimum   , test-tox-env: test-py310-minimum   , python-ver: "3.10", os: ubuntu-latest }
+          - { name: conda-linux-python3.14-upgraded  , test-tox-env: test-py314-upgraded  , python-ver: "3.14", os: ubuntu-latest }
     steps:
-      - name: Cancel non-latest runs
-        uses: styfle/cancel-workflow-action@0.11.0
-        with:
-          all_but_latest: true
-          access_token: ${{ github.token }}
-
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           submodules: 'recursive'
           fetch-depth: 0  # tags are required for versioneer to determine the version
 
       - name: Set up Conda
-        uses: conda-incubator/setup-miniconda@v3
+        uses: conda-incubator/setup-miniconda@v4
         with:
           auto-update-conda: true
           python-version: ${{ matrix.python-ver }}
@@ -158,7 +144,7 @@ jobs:
 
       - name: Build wheel and source distribution
         run: |
-          tox -e ${{ matrix.build-tox-env }}
+          tox -e build
           ls -1 dist
 
       - name: Test installation from a wheel
@@ -177,31 +163,25 @@ jobs:
         include:
           - { name: conda-linux-python3.14-ros3  , python-ver: "3.14", os: ubuntu-latest }
     steps:
-      - name: Cancel non-latest runs
-        uses: styfle/cancel-workflow-action@0.11.0
-        with:
-          all_but_latest: true
-          access_token: ${{ github.token }}
-
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           submodules: 'recursive'
           fetch-depth: 0  # tags are required for versioneer to determine the version
 
       - name: Set up Conda
-        uses: conda-incubator/setup-miniconda@v3
+        uses: conda-incubator/setup-miniconda@v4
         with:
           auto-update-conda: true
           activate-environment: ros3
           environment-file: environment-ros3.yml
           python-version: ${{ matrix.python-ver }}
           channels: conda-forge
-          auto-activate-base: false
+          conda-remove-defaults: "true"
+          auto-activate: false
 
       - name: Install run dependencies
         run: |
-          pip install -r requirements-dev.txt
-          pip install .
+          pip install --group test .
           conda info
           conda list
           pip list
@@ -222,31 +202,25 @@ jobs:
         include:
           - { name: conda-linux-gallery-python3.14-ros3  , python-ver: "3.14", os: ubuntu-latest }
     steps:
-      - name: Cancel non-latest runs
-        uses: styfle/cancel-workflow-action@0.11.0
-        with:
-          all_but_latest: true
-          access_token: ${{ github.token }}
-
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           submodules: 'recursive'
           fetch-depth: 0  # tags are required for versioneer to determine the version
 
       - name: Set up Conda
-        uses: conda-incubator/setup-miniconda@v3
+        uses: conda-incubator/setup-miniconda@v4
         with:
           auto-update-conda: true
           activate-environment: ros3
           environment-file: environment-ros3.yml
           python-version: ${{ matrix.python-ver }}
           channels: conda-forge
-          auto-activate-base: false
+          conda-remove-defaults: "true"
+          auto-activate: false
 
       - name: Install run dependencies
         run: |
-          pip install matplotlib
-          pip install .
+          pip install --group docs ".[zarr,termset]"
           pip list
 
       - name: Conda reporting
@@ -265,25 +239,19 @@ jobs:
     if: ${{ github.event_name == 'push' }}
     runs-on: ubuntu-latest
     steps:
-      - name: Cancel non-latest runs
-        uses: styfle/cancel-workflow-action@0.11.0
-        with:
-          all_but_latest: true
-          access_token: ${{ github.token }}
-
       - name: Checkout repo with submodules
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           submodules: 'recursive'
           fetch-depth: 0  # tags are required for versioneer to determine the version
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: '3.14'
 
       - name: Download wheel and source distributions from artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: distributions
           path: dist

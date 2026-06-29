@@ -83,8 +83,7 @@ editable mode.
 
     git clone --recurse-submodules https://github.com/NeurodataWithoutBorders/pynwb.git
     cd pynwb
-    pip install -r requirements.txt -r requirements-dev.txt
-    pip install -e .
+    pip install --group test --group docs -e ".[zarr,termset]"
 
 .. note::
     When importing PyNWB for the first time, the type map is automatically cached in a pickle file to improve load 
@@ -102,8 +101,7 @@ virtualenv or conda environment.
 
     git clone --recurse-submodules https://github.com/NeurodataWithoutBorders/pynwb.git
     cd pynwb
-    pip install -r requirements.txt -r requirements-dev.txt
-    pip install -e .
+    pip install --group test --group docs -e ".[zarr,termset]"
     tox
 
 For debugging it can be useful to keep the intermediate NWB files created by
