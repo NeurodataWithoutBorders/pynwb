@@ -145,7 +145,7 @@ def validate(**kwargs):
     compliance with the schema and compliance of data with NWB best practices.
     """
 
-    io, path, use_cached_namespaces, namespace, verbose, driver = getargs(
+    io, path, use_cached_namespaces, namespace, verbose, driver, aws_region = getargs(
         "io", "path", "use_cached_namespaces", "namespace", "verbose", "driver", "aws_region", kwargs
     )
     assert io != path, "Both 'io' and 'path' were specified! Please choose only one."
