@@ -5,7 +5,7 @@ from warnings import warn
 
 from hdmf.spec import NamespaceCatalog
 from hdmf.build import BuildManager, TypeMap
-from hdmf.utils import docval, getargs, popargs, AllowPositional
+from hdmf.utils import docval, getargs, AllowPositional
 from hdmf.backends.io import HDMFIO
 from hdmf.validate import ValidatorMap
 
@@ -132,18 +132,12 @@ def get_cached_namespaces_to_validate(path: Optional[str] = None,
     allow_positional=AllowPositional.WARNING,
 )
 def validate(**kwargs):
-    """Validate NWB file(s) against a namespace or its cached namespaces.
+    """Validate an NWB file against a namespace or its cached namespaces.
 
-    Note: this function checks for compliance with the NWB schema. 
+    Note: this function checks for compliance with the NWB schema.
     It is recommended to use the NWBInspector for more comprehensive validation of both
     compliance with the schema and compliance of data with NWB best practices.
     """
-
-    path = popargs("path", kwargs)
-    return _validate_single_file(path=path, **kwargs)
-
-
-def _validate_single_file(**kwargs):
 
     io, path, use_cached_namespaces, namespace, verbose, driver = getargs(
         "io", "path", "use_cached_namespaces", "namespace", "verbose", "driver", kwargs
