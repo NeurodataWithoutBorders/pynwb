@@ -1,3 +1,5 @@
+import numpy as np
+
 from pynwb import NWBHDF5IO
 
 from pynwb.testing.mock.file import mock_Subject, mock_NWBFile
@@ -33,6 +35,7 @@ from pynwb.testing.mock.behavior import (
 from pynwb.testing.mock.ecephys import (
     mock_ElectrodeGroup,
     mock_ElectrodesTable,
+    mock_electrodes,
     mock_ElectricalSeries,
     mock_SpikeEventSeries,
     mock_Units,
@@ -101,6 +104,20 @@ def test_mock_TimeSeries_w_timestamps():
 def test_mock_TimeSeries_w_no_time():
     ts = mock_TimeSeries()
     assert ts.rate == 10.0
+
+
+def test_mock_electrodes_sizes_table_to_n_electrodes():
+    """The auto-created table must have at least n_electrodes rows so the region is in range."""
+    region = mock_electrodes(n_electrodes=128)
+    assert len(region.data) == 128
+    assert len(region.table) == 128
+
+
+def test_mock_ElectricalSeries_more_than_five_channels():
+    """mock_ElectricalSeries must support data with more than the default 5 channels."""
+    electrical_series = mock_ElectricalSeries(data=np.ones((10, 128)))
+    assert electrical_series.data.shape[1] == 128
+    assert len(electrical_series.electrodes.table) == 128
 
 
 @pytest.mark.parametrize("mock_function", mock_functions)
