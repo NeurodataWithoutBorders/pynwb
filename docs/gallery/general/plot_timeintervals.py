@@ -24,8 +24,7 @@ a :py:class:`~hdmf.common.table.DynamicTable` with the following columns:
           data processing), it can be useful to describe intervals (or instantaneous events) in time
           as :py:class:`~pynwb.base.TimeSeries`. NWB provides several types for this purposes, e.g.,
           :py:class:`~pynwb.misc.IntervalSeries`, :py:class:`~pynwb.behavior.BehavioralEpochs`,
-          :py:class:`~pynwb.behavior.BehavioralEvents`, :py:class:`~pynwb.ecephys.EventDetection`, or
-          :py:class:`~pynwb.ecephys.SpikeEventSeries`.
+          :py:class:`~pynwb.ecephys.EventDetection`, or :py:class:`~pynwb.ecephys.SpikeEventSeries`.
 
 """
 
