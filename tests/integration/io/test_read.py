@@ -1,5 +1,6 @@
 from pathlib import Path
 import tempfile
+import urllib.request
 
 from pynwb import read_nwb
 from pynwb.testing.mock.file import mock_NWBFile
@@ -8,9 +9,15 @@ from pynwb.testing import TestCase
 import unittest
 try:
     from hdmf_zarr import NWBZarrIO  # noqa f401
-    HAVE_NWBZarrIO = True 
+    HAVE_NWBZarrIO = True
 except ImportError:
     HAVE_NWBZarrIO = False
+
+try:
+    import fsspec  # noqa: F401
+    HAVE_FSSPEC = True
+except ImportError:
+    HAVE_FSSPEC = False
 
 
 class TestReadNWBMethod(TestCase):
@@ -67,11 +74,50 @@ class TestReadNWBMethod(TestCase):
         with tempfile.TemporaryDirectory() as temp_dir:
             path = Path(temp_dir) / "test.txt"
             path.write_text("Not an NWB file")
-            
+
             expected_message = (
                 f"Unable to read file: '{path}'. The file is not recognized as either a valid HDF5 or Zarr NWB file. "
                 "Please ensure the file exists and contains valid NWB data."
             )
-            
+
             with self.assertRaisesWith(ValueError, expected_message):
                 read_nwb(path=path)
+
+    @unittest.skipIf(not HAVE_FSSPEC, "fsspec not installed")
+    def test_read_nwb_anonymous_remote_hdf5(self):
+        """Test reading an anonymous public HDF5 NWB file over HTTPS through fsspec."""
+        url = (
+            "https://dandiarchive.s3.amazonaws.com/blobs/11e/c89/"
+            "11ec8933-1456-4942-922b-94e5878bb991"
+        )
+        try:
+            urllib.request.urlopen(url, timeout=2)
+        except urllib.request.URLError:
+            self.skipTest("Internet access to DANDI failed.")
+
+        nwbfile = read_nwb(path=url)
+        self.assertEqual(len(nwbfile.acquisition['TestData'].data[:]), 3)
+        nwbfile.get_read_io().close()
+
+    @unittest.skipIf(not HAVE_NWBZarrIO or not HAVE_FSSPEC, "hdmf-zarr or fsspec not installed")
+    def test_read_nwb_anonymous_remote_zarr(self):
+        """Test reading an anonymous public Zarr NWB file from DANDI through fsspec.
+
+        Uses the same DANDI 000719 file as hdmf-zarr's own S3 streaming tutorial (PR #330).
+        Depends on hdmf-zarr's `resolve_ref` self-reference fix
+        (https://github.com/hdmf-dev/hdmf-zarr/pull/348); without that fix this read
+        fails with `PathNotFoundError: nothing found at path ''`.
+        """
+        url = (
+            "https://dandiarchive.s3.amazonaws.com/zarr/"
+            "c8c6b848-fbc6-4f58-85ff-e3f2618ee983/"
+        )
+        try:
+            urllib.request.urlopen(url + ".zmetadata", timeout=2)
+        except urllib.request.URLError:
+            self.skipTest("Internet access to DANDI failed.")
+
+        nwbfile = read_nwb(path=url)
+        self.assertEqual(nwbfile.identifier, "7208f856-f527-479f-973d-e6e72326a8ea")
+        self.assertEqual(nwbfile.subject.subject_id, "R6")
+        nwbfile.get_read_io().close()
