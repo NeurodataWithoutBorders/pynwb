@@ -107,7 +107,7 @@ def test_mock_TimeSeries_w_no_time():
 
 
 def test_mock_electrodes_sizes_table_to_n_electrodes():
-    """The auto-created table must have at least n_electrodes rows so the region is in range."""
+    """The auto-created table must have exactly n_electrodes rows so the region of n_electrodes is in range."""
     region = mock_electrodes(n_electrodes=128)
     assert len(region.data) == 128
     assert len(region.table) == 128
