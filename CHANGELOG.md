@@ -2,6 +2,9 @@
 
 ## PyNWB 4.0.1 (Unreleased)
 
+### Added
+- Added remote-read support to `pynwb.read_nwb`. The function now accepts remote URLs (`s3://`, `gs://`, `abfs://`, `https://`, etc.) and dispatches to the right backend based on the URL: `.zarr` suffixes (and DANDI Zarr assets under `/zarr/`) are read with `NWBZarrIO`, everything else with `NWBHDF5IO`. Remote files are opened through `fsspec`, which now uses the URL's actual scheme instead of the previous hardcoded `fsspec.filesystem("http")` that mishandled non-HTTP schemes. @h-mayorquin [#2190](https://github.com/NeurodataWithoutBorders/pynwb/pull/2190)
+
 ### Fixed
 - Fixed `mock_electrodes` (and `mock_ElectricalSeries`) sizing the auto-created `ElectrodesTable` to a fixed 5 rows while the `DynamicTableRegion` followed `n_electrodes`, which raised an `IndexError` under HDMF 4.x+ for any data with more than 5 channels. The table is now sized to `n_electrodes`. @h-mayorquin [#2214](https://github.com/NeurodataWithoutBorders/pynwb/pull/2214)
 
@@ -37,7 +40,6 @@
 - Added `get_starting_time()` and `get_duration()` methods to `TimeIntervals` to get the earliest start time and total duration (span from earliest start to latest stop) of all intervals. @h-mayorquin [#2146](https://github.com/NeurodataWithoutBorders/pynwb/pull/2146)
 - Added `get_starting_time()` and `get_duration()` methods to `Units` to get the earliest spike time and total duration (span from earliest to latest spike) across all units. @h-mayorquin [#2164](https://github.com/NeurodataWithoutBorders/pynwb/pull/2164)
 - Added pandas 3.0 compatibility. `NWBFile.add_scratch` now accepts a `pandas.Series` or a pandas `ExtensionArray` (e.g., `StringArray` and `ArrowStringArray`) as `data`, which is normalized to numpy when constructing `ScratchData`. This relies on the coercion added in [hdmf-dev/hdmf#1469](https://github.com/hdmf-dev/hdmf/pull/1469) (HDMF 6.1.0), which also makes the inherited PyArrow-backed string columns from pandas 3 DataFrames work across `TimeSeries` subclasses, `add_unit`, `add_electrode`, and `DynamicTable.from_dataframe`. The `pandas<3` cap has been lifted. @rly [#2208](https://github.com/NeurodataWithoutBorders/pynwb/pull/2208)
-- Added remote-read support to `pynwb.read_nwb`. The function now accepts remote URLs (`s3://`, `gs://`, `abfs://`, `https://`, etc.) and dispatches to the right backend based on the URL: `.zarr` suffixes (and DANDI Zarr assets under `/zarr/`) are read with `NWBZarrIO`, everything else with `NWBHDF5IO`. Remote files are opened through `fsspec`, which now uses the URL's actual scheme instead of the previous hardcoded `fsspec.filesystem("http")` that mishandled non-HTTP schemes. @h-mayorquin [#2190](https://github.com/NeurodataWithoutBorders/pynwb/pull/2190)
 
 ### Fixed
 - Fixed ROS3 streaming and added an `aws_region` argument to `validate` so the AWS region can be passed through when validating a file opened with the `ros3` driver. HDF5 2.1.0 (h5py 3.16.0) requires the AWS region to be specified when opening an S3 URL with the `ros3` driver, so the ROS3 tests and the streaming tutorial now pass `aws_region="us-east-2"` (the region of the DANDI Archive S3 bucket). @rly [#2201](https://github.com/NeurodataWithoutBorders/pynwb/pull/2201)
