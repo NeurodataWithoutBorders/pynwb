@@ -91,7 +91,7 @@ ts1 = nwb_in.acquisition["raw_timeseries"]
 filt_data = np.convolve(ts1.data, np.ones(128), mode="same") / 128
 ts2 = TimeSeries(name="filtered_timeseries", data=filt_data, unit="m", timestamps=ts1)
 
-mod.add_container(ts2)
+mod.add(ts2)
 
 
 ####################

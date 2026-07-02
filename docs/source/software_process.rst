@@ -40,37 +40,32 @@ Installation Requirements
 running PyNWB. As a library, upper bound version constraints create more harm than good in the long term (see this
 `blog post`_) so we avoid setting upper bounds on requirements.
 
-If some of the packages are outdated, see :ref:`update_requirements_files`.
-
 .. _blog post: https://iscinumpy.dev/post/bound-version-constraints/
 
 --------------------
 Testing Requirements
 --------------------
 
-There are several kinds of requirements files used for testing PyNWB.
+Dependencies are declared in :pynwb:`pyproject.toml <blob/dev/pyproject.toml>`. User-facing optional features are
+``[project.optional-dependencies]`` extras (``zarr`` and ``termset``, installable with e.g.
+``pip install pynwb[zarr]``). Development dependencies are `PEP 735 <https://peps.python.org/pep-0735/>`_
+``[dependency-groups]``: ``test`` (test and lint tooling), ``stream`` (streaming dependencies for the optional
+tests), and ``docs`` (documentation dependencies).
 
-The first one is the :pynwb:`requirements-min.txt <blob/dev/requirements-min.txt>` file, which lists the package dependencies and their minimum versions for
-installing PyNWB.
+``tox`` selects these via the ``extras`` and ``dependency_groups`` settings in :pynwb:`tox.ini <blob/dev/tox.ini>`.
+The ``upgraded`` environments install the latest compatible dependencies, while the ``minimum`` environments use
+``uv pip install --resolution lowest-direct`` to install the lowest compatible versions of the direct dependencies.
 
-The second one is :pynwb:`requirements.txt <blob/dev/requirements.txt>`, which lists the pinned (concrete) dependencies to reproduce
-an entire development environment to use PyNWB.
-
-The third one is :pynwb:`requirements-dev.txt <blob/dev/requirements-dev.txt>`, which lists the pinned (concrete) dependencies to reproduce
-an entire development environment to use PyNWB, run PyNWB tests, check code style, compute coverage, and create test
-environments.
-
-The final one is :pynwb:`environment-ros3.yml <blob/dev/environment-ros3.yml>`, which lists the dependencies used to
-test ROS3 streaming in PyNWB.
+:pynwb:`environment-ros3.yml <blob/dev/environment-ros3.yml>` lists the conda dependencies used to test ROS3
+streaming in PyNWB.
 
 --------------------------
 Documentation Requirements
 --------------------------
 
-:pynwb:`requirements-doc.txt <blob/dev/requirements-doc.txt>` lists the dependencies to generate the documentation
-for PyNWB.
-Both this file and :pynwb:`requirements.txt <blob/dev/requirements.txt>` are used by ReadTheDocs_ to initialize the
-local environment for Sphinx to run.
+The documentation dependencies are declared in the ``docs`` dependency group in
+:pynwb:`pyproject.toml <blob/dev/pyproject.toml>`. ReadTheDocs_ installs them together with the ``zarr`` and
+``termset`` feature extras (``pip install --group docs ".[zarr,termset]"``) so the gallery examples can run.
 
 .. _ReadTheDocs: https://app.readthedocs.org/projects/pynwb/
 

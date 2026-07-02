@@ -5,7 +5,7 @@ from warnings import warn
 
 from hdmf.spec import NamespaceCatalog
 from hdmf.build import BuildManager, TypeMap
-from hdmf.utils import docval, getargs, popargs, AllowPositional
+from hdmf.utils import docval, getargs, AllowPositional
 from hdmf.backends.io import HDMFIO
 from hdmf.validate import ValidatorMap
 
@@ -127,13 +127,6 @@ def get_cached_namespaces_to_validate(path: Optional[str] = None,
         "default": None,
     },  # Argument order is for back-compatability
     {
-         "name": "paths",
-         "type": list,
-         "doc": ("List of NWB file paths. This argument will be deprecated in PyNWB 4.0. "
-                 "Use 'path' instead."),
-         "default": None,
-    },
-    {
         "name": "path",
         "type": (str, Path),
         "doc": "NWB file path.",
@@ -158,6 +151,12 @@ def get_cached_namespaces_to_validate(path: Optional[str] = None,
         "default": None,
     },
     {
+        "name": "aws_region",
+        "type": str,
+        "doc": "AWS region to use when opening the HDF5 file with the ros3 driver.",
+        "default": None,
+    },
+    {
         "name": "storage_options",
         "type": dict,
         "doc": "Zarr storage options for remote stores (used by the Zarr backend).",
@@ -169,38 +168,15 @@ def get_cached_namespaces_to_validate(path: Optional[str] = None,
     allow_positional=AllowPositional.WARNING,
 )
 def validate(**kwargs):
-    """Validate NWB file(s) against a namespace or its cached namespaces.
+    """Validate an NWB file against a namespace or its cached namespaces.
 
-    Note: this function checks for compliance with the NWB schema. 
+    Note: this function checks for compliance with the NWB schema.
     It is recommended to use the NWBInspector for more comprehensive validation of both
     compliance with the schema and compliance of data with NWB best practices.
     """
 
-    paths, path = popargs("paths", "path", kwargs)
-
-    if paths is not None:
-        warn("The 'paths' argument will be deprecated in PyNWB 4.0 "
-            "Use 'path' instead. To migrate, call this function separately for "
-            "each path instead of passing a list.",
-            DeprecationWarning)
-
-        if path is not None:
-            raise ValueError("Both 'paths' and 'path' were specified. "
-                             "Please choose only one.")
-
-        validation_errors = []
-        for p in paths:
-            validation_errors +=  _validate_single_file(path=p, **kwargs)
-    else:
-        validation_errors = _validate_single_file(path=path, **kwargs)
-
-    return validation_errors
-
-
-def _validate_single_file(**kwargs):
-
-    io, path, use_cached_namespaces, namespace, verbose, driver, storage_options = getargs(
-        "io", "path", "use_cached_namespaces", "namespace", "verbose", "driver", "storage_options", kwargs
+    io, path, use_cached_namespaces, namespace, verbose, driver, aws_region, storage_options = getargs(
+        "io", "path", "use_cached_namespaces", "namespace", "verbose", "driver", "aws_region", "storage_options", kwargs
     )
     assert io != path, "Both 'io' and 'path' were specified! Please choose only one."
     path = str(path) if isinstance(path, Path) else path
@@ -211,7 +187,7 @@ def _validate_single_file(**kwargs):
 
     if use_cached_namespaces:
         cached_namespaces, manager, namespace_dependencies = get_cached_namespaces_to_validate(
-            path=path, driver=driver, storage_options=storage_options, io=io,
+            path=path, driver=driver, aws_region=aws_region, storage_options=storage_options, io=io,
         )
 
         if any(cached_namespaces):
@@ -229,6 +205,7 @@ def _validate_single_file(**kwargs):
     if path is not None:
         io = _open_backend_io(path, backend_kwargs={
             "driver": driver,
+            "aws_region": aws_region,
             "storage_options": storage_options,
             "load_namespaces": False if not use_cached_namespaces else None,
         }, manager=manager)
@@ -247,17 +224,16 @@ def _validate_single_file(**kwargs):
             raise ValueError(
                 f"The namespace '{namespace}' could not be found in {namespace_message} as only "
                 f"{namespaces_to_validate} is present.",)
-  
+
     # validate against namespaces
     validation_errors = []
     for validation_namespace in namespaces_to_validate:
         if verbose:
             print(f"Validating {f'{path} ' if path is not None else ''}against "  # noqa: T201
-                  f"{namespace_message} using namespace '{validation_namespace}'.")  
+                  f"{namespace_message} using namespace '{validation_namespace}'.")
         validation_errors += _validate_helper(io=io, namespace=validation_namespace)
 
     if path is not None:
         io.close()  # close the io object if it was created within this function, otherwise leave as is
-    
-    return validation_errors
 
+    return validation_errors

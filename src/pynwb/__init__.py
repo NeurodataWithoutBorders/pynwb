@@ -98,47 +98,23 @@ __TYPE_MAP.merge(hdmf_typemap, ns_catalog=True)
 __resources = __get_resources()
 
 
-@docval({'name': 'extensions', 'type': (str, TypeMap, list),
-         'doc': 'a path to a namespace, a TypeMap, or a list consisting of paths to namespaces and TypeMaps',
-         'default': None},
-        {
+@docval({
             'name': 'copy', 'type': bool,
             'doc': 'Whether to return a deepcopy of the TypeMap. '
             'If False, a direct reference may be returned (use with caution).',
             'default': True
         },
-        returns="TypeMap loaded for the given extension or NWB core namespace", rtype=TypeMap,
+        returns="TypeMap loaded for the NWB core namespace", rtype=TypeMap,
         is_method=False)
 def get_type_map(**kwargs):
     '''
-    Get the TypeMap for the given extensions. If no extensions are provided,
-    return the TypeMap for the core namespace
+    Get the TypeMap for the NWB core namespace.
     '''
-    extensions, copy_map = getargs('extensions', 'copy', kwargs)
-    type_map = None
-    if extensions is None:
-        if copy_map:
-            type_map = deepcopy(__TYPE_MAP)
-        else:
-            type_map = __TYPE_MAP
+    copy_map = getargs('copy', kwargs)
+    if copy_map:
+        type_map = deepcopy(__TYPE_MAP)
     else:
-        warn("The 'extensions' argument is deprecated and will be removed in PyNWB 4.0", DeprecationWarning)
-        if isinstance(extensions, TypeMap):
-            type_map = extensions
-        else:
-            type_map = deepcopy(__TYPE_MAP)
-        if isinstance(extensions, list):
-            for ext in extensions:
-                if isinstance(ext, str):
-                    type_map.load_namespaces(ext)
-                elif isinstance(ext, TypeMap):
-                    type_map.merge(ext)
-                else:
-                    raise ValueError('extensions must be a list of paths to namespace specs or a TypeMaps')
-        elif isinstance(extensions, str):
-            type_map.load_namespaces(extensions)
-        elif isinstance(extensions, TypeMap):
-            type_map.merge(extensions)
+        type_map = __TYPE_MAP
     return type_map
 
 
@@ -147,8 +123,7 @@ def get_type_map(**kwargs):
         is_method=False)
 def get_manager(**kwargs):
     '''
-    Get a BuildManager to use for I/O using the given extensions. If no extensions are provided,
-    return a BuildManager that uses the core namespace
+    Get a BuildManager to use for I/O that uses the NWB core namespace.
     '''
     type_map = get_type_map(**kwargs)
     return BuildManager(type_map)
@@ -412,20 +387,17 @@ class NWBHDF5IO(_HDF5IO):
              'default': 'r'},
             {'name': 'load_namespaces', 'type': bool,
              'doc': ('whether or not to load cached namespaces from given path - not applicable in write mode '
-                     'or when `manager` is not None or when `extensions` is not None'),
+                     'or when `manager` is not None'),
              'default': True},
             {'name': 'manager', 'type': BuildManager, 'doc': 'the BuildManager to use for I/O', 'default': None},
-            {'name': 'extensions', 'type': (str, TypeMap, list),
-             'doc': 'a path to a namespace, a TypeMap, or a list consisting paths to namespaces and TypeMaps',
-             'default': None},
             *get_docval(_HDF5IO.__init__, "file", "comm", "driver", "aws_region", "herd_path"),)
     def __init__(self, **kwargs):
-        path, mode, manager, extensions, load_namespaces, file_obj, comm, driver, aws_region, herd_path =\
-            popargs('path', 'mode', 'manager', 'extensions', 'load_namespaces',
+        path, mode, manager, load_namespaces, file_obj, comm, driver, aws_region, herd_path =\
+            popargs('path', 'mode', 'manager', 'load_namespaces',
                     'file', 'comm', 'driver', 'aws_region', 'herd_path', kwargs)
         # Define the BuildManager to use
         io_modes_that_create_file = ['w', 'w-', 'x']
-        if mode in io_modes_that_create_file or manager is not None or extensions is not None:
+        if mode in io_modes_that_create_file or manager is not None:
             load_namespaces = False
 
         if mode in io_modes_that_create_file and path is not None and not str(path).endswith('.nwb'):
@@ -443,13 +415,8 @@ class NWBHDF5IO(_HDF5IO):
             # super().load_namespaces(ns_catalog, path)
             # tm = TypeMap(ns_catalog)
             # tm.copy_mappers(get_type_map())
-        else:
-            if manager is not None and extensions is not None:
-                raise ValueError("'manager' and 'extensions' cannot be specified together")
-            elif extensions is not None:
-                manager = get_manager(extensions=extensions)
-            elif manager is None:
-                manager = get_manager()
+        elif manager is None:
+            manager = get_manager()
         # Open the file
         super().__init__(path, manager=manager, mode=mode, file=file_obj, comm=comm,
                          driver=driver, aws_region=aws_region, herd_path=herd_path)

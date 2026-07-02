@@ -125,8 +125,8 @@ for ishank in range(nshanks):
     for ielec in range(nchannels_per_shank):
         nwbfile.add_electrode(
             group=electrode_group,
-            label="shank{}elec{}".format(ishank, ielec),
             location="brain area",
+            label="shank{}elec{}".format(ishank, ielec),  # custom column data are specified with keyword arguments
         )
         electrode_counter += 1
 
@@ -341,6 +341,7 @@ res = 1000
 duration = 20
 for n_units_per_shank in range(n_units):
     spike_times = np.where(np.random.rand((res * duration)) < (firing_rate / res))[0] / res
+    # custom column data, e.g., quality, are specified with keyword arguments to `add_unit`
     nwbfile.add_unit(spike_times=spike_times, quality="good")
 
 ####################

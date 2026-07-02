@@ -173,19 +173,20 @@ with fs.open(s3_url, "rb") as f:
 # ------------------------
 # ROS3 stands for "read only S3" and is a driver created by the HDF5 Group that allows HDF5 to read HDF5 files stored
 # remotely in s3 buckets. Using this method requires that your HDF5 library is installed with the ROS3 driver enabled.
-# With ROS3 support enabled in h5py, we can instantiate a :py:class:`~pynwb.NWBHDF5IO` object with the S3 URL and
-# specify the driver as "ros3". Like the other methods, you can use a context manager to open the file and close it,
+# With ROS3 support enabled in h5py, we can instantiate a :py:class:`~pynwb.NWBHDF5IO` object with the S3 URL,
+# specify the driver as "ros3", and pass the AWS region of the S3 bucket as ``aws_region`` (DANDI data are stored
+# in ``us-east-2``). Like the other methods, you can use a context manager to open the file and close it,
 # or open the file and close it manually.
 
 from pynwb import NWBHDF5IO
 
 # open with context manager
-with NWBHDF5IO(s3_url, mode='r', driver='ros3') as io:
+with NWBHDF5IO(s3_url, mode='r', driver='ros3', aws_region="us-east-2") as io:
     nwbfile = io.read()
     streamed_data = nwbfile.acquisition['lick_times'].time_series['lick_left_times'].data[:]
 
 # open and close manually
-io = NWBHDF5IO(s3_url, mode='r', driver='ros3')
+io = NWBHDF5IO(s3_url, mode='r', driver='ros3', aws_region="us-east-2")
 nwbfile = io.read()
 streamed_data = nwbfile.acquisition['lick_times'].time_series['lick_left_times'].data[:]
 io.close()

@@ -1,4 +1,6 @@
 from datetime import datetime
+import importlib.util
+import unittest
 from dateutil.tz import tzlocal
 import numpy as np
 from numpy.testing import assert_array_equal
@@ -7,6 +9,8 @@ import pandas as pd
 from pynwb import NWBFile, TimeSeries
 from pynwb.core import ScratchData, DynamicTable
 from pynwb.testing import TestCase
+
+PYARROW_AVAILABLE = importlib.util.find_spec('pyarrow') is not None
 
 
 class TestScratchData(TestCase):
@@ -28,41 +32,9 @@ class TestScratchData(TestCase):
         self.assertListEqual(sd.data, [1, 2, 3, 4])
         self.assertEqual(sd.description, 'test scratch')
 
-    def test_scratch_notes_deprecation(self):
-        msg = ("The `notes` argument of ScratchData.__init__ has been deprecated and will "
-               "be removed in PyNWB 4.0. Use description instead.")
-        with self.assertRaisesWith(ValueError, msg):
-            ScratchData(name='test', data=[1, 2, 3, 4, 5], notes='test notes')
-
-        # create object in construct mode, modeling the behavior of the ObjectMapper on read 
-        # should not raise error or warning
-        data = ScratchData.__new__(ScratchData, in_construct_mode=True)
-        data.__init__(name='test', data=[1, 2, 3, 4, 5], notes='test notes')
-        self.assertEqual(data.description, 'test notes')
-
-        # test notes property
-        msg = ("Use of ScratchData.notes has been deprecated and will be removed in PyNWB 4.0. "
-               "Use ScratchData.description instead.")
-        
-        with self.assertWarnsWith(DeprecationWarning, msg):
-            data.notes
-
-        # test notes setter
-        data = ScratchData(name='test', data=[1, 2, 3, 4, 5], description='test description')
-        with self.assertRaisesWith(ValueError, msg):
-            data.notes = 'test notes'
-
     def test_scratch_no_description(self):
         with self.assertRaisesWith(ValueError, 'ScratchData.description is required.'):
             ScratchData(name='test', data=[1, 2, 3, 4, 5])
-
-    def test_scratch_notes_and_description(self):
-        msg = ('Cannot provide both notes and description to ScratchData.__init__. The description '
-               'argument is recommended.')
-        data = ScratchData.__new__(ScratchData, in_construct_mode=True)
-        with self.assertRaisesWith(ValueError, msg):
-            data.__init__(name='test', data=[1, 2, 3, 4, 5], notes='test notes',
-                          description='test description')
 
     def test_add_scratch_int(self):
         ret = self.nwbfile.add_scratch(2, name='test', description='test data')
@@ -83,13 +55,13 @@ class TestScratchData(TestCase):
 
     def test_add_scratch_list_no_name(self):
         msg = ('A name is required for NWBFile.add_scratch when adding a scalar, numpy.ndarray, '
-               'list, tuple, or pandas.DataFrame as scratch data.')
+               'list, tuple, pandas.Series, pandas extension array, or pandas.DataFrame as scratch data.')
         with self.assertRaisesWith(ValueError, msg):
             self.nwbfile.add_scratch([1, 2, 3, 4])
 
     def test_add_scratch_ndarray_no_description(self):
         msg = ('A description is required for NWBFile.add_scratch when adding a scalar, numpy.ndarray, '
-               'list, tuple, or pandas.DataFrame as scratch data.')
+               'list, tuple, pandas.Series, pandas extension array, or pandas.DataFrame as scratch data.')
         with self.assertRaisesWith(ValueError, msg):
             self.nwbfile.add_scratch(np.array([1, 2, 3, 4]), name='test')
 
@@ -102,17 +74,46 @@ class TestScratchData(TestCase):
     def test_add_scratch_dataframe_no_description(self):
         data = pd.DataFrame(data={'col1': [1, 2, 3, 4], 'col2': ['a', 'b', 'c', 'd']})
         msg = ('A description is required for NWBFile.add_scratch when adding a scalar, numpy.ndarray, '
-               'list, tuple, or pandas.DataFrame as scratch data.')
+               'list, tuple, pandas.Series, pandas extension array, or pandas.DataFrame as scratch data.')
         with self.assertRaisesWith(ValueError, msg):
             self.nwbfile.add_scratch(data, name='test')
 
-    def test_add_scratch_notes_and_description(self):
-        error_msg = 'Cannot call add_scratch with (notes or table_description) and description'
-        warning_msg = ("Use of the `notes` or `table_description` argument is deprecated and will be "
-                       "removed in PyNWB 4.0. Use the `description` argument instead.")
-        with self.assertWarnsWith(DeprecationWarning, warning_msg):
-            with self.assertRaisesWith(ValueError, error_msg):
-                self.nwbfile.add_scratch([1, 2, 3, 4], name='test', description='test data', notes='test notes')
+    def test_add_scratch_series_numeric(self):
+        data = pd.Series([1, 2, 3, 4])
+        self.nwbfile.add_scratch(data, name='test', description='test data')
+        ret = self.nwbfile.get_scratch('test')
+        self.assertIsInstance(ret, np.ndarray)
+        assert_array_equal(ret, np.array([1, 2, 3, 4]))
+
+    def test_add_scratch_series_string(self):
+        data = pd.Series(['a', 'b', 'c', 'd'])
+        self.nwbfile.add_scratch(data, name='test', description='test data')
+        ret = self.nwbfile.get_scratch('test')
+        self.assertIsInstance(ret, np.ndarray)
+        assert_array_equal(ret, np.array(['a', 'b', 'c', 'd']))
+
+    def test_add_scratch_extension_array_string(self):
+        # pandas StringArray, the dtype that pandas 3.0 uses for DataFrame string columns by default
+        data = pd.array(['a', 'b', 'c', 'd'], dtype='string')
+        self.nwbfile.add_scratch(data, name='test', description='test data')
+        ret = self.nwbfile.get_scratch('test')
+        self.assertIsInstance(ret, np.ndarray)
+        assert_array_equal(ret, np.array(['a', 'b', 'c', 'd']))
+
+    @unittest.skipUnless(PYARROW_AVAILABLE, 'pyarrow is not installed')
+    def test_add_scratch_arrow_extension_array_string(self):
+        # PyArrow-backed string array, the dtype that pandas 3.0 uses for df['col'].values on string columns
+        data = pd.array(['a', 'b', 'c', 'd'], dtype='string[pyarrow]')
+        self.nwbfile.add_scratch(data, name='test', description='test data')
+        ret = self.nwbfile.get_scratch('test')
+        self.assertIsInstance(ret, np.ndarray)
+        assert_array_equal(ret, np.array(['a', 'b', 'c', 'd']))
+
+    def test_add_scratch_series_no_name(self):
+        msg = ('A name is required for NWBFile.add_scratch when adding a scalar, numpy.ndarray, '
+               'list, tuple, pandas.Series, pandas extension array, or pandas.DataFrame as scratch data.')
+        with self.assertRaisesWith(ValueError, msg):
+            self.nwbfile.add_scratch(pd.Series([1, 2, 3, 4]))
 
     def test_add_scratch_container(self):
         data = TimeSeries(name='test_ts', data=[1, 2, 3, 4, 5], unit='unit', timestamps=[1.1, 1.2, 1.3, 1.4, 1.5])
@@ -150,22 +151,6 @@ class TestScratchData(TestCase):
         self.nwbfile.add_scratch(data)
         self.assertIs(self.nwbfile.get_scratch('test', convert=False), data)
         self.assertIs(self.nwbfile.scratch['test'], data)
-    
-    def test_add_scratch_notes_deprecation(self):
-        msg =  ("Use of the `notes` or `table_description` argument is deprecated and will be removed in PyNWB 4.0. "
-                "Use the `description` argument instead.")
-        with self.assertWarnsWith(DeprecationWarning, msg):
-            self.nwbfile.add_scratch(name='test', data=[1, 2, 3, 4, 5], notes='test notes')
-        self.assertEqual(self.nwbfile.scratch['test'].description, 'test notes')    
-
-    def test_add_scratch_table_description_deprecation(self):
-        msg =  ('Use of the `notes` or `table_description` argument is deprecated and will be removed in PyNWB 4.0. '
-                'Use the `description` argument instead.')
-        df = pd.DataFrame(data={'col1': [1, 2, 3, 4], 'col2': ['a', 'b', 'c', 'd']})
-        with self.assertWarnsWith(DeprecationWarning, msg):
-            self.nwbfile.add_scratch(name='test', data=df,
-                                     table_description='test table_description')
-        self.assertEqual(self.nwbfile.scratch['test'].description, 'test table_description')    
 
     def test_get_scratch_list_convert_false(self):
         self.nwbfile.add_scratch([1, 2, 3, 4], name='test', description='test description')

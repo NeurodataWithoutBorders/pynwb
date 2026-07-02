@@ -336,25 +336,6 @@ class TestValidateFunction(TestCase):
             # remove path from error messages since it will not be included in io outputs
             self.assertEqual(str(e_io.exception), str(e_path.exception))
 
-    def test_validate_paths_deprecation(self):
-        """Test paths argument deprecation warning."""
-
-        # test deprecation warning for 'paths' argument
-        msg = ("The 'paths' argument will be deprecated in PyNWB 4.0 "
-            "Use 'path' instead. To migrate, call this function separately for "
-            "each path instead of passing a list.")
-        with self.assertWarnsWith(DeprecationWarning, msg):
-            results = validate(paths=['tests/back_compat/1.1.2_nwbfile.nwb',
-                                      'tests/back_compat/2.1.0_nwbfile_with_extension.nwb'],)
-        self.assertEqual(results, [])
-
-        # test specifying both 'paths' and 'path' arguments
-        expected_error = "Both 'paths' and 'path' were specified. Please choose only one."
-        with self.assertWarnsWith(DeprecationWarning, msg):
-            with self.assertRaisesWith(ValueError, expected_error):
-                validate(paths=['tests/back_compat/1.0.2_nwbfile.nwb'],
-                         path='tests/back_compat/1.0.2_nwbfile.nwb')
-
 
 @unittest.skipIf(not HAVE_NWBZarrIO, "hdmf-zarr is not installed")
 class TestValidateZarr(TestCase):
