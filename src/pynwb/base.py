@@ -59,34 +59,6 @@ class ProcessingModule(MultiContainerInterface):
     def containers(self):
         return self.data_interfaces
 
-    @docval({'name': 'container', 'type': (NWBDataInterface, DynamicTable),
-             'doc': 'the NWBDataInterface to add to this Module'})
-    def add_container(self, **kwargs):
-        '''
-        Add an NWBContainer to this ProcessingModule
-        '''
-        warn("add_container is deprecated and will be removed in PyNWB 4.0. Use add instead.", DeprecationWarning)
-        self.add(kwargs['container'])
-
-    @docval({'name': 'container_name', 'type': str, 'doc': 'the name of the NWBContainer to retrieve'})
-    def get_container(self, **kwargs):
-        '''
-        Retrieve an NWBContainer from this ProcessingModule
-        '''
-        warn('get_container is deprecated and will be removed in PyNWB 4.0. Use get instead.', DeprecationWarning)
-        return self.get(kwargs['container_name'])
-
-    @docval({'name': 'NWBDataInterface', 'type': (NWBDataInterface, DynamicTable),
-             'doc': 'the NWBDataInterface to add to this Module'})
-    def add_data_interface(self, **kwargs):
-        warn('add_data_interface is deprecated and will be removed in PyNWB 4.0. Use add instead.', DeprecationWarning)
-        self.add(kwargs['NWBDataInterface'])
-
-    @docval({'name': 'data_interface_name', 'type': str, 'doc': 'the name of the NWBContainer to retrieve'})
-    def get_data_interface(self, **kwargs):
-        warn('get_data_interface is deprecated and will be removed in PyNWB 4.0. Use get instead.', DeprecationWarning)
-        return self.get(kwargs['data_interface_name'])
-
     def __len__(self):
         """Get the number of data interfaces in this ProcessingModule.
 

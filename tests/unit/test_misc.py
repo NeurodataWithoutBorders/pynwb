@@ -17,7 +17,8 @@ class AnnotationSeriesConstructor(TestCase):
     def test_init_deprecated(self):
         """Test that creating an AnnotationSeries warns about deprecation."""
         msg = (
-            "AnnotationSeries is deprecated. Use an EventsTable with an 'annotation' column instead. "
+            "AnnotationSeries is deprecated. Use an EventsTable with an 'annotation' column instead, "
+            "added to the NWBFile via nwbfile.add_events_table() or nwbfile.create_events_table(). "
             "Creating a new AnnotationSeries will not be allowed in a future version of PyNWB."
         )
         with self.assertWarnsWith(UserWarning, msg):

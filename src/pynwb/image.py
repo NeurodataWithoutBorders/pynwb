@@ -62,6 +62,7 @@ class ImageSeries(TimeSeries):
                      'external_file',
                      'starting_frame',
                      'format',
+                     'num_samples',
                      'device')
 
     # value used when an ImageSeries is read and missing data
@@ -88,6 +89,12 @@ class ImageSeries(TimeSeries):
             {'name': 'starting_frame', 'type': Iterable,
              'doc': 'Each entry is a frame number that corresponds to the first frame of each file '
                     'listed in external_file within the full ImageSeries.', 'default': None},
+            {'name': 'num_samples', 'type': (int, np.unsignedinteger),
+             'doc': ('Total number of frames across all external files. Required when format="external" and '
+                     'timing is described using starting_time and rate, because data is empty and its first '
+                     'dimension cannot be used to determine the number of frames. When timestamps is provided, '
+                     'len(timestamps) already serves this purpose.'),
+             'default': None},
             {'name': 'bits_per_pixel', 'type': int, 'doc': 'DEPRECATED: Number of bits per image pixel',
              'default': None},
             {'name': 'dimension', 'type': Iterable,
@@ -98,6 +105,7 @@ class ImageSeries(TimeSeries):
              'doc': 'Device used to capture the images/video.', 'default': None},
              allow_positional=AllowPositional.WARNING,)
     def __init__(self, **kwargs):
+        num_samples = kwargs.pop('num_samples')
         keys_to_set = ('bits_per_pixel', 'dimension', 'external_file', 'starting_frame', 'format', 'device')
         args_to_set = popargs_to_dict(keys_to_set, kwargs)
         name, data, unit = getargs('name', 'data', 'unit', kwargs)
@@ -123,11 +131,13 @@ class ImageSeries(TimeSeries):
                 [0] if len(args_to_set["external_file"]) == 1 else None
             )
 
+        self._num_samples = None  # must exist before super().__init__ accesses num_samples
         super().__init__(**kwargs)
 
         for key, val in args_to_set.items():
             setattr(self, key, val)
 
+        self._num_samples = num_samples
         self._change_external_file_format()
 
         error_msg = self._check_image_series_dimension()
@@ -145,6 +155,26 @@ class ImageSeries(TimeSeries):
         error_msg = self._check_external_file_data()
         if error_msg:
             self._error_on_new_warn_on_construct(error_msg=error_msg)
+
+        error_msg = self._check_num_samples()
+        if error_msg:
+            self._error_on_new_pass_on_construct(error_msg=error_msg)
+
+    def _check_num_samples(self):
+        """Check that num_samples is set when format='external' and rate is used for timing.
+
+        In this configuration data is an empty array so its shape cannot indicate frame count.
+        """
+        if (
+            self.external_file is not None
+            and self.rate is not None
+            and self.num_samples is None
+        ):
+            return (
+                "%s '%s': num_samples should be set when format='external' and rate is used for timing, "
+                "because data is empty and its length cannot be used to determine the number of frames."
+                % (self.__class__.__name__, self.name)
+            )
 
     def _change_external_file_format(self):
         """
@@ -216,6 +246,16 @@ class ImageSeries(TimeSeries):
             "%s '%s': Either external_file or data must be specified (not None), but not both."
             % (self.__class__.__name__, self.name)
         )
+
+    @property
+    def num_samples(self):
+        # Overrides TimeSeries.num_samples to return the stored attribute when set, because
+        # external-file series have empty data and len(data) would give 0 instead of the true count.
+        if self._num_samples is not None:
+            return self._num_samples
+        if self.external_file is not None:
+            return None
+        return super().num_samples
 
     @property
     def bits_per_pixel(self):

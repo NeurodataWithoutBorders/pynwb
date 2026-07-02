@@ -77,7 +77,18 @@ class CustomSphinxGallerySectionSortKey(ExampleTitleSortKey):
     # listed here will be added in alphabetical order based on title after the
     # explicitly listed galleries
     GALLERY_ORDER = {
-        'general': ['plot_file.py'],
+        'general': [
+            "plot_file.py",
+            "add_remove_containers.py",
+            "plot_timeintervals.py",
+            "scratch.py",
+            "extensions.py",
+            "plot_configurator.py",
+            "object_id.py",
+            "plot_read_basics.py",
+            "plot_external_resources.py",
+            "resources_streaming.py",
+        ],
         # Sort domain-specific tutorials based on domain to group tutorials belonging to the same domain
         'domain': [
             "ecephys.py",
@@ -168,11 +179,20 @@ extlinks = {
 
 nitpicky = True
 nitpick_ignore = [('py:class', 'Intracomm'),
-                  ('py:class', 'BaseStorageSpec')]
+                  ('py:class', 'BaseStorageSpec'),
+                  # pandas publishes ``pandas.DataFrame`` but autodoc renders the return
+                  # annotation as its qualname ``pandas.core.frame.DataFrame``, which has no
+                  # intersphinx target.
+                  ('py:class', 'pandas.core.frame.DataFrame'),
+                  # HDMF's ``array_data`` docval macro renders ``pandas.ExtensionArray``, but
+                  # pandas publishes the class as ``pandas.api.extensions.ExtensionArray``, so
+                  # the short path has no intersphinx target.
+                  ('py:class', 'pandas.ExtensionArray')]
 
 linkcheck_ignore = [
     r'https://training.incf.org/*',  # temporary ignore until SSL certificate issue is resolved
     r'https://scicrunch.org/*',  # scicrunch.org blocks automated requests with 403
+    r'https://app\.readthedocs\.org/projects/pynwb/.*',  # readthedocs blocks CI runner IPs (intermittent 403)
 ]
 
 suppress_warnings = ["config.cache"]
@@ -192,7 +212,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'PyNWB'
-copyright = u'2017-2025, Neurodata Without Borders'
+copyright = u'2017-2026, Neurodata Without Borders'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the

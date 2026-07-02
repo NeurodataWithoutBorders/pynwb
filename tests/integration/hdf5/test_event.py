@@ -159,6 +159,25 @@ class TestEventsTableRoundtrip(TestCase):
             self.assertEqual(read_table['event_type'].data[0], 'stimulus')
             self.assertEqual(read_table['confidence'].data[0], 0.95)
 
+    def test_roundtrip_source_description(self):
+        """Test that source_description is preserved after roundtrip"""
+        table = EventsTable(
+            name='test_events',
+            description='Test events table',
+            source_description='Acquisition system',
+        )
+        table.add_event(timestamp=1.0)
+
+        nwbfile = self._create_nwbfile()
+        nwbfile.add_events_table(table)
+        with NWBHDF5IO(self.path, 'w') as io:
+            io.write(nwbfile)
+
+        with NWBHDF5IO(self.path, 'r') as io:
+            read_nwbfile = io.read()
+            read_table = read_nwbfile.events['test_events']
+            self.assertEqual(read_table.source_description, 'Acquisition system')
+
     def test_roundtrip_timestamp_resolution(self):
         """Test that timestamp resolution is preserved after roundtrip"""
         # Create a table with a pre-created timestamp column with resolution

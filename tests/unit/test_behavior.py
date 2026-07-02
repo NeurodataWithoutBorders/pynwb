@@ -64,7 +64,8 @@ class BehavioralEventsConstructor(TestCase):
     def test_init_deprecated(self):
         """Test that creating a BehavioralEvents warns about deprecation."""
         msg = (
-            "BehavioralEvents is deprecated. Use an EventsTable in NWBFile.events instead for event data. "
+            "BehavioralEvents is deprecated. Use an EventsTable instead, added to the NWBFile via "
+            "nwbfile.add_events_table() or nwbfile.create_events_table(). "
             "Creating a new BehavioralEvents will not be allowed in a future version of PyNWB."
         )
         ts = TimeSeries(name='test_ts', data=np.ones((3, 2)), unit='unit', timestamps=[1., 2., 3.])

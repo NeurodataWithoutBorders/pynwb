@@ -1,6 +1,5 @@
 import os
 import tempfile
-import warnings
 from datetime import datetime
 from uuid import uuid4
 
@@ -52,14 +51,8 @@ class TestNWBContainer(TestCase):
         """
         Test constructor
         """
-        with warnings.catch_warnings(record=True):
-            warnings.filterwarnings(
-                "ignore",
-                message=r"HERD is experimental .*",
-                category=UserWarning,
-            )
-            er = HERD()
-            self.assertIsInstance(er, HERD)
+        er = HERD()
+        self.assertIsInstance(er, HERD)
 
     def test_nwbfile_init_herd(self):
         session_start_time = datetime(2018, 4, 25, 2, 30, 3, tzinfo=tz.gettz("US/Pacific"))
@@ -137,6 +130,24 @@ class TestNWBContainer(TestCase):
         self.assertIs(nwbfile.get_external_resources(linked=True), linked_herd)
         # attribute returns the original, not the linked one
         self.assertIs(nwbfile.external_resources, original_herd)
+
+    def test_get_external_resources_creates_herd(self):
+        """get_external_resources creates and attaches a HERD when the file does not have one."""
+        session_start_time = datetime(2018, 4, 25, 2, 30, 3, tzinfo=tz.gettz("US/Pacific"))
+        nwbfile = NWBFile(
+            session_description="ECoG recording during audio speech perception task",
+            identifier=str(uuid4()),
+            session_start_time=session_start_time,
+        )
+        self.assertIsNone(nwbfile.external_resources)
+
+        herd = nwbfile.get_external_resources()
+        self.assertIsInstance(herd, HERD)
+        self.assertIs(nwbfile.external_resources, herd)
+        self.assertEqual(herd.parent, nwbfile)
+
+        # calling again returns the same HERD rather than creating a new one
+        self.assertIs(nwbfile.get_external_resources(), herd)
 
     def test_link_resources(self):
         """Make sure that the original HERD is not overwritten on export."""
