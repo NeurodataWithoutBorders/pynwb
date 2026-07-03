@@ -2,6 +2,9 @@
 
 ## PyNWB 4.0.1 (Unreleased)
 
+### Changed
+- Lifted the `<1.11` cap on the `linkml` and `linkml-runtime` termset extras and bumped the `dandi` docs dependency to `>=0.76.5`. dandi 0.76.5 lifts its `click<8.2` bound ([dandi/dandi-cli#1883](https://github.com/dandi/dandi-cli/pull/1883)), which had conflicted with the `click>=8.2` requirement of linkml 1.11. @rly [#XXXX](https://github.com/NeurodataWithoutBorders/pynwb/pull/XXXX)
+
 ### Fixed
 - Fixed `mock_electrodes` (and `mock_ElectricalSeries`) sizing the auto-created `ElectrodesTable` to a fixed 5 rows while the `DynamicTableRegion` followed `n_electrodes`, which raised an `IndexError` under HDMF 4.x+ for any data with more than 5 channels. The table is now sized to `n_electrodes`. @h-mayorquin [#2214](https://github.com/NeurodataWithoutBorders/pynwb/pull/2214)
 

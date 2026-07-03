@@ -50,10 +50,8 @@ zarr = [
     "numcodecs>=0.10.0,<0.16.0",  # numcodecs 0.16.0 is not compatible with zarr<3
 ]
 termset = [
-    # linkml and linkml-runtime 1.11 require click>=8.2, which conflicts with the click<8.2 bound that
-    # dandi imposes when the termset and docs stacks are installed together in the gallery environment.
-    "linkml>=1.5.0,<1.11",
-    "linkml-runtime>=1.5.5,<1.11",
+    "linkml>=1.5.0",
+    "linkml-runtime>=1.5.5",
     "schemasheets>=0.4.0",
     "oaklib>=0.5.12",
 ]
@@ -91,7 +89,7 @@ docs = [
     "dataframe_image>=0.2.3",  # used to render large dataframe as image in the sphinx gallery to improve html display
     "lxml>=4.9.3",  # used by dataframe_image when using the matplotlib backend
     "hdf5plugin>=4.0.0",
-    "dandi>=0.46.6",
+    "dandi>=0.76.5",  # 0.76.5 lifts the click<8.2 bound, allowing linkml/linkml-runtime>=1.11
     "pooch>=1.6.0",
 ]
 
