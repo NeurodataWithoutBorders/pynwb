@@ -243,3 +243,70 @@ class TimeIntervalsTest(TestCase):
         ti.add_interval(start_time=5.0, stop_time=10.0)
         # Duration: 10.0 - 5.0 = 5.0
         self.assertEqual(ti.get_duration(), 5.0)
+
+    def test_get_starting_time_ignores_nan(self):
+        """Test get_starting_time ignores NaN start times (#2212)"""
+        ti = TimeIntervals(name='ti_name')
+        ti.add_interval(start_time=np.nan, stop_time=5.0)
+        ti.add_interval(start_time=2.0, stop_time=7.0)
+        ti.add_interval(start_time=8.0, stop_time=np.nan)
+        self.assertEqual(ti.get_starting_time(), 2.0)
+
+    def test_get_starting_time_all_nan(self):
+        """Test get_starting_time returns None when all start times are NaN (#2212)"""
+        ti = TimeIntervals(name='ti_name')
+        ti.add_interval(start_time=np.nan, stop_time=5.0)
+        ti.add_interval(start_time=np.nan, stop_time=9.0)
+        self.assertIsNone(ti.get_starting_time())
+
+    def test_get_duration_ignores_nan_stop(self):
+        """Test get_duration ignores a NaN stop time (#2212 issue example)"""
+        ti = TimeIntervals(name='ti_name')
+        ti.add_interval(start_time=0.0, stop_time=1.0)
+        ti.add_interval(start_time=2.0, stop_time=np.nan)  # ongoing interval
+        # nanmax(stop_time)=1.0, nanmin(start_time)=0.0 -> 1.0
+        self.assertEqual(ti.get_duration(), 1.0)
+
+    def test_get_duration_ignores_nan_stop_among_valid(self):
+        """Test get_duration ignores a NaN stop among valid stop times (#2212)"""
+        ti = TimeIntervals(name='ti_name')
+        ti.add_interval(start_time=2.0, stop_time=5.0)
+        ti.add_interval(start_time=7.0, stop_time=np.nan)
+        ti.add_interval(start_time=12.0, stop_time=18.0)
+        # nanmax(stop_time)=18.0, nanmin(start_time)=2.0 -> 16.0
+        self.assertEqual(ti.get_duration(), 16.0)
+
+    def test_get_duration_all_stop_nan(self):
+        """Test get_duration falls back to the span of starts when all stops are NaN (#2212)"""
+        ti = TimeIntervals(name='ti_name')
+        ti.add_interval(start_time=2.0, stop_time=np.nan)
+        ti.add_interval(start_time=9.0, stop_time=np.nan)
+        # all stop times NaN, valid starts -> span of starts: 9.0 - 2.0 = 7.0
+        self.assertEqual(ti.get_duration(), 7.0)
+
+    def test_get_duration_all_nan(self):
+        """Test get_duration returns NaN when all start and stop times are NaN (#2212)"""
+        import warnings
+        ti = TimeIntervals(name='ti_name')
+        ti.add_interval(start_time=np.nan, stop_time=np.nan)
+        ti.add_interval(start_time=np.nan, stop_time=np.nan)
+        with warnings.catch_warnings():
+            warnings.simplefilter("error", RuntimeWarning)  # must not emit an all-NaN warning
+            duration = ti.get_duration()
+        self.assertTrue(np.isnan(duration))
+
+    def test_get_duration_all_start_nan_valid_stops(self):
+        """Test get_duration returns NaN when all starts are NaN even with valid stops (#2212).
+
+        This case is not covered by the issue's explicit spec bullets. The earliest
+        start is undefined (get_starting_time returns None here), so the duration is
+        NaN for consistency.
+        """
+        import warnings
+        ti = TimeIntervals(name='ti_name')
+        ti.add_interval(start_time=np.nan, stop_time=5.0)
+        ti.add_interval(start_time=np.nan, stop_time=9.0)
+        with warnings.catch_warnings():
+            warnings.simplefilter("error", RuntimeWarning)  # must not emit an all-NaN warning
+            duration = ti.get_duration()
+        self.assertTrue(np.isnan(duration))

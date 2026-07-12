@@ -88,15 +88,21 @@ class TimeIntervals(DynamicTable):
         """
         Get the earliest start time across all intervals in this TimeIntervals table.
 
+        NaN start times are ignored.
+
         Returns
         -------
         float or None
-            The earliest start time in seconds, or None if the table is empty.
+            The earliest non-NaN start time in seconds, or None if the table is
+            empty or all start times are NaN.
         """
         if len(self) == 0:
             return None
+        start_time = np.asarray(self['start_time'].data[:], dtype=float)
+        if np.all(np.isnan(start_time)):
+            return None
         # NOTE: Could be optimized to self['start_time'].data[0] if intervals are guaranteed sorted
-        return float(np.min(self['start_time'].data[:]))
+        return float(np.nanmin(start_time))
 
     def get_duration(self):
         """
@@ -105,16 +111,28 @@ class TimeIntervals(DynamicTable):
         Returns
         -------
         float or None
-            The duration in seconds, or None if the table is empty.
+            The duration in seconds, or None if the table is empty. Returns NaN if
+            all start times are NaN (the earliest start is undefined). If all stop
+            times are NaN but valid start times exist, the duration falls back to
+            the span of the start times (latest start minus earliest start).
 
         Notes
         -----
         The duration represents the time span from the earliest interval start to the
-        latest interval stop, not the sum of individual interval durations.
+        latest interval stop, not the sum of individual interval durations. NaN
+        start/stop times (e.g. for ongoing/unbounded intervals) are ignored.
         """
         if len(self) == 0:
             return None
         starting_time = self.get_starting_time()
+        if starting_time is None:
+            # all start times are NaN, so the earliest start is undefined
+            return float("nan")
+        stop_time = np.asarray(self['stop_time'].data[:], dtype=float)
+        if np.all(np.isnan(stop_time)):
+            # no valid stop times: fall back to the span of the start times
+            start_time = np.asarray(self['start_time'].data[:], dtype=float)
+            return float(np.nanmax(start_time)) - starting_time
         # NOTE: Could be optimized to self['stop_time'].data[-1] if intervals are guaranteed sorted
-        stopping_time = float(np.max(self['stop_time'].data[:]))
+        stopping_time = float(np.nanmax(stop_time))
         return stopping_time - starting_time
