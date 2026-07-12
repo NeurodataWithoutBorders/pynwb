@@ -1,8 +1,9 @@
 from pathlib import Path
 import tempfile
 import urllib.request
+from unittest import mock
 
-from pynwb import read_nwb
+from pynwb import read_nwb, NWBHDF5IO
 from pynwb.testing.mock.file import mock_NWBFile
 from pynwb.testing import TestCase
 
@@ -121,3 +122,29 @@ class TestReadNWBMethod(TestCase):
         self.assertEqual(nwbfile.identifier, "7208f856-f527-479f-973d-e6e72326a8ea")
         self.assertEqual(nwbfile.subject.subject_id, "R6")
         nwbfile.get_read_io().close()
+
+    @unittest.skipIf(not HAVE_FSSPEC, "fsspec not installed")
+    def test_read_nwb_s3_scheme_uses_matching_fsspec_backend(self):
+        """An ``s3://`` HDF5 URL builds the fsspec filesystem from the URL's own scheme.
+
+        Only ``fsspec.filesystem`` is stubbed (its ``open`` returns a handle to a real
+        local HDF5 file), so the dispatch, h5py read, and ``NWBHDF5IO`` read all run for
+        real without network or credentials. Asserts the streaming branch passes scheme
+        ``"s3"`` (not a hardcoded ``"http"``) to ``fsspec.filesystem`` and that the file
+        round-trips.
+        """
+        with tempfile.TemporaryDirectory() as temp_dir:
+            path = Path(temp_dir) / "test.nwb"
+            with NWBHDF5IO(path, 'w') as io:
+                io.write(self.nwbfile)
+
+            fake_filesystem = mock.MagicMock()
+            fake_filesystem.open.return_value = open(path, "rb")
+            with mock.patch("fsspec.filesystem", return_value=fake_filesystem) as mock_filesystem:
+                read_nwbfile = read_nwb(path="s3://my-bucket/test.nwb")
+
+            mock_filesystem.assert_called_once_with("s3")
+            fake_filesystem.open.assert_called_once_with("s3://my-bucket/test.nwb", "rb")
+            self.assertEqual(read_nwbfile.identifier, self.nwbfile.identifier)
+            self.assertEqual(read_nwbfile.session_description, self.nwbfile.session_description)
+            read_nwbfile.get_read_io().close()
