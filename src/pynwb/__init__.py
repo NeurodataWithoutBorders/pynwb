@@ -579,6 +579,13 @@ def read_nwb(**kwargs):
             * Pre-opened HDF5 file objects or Zarr stores
             * Remote file access configuration
 
+        Remote reads use each fsspec backend's default credential chain. Public buckets
+        addressed as ``s3://`` are signed by default and fail without credentials. Read
+        them via their ``https://<bucket>.s3.amazonaws.com/...`` form, or use the IO
+        classes directly: ``NWBZarrIO`` accepts ``storage_options={"anon": True}``, and
+        for HDF5 open the object with ``fsspec.filesystem("s3", anon=True).open(url, "rb")``
+        and pass the handle to ``NWBHDF5IO(file=...)``.
+
     Example usage:
 
     .. code-block:: python
