@@ -19,4 +19,4 @@ dependencies:
   - pip
   - pip:
     - remfile==0.1.13
-    - dandi==0.76.4  # NOTE: dandi is not available on conda for osx-arm64
+    - dandi==0.76.5  # NOTE: dandi is not available on conda for osx-arm64
