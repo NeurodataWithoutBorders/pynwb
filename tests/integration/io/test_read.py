@@ -1,16 +1,24 @@
 from pathlib import Path
 import tempfile
+import urllib.request
+from unittest import mock
 
-from pynwb import read_nwb
+from pynwb import read_nwb, NWBHDF5IO
 from pynwb.testing.mock.file import mock_NWBFile
 from pynwb.testing import TestCase
 
 import unittest
 try:
     from hdmf_zarr import NWBZarrIO  # noqa f401
-    HAVE_NWBZarrIO = True 
+    HAVE_NWBZarrIO = True
 except ImportError:
     HAVE_NWBZarrIO = False
+
+try:
+    import fsspec  # noqa: F401
+    HAVE_FSSPEC = True
+except ImportError:
+    HAVE_FSSPEC = False
 
 
 class TestReadNWBMethod(TestCase):
@@ -74,11 +82,76 @@ class TestReadNWBMethod(TestCase):
         with tempfile.TemporaryDirectory() as temp_dir:
             path = Path(temp_dir) / "test.txt"
             path.write_text("Not an NWB file")
-            
+
             expected_message = (
                 f"Unable to read file: '{path}'. The file is not recognized as either a valid HDF5 or Zarr NWB file. "
                 "Please ensure the file exists and contains valid NWB data."
             )
-            
+
             with self.assertRaisesWith(ValueError, expected_message):
                 read_nwb(path=path)
+
+    @unittest.skipIf(not HAVE_FSSPEC, "fsspec not installed")
+    def test_read_nwb_anonymous_remote_hdf5(self):
+        """Test reading an anonymous public HDF5 NWB file over HTTPS through fsspec."""
+        url = (
+            "https://dandiarchive.s3.amazonaws.com/blobs/11e/c89/"
+            "11ec8933-1456-4942-922b-94e5878bb991"
+        )
+        try:
+            urllib.request.urlopen(url, timeout=2)
+        except urllib.request.URLError:
+            self.skipTest("Internet access to DANDI failed.")
+
+        nwbfile = read_nwb(path=url)
+        self.assertEqual(len(nwbfile.acquisition['TestData'].data[:]), 3)
+        nwbfile.get_read_io().close()
+
+    @unittest.skipIf(not HAVE_NWBZarrIO or not HAVE_FSSPEC, "hdmf-zarr or fsspec not installed")
+    def test_read_nwb_anonymous_remote_zarr(self):
+        """Test reading an anonymous public Zarr NWB file from DANDI through fsspec.
+
+        Uses the same DANDI 000719 file as hdmf-zarr's own S3 streaming tutorial (PR #330).
+        Depends on hdmf-zarr's `resolve_ref` self-reference fix
+        (https://github.com/hdmf-dev/hdmf-zarr/pull/348); without that fix this read
+        fails with `PathNotFoundError: nothing found at path ''`.
+        """
+        url = (
+            "https://dandiarchive.s3.amazonaws.com/zarr/"
+            "c8c6b848-fbc6-4f58-85ff-e3f2618ee983/"
+        )
+        try:
+            urllib.request.urlopen(url + ".zmetadata", timeout=2)
+        except urllib.request.URLError:
+            self.skipTest("Internet access to DANDI failed.")
+
+        nwbfile = read_nwb(path=url)
+        self.assertEqual(nwbfile.identifier, "7208f856-f527-479f-973d-e6e72326a8ea")
+        self.assertEqual(nwbfile.subject.subject_id, "R6")
+        nwbfile.get_read_io().close()
+
+    @unittest.skipIf(not HAVE_FSSPEC, "fsspec not installed")
+    def test_read_nwb_s3_scheme_uses_matching_fsspec_backend(self):
+        """An ``s3://`` HDF5 URL builds the fsspec filesystem from the URL's own scheme.
+
+        Only ``fsspec.filesystem`` is stubbed (its ``open`` returns a handle to a real
+        local HDF5 file), so the dispatch, h5py read, and ``NWBHDF5IO`` read all run for
+        real without network or credentials. Asserts the streaming branch passes scheme
+        ``"s3"`` (not a hardcoded ``"http"``) to ``fsspec.filesystem`` and that the file
+        round-trips.
+        """
+        with tempfile.TemporaryDirectory() as temp_dir:
+            path = Path(temp_dir) / "test.nwb"
+            with NWBHDF5IO(path, 'w') as io:
+                io.write(self.nwbfile)
+
+            fake_filesystem = mock.MagicMock()
+            fake_filesystem.open.return_value = open(path, "rb")
+            with mock.patch("fsspec.filesystem", return_value=fake_filesystem) as mock_filesystem:
+                read_nwbfile = read_nwb(path="s3://my-bucket/test.nwb")
+
+            mock_filesystem.assert_called_once_with("s3")
+            fake_filesystem.open.assert_called_once_with("s3://my-bucket/test.nwb", "rb")
+            self.assertEqual(read_nwbfile.identifier, self.nwbfile.identifier)
+            self.assertEqual(read_nwbfile.session_description, self.nwbfile.session_description)
+            read_nwbfile.get_read_io().close()
