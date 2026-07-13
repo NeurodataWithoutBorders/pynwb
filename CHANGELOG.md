@@ -10,6 +10,7 @@
 
 ### Fixed
 - Fixed `mock_electrodes` (and `mock_ElectricalSeries`) sizing the auto-created `ElectrodesTable` to a fixed 5 rows while the `DynamicTableRegion` followed `n_electrodes`, which raised an `IndexError` under HDMF 4.x+ for any data with more than 5 channels. The table is now sized to `n_electrodes`. @h-mayorquin [#2214](https://github.com/NeurodataWithoutBorders/pynwb/pull/2214)
+- Fixed `pynwb.validate(path=...)` raising `TypeError` on Zarr-backed NWB files because HDF5-only kwargs (`driver`, `aws_region`, `load_namespaces`) were forwarded into `NWBZarrIO`. Backend dispatch is now centralized in a single opener helper, and namespace loading uses `HDMFIO.load_namespaces_io` on the open IO, which also retires the `io._file` access in the validator. Added `storage_options` to the `validate()` API for the Zarr backend. @h-mayorquin [#2187](https://github.com/NeurodataWithoutBorders/pynwb/pull/2187)
 
 
 ## PyNWB 4.0.0 (June 29, 2026)
@@ -48,16 +49,6 @@
 - Fixed ROS3 streaming and added an `aws_region` argument to `validate` so the AWS region can be passed through when validating a file opened with the `ros3` driver. HDF5 2.1.0 (h5py 3.16.0) requires the AWS region to be specified when opening an S3 URL with the `ros3` driver, so the ROS3 tests and the streaming tutorial now pass `aws_region="us-east-2"` (the region of the DANDI Archive S3 bucket). @rly [#2201](https://github.com/NeurodataWithoutBorders/pynwb/pull/2201)
 - Fixed reading legacy files where `Device.model` is a string containing `/` or `:` (e.g., `"MFC_200/250-0.66_40mm"`), which previously raised a `ValueError`. The string is now remapped to a read-only `DeviceModel` that preserves the original name, with a warning explaining that the file cannot be written or exported until a `DeviceModel` with a valid name is created. Writing or exporting such a `DeviceModel` raises a clear error instead of silently corrupting the file. @rly [#2186](https://github.com/NeurodataWithoutBorders/pynwb/pull/2186)
 - Fixed invalid CSS properties in documentation assistant toggle that prevented proper positioning on displays ≥1400px wide. @rly [#2151](https://github.com/NeurodataWithoutBorders/pynwb/pull/2151)
-
-### Documentation and tutorial enhancements
-- Added a tutorial on using HERD to annotate an NWB file with external resources and store it at `/general/external_resources`, plus a companion example showing how to annotate multiple NWB files streamed from a DANDI dandiset with a single HERD. @rly, @mavaylon1 [#2200](https://github.com/NeurodataWithoutBorders/pynwb/pull/2200)
-- Added `pandas.ExtensionArray` to `nitpick_ignore` so the Sphinx build does not fail on the unresolved cross-reference that HDMF's `array_data` docval macro renders for every type that accepts array data. @rly [#2209](https://github.com/NeurodataWithoutBorders/pynwb/pull/2209)
-- Added `app.readthedocs.org/projects/pynwb/*` to `linkcheck_ignore` to stop the Sphinx linkcheck CI job from intermittently failing when GitHub Actions runners get throttled by readthedocs. @h-mayorquin [#2191](https://github.com/NeurodataWithoutBorders/pynwb/pull/2191)
-- Added documentation for `ExternalImage` to the images tutorial. @h-mayorquin [#2159](https://github.com/NeurodataWithoutBorders/pynwb/pull/2159)
-- Fixed broken and redirecting links in documentation. @bendichter [#2165](https://github.com/NeurodataWithoutBorders/pynwb/pull/2165)
-- Added `EventsTable` examples to the NWB file basics and behavior tutorials. @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156)
-- Added example of setting `Units.resolution` in the ecephys tutorial. @h-mayorquin [#2174](https://github.com/NeurodataWithoutBorders/pynwb/pull/2174)
-
 
 ## PyNWB 3.1.3 (December 9, 2025)
 
