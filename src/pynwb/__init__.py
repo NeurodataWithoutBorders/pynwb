@@ -346,6 +346,9 @@ def _get_backend(path: str, method: str = None):
     if method == "ros3":
         return NWBHDF5IO  # TODO - add additional conditions for other streaming methods
 
+    if not os.path.exists(path):
+        raise FileNotFoundError(f"Could not find the file '{path}'.")
+
     try:
         from hdmf_zarr import NWBZarrIO
         backend_io_classes = [NWBHDF5IO, NWBZarrIO]
@@ -612,6 +615,9 @@ def read_nwb(**kwargs):
             from hdmf_zarr import NWBZarrIO
             return NWBZarrIO.read_nwb(path=path)
         return NWBHDF5IO.read_nwb(path=path)
+
+    if not os.path.exists(path):
+        raise FileNotFoundError(f"Could not find the file '{path}'.")
 
     # HDF5 is always available so we try that first
     backend_is_hdf5 = NWBHDF5IO.can_read(path=path)
