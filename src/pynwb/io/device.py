@@ -95,7 +95,7 @@ class DeviceMapper(NWBContainerMapper):
 
             return model
 
-        return None
+        return self.NO_OVERRIDE
 
 
     def __new_container__(self, cls, container_source, parent, object_id, **kwargs):

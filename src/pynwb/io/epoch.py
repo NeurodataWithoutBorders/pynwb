@@ -47,4 +47,4 @@ class TimeIntervalsMap(DynamicTableMap):
             # overwrite the columns constructor argument
             return columns
         # do not override
-        return None
+        return self.NO_OVERRIDE

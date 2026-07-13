@@ -20,6 +20,7 @@ class BehavioralTimeSeriesMap(ObjectMapper):
                 for x in value:
                     if not isinstance(x, IndexSeries):
                         return x
+        return self.NO_OVERRIDE
 
 
 @register_map(PupilTracking)
@@ -38,3 +39,4 @@ class PupilTrackingMap(ObjectMapper):
                 for x in value:
                     if not isinstance(x, IndexSeries):
                         return x
+        return self.NO_OVERRIDE

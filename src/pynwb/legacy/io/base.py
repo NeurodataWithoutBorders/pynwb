@@ -56,9 +56,11 @@ class TimeSeriesMap(ObjectMapper):
         builder = args[0]
         if builder.name in legacy_TimeSeries_missing_time_info_name_list:
             return -1.0
+        return self.NO_OVERRIDE
 
     @ObjectMapper.constructor_arg('rate')
     def carg_rate(self, *args):
         builder = args[0]
         if builder.name in legacy_TimeSeries_missing_time_info_name_list:
             return -1.0
+        return self.NO_OVERRIDE

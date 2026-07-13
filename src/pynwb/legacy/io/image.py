@@ -13,3 +13,4 @@ class ImageSeriesMap(ObjectMapper):
         builder = args[0]
         if builder.name in ('corrected',):
             return np.array([-1.])
+        return self.NO_OVERRIDE

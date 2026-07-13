@@ -40,6 +40,7 @@ class TwoPhotonSeriesMap(ObjectMapper):
         builder = args[0]
         if builder.name in ('2p_image_series',):
             return np.array([-1.])
+        return self.NO_OVERRIDE
 
     @ObjectMapper.constructor_arg('unit')
     def carg_unit(self, *args):

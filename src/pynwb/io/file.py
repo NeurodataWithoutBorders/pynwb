@@ -290,7 +290,7 @@ class NWBFileMap(ObjectMapper):
         Then it was changed to be a 1-D array of strings. This mapping function is necessary
         for writing a valid 'experimenter' array if it is a string in the NWBFile container.
         """
-        ret = None
+        ret = self.NO_OVERRIDE
         if isinstance(container.experimenter, str):
             ret = (container.experimenter,)
         return ret
@@ -325,7 +325,7 @@ class NWBFileMap(ObjectMapper):
         Then it was changed to be a 1-D array of strings. This mapping function is necessary
         for writing a valid 'related_publications' array if it is a string in the NWBFile container.
         """
-        ret = None
+        ret = self.NO_OVERRIDE
         if isinstance(container.related_publications, str):
             ret = (container.related_publications,)
         return ret

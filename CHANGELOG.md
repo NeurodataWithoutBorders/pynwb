@@ -3,6 +3,7 @@
 ## PyNWB 4.0.1 (Unreleased)
 
 ### Changed
+- Updated `ObjectMapper` `constructor_arg` and `object_attr` override functions to return the `hdmf.build.ObjectMapper.NO_OVERRIDE` sentinel instead of `None` to signal "no override". In HDMF, returning `None` from an override function to signal "no override" is deprecated and, in HDMF 8.0, will set the constructor argument or attribute to `None`. Requires a version of HDMF that provides `ObjectMapper.NO_OVERRIDE` (see [hdmf-dev/hdmf#1167](https://github.com/hdmf-dev/hdmf/pull/1167)). @rly [#XXXX](https://github.com/NeurodataWithoutBorders/pynwb/pull/XXXX)
 - Lifted the `<1.11` cap on the `linkml` and `linkml-runtime` termset extras and bumped the `dandi` docs dependency to `>=0.76.5`. dandi 0.76.5 lifts its `click<8.2` bound ([dandi/dandi-cli#1883](https://github.com/dandi/dandi-cli/pull/1883)), which had conflicted with the `click>=8.2` requirement of linkml 1.11. @rly [#2217](https://github.com/NeurodataWithoutBorders/pynwb/pull/2217)
 
 ### Added
