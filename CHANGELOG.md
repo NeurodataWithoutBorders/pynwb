@@ -2,8 +2,15 @@
 
 ## PyNWB 4.0.1 (Unreleased)
 
+### Changed
+- Lifted the `<1.11` cap on the `linkml` and `linkml-runtime` termset extras and bumped the `dandi` docs dependency to `>=0.76.5`. dandi 0.76.5 lifts its `click<8.2` bound ([dandi/dandi-cli#1883](https://github.com/dandi/dandi-cli/pull/1883)), which had conflicted with the `click>=8.2` requirement of linkml 1.11. @rly [#2217](https://github.com/NeurodataWithoutBorders/pynwb/pull/2217)
+
+### Added
+- Added remote-read support to `pynwb.read_nwb`. The function now accepts remote URLs (`s3://`, `gs://`, `abfs://`, `https://`, etc.) and dispatches to the right backend based on the URL: `.zarr` suffixes (and DANDI Zarr assets under `/zarr/`) are read with `NWBZarrIO`, everything else with `NWBHDF5IO`. Remote files are opened through `fsspec`, which now uses the URL's actual scheme instead of the previous hardcoded `fsspec.filesystem("http")` that mishandled non-HTTP schemes. @h-mayorquin [#2190](https://github.com/NeurodataWithoutBorders/pynwb/pull/2190)
+
 ### Fixed
 - Fixed `mock_electrodes` (and `mock_ElectricalSeries`) sizing the auto-created `ElectrodesTable` to a fixed 5 rows while the `DynamicTableRegion` followed `n_electrodes`, which raised an `IndexError` under HDMF 4.x+ for any data with more than 5 channels. The table is now sized to `n_electrodes`. @h-mayorquin [#2214](https://github.com/NeurodataWithoutBorders/pynwb/pull/2214)
+- Fixed `read_nwb` and `_get_backend` reporting a nonexistent path as an unrecognized backend (and, without hdmf-zarr installed, suggesting `pip install hdmf-zarr`). A missing file now raises a `FileNotFoundError`. @rly [#2222](https://github.com/NeurodataWithoutBorders/pynwb/pull/2222)
 - Fixed `TimeIntervals.get_starting_time()` and `get_duration()` returning `NaN` when the table contains NaN start/stop times (e.g. ongoing/unbounded intervals). NaN entries are now ignored via `np.nanmin`/`np.nanmax`. `get_starting_time()` returns `None` when the table is empty or all start times are NaN. `get_duration()` returns `None` for an empty table, `NaN` when all start times are NaN, and falls back to the span of the start times when all stop times are NaN. @Leonard013 [#2212](https://github.com/NeurodataWithoutBorders/pynwb/issues/2212)
 
 
