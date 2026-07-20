@@ -3,6 +3,7 @@ import numpy as np
 from pynwb.ophys import PlaneSegmentation, TwoPhotonSeries
 
 from .. import ObjectMapper, register_map
+from pynwb.io.utils import NO_OVERRIDE
 
 
 @register_map(PlaneSegmentation)
@@ -40,7 +41,7 @@ class TwoPhotonSeriesMap(ObjectMapper):
         builder = args[0]
         if builder.name in ('2p_image_series',):
             return np.array([-1.])
-        return self.NO_OVERRIDE
+        return NO_OVERRIDE
 
     @ObjectMapper.constructor_arg('unit')
     def carg_unit(self, *args):

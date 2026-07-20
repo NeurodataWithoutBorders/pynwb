@@ -2,6 +2,7 @@ from pynwb.behavior import BehavioralTimeSeries, PupilTracking
 from pynwb.image import IndexSeries
 
 from .. import ObjectMapper, register_map
+from pynwb.io.utils import NO_OVERRIDE
 
 
 @register_map(BehavioralTimeSeries)
@@ -20,7 +21,7 @@ class BehavioralTimeSeriesMap(ObjectMapper):
                 for x in value:
                     if not isinstance(x, IndexSeries):
                         return x
-        return self.NO_OVERRIDE
+        return NO_OVERRIDE
 
 
 @register_map(PupilTracking)
@@ -39,4 +40,4 @@ class PupilTrackingMap(ObjectMapper):
                 for x in value:
                     if not isinstance(x, IndexSeries):
                         return x
-        return self.NO_OVERRIDE
+        return NO_OVERRIDE

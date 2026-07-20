@@ -1,7 +1,14 @@
 import re
 from typing import Tuple
 
-from hdmf.build import Builder
+from hdmf.build import Builder, ObjectMapper
+
+# Value an override function returns to signal "no override". HDMF >= 6.2.0 provides the
+# ObjectMapper.NO_OVERRIDE sentinel; older HDMF uses a None return. getattr resolves to whichever
+# the installed HDMF supports.
+# TODO: return ObjectMapper.NO_OVERRIDE directly and remove this shim once the minimum required HDMF
+# version is >= 6.2.0.
+NO_OVERRIDE = getattr(ObjectMapper, "NO_OVERRIDE", None)
 
 
 def get_nwb_version(builder: Builder, include_prerelease=False) -> Tuple[int, ...]:

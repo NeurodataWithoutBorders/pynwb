@@ -7,7 +7,7 @@ from hdmf.utils import docval, get_docval
 from .. import register_map
 from ..file import NWBFile, Subject
 from ..core import ScratchData
-from .utils import get_nwb_version
+from .utils import get_nwb_version, NO_OVERRIDE
 
 
 @register_map(NWBFile)
@@ -290,7 +290,7 @@ class NWBFileMap(ObjectMapper):
         Then it was changed to be a 1-D array of strings. This mapping function is necessary
         for writing a valid 'experimenter' array if it is a string in the NWBFile container.
         """
-        ret = self.NO_OVERRIDE
+        ret = NO_OVERRIDE
         if isinstance(container.experimenter, str):
             ret = (container.experimenter,)
         return ret
@@ -325,7 +325,7 @@ class NWBFileMap(ObjectMapper):
         Then it was changed to be a 1-D array of strings. This mapping function is necessary
         for writing a valid 'related_publications' array if it is a string in the NWBFile container.
         """
-        ret = self.NO_OVERRIDE
+        ret = NO_OVERRIDE
         if isinstance(container.related_publications, str):
             ret = (container.related_publications,)
         return ret
