@@ -52,6 +52,13 @@ class TestReadNWBMethod(TestCase):
             self.assertContainerEqual(read_nwbfile, self.nwbfile)
             read_nwbfile.get_read_io().close()
 
+    def test_read_missing_file(self):
+        """Test attempting to read a file that does not exist."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            path = Path(temp_dir) / "does_not_exist.nwb"
+            with self.assertRaisesWith(FileNotFoundError, f"Could not find the file '{path}'."):
+                read_nwb(path=path)
+
     def test_read_zarr_without_hdmf_zarr(self):
         """Test attempting to read a Zarr file without hdmf_zarr installed."""
         if HAVE_NWBZarrIO:
