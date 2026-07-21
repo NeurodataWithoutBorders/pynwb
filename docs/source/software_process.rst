@@ -75,15 +75,17 @@ Versioning and Releasing
 
 PyNWB uses versioneer_ for versioning source and wheel distributions. Versioneer creates a semi-unique release
 name for the wheels that are created. It requires a version control system (git in PyNWB's case) to generate a release
-name. After all the tests pass, CircleCI creates both a wheel (\*.whl) and source distribution (\*.tar.gz) for Python 3
-and uploads them back to GitHub as a :pynwb:`releases`. Versioneer makes it possible to get the source distribution from GitHub
+name. After all the tests pass, GitHub Actions creates both a wheel (\*.whl) and source distribution (\*.tar.gz) for
+Python 3 and uploads them back to GitHub as a :pynwb:`releases`. Pushing to "dev" attaches them to the rolling "latest"
+pre-release; pushing a MAJOR.MINOR.PATCH tag attaches them to a release for that tag and uploads them to PyPI.
+Versioneer makes it possible to get the source distribution from GitHub
 and create wheels directly without having to use a version control system because it hardcodes versions in the source
 distribution.
 
 It is important to note that GitHub automatically generates source code archives in .zip and .tar.gz formats and
 attaches those files to all releases as an asset. These files currently do not contain the submodules within PyNWB and
 thus do not serve as a complete installation. For a complete source code archive, use the source distribution generated
-by CircleCI, typically named `pynwb-{version}.tar.gz`.
+by GitHub Actions, typically named `pynwb-{version}.tar.gz`.
 
 .. _versioneer: https://github.com/python-versioneer/python-versioneer
 
