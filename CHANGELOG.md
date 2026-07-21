@@ -12,6 +12,7 @@
 ### Fixed
 - Fixed `mock_electrodes` (and `mock_ElectricalSeries`) sizing the auto-created `ElectrodesTable` to a fixed 5 rows while the `DynamicTableRegion` followed `n_electrodes`, which raised an `IndexError` under HDMF 4.x+ for any data with more than 5 channels. The table is now sized to `n_electrodes`. @h-mayorquin [#2214](https://github.com/NeurodataWithoutBorders/pynwb/pull/2214)
 - Fixed `read_nwb` and `_get_backend` reporting a nonexistent path as an unrecognized backend (and, without hdmf-zarr installed, suggesting `pip install hdmf-zarr`). A missing file now raises a `FileNotFoundError`. @rly [#2222](https://github.com/NeurodataWithoutBorders/pynwb/pull/2222)
+- Fixed `TimeIntervals.get_starting_time()` and `get_duration()` returning `NaN` when the table contains NaN start/stop times (e.g. ongoing/unbounded intervals). NaN entries are now ignored via `np.nanmin`/`np.nanmax`. `get_starting_time()` returns `None` when the table is empty or all start times are NaN. `get_duration()` returns `None` for an empty table, `NaN` when all start times are NaN, and falls back to the span of the start times when all stop times are NaN. @Leonard013 [#2212](https://github.com/NeurodataWithoutBorders/pynwb/issues/2212)
 
 
 ## PyNWB 4.0.0 (June 29, 2026)
