@@ -46,6 +46,13 @@ jobs:
         run: |
           tox -e wheelinstall --recreate --installpkg dist/*-none-any.whl
 
+      - name: Test installation from a source distribution
+        # The source distribution is uploaded to PyPI and attached to the GitHub release, so it is
+        # installed here from a clean environment. --recreate is required: pip skips an install whose
+        # version is already present.
+        run: |
+          tox -e wheelinstall --recreate --installpkg dist/*.tar.gz
+
       - name: Upload wheel and source distributions to PyPI
         # Publishes to PyPI via OIDC trusted publishing. The pynwb project on PyPI must have a trusted
         # publisher configured for the NeurodataWithoutBorders/pynwb repository, the deploy_release.yml
