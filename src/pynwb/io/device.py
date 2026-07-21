@@ -3,6 +3,7 @@ from warnings import warn
 from .. import register_map
 from ..device import Device, DeviceModel
 from .core import NWBContainerMapper
+from .utils import NO_OVERRIDE
 
 def _name_has_invalid_chars(name):
     """Return True if ``name`` contains a character that is not allowed in an NWB object name."""
@@ -95,7 +96,7 @@ class DeviceMapper(NWBContainerMapper):
 
             return model
 
-        return None
+        return NO_OVERRIDE
 
 
     def __new_container__(self, cls, container_source, parent, object_id, **kwargs):
