@@ -1,4 +1,6 @@
 from dateutil.parser import parse as dateutil_parse
+import datetime
+import re
 import typing
 
 from hdmf.build import ObjectMapper, Builder, GroupBuilder
@@ -8,6 +10,59 @@ from .. import register_map
 from ..file import NWBFile, Subject
 from ..core import ScratchData
 from .utils import get_nwb_version, NO_OVERRIDE
+
+
+# A trailing UTC offset that carries a seconds component (e.g. "-05:50:36"). Such offsets are
+# outside ISO 8601 and are rejected by dateutil (and by datetime.fromisoformat before Python
+# 3.11), even though they appear in files written by other tools.
+_SUBMINUTE_OFFSET_RE = re.compile(r"(?P<sign>[+-])(?P<hours>\d{2}):(?P<minutes>\d{2}):(?P<seconds>\d{2})$")
+
+
+def _parse_subminute_offset_date(datestr):
+    """Parse an ISO 8601 datetime whose UTC offset carries a seconds component.
+
+    Returns a timezone-aware ``datetime``, or ``None`` if ``datestr`` does not end in such an
+    offset or the remainder is not a valid naive datetime. Works on all supported Python
+    versions, since it parses the offset itself instead of relying on ``fromisoformat``.
+    """
+    match = _SUBMINUTE_OFFSET_RE.search(datestr)
+    if match is None:
+        return None
+    try:
+        base = datetime.datetime.fromisoformat(datestr[:match.start()])
+    except ValueError:
+        return None
+    if base.tzinfo is not None:
+        return None
+    offset = datetime.timedelta(
+        hours=int(match.group("hours")),
+        minutes=int(match.group("minutes")),
+        seconds=int(match.group("seconds")),
+    )
+    if match.group("sign") == "-":
+        offset = -offset
+    return base.replace(tzinfo=datetime.timezone(offset))
+
+
+def _parse_date(datestr, field_name):
+    """Parse an ISO 8601 date string read from a file into a ``datetime``.
+
+    ``dateutil`` is tried first (the historical behavior), then ``datetime.fromisoformat``,
+    then a fallback for sub-minute UTC offsets (e.g. ``-05:50:36``) that both reject on older
+    Python. If none succeed, raise a ``ValueError`` naming the field and the offending string.
+    """
+    try:
+        return dateutil_parse(datestr)
+    except (ValueError, OverflowError):
+        pass
+    try:
+        return datetime.datetime.fromisoformat(datestr)
+    except ValueError:
+        pass
+    parsed = _parse_subminute_offset_date(datestr)
+    if parsed is not None:
+        return parsed
+    raise ValueError("Could not parse %s value %r as a datetime." % (field_name, datestr))
 
 
 @register_map(NWBFile)
@@ -231,7 +286,7 @@ class NWBFileMap(ObjectMapper):
         for user convenience and consistency with how they are written.
         """
         datestr = builder.get('session_start_time').data
-        date = dateutil_parse(datestr)
+        date = _parse_date(datestr, "session_start_time")
         return date
 
     @ObjectMapper.constructor_arg('timestamps_reference_time')
@@ -244,7 +299,7 @@ class NWBFileMap(ObjectMapper):
         for user convenience and consistency with how they are written.
         """
         datestr = builder.get('timestamps_reference_time').data
-        date = dateutil_parse(datestr)
+        date = _parse_date(datestr, "timestamps_reference_time")
         return date
 
     @ObjectMapper.constructor_arg('file_create_date')
@@ -257,7 +312,7 @@ class NWBFileMap(ObjectMapper):
         for user convenience and consistency with how they are written.
         """
         datestr = builder.get('file_create_date').data
-        dates = list(map(dateutil_parse, datestr))
+        dates = [_parse_date(date_string, "file_create_date") for date_string in datestr]
         return dates
 
     @ObjectMapper.constructor_arg('experimenter')
@@ -348,7 +403,7 @@ class SubjectMap(ObjectMapper):
             return
         else:
             datestr = dob_builder.data
-            date = dateutil_parse(datestr)
+            date = _parse_date(datestr, "date_of_birth")
             return date
 
     @ObjectMapper.constructor_arg("age__reference")
