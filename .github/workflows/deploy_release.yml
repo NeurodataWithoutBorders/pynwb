@@ -80,11 +80,11 @@ jobs:
           fi
           # Create the release, or upload the artifacts to it if a re-run finds it already exists,
           # so the step can be re-run safely.
-          if gh release view "${GITHUB_REF_NAME}" --repo NeurodataWithoutBorders/pynwb > /dev/null 2>&1; then
-            gh release upload "${GITHUB_REF_NAME}" dist/* --repo NeurodataWithoutBorders/pynwb --clobber
+          if gh release view "${GITHUB_REF_NAME}" --repo "$GITHUB_REPOSITORY" > /dev/null 2>&1; then
+            gh release upload "${GITHUB_REF_NAME}" dist/* --repo "$GITHUB_REPOSITORY" --clobber
           else
             gh release create "${GITHUB_REF_NAME}" dist/* \
-              --repo NeurodataWithoutBorders/pynwb \
+              --repo "$GITHUB_REPOSITORY" \
               --title "${GITHUB_REF_NAME}" \
               "${notes_args[@]}"
           fi
