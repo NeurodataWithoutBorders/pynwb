@@ -185,9 +185,9 @@ jobs:
           conda list
           pip list
 
-      - name: Run gallery ros3 tests
+      - name: Run ros3 tests
         run: |
-          python test.py --ros3
+          python run_ros3_hang_safe.py --ros3
 
   run-gallery-ros3-tests:
     name: ${{ matrix.name }}
@@ -230,7 +230,7 @@ jobs:
 
       - name: Run gallery ros3 tests
         run: |
-          python test.py --example-ros3
+          python run_ros3_hang_safe.py --example-ros3
 
   deploy-dev:
     name: Deploy pre-release from dev
