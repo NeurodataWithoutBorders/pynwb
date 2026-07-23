@@ -22,8 +22,10 @@ Prepare for release of PyNWB [version]
 
 ### After merging:
 1. Create release by following steps in `docs/source/make_a_release.rst` or use alias `git pypi-release [tag]` if set up
-2. After the CI bot creates the new release (wait ~10 min), update the release notes on the
-   [GitHub releases page](https://github.com/NeurodataWithoutBorders/pynwb/releases) with the changelog
+2. After the CI bot creates the new release (wait ~10 min), check the release notes on the
+   [GitHub releases page](https://github.com/NeurodataWithoutBorders/pynwb/releases). The workflow fills them
+   from this version's section of `CHANGELOG.md`, and falls back to auto-generated notes if that section is
+   empty or its heading does not match the tag.
 3. Check that the readthedocs "stable" build runs and succeeds
 4. Either monitor [conda-forge/pynwb-feedstock](https://github.com/conda-forge/pynwb-feedstock) for the
    regro-cf-autotick-bot bot to create a PR updating the version of HDMF to the latest PyPI release, usually within

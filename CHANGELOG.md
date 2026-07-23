@@ -12,6 +12,7 @@
 ### Fixed
 - Fixed `mock_electrodes` (and `mock_ElectricalSeries`) sizing the auto-created `ElectrodesTable` to a fixed 5 rows while the `DynamicTableRegion` followed `n_electrodes`, which raised an `IndexError` under HDMF 4.x+ for any data with more than 5 channels. The table is now sized to `n_electrodes`. @h-mayorquin [#2214](https://github.com/NeurodataWithoutBorders/pynwb/pull/2214)
 - Fixed `read_nwb` and `_get_backend` reporting a nonexistent path as an unrecognized backend (and, without hdmf-zarr installed, suggesting `pip install hdmf-zarr`). A missing file now raises a `FileNotFoundError`. @rly [#2222](https://github.com/NeurodataWithoutBorders/pynwb/pull/2222)
+- Fixed the `Deploy pre-release from dev` CI job, which failed with a `404` from the GitHub API because `scikit-ci-addons` resolved the `latest` tag to one of two duplicate draft releases it had itself created. Both release paths now use the `gh` CLI. @rly [#2225](https://github.com/NeurodataWithoutBorders/pynwb/pull/2225)
 
 
 ## PyNWB 4.0.0 (June 29, 2026)

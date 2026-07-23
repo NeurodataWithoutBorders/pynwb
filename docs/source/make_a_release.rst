@@ -128,22 +128,21 @@ Publish release on PyPI: Step-by-step
 
   .. important::
 
-      This will trigger the "Deploy release" GitHub Actions workflow which will automatically
-      upload the wheels and source distribution to both the  `PyNWB PyPI project page`_ and a
-      new :pynwb:`GitHub release <releases>` using the nwb-bot account.
+      This will trigger the "Deploy release" GitHub Actions workflow, which uploads the wheel and
+      source distribution to the `PyNWB PyPI project page`_ via PyPI trusted publishing and creates
+      a new :pynwb:`GitHub release <releases>` as the github-actions bot.
 
 
 7. Check the status of the builds on :pynwb:`GitHub Actions <actions>`.
 
 
 8. Once the builds are completed, check that the distributions are available on `PyNWB PyPI project page`_ and that
-   a new :pynwb:`GitHub release <releases>` was created.
+   a new :pynwb:`GitHub release <releases>` was created. The workflow fills the release notes from this version's
+   section of ``CHANGELOG.md``, so check that they match. If the section was empty or its heading did not match the
+   tag, the workflow falls back to auto-generated notes, which should be replaced by hand.
 
 
-9. Copy the release notes from ``CHANGELOG.md`` to the newly created :pynwb:`GitHub release <releases>`.
-
-
-10. Create a clean testing environment to test the installation.
+9. Create a clean testing environment to test the installation.
 
   On bash/zsh:
 
@@ -155,7 +154,7 @@ Publish release on PyPI: Step-by-step
   On other shells, see the `Python instructions for creating a virtual environment`_.
 
 
-11. Test the installation:
+10. Test the installation:
 
   .. code::
 
@@ -163,7 +162,7 @@ Publish release on PyPI: Step-by-step
       python -c "import pynwb; print(pynwb.__version__)"
 
 
-12. Cleanup
+11. Cleanup
 
   On bash/zsh:
 
