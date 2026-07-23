@@ -187,7 +187,7 @@ jobs:
 
       - name: Run ros3 tests
         run: |
-          python test_ros3.py --ros3
+          python scripts/test_ros3.py --ros3
 
   run-gallery-ros3-tests:
     name: ${{ matrix.name }}
@@ -230,7 +230,7 @@ jobs:
 
       - name: Run gallery ros3 tests
         run: |
-          python test_ros3.py --example-ros3
+          python scripts/test_ros3.py --example-ros3
 
   deploy-dev:
     name: Deploy pre-release from dev

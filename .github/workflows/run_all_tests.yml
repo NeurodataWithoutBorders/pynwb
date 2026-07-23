@@ -216,7 +216,7 @@ jobs:
 
       - name: Run ros3 tests
         run: |
-          python test_ros3.py --ros3
+          python scripts/test_ros3.py --ros3
 
   run-gallery-ros3-tests:
     name: ${{ matrix.name }}
@@ -262,7 +262,7 @@ jobs:
 
       - name: Run gallery ros3 tests
         run: |
-          python test_ros3.py --example-ros3
+          python scripts/test_ros3.py --example-ros3
 
   # the streaming HERD gallery example is excluded from the offline example
   # tests (it streams from the DANDI Archive), so run it once here

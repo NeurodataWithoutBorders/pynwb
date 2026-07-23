@@ -31,7 +31,8 @@ def main():
     fd, result_path = tempfile.mkstemp(prefix="pynwb_exitcode_")
     os.close(fd)
     env = dict(os.environ, PYNWB_EXITCODE_FILE=result_path)
-    cmd = [sys.executable, os.path.join(os.path.dirname(__file__), "test.py")] + sys.argv[1:]
+    repo_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    cmd = [sys.executable, os.path.join(repo_root, "test.py")] + sys.argv[1:]
     proc = subprocess.Popen(cmd, env=env)
 
     start = time.monotonic()

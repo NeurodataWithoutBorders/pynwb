@@ -431,7 +431,7 @@ if __name__ == "__main__":
     exitcode = main()
     result_file = os.environ.get("PYNWB_EXITCODE_FILE")
     if result_file:
-        # Report the exit code so test_ros3.py can recover it if shutdown hangs.
+        # Report the exit code so scripts/test_ros3.py can recover it if shutdown hangs.
         # See https://github.com/NeurodataWithoutBorders/pynwb/issues/2228
         with open(result_file, "w") as f:
             f.write(str(exitcode))
