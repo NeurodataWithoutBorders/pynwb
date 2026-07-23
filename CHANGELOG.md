@@ -1,6 +1,6 @@
 # PyNWB Changelog
 
-## PyNWB 4.0.1 (Unreleased)
+## PyNWB 4.1.0 (July 23, 2026)
 
 ### Changed
 - Updated `ObjectMapper` `constructor_arg` and `object_attr` override functions to return the `hdmf.build.ObjectMapper.NO_OVERRIDE` sentinel instead of `None` to signal "no override". HDMF 6.2.0 deprecates returning `None` from an override function to signal "no override" (in HDMF 8.0 a `None` return will set the constructor argument or attribute to `None`, dropping data), and emits a `DeprecationWarning` when it happens (see [hdmf-dev/hdmf#1167](https://github.com/hdmf-dev/hdmf/pull/1167)). PyNWB resolves the sentinel via `getattr`, so it degrades to `None` on HDMF < 6.2.0 and keeps working with the existing `hdmf>=6.1.0` requirement without bumping the minimum version. @rly [#2224](https://github.com/NeurodataWithoutBorders/pynwb/pull/2224)
