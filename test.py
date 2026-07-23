@@ -431,10 +431,8 @@ if __name__ == "__main__":
     exitcode = main()
     result_file = os.environ.get("PYNWB_EXITCODE_FILE")
     if result_file:
-        # The HDF5 ros3 driver can deadlock during interpreter shutdown on Windows,
-        # after the tests have finished and this exit code is known. run_ros3_hang_safe.py
-        # reads this file to recover the result and terminate the process from outside
-        # when shutdown does not complete.
+        # Report the exit code so test_ros3.py can recover it if shutdown hangs.
+        # See https://github.com/NeurodataWithoutBorders/pynwb/issues/2228
         with open(result_file, "w") as f:
             f.write(str(exitcode))
     sys.exit(exitcode)
