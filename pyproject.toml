@@ -165,6 +165,7 @@ line-length = 120
 "src/pynwb/_version.py" = ["T201"]
 "src/pynwb/validation_cli.py" = ["T201"]
 "scripts/*" = ["T201"]
+"run_ros3_hang_safe.py" = ["T201"]
 
 # "test_gallery.py" = ["T201"] # Uncomment when test_gallery.py is created
 
