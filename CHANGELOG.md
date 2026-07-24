@@ -1,6 +1,6 @@
 # PyNWB Changelog
 
-## PyNWB 4.0.1 (Unreleased)
+## PyNWB 4.1.0 (July 23, 2026)
 
 ### Changed
 - Updated `ObjectMapper` `constructor_arg` and `object_attr` override functions to return the `hdmf.build.ObjectMapper.NO_OVERRIDE` sentinel instead of `None` to signal "no override". HDMF 6.2.0 deprecates returning `None` from an override function to signal "no override" (in HDMF 8.0 a `None` return will set the constructor argument or attribute to `None`, dropping data), and emits a `DeprecationWarning` when it happens (see [hdmf-dev/hdmf#1167](https://github.com/hdmf-dev/hdmf/pull/1167)). PyNWB resolves the sentinel via `getattr`, so it degrades to `None` on HDMF < 6.2.0 and keeps working with the existing `hdmf>=6.1.0` requirement without bumping the minimum version. @rly [#2224](https://github.com/NeurodataWithoutBorders/pynwb/pull/2224)
@@ -10,6 +10,7 @@
 - Added remote-read support to `pynwb.read_nwb`. The function now accepts remote URLs (`s3://`, `gs://`, `abfs://`, `https://`, etc.) and dispatches to the right backend based on the URL: `.zarr` suffixes (and DANDI Zarr assets under `/zarr/`) are read with `NWBZarrIO`, everything else with `NWBHDF5IO`. Remote files are opened through `fsspec`, which now uses the URL's actual scheme instead of the previous hardcoded `fsspec.filesystem("http")` that mishandled non-HTTP schemes. @h-mayorquin [#2190](https://github.com/NeurodataWithoutBorders/pynwb/pull/2190)
 
 ### Fixed
+- Fixed `pynwb.read_nwb` leaking the `fsspec` file handle when reading a remote HDF5 file. `NWBHDF5IO` now closes the `fsspec` handle when it is closed. @rly [#2226](https://github.com/NeurodataWithoutBorders/pynwb/pull/2226)
 - Worked around a deadlock in the HDF5 2.1 ROS3 driver that hung the Windows ROS3 CI jobs after the tests passed. @rly [#2228](https://github.com/NeurodataWithoutBorders/pynwb/issues/2228)
 - Fixed `mock_electrodes` (and `mock_ElectricalSeries`) sizing the auto-created `ElectrodesTable` to a fixed 5 rows while the `DynamicTableRegion` followed `n_electrodes`, which raised an `IndexError` under HDMF 4.x+ for any data with more than 5 channels. The table is now sized to `n_electrodes`. @h-mayorquin [#2214](https://github.com/NeurodataWithoutBorders/pynwb/pull/2214)
 - Fixed `read_nwb` and `_get_backend` reporting a nonexistent path as an unrecognized backend (and, without hdmf-zarr installed, suggesting `pip install hdmf-zarr`). A missing file now raises a `FileNotFoundError`. @rly [#2222](https://github.com/NeurodataWithoutBorders/pynwb/pull/2222)
