@@ -26,7 +26,7 @@ def mock_Device(
 
 def mock_DeviceModel(
     name: Optional[str] = None,
-    manufacturer: str = None,
+    manufacturer: str = "manufacturer",
     model_number: Optional[str] = None,
     description: str = "description",
     nwbfile: Optional[NWBFile] = None,

@@ -1,5 +1,11 @@
 # PyNWB Changelog
 
+## PyNWB 4.1.1 (Unreleased)
+
+### Fixed
+- Fixed `mock_DeviceModel` defaulting `manufacturer` to `None`, which made every call raise `TypeError: DeviceModel.__init__: None is not allowed for 'manufacturer'` because `DeviceModel` requires `manufacturer` to be a `str`. The mock now defaults it to `"manufacturer"`, matching the other mock defaults, and is covered by the parametrized `test_mock`/`test_mock_write` tests. @HugoFara [#2232](https://github.com/NeurodataWithoutBorders/pynwb/pull/2232)
+
+
 ## PyNWB 4.1.0 (July 23, 2026)
 
 ### Changed
