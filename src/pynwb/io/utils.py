@@ -1,6 +1,8 @@
+import datetime
 import re
 from typing import Tuple
 
+from dateutil.parser import parse as dateutil_parse
 from hdmf.build import Builder, ObjectMapper
 
 # Value an override function returns to signal "no override". HDMF >= 6.2.0 provides the
@@ -52,3 +54,56 @@ def get_nwb_version(builder: Builder, include_prerelease=False) -> Tuple[int, ..
         prerelease_info = nwb_version[nwb_version.index("-")+1:]
         version_list.append(prerelease_info)
     return tuple(version_list)
+
+
+# A trailing UTC offset that carries a seconds component (e.g. "-05:50:36"). Such offsets are
+# outside ISO 8601 and are rejected by dateutil (and by datetime.fromisoformat before Python
+# 3.11), even though they appear in files written by other tools.
+_SUBMINUTE_OFFSET_RE = re.compile(r"(?P<sign>[+-])(?P<hours>\d{2}):(?P<minutes>\d{2}):(?P<seconds>\d{2})$")
+
+
+def parse_subminute_offset_date(datestr):
+    """Parse an ISO 8601 datetime whose UTC offset carries a seconds component.
+
+    Returns a timezone-aware ``datetime``, or ``None`` if ``datestr`` does not end in such an
+    offset or the remainder is not a valid naive datetime. Works on all supported Python
+    versions, since it parses the offset itself instead of relying on ``fromisoformat``.
+    """
+    match = _SUBMINUTE_OFFSET_RE.search(datestr)
+    if match is None:
+        return None
+    try:
+        base = datetime.datetime.fromisoformat(datestr[:match.start()])
+    except ValueError:
+        return None
+    if base.tzinfo is not None:
+        return None
+    offset = datetime.timedelta(
+        hours=int(match.group("hours")),
+        minutes=int(match.group("minutes")),
+        seconds=int(match.group("seconds")),
+    )
+    if match.group("sign") == "-":
+        offset = -offset
+    return base.replace(tzinfo=datetime.timezone(offset))
+
+
+def parse_date(datestr, field_name):
+    """Parse an ISO 8601 date string read from a file into a ``datetime``.
+
+    ``dateutil`` is tried first (the historical behavior), then ``datetime.fromisoformat``,
+    then a fallback for sub-minute UTC offsets (e.g. ``-05:50:36``) that both reject on older
+    Python. If none succeed, raise a ``ValueError`` naming the field and the offending string.
+    """
+    try:
+        return dateutil_parse(datestr)
+    except (ValueError, OverflowError):
+        pass
+    try:
+        return datetime.datetime.fromisoformat(datestr)
+    except ValueError:
+        pass
+    parsed = parse_subminute_offset_date(datestr)
+    if parsed is not None:
+        return parsed
+    raise ValueError("Could not parse %s value %r as a datetime." % (field_name, datestr))
