@@ -146,7 +146,8 @@ class TestReadNWBMethod(TestCase):
                 io.write(self.nwbfile)
 
             fake_filesystem = mock.MagicMock()
-            fake_filesystem.open.return_value = open(path, "rb")
+            fsspec_handle = open(path, "rb")
+            fake_filesystem.open.return_value = fsspec_handle
             with mock.patch("fsspec.filesystem", return_value=fake_filesystem) as mock_filesystem:
                 read_nwbfile = read_nwb(path="s3://my-bucket/test.nwb")
 
@@ -155,3 +156,6 @@ class TestReadNWBMethod(TestCase):
             self.assertEqual(read_nwbfile.identifier, self.nwbfile.identifier)
             self.assertEqual(read_nwbfile.session_description, self.nwbfile.session_description)
             read_nwbfile.get_read_io().close()
+            # closing the IO must also close the fsspec handle, otherwise the open handle
+            # leaks and, on Windows, holds a lock that blocks deletion of the file
+            self.assertTrue(fsspec_handle.closed)

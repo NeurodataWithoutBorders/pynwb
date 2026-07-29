@@ -3,9 +3,8 @@ on:
   push:
     branches:
       - dev
-    tags-ignore:  # exclude tags created by "ci_addons publish_github_release"
+    tags-ignore:  # exclude the rolling tag that the deploy-dev job moves to each dev commit
       - 'latest'
-      - 'latest-tmp'
   pull_request:
 
 concurrency:
@@ -186,9 +185,9 @@ jobs:
           conda list
           pip list
 
-      - name: Run gallery ros3 tests
+      - name: Run ros3 tests
         run: |
-          python test.py --ros3
+          python scripts/test_ros3.py --ros3
 
   run-gallery-ros3-tests:
     name: ${{ matrix.name }}
@@ -231,39 +230,41 @@ jobs:
 
       - name: Run gallery ros3 tests
         run: |
-          python test.py --example-ros3
+          python scripts/test_ros3.py --example-ros3
 
   deploy-dev:
     name: Deploy pre-release from dev
     needs: [run-tests, run-gallery-tests, run-tests-on-conda, run-ros3-tests, run-gallery-ros3-tests]
     if: ${{ github.event_name == 'push' }}
     runs-on: ubuntu-latest
+    permissions:
+      contents: write  # create the "latest" pre-release and move its tag
     steps:
-      - name: Checkout repo with submodules
-        uses: actions/checkout@v7
-        with:
-          submodules: 'recursive'
-          fetch-depth: 0  # tags are required for versioneer to determine the version
-
-      - name: Set up Python
-        uses: actions/setup-python@v6
-        with:
-          python-version: '3.14'
-
       - name: Download wheel and source distributions from artifact
         uses: actions/download-artifact@v8
         with:
           name: distributions
           path: dist
 
-      - name: Publish wheel and source distributions as a GitHub release
+      - name: Publish wheel and source distributions as a GitHub pre-release
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
-          python -m pip install --upgrade pip
-          python -m pip install scikit-ci-addons
-          ci_addons publish_github_release NeurodataWithoutBorders/pynwb  \
-              --prerelease-packages "dist/*" \
-              --prerelease-sha $GITHUB_SHA \
-              --prerelease-packages-clear-pattern "*" \
-              --prerelease-packages-keep-pattern "*dev<COMMIT_DISTANCE>*" \
-              --token ${{ secrets.BOT_GITHUB_TOKEN }} \
-              --re-upload
+          ls -1 dist
+          # The "latest" pre-release is a rolling pointer to the tip of dev, holding only the
+          # distributions built from that commit. Delete the release and the tag separately, then
+          # recreate both, so that the tag, the target commit, and the attached artifacts stay
+          # consistent.
+          if gh release view latest --repo "$GITHUB_REPOSITORY" > /dev/null 2>&1; then
+            gh release delete latest --repo "$GITHUB_REPOSITORY" --yes
+          fi
+          # Delete the tag on its own so the step tolerates a release and tag that are out of sync,
+          # such as a release whose tag was already removed or a tag left behind without a release.
+          gh api --silent -X DELETE "repos/$GITHUB_REPOSITORY/git/refs/tags/latest" 2> /dev/null || true
+
+          gh release create latest dist/* \
+            --repo "$GITHUB_REPOSITORY" \
+            --target "$GITHUB_SHA" \
+            --title "Latest" \
+            --prerelease \
+            --notes "Pre-release build of the dev branch at commit $GITHUB_SHA."

@@ -423,6 +423,20 @@ class NWBHDF5IO(_HDF5IO):
         # Open the file
         super().__init__(path, manager=manager, mode=mode, file=file_obj, comm=comm,
                          driver=driver, aws_region=aws_region, herd_path=herd_path)
+        # fsspec file handle to close alongside this IO, set by read_nwb for remote reads
+        self._fsspec_file = None
+
+    def close(self, close_links=True):
+        """Close this file and any files linked to from this file.
+
+        :param close_links: Whether to close all files linked to from this file. (default: True)
+        :type close_links: bool
+        """
+        super().close(close_links=close_links)
+        fsspec_file = getattr(self, "_fsspec_file", None)
+        if fsspec_file is not None:
+            fsspec_file.close()
+            self._fsspec_file = None
 
     @property
     def nwb_version(self):
@@ -526,10 +540,14 @@ class NWBHDF5IO(_HDF5IO):
             import fsspec
             scheme = path.split("://", 1)[0]
             fsspec_file_system = fsspec.filesystem(scheme)
-            ffspec_file = fsspec_file_system.open(path, "rb")
+            fsspec_file = fsspec_file_system.open(path, "rb")
 
-            open_file = h5py.File(ffspec_file, "r")
+            open_file = h5py.File(fsspec_file, "r")
             io = NWBHDF5IO(file=open_file)
+            # h5py does not close a Python file object it was handed, so give the fsspec handle
+            # to the NWBHDF5IO to close alongside the h5py file. Leaving it open leaks the handle
+            # and, on Windows, keeps a lock that blocks deletion of the underlying file.
+            io._fsspec_file = fsspec_file
             nwbfile = io.read()
         else:
             io = NWBHDF5IO(path=path, file=file, mode="r", load_namespaces=True)
