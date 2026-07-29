@@ -1,5 +1,10 @@
 # PyNWB Changelog
 
+## PyNWB 4.1.1 (Unreleased)
+
+### Fixed
+- Fixed `set_data_io` being silently ignored on `NWBData` subclasses (`GrayscaleImage`, `RGBImage`, `RGBAImage`, `ExternalImage`, `ImageReferences`, and `ScratchData`), so requested chunking and compression were dropped without warning and the datasets were written uncompressed. `NWBData` declared its own data storage and `data` property, shadowing the ones inherited from `hdmf.container.Data`, so the inherited `set_data_io` wrapped the parent's attribute while `.data` kept reading the child's. `NWBData` now uses the inherited storage, which also makes `.data` reflect `transform`, `append`, and `extend`, and return the value coerced by `Data.__init__` (a `pandas.Series` passed as `data` now reads back as the `ndarray` that is actually written). @h-mayorquin [#2233](https://github.com/NeurodataWithoutBorders/pynwb/pull/2233)
+
 ## PyNWB 4.1.0 (July 23, 2026)
 
 ### Changed

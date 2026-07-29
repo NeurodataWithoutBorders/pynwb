@@ -102,16 +102,6 @@ class NWBData(NWBMixin, Data):
             allow_positional=AllowPositional.WARNING,)
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.__data = kwargs['data']
-
-    @property
-    def data(self):
-        """The data managed by this object"""
-        return self.__data
-
-    def __len__(self):
-        """Size of the data. Same as len(self.data)"""
-        return len(self.__data)
 
     def __getitem__(self, args):
         if isinstance(self.data, (tuple, list)) and isinstance(args, (tuple, list)):
@@ -127,25 +117,17 @@ class NWBData(NWBMixin, Data):
         Appending to scalar data is not supported. To append multiple
         elements, use extend.
         """
-        if isinstance(self.data, list):
-            self.data.append(arg)
-        elif isinstance(self.data, np.ndarray):
-            self.__data = np.concatenate((self.__data, [arg]))
-        else:
-            msg = "NWBData cannot append to object of type '%s'" % type(self.__data)
-            raise ValueError(msg)
+        if not isinstance(self.data, (list, np.ndarray)):
+            raise ValueError("NWBData cannot append to object of type '%s'" % type(self.data))
+        super().append(arg)
 
     def extend(self, arg):
         """
         Extend the data with multiple elements.
         """
-        if isinstance(self.data, list):
-            self.data.extend(arg)
-        elif isinstance(self.data, np.ndarray):
-            self.__data = np.concatenate((self.__data, arg))
-        else:
-            msg = "NWBData cannot extend object of type '%s'" % type(self.__data)
-            raise ValueError(msg)
+        if not isinstance(self.data, (list, np.ndarray)):
+            raise ValueError("NWBData cannot extend object of type '%s'" % type(self.data))
+        super().extend(arg)
 
 
 @register_class('ScratchData', CORE_NAMESPACE)
