@@ -1,5 +1,13 @@
 # PyNWB Changelog
 
+## PyNWB 4.2.0 (Upcoming)
+
+### Changed
+- Retyped array-valued fields that were declared `collections.abc.Iterable` to the `('array_data', 'data')` docval type: `TimeSeries.control` and `control_description`, `ImageSeries.dimension` and `starting_frame`, `AbstractFeatureSeries.features` and `feature_units`, and the deprecated `Clustering.peak_over_rms`, `ClusterWaveforms.waveform_mean`, and `ClusterWaveforms.waveform_sd`. A zarr v3 `Array` implements neither `__iter__` nor `__len__`, so `isinstance(zarr_array, Iterable)` is `False` and these fields rejected zarr-backed data on read; the `array_data` macro includes `zarr.Array`, so they accept it. The `('array_data', 'data')` type does not accept non-array iterables (`str`, `set`, `range`, generators) for these fields. `NWBFile.electrode_groups` is unchanged: it holds `ElectrodeGroup` objects, not array data. @rly [#2234](https://github.com/NeurodataWithoutBorders/pynwb/issues/2234)
+
+### Fixed
+- Fixed `ElectricalSeries.__init__` raising `TypeError: object of type 'Array' has no len()` when the `electrodes` region was backed by a zarr v3 `Array`. The electrode count used for the data-orientation check is derived via `get_data_shape` instead of `len()`. @rly [#2234](https://github.com/NeurodataWithoutBorders/pynwb/issues/2234)
+
 ## PyNWB 4.1.0 (July 23, 2026)
 
 ### Changed

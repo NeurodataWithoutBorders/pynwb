@@ -1,5 +1,4 @@
 from warnings import warn
-from collections.abc import Iterable
 from abc import ABC
 from typing import NamedTuple
 
@@ -159,9 +158,9 @@ class TimeSeries(NWBDataInterface):
              'default': 'no comments'},
             {'name': 'description', 'type': str, 'doc': 'Description of this TimeSeries dataset',
              'default': 'no description'},
-            {'name': 'control', 'type': Iterable, 'doc': 'Numerical labels that apply to each element in data',
-             'default': None},
-            {'name': 'control_description', 'type': Iterable, 'doc': 'Description of each control value',
+            {'name': 'control', 'type': ('array_data', 'data'),
+             'doc': 'Numerical labels that apply to each element in data', 'default': None},
+            {'name': 'control_description', 'type': ('array_data', 'data'), 'doc': 'Description of each control value',
              'default': None},
             {'name': 'continuity', 'type': str, 'default': None, 'enum': ["continuous", "instantaneous", "step"],
              'doc': 'Optionally describe the continuity of the data. Can be "continuous", "instantaneous", or '

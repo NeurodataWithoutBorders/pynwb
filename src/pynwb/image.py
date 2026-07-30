@@ -22,7 +22,6 @@ they can be imported directly from this module:
 """
 
 import warnings
-from collections.abc import Iterable
 
 import numpy as np
 
@@ -86,7 +85,7 @@ class ImageSeries(TimeSeries):
             {'name': 'external_file', 'type': ('array_data', 'data'),
              'doc': 'Path or URL to one or more external file(s). Field only present if format=external. '
                     'Either external_file or data must be specified (not None), but not both.', 'default': None},
-            {'name': 'starting_frame', 'type': Iterable,
+            {'name': 'starting_frame', 'type': ('array_data', 'data'),
              'doc': 'Each entry is a frame number that corresponds to the first frame of each file '
                     'listed in external_file within the full ImageSeries.', 'default': None},
             {'name': 'num_samples', 'type': (int, np.unsignedinteger),
@@ -97,7 +96,7 @@ class ImageSeries(TimeSeries):
              'default': None},
             {'name': 'bits_per_pixel', 'type': int, 'doc': 'DEPRECATED: Number of bits per image pixel',
              'default': None},
-            {'name': 'dimension', 'type': Iterable,
+            {'name': 'dimension', 'type': ('array_data', 'data'),
              'doc': 'Number of pixels on x, y, (and z) axes.', 'default': None},
             *get_docval(TimeSeries.__init__, 'resolution', 'conversion', 'timestamps', 'starting_time', 'rate',
                         'comments', 'description', 'control', 'control_description', 'offset'),
