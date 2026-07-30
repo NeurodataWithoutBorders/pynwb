@@ -1,5 +1,11 @@
 # PyNWB Changelog
 
+## PyNWB 4.2.0 (Upcoming)
+
+### Fixed
+- Fixed wide pandas DataFrames in the tutorials spilling out of the content column and into the right margin. Sphinx-gallery emits DataFrame output as a raw HTML table, which the theme's responsive table wrapper does not apply to, so a table wider than the content column overflowed with no way to scroll it. The output container now scrolls horizontally and cells stay on one line, which also keeps the columns aligned with their headers. The `Linking to External Resources (HERD)` tutorial was the most affected. @bendichter
+
+
 ## PyNWB 4.1.0 (July 23, 2026)
 
 ### Changed
