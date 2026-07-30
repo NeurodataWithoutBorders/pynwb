@@ -1,5 +1,11 @@
 # PyNWB Changelog
 
+## PyNWB 4.2.0 (Upcoming)
+
+### Fixed
+- Fixed wide pandas DataFrames in the tutorials spilling out of the content column and into the right margin. @bendichter [#2236](https://github.com/NeurodataWithoutBorders/pynwb/pull/2236)
+
+
 ## PyNWB 4.1.0 (July 23, 2026)
 
 ### Changed
