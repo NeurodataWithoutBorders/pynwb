@@ -59,16 +59,22 @@ def get_nwb_version(builder: Builder, include_prerelease=False) -> Tuple[int, ..
 def parse_date(datestr, field_name):
     """Parse an ISO 8601 date string read from a file into a ``datetime``.
 
-    ``dateutil`` is tried first (the historical behavior), then ``datetime.fromisoformat``,
-    which accepts UTC offsets carrying a seconds component (e.g. ``-05:50:36``) that dateutil
-    rejects. If neither succeeds, raise a ``ValueError`` naming the field and the offending string.
+    ``datestr`` may be ``str`` or UTF-8 ``bytes``. Scalar datasets are decoded on read, while
+    elements of an array-valued dataset (``file_create_date``) carry whichever the file stores:
+    a variable-length ``str`` dataset is decoded, a variable-length ``bytes`` one is not.
+
+    ``dateutil`` handles the common formats. ``datetime.fromisoformat`` covers UTC offsets that
+    carry a seconds component (e.g. ``-05:50:36``), which some writers emit. A value that neither
+    accepts raises a ``ValueError`` naming the field and the offending string.
     """
+    if isinstance(datestr, bytes):
+        datestr = datestr.decode("utf-8")
     try:
         return dateutil_parse(datestr)
-    except (ValueError, OverflowError):
-        pass
+    except (ValueError, OverflowError) as err:
+        parse_error = err
     try:
         return datetime.datetime.fromisoformat(datestr)
     except ValueError:
         pass
-    raise ValueError("Could not parse %s value %r as a datetime." % (field_name, datestr))
+    raise ValueError(f"Could not parse {field_name} value {datestr!r} as a datetime.") from parse_error

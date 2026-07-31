@@ -16,6 +16,7 @@ from pynwb.base import Image, Images
 from pynwb.file import Subject, _add_missing_timezone
 from pynwb.epoch import TimeIntervals
 from pynwb.ecephys import ElectricalSeries, ElectrodesTable
+from pynwb.io.utils import parse_date
 from pynwb.testing import TestCase, remove_test_file
 
 
@@ -727,12 +728,11 @@ class TestNoWarningWithoutPath(TestCase):
 
 
 class TestSubMinuteOffsetDates(TestCase):
-    """A date string with a sub-minute UTC offset (e.g. -05:50:36) should still parse.
+    """A date string with a sub-minute UTC offset (e.g. -05:50:36) parses on read.
 
-    ``dateutil`` rejects offsets with a seconds component, so a file written by another tool
-    that carries such an offset (a common placeholder artifact) was unreadable. The offset is
-    outside ISO 8601, so pynwb's own writer never emits it; here we patch the on-disk string to
-    reproduce it.
+    Such an offset is outside ISO 8601 and appears in files written by other tools, often as a
+    placeholder artifact. pynwb's writer emits only whole-minute offsets, so these tests patch
+    the on-disk strings directly to produce a file that carries them.
     """
 
     sub_minute_offset = -timedelta(hours=5, minutes=50, seconds=36)
@@ -744,33 +744,41 @@ class TestSubMinuteOffsetDates(TestCase):
         remove_test_file(self.path)
 
     def test_parse_date_standard_offset_unchanged(self):
-        from pynwb.io.utils import parse_date
         standard = parse_date("2017-05-01T12:00:00-06:00", "session_start_time")
         self.assertEqual(standard.utcoffset(), timedelta(hours=-6))
 
     def test_parse_date_sub_minute_offset(self):
-        from pynwb.io.utils import parse_date
         result = parse_date("1900-10-01T00:00:00-05:50:36", "session_start_time")
         self.assertEqual(result.replace(tzinfo=None), datetime(1900, 10, 1, 0, 0, 0))
         self.assertEqual(result.utcoffset(), self.sub_minute_offset)
 
+    def test_parse_date_bytes(self):
+        result = parse_date(b"1900-10-01T00:00:00-05:50:36", "file_create_date")
+        self.assertEqual(result.utcoffset(), self.sub_minute_offset)
+
     def test_parse_date_invalid_names_field_and_value(self):
-        from pynwb.io.utils import parse_date
         with self.assertRaisesRegex(ValueError, r"session_start_time value 'not a date'"):
             parse_date("not a date", "session_start_time")
 
-    def test_read_file_with_sub_minute_session_start_time(self):
+    def test_read_file_with_sub_minute_dates(self):
         nwbfile = NWBFile(
             session_description="a test session",
             identifier="TEST123",
             session_start_time=datetime(1900, 10, 1, tzinfo=tzutc()),
+            subject=Subject(subject_id="SUBJ1", date_of_birth=datetime(1900, 9, 1, tzinfo=tzutc())),
         )
         with NWBHDF5IO(self.path, "w") as write_io:
             write_io.write(nwbfile)
-        # Patch the on-disk timestamp to a non-conformant sub-minute UTC offset, which
-        # pynwb's own writer never emits but some foreign writers do.
+        # Patch every date on disk to carry a sub-minute UTC offset, exercising each of the
+        # constructor args that parse dates on read.
         with h5py.File(self.path, "r+") as f:
             f["session_start_time"][()] = "1900-10-01T00:00:00-05:50:36"
+            f["timestamps_reference_time"][()] = "1900-10-01T00:00:00-05:50:36"
+            f["file_create_date"][0] = "2026-07-30T12:00:00-05:50:36"
+            f["general/subject/date_of_birth"][()] = "1900-09-01T00:00:00-05:50:36"
         with NWBHDF5IO(self.path, "r") as read_io:
             read_nwbfile = read_io.read()
             self.assertEqual(read_nwbfile.session_start_time.utcoffset(), self.sub_minute_offset)
+            self.assertEqual(read_nwbfile.timestamps_reference_time.utcoffset(), self.sub_minute_offset)
+            self.assertEqual(read_nwbfile.file_create_date[0].utcoffset(), self.sub_minute_offset)
+            self.assertEqual(read_nwbfile.subject.date_of_birth.utcoffset(), self.sub_minute_offset)
