@@ -4,6 +4,8 @@
 
 ### Fixed
 - Fixed reading a file whose `session_start_time` (or `timestamps_reference_time`, `file_create_date`, or `Subject.date_of_birth`) carries a sub-minute UTC offset (e.g. `1900-10-01T00:00:00-05:50:36`). `dateutil` rejects offsets with a seconds component, so such a file, written by another tool, was unreadable even though the value is well-defined. Date parsing on read now falls back to `datetime.fromisoformat` and then to a small parser for the sub-minute offset, so these files read on all supported Python versions; if parsing fails entirely it raises a `ValueError` that names the field and shows the offending string. @h-mayorquin [#2230](https://github.com/NeurodataWithoutBorders/pynwb/pull/2230)
+- Fixed wide pandas DataFrames in the tutorials spilling out of the content column and into the right margin. @bendichter [#2236](https://github.com/NeurodataWithoutBorders/pynwb/pull/2236)
+
 
 ## PyNWB 4.1.0 (July 23, 2026)
 
