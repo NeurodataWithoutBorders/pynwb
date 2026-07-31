@@ -16,6 +16,7 @@ from pynwb.base import Image, Images
 from pynwb.file import Subject, _add_missing_timezone
 from pynwb.epoch import TimeIntervals
 from pynwb.ecephys import ElectricalSeries, ElectrodesTable
+from pynwb.behavior import SpatialSeries
 from pynwb.testing import TestCase, remove_test_file
 
 
@@ -442,6 +443,63 @@ class NWBFileTest(TestCase):
         self.assertIn(ts2, children)
         self.assertIn(device, children)
         self.assertIn(elecgrp, children)
+
+    def test_collect_descendants_of_type_class_arg(self):
+        """Passing a class returns every descendant that is an instance of it."""
+        ts1 = TimeSeries(name='ts1', data=[0, 1, 2], unit='grams', timestamps=[0.0, 0.1, 0.2])
+        ts2 = TimeSeries(name='ts2', data=[3, 4, 5], unit='grams', timestamps=[0.3, 0.4, 0.5])
+        self.nwbfile.add_acquisition(ts1)
+        self.nwbfile.add_acquisition(ts2)
+        result = self.nwbfile.collect_descendants_of_type(TimeSeries)
+        self.assertIn(ts1, result)
+        self.assertIn(ts2, result)
+        self.assertEqual(len(result), 2)
+
+    def test_collect_descendants_of_type_subclass_inclusion(self):
+        """Querying with a base class returns subclass instances too."""
+        ts = TimeSeries(name='ts', data=[0, 1, 2], unit='grams', timestamps=[0.0, 0.1, 0.2])
+        ss = SpatialSeries(name='ss', data=[[0, 0], [1, 1], [2, 2]],
+                           reference_frame='origin', timestamps=[0.0, 0.1, 0.2])
+        self.nwbfile.add_acquisition(ts)
+        self.nwbfile.add_acquisition(ss)
+        all_ts = self.nwbfile.collect_descendants_of_type(TimeSeries)
+        self.assertIn(ts, all_ts)
+        self.assertIn(ss, all_ts)
+        only_ss = self.nwbfile.collect_descendants_of_type(SpatialSeries)
+        self.assertEqual(only_ss, [ss])
+
+    def test_collect_descendants_of_type_string_arg(self):
+        """Passing a string neurodata_type name resolves to the same class."""
+        ts = TimeSeries(name='ts', data=[0, 1, 2], unit='grams', timestamps=[0.0, 0.1, 0.2])
+        self.nwbfile.add_acquisition(ts)
+        by_class = self.nwbfile.collect_descendants_of_type(TimeSeries)
+        by_string = self.nwbfile.collect_descendants_of_type('TimeSeries')
+        self.assertEqual(by_class, by_string)
+        self.assertIn(ts, by_string)
+
+    def test_collect_descendants_of_type_no_matches(self):
+        """Querying for a type with zero instances returns an empty list."""
+        result = self.nwbfile.collect_descendants_of_type(SpatialSeries)
+        self.assertEqual(result, [])
+
+    def test_collect_descendants_of_type_excludes_self(self):
+        """A container does not include itself in its own descendant search."""
+        ts = TimeSeries(name='ts', data=[0, 1, 2], unit='grams', timestamps=[0.0, 0.1, 0.2])
+        self.nwbfile.add_acquisition(ts)
+        result = ts.collect_descendants_of_type(TimeSeries)
+        self.assertNotIn(ts, result)
+
+    def test_collect_descendants_of_type_scoped_to_subtree(self):
+        """Calling on a sub-container only searches its subtree, not siblings."""
+        ts_a = TimeSeries(name='ts_a', data=[0, 1, 2], unit='grams', timestamps=[0.0, 0.1, 0.2])
+        ts_b = TimeSeries(name='ts_b', data=[3, 4, 5], unit='grams', timestamps=[0.3, 0.4, 0.5])
+        mod_a = self.nwbfile.create_processing_module(name='mod_a', description='a')
+        mod_b = self.nwbfile.create_processing_module(name='mod_b', description='b')
+        mod_a.add(ts_a)
+        mod_b.add(ts_b)
+        in_a = mod_a.collect_descendants_of_type(TimeSeries)
+        self.assertEqual(in_a, [ts_a])
+        self.assertNotIn(ts_b, in_a)
 
     def test_fail_if_source_script_file_name_without_source_script(self):
         with self.assertRaises(ValueError):

@@ -85,7 +85,24 @@ class NWBMixin(AbstractContainer):
 @register_class('NWBContainer', CORE_NAMESPACE)
 class NWBContainer(NWBMixin, Container):
 
-    pass
+    @docval({'name': 'neurodata_type', 'type': (type, str),
+             'doc': ('A PyNWB container class, or the string name of a neurodata_type. '
+                     'Subclass matches are included. For type names that may be ambiguous '
+                     'across loaded namespaces, pass the class directly.')})
+    def collect_descendants_of_type(self, **kwargs):
+        """Return all descendants that are instances of the given neurodata type.
+
+        Walks the entire subtree of this container and returns every descendant that is an
+        instance of the given class. Subclasses are included. ``self`` is excluded from the
+        result. Returns an empty list if there are no matches.
+        """
+        neurodata_type = kwargs['neurodata_type']
+        if isinstance(neurodata_type, str):
+            cls = self._get_type_map().get_dt_container_cls(neurodata_type)
+        else:
+            cls = neurodata_type
+        return [obj for obj in self.all_children()
+                if obj is not self and isinstance(obj, cls)]
 
 
 @register_class('NWBDataInterface', CORE_NAMESPACE)

@@ -13,6 +13,7 @@
 - Lifted the `<1.11` cap on the `linkml` and `linkml-runtime` termset extras and bumped the `dandi` docs dependency to `>=0.76.5`. dandi 0.76.5 lifts its `click<8.2` bound ([dandi/dandi-cli#1883](https://github.com/dandi/dandi-cli/pull/1883)), which had conflicted with the `click>=8.2` requirement of linkml 1.11. @rly [#2217](https://github.com/NeurodataWithoutBorders/pynwb/pull/2217)
 
 ### Added
+- Added `collect_descendants_of_type` method to `NWBContainer` for finding all descendant objects of a given neurodata type (by class or by string name), addressing the long-standing request in #560. @h-mayorquin [#2189](https://github.com/NeurodataWithoutBorders/pynwb/pull/2189)
 - Added remote-read support to `pynwb.read_nwb`. The function now accepts remote URLs (`s3://`, `gs://`, `abfs://`, `https://`, etc.) and dispatches to the right backend based on the URL: `.zarr` suffixes (and DANDI Zarr assets under `/zarr/`) are read with `NWBZarrIO`, everything else with `NWBHDF5IO`. Remote files are opened through `fsspec`, which now uses the URL's actual scheme instead of the previous hardcoded `fsspec.filesystem("http")` that mishandled non-HTTP schemes. @h-mayorquin [#2190](https://github.com/NeurodataWithoutBorders/pynwb/pull/2190)
 
 ### Fixed
