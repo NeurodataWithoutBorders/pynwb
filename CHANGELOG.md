@@ -3,7 +3,7 @@
 ## PyNWB 4.1.1 (Unreleased)
 
 ### Fixed
-- Fixed reading a file whose `session_start_time` (or `timestamps_reference_time`, `file_create_date`, or `Subject.date_of_birth`) carries a sub-minute UTC offset (e.g. `1900-10-01T00:00:00-05:50:36`). `dateutil` rejects offsets with a seconds component, so such a file, written by another tool, was unreadable even though the value is well-defined. Date parsing on read now falls back to `datetime.fromisoformat` and then to a small parser for the sub-minute offset, so these files read on all supported Python versions; if parsing fails entirely it raises a `ValueError` that names the field and shows the offending string. @h-mayorquin [#2230](https://github.com/NeurodataWithoutBorders/pynwb/pull/2230)
+- Fixed reading a file whose dates carry a sub-minute UTC offset (e.g. `1900-10-01T00:00:00-05:50:36`), which `dateutil` rejects. Date parsing on read now falls back to `datetime.fromisoformat`, and raises a `ValueError` naming the field if both fail. @h-mayorquin [#2230](https://github.com/NeurodataWithoutBorders/pynwb/pull/2230)
 
 ## PyNWB 4.1.0 (July 23, 2026)
 

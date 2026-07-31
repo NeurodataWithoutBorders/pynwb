@@ -754,14 +754,6 @@ class TestSubMinuteOffsetDates(TestCase):
         self.assertEqual(result.replace(tzinfo=None), datetime(1900, 10, 1, 0, 0, 0))
         self.assertEqual(result.utcoffset(), self.sub_minute_offset)
 
-    def test_parse_subminute_offset_helper(self):
-        # Exercises the version-independent fallback directly (the path used on Python < 3.11).
-        from pynwb.io.utils import parse_subminute_offset_date
-        result = parse_subminute_offset_date("1900-10-01T00:00:00-05:50:36")
-        self.assertEqual(result.utcoffset(), self.sub_minute_offset)
-        self.assertIsNone(parse_subminute_offset_date("1900-10-01T00:00:00-06:00"))
-        self.assertIsNone(parse_subminute_offset_date("not a date"))
-
     def test_parse_date_invalid_names_field_and_value(self):
         from pynwb.io.utils import parse_date
         with self.assertRaisesRegex(ValueError, r"session_start_time value 'not a date'"):
