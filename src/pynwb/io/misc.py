@@ -1,3 +1,5 @@
+import warnings
+
 from hdmf.common.io.table import DynamicTableMap
 
 from .. import register_map
@@ -22,17 +24,27 @@ class UnitsMap(DynamicTableMap):
         return self._get_waveform_stat(builder, 'unit')
 
     def _get_waveform_stat(self, builder, attribute):
+        """Get the value of an attribute shared by the waveform columns of a Units table.
+
+        The `Units` container holds one `waveform_rate` and one `waveform_unit` for the whole table, while the
+        file stores a `sampling_rate` and `unit` attribute on each waveform column. When the columns disagree,
+        the value of the first populated column is used and a warning is raised.
+        """
         waveform_columns = ('waveform_mean', 'waveform_sd', 'waveforms')
-        stats = [builder[column].attributes.get(attribute) for column in waveform_columns if column in builder]
-        if not stats:
+        stats = {column: builder[column].attributes.get(attribute)
+                 for column in waveform_columns if column in builder}
+        populated_stats = {column: value for column, value in stats.items() if value is not None}
+        if not populated_stats:
             return None
-        populated_stats = [stat for stat in stats if stat is not None]
-        if len(set(populated_stats)) > 1:
-            # throw warning
-            pass
-        if populated_stats:
-            return populated_stats[0]
-        return None
+        first_column, first_value = next(iter(populated_stats.items()))
+        if len(set(populated_stats.values())) > 1:
+            warnings.warn(
+                f"The '{attribute}' attribute differs across the waveform columns of Units "
+                f"'{builder.name}': {populated_stats}. Using the value of '{first_column}'.",
+                UserWarning,
+                stacklevel=2
+            )
+        return first_value
 
     @DynamicTableMap.object_attr("electrodes")
     def electrodes_column(self, container, manager):
