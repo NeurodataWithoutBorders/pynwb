@@ -10,15 +10,22 @@ def mock_Device(
     name: Optional[str] = None,
     description: str = "description",
     manufacturer: Optional[str] = None,
+    model: Optional[DeviceModel] = None,
+    serial_number: Optional[str] = None,
     nwbfile: Optional[NWBFile] = None,
 ) -> Device:
     device = Device(
         name=name or name_generator("Device"),
         description=description,
         manufacturer=manufacturer,
+        model=model,
+        serial_number=serial_number,
     )
 
     if nwbfile is not None:
+        # Device.model is a link, so the DeviceModel must live in the same NWBFile for the file to be written.
+        if model is not None and nwbfile.device_models.get(model.name) is not model:
+            nwbfile.add_device_model(model)
         nwbfile.add_device(device)
 
     return device

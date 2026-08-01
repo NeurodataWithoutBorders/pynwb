@@ -23,7 +23,7 @@ from pynwb.testing.mock.ogen import (
     mock_OptogeneticSeries
 )
 
-from pynwb.testing.mock.device import mock_Device
+from pynwb.testing.mock.device import mock_Device, mock_DeviceModel
 
 from pynwb.testing.mock.behavior import (
     mock_Position,
@@ -118,6 +118,50 @@ def test_mock_ElectricalSeries_more_than_five_channels():
     electrical_series = mock_ElectricalSeries(data=np.ones((10, 128)))
     assert electrical_series.data.shape[1] == 128
     assert len(electrical_series.electrodes.table) == 128
+
+
+def test_mock_Device_links_model():
+    """mock_Device must link the given DeviceModel and set the serial number."""
+    device = mock_Device(model=mock_DeviceModel(manufacturer="manufacturer"), serial_number="1234")
+    assert device.model.manufacturer == "manufacturer"
+    assert device.serial_number == "1234"
+
+
+def test_mock_Device_adds_model_to_nwbfile():
+    """A linked DeviceModel must be placed in the NWBFile so that the link resolves."""
+    nwbfile = mock_NWBFile()
+    model = mock_DeviceModel(manufacturer="manufacturer")
+    device = mock_Device(model=model, nwbfile=nwbfile)
+    assert nwbfile.device_models[model.name] is model
+    assert nwbfile.devices[device.name] is device
+
+
+def test_mock_Device_model_already_in_nwbfile():
+    """A DeviceModel already in the NWBFile must be linked without being added a second time."""
+    nwbfile = mock_NWBFile()
+    model = mock_DeviceModel(manufacturer="manufacturer", nwbfile=nwbfile)
+    device = mock_Device(model=model, nwbfile=nwbfile)
+    assert device.model is model
+    assert len(nwbfile.device_models) == 1
+
+
+def test_mock_Device_model_name_clash():
+    """A DeviceModel whose name is taken by a different DeviceModel in the NWBFile must raise."""
+    nwbfile = mock_NWBFile()
+    mock_DeviceModel(name="clashing_name", manufacturer="manufacturer", nwbfile=nwbfile)
+    other_model = mock_DeviceModel(name="clashing_name", manufacturer="manufacturer")
+
+    with pytest.raises(ValueError, match="already exists in 'device_models'"):
+        mock_Device(model=other_model, nwbfile=nwbfile)
+
+
+def test_mock_Device_with_model_write(tmp_path):
+    """An NWBFile holding a Device with a linked DeviceModel must be writable."""
+    nwbfile = mock_NWBFile()
+    mock_Device(model=mock_DeviceModel(manufacturer="manufacturer"), nwbfile=nwbfile)
+
+    with NWBHDF5IO(tmp_path / "device_with_model.nwb", "w") as io:
+        io.write(nwbfile)
 
 
 @pytest.mark.parametrize("mock_function", mock_functions)
