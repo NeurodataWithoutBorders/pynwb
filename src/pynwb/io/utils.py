@@ -1,6 +1,8 @@
+import datetime
 import re
 from typing import Tuple
 
+from dateutil.parser import parse as dateutil_parse
 from hdmf.build import Builder, ObjectMapper
 
 # Value an override function returns to signal "no override". HDMF >= 6.2.0 provides the
@@ -52,3 +54,27 @@ def get_nwb_version(builder: Builder, include_prerelease=False) -> Tuple[int, ..
         prerelease_info = nwb_version[nwb_version.index("-")+1:]
         version_list.append(prerelease_info)
     return tuple(version_list)
+
+
+def parse_date(datestr, field_name):
+    """Parse an ISO 8601 date string read from a file into a ``datetime``.
+
+    ``datestr`` may be ``str`` or UTF-8 ``bytes``. Scalar datasets are decoded on read, while
+    elements of an array-valued dataset (``file_create_date``) carry whichever the file stores:
+    a variable-length ``str`` dataset is decoded, a variable-length ``bytes`` one is not.
+
+    ``dateutil`` handles the common formats. ``datetime.fromisoformat`` covers UTC offsets that
+    carry a seconds component (e.g. ``-05:50:36``), which some writers emit. A value that neither
+    accepts raises a ``ValueError`` naming the field and the offending string.
+    """
+    if isinstance(datestr, bytes):
+        datestr = datestr.decode("utf-8")
+    try:
+        return dateutil_parse(datestr)
+    except (ValueError, OverflowError) as err:
+        parse_error = err
+    try:
+        return datetime.datetime.fromisoformat(datestr)
+    except ValueError:
+        pass
+    raise ValueError(f"Could not parse {field_name} value {datestr!r} as a datetime.") from parse_error
