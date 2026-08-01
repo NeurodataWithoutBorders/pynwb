@@ -3,7 +3,7 @@
 ## PyNWB 4.1.1 (Unreleased)
 
 ### Added
-- Added `model` and `serial_number` parameters to `mock_Device`. Passing a `DeviceModel` as `model` together with an `nwbfile` also places that `DeviceModel` in the `NWBFile`, so the link resolves when the file is written. @rly [#2237](https://github.com/NeurodataWithoutBorders/pynwb/pull/2237)
+- Added `model` and `serial_number` parameters to `mock_Device`. Passing a `DeviceModel` as `model` together with an `nwbfile` also places that `DeviceModel` in the `NWBFile`, so the link resolves when the file is written. @rly [#2238](https://github.com/NeurodataWithoutBorders/pynwb/pull/2238)
 
 ### Fixed
 - Fixed reading a file whose dates carry a sub-minute UTC offset (e.g. `1900-10-01T00:00:00-05:50:36`). @h-mayorquin [#2230](https://github.com/NeurodataWithoutBorders/pynwb/pull/2230)
