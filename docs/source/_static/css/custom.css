@@ -26,3 +26,26 @@ button.copybtn {
     border: none;
     background: none;
 }
+
+/* Pandas DataFrames in sphinx-gallery output.
+
+   Sphinx-gallery emits the DataFrame as a raw HTML table that no responsive wrapper
+   applies to, so a table wider than the content column spills into the right margin
+   instead of scrolling. Scroll the container, and let each cell keep to one line so
+   the columns line up with their headers. Pandas already caps cell text at
+   display.max_colwidth, which bounds how wide the table can get. */
+.rendered_html {
+    overflow-x: auto;
+}
+
+.rendered_html table.dataframe {
+    table-layout: auto;
+    width: auto;
+    margin-left: 0;
+    margin-right: 0;
+}
+
+.rendered_html table.dataframe th,
+.rendered_html table.dataframe td {
+    white-space: nowrap;
+}
