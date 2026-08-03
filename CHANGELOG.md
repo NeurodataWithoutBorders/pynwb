@@ -1,8 +1,10 @@
 # PyNWB Changelog
 
-## PyNWB 4.2.0 (Upcoming)
+## PyNWB 4.1.1 (Unreleased)
 
 ### Fixed
+- Fixed `mock_DeviceModel` defaulting `manufacturer` to `None`. The mock now defaults it to `"manufacturer"`. @HugoFara [#2232](https://github.com/NeurodataWithoutBorders/pynwb/pull/2232)
+- Fixed reading a file whose dates carry a sub-minute UTC offset (e.g. `1900-10-01T00:00:00-05:50:36`). @h-mayorquin [#2230](https://github.com/NeurodataWithoutBorders/pynwb/pull/2230)
 - Fixed wide pandas DataFrames in the tutorials spilling out of the content column and into the right margin. @bendichter [#2236](https://github.com/NeurodataWithoutBorders/pynwb/pull/2236)
 - Fixed `set_data_io` being silently ignored on `NWBData` subclasses (`GrayscaleImage`, `RGBImage`, `RGBAImage`, `ExternalImage`, `ImageReferences`, and `ScratchData`), so requested chunking and compression were dropped without warning and the datasets were written uncompressed. @h-mayorquin [#2233](https://github.com/NeurodataWithoutBorders/pynwb/pull/2233)
 
