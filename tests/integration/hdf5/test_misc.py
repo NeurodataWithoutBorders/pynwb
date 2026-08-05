@@ -14,40 +14,30 @@ class TestUnitsIO(AcquisitionH5IOMixin, TestCase):
 
     def setUpContainer(self):
         """ Return the test Units to read/write """
+        # A 3-D waveforms input to add_unit is ordered (num_spikes, num_electrodes, num_samples).
+        # Dim 0 indexes spike events and becomes waveforms_index_index, dim 1 indexes the electrodes
+        # that observed each spike event and becomes waveforms_index, and dim 2 holds the samples of
+        # each waveform. Every unit below has one waveform per electrode per spike time, so the
+        # number of spike events matches the number of spike_times.
         ut = Units(name='UnitsTest', description='a simple table for testing Units')
         ut.add_unit(spike_times=[0., 1., 2.], obs_intervals=[[0., 1.], [2., 3.]],
                     waveform_mean=[1., 2., 3.], waveform_sd=[4., 5., 6.],
-                    waveforms=[
-                        [  # elec 1
-                            [1, 2, 3],
-                            [1, 2, 3],
-                            [1, 2, 3]
-                        ], [  # elec 2
-                            [1, 2, 3],
-                            [1, 2, 3],
-                            [1, 2, 3]
+                    waveforms=[  # 3 spike times, 2 electrodes, 3 samples
+                        [                # spike 1
+                            [1, 2, 3],   # elec 1, [sample 1, sample 2, sample 3]
+                            [4, 5, 6]    # elec 2
+                        ], [             # spike 2
+                            [7, 8, 9],
+                            [10, 11, 12]
+                        ], [             # spike 3
+                            [13, 14, 15],
+                            [16, 17, 18]
                         ]
                     ])
         ut.add_unit(spike_times=[3., 4., 5.], obs_intervals=[[2., 5.], [6., 7.]],
                     waveform_mean=[1., 2., 3.], waveform_sd=[4., 5., 6.],
-                    waveforms=np.array([
-                        [     # elec 1
-                            [1, 2, 3],  # spike 1, [sample 1, sample 2, sample 3]
-                            [1, 2, 3],  # spike 2
-                            [1, 2, 3],  # spike 3
-                            [1, 2, 3]   # spike 4
-                        ], [  # elec 2
-                            [1, 2, 3],  # spike 1
-                            [1, 2, 3],  # spike 2
-                            [1, 2, 3],  # spike 3
-                            [1, 2, 3]   # spike 4
-                        ], [  # elec 3
-                            [1, 2, 3],  # spike 1
-                            [1, 2, 3],  # spike 2
-                            [1, 2, 3],  # spike 3
-                            [1, 2, 3]   # spike 4
-                        ]
-                    ]))
+                    # 3 spike times, 4 electrodes, 3 samples, continuing the sample values above
+                    waveforms=np.arange(19, 55).reshape(3, 4, 3))
         ut.waveform_rate = 40000.
         ut.resolution = 1/40000
         return ut
@@ -70,6 +60,24 @@ class TestUnitsIO(AcquisitionH5IOMixin, TestCase):
         np.testing.assert_array_equal(received, [[2., 5.], [6., 7.]])
         np.testing.assert_array_equal(ut['obs_intervals'][:], [[[0., 1.], [2., 3.]], [[2., 5.], [6., 7.]]])
 
+    def test_waveforms_structure(self):
+        """ Test the structure of the doubly indexed waveforms column read from file """
+        ut = self.roundtripContainer()
+        waveforms_index_index = ut['waveforms']
+        waveforms_index = waveforms_index_index.target
+        waveforms = waveforms_index.target
+
+        # waveforms_index_index holds the number of spike events of each unit
+        np.testing.assert_array_equal(waveforms_index_index.data[:], [3, 6])
+        # waveforms_index holds the number of waveforms, one per electrode, of each spike event
+        np.testing.assert_array_equal(waveforms_index.data[:], [2, 4, 6, 10, 14, 18])
+        # the waveforms dataset itself is 2-D, (num_waveforms, num_samples)
+        np.testing.assert_array_equal(waveforms.data[:], np.arange(1, 55).reshape(18, 3))
+
+        # unit 0 has 2 electrodes per spike event, unit 1 has 4
+        self.assertEqual([len(spike_event) for spike_event in waveforms_index_index[0]], [2, 2, 2])
+        self.assertEqual([len(spike_event) for spike_event in waveforms_index_index[1]], [4, 4, 4])
+
 
 class TestUnitsWaveformsOnlyIO(AcquisitionH5IOMixin, TestCase):
     """Test roundtripping waveform metadata when only waveforms are present."""
@@ -78,13 +86,14 @@ class TestUnitsWaveformsOnlyIO(AcquisitionH5IOMixin, TestCase):
         ut = Units(name='UnitsWaveformsOnlyTest', description='a simple table for testing Units waveforms')
         ut.add_unit(
             spike_times=[0., 1., 2.],
-            waveforms=[
-                [
-                    [1, 2, 3],
+            waveforms=[  # 3 spike times, 2 electrodes, 3 samples
+                [                # spike 1
+                    [1, 2, 3],   # elec 1, [sample 1, sample 2, sample 3]
+                    [1, 2, 3]    # elec 2
+                ], [             # spike 2
                     [1, 2, 3],
                     [1, 2, 3]
-                ], [
-                    [1, 2, 3],
+                ], [             # spike 3
                     [1, 2, 3],
                     [1, 2, 3]
                 ]
@@ -92,13 +101,14 @@ class TestUnitsWaveformsOnlyIO(AcquisitionH5IOMixin, TestCase):
         )
         ut.add_unit(
             spike_times=[3., 4., 5.],
-            waveforms=np.array([
+            waveforms=np.array([  # 3 spike times, 2 electrodes, 3 samples
                 [
-                    [1, 2, 3],
                     [1, 2, 3],
                     [1, 2, 3]
                 ], [
                     [1, 2, 3],
+                    [1, 2, 3]
+                ], [
                     [1, 2, 3],
                     [1, 2, 3]
                 ]
