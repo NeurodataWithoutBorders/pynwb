@@ -6,6 +6,7 @@
 - Fixed `mock_DeviceModel` defaulting `manufacturer` to `None`. The mock now defaults it to `"manufacturer"`. @HugoFara [#2232](https://github.com/NeurodataWithoutBorders/pynwb/pull/2232)
 - Fixed reading a file whose dates carry a sub-minute UTC offset (e.g. `1900-10-01T00:00:00-05:50:36`). @h-mayorquin [#2230](https://github.com/NeurodataWithoutBorders/pynwb/pull/2230)
 - Fixed wide pandas DataFrames in the tutorials spilling out of the content column and into the right margin. @bendichter [#2236](https://github.com/NeurodataWithoutBorders/pynwb/pull/2236)
+- Fixed `ImageSeries` (and its subclasses) writing a `num_samples` dataset derived from `len(data)` when the user never set one, which emitted an HDMF `DtypeConversionWarning` on write. `num_samples` is now written only when it was explicitly provided, and an explicitly provided value is written with the schema's `uint32` dtype instead of being widened to `uint64`. Reading a file that contains `num_samples` is unchanged, as is the in-memory `ImageSeries.num_samples` property. @adityasingh2400 [#2239](https://github.com/NeurodataWithoutBorders/pynwb/pull/2239)
 
 
 ## PyNWB 4.1.0 (July 23, 2026)
