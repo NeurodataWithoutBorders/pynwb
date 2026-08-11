@@ -1,7 +1,5 @@
 from warnings import warn
 
-import numpy as np
-
 from hdmf import Container, Data
 from hdmf.container import AbstractContainer, MultiContainerInterface as hdmf_MultiContainerInterface, Table
 from hdmf.common import DynamicTable, DynamicTableRegion  # noqa: F401
@@ -102,32 +100,6 @@ class NWBData(NWBMixin, Data):
             allow_positional=AllowPositional.WARNING,)
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-
-    def __getitem__(self, args):
-        if isinstance(self.data, (tuple, list)) and isinstance(args, (tuple, list)):
-            return [self.data[i] for i in args]
-        return self.data[args]
-
-    def append(self, arg):
-        """
-        Append a single element to the data
-
-        Note: The arg to append should be 1 dimension less than the data.
-        For example, if the data is a 2D array, arg should be a 1D array.
-        Appending to scalar data is not supported. To append multiple
-        elements, use extend.
-        """
-        if not isinstance(self.data, (list, np.ndarray)):
-            raise ValueError("NWBData cannot append to object of type '%s'" % type(self.data))
-        super().append(arg)
-
-    def extend(self, arg):
-        """
-        Extend the data with multiple elements.
-        """
-        if not isinstance(self.data, (list, np.ndarray)):
-            raise ValueError("NWBData cannot extend object of type '%s'" % type(self.data))
-        super().extend(arg)
 
 
 @register_class('ScratchData', CORE_NAMESPACE)
