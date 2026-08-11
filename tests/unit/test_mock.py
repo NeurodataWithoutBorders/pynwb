@@ -23,7 +23,7 @@ from pynwb.testing.mock.ogen import (
     mock_OptogeneticSeries
 )
 
-from pynwb.testing.mock.device import mock_Device
+from pynwb.testing.mock.device import mock_Device, mock_DeviceModel
 
 from pynwb.testing.mock.behavior import (
     mock_Position,
@@ -68,6 +68,7 @@ mock_functions = [
     mock_OptogeneticStimulusSite,
     mock_OptogeneticSeries,
     mock_Device,
+    mock_DeviceModel,
     mock_Position,
     mock_PupilTracking,
     mock_CompassDirection,
