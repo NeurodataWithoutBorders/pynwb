@@ -322,10 +322,15 @@ class UnitsTests(TestCase):
         ut = Units(waveform_rate=40000.)
         self.assertEqual(ut.waveform_rate, 40000.)
         self.assertEqual(ut.waveform_unit, 'volts')
+        self.assertIsNone(ut.waveform_time_before_peak_in_ms)
 
     def test_custom_waveform_unit(self):
         ut = Units(waveform_unit='microvolts')
         self.assertEqual(ut.waveform_unit, 'microvolts')
+
+    def test_waveform_time_before_peak_in_ms(self):
+        ut = Units(waveform_time_before_peak_in_ms=1.5)
+        self.assertEqual(ut.waveform_time_before_peak_in_ms, 1.5)
 
     def test_get_starting_time(self):
         """Test get_starting_time returns the earliest spike time across units."""
