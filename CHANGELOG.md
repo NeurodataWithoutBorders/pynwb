@@ -2,10 +2,17 @@
 
 ## PyNWB 4.1.1 (Unreleased)
 
+### Changed
+- Added support for NWB Schema 2.10.1
+  - The `unit` attribute of `Units.waveform_mean`, `Units.waveform_sd`, and `Units.waveforms` now has a default value of `"volts"` instead of a fixed value of `"volts"`.
+  - `Units.waveform_mean`, `Units.waveform_sd`, and `Units.waveforms` have a new optional `time_before_peak_in_ms` attribute, exposed as the `waveform_time_before_peak_in_ms` argument and field of `Units`. It holds the time, in milliseconds, from the start of each waveform to the spike peak, i.e., the alignment point used during spike sorting. @rly [#2237](https://github.com/NeurodataWithoutBorders/pynwb/pull/2237)
+
 ### Fixed
+- Fixed `Units.waveform_unit` having no effect on the written file. The `waveform_unit` passed to `Units` is now written to the `waveform_mean`, `waveform_sd`, and `waveforms` columns, and `"volts"` remains the default. PyNWB now also warns when the waveform columns of a file being read carry different `unit` or `sampling_rate` attributes, since only one value per attribute is kept on the `Units` container. @rly [#2162](https://github.com/NeurodataWithoutBorders/pynwb/issues/2162)
 - Fixed `mock_DeviceModel` defaulting `manufacturer` to `None`. The mock now defaults it to `"manufacturer"`. @HugoFara [#2232](https://github.com/NeurodataWithoutBorders/pynwb/pull/2232)
 - Fixed reading a file whose dates carry a sub-minute UTC offset (e.g. `1900-10-01T00:00:00-05:50:36`). @h-mayorquin [#2230](https://github.com/NeurodataWithoutBorders/pynwb/pull/2230)
 - Fixed wide pandas DataFrames in the tutorials spilling out of the content column and into the right margin. @bendichter [#2236](https://github.com/NeurodataWithoutBorders/pynwb/pull/2236)
+- Fixed `set_data_io` being silently ignored on `NWBData` subclasses (`GrayscaleImage`, `RGBImage`, `RGBAImage`, `ExternalImage`, `ImageReferences`, and `ScratchData`), so requested chunking and compression were dropped without warning and the datasets were written uncompressed. @h-mayorquin [#2233](https://github.com/NeurodataWithoutBorders/pynwb/pull/2233)
 - Fixed the `Units` waveforms test fixtures, which labelled the dimensions of the 3-D `add_unit` waveforms input as `(num_electrodes, num_spikes, num_samples)` when `add_unit` reads them as `(num_spikes, num_electrodes, num_samples)`, and so encoded a number of spike events that disagreed with the unit's `spike_times`. Added `TestUnitsIO.test_waveforms_structure` asserting `waveforms_index_index`, `waveforms_index`, and the 2-D `waveforms` dataset after a roundtrip. @adityasingh2400 [#2240](https://github.com/NeurodataWithoutBorders/pynwb/pull/2240)
 
 

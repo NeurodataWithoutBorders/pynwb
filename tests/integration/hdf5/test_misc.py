@@ -2,9 +2,10 @@ import h5py
 import numpy as np
 
 from hdmf.common import VectorData, DynamicTableRegion
-from pynwb import TimeSeries
+from pynwb import NWBHDF5IO, TimeSeries
 from pynwb.misc import Units, DecompositionSeries, FrequencyBandsTable
-from pynwb.testing import NWBH5IOMixin, AcquisitionH5IOMixin, TestCase
+from pynwb.testing import NWBH5IOMixin, AcquisitionH5IOMixin, TestCase, remove_test_file
+from pynwb.testing.mock.file import mock_NWBFile
 from pynwb.ecephys import ElectrodeGroup, ElectrodesTable
 from pynwb.device import Device
 
@@ -131,6 +132,140 @@ class TestUnitsWaveformsOnlyIO(AcquisitionH5IOMixin, TestCase):
             if isinstance(unit, bytes):
                 unit = unit.decode('utf-8')
             self.assertEqual(unit, 'volts')
+
+
+class TestUnitsCustomWaveformUnitIO(AcquisitionH5IOMixin, TestCase):
+    """Test roundtripping a waveform unit other than the default 'volts'."""
+
+    def setUpContainer(self):
+        ut = Units(
+            name='UnitsCustomWaveformUnitTest',
+            description='a simple table for testing a custom Units waveform unit',
+            waveform_rate=40000.,
+            waveform_unit='microvolts',
+        )
+        ut.add_unit(
+            spike_times=[0., 1., 2.],
+            waveform_mean=[1., 2., 3.],
+            waveform_sd=[4., 5., 6.],
+            waveforms=[
+                [  # elec 1
+                    [1, 2, 3],
+                    [1, 2, 3]
+                ], [  # elec 2
+                    [1, 2, 3],
+                    [1, 2, 3]
+                ]
+            ],
+        )
+        return ut
+
+    def test_waveform_unit_roundtrip(self):
+        ut = self.roundtripContainer()
+        self.assertEqual(ut.waveform_unit, 'microvolts')
+
+    def test_waveform_unit_written(self):
+        self.roundtripContainer()
+        with h5py.File(self.filename, 'r') as infile:
+            units = infile['acquisition'][self.container.name]
+            for column in ('waveform_mean', 'waveform_sd', 'waveforms'):
+                unit = units[column].attrs['unit']
+                if isinstance(unit, bytes):
+                    unit = unit.decode('utf-8')
+                self.assertEqual(unit, 'microvolts')
+
+
+class TestUnitsWaveformTimeBeforePeakIO(AcquisitionH5IOMixin, TestCase):
+    """Test roundtripping the time from the start of a waveform to the spike peak."""
+
+    def setUpContainer(self):
+        ut = Units(
+            name='UnitsWaveformTimeBeforePeakTest',
+            description='a simple table for testing the Units waveform peak alignment',
+            waveform_rate=40000.,
+            waveform_time_before_peak_in_ms=1.5,
+        )
+        ut.add_unit(
+            spike_times=[0., 1., 2.],
+            waveform_mean=[1., 2., 3.],
+            waveform_sd=[4., 5., 6.],
+            waveforms=[
+                [  # elec 1
+                    [1, 2, 3],
+                    [1, 2, 3]
+                ], [  # elec 2
+                    [1, 2, 3],
+                    [1, 2, 3]
+                ]
+            ],
+        )
+        return ut
+
+    def test_waveform_time_before_peak_roundtrip(self):
+        ut = self.roundtripContainer()
+        self.assertEqual(ut.waveform_time_before_peak_in_ms, 1.5)
+
+    def test_waveform_time_before_peak_written(self):
+        self.roundtripContainer()
+        with h5py.File(self.filename, 'r') as infile:
+            units = infile['acquisition'][self.container.name]
+            for column in ('waveform_mean', 'waveform_sd', 'waveforms'):
+                self.assertEqual(units[column].attrs['time_before_peak_in_ms'], 1.5)
+
+
+class TestUnitsWaveformTimeBeforePeakOmitted(TestCase):
+    """Test a Units table whose waveform peak alignment is unset."""
+
+    def setUp(self):
+        self.filename = 'test_units_waveform_time_before_peak_omitted.nwb'
+        nwbfile = mock_NWBFile()
+        ut = Units(name='units', description='a table without waveform peak alignment')
+        ut.add_unit(spike_times=[0., 1., 2.], waveform_mean=[1., 2., 3.])
+        nwbfile.units = ut
+        with NWBHDF5IO(self.filename, 'w') as io:
+            io.write(nwbfile)
+
+    def tearDown(self):
+        remove_test_file(self.filename)
+
+    def test_attribute_not_written(self):
+        with h5py.File(self.filename, 'r') as infile:
+            self.assertNotIn('time_before_peak_in_ms', infile['units']['waveform_mean'].attrs)
+
+    def test_read_as_none(self):
+        with NWBHDF5IO(self.filename, 'r') as io:
+            nwbfile = io.read()
+            self.assertIsNone(nwbfile.units.waveform_time_before_peak_in_ms)
+
+
+class TestUnitsMismatchedWaveformUnit(TestCase):
+    """Test reading a file whose waveform columns carry different unit attributes."""
+
+    def setUp(self):
+        self.filename = 'test_units_mismatched_waveform_unit.nwb'
+        nwbfile = mock_NWBFile()
+        ut = Units(name='units', description='a table for testing mismatched waveform units')
+        ut.add_unit(
+            spike_times=[0., 1., 2.],
+            waveform_mean=[1., 2., 3.],
+            waveform_sd=[4., 5., 6.],
+        )
+        nwbfile.units = ut
+        with NWBHDF5IO(self.filename, 'w') as io:
+            io.write(nwbfile)
+        with h5py.File(self.filename, 'r+') as infile:
+            infile['units']['waveform_sd'].attrs['unit'] = 'microvolts'
+
+    def tearDown(self):
+        remove_test_file(self.filename)
+
+    def test_warn_on_mismatched_unit(self):
+        msg = ("The 'unit' attribute differs across the waveform columns of Units 'units': "
+               "{'waveform_mean': 'volts', 'waveform_sd': 'microvolts'}. Using the value of 'waveform_mean'.")
+        with self.assertWarnsWith(UserWarning, msg):
+            with NWBHDF5IO(self.filename, 'r') as io:
+                nwbfile = io.read()
+                self.assertEqual(nwbfile.units.waveform_unit, 'volts')
 
 
 class TestUnitsFileIO(NWBH5IOMixin, TestCase):
