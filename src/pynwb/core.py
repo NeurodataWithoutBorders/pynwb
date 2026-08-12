@@ -1,7 +1,5 @@
 from warnings import warn
 
-import numpy as np
-
 from hdmf import Container, Data
 from hdmf.container import AbstractContainer, MultiContainerInterface as hdmf_MultiContainerInterface, Table
 from hdmf.common import DynamicTable, DynamicTableRegion  # noqa: F401
@@ -102,50 +100,6 @@ class NWBData(NWBMixin, Data):
             allow_positional=AllowPositional.WARNING,)
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.__data = kwargs['data']
-
-    @property
-    def data(self):
-        """The data managed by this object"""
-        return self.__data
-
-    def __len__(self):
-        """Size of the data. Same as len(self.data)"""
-        return len(self.__data)
-
-    def __getitem__(self, args):
-        if isinstance(self.data, (tuple, list)) and isinstance(args, (tuple, list)):
-            return [self.data[i] for i in args]
-        return self.data[args]
-
-    def append(self, arg):
-        """
-        Append a single element to the data
-
-        Note: The arg to append should be 1 dimension less than the data.
-        For example, if the data is a 2D array, arg should be a 1D array.
-        Appending to scalar data is not supported. To append multiple
-        elements, use extend.
-        """
-        if isinstance(self.data, list):
-            self.data.append(arg)
-        elif isinstance(self.data, np.ndarray):
-            self.__data = np.concatenate((self.__data, [arg]))
-        else:
-            msg = "NWBData cannot append to object of type '%s'" % type(self.__data)
-            raise ValueError(msg)
-
-    def extend(self, arg):
-        """
-        Extend the data with multiple elements.
-        """
-        if isinstance(self.data, list):
-            self.data.extend(arg)
-        elif isinstance(self.data, np.ndarray):
-            self.__data = np.concatenate((self.__data, arg))
-        else:
-            msg = "NWBData cannot extend object of type '%s'" % type(self.__data)
-            raise ValueError(msg)
 
 
 @register_class('ScratchData', CORE_NAMESPACE)

@@ -358,6 +358,24 @@ nwbfile.units.resolution = 1 / res  # resolution in seconds (1 / sampling rate)
 # The :py:class:`~pynwb.misc.Units` table can contain simply the spike times of sorted units, or you can also include
 # individual and mean waveform information in some of the optional, predefined :py:class:`~pynwb.misc.Units` table
 # columns: ``waveform_mean``, ``waveform_sd``, or ``waveforms``.
+#
+# The sampling rate and unit of measurement of those three columns are set with the ``waveform_rate`` and
+# ``waveform_unit`` arguments of :py:class:`~pynwb.misc.Units`, which default to ``None`` and ``"volts"``.
+# The ``waveform_time_before_peak_in_ms`` argument records where the spike peak sits within each waveform,
+# that is, the time in milliseconds from the first sample to the alignment point used during spike sorting.
+# Together with ``waveform_rate`` and the number of samples, it locates every waveform sample relative to the
+# spike event. All three are constructor arguments, so set them when you build the
+# :py:class:`~pynwb.misc.Units` table and assign it to :py:attr:`.NWBFile.units`::
+#
+#     from pynwb.misc import Units
+#
+#     nwbfile.units = Units(
+#         name="units",
+#         description="units table",
+#         waveform_rate=30000.0,
+#         waveform_unit="microvolts",
+#         waveform_time_before_peak_in_ms=1.0,
+#     )
 
 nwbfile.units.to_dataframe()
 
