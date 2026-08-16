@@ -444,6 +444,30 @@ class NWBFileTest(TestCase):
         self.assertIn(device, children)
         self.assertIn(elecgrp, children)
 
+    def test_objects_includes_container_added_after_first_access(self):
+        """Reading objects must not freeze its contents: containers added later must show up."""
+        self.assertNotIn('test_ts', [obj.name for obj in self.nwbfile.objects.values()])
+        ts = TimeSeries(name='test_ts', data=[0, 1, 2], unit='grams', timestamps=[0.0, 0.1, 0.2])
+        self.nwbfile.add_acquisition(ts)
+        self.assertIs(self.nwbfile.objects[ts.object_id], ts)
+
+    def test_objects_includes_nested_container_added_after_first_access(self):
+        """Containers added to a child of the file must show up in objects as well."""
+        module = self.nwbfile.create_processing_module(name='behavior', description='a test module')
+        self.nwbfile.objects
+        ts = TimeSeries(name='test_ts', data=[0, 1, 2], unit='grams', timestamps=[0.0, 0.1, 0.2])
+        module.add(ts)
+        self.assertIs(self.nwbfile.objects[ts.object_id], ts)
+
+    def test_objects_excludes_removed_container(self):
+        """Containers removed from the file must not linger in objects."""
+        ts = TimeSeries(name='test_ts', data=[0, 1, 2], unit='grams', timestamps=[0.0, 0.1, 0.2])
+        self.nwbfile.add_acquisition(ts)
+        self.assertIn(ts.object_id, self.nwbfile.objects)
+        del self.nwbfile.acquisition['test_ts']
+        ts.reset_parent()
+        self.assertNotIn(ts.object_id, self.nwbfile.objects)
+
     def test_fail_if_source_script_file_name_without_source_script(self):
         with self.assertRaises(ValueError):
             # <-- source_script_file_name without source_script is not allowed
