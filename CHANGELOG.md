@@ -13,6 +13,7 @@
 
 ### Fixed
 - Fixed `ElectricalSeries.__init__`, `TimeSeries.get_timestamps`, and `TimeSeries.num_samples` failing on data backed by a zarr array. @rly [#2235](https://github.com/NeurodataWithoutBorders/pynwb/pull/2235)
+- Fixed `TimeSeries.num_samples` returning `None` when the data or timestamps are backed by a `DataChunkIterator` that wraps an array. @rly [#2235](https://github.com/NeurodataWithoutBorders/pynwb/pull/2235)
 - Fixed `Units.waveform_unit` having no effect on the written file. The `waveform_unit` passed to `Units` is now written to the `waveform_mean`, `waveform_sd`, and `waveforms` columns, and `"volts"` remains the default. PyNWB now also warns when the waveform columns of a file being read carry different `unit` or `sampling_rate` attributes, since only one value per attribute is kept on the `Units` container. @rly [#2162](https://github.com/NeurodataWithoutBorders/pynwb/issues/2162)
 - Fixed `mock_DeviceModel` defaulting `manufacturer` to `None`. The mock now defaults it to `"manufacturer"`. @HugoFara [#2232](https://github.com/NeurodataWithoutBorders/pynwb/pull/2232)
 - Fixed reading a file whose dates carry a sub-minute UTC offset (e.g. `1900-10-01T00:00:00-05:50:36`). @h-mayorquin [#2230](https://github.com/NeurodataWithoutBorders/pynwb/pull/2230)
