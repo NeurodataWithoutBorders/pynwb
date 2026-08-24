@@ -14,10 +14,11 @@ import numpy as np
 from hdmf.utils import check_type, get_docval
 
 from pynwb.base import TimeSeries
-from pynwb.image import ImageSeries
+from pynwb.image import ImageSeries, OpticalSeries
 from pynwb.misc import AbstractFeatureSeries
 from pynwb.ecephys import Clustering, ClusterWaveforms
 from pynwb.file import NWBFile
+from pynwb.ophys import TwoPhotonSeries
 from pynwb.testing import TestCase
 
 
@@ -39,6 +40,8 @@ class TestArrayDataFieldTypes(TestCase):
             (Clustering.__init__, 'peak_over_rms'),
             (ClusterWaveforms.__init__, 'waveform_mean'),
             (ClusterWaveforms.__init__, 'waveform_sd'),
+            (OpticalSeries.__init__, 'field_of_view'),
+            (TwoPhotonSeries.__init__, 'field_of_view'),
         ]
         for func, name in cases:
             with self.subTest(field=name):
