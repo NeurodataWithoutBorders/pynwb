@@ -274,8 +274,8 @@ class TimeSeries(NWBDataInterface):
         '''
 
         def unknown_length_warning(attr):
-            return ('The length of the {} attribute on this TimeSeries (named: {}) '
-                    'could not be determined'.format(attr, self.name))
+            return f'The length of the {attr} attribute on this TimeSeries (named: {self.name}) ' \
+                   'could not be determined'
 
         num_samples = _get_num_samples(self.data)
         if num_samples is not None:
