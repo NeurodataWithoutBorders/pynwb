@@ -68,6 +68,7 @@ mock_functions = [
     mock_OptogeneticStimulusSite,
     mock_OptogeneticSeries,
     mock_Device,
+    mock_DeviceModel,
     mock_Position,
     mock_PupilTracking,
     mock_CompassDirection,
