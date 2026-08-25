@@ -1,6 +1,6 @@
 # PyNWB Changelog
 
-## PyNWB 4.1.1 (Unreleased)
+## PyNWB 4.2.0 (Upcoming)
 
 ### Changed
 - Added support for NWB Schema 2.11.0
@@ -8,6 +8,9 @@
   - `Units.waveform_mean`, `Units.waveform_sd`, and `Units.waveforms` have a new optional `time_before_peak_in_ms` attribute, exposed as the `waveform_time_before_peak_in_ms` argument and field of `Units`. It holds the time, in milliseconds, from the start of each waveform to the spike peak, i.e., the alignment point used during spike sorting. @rly [#2237](https://github.com/NeurodataWithoutBorders/pynwb/pull/2237)
   - Incorporates HDMF Common Schema 1.10.0, which changes `MeaningsTable.target` from a link to an object-reference attribute. @rly [#2244](https://github.com/NeurodataWithoutBorders/pynwb/pull/2244)
 - Raised the minimum HDMF requirement to 6.2.0. HDMF 6.2.0 bundles HDMF Common Schema 1.10.0, matching the copy in NWB Schema 2.11.0. @rly [#2244](https://github.com/NeurodataWithoutBorders/pynwb/pull/2244)
+
+### Added
+- Added `model` and `serial_number` parameters to `mock_Device`. Passing a `DeviceModel` as `model` together with an `nwbfile` also places that `DeviceModel` in the `NWBFile`, so the link resolves when the file is written. @rly [#2238](https://github.com/NeurodataWithoutBorders/pynwb/pull/2238)
 
 ### Fixed
 - Fixed `Units.waveform_unit` having no effect on the written file. The `waveform_unit` passed to `Units` is now written to the `waveform_mean`, `waveform_sd`, and `waveforms` columns, and `"volts"` remains the default. PyNWB now also warns when the waveform columns of a file being read carry different `unit` or `sampling_rate` attributes, since only one value per attribute is kept on the `Units` container. @rly [#2162](https://github.com/NeurodataWithoutBorders/pynwb/issues/2162)
