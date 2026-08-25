@@ -676,8 +676,8 @@ class TimeSeriesReference(NamedTuple):
             return self.timeseries.timestamps[self.idx_start: (self.idx_start + self.count)]
         # construct the timestamps from the starting_time and rate
         else:
-            start_time = self.timeseries.rate * self.idx_start + self.timeseries.starting_time
-            return np.arange(0, self.count) * self.timeseries.rate + start_time
+            start_time = self.idx_start / self.timeseries.rate + self.timeseries.starting_time
+            return np.arange(0, self.count) / self.timeseries.rate + start_time
 
     @property
     def data(self):

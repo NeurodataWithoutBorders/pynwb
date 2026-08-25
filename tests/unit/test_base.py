@@ -949,7 +949,7 @@ class TestTimeSeriesReference(TestCase):
     def test_timestamps_property(self):
         # Timestamps from starting_time and rate
         tsr = TimeSeriesReference(5, 4, self._create_time_series_with_rate())
-        np.testing.assert_array_equal(tsr.timestamps, np.array([5.5, 5.6, 5.7, 5.8]))
+        np.testing.assert_array_equal(tsr.timestamps, np.array([55.0, 65.0, 75.0, 85.0]))
         # Timestamps from timestamps directly
         tsr = TimeSeriesReference(5, 4, self._create_time_series_with_timestamps())
         np.testing.assert_array_equal(tsr.timestamps, np.array([5.0, 6.0, 7.0, 8.0]))
