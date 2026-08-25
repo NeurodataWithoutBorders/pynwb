@@ -1,5 +1,4 @@
 from warnings import warn
-from collections.abc import Iterable
 from abc import ABC
 from typing import NamedTuple
 
@@ -24,6 +23,17 @@ __all__ = [
     'TimeSeriesReferenceVectorData',
     'TimeSeriesReference'
 ]
+
+
+def _get_num_samples(data):
+    """Return the length of the first dimension of ``data``, or None if it cannot be determined.
+
+    The shape is read without loading the data, so out-of-core iterators of unknown length yield None.
+    """
+    shape = get_data_shape(data, strict_no_data_load=True)
+    if shape is None or len(shape) == 0:
+        return None
+    return shape[0]
 
 
 @register_class('ProcessingModule', CORE_NAMESPACE)
@@ -159,9 +169,9 @@ class TimeSeries(NWBDataInterface):
              'default': 'no comments'},
             {'name': 'description', 'type': str, 'doc': 'Description of this TimeSeries dataset',
              'default': 'no description'},
-            {'name': 'control', 'type': Iterable, 'doc': 'Numerical labels that apply to each element in data',
-             'default': None},
-            {'name': 'control_description', 'type': Iterable, 'doc': 'Description of each control value',
+            {'name': 'control', 'type': ('array_data', 'data'),
+             'doc': 'Numerical labels that apply to each element in data', 'default': None},
+            {'name': 'control_description', 'type': ('array_data', 'data'), 'doc': 'Description of each control value',
              'default': None},
             {'name': 'continuity', 'type': str, 'default': None, 'enum': ["continuous", "instantaneous", "step"],
              'doc': 'Optionally describe the continuity of the data. Can be "continuous", "instantaneous", or '
@@ -263,31 +273,20 @@ class TimeSeries(NWBDataInterface):
         ''' Tries to return the number of data samples. If this cannot be assessed, returns None.
         '''
 
-        def unreadable_warning(attr):
-            return (
-                'The {} attribute on this TimeSeries (named: {}) has a __len__, '
-                'but it cannot be read'.format(attr, self.name)
-            )
+        def unknown_length_warning(attr):
+            return f'The length of the {attr} attribute on this TimeSeries (named: {self.name}) ' \
+                   'could not be determined'
 
-        def no_len_warning(attr):
-            return 'The {} attribute on this TimeSeries (named: {}) has no __len__'.format(attr, self.name)
+        num_samples = _get_num_samples(self.data)
+        if num_samples is not None:
+            return num_samples
+        warn(unknown_length_warning('data'), UserWarning)
 
-        if hasattr(self.data, '__len__'):
-            try:
-                return len(self.data)  # for an ndarray this will return the first element of shape
-            except TypeError:
-                warn(unreadable_warning('data'), UserWarning)
-        else:
-            warn(no_len_warning('data'), UserWarning)
-
-        # only get here if self.data has no __len__ or __len__ is unreadable
-        if hasattr(self.timestamps, '__len__'):
-            try:
-                return len(self.timestamps)
-            except TypeError:
-                warn(unreadable_warning('timestamps'), UserWarning)
-        elif self.rate is None and self.starting_time is None:
-            warn(no_len_warning('timestamps'), UserWarning)
+        num_samples = _get_num_samples(self.timestamps)
+        if num_samples is not None:
+            return num_samples
+        if self.rate is None and self.starting_time is None:
+            warn(unknown_length_warning('timestamps'), UserWarning)
 
         return None
 
@@ -366,11 +365,16 @@ class TimeSeries(NWBDataInterface):
     def get_timestamps(self):
         """
         Get the timestamps of this TimeSeries. If timestamps are not stored in this TimeSeries, generate timestamps.
+
+        Raises a ValueError if timestamps must be generated but the number of samples in data cannot be determined.
         """
         if self.fields.get('timestamps') is not None:
             return self.timestamps
-        else:
-            return np.arange(len(self.data)) / self.rate + self.starting_time
+        num_samples = _get_num_samples(self.data)
+        if num_samples is None:
+            raise ValueError("%s '%s': Cannot generate timestamps because the number of samples in data could not "
+                             "be determined." % (self.__class__.__name__, self.name))
+        return np.arange(num_samples) / self.rate + self.starting_time
 
     def get_starting_time(self):
         """
