@@ -52,26 +52,9 @@ Make pre-release pull request on GitHub: Step-by-step
 For example, ``https://github.com/NeurodataWithoutBorders/pynwb/compare/dev...release-X.Y.Z?quick_pull=1&template=release.md``
 
 
-3. Follow the checklist in the template. The checklist covers the following steps in more detail:
-
-  * Make sure all PRs to be included in this release have been merged to ``dev``.
-
-  * Update the dependency version bounds in ``pyproject.toml`` and the pinned versions in
-    ``environment-ros3.yml`` to the latest as needed.
-
-  * Check legal information and copyright dates in ``Legal.txt``, ``license.txt``, ``README.rst``,
-    ``docs/source/conf.py``.
-
-  * Update ``pyproject.toml`` and ``README.rst`` as needed.
-
-  * Update ``src/pynwb/nwb-schema`` submodule as needed. Check the version number manually to make sure
-    we are using the latest release.
-
-  * Update documentation to reflect new features and changes in PyNWB functionality.
-
-  * Run tests locally, inspect all warnings and outputs, and try to remove all warnings.
-
-  * Test documentation builds locally and on the `ReadTheDocs project`_ on the "dev" build.
+3. Follow the checklist in the template. It covers updating the version bounds, legal dates, the nwb-schema
+submodule, and the changelog; running the tests, docs, and distribution builds locally; and triggering the
+GitHub Actions workflows that do not run on pull requests.
 
 
 
@@ -174,7 +157,6 @@ Publish release on PyPI: Step-by-step
 
 
 .. _GPG signing key: https://docs.github.com/en/authentication/managing-commit-signature-verification/generating-a-new-gpg-key
-.. _ReadTheDocs project: https://app.readthedocs.org/projects/pynwb/builds/
 .. _PyNWB PyPI project page: https://pypi.org/project/pynwb
 .. _Python instructions for creating a virtual environment: https://docs.python.org/3/library/venv.html#creating-virtual-environments
 .. _PyPI: https://pypi.org/project/pynwb
@@ -194,7 +176,7 @@ Publish release on conda-forge: Step-by-step
    Conda-forge maintains a bot called "regro-cf-autotick-bot" that regularly monitors PyPI for new releases of
    packages that are also on conda-forge. When a new release is detected, usually within 24 hours of publishing
    on PyPI, the bot will create a Pull Request with the correct modifications to the version and sha256 values
-   in ``meta.yaml``. If the requirements in ``setup.py`` have been changed, then you need to modify the
+   in ``meta.yaml``. If the dependencies in ``pyproject.toml`` have been changed, then you need to modify the
    requirements/run section in ``meta.yaml`` manually to reflect these changes. Once tests pass, merge the PR,
    and a new release will be published on Anaconda cloud. This is the easiest way to update the package version
    on conda-forge.
@@ -259,7 +241,7 @@ In order to release a new version on conda-forge manually, follow the steps belo
       $ sha=$(openssl sha256 /tmp/pynwb-$release.tar.gz | awk '{print $2}')
       $ sed -i -- "3s/.*/{$ set sha256 = \"$sha\" %}/" recipe/meta.yaml
 
-  If the requirements in ``setup.py`` have been changed, then modify the requirements/run list in
+  If the dependencies in ``pyproject.toml`` have been changed, then modify the requirements/run list in
   the ``meta.yaml`` file to reflect these changes.
 
 
