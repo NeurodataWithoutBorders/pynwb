@@ -1,6 +1,6 @@
 # PyNWB Changelog
 
-## PyNWB 4.1.1 (Unreleased)
+## PyNWB 4.2.0 (Upcoming)
 
 ### Changed
 - The array-valued fields `TimeSeries.control` and `control_description`, `ImageSeries.dimension` and `starting_frame`, `TwoPhotonSeries.field_of_view`, `AbstractFeatureSeries.features` and `feature_units`, `Clustering.peak_over_rms`, and `ClusterWaveforms.waveform_mean` and `waveform_sd` accept zarr arrays. They no longer accept non-array iterables such as `str`, `set`, `range`, and generators. @rly [#2235](https://github.com/NeurodataWithoutBorders/pynwb/pull/2235)
@@ -10,6 +10,9 @@
   - `Units.waveform_mean`, `Units.waveform_sd`, and `Units.waveforms` have a new optional `time_before_peak_in_ms` attribute, exposed as the `waveform_time_before_peak_in_ms` argument and field of `Units`. It holds the time, in milliseconds, from the start of each waveform to the spike peak, i.e., the alignment point used during spike sorting. @rly [#2237](https://github.com/NeurodataWithoutBorders/pynwb/pull/2237)
   - Incorporates HDMF Common Schema 1.10.0, which changes `MeaningsTable.target` from a link to an object-reference attribute. @rly [#2244](https://github.com/NeurodataWithoutBorders/pynwb/pull/2244)
 - Raised the minimum HDMF requirement to 6.2.0. HDMF 6.2.0 bundles HDMF Common Schema 1.10.0, matching the copy in NWB Schema 2.11.0. @rly [#2244](https://github.com/NeurodataWithoutBorders/pynwb/pull/2244)
+
+### Added
+- Added `model` and `serial_number` parameters to `mock_Device`. Passing a `DeviceModel` as `model` together with an `nwbfile` also places that `DeviceModel` in the `NWBFile`, so the link resolves when the file is written. @rly [#2238](https://github.com/NeurodataWithoutBorders/pynwb/pull/2238)
 
 ### Fixed
 - Fixed `ElectricalSeries.__init__`, `TimeSeries.get_timestamps`, and `TimeSeries.num_samples` failing on data backed by a zarr array. @rly [#2235](https://github.com/NeurodataWithoutBorders/pynwb/pull/2235)
