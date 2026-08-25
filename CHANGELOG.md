@@ -22,6 +22,7 @@
 - Fixed reading a file whose dates carry a sub-minute UTC offset (e.g. `1900-10-01T00:00:00-05:50:36`). @h-mayorquin [#2230](https://github.com/NeurodataWithoutBorders/pynwb/pull/2230)
 - Fixed wide pandas DataFrames in the tutorials spilling out of the content column and into the right margin. @bendichter [#2236](https://github.com/NeurodataWithoutBorders/pynwb/pull/2236)
 - Fixed `set_data_io` being silently ignored on `NWBData` subclasses (`GrayscaleImage`, `RGBImage`, `RGBAImage`, `ExternalImage`, `ImageReferences`, and `ScratchData`), so requested chunking and compression were dropped without warning and the datasets were written uncompressed. @h-mayorquin [#2233](https://github.com/NeurodataWithoutBorders/pynwb/pull/2233)
+- Fixed the `Units` waveforms test fixtures, which labelled the dimensions of the 3-D `add_unit` waveforms input as `(num_electrodes, num_spikes, num_samples)` when `add_unit` reads them as `(num_spikes, num_electrodes, num_samples)`, and so encoded a number of spike events that disagreed with the unit's `spike_times`. Added `TestUnitsIO.test_waveforms_structure` asserting `waveforms_index_index`, `waveforms_index`, and the 2-D `waveforms` dataset after a roundtrip. @adityasingh2400 [#2240](https://github.com/NeurodataWithoutBorders/pynwb/pull/2240)
 
 ## PyNWB 4.1.0 (July 23, 2026)
 
