@@ -416,9 +416,9 @@ class OpticalSeries(ImageSeries):
                      'dimension must be length 3 and represents the RGB value for color images. Either data or '
                      'external_file must be specified, but not both.'),
              'default': None},
-            *get_docval(ImageSeries.__init__, 'unit', 'format', 'external_file', 'starting_frame', 'bits_per_pixel',
-                        'dimension', 'resolution', 'conversion', 'timestamps', 'starting_time', 'rate', 'comments',
-                        'description', 'control', 'control_description', 'device', 'offset'),
+            *get_docval(ImageSeries.__init__, 'unit', 'format', 'external_file', 'starting_frame', 'num_samples',
+                        'bits_per_pixel', 'dimension', 'resolution', 'conversion', 'timestamps', 'starting_time',
+                        'rate', 'comments', 'description', 'control', 'control_description', 'device', 'offset'),
             allow_positional=AllowPositional.WARNING,)
     def __init__(self, **kwargs):
         distance, field_of_view, orientation = popargs('distance', 'field_of_view', 'orientation', kwargs)
