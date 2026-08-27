@@ -36,7 +36,7 @@ from hdmf.utils import (
 )
 
 from . import register_class, CORE_NAMESPACE
-from .base import TimeSeries, Image, Images
+from .base import TimeSeries, Image, Images, _get_num_samples
 from .device import Device
 
 
@@ -248,12 +248,12 @@ class ImageSeries(TimeSeries):
 
     @property
     def num_samples(self):
-        # Overrides TimeSeries.num_samples to return the stored attribute when set, because
-        # external-file series have empty data and len(data) would give 0 instead of the true count.
+        # The data of an external-file series is empty, so its frame count comes from the
+        # num_samples given at construction, and from the length of the timestamps otherwise.
         if self._num_samples is not None:
             return self._num_samples
         if self.external_file is not None:
-            return None
+            return _get_num_samples(self.timestamps)
         return super().num_samples
 
     @property
