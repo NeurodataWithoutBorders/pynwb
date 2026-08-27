@@ -1,20 +1,31 @@
 # PyNWB Changelog
 
-## PyNWB 4.1.1 (Unreleased)
+## PyNWB 4.2.0 (Upcoming)
 
 ### Changed
-- Added support for NWB Schema 2.10.1
+- The array-valued fields `TimeSeries.control` and `control_description`, `ImageSeries.dimension` and `starting_frame`, `TwoPhotonSeries.field_of_view`, `AbstractFeatureSeries.features` and `feature_units`, `Clustering.peak_over_rms`, and `ClusterWaveforms.waveform_mean` and `waveform_sd` accept zarr arrays. They no longer accept non-array iterables such as `str`, `set`, `range`, and generators. @rly [#2235](https://github.com/NeurodataWithoutBorders/pynwb/pull/2235)
+- `TimeSeries.get_timestamps` raises a `ValueError`, and `TimeSeries.num_samples` warns with a reworded message, when the number of samples in the data cannot be determined. @rly [#2235](https://github.com/NeurodataWithoutBorders/pynwb/pull/2235)
+- Added support for NWB Schema 2.11.0
   - The `unit` attribute of `Units.waveform_mean`, `Units.waveform_sd`, and `Units.waveforms` now has a default value of `"volts"` instead of a fixed value of `"volts"`.
   - `Units.waveform_mean`, `Units.waveform_sd`, and `Units.waveforms` have a new optional `time_before_peak_in_ms` attribute, exposed as the `waveform_time_before_peak_in_ms` argument and field of `Units`. It holds the time, in milliseconds, from the start of each waveform to the spike peak, i.e., the alignment point used during spike sorting. @rly [#2237](https://github.com/NeurodataWithoutBorders/pynwb/pull/2237)
+  - Incorporates HDMF Common Schema 1.10.0, which changes `MeaningsTable.target` from a link to an object-reference attribute. @rly [#2244](https://github.com/NeurodataWithoutBorders/pynwb/pull/2244)
+- Raised the minimum HDMF requirement to 6.2.0. HDMF 6.2.0 bundles HDMF Common Schema 1.10.0, matching the copy in NWB Schema 2.11.0. @rly [#2244](https://github.com/NeurodataWithoutBorders/pynwb/pull/2244)
+
+### Added
+- Added `model` and `serial_number` parameters to `mock_Device`. Passing a `DeviceModel` as `model` together with an `nwbfile` also places that `DeviceModel` in the `NWBFile`, so the link resolves when the file is written. @rly [#2238](https://github.com/NeurodataWithoutBorders/pynwb/pull/2238)
 
 ### Fixed
+- Fixed `ElectricalSeries.__init__`, `TimeSeries.get_timestamps`, and `TimeSeries.num_samples` failing on data backed by a zarr array. @rly [#2235](https://github.com/NeurodataWithoutBorders/pynwb/pull/2235)
+- Fixed `TimeSeries.num_samples` returning `None` when the data or timestamps are backed by a `DataChunkIterator` that wraps an array. @rly [#2235](https://github.com/NeurodataWithoutBorders/pynwb/pull/2235)
 - Fixed `Units.waveform_unit` having no effect on the written file. The `waveform_unit` passed to `Units` is now written to the `waveform_mean`, `waveform_sd`, and `waveforms` columns, and `"volts"` remains the default. PyNWB now also warns when the waveform columns of a file being read carry different `unit` or `sampling_rate` attributes, since only one value per attribute is kept on the `Units` container. @rly [#2162](https://github.com/NeurodataWithoutBorders/pynwb/issues/2162)
 - Fixed `mock_DeviceModel` defaulting `manufacturer` to `None`. The mock now defaults it to `"manufacturer"`. @HugoFara [#2232](https://github.com/NeurodataWithoutBorders/pynwb/pull/2232)
 - Fixed reading a file whose dates carry a sub-minute UTC offset (e.g. `1900-10-01T00:00:00-05:50:36`). @h-mayorquin [#2230](https://github.com/NeurodataWithoutBorders/pynwb/pull/2230)
 - Fixed wide pandas DataFrames in the tutorials spilling out of the content column and into the right margin. @bendichter [#2236](https://github.com/NeurodataWithoutBorders/pynwb/pull/2236)
 - Fixed `set_data_io` being silently ignored on `NWBData` subclasses (`GrayscaleImage`, `RGBImage`, `RGBAImage`, `ExternalImage`, `ImageReferences`, and `ScratchData`), so requested chunking and compression were dropped without warning and the datasets were written uncompressed. @h-mayorquin [#2233](https://github.com/NeurodataWithoutBorders/pynwb/pull/2233)
 - Fixed `ImageSeries` (and its subclasses) writing a `num_samples` dataset derived from `len(data)` when the user never set one, which emitted an HDMF `DtypeConversionWarning` on write. `num_samples` is now written only when it was explicitly provided, and an explicitly provided value is written with the schema's `uint32` dtype instead of being widened to `uint64`. Reading a file that contains `num_samples` is unchanged, as is the in-memory `ImageSeries.num_samples` property. @adityasingh2400 [#2239](https://github.com/NeurodataWithoutBorders/pynwb/pull/2239)
-
+- Fixed `OpticalSeries`, `OnePhotonSeries`, and `TwoPhotonSeries` not accepting `num_samples`, which made them impossible to construct with `format="external"` and `rate`, because that configuration requires `num_samples`. @rly [#2247](https://github.com/NeurodataWithoutBorders/pynwb/issues/2247)
+- Fixed `ImageSeries.num_samples` returning `None` for an external-file series timed with `timestamps`, which also made `get_starting_time` and `get_duration` return `None` and made `TimeSeriesReferenceVectorData` skip its bounds checks against such a series. It now returns `len(timestamps)`. @rly [#2249](https://github.com/NeurodataWithoutBorders/pynwb/issues/2249)
+- Fixed `TimeSeriesReference.timestamps` returning incorrect times for a `TimeSeries` that has `starting_time` and `rate` instead of `timestamps`. The sample index was multiplied by `rate` instead of divided by it. @h-mayorquin @rly [#2245](https://github.com/NeurodataWithoutBorders/pynwb/pull/2245)
 
 ## PyNWB 4.1.0 (July 23, 2026)
 
