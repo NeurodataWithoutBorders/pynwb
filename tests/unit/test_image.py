@@ -618,6 +618,23 @@ class OpticalSeriesConstructor(TestCase):
         self.assertIsNone(ts.field_of_view)
         self.assertIsNone(ts.orientation)
 
+    def test_num_samples(self):
+        """Test that num_samples can be set on an external-file OpticalSeries timed with rate."""
+        ts = OpticalSeries(
+            name='test_ts',
+            unit='unit',
+            distance=1.0,
+            field_of_view=[4, 5],
+            orientation='orientation',
+            external_file=['external_file'],
+            starting_frame=[0],
+            format='external',
+            rate=30.0,
+            num_samples=900,
+        )
+        self.assertEqual(ts.num_samples, 900)
+
+
 class TestImageSubtypes(TestCase):
 
     def test_grayscale_image(self):

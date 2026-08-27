@@ -132,3 +132,31 @@ class TestOpticalSeriesOptionalFieldsIO(NWBH5IOMixin, TestCase):
         self.assertIsNone(self.optical_series.distance)
         self.assertIsNone(self.optical_series.field_of_view)
         self.assertIsNone(self.optical_series.orientation)
+
+
+class TestOpticalSeriesWithNumSamplesIO(NWBH5IOMixin, TestCase):
+    """Roundtrip test for OpticalSeries with num_samples (external file + rate timing)."""
+
+    def setUpContainer(self):
+        self.dev1 = Device(name='dev1')
+        self.optical_series = OpticalSeries(
+            name='OpticalSeries',
+            distance=8.,
+            field_of_view=(4., 5.),
+            orientation='upper left',
+            unit='m',
+            external_file=['external_file'],
+            starting_frame=[0],
+            format='external',
+            rate=30.0,
+            num_samples=900,
+            device=self.dev1,
+        )
+        return self.optical_series
+
+    def addContainer(self, nwbfile):
+        nwbfile.add_device(self.dev1)
+        nwbfile.add_stimulus(self.optical_series)
+
+    def getContainer(self, nwbfile):
+        return nwbfile.stimulus['OpticalSeries']
