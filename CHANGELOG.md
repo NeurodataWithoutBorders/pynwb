@@ -12,6 +12,7 @@
 - Raised the minimum HDMF requirement to 6.2.0. HDMF 6.2.0 bundles HDMF Common Schema 1.10.0, matching the copy in NWB Schema 2.11.0. @rly [#2244](https://github.com/NeurodataWithoutBorders/pynwb/pull/2244)
 
 ### Added
+- Added a section to the "How to Configure Term Validations" tutorial showing how to populate a `HERD` from the fields that a loaded type configuration wraps with a `TermSetWrapper`. @oruebel [#2251](https://github.com/NeurodataWithoutBorders/pynwb/pull/2251)
 - Added `model` and `serial_number` parameters to `mock_Device`. Passing a `DeviceModel` as `model` together with an `nwbfile` also places that `DeviceModel` in the `NWBFile`, so the link resolves when the file is written. @rly [#2238](https://github.com/NeurodataWithoutBorders/pynwb/pull/2238)
 
 ### Fixed
