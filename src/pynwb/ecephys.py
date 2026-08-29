@@ -1,6 +1,5 @@
 import warnings
 import numpy as np
-from collections.abc import Iterable
 
 from hdmf.common import DynamicTableRegion, DynamicTable
 from hdmf.data_utils import assertEqualShape
@@ -146,12 +145,15 @@ class ElectricalSeries(TimeSeries):
         args_to_set = popargs_to_dict(('electrodes', 'channel_conversion', 'filtering'), kwargs)
 
         data_shape = get_data_shape(kwargs['data'], strict_no_data_load=True)
+        electrodes_shape = get_data_shape(args_to_set['electrodes'].data, strict_no_data_load=True)
+        n_electrodes = electrodes_shape[0] if electrodes_shape is not None else None
         if (
             data_shape is not None
+            and n_electrodes is not None
             and len(data_shape) == 2
-            and data_shape[1] != len(args_to_set['electrodes'].data)
+            and data_shape[1] != n_electrodes
         ):
-            if data_shape[0] == len(args_to_set['electrodes'].data):
+            if data_shape[0] == n_electrodes:
                 warnings.warn("%s '%s': The second dimension of data does not match the length of electrodes, "
                               "but instead the first does. Data is oriented incorrectly and should be transposed."
                               % (self.__class__.__name__, kwargs["name"]))
@@ -300,7 +302,7 @@ class Clustering(NWBDataInterface):
              'doc': 'Description of clusters or clustering, (e.g. cluster 0 is noise, '
                     'clusters curated using Klusters, etc).'},
             {'name': 'num', 'type': ('array_data', 'data'), 'doc': 'Cluster number of each event.', 'shape': (None, )},
-            {'name': 'peak_over_rms', 'type': Iterable, 'shape': (None, ),
+            {'name': 'peak_over_rms', 'type': ('array_data', 'data'), 'shape': (None, ),
              'doc': 'Maximum ratio of waveform peak to RMS on any channel in the cluster'
                     '(provides a basic clustering metric).'},
             {'name': 'times', 'type': ('array_data', 'data'), 'doc': 'Times of clustered events, in seconds.',
@@ -312,7 +314,6 @@ class Clustering(NWBDataInterface):
         )
         args_to_set = popargs_to_dict(('description', 'num', 'peak_over_rms', 'times'), kwargs)
         super().__init__(**kwargs)
-        args_to_set['peak_over_rms'] = list(args_to_set['peak_over_rms'])
         for key, val in args_to_set.items():
             setattr(self, key, val)
 
@@ -337,9 +338,9 @@ class ClusterWaveforms(NWBDataInterface):
              'doc': 'the clustered spike data used as input for computing waveforms'},
             {'name': 'waveform_filtering', 'type': str,
              'doc': 'filter applied to data before calculating mean and standard deviation'},
-            {'name': 'waveform_mean', 'type': Iterable, 'shape': (None, None),
+            {'name': 'waveform_mean', 'type': ('array_data', 'data'), 'shape': (None, None),
              'doc': 'the mean waveform for each cluster'},
-            {'name': 'waveform_sd', 'type': Iterable, 'shape': (None, None),
+            {'name': 'waveform_sd', 'type': ('array_data', 'data'), 'shape': (None, None),
              'doc': 'the standard deviations of waveforms for each cluster'},
             {'name': 'name', 'type': str, 'doc': 'the name of this container', 'default': 'ClusterWaveforms'})
     def __init__(self, **kwargs):
@@ -458,5 +459,5 @@ class FeatureExtraction(NWBDataInterface):
         super().__init__(**kwargs)
         self.electrodes = electrodes
         self.description = description
-        self.times = list(times)
+        self.times = times
         self.features = features
