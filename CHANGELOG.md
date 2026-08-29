@@ -10,7 +10,7 @@
 - Raised the minimum HDMF requirement to 6.2.0. HDMF 6.2.0 bundles HDMF Common Schema 1.10.0, matching the copy in NWB Schema 2.11.0. @rly [#2244](https://github.com/NeurodataWithoutBorders/pynwb/pull/2244)
 
 ### Added
-- Added a section to the "How to Configure Term Validations" tutorial showing how to populate a `HERD` from the fields that a loaded type configuration wraps with a `TermSetWrapper`. It covers `HERD.add_ref_container` to walk an `NWBFile` and add a reference for every wrapped field, `HERD.to_dataframe` to inspect the result, and `HERD.add_ref_termset` to add a reference for a single field. @oruebel [#2251](https://github.com/NeurodataWithoutBorders/pynwb/pull/2251)
+- Added a section to the "How to Configure Term Validations" tutorial showing how to populate a `HERD` from the fields that a loaded type configuration wraps with a `TermSetWrapper`. @oruebel [#2251](https://github.com/NeurodataWithoutBorders/pynwb/pull/2251)
 
 ### Fixed
 - Fixed `Units.waveform_unit` having no effect on the written file. The `waveform_unit` passed to `Units` is now written to the `waveform_mean`, `waveform_sd`, and `waveforms` columns, and `"volts"` remains the default. PyNWB now also warns when the waveform columns of a file being read carry different `unit` or `sampling_rate` attributes, since only one value per attribute is kept on the `Units` container. @rly [#2162](https://github.com/NeurodataWithoutBorders/pynwb/issues/2162)
