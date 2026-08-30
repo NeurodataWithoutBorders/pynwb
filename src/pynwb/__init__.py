@@ -660,6 +660,19 @@ def read_nwb(**kwargs):
             )
 
 
+    @docval(*get_docval(_HDF5IO.read))
+    def read(self, **kwargs):
+        try:
+            return super(NWBHDF5IO, self).read(**kwargs)
+        except ValueError as e:
+            built = next(iter(self._HDF5IO__built.values()))
+            if '/nwb_version' in built:
+                raise Exception('File is version {} and is not supported by PyNWB. '
+                                'h5py is recommended as an alternative.'.
+                                format(built['/nwb_version'].data))
+            else:
+                raise e
+
 
 from . import io as __io  # noqa: F401,E402
 from .core import NWBContainer, NWBData  # noqa: F401,E402
