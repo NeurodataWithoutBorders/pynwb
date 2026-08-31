@@ -12,9 +12,11 @@
 - Raised the minimum HDMF requirement to 6.2.0. HDMF 6.2.0 bundles HDMF Common Schema 1.10.0, matching the copy in NWB Schema 2.11.0. @rly [#2244](https://github.com/NeurodataWithoutBorders/pynwb/pull/2244)
 
 ### Added
+- Added a section to the "How to Configure Term Validations" tutorial showing how to populate a `HERD` from the fields that a loaded type configuration wraps with a `TermSetWrapper`. @oruebel [#2251](https://github.com/NeurodataWithoutBorders/pynwb/pull/2251)
 - Added `model` and `serial_number` parameters to `mock_Device`. Passing a `DeviceModel` as `model` together with an `nwbfile` also places that `DeviceModel` in the `NWBFile`, so the link resolves when the file is written. @rly [#2238](https://github.com/NeurodataWithoutBorders/pynwb/pull/2238)
 
 ### Fixed
+- Fixed `FeatureExtraction.times` and `Clustering.peak_over_rms` being copied into a Python list on construction, which read the backing dataset one element at a time. @cboulay [#2253](https://github.com/NeurodataWithoutBorders/pynwb/pull/2253)
 - Fixed `ElectricalSeries.__init__`, `TimeSeries.get_timestamps`, and `TimeSeries.num_samples` failing on data backed by a zarr array. @rly [#2235](https://github.com/NeurodataWithoutBorders/pynwb/pull/2235)
 - Fixed `TimeSeries.num_samples` returning `None` when the data or timestamps are backed by a `DataChunkIterator` that wraps an array. @rly [#2235](https://github.com/NeurodataWithoutBorders/pynwb/pull/2235)
 - Fixed `Units.waveform_unit` having no effect on the written file. The `waveform_unit` passed to `Units` is now written to the `waveform_mean`, `waveform_sd`, and `waveforms` columns, and `"volts"` remains the default. PyNWB now also warns when the waveform columns of a file being read carry different `unit` or `sampling_rate` attributes, since only one value per attribute is kept on the `Units` container. @rly [#2162](https://github.com/NeurodataWithoutBorders/pynwb/issues/2162)
