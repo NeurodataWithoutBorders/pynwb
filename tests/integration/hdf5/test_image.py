@@ -4,6 +4,7 @@ from datetime import datetime
 import h5py
 import numpy as np
 from dateutil.tz import tzutc
+from hdmf.build.warnings import DtypeConversionWarning
 
 from pynwb import NWBFile, NWBHDF5IO
 from pynwb.base import Image, ImageReferences, Images
@@ -110,7 +111,7 @@ class TestImageSeriesNumSamplesWriteWarnings(TestCase):
             warnings.simplefilter('always')
             with NWBHDF5IO(self.filename, mode='w') as write_io:
                 write_io.write(nwbfile)
-        return [str(w.message) for w in ws if 'num_samples' in str(w.message)]
+        return [str(w.message) for w in ws if issubclass(w.category, DtypeConversionWarning)]
 
     def test_no_warning_for_derived_num_samples(self):
         image_series = ImageSeries(
