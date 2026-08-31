@@ -566,18 +566,14 @@ class NWBFile(MultiContainerInterface, HERDManager):
         for key, val in args_to_set.items():
             setattr(self, key, val)
 
-        self.__obj = None
-
     def all_children(self):
+        """Get a list of this file and all of its children, recursively."""
         stack = [self]
         ret = list()
-        self.__obj = LabelledDict(label='all_objects', key_attr='object_id')
         while len(stack):
             n = stack.pop()
             ret.append(n)
-            if n.object_id is not None:
-                self.__obj[n.object_id] = n
-            else:
+            if n.object_id is None:
                 warn('%s "%s" does not have an object_id' % (n.neurodata_type, n.name))
             if hasattr(n, 'children'):
                 for c in n.children:
@@ -586,9 +582,15 @@ class NWBFile(MultiContainerInterface, HERDManager):
 
     @property
     def objects(self):
-        if self.__obj is None:
-            self.all_children()
-        return self.__obj
+        """A dict of this file and all of its children, recursively, keyed by object ID.
+
+        The dict is rebuilt on every access, so it always reflects the current contents of the file.
+        """
+        ret = LabelledDict(label='all_objects', key_attr='object_id')
+        for n in self.all_children():
+            if n.object_id is not None:
+                ret[n.object_id] = n
+        return ret
 
     @property
     def epoch_tags(self):
