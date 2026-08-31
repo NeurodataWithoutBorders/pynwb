@@ -36,7 +36,7 @@ from hdmf.utils import (
 )
 
 from . import register_class, CORE_NAMESPACE
-from .base import TimeSeries, Image, Images
+from .base import TimeSeries, Image, Images, _get_num_samples
 from .device import Device
 
 
@@ -248,12 +248,12 @@ class ImageSeries(TimeSeries):
 
     @property
     def num_samples(self):
-        # Overrides TimeSeries.num_samples to return the stored attribute when set, because
-        # external-file series have empty data and len(data) would give 0 instead of the true count.
+        # The data of an external-file series is empty, so its frame count comes from the
+        # num_samples given at construction, and from the length of the timestamps otherwise.
         if self._num_samples is not None:
             return self._num_samples
         if self.external_file is not None:
-            return None
+            return _get_num_samples(self.timestamps)
         return super().num_samples
 
     @property
@@ -416,9 +416,9 @@ class OpticalSeries(ImageSeries):
                      'dimension must be length 3 and represents the RGB value for color images. Either data or '
                      'external_file must be specified, but not both.'),
              'default': None},
-            *get_docval(ImageSeries.__init__, 'unit', 'format', 'external_file', 'starting_frame', 'bits_per_pixel',
-                        'dimension', 'resolution', 'conversion', 'timestamps', 'starting_time', 'rate', 'comments',
-                        'description', 'control', 'control_description', 'device', 'offset'),
+            *get_docval(ImageSeries.__init__, 'unit', 'format', 'external_file', 'starting_frame', 'num_samples',
+                        'bits_per_pixel', 'dimension', 'resolution', 'conversion', 'timestamps', 'starting_time',
+                        'rate', 'comments', 'description', 'control', 'control_description', 'device', 'offset'),
             allow_positional=AllowPositional.WARNING,)
     def __init__(self, **kwargs):
         distance, field_of_view, orientation = popargs('distance', 'field_of_view', 'orientation', kwargs)
