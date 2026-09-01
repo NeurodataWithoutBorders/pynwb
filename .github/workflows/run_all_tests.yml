@@ -265,6 +265,7 @@ jobs:
   run-streaming-example:
     name: linux-streaming-example-python3.14
     runs-on: ubuntu-latest
+    timeout-minutes: 15  # backstop against a stalled or throttled stream from the DANDI Archive
     defaults:
       run:
         shell: bash
