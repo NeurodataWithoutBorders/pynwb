@@ -49,12 +49,12 @@ Make pre-release pull request on GitHub: Step-by-step
 
 
 2. Create a pull request for the new release branch, then append the URL with: "&template=release.md".
-For example, ``https://github.com/NeurodataWithoutBorders/pynwb/compare/dev...release-X.Y.Z?quick_pull=1&template=release.md``
+   For example, ``https://github.com/NeurodataWithoutBorders/pynwb/compare/dev...release-X.Y.Z?quick_pull=1&template=release.md``
 
 
 3. Follow the checklist in the template. It covers updating the version bounds, legal dates, the nwb-schema
-submodule, and the changelog; running the tests, docs, and distribution builds locally; and triggering the
-GitHub Actions workflows that do not run on pull requests.
+   submodule, and the changelog; running the tests, docs, and distribution builds locally; and triggering the
+   GitHub Actions workflows that do not run on pull requests.
 
 
 

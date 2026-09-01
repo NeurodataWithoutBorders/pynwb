@@ -12,7 +12,10 @@ Prepare for release of PyNWB [version]
 - [ ] Update `pyproject.toml` as needed
 - [ ] Confirm the version number matches the severity of the changes, following
   [semantic versioning](https://semver.org). A changelog entry that removes or narrows accepted input, changes a
-  return type, or turns a warning into an exception is a breaking change and belongs in a major release.
+  return type, or turns a warning into an exception is a breaking change and belongs in a major release. Two
+  cases are exempt from that rule and may go in a minor release: input that was accepted but could not be
+  written or read back correctly, and a change in the type of an exception that was already raised for the same
+  input. Record the reasoning in this pull request.
 - [ ] Update `README.rst` as needed
 - [ ] Update `src/pynwb/nwb-schema` submodule as needed. Check the version number and commit SHA
   manually. Make sure we are using the latest release and not the latest commit on the `main` branch.
