@@ -126,7 +126,7 @@ jobs:
         continue-on-error: true
         timeout-minutes: 10
         run: |
-          python .github/scripts/check_ros3_exit.py --timeout 180
+          python scripts/check_ros3_exit.py --timeout 180
 
       - name: Run the pynwb ros3 test suite
         id: suite
