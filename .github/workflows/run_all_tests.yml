@@ -175,7 +175,7 @@ jobs:
   run-ros3-tests:  # tox and conda do not play nicely so do not use tox here
     name: ${{ matrix.name }}
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 20  # backstop against the HDF5 ros3 shutdown deadlock on Windows
+    timeout-minutes: 30  # backstop against the HDF5 ros3 shutdown deadlock on Windows
     defaults:
       run:
         shell: bash -l {0}  # necessary for conda
@@ -203,6 +203,10 @@ jobs:
           conda-remove-defaults: "true"
           auto-activate: false
 
+      - name: Install pip-only ros3 dependencies
+        run: |
+          pip install -v remfile==0.1.14 dandi==0.77.0
+
       - name: Install run dependencies
         run: |
           pip install --group test .
@@ -217,7 +221,7 @@ jobs:
   run-gallery-ros3-tests:
     name: ${{ matrix.name }}
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 20  # backstop against the HDF5 ros3 shutdown deadlock on Windows
+    timeout-minutes: 30  # backstop against the HDF5 ros3 shutdown deadlock on Windows
     defaults:
       run:
         shell: bash -l {0}  # necessary for conda
@@ -244,6 +248,10 @@ jobs:
           channels: conda-forge
           conda-remove-defaults: "true"
           auto-activate: false
+
+      - name: Install pip-only ros3 dependencies
+        run: |
+          pip install -v remfile==0.1.14 dandi==0.77.0
 
       - name: Install run dependencies
         run: |
