@@ -412,6 +412,15 @@ class ClusteringConstructor(TestCase):
         self.assertEqual(cc.peak_over_rms, peak_over_rms)
         self.assertEqual(cc.times, times)
 
+    def test_peak_over_rms_is_not_copied(self):
+        """Stored as given, for the same reason as ``FeatureExtraction.times``:
+        on read this is a lazily-read dataset, and copying it into a list reads
+        it element by element."""
+        peak_over_rms = np.array([5.3, 6.3])
+        cc = Clustering.__new__(Clustering, in_construct_mode=True)
+        cc.__init__(description='description', num=[3, 4], peak_over_rms=peak_over_rms, times=[1.3, 2.3])
+        self.assertIs(cc.peak_over_rms, peak_over_rms)
+
 
 class ClusterWaveformsConstructor(TestCase):
 
@@ -552,6 +561,23 @@ class FeatureExtractionConstructor(TestCase):
         self.assertEqual(fe.description, description)
         self.assertEqual(fe.times, event_times)
         self.assertEqual(fe.features, features)
+
+    def test_times_are_not_copied(self):
+        """The constructor stores ``times`` as given, rather than copying it.
+
+        On read this is the backend's lazily-read dataset. Copying it into a list
+        reads it element by element, which is both slow and at odds with the
+        lazy-array support added for these fields in #2235.
+        """
+        table, region = self._create_table_and_region()
+        event_times = np.array([1.9, 3.5])
+        fe = FeatureExtraction(
+            electrodes=region,
+            description=['desc1', 'desc2', 'desc3'],
+            times=event_times,
+            features=[[[0, 1, 2], [3, 4, 5]], [[6, 7, 8], [9, 10, 11]]],
+        )
+        self.assertIs(fe.times, event_times)
 
     def test_invalid_init_mismatched_event_times(self):
         event_times = []  # Need 1 event time but give 0

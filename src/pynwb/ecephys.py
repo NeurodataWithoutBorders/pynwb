@@ -321,7 +321,6 @@ class Clustering(NWBDataInterface):
         )
         args_to_set = popargs_to_dict(('description', 'num', 'peak_over_rms', 'times'), kwargs)
         super().__init__(**kwargs)
-        args_to_set['peak_over_rms'] = list(args_to_set['peak_over_rms'])
         for key, val in args_to_set.items():
             setattr(self, key, val)
 
@@ -467,5 +466,5 @@ class FeatureExtraction(NWBDataInterface):
         super().__init__(**kwargs)
         self.electrodes = electrodes
         self.description = description
-        self.times = list(times)
+        self.times = times
         self.features = features
