@@ -36,9 +36,6 @@ Prepare for release of PyNWB [version]
   branch by going to https://github.com/NeurodataWithoutBorders/pynwb/actions/workflows/run_all_tests.yml, selecting
   "Run workflow" on the right, selecting this branch, and clicking "Run workflow". Make sure all tests pass, and
   check the ROS3 streaming jobs specifically, since those need a conda environment and are not run locally.
-- [ ] Manually trigger the "Run DANDI read tests" GitHub Actions workflow on this branch by going to
-  https://github.com/NeurodataWithoutBorders/pynwb/actions/workflows/run_dandi_read_tests.yml, selecting
-  "Run workflow" on the right, selecting this branch, and clicking "Run workflow".
 - [ ] Check that the readthedocs build for this PR succeeds (see the PR check)
 
 ### After merging:
