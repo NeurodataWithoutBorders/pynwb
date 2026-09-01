@@ -3,13 +3,20 @@ name: Test HDF5 PR 6654 against Windows ros3
 # Throwaway workflow that checks whether HDFGroup/hdf5#6654 fixes the Windows
 # ROS3 shutdown deadlock tracked in pynwb#2228 and HDFGroup/hdf5#6560.
 #
-# The `patched` variant builds HDF5 from the hdf5_2.1.0 tag with the PR applied
-# and drops the resulting hdf5.dll into the conda environment, replacing the one
-# that conda-forge's h5py 3.16.0 links against. Building from the release tag
-# keeps the ABI identical to the h5py binary, so no rebuild of h5py is needed.
+# Three variants run the same two checks:
 #
-# The `stock` variant runs the same checks against the unmodified conda-forge
-# HDF5 and serves as the control.
+#   stock     - the conda-forge HDF5 that environment-ros3.yml installs
+#   unpatched - HDF5 built here from the hdf5_2.1.0 tag
+#   patched   - HDF5 built here from the hdf5_2.1.0 tag with the PR applied
+#
+# The two built variants drop their hdf5.dll into the conda environment,
+# replacing the one that conda-forge's h5py 3.16.0 links against. Building from
+# the release tag keeps the ABI identical to the h5py binary, so no rebuild of
+# h5py is needed.
+#
+# `unpatched` differs from `patched` only in the PR, which isolates the PR as
+# the cause of any difference between them. `stock` additionally shows that the
+# build settings used here reproduce the deadlock that users see in the wild.
 
 on:
   workflow_dispatch:
@@ -28,7 +35,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        variant: [stock, patched]
+        variant: [stock, unpatched, patched]
     env:
       HDF5_TAG: hdf5_2.1.0
       HDF5_PR: 6654
@@ -55,7 +62,7 @@ jobs:
           conda list
 
       - name: Install HDF5 build dependencies
-        if: matrix.variant == 'patched'
+        if: matrix.variant != 'stock'
         run: |
           conda install -y -c conda-forge cmake ninja
           # aws-c-s3 and zlib arrive as HDF5 dependencies and carry their headers
@@ -64,17 +71,23 @@ jobs:
           conda install -y -c conda-forge --freeze-installed aws-c-s3 zlib
           ls "$CONDA_PREFIX/Library/lib/cmake"
 
-      - name: Check out HDF5 ${{ env.HDF5_TAG }} with PR ${{ env.HDF5_PR }} applied
-        if: matrix.variant == 'patched'
+      - name: Check out HDF5 ${{ env.HDF5_TAG }}
+        if: matrix.variant != 'stock'
         run: |
           set -eo pipefail
           git clone --filter=blob:none --no-checkout https://github.com/HDFGroup/hdf5.git hdf5-src
           cd hdf5-src
           git fetch --filter=blob:none origin "pull/${HDF5_PR}/head:pr"
+          git checkout "$HDF5_TAG"
+
+      - name: Apply PR ${{ env.HDF5_PR }}
+        if: matrix.variant == 'patched'
+        run: |
+          set -eo pipefail
+          cd hdf5-src
           # Only the source and build-configuration changes are needed; the PR's
           # release note does not apply to the release tag.
           git diff pr^ pr -- src config > ../pr.patch
-          git checkout "$HDF5_TAG"
           git apply -v ../pr.patch
           git --no-pager diff --stat
 
@@ -82,13 +95,13 @@ jobs:
       # so CMake's Visual Studio generator cannot locate vswhere. Putting the
       # MSVC toolchain on PATH and building with Ninja sidesteps that lookup.
       - name: Set up MSVC
-        if: matrix.variant == 'patched'
+        if: matrix.variant != 'stock'
         uses: ilammy/msvc-dev-cmd@v1
         with:
           arch: x64
 
       - name: Build HDF5
-        if: matrix.variant == 'patched'
+        if: matrix.variant != 'stock'
         run: |
           set -eo pipefail
           which cl.exe
@@ -108,8 +121,8 @@ jobs:
             -DHDF5_ENABLE_Z_LIB_SUPPORT=ON
           cmake --build hdf5-build -j 4
 
-      - name: Install the patched HDF5 into the conda environment
-        if: matrix.variant == 'patched'
+      - name: Install the built HDF5 into the conda environment
+        if: matrix.variant != 'stock'
         run: |
           set -eo pipefail
           dest="$CONDA_PREFIX/Library/bin"
@@ -165,8 +178,8 @@ jobs:
           } >> "$GITHUB_STEP_SUMMARY"
           echo "variant=$variant exit_check=$exit_check watchdog=$watchdog"
 
-          # The stock variant is the control and is expected to hang, so it only
-          # reports. The patched variant is the one under test.
+          # The stock and unpatched variants are controls and are expected to
+          # hang, so they only report. The patched variant is the one under test.
           if [ "$variant" = "patched" ]; then
             if [ "$exit_check" != "success" ]; then
               echo "::error::patched HDF5 still hangs at process exit"
