@@ -57,7 +57,7 @@ jobs:
       - name: Install HDF5 build dependencies
         if: matrix.variant == 'patched'
         run: |
-          conda install -y -c conda-forge cmake
+          conda install -y -c conda-forge cmake ninja
           # aws-c-s3 and zlib arrive as HDF5 dependencies and carry their headers
           # and CMake config files. --freeze-installed keeps the solver from
           # moving the versions that the installed h5py/hdf5 were built against.
@@ -78,12 +78,23 @@ jobs:
           git apply -v ../pr.patch
           git --no-pager diff --stat
 
+      # Git Bash cannot pass through the `ProgramFiles(x86)` environment variable,
+      # so CMake's Visual Studio generator cannot locate vswhere. Putting the
+      # MSVC toolchain on PATH and building with Ninja sidesteps that lookup.
+      - name: Set up MSVC
+        if: matrix.variant == 'patched'
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+
       - name: Build HDF5
         if: matrix.variant == 'patched'
         run: |
           set -eo pipefail
+          which cl.exe
           prefix="$(cygpath -m "$CONDA_PREFIX")/Library"
-          cmake -S hdf5-src -B hdf5-build -G "Visual Studio 17 2022" -A x64 \
+          cmake -S hdf5-src -B hdf5-build -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_PREFIX_PATH="$prefix" \
             -DBUILD_SHARED_LIBS=ON \
             -DBUILD_STATIC_LIBS=OFF \
@@ -95,7 +106,7 @@ jobs:
             -DHDF5_BUILD_HL_LIB=ON \
             -DHDF5_ENABLE_ROS3_VFD=ON \
             -DHDF5_ENABLE_Z_LIB_SUPPORT=ON
-          cmake --build hdf5-build --config Release -j 4
+          cmake --build hdf5-build -j 4
 
       - name: Install the patched HDF5 into the conda environment
         if: matrix.variant == 'patched'
