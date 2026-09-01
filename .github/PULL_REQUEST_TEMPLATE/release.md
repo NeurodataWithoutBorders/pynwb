@@ -3,9 +3,7 @@ Prepare for release of PyNWB [version]
 ### Before merging:
 - [ ] Make sure all PRs to be included in this release have been merged to `dev`.
 - [ ] Major and minor releases: Update the dependency version bounds in `pyproject.toml` and the pinned
-  versions in `environment-ros3.yml` to the latest as needed. The `remfile` and `dandi` pins used by the ros3
-  jobs live in the "Install pip-only ros3 dependencies" step of `.github/workflows/run_tests.yml` and
-  `.github/workflows/run_all_tests.yml`. The `zarr` and `numcodecs` upper bounds in the
+  versions in `environment-ros3.yml` to the latest as needed. The `zarr` and `numcodecs` upper bounds in the
   `zarr` extra track hdmf-zarr's own bounds. Check hdmf-zarr's requirements before touching them rather than
   raising them to the latest release.
 - [ ] Major releases: Remove the deprecated functionality slated for removal in this version.

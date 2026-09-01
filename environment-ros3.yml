@@ -5,6 +5,10 @@ channels:
   - defaults
 dependencies:
   - python==3.14
+  # select the GIL build of CPython. tensorstore, numcodecs, pycryptodomex, and google-crc32c publish
+  # no free-threaded Windows wheels, and pip builds them from source when the free-threaded build is
+  # selected; tensorstore alone is an 8,000-action Bazel compile.
+  - python-gil
   - h5py==3.16.0
   - hdmf==6.2.0
   - matplotlib==3.11.1
@@ -17,6 +21,6 @@ dependencies:
   - requests==2.34.2
   - aiohttp==3.14.3
   - pip
-# remfile and dandi are pip-only (dandi is not available on conda for osx-arm64). The ros3 CI jobs
-# install them in a separate "pip install -v" step so that pip's output reaches the workflow log;
-# their pins live in .github/workflows/run_tests.yml and .github/workflows/run_all_tests.yml.
+  - pip:
+    - remfile==0.1.14  # remfile is not packaged on conda-forge
+    - dandi==0.77.0  # PyPI carries releases newer than the conda-forge build

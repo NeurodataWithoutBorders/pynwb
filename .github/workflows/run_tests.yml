@@ -178,10 +178,6 @@ jobs:
           conda-remove-defaults: "true"
           auto-activate: false
 
-      - name: Install pip-only ros3 dependencies
-        run: |
-          pip install -v remfile==0.1.14 dandi==0.77.0
-
       - name: Install run dependencies
         run: |
           pip install --group test .
@@ -220,10 +216,6 @@ jobs:
           channels: conda-forge
           conda-remove-defaults: "true"
           auto-activate: false
-
-      - name: Install pip-only ros3 dependencies
-        run: |
-          pip install -v remfile==0.1.14 dandi==0.77.0
 
       - name: Install run dependencies
         run: |
