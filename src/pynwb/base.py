@@ -285,7 +285,8 @@ class TimeSeries(NWBDataInterface):
             warn(
                 f"{self.__class__.__name__} '{name}': {missing_str} not specified. Data in '{unit}' is computed "
                 f"as data * conversion + offset, so leaving {missing_str} unspecified claims that the values in "
-                f"data are already in '{unit}'. This will raise an error in PyNWB 5.0."
+                f"data are already in '{unit}'. This will raise an error in PyNWB 4.4.0. Specify the "
+                f"{missing_str} to remove this warning."
             )
 
     @property
