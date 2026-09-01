@@ -149,16 +149,17 @@ class TimeSeries(NWBDataInterface):
              'doc': 'The smallest meaningful difference (in specified unit) between values in data',
              'default': DEFAULT_RESOLUTION},
             {'name': 'conversion', 'type': float,
-             'doc': 'Scalar to multiply each element in data to convert it to the specified unit',
-             'default': DEFAULT_CONVERSION},
+             'doc': 'Scalar to multiply each element in data to convert it to the specified unit. '
+                    'Defaults to 1.0 when not specified.',
+             'default': None},
             {
                 'name': 'offset',
                 'type': float,
                 'doc': (
                     "Scalar to add to each element in the data scaled by 'conversion' to finish converting it to the "
-                    "specified unit."
+                    "specified unit. Defaults to 0.0 when not specified."
                     ),
-                'default': DEFAULT_OFFSET
+                'default': None
             },
             {'name': 'timestamps', 'type': ('array_data', 'data', 'TimeSeries'), 'shape': (None,),
              'doc': 'Timestamps for samples stored in data', 'default': None},
@@ -199,6 +200,10 @@ class TimeSeries(NWBDataInterface):
                        "control_description",
                        "continuity")
         args_to_set = popargs_to_dict(keys_to_set, kwargs)
+        if args_to_set["conversion"] is None:
+            args_to_set["conversion"] = self.DEFAULT_CONVERSION
+        if args_to_set["offset"] is None:
+            args_to_set["offset"] = self.DEFAULT_OFFSET
         keys_to_process = ("data", "timestamps")  # these are properties and cannot be set with setattr
         args_to_process = popargs_to_dict(keys_to_process, kwargs)
         super().__init__(**kwargs)
@@ -267,6 +272,21 @@ class TimeSeries(NWBDataInterface):
             "%s '%s': Length of data does not match length of timestamps. Your data may be transposed. "
             "Time should be on the 0th dimension" % (self.__class__.__name__, self.name)
         )
+
+    def _check_conversion_and_offset(self, name, unit, conversion, offset, channel_conversion=None):
+        """Warn when a subtype that fixes the unit of its data is created without a conversion or offset."""
+        missing = []
+        if conversion is None and channel_conversion is None:
+            missing.append("conversion")
+        if offset is None:
+            missing.append("offset")
+        if missing and not self._in_construct_mode:
+            missing_str = " and ".join(missing)
+            warn(
+                f"{self.__class__.__name__} '{name}': {missing_str} not specified. Data in '{unit}' is computed "
+                f"as data * conversion + offset, so leaving {missing_str} unspecified claims that the values in "
+                f"data are already in '{unit}'. This will raise an error in PyNWB 5.0."
+            )
 
     @property
     def num_samples(self):
