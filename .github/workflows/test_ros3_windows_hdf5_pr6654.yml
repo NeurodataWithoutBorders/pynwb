@@ -1,0 +1,172 @@
+name: Test HDF5 PR 6654 against Windows ros3
+
+# Throwaway workflow that checks whether HDFGroup/hdf5#6654 fixes the Windows
+# ROS3 shutdown deadlock tracked in pynwb#2228 and HDFGroup/hdf5#6560.
+#
+# The `patched` variant builds HDF5 from the hdf5_2.1.0 tag with the PR applied
+# and drops the resulting hdf5.dll into the conda environment, replacing the one
+# that conda-forge's h5py 3.16.0 links against. Building from the release tag
+# keeps the ABI identical to the h5py binary, so no rebuild of h5py is needed.
+#
+# The `stock` variant runs the same checks against the unmodified conda-forge
+# HDF5 and serves as the control.
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - ros3-win-hdf5-6654
+
+jobs:
+  ros3-windows-hdf5-pr:
+    name: windows-ros3-hdf5-${{ matrix.variant }}
+    runs-on: windows-latest
+    timeout-minutes: 90
+    defaults:
+      run:
+        shell: bash -l {0}  # necessary for conda
+    strategy:
+      fail-fast: false
+      matrix:
+        variant: [stock, patched]
+    env:
+      HDF5_TAG: hdf5_2.1.0
+      HDF5_PR: 6654
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          submodules: 'recursive'
+          fetch-depth: 0  # tags are required for versioneer to determine the version
+
+      - name: Set up Conda
+        uses: conda-incubator/setup-miniconda@v4
+        with:
+          auto-update-conda: true
+          activate-environment: ros3
+          environment-file: environment-ros3.yml
+          python-version: "3.14"
+          channels: conda-forge
+          conda-remove-defaults: "true"
+          auto-activate: false
+
+      - name: Install run dependencies
+        run: |
+          pip install --group test .
+          conda list
+
+      - name: Install HDF5 build dependencies
+        if: matrix.variant == 'patched'
+        run: |
+          conda install -y -c conda-forge cmake
+          # aws-c-s3 and zlib arrive as HDF5 dependencies and carry their headers
+          # and CMake config files. --freeze-installed keeps the solver from
+          # moving the versions that the installed h5py/hdf5 were built against.
+          conda install -y -c conda-forge --freeze-installed aws-c-s3 zlib
+          ls "$CONDA_PREFIX/Library/lib/cmake"
+
+      - name: Check out HDF5 ${{ env.HDF5_TAG }} with PR ${{ env.HDF5_PR }} applied
+        if: matrix.variant == 'patched'
+        run: |
+          set -eo pipefail
+          git clone --filter=blob:none --no-checkout https://github.com/HDFGroup/hdf5.git hdf5-src
+          cd hdf5-src
+          git fetch --filter=blob:none origin "pull/${HDF5_PR}/head:pr"
+          # Only the source and build-configuration changes are needed; the PR's
+          # release note does not apply to the release tag.
+          git diff pr^ pr -- src config > ../pr.patch
+          git checkout "$HDF5_TAG"
+          git apply -v ../pr.patch
+          git --no-pager diff --stat
+
+      - name: Build HDF5
+        if: matrix.variant == 'patched'
+        run: |
+          set -eo pipefail
+          prefix="$(cygpath -m "$CONDA_PREFIX")/Library"
+          cmake -S hdf5-src -B hdf5-build -G "Visual Studio 17 2022" -A x64 \
+            -DCMAKE_PREFIX_PATH="$prefix" \
+            -DBUILD_SHARED_LIBS=ON \
+            -DBUILD_STATIC_LIBS=OFF \
+            -DBUILD_TESTING=OFF \
+            -DHDF5_BUILD_TOOLS=OFF \
+            -DHDF5_BUILD_UTILS=OFF \
+            -DHDF5_BUILD_EXAMPLES=OFF \
+            -DHDF5_BUILD_CPP_LIB=OFF \
+            -DHDF5_BUILD_HL_LIB=ON \
+            -DHDF5_ENABLE_ROS3_VFD=ON \
+            -DHDF5_ENABLE_Z_LIB_SUPPORT=ON
+          cmake --build hdf5-build --config Release -j 4
+
+      - name: Install the patched HDF5 into the conda environment
+        if: matrix.variant == 'patched'
+        run: |
+          set -eo pipefail
+          dest="$CONDA_PREFIX/Library/bin"
+          for name in hdf5.dll hdf5_hl.dll; do
+            built="$(find hdf5-build -name "$name" -print -quit)"
+            if [ -z "$built" ]; then
+              echo "::error::$name was not produced by the HDF5 build"
+              exit 1
+            fi
+            if [ ! -f "$dest/$name" ]; then
+              echo "::error::$dest/$name does not exist; the conda layout is not what this job assumes"
+              exit 1
+            fi
+            cp "$built" "$dest/$name"
+            echo "installed $built -> $dest/$name"
+          done
+
+      - name: Report the HDF5 in use
+        run: |
+          python -c "import h5py; print(h5py.version.info)"
+          python -c "import h5py; print('drivers:', sorted(h5py.registered_drivers()))"
+
+      - name: Check whether a ROS3 process can exit
+        id: exit_check
+        continue-on-error: true
+        timeout-minutes: 10
+        run: |
+          python .github/scripts/check_ros3_exit.py --timeout 180
+
+      - name: Run the pynwb ros3 test suite
+        id: suite
+        continue-on-error: true
+        timeout-minutes: 20
+        run: |
+          set -o pipefail
+          python scripts/test_ros3.py --ros3 2>&1 | tee ros3.log
+
+      - name: Summarize
+        run: |
+          touch ros3.log
+          variant="${{ matrix.variant }}"
+          exit_check="${{ steps.exit_check.outcome }}"
+          if grep -q "did not exit within" ros3.log; then
+            watchdog="fired (deadlock still present)"
+          else
+            watchdog="did not fire"
+          fi
+          {
+            echo "### windows-ros3-hdf5-$variant"
+            echo ""
+            echo "- process-exit check: \`$exit_check\`"
+            echo "- test.py watchdog: $watchdog"
+          } >> "$GITHUB_STEP_SUMMARY"
+          echo "variant=$variant exit_check=$exit_check watchdog=$watchdog"
+
+          # The stock variant is the control and is expected to hang, so it only
+          # reports. The patched variant is the one under test.
+          if [ "$variant" = "patched" ]; then
+            if [ "$exit_check" != "success" ]; then
+              echo "::error::patched HDF5 still hangs at process exit"
+              exit 1
+            fi
+            if grep -q "did not exit within" ros3.log; then
+              echo "::error::patched HDF5 still triggers the test.py shutdown watchdog"
+              exit 1
+            fi
+            if [ "${{ steps.suite.outcome }}" != "success" ]; then
+              echo "::error::the pynwb ros3 test suite failed against the patched HDF5"
+              exit 1
+            fi
+          fi
