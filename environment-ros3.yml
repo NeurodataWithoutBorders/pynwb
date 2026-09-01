@@ -5,9 +5,8 @@ channels:
   - defaults
 dependencies:
   - python==3.14
-  # select the GIL build of CPython. tensorstore, numcodecs, pycryptodomex, and google-crc32c publish
-  # no free-threaded Windows wheels, and pip builds them from source when the free-threaded build is
-  # selected; tensorstore alone is an 8,000-action Bazel compile.
+  # select the GIL build of CPython. several packages do not publish free-threaded Windows wheels,
+  # and pip building them from source overruns the CI job timeout. See #2246.
   - python-gil
   - h5py==3.16.0
   - hdmf==6.2.0
