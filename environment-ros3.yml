@@ -19,6 +19,8 @@ dependencies:
   - fsspec==2026.7.0
   - requests==2.34.2
   - aiohttp==3.14.3
+  # dandi depends on pynwb, so the solve pulls in a released pynwb that the "pip install ." step
+  # in the ros3 jobs then replaces. The "conda list" in those jobs reports the conda-forge version.
   - dandi==0.78.0
   - pip
   - pip:
