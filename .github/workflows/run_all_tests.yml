@@ -54,7 +54,7 @@ jobs:
           fetch-depth: 0  # tags are required for versioneer to determine the version
 
       - name: Set up Python
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@v7
         with:
           python-version: ${{ matrix.python-ver }}
 
@@ -111,7 +111,7 @@ jobs:
           fetch-depth: 0  # tags are required for versioneer to determine the version
 
       - name: Set up Python
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@v7
         with:
           python-version: ${{ matrix.python-ver }}
 
@@ -290,7 +290,7 @@ jobs:
           fetch-depth: 0  # tags are required for versioneer to determine the version
 
       - name: Set up Python
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@v7
         with:
           python-version: "3.14"
 
