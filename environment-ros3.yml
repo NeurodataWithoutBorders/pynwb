@@ -12,6 +12,10 @@ dependencies:
   - hdmf==6.2.0
   - matplotlib==3.11.1
   - numpy==2.5.2
+  # Supplies a prebuilt numcodecs for the conda-forge python, which cannot compile the sdist. PyPI
+  # has no wheel for this python within the numcodecs bound of the zarr extra, so keep this version
+  # inside that bound (see pyproject.toml).
+  - numcodecs==0.15.1
   - pandas==3.0.5
   - python-dateutil==2.9.0.post0
   - setuptools

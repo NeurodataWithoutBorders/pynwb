@@ -6,6 +6,12 @@ Prepare for release of PyNWB [version]
   versions in `environment-ros3.yml` to the latest as needed. The `zarr` and `numcodecs` upper bounds in the
   `zarr` extra track hdmf-zarr's own bounds. Check hdmf-zarr's requirements before touching them rather than
   raising them to the latest release.
+- [ ] Update the actions referenced in `.github/workflows/` to their latest releases. `pypa/gh-action-pypi-publish`
+  validates the distributions with the `twine` and `packaging` versions it bundles, and an outdated release rejects
+  metadata that current build backends emit. Set the `twine` pin in the "Check distribution metadata" steps to the
+  version in the action's
+  [`requirements/runtime.txt`](https://github.com/pypa/gh-action-pypi-publish/blob/release/v1/requirements/runtime.txt)
+  (the `release/v1` branch tracks the latest v1 release).
 - [ ] Major releases: Remove the deprecated functionality slated for removal in this version.
 - [ ] Check legal file dates and information in `Legal.txt`, `license.txt`, `README.rst`, `docs/source/conf.py`,
   and any other locations as needed
