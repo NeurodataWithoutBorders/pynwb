@@ -27,14 +27,11 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Set up Python
-        uses: actions/setup-python@v7.0.0
-        with:
-          python-version: '3.14'
-
       - name: Run zizmor
-        env:
-          GH_TOKEN: ${{ github.token }}  # lets zizmor run its online audits against the GitHub API
-        run: |
-          python -m pip install zizmor==1.30.0
-          zizmor --persona regular .github/
+        # The action carries the zizmor version it runs, pinned by container image digest, so
+        # Dependabot keeps zizmor current by bumping the action.
+        # immutable release (see .github/zizmor.yml for the policy exception)
+        uses: zizmorcore/zizmor-action@v0.6.3
+        with:
+          # advanced security requires a permission change and another action and is unnecessary
+          advanced-security: false
