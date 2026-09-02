@@ -2,21 +2,26 @@
 name: ros3
 channels:
   - conda-forge
-  - defaults
 dependencies:
   - python==3.14
+  # select the GIL build of CPython. tensorstore publishes a cp314 Windows wheel but no
+  # free-threaded one, and building it from source is an 8,000-action Bazel compile that
+  # overruns the CI job timeout. See #2246.
+  - python-gil
   - h5py==3.16.0
   - hdmf==6.2.0
-  - matplotlib==3.11.0
-  - numpy==2.4.3
-  - pandas==2.3.3
+  - matplotlib==3.11.1
+  - numpy==2.5.2
+  - pandas==3.0.5
   - python-dateutil==2.9.0.post0
   - setuptools
-  - pytest==9.0.3
-  - fsspec==2026.6.0
+  - pytest==9.1.1
+  - fsspec==2026.7.0
   - requests==2.34.2
-  - aiohttp==3.14.1
+  - aiohttp==3.14.3
+  # dandi depends on pynwb, so the solve pulls in a released pynwb that the "pip install ." step
+  # in the ros3 jobs then replaces. The "conda list" in those jobs reports the conda-forge version.
+  - dandi==0.78.0
   - pip
   - pip:
-    - remfile==0.1.13
-    - dandi==0.76.5  # NOTE: dandi is not available on conda for osx-arm64
+    - remfile==0.1.14  # remfile is not packaged on conda-forge

@@ -9,7 +9,7 @@ A single :py:class:`~pynwb.resources.HERD` can hold external resource references
 ontology annotations across an entire dataset, for example every file in a
 `DANDI <https://dandiarchive.org/>`_ dandiset.
 
-This example streams each NWB file in a dandiset directly from the DANDI Archive (without
+This example streams several NWB files of a dandiset directly from the DANDI Archive (without
 downloading the full files) and adds references for two pieces of metadata in each file: the
 subject species (mapped to the `NCBI Taxonomy <https://www.ncbi.nlm.nih.gov/taxonomy>`_) and the
 experimenter (mapped to an `ORCID <https://orcid.org/>`_ iD). Because a HERD can be saved
@@ -30,6 +30,8 @@ For storing a HERD inside a single NWB file, see :ref:`external_resources`.
 """
 
 # sphinx_gallery_thumbnail_path = 'figures/gallery_thumbnails_streaming_external_resources.png'
+from itertools import islice
+
 import h5py
 from dandi.dandiapi import DandiAPIClient
 from fsspec import filesystem
@@ -42,15 +44,17 @@ from pynwb.resources import HERD
 ###############################################################################
 # Collect the file URLs from DANDI
 # --------------------------------
-# Use the :py:class:`~dandi.dandiapi.DandiAPIClient` to list the S3 URL of every NWB file in a
-# dandiset. Here we use dandiset `000015 <https://dandiarchive.org/dandiset/000015>`_.
+# Use the :py:class:`~dandi.dandiapi.DandiAPIClient` to list the S3 URL of each NWB file in a
+# dandiset. Here we use dandiset `000015 <https://dandiarchive.org/dandiset/000015>`_ and take the
+# first ``n_assets`` files.
 
 dandiset_id = "000015"
+n_assets = 5
 with DandiAPIClient() as client:
     dandiset = client.get_dandiset(dandiset_id, "draft")
     urls = [
         asset.get_content_url(follow_redirects=1, strip_query=True)
-        for asset in dandiset.get_assets()
+        for asset in islice(dandiset.get_assets(), n_assets)
     ]
 
 ###############################################################################
@@ -61,7 +65,7 @@ with DandiAPIClient() as client:
 fs = CachingFileSystem(fs=filesystem("http"), cache_storage="nwb-cache")
 
 ###############################################################################
-# Populate a single HERD across all files
+# Populate a single HERD across the files
 # ---------------------------------------
 # Open each file in read mode and add references for its subject species and experimenter. Checking
 # the value read from each file before annotating it keeps a file with unexpected metadata from being
@@ -92,7 +96,7 @@ for url in tqdm(urls):
 
             # reference the experimenter, an attribute of the NWBFile itself
             experimenter = read_nwbfile.experimenter[0]
-            if experimenter == "Chen, Tsai-Wen":
+            if experimenter == "Tsai-Wen Chen":
                 herd.add_ref(
                     container=read_nwbfile,
                     attribute="experimenter",
