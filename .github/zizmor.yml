@@ -1,0 +1,16 @@
+# Configuration for zizmor (https://docs.zizmor.sh), the GitHub Actions security auditor.
+
+rules:
+  unpinned-uses:
+    config:
+      # Every action must be pinned to a full commit SHA so the referenced code cannot change
+      # under a moving tag. The actions below publish GitHub immutable releases, whose tags cannot
+      # be reassigned, so they are allowed to be pinned to a version tag (ref-pin). These exceptions
+      # can be dropped once zizmor recognizes immutable releases (zizmorcore/zizmor#766).
+      policies:
+        astral-sh/ruff-action: ref-pin
+        codecov/codecov-action: ref-pin
+        actions/create-github-app-token: ref-pin
+        actions/setup-python: ref-pin
+        pypa/gh-action-pypi-publish: ref-pin
+        "*": hash-pin

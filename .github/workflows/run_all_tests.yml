@@ -7,6 +7,9 @@ on:
       - '[0-9]+.[0-9]+.[0-9]+'
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -48,21 +51,17 @@ jobs:
           - { name: macos-python3.14             , test-tox-env: test-py314-upgraded         , python-ver: "3.14", os: macos-latest }
           - { name: macos-python3.14-prerelease  , test-tox-env: test-py314-prerelease     , python-ver: "3.14", os: macos-latest }
     steps:
-      - uses: actions/checkout@v7
+      - name: Checkout repo with submodules
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
         with:
+          persist-credentials: false
           submodules: 'recursive'
           fetch-depth: 0  # tags are required for versioneer to determine the version
 
-      - name: Set up Python
-        uses: actions/setup-python@v7
+      - name: Set up Python and tox
+        uses: $/.github/actions/setup-python-tox
         with:
           python-version: ${{ matrix.python-ver }}
-
-      - name: Install build dependencies
-        run: |
-          python -m pip install --upgrade pip
-          python -m pip install tox
-          python -m pip list
 
       - name: Run tox tests
         run: |
@@ -105,21 +104,17 @@ jobs:
           - { name: macos-gallery-python3.13-upgraded    , test-tox-env: gallery-py313-upgraded  , python-ver: "3.13", os: macos-latest }
           - { name: macos-gallery-python3.13-prerelease  , test-tox-env: gallery-py313-prerelease, python-ver: "3.13", os: macos-latest }
     steps:
-      - uses: actions/checkout@v7
+      - name: Checkout repo with submodules
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
         with:
+          persist-credentials: false
           submodules: 'recursive'
           fetch-depth: 0  # tags are required for versioneer to determine the version
 
-      - name: Set up Python
-        uses: actions/setup-python@v7
+      - name: Set up Python and tox
+        uses: $/.github/actions/setup-python-tox
         with:
           python-version: ${{ matrix.python-ver }}
-
-      - name: Install build dependencies
-        run: |
-          python -m pip install --upgrade pip
-          python -m pip install tox
-          python -m pip list
 
       - name: Run tox tests
         run: |
@@ -142,13 +137,15 @@ jobs:
           - { name: conda-linux-python3.14           , test-tox-env: test-py314-upgraded    , python-ver: "3.14", os: ubuntu-latest }
           - { name: conda-linux-python3.14-prerelease, test-tox-env: test-py314-prerelease, python-ver: "3.14", os: ubuntu-latest }
     steps:
-      - uses: actions/checkout@v7
+      - name: Checkout repo with submodules
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
         with:
+          persist-credentials: false
           submodules: 'recursive'
           fetch-depth: 0  # tags are required for versioneer to determine the version
 
       - name: Set up Conda
-        uses: conda-incubator/setup-miniconda@v4
+        uses: conda-incubator/setup-miniconda@8ee1f361103df19b6f8c8655fd3967a8ecb162d5  # v4.0.1
         with:
           auto-update-conda: true
           python-version: ${{ matrix.python-ver }}
@@ -201,13 +198,15 @@ jobs:
           - { name: conda-windows-python3.14-ros3, python-ver: "3.14", os: windows-latest }
           - { name: conda-macos-python3.14-ros3  , python-ver: "3.14", os: macos-latest }
     steps:
-      - uses: actions/checkout@v7
+      - name: Checkout repo with submodules
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
         with:
+          persist-credentials: false
           submodules: 'recursive'
           fetch-depth: 0  # tags are required for versioneer to determine the version
 
       - name: Set up Conda
-        uses: conda-incubator/setup-miniconda@v4
+        uses: conda-incubator/setup-miniconda@8ee1f361103df19b6f8c8655fd3967a8ecb162d5  # v4.0.1
         with:
           auto-update-conda: true
           activate-environment: ros3
@@ -243,13 +242,15 @@ jobs:
           - { name: conda-windows-gallery-python3.14-ros3, python-ver: "3.14", os: windows-latest }
           - { name: conda-macos-gallery-python3.14-ros3  , python-ver: "3.14", os: macos-latest }
     steps:
-      - uses: actions/checkout@v7
+      - name: Checkout repo with submodules
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
         with:
+          persist-credentials: false
           submodules: 'recursive'
           fetch-depth: 0  # tags are required for versioneer to determine the version
 
       - name: Set up Conda
-        uses: conda-incubator/setup-miniconda@v4
+        uses: conda-incubator/setup-miniconda@8ee1f361103df19b6f8c8655fd3967a8ecb162d5  # v4.0.1
         with:
           auto-update-conda: true
           activate-environment: ros3
@@ -284,13 +285,15 @@ jobs:
       run:
         shell: bash
     steps:
-      - uses: actions/checkout@v7
+      - name: Checkout repo with submodules
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
         with:
+          persist-credentials: false
           submodules: 'recursive'
           fetch-depth: 0  # tags are required for versioneer to determine the version
 
       - name: Set up Python
-        uses: actions/setup-python@v7
+        uses: actions/setup-python@v7.0.0
         with:
           python-version: "3.14"
 

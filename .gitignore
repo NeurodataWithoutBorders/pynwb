@@ -5,6 +5,9 @@
 !.vscode/extensions.json
 .history
 
+### Coding Agents ###
+.claude/
+
 ### PyNWB###
 
 docs/notebooks/boc/

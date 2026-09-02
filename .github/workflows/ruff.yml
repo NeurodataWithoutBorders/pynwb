@@ -1,11 +1,17 @@
 name: Ruff
 on: pull_request
 
+permissions:
+  contents: read
+
 jobs:
   ruff:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
       - name: Run ruff
+        # immutable release (see .github/zizmor.yml for the policy exception)
         uses: astral-sh/ruff-action@v4.1.0

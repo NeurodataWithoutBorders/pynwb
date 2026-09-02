@@ -1,5 +1,10 @@
 # PyNWB Changelog
 
+## PyNWB 4.3.0 (Upcoming)
+
+### Internal improvements
+- Hardened the GitHub Actions CI: added least-privilege `permissions` blocks, pinned actions to commit SHAs (or immutable release tags), disabled credential persistence on checkout, deduplicated the test setup into a composite action, enabled Dependabot for GitHub Actions with a publication cooldown, and added a zizmor security audit of the workflows. @rly [#2262](https://github.com/NeurodataWithoutBorders/pynwb/pull/2262)
+
 ## PyNWB 4.2.0 (September 2, 2026)
 
 ### Changed

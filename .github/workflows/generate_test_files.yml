@@ -3,6 +3,9 @@ on:
   workflow_dispatch:
   # pull_request:
 
+permissions:
+  contents: read
+
 jobs:
   gen-test-files:
     name: ${{ matrix.os }}
@@ -17,13 +20,15 @@ jobs:
           - { name: pynwb-1.5.1, pynwb-version: "1.5.1", python-version: "3.8"}
           - { name: pynwb-2.1.0, pynwb-version: "2.1.0", python-version: "3.9"}
     steps:
-      - uses: actions/checkout@v7
+      - name: Checkout repo with submodules
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
         with:
+          persist-credentials: false
           submodules: 'recursive'
           fetch-depth: 0  # tags are required for versioneer to determine the version
 
       - name: Set up Python
-        uses: actions/setup-python@v7
+        uses: actions/setup-python@v7.0.0
         with:
           python-version: ${{ matrix.python-version }}
 
@@ -37,7 +42,7 @@ jobs:
           python src/pynwb/testing/make_test_files.py
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
         with:
           name: test-files-${{ matrix.name }}
           path: |

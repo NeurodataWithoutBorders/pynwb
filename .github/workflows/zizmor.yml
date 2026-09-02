@@ -1,0 +1,40 @@
+name: Zizmor GitHub Actions security audit
+on:
+  pull_request:
+    paths:
+      - '.github/**'
+  push:
+    branches:
+      - dev
+    paths:
+      - '.github/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  zizmor:
+    name: Run zizmor
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@v7.0.0
+        with:
+          python-version: '3.14'
+
+      - name: Run zizmor
+        env:
+          GH_TOKEN: ${{ github.token }}  # lets zizmor run its online audits against the GitHub API
+        run: |
+          python -m pip install zizmor==1.30.0
+          zizmor --persona regular .github/
