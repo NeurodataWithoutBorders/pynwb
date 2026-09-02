@@ -16,12 +16,10 @@ jobs:
   run-coverage:
     name: ${{ matrix.os }}, opt reqs ${{ matrix.opt_req }}
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
     concurrency:
       group: ${{ github.workflow }}-${{ github.ref }}-${{ matrix.os }}-${{ matrix.opt_req }}
       cancel-in-progress: true
-    # TODO handle forks
-    # run pipeline on either a push event or a PR event on a fork
-    # if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.event.pull_request.base.repo.full_name
     defaults:
       run:
         shell: bash
@@ -44,9 +42,13 @@ jobs:
           fetch-depth: 0  # tags are required for versioneer to determine the version
 
       - name: Set up Python
-        uses: actions/setup-python@v7.0.0
+        # This workflow uploads coverage percentages to Codecov and produces no artifact, so a
+        # restored pip cache cannot reach a consumer.
+        uses: actions/setup-python@v7.0.0  # zizmor: ignore[cache-poisoning]
         with:
           python-version: ${{ env.PYTHON }}
+          cache: pip
+          cache-dependency-path: pyproject.toml
 
       - name: Install dependencies
         run: |
@@ -69,6 +71,9 @@ jobs:
           python -m coverage report
 
       - name: Upload coverage to Codecov
+        # CODECOV_TOKEN is not exposed to a pull request from a fork, so the upload is skipped
+        # there and the tests above still run.
+        if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
         # immutable release (see .github/zizmor.yml for the policy exception)
         uses: codecov/codecov-action@v7.0.0
         with:
@@ -87,6 +92,9 @@ jobs:
           python -m coverage report
 
       - name: Upload coverage to Codecov
+        # CODECOV_TOKEN is not exposed to a pull request from a fork, so the upload is skipped
+        # there and the tests above still run.
+        if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
         # immutable release (see .github/zizmor.yml for the policy exception)
         uses: codecov/codecov-action@v7.0.0
         with:

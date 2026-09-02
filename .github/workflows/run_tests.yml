@@ -14,6 +14,7 @@ jobs:
   run-tests:
     name: ${{ matrix.name }}
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 45
     concurrency:
       group: ${{ github.workflow }}-${{ github.ref }}-${{ matrix.name }}
       cancel-in-progress: true
@@ -43,6 +44,8 @@ jobs:
         uses: $/.github/actions/setup-python-tox
         with:
           python-version: ${{ matrix.python-ver }}
+          # the leg that uploads wheels feeds the "latest" pre-release, so it builds from a cold cache
+          pip-cache: ${{ matrix.upload-wheels && 'false' || 'true' }}
 
       - name: Run tox tests
         run: |
@@ -70,10 +73,12 @@ jobs:
         with:
           name: distributions
           path: dist
+          retention-days: 1  # the deploy-dev job consumes this within the same run
 
   run-gallery-tests:
     name: ${{ matrix.name }}
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
     concurrency:
       group: ${{ github.workflow }}-${{ github.ref }}-${{ matrix.name }}
       cancel-in-progress: true
@@ -108,6 +113,7 @@ jobs:
   run-tests-on-conda:
     name: ${{ matrix.name }}
     runs-on: ubuntu-latest
+    timeout-minutes: 45
     concurrency:
       group: ${{ github.workflow }}-${{ github.ref }}-${{ matrix.name }}
       cancel-in-progress: true
@@ -138,7 +144,7 @@ jobs:
         run: |
           conda config --set always_yes yes --set changeps1 no
           conda info
-          conda install -c conda-forge tox
+          conda install -c conda-forge "tox>=4.0"
 
       - name: Conda reporting
         run: |
@@ -169,6 +175,7 @@ jobs:
   run-ros3-tests:  # tox and conda do not play nicely so do not use tox here
     name: ${{ matrix.name }}
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
     concurrency:
       group: ${{ github.workflow }}-${{ github.ref }}-${{ matrix.name }}
       cancel-in-progress: true
@@ -213,6 +220,7 @@ jobs:
   run-gallery-ros3-tests:
     name: ${{ matrix.name }}
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
     concurrency:
       group: ${{ github.workflow }}-${{ github.ref }}-${{ matrix.name }}
       cancel-in-progress: true
@@ -263,6 +271,7 @@ jobs:
     needs: [run-tests, run-gallery-tests, run-tests-on-conda, run-ros3-tests, run-gallery-ros3-tests]
     if: ${{ github.event_name == 'push' }}
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     concurrency:
       group: ${{ github.workflow }}-${{ github.ref }}
       cancel-in-progress: true

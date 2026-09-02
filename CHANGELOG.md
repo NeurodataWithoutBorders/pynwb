@@ -5,7 +5,11 @@
 ### Internal improvements
 - Hardened the GitHub Actions CI: added least-privilege `permissions` blocks, pinned actions to commit SHAs (or immutable release tags), disabled credential persistence on checkout, deduplicated the test setup into a composite action, enabled Dependabot for GitHub Actions with a publication cooldown, and added a zizmor security audit of the workflows. @rly [#2262](https://github.com/NeurodataWithoutBorders/pynwb/pull/2262)
 - Scoped the CI `concurrency` groups per job, keyed on the matrix entry, so a superseding run cancels each matrix leg individually. @rly [#2262](https://github.com/NeurodataWithoutBorders/pynwb/pull/2262)
-- Fixed the "Generate test files" job name rendering blank, and dropped a conda reporting step from the DANDI read tests, which run under `actions/setup-python` and report on the runner's preinstalled conda rather than the test environment. @rly [#2262](https://github.com/NeurodataWithoutBorders/pynwb/pull/2262)
+- Gave every CI job a `timeout-minutes` backstop, sized from measured runtimes, in place of the 6-hour default. @rly [#2262](https://github.com/NeurodataWithoutBorders/pynwb/pull/2262)
+- Cached pip downloads across CI runs. The jobs whose distributions are published build from a cold cache. @rly [#2262](https://github.com/NeurodataWithoutBorders/pynwb/pull/2262)
+- Skipped the Codecov upload on pull requests from forks, where `CODECOV_TOKEN` is unavailable. The tests themselves still run. @rly [#2262](https://github.com/NeurodataWithoutBorders/pynwb/pull/2262)
+- Removed the "Generate test files" workflow. Running `src/pynwb/testing/make_test_files.py` under an old PyNWB still generates the back-compat files. @rly [#2262](https://github.com/NeurodataWithoutBorders/pynwb/pull/2262)
+- Dropped a conda reporting step from the DANDI read tests, which run under `actions/setup-python` and so reported on the runner's preinstalled conda rather than the test environment. @rly [#2262](https://github.com/NeurodataWithoutBorders/pynwb/pull/2262)
 
 ## PyNWB 4.2.0 (September 2, 2026)
 

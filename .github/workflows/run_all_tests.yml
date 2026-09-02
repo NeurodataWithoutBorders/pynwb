@@ -18,6 +18,7 @@ jobs:
     # configurations based on the github event, so this job is duplicated for the most part
     name: ${{ matrix.name }}
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 45
     concurrency:
       group: ${{ github.workflow }}-${{ github.ref }}-${{ matrix.name }}
       cancel-in-progress: true
@@ -85,6 +86,7 @@ jobs:
   run-all-gallery-tests:
     name: ${{ matrix.name }}
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
     concurrency:
       group: ${{ github.workflow }}-${{ github.ref }}-${{ matrix.name }}
       cancel-in-progress: true
@@ -125,6 +127,7 @@ jobs:
   run-all-tests-on-conda:
     name: ${{ matrix.name }}
     runs-on: ubuntu-latest
+    timeout-minutes: 45
     concurrency:
       group: ${{ github.workflow }}-${{ github.ref }}-${{ matrix.name }}
       cancel-in-progress: true
@@ -307,9 +310,13 @@ jobs:
           fetch-depth: 0  # tags are required for versioneer to determine the version
 
       - name: Set up Python
-        uses: actions/setup-python@v7.0.0
+        # This workflow builds distributions only to check that they build and install; nothing
+        # it produces is published, so a restored pip cache cannot reach a consumer.
+        uses: actions/setup-python@v7.0.0  # zizmor: ignore[cache-poisoning]
         with:
           python-version: "3.14"
+          cache: pip
+          cache-dependency-path: pyproject.toml
 
       - name: Install run dependencies
         run: |
