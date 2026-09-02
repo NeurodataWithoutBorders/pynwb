@@ -5,8 +5,9 @@ channels:
   - defaults
 dependencies:
   - python==3.14
-  # select the GIL build of CPython. several packages do not publish free-threaded Windows wheels,
-  # and pip building them from source overruns the CI job timeout. See #2246.
+  # select the GIL build of CPython. tensorstore, numcodecs, pycryptodomex, and google-crc32c
+  # publish no free-threaded Windows wheels, so pip builds them from source and overruns the
+  # CI job timeout. See #2246.
   - python-gil
   - h5py==3.16.0
   - hdmf==6.2.0
@@ -22,4 +23,4 @@ dependencies:
   - pip
   - pip:
     - remfile==0.1.14  # remfile is not packaged on conda-forge
-    - dandi==0.77.0  # PyPI carries releases newer than the conda-forge build
+    - dandi==0.77.0
