@@ -8,8 +8,11 @@ permissions:
 
 jobs:
   gen-test-files:
-    name: ${{ matrix.os }}
+    name: ${{ matrix.name }}
     runs-on: ubuntu-latest
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}-${{ matrix.name }}
+      cancel-in-progress: true
     defaults:
       run:
         shell: bash

@@ -10,14 +10,13 @@ on:
 permissions:
   contents: read
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
 jobs:
   run-tests:
     name: ${{ matrix.name }}
     runs-on: ${{ matrix.os }}
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}-${{ matrix.name }}
+      cancel-in-progress: true
     defaults:
       run:
         shell: bash
@@ -75,6 +74,9 @@ jobs:
   run-gallery-tests:
     name: ${{ matrix.name }}
     runs-on: ${{ matrix.os }}
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}-${{ matrix.name }}
+      cancel-in-progress: true
     defaults:
       run:
         shell: bash
@@ -106,6 +108,9 @@ jobs:
   run-tests-on-conda:
     name: ${{ matrix.name }}
     runs-on: ubuntu-latest
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}-${{ matrix.name }}
+      cancel-in-progress: true
     defaults:
      run:
        shell: bash -l {0}  # necessary for conda
@@ -164,6 +169,9 @@ jobs:
   run-ros3-tests:  # tox and conda do not play nicely so do not use tox here
     name: ${{ matrix.name }}
     runs-on: ${{ matrix.os }}
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}-${{ matrix.name }}
+      cancel-in-progress: true
     defaults:
       run:
         shell: bash -l {0}  # necessary for conda
@@ -205,6 +213,9 @@ jobs:
   run-gallery-ros3-tests:
     name: ${{ matrix.name }}
     runs-on: ${{ matrix.os }}
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}-${{ matrix.name }}
+      cancel-in-progress: true
     defaults:
       run:
         shell: bash -l {0}  # necessary for conda
@@ -252,6 +263,9 @@ jobs:
     needs: [run-tests, run-gallery-tests, run-tests-on-conda, run-ros3-tests, run-gallery-ros3-tests]
     if: ${{ github.event_name == 'push' }}
     runs-on: ubuntu-latest
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
+      cancel-in-progress: true
     permissions:
       contents: write  # create the "latest" pre-release and move its tag
     steps:

@@ -10,10 +10,6 @@ on:
 permissions:
   contents: read
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
 jobs:
   run-all-tests:
     # the only differences between this job and "run_tests.yml" is the "strategy.matrix.include" and the upload
@@ -22,6 +18,9 @@ jobs:
     # configurations based on the github event, so this job is duplicated for the most part
     name: ${{ matrix.name }}
     runs-on: ${{ matrix.os }}
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}-${{ matrix.name }}
+      cancel-in-progress: true
     defaults:
       run:
         shell: bash
@@ -86,6 +85,9 @@ jobs:
   run-all-gallery-tests:
     name: ${{ matrix.name }}
     runs-on: ${{ matrix.os }}
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}-${{ matrix.name }}
+      cancel-in-progress: true
     defaults:
       run:
         shell: bash
@@ -123,6 +125,9 @@ jobs:
   run-all-tests-on-conda:
     name: ${{ matrix.name }}
     runs-on: ubuntu-latest
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}-${{ matrix.name }}
+      cancel-in-progress: true
     defaults:
      run:
        shell: bash -l {0}  # needed for conda environment to work
@@ -186,6 +191,9 @@ jobs:
   run-ros3-tests:  # tox and conda do not play nicely so do not use tox here
     name: ${{ matrix.name }}
     runs-on: ${{ matrix.os }}
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}-${{ matrix.name }}
+      cancel-in-progress: true
     timeout-minutes: 20  # backstop against the HDF5 ros3 shutdown deadlock on Windows
     defaults:
       run:
@@ -230,6 +238,9 @@ jobs:
   run-gallery-ros3-tests:
     name: ${{ matrix.name }}
     runs-on: ${{ matrix.os }}
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}-${{ matrix.name }}
+      cancel-in-progress: true
     timeout-minutes: 20  # backstop against the HDF5 ros3 shutdown deadlock on Windows
     defaults:
       run:
@@ -280,6 +291,9 @@ jobs:
   run-streaming-example:
     name: linux-streaming-example-python3.14
     runs-on: ubuntu-latest
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
+      cancel-in-progress: true
     timeout-minutes: 15  # backstop against a stalled or throttled stream from the DANDI Archive
     defaults:
       run:
