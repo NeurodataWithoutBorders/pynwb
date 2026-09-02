@@ -7,9 +7,8 @@ on:
       - '[0-9]+.[0-9]+.[0-9]+'
   workflow_dispatch:
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+permissions:
+  contents: read
 
 jobs:
   run-all-tests:
@@ -19,6 +18,10 @@ jobs:
     # configurations based on the github event, so this job is duplicated for the most part
     name: ${{ matrix.name }}
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 45
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}-${{ matrix.name }}
+      cancel-in-progress: true
     defaults:
       run:
         shell: bash
@@ -48,21 +51,17 @@ jobs:
           - { name: macos-python3.14             , test-tox-env: test-py314-upgraded         , python-ver: "3.14", os: macos-latest }
           - { name: macos-python3.14-prerelease  , test-tox-env: test-py314-prerelease     , python-ver: "3.14", os: macos-latest }
     steps:
-      - uses: actions/checkout@v7
+      - name: Checkout repo with submodules
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
         with:
+          persist-credentials: false
           submodules: 'recursive'
           fetch-depth: 0  # tags are required for versioneer to determine the version
 
-      - name: Set up Python
-        uses: actions/setup-python@v7
+      - name: Set up Python and tox
+        uses: $/.github/actions/setup-python-tox
         with:
           python-version: ${{ matrix.python-ver }}
-
-      - name: Install build dependencies
-        run: |
-          python -m pip install --upgrade pip
-          python -m pip install tox
-          python -m pip list
 
       - name: Run tox tests
         run: |
@@ -87,6 +86,10 @@ jobs:
   run-all-gallery-tests:
     name: ${{ matrix.name }}
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}-${{ matrix.name }}
+      cancel-in-progress: true
     defaults:
       run:
         shell: bash
@@ -105,21 +108,17 @@ jobs:
           - { name: macos-gallery-python3.13-upgraded    , test-tox-env: gallery-py313-upgraded  , python-ver: "3.13", os: macos-latest }
           - { name: macos-gallery-python3.13-prerelease  , test-tox-env: gallery-py313-prerelease, python-ver: "3.13", os: macos-latest }
     steps:
-      - uses: actions/checkout@v7
+      - name: Checkout repo with submodules
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
         with:
+          persist-credentials: false
           submodules: 'recursive'
           fetch-depth: 0  # tags are required for versioneer to determine the version
 
-      - name: Set up Python
-        uses: actions/setup-python@v7
+      - name: Set up Python and tox
+        uses: $/.github/actions/setup-python-tox
         with:
           python-version: ${{ matrix.python-ver }}
-
-      - name: Install build dependencies
-        run: |
-          python -m pip install --upgrade pip
-          python -m pip install tox
-          python -m pip list
 
       - name: Run tox tests
         run: |
@@ -128,6 +127,10 @@ jobs:
   run-all-tests-on-conda:
     name: ${{ matrix.name }}
     runs-on: ubuntu-latest
+    timeout-minutes: 45
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}-${{ matrix.name }}
+      cancel-in-progress: true
     defaults:
      run:
        shell: bash -l {0}  # needed for conda environment to work
@@ -142,13 +145,15 @@ jobs:
           - { name: conda-linux-python3.14           , test-tox-env: test-py314-upgraded    , python-ver: "3.14", os: ubuntu-latest }
           - { name: conda-linux-python3.14-prerelease, test-tox-env: test-py314-prerelease, python-ver: "3.14", os: ubuntu-latest }
     steps:
-      - uses: actions/checkout@v7
+      - name: Checkout repo with submodules
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
         with:
+          persist-credentials: false
           submodules: 'recursive'
           fetch-depth: 0  # tags are required for versioneer to determine the version
 
       - name: Set up Conda
-        uses: conda-incubator/setup-miniconda@v4
+        uses: conda-incubator/setup-miniconda@8ee1f361103df19b6f8c8655fd3967a8ecb162d5  # v4.0.1
         with:
           auto-update-conda: true
           python-version: ${{ matrix.python-ver }}
@@ -189,6 +194,9 @@ jobs:
   run-ros3-tests:  # tox and conda do not play nicely so do not use tox here
     name: ${{ matrix.name }}
     runs-on: ${{ matrix.os }}
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}-${{ matrix.name }}
+      cancel-in-progress: true
     timeout-minutes: 20  # backstop against the HDF5 ros3 shutdown deadlock on Windows
     defaults:
       run:
@@ -201,13 +209,15 @@ jobs:
           - { name: conda-windows-python3.14-ros3, python-ver: "3.14", os: windows-latest }
           - { name: conda-macos-python3.14-ros3  , python-ver: "3.14", os: macos-latest }
     steps:
-      - uses: actions/checkout@v7
+      - name: Checkout repo with submodules
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
         with:
+          persist-credentials: false
           submodules: 'recursive'
           fetch-depth: 0  # tags are required for versioneer to determine the version
 
       - name: Set up Conda
-        uses: conda-incubator/setup-miniconda@v4
+        uses: conda-incubator/setup-miniconda@8ee1f361103df19b6f8c8655fd3967a8ecb162d5  # v4.0.1
         with:
           auto-update-conda: true
           activate-environment: ros3
@@ -231,6 +241,9 @@ jobs:
   run-gallery-ros3-tests:
     name: ${{ matrix.name }}
     runs-on: ${{ matrix.os }}
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}-${{ matrix.name }}
+      cancel-in-progress: true
     timeout-minutes: 20  # backstop against the HDF5 ros3 shutdown deadlock on Windows
     defaults:
       run:
@@ -243,13 +256,15 @@ jobs:
           - { name: conda-windows-gallery-python3.14-ros3, python-ver: "3.14", os: windows-latest }
           - { name: conda-macos-gallery-python3.14-ros3  , python-ver: "3.14", os: macos-latest }
     steps:
-      - uses: actions/checkout@v7
+      - name: Checkout repo with submodules
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
         with:
+          persist-credentials: false
           submodules: 'recursive'
           fetch-depth: 0  # tags are required for versioneer to determine the version
 
       - name: Set up Conda
-        uses: conda-incubator/setup-miniconda@v4
+        uses: conda-incubator/setup-miniconda@8ee1f361103df19b6f8c8655fd3967a8ecb162d5  # v4.0.1
         with:
           auto-update-conda: true
           activate-environment: ros3
@@ -279,20 +294,29 @@ jobs:
   run-streaming-example:
     name: linux-streaming-example-python3.14
     runs-on: ubuntu-latest
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
+      cancel-in-progress: true
     timeout-minutes: 15  # backstop against a stalled or throttled stream from the DANDI Archive
     defaults:
       run:
         shell: bash
     steps:
-      - uses: actions/checkout@v7
+      - name: Checkout repo with submodules
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
         with:
+          persist-credentials: false
           submodules: 'recursive'
           fetch-depth: 0  # tags are required for versioneer to determine the version
 
       - name: Set up Python
-        uses: actions/setup-python@v7
+        # This workflow builds distributions only to check that they build and install; nothing
+        # it produces is published, so a restored pip cache cannot reach a consumer.
+        uses: actions/setup-python@v7.0.0  # zizmor: ignore[cache-poisoning]
         with:
           python-version: "3.14"
+          cache: pip
+          cache-dependency-path: pyproject.toml
 
       - name: Install run dependencies
         run: |

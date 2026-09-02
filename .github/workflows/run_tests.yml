@@ -7,14 +7,17 @@ on:
       - 'latest'
   pull_request:
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+permissions:
+  contents: read
 
 jobs:
   run-tests:
     name: ${{ matrix.name }}
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 45
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}-${{ matrix.name }}
+      cancel-in-progress: true
     defaults:
       run:
         shell: bash
@@ -30,21 +33,19 @@ jobs:
           - { name: macos-python3.10-minimum     , test-tox-env: test-py310-minimum   , python-ver: "3.10", os: macos-15-intel }
           - { name: macos-python3.14-upgraded    , test-tox-env: test-py314-upgraded  , python-ver: "3.14", os: macos-latest }
     steps:
-      - uses: actions/checkout@v7
+      - name: Checkout repo with submodules
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
         with:
+          persist-credentials: false
           submodules: 'recursive'
           fetch-depth: 0  # tags are required for versioneer to determine the version
 
-      - name: Set up Python
-        uses: actions/setup-python@v7
+      - name: Set up Python and tox
+        uses: $/.github/actions/setup-python-tox
         with:
           python-version: ${{ matrix.python-ver }}
-
-      - name: Install build dependencies
-        run: |
-          python -m pip install --upgrade pip
-          python -m pip install tox
-          python -m pip list
+          # the leg that uploads wheels feeds the "latest" pre-release, so it builds from a cold cache
+          pip-cache: ${{ matrix.upload-wheels && 'false' || 'true' }}
 
       - name: Run tox tests
         run: |
@@ -68,14 +69,19 @@ jobs:
 
       - name: Upload distribution as a workspace artifact
         if: ${{ matrix.upload-wheels }}
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
         with:
           name: distributions
           path: dist
+          retention-days: 1  # the deploy-dev job consumes this within the same run
 
   run-gallery-tests:
     name: ${{ matrix.name }}
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}-${{ matrix.name }}
+      cancel-in-progress: true
     defaults:
       run:
         shell: bash
@@ -88,21 +94,17 @@ jobs:
           - { name: windows-gallery-python3.10-minimum , test-tox-env: gallery-py310-minimum , python-ver: "3.10", os: windows-latest }
           - { name: windows-gallery-python3.14-upgraded, test-tox-env: gallery-py314-upgraded, python-ver: "3.14", os: windows-latest }
     steps:
-      - uses: actions/checkout@v7
+      - name: Checkout repo with submodules
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
         with:
+          persist-credentials: false
           submodules: 'recursive'
           fetch-depth: 0  # tags are required for versioneer to determine the version
 
-      - name: Set up Python
-        uses: actions/setup-python@v7
+      - name: Set up Python and tox
+        uses: $/.github/actions/setup-python-tox
         with:
           python-version: ${{ matrix.python-ver }}
-
-      - name: Install build dependencies
-        run: |
-          python -m pip install --upgrade pip
-          python -m pip install tox
-          python -m pip list
 
       - name: Run tox tests
         run: |
@@ -111,6 +113,10 @@ jobs:
   run-tests-on-conda:
     name: ${{ matrix.name }}
     runs-on: ubuntu-latest
+    timeout-minutes: 45
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}-${{ matrix.name }}
+      cancel-in-progress: true
     defaults:
      run:
        shell: bash -l {0}  # necessary for conda
@@ -121,13 +127,15 @@ jobs:
           - { name: conda-linux-python3.10-minimum   , test-tox-env: test-py310-minimum   , python-ver: "3.10", os: ubuntu-latest }
           - { name: conda-linux-python3.14-upgraded  , test-tox-env: test-py314-upgraded  , python-ver: "3.14", os: ubuntu-latest }
     steps:
-      - uses: actions/checkout@v7
+      - name: Checkout repo with submodules
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
         with:
+          persist-credentials: false
           submodules: 'recursive'
           fetch-depth: 0  # tags are required for versioneer to determine the version
 
       - name: Set up Conda
-        uses: conda-incubator/setup-miniconda@v4
+        uses: conda-incubator/setup-miniconda@8ee1f361103df19b6f8c8655fd3967a8ecb162d5  # v4.0.1
         with:
           auto-update-conda: true
           python-version: ${{ matrix.python-ver }}
@@ -136,7 +144,7 @@ jobs:
         run: |
           conda config --set always_yes yes --set changeps1 no
           conda info
-          conda install -c conda-forge tox
+          conda install -c conda-forge "tox>=4.0"
 
       - name: Conda reporting
         run: |
@@ -167,6 +175,10 @@ jobs:
   run-ros3-tests:  # tox and conda do not play nicely so do not use tox here
     name: ${{ matrix.name }}
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}-${{ matrix.name }}
+      cancel-in-progress: true
     defaults:
       run:
         shell: bash -l {0}  # necessary for conda
@@ -176,13 +188,15 @@ jobs:
         include:
           - { name: conda-linux-python3.14-ros3  , python-ver: "3.14", os: ubuntu-latest }
     steps:
-      - uses: actions/checkout@v7
+      - name: Checkout repo with submodules
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
         with:
+          persist-credentials: false
           submodules: 'recursive'
           fetch-depth: 0  # tags are required for versioneer to determine the version
 
       - name: Set up Conda
-        uses: conda-incubator/setup-miniconda@v4
+        uses: conda-incubator/setup-miniconda@8ee1f361103df19b6f8c8655fd3967a8ecb162d5  # v4.0.1
         with:
           auto-update-conda: true
           activate-environment: ros3
@@ -206,6 +220,10 @@ jobs:
   run-gallery-ros3-tests:
     name: ${{ matrix.name }}
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}-${{ matrix.name }}
+      cancel-in-progress: true
     defaults:
       run:
         shell: bash -l {0}  # necessary for conda
@@ -215,13 +233,15 @@ jobs:
         include:
           - { name: conda-linux-gallery-python3.14-ros3  , python-ver: "3.14", os: ubuntu-latest }
     steps:
-      - uses: actions/checkout@v7
+      - name: Checkout repo with submodules
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
         with:
+          persist-credentials: false
           submodules: 'recursive'
           fetch-depth: 0  # tags are required for versioneer to determine the version
 
       - name: Set up Conda
-        uses: conda-incubator/setup-miniconda@v4
+        uses: conda-incubator/setup-miniconda@8ee1f361103df19b6f8c8655fd3967a8ecb162d5  # v4.0.1
         with:
           auto-update-conda: true
           activate-environment: ros3
@@ -251,11 +271,15 @@ jobs:
     needs: [run-tests, run-gallery-tests, run-tests-on-conda, run-ros3-tests, run-gallery-ros3-tests]
     if: ${{ github.event_name == 'push' }}
     runs-on: ubuntu-latest
+    timeout-minutes: 15
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
+      cancel-in-progress: true
     permissions:
       contents: write  # create the "latest" pre-release and move its tag
     steps:
       - name: Download wheel and source distributions from artifact
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c  # v8.0.1
         with:
           name: distributions
           path: dist

@@ -7,23 +7,30 @@ on:
   #   - cron: '0 6 * * *'  # once per day at 1am ET
   workflow_dispatch:
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+permissions:
+  contents: read
 
 jobs:
   run-tests:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
+      cancel-in-progress: true
     steps:
-      - uses: actions/checkout@v7
+      - name: Checkout repo with submodules
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
         with:
+          persist-credentials: false
           submodules: 'recursive'
           fetch-depth: 0  # tags are required for versioneer to determine the version
 
       - name: Set up Python
-        uses: actions/setup-python@v7
+        uses: actions/setup-python@v7.0.0
         with:
           python-version: '3.14'
+          cache: pip
+          cache-dependency-path: pyproject.toml
 
       - name: Install run dependencies
         run: |
@@ -31,12 +38,6 @@ jobs:
           python -m pip uninstall -y pynwb  # uninstall pynwb
           python -m pip install .
           python -m pip list
-
-      - name: Conda reporting
-        run: |
-          conda info
-          conda config --show-sources
-          conda list --show-channel-urls
 
       - name: Run DANDI read tests
         run: |

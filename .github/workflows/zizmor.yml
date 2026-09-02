@@ -1,0 +1,37 @@
+name: Zizmor GitHub Actions security audit
+on:
+  pull_request:
+    paths:
+      - '.github/**'
+  push:
+    branches:
+      - dev
+    paths:
+      - '.github/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  zizmor:
+    name: Run zizmor
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
+      cancel-in-progress: true
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Run zizmor
+        # The action carries the zizmor version it runs, pinned by container image digest, so
+        # Dependabot keeps zizmor current by bumping the action.
+        # immutable release (see .github/zizmor.yml for the policy exception)
+        uses: zizmorcore/zizmor-action@v0.6.3
+        with:
+          # advanced security requires a permission change and another action and is unnecessary
+          advanced-security: false

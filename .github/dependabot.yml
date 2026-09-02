@@ -1,0 +1,11 @@
+version: 2
+updates:
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      # Check for updates to GitHub Actions every week
+      interval: "weekly"
+    cooldown:
+      # Wait a week after a new action version is published before opening a PR,
+      # so a freshly published (potentially compromised) version is not adopted immediately.
+      default-days: 7
