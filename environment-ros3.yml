@@ -2,7 +2,6 @@
 name: ros3
 channels:
   - conda-forge
-  - defaults
 dependencies:
   - python==3.14
   # select the GIL build of CPython. tensorstore publishes a cp314 Windows wheel but no
