@@ -3,6 +3,7 @@
 ## PyNWB 4.2.0 (September 1, 2026)
 
 ### Changed
+- `ElectricalSeries`, `CurrentClampSeries`, `CurrentClampStimulusSeries`, `VoltageClampSeries`, and `VoltageClampStimulusSeries` warn when they are created without a `conversion` or an `offset`, which will raise an error in PyNWB 4.4.0. Passing `channel_conversion` counts as passing a `conversion`, and reading a file is unaffected. @h-mayorquin [#2258](https://github.com/NeurodataWithoutBorders/pynwb/pull/2258)
 - The array-valued fields `TimeSeries.control` and `control_description`, `ImageSeries.dimension` and `starting_frame`, `TwoPhotonSeries.field_of_view`, `AbstractFeatureSeries.features` and `feature_units`, `Clustering.peak_over_rms`, and `ClusterWaveforms.waveform_mean` and `waveform_sd` accept zarr arrays. They no longer accept non-array iterables such as `str`, `set`, `range`, and generators. @rly [#2235](https://github.com/NeurodataWithoutBorders/pynwb/pull/2235)
 - `TimeSeries.get_timestamps` raises a `ValueError` when timestamps must be generated but the number of samples in the data cannot be determined. @rly [#2235](https://github.com/NeurodataWithoutBorders/pynwb/pull/2235)
 - Added support for NWB Schema 2.11.0

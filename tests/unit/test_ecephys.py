@@ -103,7 +103,9 @@ class ElectricalSeriesConstructor(TestCase):
                 name="test_ts1",
                 data=np.ones((6, 3)),
                 electrodes=region,
-                timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5]
+                timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5],
+                conversion=1.0,
+                offset=0.0,
             )
             self.assertEqual(len(w), 1)
             assert (
@@ -119,6 +121,8 @@ class ElectricalSeriesConstructor(TestCase):
                 data=np.ones((2, 6)),
                 electrodes=region,
                 rate=30000.,
+                conversion=1.0,
+                offset=0.0,
             )
             self.assertEqual(len(w), 1)
             assert (

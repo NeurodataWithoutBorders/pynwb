@@ -143,6 +143,13 @@ class ElectricalSeries(TimeSeries):
             allow_positional=AllowPositional.WARNING,)
     def __init__(self, **kwargs):
         args_to_set = popargs_to_dict(('electrodes', 'channel_conversion', 'filtering'), kwargs)
+        self._check_conversion_and_offset(
+            name=kwargs['name'],
+            unit='volts',
+            conversion=kwargs['conversion'],
+            offset=kwargs['offset'],
+            channel_conversion=args_to_set['channel_conversion'],
+        )
 
         data_shape = get_data_shape(kwargs['data'], strict_no_data_load=True)
         electrodes_shape = get_data_shape(args_to_set['electrodes'].data, strict_no_data_load=True)
