@@ -217,6 +217,21 @@ class TimeIntervalsTest(TestCase):
         ti = TimeIntervals(name='ti_name')
         self.assertIsNone(ti.get_starting_time())
 
+    def test_get_starting_time_ignores_nan(self):
+        """Test get_starting_time ignores NaN start times"""
+        ti = TimeIntervals(name='ti_name')
+        ti.add_interval(start_time=np.nan, stop_time=1.0)
+        ti.add_interval(start_time=2.0, stop_time=3.0)
+        ti.add_interval(start_time=1.0, stop_time=2.0)
+        self.assertEqual(ti.get_starting_time(), 1.0)
+
+    def test_get_starting_time_all_nan(self):
+        """Test get_starting_time returns None when all starts are NaN"""
+        ti = TimeIntervals(name='ti_name')
+        ti.add_interval(start_time=np.nan, stop_time=1.0)
+        ti.add_interval(start_time=np.nan, stop_time=2.0)
+        self.assertIsNone(ti.get_starting_time())
+
     def test_get_starting_time_single_interval(self):
         """Test get_starting_time with single interval"""
         ti = TimeIntervals(name='ti_name')
@@ -236,6 +251,27 @@ class TimeIntervalsTest(TestCase):
         """Test get_duration returns None for empty table"""
         ti = TimeIntervals(name='ti_name')
         self.assertIsNone(ti.get_duration())
+
+    def test_get_duration_ignores_nan_stop_and_uses_later_start(self):
+        """Test get_duration includes a later start when its stop is NaN"""
+        ti = TimeIntervals(name='ti_name')
+        ti.add_interval(start_time=0.0, stop_time=1.0)
+        ti.add_interval(start_time=2.0, stop_time=np.nan)
+        self.assertEqual(ti.get_duration(), 2.0)
+
+    def test_get_duration_all_nan_stops_uses_start_span(self):
+        """Test get_duration falls back to the span of valid starts"""
+        ti = TimeIntervals(name='ti_name')
+        ti.add_interval(start_time=2.0, stop_time=np.nan)
+        ti.add_interval(start_time=5.0, stop_time=np.nan)
+        self.assertEqual(ti.get_duration(), 3.0)
+
+    def test_get_duration_all_nan_starts_returns_nan(self):
+        """Test get_duration returns NaN when no valid start exists"""
+        ti = TimeIntervals(name='ti_name')
+        ti.add_interval(start_time=np.nan, stop_time=1.0)
+        ti.add_interval(start_time=np.nan, stop_time=np.nan)
+        self.assertTrue(np.isnan(ti.get_duration()))
 
     def test_get_duration_single_interval(self):
         """Test get_duration with single interval"""
