@@ -121,6 +121,59 @@ def test_mock_ElectricalSeries_more_than_five_channels():
     assert len(electrical_series.electrodes.table) == 128
 
 
+def test_mock_Device_links_model():
+    """mock_Device must link the given DeviceModel and set the serial number."""
+    model = mock_DeviceModel()
+    device = mock_Device(model=model, serial_number="1234")
+    assert device.model is model
+    assert device.serial_number == "1234"
+
+
+def test_mock_Device_adds_model_to_nwbfile():
+    """A linked DeviceModel must be placed in the NWBFile so that the link resolves."""
+    nwbfile = mock_NWBFile()
+    model = mock_DeviceModel()
+    device = mock_Device(model=model, nwbfile=nwbfile)
+    assert nwbfile.device_models[model.name] is model
+    assert nwbfile.devices[device.name] is device
+
+
+def test_mock_Device_model_already_in_nwbfile():
+    """A DeviceModel already in the NWBFile must be linked without being added a second time."""
+    nwbfile = mock_NWBFile()
+    model = mock_DeviceModel(nwbfile=nwbfile)
+    device = mock_Device(model=model, nwbfile=nwbfile)
+    assert device.model is model
+    assert len(nwbfile.device_models) == 1
+
+
+def test_mock_Device_model_name_clash():
+    """A DeviceModel whose name is taken by a different DeviceModel in the NWBFile must raise."""
+    nwbfile = mock_NWBFile()
+    mock_DeviceModel(name="clashing_name", nwbfile=nwbfile)
+    other_model = mock_DeviceModel(name="clashing_name")
+
+    with pytest.raises(ValueError, match="already exists in 'device_models'"):
+        mock_Device(model=other_model, nwbfile=nwbfile)
+
+
+def test_mock_Device_with_model_roundtrip(tmp_path):
+    """The link from a written Device to its DeviceModel must resolve on read."""
+    nwbfile = mock_NWBFile()
+    model = mock_DeviceModel()
+    device = mock_Device(model=model, serial_number="1234", nwbfile=nwbfile)
+
+    path = tmp_path / "device_with_model.nwb"
+    with NWBHDF5IO(path, "w") as io:
+        io.write(nwbfile)
+
+    with NWBHDF5IO(path, "r") as io:
+        read_nwbfile = io.read()
+        read_device = read_nwbfile.devices[device.name]
+        assert read_device.model is read_nwbfile.device_models[model.name]
+        assert read_device.serial_number == "1234"
+
+
 @pytest.mark.parametrize("mock_function", mock_functions)
 def test_mock_write(mock_function, tmp_path):
     if mock_function is mock_NWBFile:

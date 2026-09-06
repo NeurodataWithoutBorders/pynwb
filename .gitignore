@@ -20,9 +20,11 @@ docs/source/modules/generated
 mylab.*.yaml
 *.npy
 *.nwb
+*.nwb.zarr/
 *.h5
 !/tests/back_compat/*.nwb
 manifest.json
+nwb-cache/
 
 # Auto-generated tutorials
 docs/source/tutorials/

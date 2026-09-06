@@ -34,7 +34,7 @@ classifiers = [
 ]
 dependencies = [
     "h5py>=3.6.0",
-    "hdmf>=6.1.0,<7",
+    "hdmf>=6.2.0,<7",
     "numpy>=1.24.0",
     "pandas>=1.4.0",
     "python-dateutil>=2.8.2",

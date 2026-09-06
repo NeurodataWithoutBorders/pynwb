@@ -247,8 +247,8 @@ class TestTimeSeries(TestCase):
         ts = self._create_time_series_with_data(data)
         with self.assertWarnsWith(
             UserWarning,
-            "The data attribute on this TimeSeries (named: test_ts1) has a "
-            "__len__, but it cannot be read",
+            "The length of the data attribute on this TimeSeries (named: test_ts1) "
+            "could not be determined",
         ):
             self.assertIsNone(ts.num_samples)
         for xi, yi in zip(data, generator_factory()):
@@ -262,7 +262,7 @@ class TestTimeSeries(TestCase):
         ts = self._create_time_series_with_data(data)
         with self.assertWarnsWith(
             UserWarning,
-            "The data attribute on this TimeSeries (named: test_ts1) has no __len__",
+            "The length of the data attribute on this TimeSeries (named: test_ts1) could not be determined",
         ):
             self.assertIsNone(ts.num_samples)
         for xi, yi in zip(data, generator_factory()):
@@ -276,7 +276,7 @@ class TestTimeSeries(TestCase):
         ts = self._create_time_series_with_data(data)
         with self.assertWarnsWith(
             UserWarning,
-            "The data attribute on this TimeSeries (named: test_ts1) has no __len__",
+            "The length of the data attribute on this TimeSeries (named: test_ts1) could not be determined",
         ):
             self.assertIsNone(ts.num_samples)
         for xi, yi in zip(data, generator_factory()):
@@ -290,7 +290,7 @@ class TestTimeSeries(TestCase):
         assert data == list(ts.data)
 
     def _create_time_series_with_timestamps(self, timestamps):
-        # data has no __len__ for these tests
+        # the length of data cannot be determined for these tests
         def generator_factory():
             return (i for i in range(100))
 
@@ -312,11 +312,11 @@ class TestTimeSeries(TestCase):
             self.assertIsNone(ts.num_samples)
         assert len(record.warnings) == 2
         assert record.warnings[0].message.args[0] == (
-            "The data attribute on this TimeSeries (named: test_ts1) has no __len__"
+            "The length of the data attribute on this TimeSeries (named: test_ts1) could not be determined"
         )
         assert record.warnings[1].message.args[0] == (
-            "The timestamps attribute on this TimeSeries (named: test_ts1) has a "
-            "__len__, but it cannot be read"
+            "The length of the timestamps attribute on this TimeSeries (named: test_ts1) "
+            "could not be determined"
         )
         for xi, yi in zip(timestamps, generator_factory()):
             assert np.allclose(xi, yi)
@@ -331,10 +331,10 @@ class TestTimeSeries(TestCase):
             self.assertIsNone(ts.num_samples)
         assert len(record.warnings) == 2
         assert record.warnings[0].message.args[0] == (
-            "The data attribute on this TimeSeries (named: test_ts1) has no __len__"
+            "The length of the data attribute on this TimeSeries (named: test_ts1) could not be determined"
         )
         assert record.warnings[1].message.args[0] == (
-            "The timestamps attribute on this TimeSeries (named: test_ts1) has no __len__"
+            "The length of the timestamps attribute on this TimeSeries (named: test_ts1) could not be determined"
         )
         for xi, yi in zip(timestamps, generator_factory()):
             assert np.allclose(xi, yi)
@@ -343,19 +343,30 @@ class TestTimeSeries(TestCase):
         def generator_factory():
             return np.array(np.arange(100))
 
+        # an array-backed DataChunkIterator knows its shape, so the number of samples is taken from timestamps
         timestamps = DataChunkIterator(data=generator_factory())
         ts = self._create_time_series_with_timestamps(timestamps)
-        with self.assertWarns(UserWarning) as record:
-            self.assertIsNone(ts.num_samples)
-        assert len(record.warnings) == 2
-        assert record.warnings[0].message.args[0] == (
-            "The data attribute on this TimeSeries (named: test_ts1) has no __len__"
-        )
-        assert record.warnings[1].message.args[0] == (
-            "The timestamps attribute on this TimeSeries (named: test_ts1) has no __len__"
-        )
+        with self.assertWarnsWith(
+            UserWarning,
+            "The length of the data attribute on this TimeSeries (named: test_ts1) could not be determined",
+        ):
+            self.assertEqual(ts.num_samples, 100)
         for xi, yi in zip(timestamps, generator_factory()):
             assert np.allclose(xi, yi)
+
+    def test_get_timestamps_from_rate(self):
+        ts = self._create_time_series_with_data(np.arange(5.0))
+        np.testing.assert_array_equal(ts.get_timestamps(), np.arange(5) / 0.1)
+
+    def test_get_timestamps_unknown_num_samples(self):
+        data = DataChunkIterator(data=(i for i in range(100)))
+        ts = self._create_time_series_with_data(data)
+        with self.assertRaisesWith(
+            ValueError,
+            "TimeSeries 'test_ts1': Cannot generate timestamps because the number of samples in data "
+            "could not be determined.",
+        ):
+            ts.get_timestamps()
 
     def test_conflicting_time_args(self):
         with self.assertRaisesWith(
@@ -856,7 +867,7 @@ class TestTimeSeriesReference(TestCase):
             data=np.arange(10),
             unit="unit",
             starting_time=5.0,
-            rate=0.1,
+            rate=100.0,
         )
         return ts
 
@@ -942,14 +953,17 @@ class TestTimeSeriesReference(TestCase):
         tsr = TimeSeriesReference(0, 10, ts)
         with self.assertWarnsWith(
             UserWarning,
-            "The data attribute on this TimeSeries (named: test_ts1) has no __len__",
+            "The length of the data attribute on this TimeSeries (named: test_ts1) could not be determined",
         ):
             self.assertTrue(tsr.isvalid())
 
     def test_timestamps_property(self):
         # Timestamps from starting_time and rate
-        tsr = TimeSeriesReference(5, 4, self._create_time_series_with_rate())
-        np.testing.assert_array_equal(tsr.timestamps, np.array([5.5, 5.6, 5.7, 5.8]))
+        ts = self._create_time_series_with_rate()
+        tsr = TimeSeriesReference(5, 4, ts)
+        np.testing.assert_array_equal(tsr.timestamps, np.array([5.05, 5.06, 5.07, 5.08]))
+        # The reconstructed timestamps are the same values that the referenced TimeSeries reports
+        np.testing.assert_array_equal(tsr.timestamps, ts.get_timestamps()[5:9])
         # Timestamps from timestamps directly
         tsr = TimeSeriesReference(5, 4, self._create_time_series_with_timestamps())
         np.testing.assert_array_equal(tsr.timestamps, np.array([5.0, 6.0, 7.0, 8.0]))

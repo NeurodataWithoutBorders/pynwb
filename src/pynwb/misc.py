@@ -1,5 +1,4 @@
 import warnings
-from collections.abc import Iterable
 from bisect import bisect_left, bisect_right
 
 import numpy as np
@@ -72,9 +71,9 @@ class AbstractFeatureSeries(TimeSeries):
                      'features')
 
     @docval(*get_docval(TimeSeries.__init__, 'name'),  # required
-            {'name': 'feature_units', 'type': Iterable, 'shape': (None, ),  # required
+            {'name': 'feature_units', 'type': ('array_data', 'data'), 'shape': (None, ),  # required
              'doc': 'The unit of each feature'},
-            {'name': 'features', 'type': Iterable, 'shape': (None, ),  # required
+            {'name': 'features', 'type': ('array_data', 'data'), 'shape': (None, ),  # required
              'doc': 'Description of each feature'},
             {'name': 'data', 'type': ('array_data', 'data', TimeSeries), 'shape': ((None,), (None, None)),
              'doc': ('The data values. May be 1D or 2D. The first dimension must be time. The optional second '
