@@ -586,8 +586,10 @@ class NWBFile(MultiContainerInterface, HERDManager):
 
     @property
     def objects(self):
-        if self.__obj is None:
-            self.all_children()
+        # Containers can be added to or removed from nested parents without
+        # notifying the NWBFile, so a cached mapping cannot be invalidated
+        # reliably. Rebuild it to keep this view in sync with the file.
+        self.all_children()
         return self.__obj
 
     @property

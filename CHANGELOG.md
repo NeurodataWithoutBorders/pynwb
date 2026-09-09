@@ -17,6 +17,7 @@
 
 ### Fixed
 - Fixed `FeatureExtraction.times` and `Clustering.peak_over_rms` being copied into a Python list on construction, which was slow for data read from a file. @cboulay [#2253](https://github.com/NeurodataWithoutBorders/pynwb/pull/2253)
+- Fixed `NWBFile.objects` becoming stale after containers were added to or removed from the file, including mutations made through nested containers. The object mapping is now rebuilt whenever it is accessed. @AtomicGlance [#2242](https://github.com/NeurodataWithoutBorders/pynwb/issues/2242)
 - Fixed `ElectricalSeries.__init__`, `TimeSeries.get_timestamps`, and `TimeSeries.num_samples` failing on data backed by a zarr array. @rly [#2235](https://github.com/NeurodataWithoutBorders/pynwb/pull/2235)
 - Fixed `TimeSeries.num_samples` returning `None` when the data or timestamps are backed by a `DataChunkIterator` that wraps an array. @rly [#2235](https://github.com/NeurodataWithoutBorders/pynwb/pull/2235)
 - Fixed `Units.waveform_unit` having no effect on the written file. It is now written to the `unit` attribute of the `waveform_mean`, `waveform_sd`, and `waveforms` columns, and still defaults to `"volts"`. Reading a file whose waveform columns carry different `unit` or `sampling_rate` attributes now warns, since `Units` keeps a single value for each. @rly [#2237](https://github.com/NeurodataWithoutBorders/pynwb/pull/2237)
