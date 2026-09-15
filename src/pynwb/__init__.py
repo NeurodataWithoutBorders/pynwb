@@ -257,6 +257,19 @@ def register_class(**kwargs):
         _dec(container_cls)
 
 
+def _get_nwb1_version_string(h5py_file):
+    """Return the version string an NWB 1.x file stores as a root-level dataset, or None."""
+    for name in ('nwb_version', 'neurodata_version'):
+        obj = h5py_file.get(name)
+        if isinstance(obj, h5py.Dataset) and obj.shape == ():
+            value = obj[()]
+            if isinstance(value, bytes):
+                value = value.decode()
+            if isinstance(value, str):
+                return value
+    return None
+
+
 @docval({'name': 'h5py_file', 'type': h5py.File, 'doc': 'An NWB file'}, rtype=tuple,
         is_method=False,)
 def get_nwbfile_version(**kwargs):
@@ -275,7 +288,13 @@ def get_nwbfile_version(**kwargs):
     #  KeyError occurs  when the file is empty (e.g., when creating a new file nothing has been written)
     #  or when the HDF5 file is not a valid NWB file
     except KeyError:
-        return None, None
+        # NWB 1.x files did not store the version as a root attribute. They stored it as a
+        # root-level dataset named 'nwb_version' (around 1.0.4 and later) or 'neurodata_version'
+        # (1.0.0). Read it from there so that a 1.x file is reported as an unsupported version
+        # rather than as "not an NWB file".
+        nwb_version_string = _get_nwb1_version_string(h5py_file)
+        if nwb_version_string is None:
+            return None, None
     # Other system may have written nwb_version as a fixed-length string, resulting in a numpy.bytes_ object
     # on read, rather than a variable-length string. To address this, decode the bytes if necessary.
     if not isinstance(nwb_version_string, str):
