@@ -3,7 +3,7 @@
 ## PyNWB 4.2.1 (Upcoming)
 
 ### Fixed
-- Reading an NWB 1.x file now fails with `NWB version 1.x.y not supported` instead of `Missing NWB version in file. The file is not a valid NWB file.` NWB 1.x stored the version as a root-level dataset (`nwb_version`, or `neurodata_version` in 1.0.0) rather than a root attribute, so it is now read from there when the attribute is absent. @bendichter [#1086](https://github.com/NeurodataWithoutBorders/pynwb/pull/1086)
+- Reading an NWB 1.x file now fails with `NWB version 1.x.y not supported` instead of `Missing NWB version in file. The file is not a valid NWB file.` NWB 1.x stored the version as a root-level dataset (`nwb_version`, or `neurodata_version` in 1.0.0) rather than a root attribute, so it is now read from there when the attribute is absent. @bendichter [#2264](https://github.com/NeurodataWithoutBorders/pynwb/pull/2264)
 
 ## PyNWB 4.2.0 (September 2, 2026)
 
