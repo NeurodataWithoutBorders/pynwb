@@ -13,18 +13,15 @@ class TestIntracellularElectrode(NWBH5IOMixin, TestCase):
     def setUpContainer(self):
         """ Return the test IntracellularElectrode to read/write """
         self.device = Device(name='device_name')
-        elec = IntracellularElectrode(
-            name="elec0",
-            slice='tissue slice',
-            resistance='something measured in ohms',
-            seal='sealing method',
-            description='a fake electrode object',
-            location='Springfield Elementary School',
-            filtering='a meaningless free-form text field',
-            initial_access_resistance='I guess this changes',
-            device=self.device,
-            cell_id="this_cell",
-        )
+        elec = IntracellularElectrode(name="elec0",
+                                      slice='tissue slice',
+                                      resistance='something measured in ohms',
+                                      seal='sealing method',
+                                      description='a fake electrode object',
+                                      location='Springfield Elementary School',
+                                      filtering='a meaningless free-form text field',
+                                      initial_access_resistance='I guess this changes',
+                                      device=self.device)
         return elec
 
     def addContainer(self, nwbfile):
@@ -65,27 +62,6 @@ class TestPatchClampSeries(AcquisitionH5IOMixin, TestCase):
         nwbfile.add_device(self.device)
         super().addContainer(nwbfile)
 
-class TestPatchClampSeriesMin(AcquisitionH5IOMixin, TestCase):
-    """ Test a PatchClampSeries with minimum required args to read/write """
-
-    def setUpElectrode(self):
-        """ Set up the test IntracellularElectrode """
-        self.device = Device(name='device_name')
-        self.elec = IntracellularElectrode(name="elec0", description='a fake electrode object',
-                                           device=self.device)
-
-    def setUpContainer(self):
-        self.setUpElectrode()
-        return PatchClampSeries(name="pcs", data=[1, 2, 3, 4, 5], unit='A',
-                                starting_time=123.6, rate=10e3, electrode=self.elec)
-
-    def addContainer(self, nwbfile):
-        """
-        Add the test PatchClampSeries as an acquisition and IntracellularElectrode and Device to the given NWBFile
-        """
-        nwbfile.add_icephys_electrode(self.elec)
-        nwbfile.add_device(self.device)
-        super().addContainer(nwbfile)
 
 class TestCurrentClampStimulusSeries(TestPatchClampSeries):
 
@@ -152,41 +128,20 @@ class TestSweepTableRoundTripEasy(NWBH5IOMixin, TestCase):
         self.pcs = PatchClampSeries(name="pcs", data=[1, 2, 3, 4, 5], unit='A',
                                     starting_time=123.6, rate=10e3, electrode=self.elec, gain=0.126,
                                     stimulus_description="gotcha ya!", sweep_number=np.uint(4711))
-        
-        # create the sweeptable in construct mode, modeling the behavior of the ObjectMapper on read
-        # no user warning or error should be raised
-        sweeptable = SweepTable.__new__(SweepTable)
-        sweeptable._in_construct_mode = True
-        sweeptable.__init__(name='sweep_table')
-        sweeptable._in_construct_mode = False
-
-        return sweeptable
+        return SweepTable(name='sweep_table')
 
     def addContainer(self, nwbfile):
         """
         Add the test SweepTable, PatchClampSeries, IntracellularElectrode, and Device to the given NWBFile
         """
-        # NOTE - if the SweepTable creation warning has already been bypassed so that self.container is an
-        # instance of SweepTable, then adding sweep_table to the NWBFile in this way will not trigger an
-        # error
-        nwbfile.sweep_table = self.container  
+        nwbfile.sweep_table = self.container
         nwbfile.add_device(self.device)
         nwbfile.add_icephys_electrode(self.elec)
-        nwbfile.add_acquisition(self.pcs, use_sweep_table=True)
+        nwbfile.add_acquisition(self.pcs)
 
     def getContainer(self, nwbfile):
         """ Return the test SweepTable from the given NWBFile """
         return nwbfile.sweep_table
-
-    def roundtripContainer(self, cache_spec=False):
-        # catch the DeprecationWarning raised when reading the SweepTable object from file
-        # no warning or error message should be raised
-        return super().roundtripContainer(cache_spec)
-
-    def roundtripExportContainer(self, cache_spec=False):
-        # catch the DeprecationWarning raised when reading the SweepTable object from file
-        # no warning or error message should be raised
-        return super().roundtripExportContainer(cache_spec)
 
     def test_container(self):
         """ Test properties of the SweepTable read from file """
@@ -223,41 +178,23 @@ class TestSweepTableRoundTripComplicated(NWBH5IOMixin, TestCase):
                                       starting_time=123.6, rate=10e3, electrode=self.elec, gain=0.126,
                                       stimulus_description="gotcha ya!", sweep_number=np.uint(4712))
 
-        # create the sweeptable in construct mode, modeling the behavior of the ObjectMapper on read
-        # no warning or error should be raised
-        sweeptable = SweepTable.__new__(SweepTable)
-        sweeptable._in_construct_mode = True
-        sweeptable.__init__(name='sweep_table')
-        sweeptable._in_construct_mode = False
-            
-        return sweeptable
+        return SweepTable(name='sweep_table')
 
     def addContainer(self, nwbfile):
         """
         Add the test SweepTable, PatchClampSeries, IntracellularElectrode, and Device to the given NWBFile
         """
-        # NOTE - if the SweepTable creation error has already been bypassed so that self.container is an
-        # instance of SweepTable, then adding sweep_table to the NWBFile in this way will not trigger an
-        # error
         nwbfile.sweep_table = self.container
         nwbfile.add_device(self.device)
         nwbfile.add_icephys_electrode(self.elec)
 
-        nwbfile.add_acquisition(self.pcs1, use_sweep_table=True)
-        nwbfile.add_stimulus_template(self.pcs2a, use_sweep_table=True)
-        nwbfile.add_stimulus(self.pcs2b, use_sweep_table=True)
+        nwbfile.add_acquisition(self.pcs1)
+        nwbfile.add_stimulus_template(self.pcs2a)
+        nwbfile.add_stimulus(self.pcs2b)
 
     def getContainer(self, nwbfile):
         """ Return the test SweepTable from the given NWBFile """
         return nwbfile.sweep_table
-
-    def roundtripContainer(self, cache_spec=False):
-        # no warning or error should be raised when reading the SweepTable object from file
-        return super().roundtripContainer(cache_spec)
-
-    def roundtripExportContainer(self, cache_spec=False):
-        # no warning or error should be raised when reading the SweepTable object from file
-        return super().roundtripExportContainer(cache_spec)
 
     def test_container(self):
         """ Test properties of the SweepTable read from file """

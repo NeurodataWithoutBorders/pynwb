@@ -1,458 +1,193 @@
 # -*- coding: utf-8 -*-
-"""
+'''
 .. _ecephys_tutorial:
 
-Extracellular Electrophysiology Data
-====================================
-
-This tutorial describes storage of extracellular electrophysiology data in NWB in four
-main steps:
-
-1. Create the electrodes table
-2. Add acquired raw voltage data
-3. Add LFP data
-4. Add spike data
-
-It is recommended to cover :ref:`basics` before this tutorial.
-
-.. note:: It is recommended to check if your source data is supported by
-  `NeuroConv Extracellular Electrophysiology Gallery <https://neuroconv.readthedocs.io/en/main/conversion_examples_gallery/#extracellular-electrophysiology>`_.
-  If it is supported, it is recommended to use NeuroConv to convert your data.
+Extracellular electrophysiology data
+============================================
 
 The following examples will reference variables that may not be defined within the block they are used in. For
 clarity, we define them here:
-"""
+'''
 
-# sphinx_gallery_thumbnail_path = 'figures/gallery_thumbnails_ecephys.png'
-from datetime import datetime
-from uuid import uuid4
 
 import numpy as np
-from dateutil.tz import tzlocal
-
-from pynwb import NWBHDF5IO, NWBFile
-
-from pynwb.ecephys import LFP, ElectricalSeries, SpikeEventSeries
-from pynwb.misc import DecompositionSeries
 
 #######################
 # Creating and Writing NWB files
 # ------------------------------
 #
-# When creating a NWB file, the first step is to create the :py:class:`~pynwb.file.NWBFile`.
+# When creating a NWB file, the first step is to create the :py:class:`~pynwb.file.NWBFile`. The first
+# argument is the name of the NWB file, and the second argument is a brief description of the dataset.
 
-nwbfile = NWBFile(
-    session_description="my first synthetic recording",
-    identifier=str(uuid4()),
-    session_start_time=datetime.now(tzlocal()),
-    experimenter=[
-        "Baggins, Bilbo",
-    ],
-    lab="Bag End Laboratory",
-    institution="University of Middle Earth at the Shire",
-    experiment_description="I went on an adventure to reclaim vast treasures.",
-    keywords=["ecephys", "exploration", "wanderlust"],
-    related_publications="doi:10.1016/j.neuron.2016.12.011",
-)
+from datetime import datetime
+from dateutil.tz import tzlocal
+from pynwb import NWBFile
+
+nwbfile = NWBFile('my first synthetic recording', 'EXAMPLE_ID', datetime.now(tzlocal()),
+                  experimenter='Dr. Bilbo Baggins',
+                  lab='Bag End Laboratory',
+                  institution='University of Middle Earth at the Shire',
+                  experiment_description='I went on an adventure with thirteen dwarves to reclaim vast treasures.',
+                  session_id='LONELYMTN')
+
 
 #######################
-# Electrodes Table
-# ----------------
+# Electrode metadata
+# ^^^^^^^^^^^^^^^^^^
 #
-# To store extracellular electrophysiology data, you first must create an electrodes table
-# describing the electrodes that generated this data. Extracellular electrodes are stored in an
-# ``"electrodes"`` table, which is a :py:class:`~hdmf.common.table.DynamicTable`.
+# Electrode groups (i.e. experimentally relevant groupings of channels) are represented by
+# :py:class:`~pynwb.ecephys.ElectrodeGroup` objects. To create an electrode group, you can use the
+# :py:class:`~pynwb.file.NWBFile` instance method :py:meth:`~pynwb.file.NWBFile.create_electrode_group`.
 #
-# .. only:: html
-#
-#   .. image:: ../../_static/Electrodes.svg
-#     :width: 500
-#     :alt: electrodes table UML diagram
-#     :align: center
-#
-# .. only:: latex
-#
-#   .. image:: ../../_static/Electrodes.png
-#     :width: 500
-#     :alt: electrodes table UML diagram
-#     :align: center
-#
-# The electrodes table references a required :py:class:`~pynwb.ecephys.ElectrodeGroup`, which is used to represent a
-# group of electrodes. Before creating an :py:class:`~pynwb.ecephys.ElectrodeGroup`, you must define a
-# :py:class:`~pynwb.device.Device` object using the method :py:meth:`.NWBFile.create_device`. The fields
-# ``description``, ``serial_number``, and ``model`` are optional, but recommended. The
-# :py:class:`~pynwb.device.DeviceModel` object stores information about the device model, which can be useful
-# when searching a set of NWB files or a data archive for all files that use a specific device model
-# (e.g., Neuropixels probe).
-device_model = nwbfile.create_device_model(
-    name="Neurovoxels 0.99",
-    manufacturer="Array Technologies",
-    model_number="PRB_1_4_0480_123",
-    description="A 12-channel array with 4 shanks and 3 channels per shank",
-)
-device = nwbfile.create_device(
-    name="array",
-    description="A 12-channel array with 4 shanks and 3 channels per shank",
-    serial_number="1234567890",
-    model=device_model,
-)
+# Before creating an :py:class:`~pynwb.ecephys.ElectrodeGroup`, you need to provide some information about the
+# device that was used to record from the electrode. This is done by creating a :py:class:`~pynwb.device.Device`
+# object using the instance method :py:meth:`~pynwb.file.NWBFile.create_device`.
+
+device = nwbfile.create_device(name='trodes_rig123')
 
 #######################
 # Once you have created the :py:class:`~pynwb.device.Device`, you can create an
-# :py:class:`~pynwb.ecephys.ElectrodeGroup`. Then you can add electrodes one-at-a-time with
-# :py:meth:`.NWBFile.add_electrode`. :py:meth:`.NWBFile.add_electrode` has two required arguments,
-# ``group``, which takes an :py:class:`~pynwb.ecephys.ElectrodeGroup`, and ``location``, which takes a string. It also
-# has a number of optional metadata fields for electrode features (e.g, ``x``, ``y``, ``z``, ``imp``,
-# and ``filtering``). Since this table is a :py:class:`~hdmf.common.table.DynamicTable`, we can add
-# additional user-specified metadata as custom columns of the table. We will be adding a ``"label"`` column to the
-# table. Use the following code to add electrodes for an array with 4 shanks and 3 channels per shank.
+# :py:class:`~pynwb.ecephys.ElectrodeGroup`.
 
-nwbfile.add_electrode_column(name="label", description="label of electrode")
+electrode_name = 'tetrode1'
+description = "an example tetrode"
+location = "somewhere in the hippocampus"
 
-nshanks = 4
-nchannels_per_shank = 3
-electrode_counter = 0
-
-for ishank in range(nshanks):
-    # create an electrode group for this shank
-    electrode_group = nwbfile.create_electrode_group(
-        name="shank{}".format(ishank),
-        description="electrode group for shank {}".format(ishank),
-        device=device,
-        location="brain area",
-    )
-    # add electrodes to the electrode table
-    for ielec in range(nchannels_per_shank):
-        nwbfile.add_electrode(
-            group=electrode_group,
-            location="brain area",
-            label="shank{}elec{}".format(ishank, ielec),  # custom column data are specified with keyword arguments
-        )
-        electrode_counter += 1
+electrode_group = nwbfile.create_electrode_group(electrode_name,
+                                                 description=description,
+                                                 location=location,
+                                                 device=device)
 
 #######################
-# Similarly to other tables in PyNWB, we can view the ``electrodes`` table in tabular form
-# by converting it to a pandas :py:class:`~pandas.DataFrame`.
+# After setting up electrode group metadata, you should add metadata about the individual electrodes comprising
+# each electrode group. This is done with :py:func:`~pynwb.file.NWBFile.add_electrode`.
+#
+# The first argument to :py:class:`~pynwb.file.NWBFile.add_electrode` is a unique identifier that the user should
+# assign. For details on the rest of the arguments, please see the
+# :py:func:`API documentation <pynwb.file.NWBFile.add_electrode>`.
 
-nwbfile.electrodes.to_dataframe()
+
+for idx in [1, 2, 3, 4]:
+    nwbfile.add_electrode(id=idx,
+                          x=1.0, y=2.0, z=3.0,
+                          imp=float(-idx),
+                          location='CA1', filtering='none',
+                          group=electrode_group)
+
 
 #######################
-# .. note:: When we added an electrode with the :py:meth:`~pynwb.file.NWBFile.add_electrode`
-#    method, we passed in the :py:class:`~pynwb.ecephys.ElectrodeGroup` object for the ``"group"`` argument.
-#    This creates a reference from the ``"electrodes"`` table to the individual
-#    :py:class:`~pynwb.ecephys.ElectrodeGroup` objects, one per row (electrode).
+# .. note: :py:class:`~pynwb.file.NWBFile.add_electrode` returns the index of the electrode you just added.
+#    This can come in handy when creating with an :py:class:`~pynwb.core.DynamicTableRegion`
+#    :py:class:`~pynwb.file.NWBFile.create_electrode_table_region` (See :ref:`ec_recordings`).
 
 #######################
 # .. _ec_recordings:
 #
 # Extracellular recordings
-# ------------------------
+# ^^^^^^^^^^^^^^^^^^^^^^^^
 #
-# Raw voltage traces and local-field potential (LFP) data are stored in :py:class:`~pynwb.ecephys.ElectricalSeries`
-# objects. :py:class:`~pynwb.ecephys.ElectricalSeries` is a subclass of :py:class:`~pynwb.base.TimeSeries`
-# specialized for voltage data. To create the :py:class:`~pynwb.ecephys.ElectricalSeries` objects, we need to
-# reference a set of rows in the ``"electrodes"`` table to indicate which electrodes were recorded. We will do this
-# by creating a :py:class:`~hdmf.common.table.DynamicTableRegion`, which is a type of link that allows you to reference
-# rows of a :py:class:`~hdmf.common.table.DynamicTable`. :py:meth:`.NWBFile.create_electrode_table_region` is a
-# convenience function that creates a :py:class:`~hdmf.common.table.DynamicTableRegion` which references the
-# ``"electrodes"`` table.
+# The main classes for storing extracellular recordings are :py:class:`~pynwb.ecephys.ElectricalSeries`
+# and :py:class:`~pynwb.ecephys.SpikeEventSeries`. :py:class:`~pynwb.ecephys.ElectricalSeries` should be used
+# for storing raw voltage traces, local-field potential and filtered voltage traces and
+# :py:class:`~pynwb.ecephys.SpikeEventSeries` is meant for storing spike waveforms (typically in preparation for
+# clustering). The results of spike clustering (e.g. per-unit metadata and spike times) should be stored in the
+# top-level :py:class:`~pynwb.misc.Units` table.
+#
+# In addition to the *data* and *timestamps* fields inherited
+# from :py:class:`~pynwb.base.TimeSeries` class, these two classs will require metadata about the elctrodes
+# from which *data* was generated. This is done by providing an :py:class:`~pynwb.core.DynamicTableRegion`,
+# which you can create using the :py:class:`~pynwb.file.NWBFile.create_electrode_table_region`
+#
+# The first argument to :py:class:`~pynwb.file.NWBFile.create_electrode_table_region` a list of the
+# indices of the electrodes you want in the region..
 
-all_table_region = nwbfile.create_electrode_table_region(
-    region=list(range(electrode_counter)),  # reference row indices 0 to N-1
-    description="all electrodes",
-)
+electrode_table_region = nwbfile.create_electrode_table_region([0, 2], 'the first and third electrodes')
+
 
 ####################
-# Raw voltage data
-# ^^^^^^^^^^^^^^^^^
-#
-# Now create an :py:class:`~pynwb.ecephys.ElectricalSeries` object to store raw data collected
-# during the experiment, passing in this ``all_table_region`` :py:class:`~hdmf.common.table.DynamicTableRegion`
-# reference to all rows of the electrodes table.
-#
-# .. only:: html
-#
-#   .. image:: ../../_static/ElectricalSeries.svg
-#     :width: 800
-#     :alt: electrical series UML diagram
-#     :align: center
-#
-# .. only:: latex
-#
-#   .. image:: ../../_static/ElectricalSeries.png
-#     :width: 800
-#     :alt: electrical series UML diagram
-#     :align: center
-#
-
-raw_data = np.random.randn(50, 12)
-raw_electrical_series = ElectricalSeries(
-    name="ElectricalSeries",
-    description="Raw acquisition traces",
-    data=raw_data,
-    electrodes=all_table_region,
-    starting_time=0.0,  # timestamp of the first sample in seconds relative to the session start time
-    rate=20000.0,  # in Hz
-)
-
-####################
-# Since this :py:class:`~pynwb.ecephys.ElectricalSeries` represents raw data from the data acquisition system,
-# add it to the acquisition group of the :py:class:`~pynwb.file.NWBFile`.
-
-nwbfile.add_acquisition(raw_electrical_series)
-
-####################
-# LFP
-# ^^^
-#
-# Now create an :py:class:`~pynwb.ecephys.ElectricalSeries` object to store LFP data collected during the experiment,
-# again passing in the :py:class:`~hdmf.common.table.DynamicTableRegion` reference to all rows of the ``"electrodes"``
-# table.
-
-lfp_data = np.random.randn(50, 12)
-lfp_electrical_series = ElectricalSeries(
-    name="ElectricalSeries",
-    description="LFP data",
-    data=lfp_data,
-    filtering='Low-pass filter at 300 Hz',
-    electrodes=all_table_region,
-    starting_time=0.0,
-    rate=200.0,
-)
-
-####################
-# To help data analysis and visualization tools know that this :py:class:`~pynwb.ecephys.ElectricalSeries` object
-# represents LFP data, store the :py:class:`~pynwb.ecephys.ElectricalSeries` object inside of an
-# :py:class:`~pynwb.ecephys.LFP` object. This is analogous to how we can store the
-# :py:class:`~pynwb.behavior.SpatialSeries` object inside of a :py:class:`~pynwb.behavior.Position` object.
-#
-# .. only:: html
-#
-#   .. image:: ../../_static/LFP.svg
-#     :width: 800
-#     :alt: LFP UML diagram
-#     :align: center
-#
-# .. only:: latex
-#
-#   .. image:: ../../_static/LFP.png
-#     :width: 800
-#     :alt: LFP UML diagram
-#     :align: center
-#
-
-lfp = LFP(electrical_series=lfp_electrical_series)
-
-####################
-# LFP refers to data that has been low-pass filtered, typically below 300 Hz. This data may also be downsampled.
-# Because it is filtered and potentially resampled, it is categorized as processed data.
-#
-# Create a processing module named ``"ecephys"`` and add the :py:class:`~pynwb.ecephys.LFP` object to it.
-# This is analogous to how we can store the :py:class:`~pynwb.behavior.Position` object in a processing module
-# created with the method :py:meth:`.NWBFile.create_processing_module`.
-
-ecephys_module = nwbfile.create_processing_module(
-    name="ecephys", description="processed extracellular electrophysiology data"
-)
-ecephys_module.add(lfp)
-
-#######################
-# If your data is filtered for frequency ranges other than LFP — such as Gamma or Theta — you should store it in an
-# :py:class:`~pynwb.ecephys.ElectricalSeries` and encapsulate it within a
-# :py:class:`~pynwb.ecephys.FilteredEphys` object.
-
-from pynwb.ecephys import FilteredEphys
-
-filtered_data = np.random.randn(50, 12)
-filtered_electrical_series = ElectricalSeries(
-    name="FilteredElectricalSeries",
-    description="Filtered data",
-    data=filtered_data,
-    filtering='Band-pass filtered between 4 and 8 Hz',
-    electrodes=all_table_region,
-    starting_time=0.0,
-    rate=200.0,
-)
-
-filtered_ephys = FilteredEphys(electrical_series=filtered_electrical_series)
-ecephys_module.add(filtered_ephys)
-
-################################
-# In some cases, you may want to further process the LFP data and decompose the signal into different frequency bands
-# to use for other downstream analyses. You can store the processed data from these spectral analyses using a
-# :py:class:`~pynwb.misc.DecompositionSeries` object. This object allows you to include metadata about the frequency
-# bands and metric used (e.g., power, phase, amplitude), as well as link the decomposed data to the original
-# :py:class:`~pynwb.base.TimeSeries` signal the data was derived from.
-
-#######################
-# .. note:: When adding data to :py:class:`~pynwb.misc.DecompositionSeries`, the ``data`` argument is assumed to be
-#           3D where the first dimension is time, the second dimension is channels, and the third dimension is bands.
+# Now that we have a :py:class:`~pynwb.core.DynamicTableRegion`, we can create an
+# :py:class:`~pynwb.ecephys.ElectricalSeries` and add it to our :py:class:`~pynwb.file.NWBFile`.
 
 
-bands = dict(theta=(4.0, 12.0),
-             beta=(12.0, 30.0),
-             gamma=(30.0, 80.0))  # in Hz
-phase_data = np.random.randn(50, 12, len(bands))  # 50 samples, 12 channels, 3 frequency bands
+from pynwb.ecephys import ElectricalSeries
 
-decomp_series = DecompositionSeries(
-    name="theta",
-    description="phase of bandpass filtered LFP data",
-    data=phase_data,
-    metric='phase',
-    rate=200.0,
-    source_channels=all_table_region,
-    source_timeseries=lfp_electrical_series,
-)
+rate = 10.0
+np.random.seed(1234)
+data_len = 1000
+ephys_data = np.random.rand(data_len * 2).reshape((data_len, 2))
+ephys_timestamps = np.arange(data_len) / rate
 
-for band_name, band_limits in bands.items():
-    decomp_series.add_band(
-        band_name=band_name,
-        band_limits=band_limits,
-    )
-
-ecephys_module.add(decomp_series)
-
-#######################
-# The frequency band information can also be viewed as a pandas DataFrame.
-
-decomp_series.bands.to_dataframe()
+ephys_ts = ElectricalSeries('test_ephys_data',
+                            ephys_data,
+                            electrode_table_region,
+                            timestamps=ephys_timestamps,
+                            # Alternatively, could specify starting_time and rate as follows
+                            # starting_time=ephys_timestamps[0],
+                            # rate=rate,
+                            resolution=0.001,
+                            comments="This data was randomly generated with numpy, using 1234 as the seed",
+                            description="Random numbers generated with numpy.random.rand")
+nwbfile.add_acquisition(ephys_ts)
 
 ####################
 # .. _units_electrode:
 #
-# Sorted spike times
-# ^^^^^^^^^^^^^^^^^^
+# Associate electrodes with units
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 #
-# Spike times are stored in the :py:class:`~pynwb.misc.Units` table, which is a subclass of
-# :py:class:`~hdmf.common.table.DynamicTable`. Adding columns to the :py:class:`~pynwb.misc.Units` table is analogous
-# to how we can add columns to the ``"electrodes"`` and ``"trials"`` tables. Use the convenience method
-# :py:meth:`.NWBFile.add_unit_column` to add a new column on the :py:class:`~pynwb.misc.Units` table for the
-# sorting quality of the units.
+# The :ref:`PyNWB Basics tutorial <basics>` demonstrates how to add data about units and specifying custom metadata
+# about units. As mentioned :ref:`here <units_fields_ref>`, there are some optional fields for units, one of these
+# is *electrodes*. This field takes a list of indices into the electrode table for the electrodes that the unit
+# corresponds to. For example, if two units were inferred from the first electrode (*id* = 1, index = 0), you would
+# specify that like so:
 
-nwbfile.add_unit_column(name="quality", description="sorting quality")
-
-####################
-# Generate some random spike data and populate the :py:class:`~pynwb.misc.Units` table using the
-# method :py:meth:`.NWBFile.add_unit`.
-
-firing_rate = 20
-n_units = 10
-res = 1000
-duration = 20
-for n_units_per_shank in range(n_units):
-    spike_times = np.where(np.random.rand((res * duration)) < (firing_rate / res))[0] / res
-    # custom column data, e.g., quality, are specified with keyword arguments to `add_unit`
-    nwbfile.add_unit(spike_times=spike_times, quality="good")
-
-####################
-# The ``resolution`` field on the :py:class:`~pynwb.misc.Units` table documents the precision of spike timing
-# data, typically ``1 / sampling_rate`` of the acquisition system (i.e., the smallest measurable difference
-# between two spike times, in seconds). Setting it helps downstream users judge whether fine-timescale
-# analyses are appropriate for the dataset.
-
-nwbfile.units.resolution = 1 / res  # resolution in seconds (1 / sampling rate)
+nwbfile.add_unit(id=1, electrodes=[0])
+nwbfile.add_unit(id=2, electrodes=[0])
 
 #######################
-# The :py:class:`~pynwb.misc.Units` table can also be converted to a pandas :py:class:`~pandas.DataFrame`.
+# Designating electrophysiology data
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 #
-# The :py:class:`~pynwb.misc.Units` table can contain simply the spike times of sorted units, or you can also include
-# individual and mean waveform information in some of the optional, predefined :py:class:`~pynwb.misc.Units` table
-# columns: ``waveform_mean``, ``waveform_sd``, or ``waveforms``.
+# As mentioned above, :py:class:`~pynwb.ecephys.ElectricalSeries` and :py:class:`~pynwb.ecephys.SpikeEventSeries`
+# are meant for storing specific types of extracellular recordings. In addition to these two
+# :py:class:`~pynwb.base.TimeSeries` classes, NWB provides some :ref:`data interfaces <basic_data_interfaces>`
+# for designating the type of data you are storing. We will briefly discuss them here, and refer the reader to
+# :py:mod:`API documentation <pynwb.ecephys>` and :ref:`PyNWB Basics tutorial <basics>` for more details on
+# using these objects.
 #
-# The sampling rate and unit of measurement of those three columns are set with the ``waveform_rate`` and
-# ``waveform_unit`` arguments of :py:class:`~pynwb.misc.Units`, which default to ``None`` and ``"volts"``.
-# The ``waveform_time_before_peak_in_ms`` argument records where the spike peak sits within each waveform,
-# that is, the time in milliseconds from the first sample to the alignment point used during spike sorting.
-# Together with ``waveform_rate`` and the number of samples, it locates every waveform sample relative to the
-# spike event. All three are constructor arguments, so set them when you build the
-# :py:class:`~pynwb.misc.Units` table and assign it to :py:attr:`.NWBFile.units`::
-#
-#     from pynwb.misc import Units
-#
-#     nwbfile.units = Units(
-#         name="units",
-#         description="units table",
-#         waveform_rate=30000.0,
-#         waveform_unit="microvolts",
-#         waveform_time_before_peak_in_ms=1.0,
-#     )
-
-nwbfile.units.to_dataframe()
-
-####################
-# Unsorted spike times
-# ^^^^^^^^^^^^^^^^^^^^
-#
-# While the :py:class:`~pynwb.misc.Units` table is used to store spike times and waveform data for
-# spike-sorted, single-unit activity, you may also want to store spike times and waveform snippets of
-# unsorted spiking activity (e.g., multi-unit activity detected via threshold crossings during data acquisition).
-# This information can be stored using :py:class:`~pynwb.ecephys.SpikeEventSeries` objects.
-
-spike_snippets = np.random.rand(40, 3, 30)  # 40 events, 3 channels, 30 samples per event
-shank0 = nwbfile.create_electrode_table_region(
-    region=[0, 1, 2],
-    description="shank0",
-)
-
-spike_events = SpikeEventSeries(
-    name='SpikeEvents_Shank0',
-    description="events detected with 100uV threshold",
-    data=spike_snippets,
-    timestamps=np.arange(40).astype(float),
-    electrodes=shank0,
-)
-nwbfile.add_acquisition(spike_events)
-
-############################################
-# If you need to store the complete, continuous raw voltage traces, along with unsorted spike times, you should store
-# the traces with :py:class:`~pynwb.ecephys.ElectricalSeries` objects as :ref:`acquisition <basic_timeseries>` data,
-# and use the :py:class:`~pynwb.ecephys.EventDetection` class to identify the spike events in your raw traces.
-
-from pynwb.ecephys import EventDetection
-
-event_detection = EventDetection(
-    name="threshold_events",
-    detection_method="thresholding, 1.5 * std",
-    source_electricalseries=raw_electrical_series,
-    source_idx=[[1000, 0], [2000, 4], [3000, 8]],  # indicates the time and channel indices
-    times=[.033, .066, .099],
-)
-
-ecephys_module.add(event_detection)
-
-######################################
+# For storing spike data, there are two options. Which one you choose depends on what data you have available.
+# If you need to store the complete, continuous raw voltage traces, you should store your the traces with
+# :py:class:`~pynwb.ecephys.ElectricalSeries` objects as :ref:`acquisition <basic_timeseries>` data, and use
+# the :py:class:`~pynwb.ecephys.EventDetection` class for identifying the spike events in your raw traces.
 # If you do not want to store the raw voltage traces and only the waveform 'snippets' surrounding spike events,
-# you should store the snippets with :py:class:`~pynwb.ecephys.SpikeEventSeries` objects.
+# you should use the :py:class:`~pynwb.ecephys.EventWaveform` class, which can store one or more
+# :py:class:`~pynwb.ecephys.SpikeEventSeries` objects.
 #
-# NWB also provides a way to store features of spikes, such as principal components, using the
-# :py:class:`~pynwb.ecephys.FeatureExtraction` class.
+# The results of spike sorting (or clustering) should be stored in the top-level :py:class:`~pynwb.misc.Units` table.
+# Note that it is not required to store spike waveforms in order to store spike events or waveforms--if you only
+# want to store the spike times of clustered units you can use only the Units table.
+#
+# For local field potential data, there are two options. Again, which one you choose depends on what data you
+# have available. With both options, you should store your traces with :py:class:`~pynwb.ecephys.ElectricalSeries`
+# objects. If you are storing unfiltered local field potential data, you should store
+# the :py:class:`~pynwb.ecephys.ElectricalSeries` objects in :py:class:`~pynwb.ecephys.LFP` data interface object(s).
+# If you have filtered LFP data, you should store the :py:class:`~pynwb.ecephys.ElectricalSeries` objects  in
+# :py:class:`~pynwb.ecephys.FilteredEphys` data interface object(s).
 
-from pynwb.ecephys import FeatureExtraction
-
-feature_extraction = FeatureExtraction(
-    name="PCA_features",
-    electrodes=all_table_region,
-    description=["PC1", "PC2", "PC3", "PC4"],
-    times=[.033, .066, .099],
-    features=np.random.rand(3, 12, 4),  # time, channel, feature
-)
-
-ecephys_module.add(feature_extraction)
 
 ####################
 # .. _ecephys_writing:
 #
-# Writing electrophysiology data
-# ------------------------------
-#
 # Once you have finished adding all of your data to the :py:class:`~pynwb.file.NWBFile`,
 # write the file with :py:class:`~pynwb.NWBHDF5IO`.
 
-with NWBHDF5IO("ecephys_tutorial.nwb", "w") as io:
+from pynwb import NWBHDF5IO
+
+with NWBHDF5IO('ecephys_example.nwb', 'w') as io:
     io.write(nwbfile)
 
 ####################
-# For more details on :py:class:`~pynwb.NWBHDF5IO`, see the :ref:`basic_writing` tutorial.
+# For more details on :py:class:`~pynwb.NWBHDF5IO`, see the :ref:`basic tutorial <basic_writing>`.
 
 ####################
 # .. _ecephys_reading:
@@ -460,58 +195,24 @@ with NWBHDF5IO("ecephys_tutorial.nwb", "w") as io:
 # Reading electrophysiology data
 # ------------------------------
 #
-# Access the raw data by indexing :py:class:`~pynwb.file.NWBFile.acquisition`
-# with the name of the :py:class:`~pynwb.ecephys.ElectricalSeries`, which we named ``"ElectricalSeries"``.
-# We can also access the LFP data by indexing :py:class:`~pynwb.file.NWBFile.processing`
-# with the name of the processing module ``"ecephys"``.
-# Then, we can access the :py:class:`~pynwb.ecephys.LFP` object inside the ``"ecephys"`` processing module
-# by indexing it with the name of the :py:class:`~pynwb.ecephys.LFP` object.
-# The default name of :py:class:`~pynwb.ecephys.LFP` objects is ``"LFP"``.
-# Finally, we can access the :py:class:`~pynwb.ecephys.ElectricalSeries` object inside the
-# :py:class:`~pynwb.ecephys.LFP` object by indexing it with the name of the
-# :py:class:`~pynwb.ecephys.ElectricalSeries` object, which we named ``"ElectricalSeries"``.
+# Now that you have written some electrophysiology data, you can read it back in.
 
-with NWBHDF5IO("ecephys_tutorial.nwb", "r") as io:
-    read_nwbfile = io.read()
-    print(read_nwbfile.acquisition["ElectricalSeries"])
-    print(read_nwbfile.processing["ecephys"])
-    print(read_nwbfile.processing["ecephys"]["LFP"])
-    print(read_nwbfile.processing["ecephys"]["LFP"]["ElectricalSeries"])
+io = NWBHDF5IO('ecephys_example.nwb', 'r')
+nwbfile = io.read()
 
 ####################
-# Accessing your data
-# ^^^^^^^^^^^^^^^^^^^
+# For details on retrieving data from an :py:class:`~pynwb.file.NWBFile`, we refer the reader to the
+# :ref:`basic tutorial <basic_reading>`. For this tutorial, we will just get back our the
+# :py:class:`~pynwb.ecephys.ElectricalSeries` object we added above.
 #
-# Data arrays are read passively from the file. Calling the data attribute on a :py:class:`~pynwb.base.TimeSeries`
-# such as a :py:class:`~pynwb.ecephys.ElectricalSeries` does not read the data values, but presents an
-# :py:class:`h5py.Dataset` object that can be indexed to read data. You can use the ``[:]`` operator to read the entire
-# data array into memory.
-#
-# Load and print all the data values of the :py:class:`~pynwb.ecephys.ElectricalSeries`
-# object representing the LFP data.
+# First, get the :py:class:`~pynwb.ecephys.ElectricalSeries`.
 
-with NWBHDF5IO("ecephys_tutorial.nwb", "r") as io:
-    read_nwbfile = io.read()
-    print(read_nwbfile.processing["ecephys"]["LFP"]["ElectricalSeries"].data[:])
+ephys_ts = nwbfile.acquisition['test_ephys_data']
 
 ####################
-# Accessing data regions
-# ^^^^^^^^^^^^^^^^^^^^^^
-#
-# It is often preferable to read only a portion of the data. To do this, index
-# or slice into the ``data`` attribute just like if you index or slice a
-# :py:class:`numpy.ndarray`.
-#
-# The following code prints elements ``0:10`` in the first dimension (time)
-# and ``0:3`` in the second dimension (electrodes) from the LFP data we have written.
-# It also demonstrates how to access the spike times of the 0th unit.
+# The second dimension of the :py:func:`~pynwb.base.TimeSeries.data` attribute should be the
+# electrodes the data was recorded with. We can get the electrodes for each column in *data*
+# from the :py:func:`~pynwb.ecephys.ElectricalSeries.electrodes` attribute. For example,
+# information about the electrode in the second index can be retrieved like so:
 
-
-with NWBHDF5IO("ecephys_tutorial.nwb", "r") as io:
-    read_nwbfile = io.read()
-
-    print("section of LFP:")
-    print(read_nwbfile.processing["ecephys"]["LFP"]["ElectricalSeries"].data[:10, :3])
-    print("")
-    print("spike times from 0th unit:")
-    print(read_nwbfile.units["spike_times"][0])
+elec2 = ephys_ts.electrodes[1]

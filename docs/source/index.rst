@@ -7,76 +7,56 @@ NWB for Python
 ==============
 
 PyNWB is a Python package for working with NWB files. It provides a high-level API for
-efficiently working with neurodata stored in the NWB format. If you are new to NWB
-and would like to learn more, then please also visit the :nwb_overview:`NWB Overview <>`
-website, which provides an entry point for researchers and developers interested in using NWB.
+efficiently working with Neurodata stored in the `NWB format <https://nwb-schema.readthedocs.io>`_.
 
-`Neurodata Without Borders (NWB) <https://nwb.org/>`_ is a project to develop a
+`Neurodata Without Borders: Neurophysiology (NWB:N) <http://www.nwb.org/>`_ is a project to develop a
 unified data format for cellular-based neurophysiology data, focused on the
 dynamics of groups of neurons measured under a large range of experimental
 conditions.
 
-The NWB team consists of neuroscientists and software developers
+The NWB:N team consists of neuroscientists and software developers
 who recognize that adoption of a unified data format is an important step toward
 breaking down the barriers to data sharing in neuroscience.
 
-.. raw:: html
-
-   <div class="assistant-container">
-     <iframe class="assistant-iframe"></iframe>
-   </div>
-   <button class="assistant-toggle">Open Assistant</button>
-   <script>
-     document.addEventListener('DOMContentLoaded', function() {
-       const toggle = document.querySelector('.assistant-toggle');
-       const container = document.querySelector('.assistant-container');
-       const iframe = document.querySelector('.assistant-iframe');
-       let iframeLoaded = false;
-
-       toggle.addEventListener('click', function() {
-         const isShowing = container.classList.toggle('show');
-
-         // Load iframe content only when first opened
-         if (isShowing && !iframeLoaded) {
-           iframe.src = 'https://nwb-assistant.neurosift.app/';
-           iframeLoaded = true;
-         }
-       });
-     });
-   </script>
 
 .. toctree::
    :maxdepth: 2
    :caption: Getting Started
 
-   install_users
-   tutorials/index
-   overview_citing
+   getting_started
+   contributing
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Overview
+
+   overview_intro
+   overview_software_architecture
+   overview_nwbfile
 
 .. toctree::
    :maxdepth: 2
    :caption: Resources
 
+   tutorials/index
+   extensions
+   building_api
    validation
-   export
    api_docs
-
-.. toctree::
-   :maxdepth: 2
-   :caption: For Developers
-
-   install_developers
-   overview_software_architecture
    software_process
-   make_a_release
-   testing/index
-   make_a_tutorial
+   make_roundtrip_test
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contributing
+   :caption: For Maintainers
 
-   contributing
+   make_a_release
+   update_requirements
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Legal
+
    legal
 
 Indices and tables

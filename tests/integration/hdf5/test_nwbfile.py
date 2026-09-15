@@ -7,11 +7,10 @@ from hdmf.backends.hdf5 import HDF5IO
 from hdmf.common import DynamicTable
 
 from pynwb import NWBFile, TimeSeries, NWBHDF5IO, get_manager
-from pynwb.base import Image, Images
 from pynwb.file import Subject
 from pynwb.epoch import TimeIntervals
 from pynwb.ecephys import ElectricalSeries
-from pynwb.testing import NWBH5IOMixin, NWBH5IOFlexMixin, TestCase, remove_test_file
+from pynwb.testing import NWBH5IOMixin, TestCase, remove_test_file
 
 
 class TestNWBFileHDF5IO(TestCase):
@@ -42,7 +41,6 @@ class TestNWBFileHDF5IO(TestCase):
                                session_id='007',
                                slices='noslices',
                                source_script='nosources',
-                               was_generated_by=[('nosoftware', '0.0.0')],
                                surgery='nosurgery',
                                virus='novirus',
                                source_script_file_name='nofilename')
@@ -129,7 +127,6 @@ class TestNWBFileIO(NWBH5IOMixin, TestCase):
                                  virus='a virus',
                                  source_script='noscript',
                                  source_script_file_name='nofilename',
-                                 was_generated_by=[('nosoftware', '0.0.0')],
                                  stimulus_notes='test stimulus notes',
                                  data_collection='test data collection notes',
                                  keywords=('these', 'are', 'keywords'))
@@ -178,32 +175,6 @@ class TestExperimentersSetterRoundtrip(TestNWBFileIO):
         self.nwbfile.experimenter = ('experimenter1', 'experimenter2')
 
 
-class TestWasGeneratedByConstructorRoundtrip(TestNWBFileIO):
-    """ Test that a list of software packages / versions in a constructor is written to and read from file """
-
-    def build_nwbfile(self):
-        description = 'test nwbfile was_generated_by'
-        identifier = 'TEST_was_generated_by'
-        self.nwbfile = NWBFile(session_description=description,
-                               identifier=identifier,
-                               session_start_time=self.start_time,
-                               was_generated_by=[('software1', '0.1.0'),
-                                                 ('software2', '0.2.0'),
-                                                 ('software3', '0.3.0')],)
-
-class TestWasGeneratedBySetterRoundtrip(TestNWBFileIO):
-    """ Test that a single tuple of software versions packages in a setter is written to and read from file """
-
-    def build_nwbfile(self):
-        description = 'test nwbfile was_generated_by'
-        identifier = 'TEST_was_generated_by'
-        self.nwbfile = NWBFile(session_description=description,
-                               identifier=identifier,
-                               session_start_time=self.start_time)
-        self.nwbfile.was_generated_by = [('software1', '0.1.0'),
-                                         ('software2', '0.2.0'),
-                                         ('software3', '0.3.0')]
-
 class TestPublicationsConstructorRoundtrip(TestNWBFileIO):
     """ Test that a list of multiple publications in a constructor is written to and read from file """
 
@@ -232,43 +203,14 @@ class TestSubjectIO(NWBH5IOMixin, TestCase):
 
     def setUpContainer(self):
         """ Return the test Subject """
-        return Subject(
-            age="P90D",
-            age__reference="gestational",
-            description="An unfortunate rat",
-            genotype="WT",
-            sex="M",
-            species="Rattus norvegicus",
-            subject_id="RAT123",
-            weight="2 kg",
-            date_of_birth=datetime(1970, 1, 1, 12, tzinfo=tzutc()),
-            strain="my_strain",
-        )
-
-    def addContainer(self, nwbfile):
-        """ Add the test Subject to the given NWBFile """
-        nwbfile.subject = self.container
-
-    def getContainer(self, nwbfile):
-        """ Return the test Subject from the given NWBFile """
-        return nwbfile.subject
-
-
-class TestSubjectAgeReferenceNotSetIO(NWBH5IOMixin, TestCase):
-
-    def setUpContainer(self):
-        """ Return the test Subject """
-        return Subject(
-            age="P90D",
-            description="An unfortunate rat",
-            genotype="WT",
-            sex="M",
-            species="Rattus norvegicus",
-            subject_id="RAT123",
-            weight="2 kg",
-            date_of_birth=datetime(1970, 1, 1, 12, tzinfo=tzutc()),
-            strain="my_strain",
-        )
+        return Subject(age='12 mo',
+                       description='An unfortunate rat',
+                       genotype='WT',
+                       sex='M',
+                       species='Rattus norvegicus',
+                       subject_id='RAT123',
+                       weight='2 lbs',
+                       date_of_birth=datetime(1970, 1, 1, 12, tzinfo=tzutc()))
 
     def addContainer(self, nwbfile):
         """ Add the test Subject to the given NWBFile """
@@ -289,13 +231,13 @@ class TestEpochsIO(NWBH5IOMixin, TestCase):
 
     def setUpContainer(self):
         """ Return placeholder epochs object. Tested epochs are added directly to the NWBFile in addContainer """
-        return TimeIntervals(name='epochs')
+        return TimeIntervals('epochs')
 
     def addContainer(self, nwbfile):
         """ Add the test epochs to the given NWBFile """
         nwbfile.add_epoch_column(
             name='temperature',
-            description='average temperature (c) during epoch'
+            description='average temperture (c) during epoch'
         )
 
         nwbfile.add_epoch(
@@ -368,7 +310,7 @@ class TestEpochsIODf(TestEpochsIO):
                                [(4, 1, tsa)]],
                 'tags': [[''], [''], ['fizz', 'buzz'], ['qaz']]
             },
-            index=pd.Index(np.arange(4, dtype=np.int64), name='id')
+            index=pd.Index(np.arange(4), name='id')
         )
         # pop the timeseries column out because ts_obt has rows of lists of tuples and ts_exp has rows of lists of lists
         ts_obt = df_obt.pop('timeseries')
@@ -395,7 +337,7 @@ class TestEpochsIODf(TestEpochsIO):
                 'stop_time': [0.25, 0.30, 0.40, 0.45],
                 'tags': [[''], [''], ['fizz', 'buzz'], ['qaz']]
             },
-            index=pd.Index(np.arange(4, dtype=np.int64), name='id')
+            index=pd.Index(np.arange(4), name='id')
         )
 
         df_obt = self.read_container.to_dataframe(exclude=set(['timeseries', 'timeseries_index']))
@@ -497,7 +439,7 @@ class TestElectrodes(NWBH5IOMixin, TestCase):
         """
         Return placeholder table for electrodes. Tested electrodes are added directly to the NWBFile in addContainer
         """
-        return DynamicTable(name='electrodes', description='a placeholder table')
+        return DynamicTable('electrodes', 'a placeholder table')
 
     def addContainer(self, nwbfile):
         """ Add electrodes and related objects to the given NWBFile """
@@ -548,7 +490,7 @@ class TestElectrodesOptColumns(NWBH5IOMixin, TestCase):
         """
         Return placeholder table for electrodes. Tested electrodes are added directly to the NWBFile in addContainer
         """
-        return DynamicTable(name='electrodes', description='a placeholder table')
+        return DynamicTable('electrodes', 'a placeholder table')
 
     def addContainer(self, nwbfile):
         """ Add electrodes and related objects to the given NWBFile """
@@ -603,7 +545,7 @@ class TestElectrodesRegion(NWBH5IOMixin, TestCase):
         """
         Return placeholder table for electrodes. Tested electrodes are added directly to the NWBFile in addContainer
         """
-        return DynamicTable(name='electrodes', description='a placeholder table')
+        return DynamicTable('electrodes', 'a placeholder table')
 
     def addContainer(self, nwbfile):
         """ Add electrode table region and related objects to the given NWBFile """
@@ -643,35 +585,3 @@ class TestElectrodesRegion(NWBH5IOMixin, TestCase):
         super().test_roundtrip()
         for ii, item in enumerate(self.read_container):
             pd.testing.assert_frame_equal(self.table[ii+1], item)
-
-
-class TestAddStimulusTemplateTimeSeries(NWBH5IOFlexMixin, TestCase):
-
-    def getContainerType(self):
-        return "time series stored as a stimulus template"
-
-    def addContainer(self):
-        ts = TimeSeries(
-            name="test_ts",
-            data=[0, 1, 2, 3, 4, 5],
-            unit="grams",
-            timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5]
-        )
-        self.nwbfile.add_stimulus_template(ts)
-
-    def getContainer(self, nwbfile):
-        return nwbfile.get_stimulus_template("test_ts")
-
-
-class TestAddStimulusTemplateImages(NWBH5IOFlexMixin, TestCase):
-
-    def getContainerType(self):
-        return "images stored as a stimulus template"
-
-    def addContainer(self):
-        image1 = Image(name="test_image1", data=np.ones((10, 10)))
-        images = Images(name="images_name", images=[image1])
-        self.nwbfile.add_stimulus_template(images)
-
-    def getContainer(self, nwbfile):
-        return nwbfile.get_stimulus_template("images_name")

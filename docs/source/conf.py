@@ -13,7 +13,6 @@
 
 import sys
 import os
-
 import sphinx_rtd_theme
 
 
@@ -33,16 +32,14 @@ project_root = os.path.dirname(os.path.dirname(cwd))
 # version is used.
 sys.path.insert(0, os.path.join(project_root, 'src'))
 
-import pynwb
+from pynwb._version import get_versions
+
 
 # -- Autodoc configuration -----------------------------------------------------
 
 autoclass_content = 'both'
 autodoc_docstring_signature = True
 autodoc_member_order = 'bysource'
-autodoc_default_options = {
-    'ignore-module-all': True,  # Continue documenting classes not in __all__
-}
 
 # -- General configuration -----------------------------------------------------
 
@@ -56,147 +53,30 @@ extensions = [
     'sphinx.ext.napoleon',
     'sphinx.ext.intersphinx',
     'sphinx.ext.viewcode',
-    'sphinx.ext.extlinks',
-    'sphinx_gallery.gen_gallery',
-    'sphinx_copybutton',
-    "sphinxcontrib.jquery",  # can be removed as soon as the theme no longer depends on jQuery
+    'sphinx_gallery.gen_gallery'
 ]
 
 from sphinx_gallery.sorting import ExplicitOrder
-from sphinx_gallery.sorting import ExampleTitleSortKey
-
-
-class CustomSphinxGallerySectionSortKey(ExampleTitleSortKey):
-    """
-    Define the key to be used to sort sphinx galleries sections
-
-    :param src_dir : The source directory.
-    :type srd_dir: str
-    """
-    # Define a partial ordered list of galleries for all subsections. Galleries not
-    # listed here will be added in alphabetical order based on title after the
-    # explicitly listed galleries
-    GALLERY_ORDER = {
-        'general': [
-            "plot_file.py",
-            "add_remove_containers.py",
-            "plot_timeintervals.py",
-            "scratch.py",
-            "extensions.py",
-            "plot_configurator.py",
-            "object_id.py",
-            "plot_read_basics.py",
-            "plot_external_resources.py",
-            "resources_streaming.py",
-        ],
-        # Sort domain-specific tutorials based on domain to group tutorials belonging to the same domain
-        'domain': [
-            "ecephys.py",
-            "ophys.py",
-            "plot_icephys.py",
-            "plot_icephys_pandas.py",
-            "icephys.py",
-            "plot_behavior.py",
-            "images.py",
-        ],
-        'advanced_io': []
-    }
-
-    def __call__(self, filename):
-        """
-        Compute index to use for sorting galleries.
-
-        Return the explicit index of the gallery if defined as part of self.GALLERY_ORDER
-        and otherwise compute a score based on the title of the gallery to ensure galleries
-        are sorted alphabetically by default
-        """
-        import string
-        import math
-
-        # Get the ordered list of gallery files for the current source dir
-        explicit_order = self.GALLERY_ORDER.get(os.path.basename(self.src_dir), [])
-        # If the file is in the explicit order then return its index
-        if filename in explicit_order:
-            sort_index = explicit_order.index(filename)
-        # Else sort alphabetically based on the title by computing a corresponding
-        # floating point index based on the characters of the titles
-        else:
-            title = super().__call__(filename)
-            # map the characters of the title to a floating point number
-            # based on the numerical index of the individual lowercase characters
-            sort_index = len(explicit_order)  # all explicitly ordered galleries come first
-            for i, v in enumerate(title.lower()):
-                # get the index of the current character
-                curr_index = (string.ascii_lowercase.index(v)
-                              if v in string.ascii_lowercase
-                              else len(string.ascii_lowercase))
-                # shift the value based on its position in the title string and
-                # add it to the sort_index value
-                sort_index += curr_index / math.pow(10, ((i+1) * 2))
-        return sort_index
-
 
 sphinx_gallery_conf = {
     # path to your examples scripts
     'examples_dirs': ['../gallery'],
     # path where to save gallery generated examples
     'gallery_dirs': ['tutorials'],
-    'subsection_order': ExplicitOrder(['../gallery/general', '../gallery/domain', '../gallery/advanced_io']),
+    'subsection_order': ExplicitOrder(['../gallery/general', '../gallery/domain']),
     'backreferences_dir': 'gen_modules/backreferences',
-    'min_reported_time': 5,
-    'remove_config_comments': True,
-    'within_subsection_order': CustomSphinxGallerySectionSortKey,
-    'nested_sections': False,  # See issue https://github.com/sphinx-gallery/sphinx-gallery/issues/1152
+    'download_section_examples': False,
+    'min_reported_time': 5
 }
 
 intersphinx_mapping = {
-    'python': ('https://docs.python.org/3.11', None),
-    'numpy': ('https://numpy.org/doc/stable/', None),
-    'matplotlib': ('https://matplotlib.org/stable/', None),
-    'h5py': ('https://docs.h5py.org/en/latest/', None),
-    'hdmf': ('https://hdmf.readthedocs.io/en/stable/', None),
-    'pandas': ('https://pandas.pydata.org/pandas-docs/stable/', None),
-    'dandi': ('https://dandi.readthedocs.io/en/stable/', None),
-    'fsspec': ("https://filesystem-spec.readthedocs.io/en/latest/", None),
-    'nwbwidgets': ("https://nwb-widgets.readthedocs.io/en/latest/", None),
-    'nwb-overview': ("https://nwb-overview.readthedocs.io/en/latest/", None),
-    'zarr': ("https://zarr.readthedocs.io/en/v2.18.4/", None),  # TODO - update when hdmf-zarr supports Zarr 3.0
-    'hdmf-zarr': ("https://hdmf-zarr.readthedocs.io/en/stable/", None),
-    'numcodecs': ("https://numcodecs.readthedocs.io/en/latest/", None),
+    'python': ('https://docs.python.org/3.8', None),
+    'numpy': ('https://docs.scipy.org/doc/numpy/', None),
+    'matplotlib': ('https://matplotlib.org', None),
+    'h5py': ('http://docs.h5py.org/en/latest/', None),
+    'hdmf': ('https://hdmf.readthedocs.io/en/latest/', None),
+    'pandas': ('http://pandas.pydata.org/pandas-docs/stable/', None)
 }
-
-extlinks = {
-    'incf_lesson': ('https://training.incf.org/lesson/%s', '%s'),
-    'incf_collection': ('https://training.incf.org/collection/%s', '%s'),
-    'nwb_extension': ('https://github.com/nwb-extensions/%s', '%s'),
-    'pynwb': ('https://github.com/NeurodataWithoutBorders/pynwb/%s', '%s'),
-    'nwb_overview': ('https://nwb-overview.readthedocs.io/en/latest/%s', '%s'),
-    'hdmf-docs': ('https://hdmf.readthedocs.io/en/stable/%s', '%s'),
-    'dandi': ('https://dandiarchive.org/%s', '%s'),
-    "nwbinspector": ("https://nwbinspector.readthedocs.io/en/dev/%s", "%s"),
-    'hdmf-zarr': ('https://hdmf-zarr.readthedocs.io/en/stable/%s', '%s'),
-}
-
-nitpicky = True
-nitpick_ignore = [('py:class', 'Intracomm'),
-                  ('py:class', 'BaseStorageSpec'),
-                  # pandas publishes ``pandas.DataFrame`` but autodoc renders the return
-                  # annotation as its qualname ``pandas.core.frame.DataFrame``, which has no
-                  # intersphinx target.
-                  ('py:class', 'pandas.core.frame.DataFrame'),
-                  # HDMF's ``array_data`` docval macro renders ``pandas.ExtensionArray``, but
-                  # pandas publishes the class as ``pandas.api.extensions.ExtensionArray``, so
-                  # the short path has no intersphinx target.
-                  ('py:class', 'pandas.ExtensionArray')]
-
-linkcheck_ignore = [
-    r'https://training.incf.org/*',  # temporary ignore until SSL certificate issue is resolved
-    r'https://scicrunch.org/*',  # scicrunch.org blocks automated requests with 403
-    r'https://app\.readthedocs\.org/projects/pynwb/.*',  # readthedocs blocks CI runner IPs (intermittent 403)
-    r'https://nwb-users\.slack\.com/*',  # Slack returns 403 to unauthenticated requests
-]
-
-suppress_warnings = ["config.cache"]
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -213,16 +93,16 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'PyNWB'
-copyright = u'2017-2026, Neurodata Without Borders'
+copyright = u'2017-2020, Neurodata Without Borders'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
 # built documents.
 #
 # The short X.Y version.
-version = pynwb.__version__
+version = '{}'.format(get_versions()['version'])
 # The full version, including alpha/beta/rc tags.
-release = pynwb.__version__
+release = '{}'.format(get_versions()['version'])
 
 # The language for content autogenerated by Sphinx. Refer to documentation
 # for a list of supported languages.
@@ -237,12 +117,6 @@ release = pynwb.__version__
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 exclude_patterns = ['_build', 'test.py']
-
-# List of patterns, relative to source directory, of modules to be
-# excluded by apidoc when generating rst files.
-apidoc_exclude = [
-    "../../src/pynwb/retinotopy.py",
-]
 
 # The reST default role (used for this markup: `text`) to use for all documents.
 # default_role = None
@@ -272,21 +146,15 @@ pygments_style = 'sphinx'
 # html_theme = 'default'
 # html_theme = "sphinxdoc"
 html_theme = "sphinx_rtd_theme"
+html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
 # documentation.
-html_theme_options = {
-    # "style_nav_header_background": "#AFD2E8"
-    "style_nav_header_background": "#000000"
-}
+# html_theme_options = {}
 
-# These paths are either relative to html_static_path
-# or fully qualified paths (eg. https://...)
-html_css_files = [
-    'css/custom.css',
-    'css/nwb_assistant.css'
-]
+# Add any paths that contain custom themes here, relative to this directory.
+# html_theme_path = []
 
 # The name for this set of Sphinx documents.  If None, it defaults to
 # "<project> v<release> documentation".
@@ -298,12 +166,12 @@ html_css_files = [
 # The name of an image file (relative to this directory) to place at the top
 # of the sidebar.
 # html_logo = None
-html_logo = 'figures/logo_pynwb_with_margin.png'
+html_logo = 'logo.png'
 
 # The name of an image file (within the static path) to use as favicon of the
 # docs.  This file should be a Windows icon file (.ico) being 16x16 or 32x32
 # pixels large.
-html_favicon = 'figures/favicon_96.png'
+html_favicon = 'favicon_96.png'
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
@@ -377,7 +245,7 @@ latex_elements = {
 
 # The name of an image file (relative to this directory) to place at the top of
 # the title page.
-latex_logo = 'figures/logo_pynwb_with_margin.png'
+latex_logo = 'logo.pdf'
 
 # For "manual" documents, if this is true, then toplevel headings are parts,
 # not chapters.
@@ -443,8 +311,7 @@ def run_apidoc(_):
     out_dir = os.path.dirname(__file__)
     src_dir = os.path.join(out_dir, '../../src')
     sys.path.append(src_dir)
-    apidoc_exclude_abs = [os.path.join(out_dir, f) for f in apidoc_exclude]
-    apidoc_main(['-f', '-e', '--no-toc', '-o', out_dir, src_dir, *apidoc_exclude_abs])
+    apidoc_main(['-f', '-e', '--no-toc', '-o', out_dir, src_dir])
 
 
 from abc import abstractproperty
@@ -459,5 +326,5 @@ def skip(app, what, name, obj, skip, options):
 
 def setup(app):
     app.connect('builder-inited', run_apidoc)
-    app.add_css_file("theme_overrides.css")  # overrides for wide tables in RTD theme
+    app.add_stylesheet("theme_overrides.css")  # overrides for wide tables in RTD theme
     app.connect("autodoc-skip-member", skip)

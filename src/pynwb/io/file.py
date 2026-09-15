@@ -1,19 +1,15 @@
-import typing
-
-from hdmf.build import ObjectMapper, Builder, GroupBuilder
-from hdmf.utils import docval, get_docval
-
+from dateutil.parser import parse as dateutil_parse
+from hdmf.build import ObjectMapper
 from .. import register_map
 from ..file import NWBFile, Subject
 from ..core import ScratchData
-from .utils import get_nwb_version, parse_date, NO_OVERRIDE
 
 
 @register_map(NWBFile)
 class NWBFileMap(ObjectMapper):
 
     def __init__(self, spec):
-        super().__init__(spec)
+        super(NWBFileMap, self).__init__(spec)
 
         acq_spec = self.spec.get_group('acquisition')
         self.unmap(acq_spec)
@@ -32,13 +28,8 @@ class NWBFileMap(ObjectMapper):
         self.unmap(stimulus_spec)
         self.unmap(stimulus_spec.get_group('presentation'))
         self.unmap(stimulus_spec.get_group('templates'))
-        # map "stimulus" to NWBDataInterface and DynamicTable and unmap the spec for TimeSeries because it is
-        # included in the mapping to NWBDataInterface
-        self.unmap(stimulus_spec.get_group('presentation').get_neurodata_type('TimeSeries'))
-        self.map_spec('stimulus', stimulus_spec.get_group('presentation').get_neurodata_type('NWBDataInterface'))
-        self.map_spec('stimulus', stimulus_spec.get_group('presentation').get_neurodata_type('DynamicTable'))
+        self.map_spec('stimulus', stimulus_spec.get_group('presentation').get_neurodata_type('TimeSeries'))
         self.map_spec('stimulus_template', stimulus_spec.get_group('templates').get_neurodata_type('TimeSeries'))
-        self.map_spec('stimulus_template', stimulus_spec.get_group('templates').get_neurodata_type('Images'))
 
         intervals_spec = self.spec.get_group('intervals')
         self.unmap(intervals_spec)
@@ -53,28 +44,16 @@ class NWBFileMap(ObjectMapper):
         invalid_times_spec = intervals_spec.get_group('invalid_times')
         self.map_spec('invalid_times', invalid_times_spec)
 
-        events_spec = self.spec.get_group('events')
-        self.unmap(events_spec)
-        self.map_spec('events', events_spec.get_neurodata_type('EventsTable'))
-
         general_spec = self.spec.get_group('general')
         self.unmap(general_spec)
 
-        # map icephys metadata structures and tables
         icephys_spec = general_spec.get_group('intracellular_ephys')
         self.unmap(icephys_spec)
         self.map_spec('icephys_electrodes', icephys_spec.get_neurodata_type('IntracellularElectrode'))
         self.map_spec('sweep_table', icephys_spec.get_neurodata_type('SweepTable'))
-        self.map_spec('intracellular_recordings', icephys_spec.get_neurodata_type('IntracellularRecordingsTable'))
-        self.map_spec('icephys_simultaneous_recordings', icephys_spec.get_neurodata_type('SimultaneousRecordingsTable'))
-        self.map_spec('icephys_sequential_recordings', icephys_spec.get_neurodata_type('SequentialRecordingsTable'))
-        self.map_spec('icephys_repetitions', icephys_spec.get_neurodata_type('RepetitionsTable'))
-        self.map_spec('icephys_experimental_conditions', icephys_spec.get_neurodata_type('ExperimentalConditionsTable'))
 
-        # 'filtering' has been deprecated. add this mapping in the meantime
-        icephys_filtering_spec = icephys_spec.get_dataset('filtering')
-        self.unmap(icephys_filtering_spec)
-        self.map_spec('icephys_filtering', icephys_filtering_spec)
+        # TODO map the filtering dataset to something or deprecate it
+        self.unmap(icephys_spec.get_dataset('filtering'))
 
         ecephys_spec = general_spec.get_group('extracellular_ephys')
         self.unmap(ecephys_spec)
@@ -102,7 +81,6 @@ class NWBFileMap(ObjectMapper):
                             'session_id',
                             'slices',
                             'source_script',
-                            'was_generated_by',
                             'stimulus',
                             'surgery',
                             'virus']
@@ -115,15 +93,9 @@ class NWBFileMap(ObjectMapper):
 
         self.map_spec('subject', general_spec.get_group('subject'))
 
-        self.map_spec('external_resources', general_spec.get_group('external_resources'))
-
         device_spec = general_spec.get_group('devices')
         self.unmap(device_spec)
         self.map_spec('devices', device_spec.get_neurodata_type('Device'))
-
-        device_model_spec = general_spec.get_group('devices').get_group('models')
-        self.unmap(device_model_spec)
-        self.map_spec('device_models', device_model_spec.get_neurodata_type('DeviceModel'))
 
         self.map_spec('lab_meta_data', general_spec.get_neurodata_type('LabMetaData'))
 
@@ -137,45 +109,8 @@ class NWBFileMap(ObjectMapper):
         self.map_spec('scratch_containers', scratch_spec.get_neurodata_type('NWBContainer'))
         self.map_spec('scratch_containers', scratch_spec.get_neurodata_type('DynamicTable'))
 
-    @docval(*get_docval(ObjectMapper.construct))
-    def construct(self, **kwargs):
-        nwbfile_builder = kwargs["builder"]
-        electrodes_builder = nwbfile_builder.get("general", dict()).get("extracellular_ephys", dict()).get("electrodes")
-        if (electrodes_builder is not None and electrodes_builder.attributes['neurodata_type'] != 'ElectrodesTable'):
-            electrodes_builder.attributes['neurodata_type'] = 'ElectrodesTable'
-            electrodes_builder.attributes['namespace'] = 'core'
-
-        def apply_to_child_builders(builder: Builder, funcs: list[typing.Callable]):
-            # iterate recursively through each builder (which is just a dict of dicts) and make migration changes
-            for bchild_value in builder.values():
-                if isinstance(bchild_value, Builder):
-                    for func in funcs:
-                        func(bchild_value)
-                    apply_to_child_builders(bchild_value, funcs)
-
-        def update_builder_frequency_bands_table(builder: Builder):
-            if (isinstance(builder, GroupBuilder) and
-                builder.attributes.get('namespace') == 'core' and
-                builder.attributes.get('neurodata_type') == 'DecompositionSeries' and
-                builder.groups['bands'].attributes['neurodata_type'] == 'DynamicTable'):
-                builder.groups['bands'].attributes['neurodata_type'] = 'FrequencyBandsTable'
-                builder.groups['bands'].attributes['namespace'] = 'core'
-
-        apply_to_child_builders(nwbfile_builder, [update_builder_frequency_bands_table])
-
-        return super().construct(**kwargs)
-
     @ObjectMapper.object_attr('scratch_datas')
     def scratch_datas(self, container, manager):
-        """Set the value for the 'scratch_datas' spec on NWBFile to a list of ScratchData objects.
-
-        Used when writing (building) the NWBFile container to a file.
-
-        The 'scratch' group can contain both groups and datasets. This mapping function
-        is used when writing the value for the 'scratch_datas' spec (ScratchData type
-        -- see __init__ above). The value is set to a list of all ScratchData
-        objects in the 'scratch' field of the NWBFile container.
-        """
         scratch = container.scratch
         ret = list()
         for s in scratch.values():
@@ -185,15 +120,6 @@ class NWBFileMap(ObjectMapper):
 
     @ObjectMapper.object_attr('scratch_containers')
     def scratch_containers(self, container, manager):
-        """Set the value for the 'scratch_containers' spec on NWBFile to a list of non-ScratchData objects.
-
-        Used when writing (building) the NWBFile container to a file.
-
-        The 'scratch' group can contain both groups and datasets. This mapping function
-        is used when writing the value for the 'scratch_containers' spec (NWBContainers
-        and DynamicTable type -- see __init__ above). The value is set to a list of all non-ScratchData
-        objects in the 'scratch' field of the NWBFile container.
-        """
         scratch = container.scratch
         ret = list()
         for s in scratch.values():
@@ -203,14 +129,6 @@ class NWBFileMap(ObjectMapper):
 
     @ObjectMapper.constructor_arg('scratch')
     def scratch(self, builder, manager):
-        """Set the constructor arg for 'scratch' to a tuple of objects.
-
-        Used when constructing the NWBFile container from a written file.
-
-        The 'scratch' group can contain both groups and datasets. This mapping function
-        is used to construct the contained groups and datasets and put them into a single
-        field 'scratch' on the NWBFile container for user convenience.
-        """
         scratch = builder.get('scratch')
         ret = list()
         if scratch is not None:
@@ -222,54 +140,28 @@ class NWBFileMap(ObjectMapper):
 
     @ObjectMapper.constructor_arg('session_start_time')
     def dateconversion(self, builder, manager):
-        """Set the constructor arg for 'session_start_time' to a datetime object.
-
-        Used when constructing the NWBFile container from a written file.
-
-        Dates are read into builders as strings and are parsed into datetime objects
-        for user convenience and consistency with how they are written.
-        """
         datestr = builder.get('session_start_time').data
-        date = parse_date(datestr, "session_start_time")
+        date = dateutil_parse(datestr)
         return date
 
     @ObjectMapper.constructor_arg('timestamps_reference_time')
     def dateconversion_trt(self, builder, manager):
-        """Set the constructor arg for 'timestamps_reference_time' to a datetime object.
-
-        Used when constructing the NWBFile container from a written file.
-
-        Dates are read into builders as strings and are parsed into datetime objects
-        for user convenience and consistency with how they are written.
-        """
         datestr = builder.get('timestamps_reference_time').data
-        date = parse_date(datestr, "timestamps_reference_time")
+        date = dateutil_parse(datestr)
         return date
 
     @ObjectMapper.constructor_arg('file_create_date')
     def dateconversion_list(self, builder, manager):
-        """Set the constructor arg for 'file_create_date' to a datetime object.
-
-        Used when constructing the NWBFile container from a written file.
-
-        Dates are read into builders as strings and are parsed into datetime objects
-        for user convenience and consistency with how they are written.
-        """
         datestr = builder.get('file_create_date').data
-        dates = [parse_date(date_string, "file_create_date") for date_string in datestr]
+        dates = list(map(dateutil_parse, datestr))
         return dates
+
+    @ObjectMapper.constructor_arg('file_name')
+    def name(self, builder, manager):
+        return builder.name
 
     @ObjectMapper.constructor_arg('experimenter')
     def experimenter_carg(self, builder, manager):
-        """Set the constructor arg for 'experimenter' to a tuple if the builder value is a string.
-
-        Used when constructing the NWBFile container from a written file.
-
-        In early versions of the NWB 2 schema, 'experimenter' was specified as a string.
-        Then it was changed to be a 1-D array of strings. This mapping function is necessary
-        to allow reading of both data where 'experimenter' was specified as a string and data
-        where 'experimenter' was specified as an array.
-        """
         ret = None
         exp_bldr = builder['general'].get('experimenter')
         if exp_bldr is not None:
@@ -281,30 +173,13 @@ class NWBFileMap(ObjectMapper):
 
     @ObjectMapper.object_attr('experimenter')
     def experimenter_obj_attr(self, container, manager):
-        """Change the value for the field 'experimenter' on NWBFile to a tuple if it is a string.
-
-        Used when writing (building) the NWBFile container to a file.
-
-        In early versions of the NWB 2 schema, 'experimenter' was specified as a string.
-        Then it was changed to be a 1-D array of strings. This mapping function is necessary
-        for writing a valid 'experimenter' array if it is a string in the NWBFile container.
-        """
-        ret = NO_OVERRIDE
+        ret = None
         if isinstance(container.experimenter, str):
             ret = (container.experimenter,)
         return ret
 
     @ObjectMapper.constructor_arg('related_publications')
     def publications_carg(self, builder, manager):
-        """Set the constructor arg for 'related_publications' to a tuple if the builder value is a string.
-
-        Used when constructing the NWBFile container from a written file.
-
-        In early versions of the NWB 2 schema, 'related_publications' was specified as a string.
-        Then it was changed to be a 1-D array of strings. This mapping function is necessary
-        to allow reading of both data where 'related_publications' was specified as a string and data
-        where 'related_publications' was specified as an array.
-        """
         ret = None
         pubs_bldr = builder['general'].get('related_publications')
         if pubs_bldr is not None:
@@ -316,15 +191,7 @@ class NWBFileMap(ObjectMapper):
 
     @ObjectMapper.object_attr('related_publications')
     def publication_obj_attr(self, container, manager):
-        """Change the value for the field 'related_publications' on NWBFile to a tuple if it is a string.
-
-        Used when writing (building) the NWBFile container to a file.
-
-        In early versions of the NWB 2 schema, 'related_publications' was specified as a string.
-        Then it was changed to be a 1-D array of strings. This mapping function is necessary
-        for writing a valid 'related_publications' array if it is a string in the NWBFile container.
-        """
-        ret = NO_OVERRIDE
+        ret = None
         if isinstance(container.related_publications, str):
             ret = (container.related_publications,)
         return ret
@@ -335,42 +202,10 @@ class SubjectMap(ObjectMapper):
 
     @ObjectMapper.constructor_arg('date_of_birth')
     def dateconversion(self, builder, manager):
-        """Set the constructor arg for 'date_of_birth' to a datetime object.
-
-        Used when constructing the Subject container from a written file.
-
-        Dates are read into builders as strings and are parsed into datetime objects
-        for user convenience and consistency with how they are written.
-        """
         dob_builder = builder.get('date_of_birth')
         if dob_builder is None:
             return
         else:
             datestr = dob_builder.data
-            date = parse_date(datestr, "date_of_birth")
+            date = dateutil_parse(datestr)
             return date
-
-    @ObjectMapper.constructor_arg("age__reference")
-    def age_reference_none(self, builder, manager):
-        """Set the constructor arg for 'age__reference' to "unspecified" for NWB files < 2.6, else "birth".
-
-        Used when constructing the Subject container from a written file.
-
-        NWB schema 2.6.0 introduced a new optional attribute 'reference' on the 'age' dataset with a default
-        value of "birth". When data written with NWB versions < 2.6 are read, 'age__reference' is set to
-        "unspecified" in the Subject constructor. "unspecified" is a special non-None placeholder value
-        that is handled specially in Subject.__init__ to distinguish it from no value being provided by the
-        user. When data written with NWB versions >= 2.6 are read, 'age__reference' is set to the default
-        value, "birth", in the Subject constructor (this is not strictly necessary because Subject.__init__
-        has default value "birth" for 'age__reference').
-        """
-        age_builder = builder.get("age")
-        age_reference = None
-        if age_builder is not None:
-            age_reference = age_builder["attributes"].get("reference")
-        if age_reference is None:
-            if get_nwb_version(builder) < (2, 6, 0):
-                return "unspecified"  # this is handled specially in Subject.__init__
-            else:
-                return "birth"
-        return age_reference

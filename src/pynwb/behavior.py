@@ -1,22 +1,9 @@
-import warnings
-
-from hdmf.utils import docval, popargs, get_docval, get_data_shape, AllowPositional
+from hdmf.utils import docval, popargs, get_docval
 
 from . import register_class, CORE_NAMESPACE
 from .core import MultiContainerInterface
 from .misc import IntervalSeries
 from .base import TimeSeries
-
-__all__ = [
-    'SpatialSeries',
-    'BehavioralEpochs',
-    'BehavioralEvents',
-    'BehavioralTimeSeries',
-    'PupilTracking',
-    'EyeTracking',
-    'CompassDirection',
-    'Position'
-]
 
 
 @register_class('SpatialSeries', CORE_NAMESPACE)
@@ -34,49 +21,27 @@ class SpatialSeries(TimeSeries):
     __nwbfields__ = ('reference_frame',)
 
     @docval(*get_docval(TimeSeries.__init__, 'name'),  # required
-            {'name': 'data', 'type': ('array_data', 'data', TimeSeries), 'shape': ((None, ), (None, None)), # required
-             'doc': ('The data values. Can be 1D or 2D. The first dimension must be time. If 2D, there can be 1, 2, '
-                     'or 3 columns, which represent x, y, and z.')},
-            {'name': 'reference_frame', 'type': str,
-             'doc': 'description defining what the zero-position is', 'default': None},
-            {'name': 'unit', 'type': str, 'doc': 'The base unit of measurement (should be SI unit)',
-             'default': 'meters'},
+            {'name': 'data', 'type': ('array_data', 'data', TimeSeries), 'shape': ((None, ), (None, None)),  # required
+             'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
+            {'name': 'reference_frame', 'type': str,   # required
+             'doc': 'description defining what the zero-position is'},
             *get_docval(TimeSeries.__init__, 'conversion', 'resolution', 'timestamps', 'starting_time', 'rate',
-                        'comments', 'description', 'control', 'control_description', 'offset'),
-            allow_positional=AllowPositional.WARNING,)
+                        'comments', 'description', 'control', 'control_description'))
     def __init__(self, **kwargs):
         """
         Create a SpatialSeries TimeSeries dataset
         """
         name, data, reference_frame = popargs('name', 'data', 'reference_frame', kwargs)
-        super().__init__(name=name, data=data, **kwargs)
-
-        # NWB 2.5 restricts length of second dimension to be <= 3
-        allowed_data_shapes = ((None, ), (None, 1), (None, 2), (None, 3))
-        data_shape = get_data_shape(data)
-        if not any(self._validate_data_shape(data_shape, a) for a in allowed_data_shapes):
-            warnings.warn("SpatialSeries '%s' has data shape %s which is not compliant with NWB 2.5 and greater. "
-                          "The second dimension should have length <= 3 to represent at most x, y, z." %
-                          (name, str(data_shape)))
-
+        super(SpatialSeries, self).__init__(name, data, 'meters', **kwargs)
         self.reference_frame = reference_frame
-
-    @staticmethod
-    def _validate_data_shape(valshape, argshape):
-        if not len(valshape) == len(argshape):
-            return False
-        for a, b in zip(valshape, argshape):
-            if b not in (a, None):
-                return False
-        return True
 
 
 @register_class('BehavioralEpochs', CORE_NAMESPACE)
 class BehavioralEpochs(MultiContainerInterface):
     """
-    TimeSeries for storing behavioral epochs. The objective of this and the other two Behavioral
+    TimeSeries for storing behavoioral epochs. The objective of this and the other two Behavioral
     interfaces (e.g. BehavioralEvents and BehavioralTimeSeries) is to provide generic hooks for
-    software tools/scripts. This allows a tool/script to take the output of one specific interface (e.g.,
+    software tools/scripts. This allows a tool/script to take the output one specific interface (e.g.,
     UnitTimes) and plot that data relative to another data modality (e.g., behavioral events) without
     having to define all possible modalities in advance. Declaring one of these interfaces means that
     one or more TimeSeries of the specified type is published. These TimeSeries should reside in a
@@ -97,14 +62,8 @@ class BehavioralEpochs(MultiContainerInterface):
 
 @register_class('BehavioralEvents', CORE_NAMESPACE)
 class BehavioralEvents(MultiContainerInterface):
-    """DEPRECATED. Use an :py:class:`~pynwb.event.EventsTable` instead, placed in the top-level ``/events``
-    group of the NWBFile. Each TimeSeries formerly stored under BehavioralEvents becomes one EventsTable.
-    The ``timestamps`` field maps to the ``timestamp`` column, and the ``data`` field maps to an additional
-    column named after the event marker (e.g., ``reward_magnitude``, ``port_number``); for multi-dimensional
-    ``data``, use one column per field. Any other per-event metadata becomes additional columns. Use the
-    ``source_description`` attribute on the EventsTable to record where the events came from (e.g.,
-    "Acquisition system", "Thresholding of analog signal ANALOG1 at 3 V", "Manual video review"). Original
-    definition: TimeSeries for storing behavioral events. See description of BehavioralEpochs for more details.
+    """
+    TimeSeries for storing behavioral events. See description of BehavioralEpochs for more details.
     """
 
     __clsconf__ = {
@@ -115,24 +74,11 @@ class BehavioralEvents(MultiContainerInterface):
         'attr': 'time_series'
     }
 
-    @docval({'name': 'time_series', 'type': (list, tuple, dict, TimeSeries),
-             'doc': 'TimeSeries to store in this interface', 'default': dict()},
-            {'name': 'name', 'type': str, 'doc': 'the name of this container', 'default': 'BehavioralEvents'})
-    def __init__(self, **kwargs):
-        time_series = popargs('time_series', kwargs)
-        super().__init__(**kwargs)
-        self.add_timeseries(time_series)
-        self._warn_on_new_pass_on_construct(
-            "BehavioralEvents is deprecated. Use an EventsTable instead, added to the NWBFile via "
-            "nwbfile.add_events_table() or nwbfile.create_events_table(). "
-            "Creating a new BehavioralEvents will not be allowed in a future version of PyNWB."
-        )
-
 
 @register_class('BehavioralTimeSeries', CORE_NAMESPACE)
 class BehavioralTimeSeries(MultiContainerInterface):
     """
-    TimeSeries for storing Behavioral time series data. See description of BehavioralEpochs for
+    TimeSeries for storing Behavoioral time series data. See description of BehavioralEpochs for
     more details.
     """
 

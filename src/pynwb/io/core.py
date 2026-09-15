@@ -1,4 +1,4 @@
-from hdmf.build import ObjectMapper
+from hdmf.build import ObjectMapper, RegionBuilder
 from hdmf.common import VectorData
 from hdmf.utils import getargs, docval
 from hdmf.spec import AttributeSpec
@@ -6,12 +6,21 @@ from hdmf.build import BuildManager
 
 from .. import register_map
 
-from pynwb.core import NWBData, NWBContainer, ScratchData
+from pynwb.file import NWBFile
+from pynwb.core import NWBData, NWBContainer
 from pynwb.misc import Units
 
 
 class NWBBaseTypeMapper(ObjectMapper):
-    pass
+
+    @staticmethod
+    def get_nwb_file(container):
+        curr = container
+        while curr is not None:
+            if isinstance(curr, NWBFile):
+                return curr
+            curr = container.parent
+
 
 @register_map(NWBContainer)
 class NWBContainerMapper(NWBBaseTypeMapper):
@@ -20,15 +29,27 @@ class NWBContainerMapper(NWBBaseTypeMapper):
 
 @register_map(NWBData)
 class NWBDataMap(NWBBaseTypeMapper):
-    pass
+
+    @ObjectMapper.constructor_arg('name')
+    def carg_name(self, builder, manager):
+        return builder.name
+
+    @ObjectMapper.constructor_arg('data')
+    def carg_data(self, builder, manager):
+        return builder.data
 
 
-@register_map(ScratchData)
-class ScratchDataMap(NWBContainerMapper):
+class NWBTableRegionMap(NWBDataMap):
 
-    def __init__(self, spec):
-        super().__init__(spec)
-        self.map_spec('description', spec.get_attribute('notes'))
+    @ObjectMapper.constructor_arg('table')
+    def carg_table(self, builder, manager):
+        return manager.construct(builder.data.builder)
+
+    @ObjectMapper.constructor_arg('region')
+    def carg_region(self, builder, manager):
+        if not isinstance(builder.data, RegionBuilder):
+            raise ValueError("'builder' must be a RegionBuilder")
+        return builder.data.region
 
 
 @register_map(VectorData)
@@ -42,15 +63,13 @@ class VectorDataMap(ObjectMapper):
         ''' Get the value of the attribute corresponding to this spec from the given container '''
         spec, container, manager = getargs('spec', 'container', 'manager', kwargs)
 
-        # handle custom mapping of Units waveform metadata onto waveform-bearing columns
+        # handle custom mapping of container Units.waveform_rate -> spec Units.waveform_mean.sampling_rate
         if isinstance(container.parent, Units):
-            if container.name in ('waveform_mean', 'waveform_sd', 'waveforms'):
+            if container.name == 'waveform_mean' or container.name == 'waveform_sd':
                 if spec.name == 'sampling_rate':
                     return container.parent.waveform_rate
                 if spec.name == 'unit':
                     return container.parent.waveform_unit
-                if spec.name == 'time_before_peak_in_ms':
-                    return container.parent.waveform_time_before_peak_in_ms
             if container.name == 'spike_times':
                 if spec.name == 'resolution':
                     return container.parent.resolution

@@ -1,32 +1,17 @@
 from copy import copy, deepcopy
-from warnings import warn
 
-from hdmf.spec import (LinkSpec, GroupSpec, DatasetSpec, SpecNamespace, NamespaceBuilder,
-                       AttributeSpec, DtypeSpec, RefSpec)
+from hdmf.spec import LinkSpec, GroupSpec, DatasetSpec, SpecNamespace,\
+                       NamespaceBuilder, AttributeSpec, DtypeSpec, RefSpec
 from hdmf.spec.write import export_spec  # noqa: F401
-from hdmf.utils import docval, get_docval
+from hdmf.utils import docval, get_docval, call_docval_func
 
 from . import CORE_NAMESPACE
-
-
-__all__ = [
-    'NWBRefSpec',
-    'NWBAttributeSpec',
-    'NWBLinkSpec',
-    'NWBDtypeSpec',
-    'NWBDatasetSpec',
-    'NWBGroupSpec',
-    'NWBNamespace',
-    'NWBNamespaceBuilder',
-    'export_spec'  # Re-exported from hdmf.spec.write
-]
 
 
 def __swap_inc_def(cls):
     args = get_docval(cls.__init__)
     clsname = 'NWB%s' % cls.__name__
     ret = list()
-    # do not set default neurodata_type_inc for base hdmf-common types that should not have data_type_inc
     for arg in args:
         if arg['name'] == 'data_type_def':
             ret.append({'name': 'neurodata_type_def', 'type': str,
@@ -44,9 +29,9 @@ _ref_docval = __swap_inc_def(RefSpec)
 
 class NWBRefSpec(RefSpec):
 
-    @docval(*deepcopy(_ref_docval))
+    @docval(*_ref_docval)
     def __init__(self, **kwargs):
-        super().__init__(**kwargs)
+        call_docval_func(super(NWBRefSpec, self).__init__, kwargs)
 
 
 _attr_docval = __swap_inc_def(AttributeSpec)
@@ -54,9 +39,9 @@ _attr_docval = __swap_inc_def(AttributeSpec)
 
 class NWBAttributeSpec(AttributeSpec):
 
-    @docval(*deepcopy(_attr_docval))
+    @docval(*_attr_docval)
     def __init__(self, **kwargs):
-        super().__init__(**kwargs)
+        call_docval_func(super(NWBAttributeSpec, self).__init__, kwargs)
 
 
 _link_docval = __swap_inc_def(LinkSpec)
@@ -64,9 +49,9 @@ _link_docval = __swap_inc_def(LinkSpec)
 
 class NWBLinkSpec(LinkSpec):
 
-    @docval(*deepcopy(_link_docval))
+    @docval(*_link_docval)
     def __init__(self, **kwargs):
-        super().__init__(**kwargs)
+        call_docval_func(super(NWBLinkSpec, self).__init__, kwargs)
 
     @property
     def neurodata_type_inc(self):
@@ -74,9 +59,9 @@ class NWBLinkSpec(LinkSpec):
         return self.data_type_inc
 
 
-class BaseStorageOverride:
+class BaseStorageOverride(object):
     ''' This class is used for the purpose of overriding
-        :py:class:`~hdmf.spec.spec.BaseStorageSpec` classmethods, without creating diamond
+        BaseStorageSpec classmethods, without creating diamond
         inheritance hierarchies.
     '''
 
@@ -111,7 +96,7 @@ class BaseStorageOverride:
     def build_const_args(cls, spec_dict):
         """Extend base functionality to remap data_type_def and data_type_inc keys"""
         spec_dict = copy(spec_dict)
-        proxy = super()
+        proxy = super(BaseStorageOverride, cls)
         if proxy.inc_key() in spec_dict:
             spec_dict[cls.inc_key()] = spec_dict.pop(proxy.inc_key())
         if proxy.def_key() in spec_dict:
@@ -122,10 +107,11 @@ class BaseStorageOverride:
     @classmethod
     def _translate_kwargs(cls, kwargs):
         """Swap neurodata_type_def and neurodata_type_inc for data_type_def and data_type_inc, respectively"""
-        proxy = super()
+        proxy = super(BaseStorageOverride, cls)
         kwargs[proxy.def_key()] = kwargs.pop(cls.def_key())
         kwargs[proxy.inc_key()] = kwargs.pop(cls.inc_key())
-        return kwargs
+        args = [kwargs.pop(x['name']) for x in get_docval(proxy.__init__) if 'default' not in x]
+        return args, kwargs
 
 
 _dtype_docval = __swap_inc_def(DtypeSpec)
@@ -133,51 +119,33 @@ _dtype_docval = __swap_inc_def(DtypeSpec)
 
 class NWBDtypeSpec(DtypeSpec):
 
-    @docval(*deepcopy(_dtype_docval))
+    @docval(*_dtype_docval)
     def __init__(self, **kwargs):
-        super().__init__(**kwargs)
+        call_docval_func(super(NWBDtypeSpec, self).__init__, kwargs)
 
 
 _dataset_docval = __swap_inc_def(DatasetSpec)
 
 
 class NWBDatasetSpec(BaseStorageOverride, DatasetSpec):
-    ''' The Spec class to use for NWB dataset specifications.
+    ''' The Spec class to use for NWB specifications '''
 
-    Classes will automatically include NWBData if None is specified.
-    '''
-
-    @docval(*deepcopy(_dataset_docval))
+    @docval(*_dataset_docval)
     def __init__(self, **kwargs):
-        kwargs = self._translate_kwargs(kwargs)
-        # set data_type_inc to NWBData only if it is not specified and the type is not an HDMF base type
-        exclude_set_data_type_inc_types = (None, 'Data', 'NWBData')
-        if kwargs['data_type_inc'] is None and kwargs['data_type_def'] not in exclude_set_data_type_inc_types:
-            kwargs['data_type_inc'] = 'NWBData'
-        super().__init__(**kwargs)
+        args, kwargs = self._translate_kwargs(kwargs)
+        super(NWBDatasetSpec, self).__init__(*args, **kwargs)
 
 
 _group_docval = __swap_inc_def(GroupSpec)
 
 
 class NWBGroupSpec(BaseStorageOverride, GroupSpec):
-    ''' The Spec class to use for NWB group specifications.
+    ''' The Spec class to use for NWB specifications '''
 
-    Classes will automatically include NWBContainer if None is specified.
-    '''
-
-    @docval(*deepcopy(_group_docval))
+    @docval(*_group_docval)
     def __init__(self, **kwargs):
-        kwargs = self._translate_kwargs(kwargs)
-        # set data_type_inc to NWBContainer only if it is not specified or special cases
-        # NOTE: NWBContainer in nwb-schema < 2.2.0 had no neurodata_type_inc, so we need to exclude it here to avoid
-        # setting data_type_inc to NWBContainer for NWBContainer itself
-        # NOTE: CSRMatrix in hdmf-common-schema < 1.2.1 had no data_type_inc, but should not inherit from
-        # NWBContainer.
-        exclude_set_data_type_inc_types = (None, 'Container', 'NWBContainer', 'CSRMatrix')
-        if kwargs['data_type_inc'] is None and kwargs['data_type_def'] not in exclude_set_data_type_inc_types:
-            kwargs['data_type_inc'] = 'NWBContainer'
-        super().__init__(**kwargs)
+        args, kwargs = self._translate_kwargs(kwargs)
+        super(NWBGroupSpec, self).__init__(*args, **kwargs)
 
     @classmethod
     def dataset_spec_cls(cls):
@@ -185,18 +153,14 @@ class NWBGroupSpec(BaseStorageOverride, GroupSpec):
 
     @docval({'name': 'neurodata_type', 'type': str, 'doc': 'the neurodata_type to retrieve'})
     def get_neurodata_type(self, **kwargs):
-        ''' Get a specification by "neurodata_type" '''
-        return super().get_data_type(kwargs['neurodata_type'])
+        '''
+        Get a specification by "data_type"
+        '''
+        return super(NWBGroupSpec, self).get_data_type(kwargs['neurodata_type'])
 
     @docval(*deepcopy(_group_docval))
     def add_group(self, **kwargs):
         ''' Add a new specification for a subgroup to this group specification '''
-        warn(
-            "NWBGroupSpec.add_group is deprecated and will be removed in PyNWB 5.0. "
-            "Use NWBGroupSpec.set_group instead.",
-            DeprecationWarning, 
-            stacklevel=2
-        )
         doc = kwargs.pop('doc')
         spec = NWBGroupSpec(doc, **kwargs)
         self.set_group(spec)
@@ -205,12 +169,6 @@ class NWBGroupSpec(BaseStorageOverride, GroupSpec):
     @docval(*deepcopy(_dataset_docval))
     def add_dataset(self, **kwargs):
         ''' Add a new specification for a subgroup to this group specification '''
-        warn(
-            "NWBGroupSpec.add_dataset is deprecated and will be removed in PyNWB 5.0. "
-            "Use NWBGroupSpec.set_dataset instead.",
-            DeprecationWarning, 
-            stacklevel=2
-        )
         doc = kwargs.pop('doc')
         spec = NWBDatasetSpec(doc, **kwargs)
         self.set_dataset(spec)
@@ -245,5 +203,5 @@ class NWBNamespaceBuilder(NamespaceBuilder):
     def __init__(self, **kwargs):
         ''' Create a NWBNamespaceBuilder '''
         kwargs['namespace_cls'] = NWBNamespace
-        super().__init__(**kwargs)
+        call_docval_func(super(NWBNamespaceBuilder, self).__init__, kwargs)
         self.include_namespace(CORE_NAMESPACE)
