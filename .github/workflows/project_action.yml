@@ -1,0 +1,34 @@
+name: Add issues to Development Project Board
+
+on:
+  issues:
+    types:
+      - opened
+
+jobs:
+  add-to-project:
+    name: Add issue to project
+    runs-on: ubuntu-latest
+    steps:
+      - name: GitHub App token
+        id: generate_token
+        uses: actions/create-github-app-token@v3
+        with:
+          app-id: ${{ secrets.APP_ID }}
+          private-key: ${{ secrets.APP_PEM }}
+
+      - name: Add to Developer Board
+        env:
+          TOKEN: ${{ steps.generate_token.outputs.token }}
+        uses: actions/add-to-project@v2.0.0
+        with:
+          project-url: https://github.com/orgs/NeurodataWithoutBorders/projects/7
+          github-token: ${{ env.TOKEN }}
+      
+      - name: Add to Community Board
+        env:
+          TOKEN: ${{ steps.generate_token.outputs.token }}
+        uses: actions/add-to-project@v2.0.0
+        with:
+          project-url: https://github.com/orgs/NeurodataWithoutBorders/projects/8
+          github-token: ${{ env.TOKEN }}

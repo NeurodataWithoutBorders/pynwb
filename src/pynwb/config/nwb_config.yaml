@@ -1,0 +1,7 @@
+namespaces:
+  core:
+    version: 2.7.0
+    data_types:
+      Subject:
+        species:
+          termset: nwb_subject_termset.yaml

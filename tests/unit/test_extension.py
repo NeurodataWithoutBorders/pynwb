@@ -1,11 +1,12 @@
 import os
 import random
 import string
+import warnings
 from datetime import datetime
 from dateutil.tz import tzlocal
 from tempfile import gettempdir
 
-from hdmf.spec import RefSpec
+from hdmf.spec import RefSpec, NamespaceCatalog
 from hdmf.utils import get_docval, docval, popargs
 from pynwb import get_type_map, TimeSeries, NWBFile, register_class, load_namespaces, get_class
 from pynwb.spec import NWBNamespaceBuilder, NWBGroupSpec, NWBAttributeSpec, NWBDatasetSpec
@@ -44,12 +45,14 @@ class TestExtension(TestCase):
 
     def test_load_namespace(self):
         self.test_export()
-        get_type_map(extensions=os.path.join(self.tempdir, self.ns_path))
+        type_map = get_type_map()
+        type_map.load_namespaces(os.path.join(self.tempdir, self.ns_path))
 
     def test_get_class(self):
         self.test_export()
-        type_map = get_type_map(extensions=os.path.join(self.tempdir, self.ns_path))
-        type_map.get_container_cls(self.prefix, 'TetrodeSeries')
+        type_map = get_type_map()
+        type_map.load_namespaces(os.path.join(self.tempdir, self.ns_path))
+        type_map.get_dt_container_cls('TetrodeSeries', self.prefix)
 
     def test_load_namespace_with_reftype_attribute(self):
         ns_builder = NWBNamespaceBuilder('Extension for use in my Lab', self.prefix, version='0.1.0')
@@ -61,7 +64,8 @@ class TestExtension(TestCase):
                                      neurodata_type_def='my_new_type')
         ns_builder.add_spec(self.ext_source, test_ds_ext)
         ns_builder.export(self.ns_path, outdir=self.tempdir)
-        get_type_map(extensions=os.path.join(self.tempdir, self.ns_path))
+        type_map = get_type_map()
+        type_map.load_namespaces(os.path.join(self.tempdir, self.ns_path))
 
     def test_load_namespace_with_reftype_attribute_check_autoclass_const(self):
         ns_builder = NWBNamespaceBuilder('Extension for use in my Lab', self.prefix, version='0.1.0')
@@ -73,8 +77,9 @@ class TestExtension(TestCase):
                                      neurodata_type_def='my_new_type')
         ns_builder.add_spec(self.ext_source, test_ds_ext)
         ns_builder.export(self.ns_path, outdir=self.tempdir)
-        type_map = get_type_map(extensions=os.path.join(self.tempdir, self.ns_path))
-        my_new_type = type_map.get_container_cls(self.prefix, 'my_new_type')
+        type_map = get_type_map()
+        type_map.load_namespaces(os.path.join(self.tempdir, self.ns_path))
+        my_new_type = type_map.get_dt_container_cls('my_new_type', self.prefix)
         docval = None
         for tmp in get_docval(my_new_type.__init__):
             if tmp['name'] == 'target_ds':
@@ -105,7 +110,7 @@ class TestExtension(TestCase):
                     {'name': 'test_attr', 'type': float, 'doc': 'test attribute'})
             def __init__(self, **kwargs):
                 test_attr = popargs('test_attr', kwargs)
-                super(MyTestMetaData, self).__init__(**kwargs)
+                super().__init__(**kwargs)
                 self.test_attr = test_attr
 
         nwbfile = NWBFile("a file with header data", "NB123A",  datetime(2017, 5, 1, 12, 0, 0, tzinfo=tzlocal()))
@@ -131,7 +136,42 @@ class TestExtension(TestCase):
         nwbfile = NWBFile("a file with header data", "NB123A", datetime(2017, 5, 1, 12, 0, 0, tzinfo=tzlocal()))
 
         nwbfile.add_lab_meta_data(MyTestMetaData(name='test_name', test_attr=5.))
+    
+    def test_custom_target_table(self):
+        ns_builder = NWBNamespaceBuilder('Extension for custom target table', self.prefix, version='0.1.0')
+        test_epochs_table_ext = NWBGroupSpec(
+            neurodata_type_def="MyEpochsTable",
+            neurodata_type_inc="TimeIntervals",
+            doc=("Custom table for storing my epochs. Inherits from TimeIntervals."),
+            datasets=[
+                NWBDatasetSpec(
+                    name="my_locations",
+                    doc="References row(s) of MyLocationsTable.",
+                    neurodata_type_inc="DynamicTableRegion",
+                ),
+            ] 
+        )
+        test_locations_table_ext = NWBGroupSpec(
+            neurodata_type_def="MyLocationsTable",
+            neurodata_type_inc="DynamicTable",
+            doc=("Table to reference."),
+            default_name="my_locations_table",
+        )
+    
+        ns_builder.add_spec(self.ext_source, test_epochs_table_ext)
+        ns_builder.add_spec(self.ext_source, test_locations_table_ext)
+        ns_builder.export(self.ns_path, outdir=self.tempdir)
+        ns_abs_path = os.path.join(self.tempdir, self.ns_path)
 
+        load_namespaces(ns_abs_path)
+
+        MyLocationsTable = get_class('MyLocationsTable', self.prefix)
+        MyEpochsTable = get_class('MyEpochsTable', self.prefix)
+        my_locations_table = MyLocationsTable(name='test_name', description='test desc')
+        my_epochs_table = MyEpochsTable(name='test_name', 
+                                        description='test desc',
+                                        target_tables={'my_locations': my_locations_table})
+        self.assertIs(my_epochs_table['my_locations'].table, my_locations_table)
 
 class TestCatchDupNS(TestCase):
 
@@ -142,6 +182,10 @@ class TestCatchDupNS(TestCase):
         self.ns_path1 = '%s_namespace1.yaml' % self.prefix
         self.ext_source2 = '%s_extension2.yaml' % self.prefix
         self.ns_path2 = '%s_namespace2.yaml' % self.prefix
+
+        self.ns_catalog = get_type_map().namespace_catalog
+        self.core_ns = 'core'
+        self.core_ns_version = self.ns_catalog.get_namespace(self.core_ns)['version']
 
     def tearDown(self):
         files = (self.ext_source1,
@@ -167,31 +211,51 @@ class TestCatchDupNS(TestCase):
                             neurodata_type_def='TetrodeSeries')
         ns_builder2.add_spec(self.ext_source2, ext2)
         ns_builder2.export(self.ns_path2, outdir=self.tempdir)
-        type_map = get_type_map(extensions=os.path.join(self.tempdir, self.ns_path1))
-        with self.assertWarnsRegex(UserWarning, r"ignoring namespace '\S+' because it already exists"):
-            type_map.load_namespaces(os.path.join(self.tempdir, self.ns_path2))
+        type_map = get_type_map()
+        type_map.load_namespaces(os.path.join(self.tempdir, self.ns_path1))
+        type_map.load_namespaces(os.path.join(self.tempdir, self.ns_path2))
 
+    def test_catch_dup_name_core_newer(self):
+        new_ns_version = '100.0.0'
+        ns_builder1 = NWBNamespaceBuilder('Extension for us in my Lab', self.core_ns, version=new_ns_version)
+        ext1 = NWBGroupSpec('A custom ElectricalSeries for my lab',
+                            attributes=[NWBAttributeSpec(name='trode_id', doc='the tetrode id', dtype='int')],
+                            neurodata_type_inc='ElectricalSeries',
+                            neurodata_type_def='TetrodeSeries')
+        ns_builder1.add_spec(self.ext_source1, ext1)
+        ns_builder1.export(self.ns_path1, outdir=self.tempdir)
 
-class TestCatchDuplicateSpec(TestCase):
+        # create new catalog and merge the loaded core namespace catalog
+        ns_catalog = NamespaceCatalog()
+        ns_catalog.merge(self.ns_catalog)
 
-    def setUp(self):
-        self.prefix = id_generator()
-        self.ext_source = '%s_extension3.yaml' % self.prefix
+        # test loading newer namespace than one already loaded will warn
+        msg = (f'Ignoring the following cached namespace(s) because another version is already loaded:\n'
+               f'{self.core_ns} - cached version: {new_ns_version}, loaded version: {self.core_ns_version}\n'
+               f'Please update to the latest package versions.')
+        with self.assertWarnsWith(UserWarning, msg):
+            ns_catalog.load_namespaces(os.path.join(self.tempdir, self.ns_path1))
 
-    def tearDown(self):
-        pass
+    def test_catch_dup_name_core_older(self):
+        new_ns_version = '0.0.0'
+        ns_builder1 = NWBNamespaceBuilder('Extension for us in my Lab', self.core_ns, version=new_ns_version)
+        ext1 = NWBGroupSpec('A custom ElectricalSeries for my lab',
+                            attributes=[NWBAttributeSpec(name='trode_id', doc='the tetrode id', dtype='int')],
+                            neurodata_type_inc='ElectricalSeries',
+                            neurodata_type_def='TetrodeSeries')
+        ns_builder1.add_spec(self.ext_source1, ext1)
+        ns_builder1.export(self.ns_path1, outdir=self.tempdir)
 
-    def test_catch_duplicate_spec(self):
-        spec1 = NWBGroupSpec("This is my new group 1",
-                             "Group1",
-                             neurodata_type_inc="NWBDataInterface",
-                             neurodata_type_def="Group1")
-        spec2 = NWBGroupSpec("This is my new group 2",
-                             "Group2",
-                             groups=[spec1],
-                             neurodata_type_inc="NWBDataInterface",
-                             neurodata_type_def="Group2")
-        ns_builder = NWBNamespaceBuilder("Example namespace", "pynwb_test_ext", version='0.1.0')
-        ns_builder.add_spec(self.ext_source, spec1)
-        with self.assertRaises(ValueError):
-            ns_builder.add_spec(self.ext_source, spec2)
+        # create new catalog and merge the loaded core namespace catalog
+        ns_catalog = NamespaceCatalog()
+        ns_catalog.merge(self.ns_catalog)
+
+        # test no warning if loading older namespace than one already loaded
+        msg = (f'Ignoring the following cached namespace(s) because another version is already loaded:\n'
+               f'{self.core_ns} - cached version: {new_ns_version}, loaded version: {self.core_ns_version}\n'
+               f'Please update to the latest package versions.')
+        with warnings.catch_warnings(record=True) as ws:
+            ns_catalog.load_namespaces(os.path.join(self.tempdir, self.ns_path1))
+        for w in ws:
+            self.assertTrue(str(w.message) != msg)
+            warnings.warn(str(w.message), w.category)

@@ -1,8 +1,8 @@
-=====
-PyNWB
-=====
+.. image:: docs/source/figures/logo_pynwb.png
+    :width: 200px
 
-Documentation of PyNWB can be found at https://pynwb.readthedocs.io
+PyNWB is a Python package for working with NWB files. The PyNWB
+documentation can be found at https://pynwb.readthedocs.io
 
 Latest Release
 ==============
@@ -13,56 +13,72 @@ Latest Release
 .. image:: https://anaconda.org/conda-forge/pynwb/badges/version.svg
      :target: https://anaconda.org/conda-forge/pynwb
 
-
-Build Status
-============
-
-.. table::
-
-  +-----------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------+
-  | Linux                                                                                   | Windows and MacOS                                                                                                               |
-  +=========================================================================================+=================================================================================================================================+
-  | .. image:: https://circleci.com/gh/NeurodataWithoutBorders/pynwb.svg?style=shield       | .. image:: https://dev.azure.com/NeurodataWithoutBorders/pynwb/_apis/build/status/NeurodataWithoutBorders.pynwb?branchName=dev  |
-  |     :target: https://circleci.com/gh/NeurodataWithoutBorders/pynwb                      |     :target: https://dev.azure.com/NeurodataWithoutBorders/pynwb/_build/latest?definitionId=3&branchName=dev                    |
-  +-----------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------+
-
-
-**Conda**
-
-
-.. image:: https://circleci.com/gh/conda-forge/pynwb-feedstock.svg?style=shield
-     :target: https://circleci.com/gh/conda-forge/pynwb-feedstocks
-
+.. image:: https://zenodo.org/badge/99273369.svg
+  :target: https://doi.org/10.5281/zenodo.10582180
 
 Overall Health
 ==============
 
+.. image:: https://github.com/NeurodataWithoutBorders/pynwb/actions/workflows/run_coverage.yml/badge.svg
+    :target: https://github.com/NeurodataWithoutBorders/pynwb/actions/workflows/run_coverage.yml
+
+.. image:: https://github.com/NeurodataWithoutBorders/pynwb/actions/workflows/run_tests.yml/badge.svg
+    :target: https://github.com/NeurodataWithoutBorders/pynwb/actions/workflows/run_tests.yml
+
+.. image:: https://github.com/NeurodataWithoutBorders/pynwb/actions/workflows/codespell.yml/badge.svg
+    :target: https://github.com/NeurodataWithoutBorders/pynwb/actions/workflows/codespell.yml
+
+.. image:: https://github.com/NeurodataWithoutBorders/pynwb/actions/workflows/ruff.yml/badge.svg
+    :target: https://github.com/NeurodataWithoutBorders/pynwb/actions/workflows/ruff.yml
+
+.. image:: https://github.com/NeurodataWithoutBorders/pynwb/actions/workflows/check_sphinx_links.yml/badge.svg
+    :target: https://github.com/NeurodataWithoutBorders/pynwb/actions/workflows/check_sphinx_links.yml
+
+.. image:: https://github.com/NeurodataWithoutBorders/pynwb/actions/workflows/run_inspector_tests.yml/badge.svg
+    :target: https://github.com/NeurodataWithoutBorders/pynwb/actions/workflows/run_inspector_tests.yml
+
+.. image:: https://github.com/NeurodataWithoutBorders/pynwb/actions/workflows/run_all_tests.yml/badge.svg
+    :target: https://github.com/NeurodataWithoutBorders/pynwb/actions/workflows/run_all_tests.yml
+
+.. image:: https://github.com/NeurodataWithoutBorders/pynwb/actions/workflows/deploy_release.yml/badge.svg
+    :target: https://github.com/NeurodataWithoutBorders/pynwb/actions/workflows/deploy_release.yml
+
 .. image:: https://codecov.io/gh/NeurodataWithoutBorders/pynwb/branch/dev/graph/badge.svg
     :target: https://codecov.io/gh/NeurodataWithoutBorders/pynwb
 
-.. image:: https://requires.io/github/NeurodataWithoutBorders/pynwb/requirements.svg?branch=dev
-     :target: https://requires.io/github/NeurodataWithoutBorders/pynwb/requirements/?branch=dev
-     :alt: Requirements Status
+.. image:: https://app.readthedocs.org/projects/pynwb/badge/?version=latest
+     :target: https://pynwb.readthedocs.io/en/latest/?badge=latest
+     :alt: Documentation Status
+
+.. image:: https://img.shields.io/pypi/l/pynwb.svg
+     :target: https://github.com/neurodatawithoutborders/pynwb/blob/dev/license.txt
+     :alt: PyPI - License
+
+**Conda Feedstock**
+
+.. image:: https://dev.azure.com/conda-forge/feedstock-builds/_apis/build/status/pynwb-feedstock?branchName=main
+     :target: https://dev.azure.com/conda-forge/feedstock-builds/_build/latest?definitionId=5703&branchName=main
+     :alt: Conda Feedstock Status
 
 NWB Format API
 ==============
 
 PyNWB is a Python package for working with NWB files. It provides a high-level API for
-efficiently working with Neurodata stored in the `NWB format <https://nwb-schema.readthedocs.io>`_.
+efficiently working with Neurodata stored in the `NWB format <https://nwb-schema.readthedocs.io/en/latest/>`_.
 
-`Neurodata Without Borders: Neurophysiology (NWB:N) <http://www.nwb.org/>`_ is a project to develop a
+`Neurodata Without Borders (NWB) <https://nwb.org/>`_ is a project to develop a
 unified data format for cellular-based neurophysiology data, focused on the
 dynamics of groups of neurons measured under a large range of experimental
 conditions.
 
-The NWB:N team consists of neuroscientists and software developers
+The NWB team consists of neuroscientists and software developers
 who recognize that adoption of a unified data format is an important step toward
 breaking down the barriers to data sharing in neuroscience.
 
 Installation
 ============
 
-See the PyNWB documentation for details http://pynwb.readthedocs.io/en/latest/getting_started.html#installation
+See the PyNWB documentation for details https://pynwb.readthedocs.io/en/stable/install_users.html
 
 Code of Conduct
 ===============
@@ -74,10 +90,16 @@ Contributing
 
 For details on how to contribute to PyNWB see our `contribution guidelines <docs/CONTRIBUTING.rst>`_.
 
+Citing NWB
+==========
+
+* **Manuscript:** Oliver Rübel, Andrew Tritt, Ryan Ly, Benjamin K Dichter, Satrajit Ghosh, Lawrence Niu, Pamela Baker, Ivan Soltesz, Lydia Ng, Karel Svoboda, Loren Frank, Kristofer E Bouchard. (2022). The Neurodata Without Borders ecosystem for neurophysiological data science. eLife, 11:e78362. doi: https://doi.org/10.7554/eLife.78362
+* **RRID:** (PyNWB, RRID:SCR_017452)
+
 LICENSE
 =======
 
-"pynwb" Copyright (c) 2017-2019, The Regents of the University of California, through Lawrence Berkeley National Laboratory (subject to receipt of any required approvals from the U.S. Dept. of Energy).  All rights reserved.
+"pynwb" Copyright (c) 2017-2026, The Regents of the University of California, through Lawrence Berkeley National Laboratory (subject to receipt of any required approvals from the U.S. Dept. of Energy).  All rights reserved.
 Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
 
 (1) Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
@@ -93,7 +115,7 @@ You are under no obligation whatsoever to provide any bug fixes, patches, or upg
 COPYRIGHT
 =========
 
-"pynwb" Copyright (c) 2017-2020, The Regents of the University of California, through Lawrence Berkeley National Laboratory (subject to receipt of any required approvals from the U.S. Dept. of Energy).  All rights reserved.
+"pynwb" Copyright (c) 2017-2026, The Regents of the University of California, through Lawrence Berkeley National Laboratory (subject to receipt of any required approvals from the U.S. Dept. of Energy).  All rights reserved.
 If you have questions about your rights to use or distribute this software, please contact Berkeley Lab's Innovation & Partnerships Office at IPO@lbl.gov.
 
 NOTICE.  This Software was developed under funding from the U.S. Department of Energy and the U.S. Government consequently retains certain rights. As such, the U.S. Government has been granted for itself and others acting on its behalf a paid-up, nonexclusive, irrevocable, worldwide license in the Software to reproduce, distribute copies to the public, prepare derivative works, and perform publicly and display publicly, and to permit other to do so.

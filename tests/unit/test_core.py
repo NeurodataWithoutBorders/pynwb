@@ -1,73 +1,170 @@
 from datetime import datetime
 from dateutil.tz import tzlocal
 
-from hdmf.utils import docval, call_docval_func
+import numpy as np
+from hdmf.backends.hdf5 import H5DataIO
+from hdmf.utils import docval
 
 from pynwb import NWBFile, TimeSeries, available_namespaces
-from pynwb.core import NWBContainer, LabelledDict
+from pynwb.core import NWBContainer, NWBData, ScratchData
 from pynwb.testing import TestCase
 
 
 class MyTestClass(NWBContainer):
 
-    __nwbfields__ = ('prop1', 'prop2')
+    __nwbfields__ = ("prop1", "prop2")
 
-    @docval({'name': 'name', 'type': str, 'doc': 'The name of this container'})
+    @docval({"name": "name", "type": str, "doc": "The name of this container"})
     def __init__(self, **kwargs):
-        call_docval_func(super(MyTestClass, self).__init__, kwargs)
-        self.prop1 = 'test1'
+        super().__init__(**kwargs)
+        self.prop1 = "test1"
 
 
 class TestNWBContainer(TestCase):
-
     def test_constructor(self):
         """Test constructor
         """
-        obj = MyTestClass('obj1')
-        self.assertEqual(obj.name, 'obj1')
-        obj.prop2 = 'test2'
+        obj = MyTestClass("obj1")
+        self.assertEqual(obj.name, "obj1")
+        obj.prop2 = "test2"
 
     def test_nwbfields(self):
         """Test that getters and setters work for nwbfields
         """
-        obj = MyTestClass('obj1')
-        obj.prop2 = 'test2'
-        self.assertEqual(obj.prop1, 'test1')
-        self.assertEqual(obj.prop2, 'test2')
+        obj = MyTestClass("obj1")
+        obj.prop2 = "test2"
+        self.assertEqual(obj.prop1, "test1")
+        self.assertEqual(obj.prop2, "test2")
+
+    def test_get_data_type(self):
+        obj = NWBContainer("obj1")
+        dt = obj.data_type
+        self.assertEqual(dt, 'NWBContainer')
+
+
+class MyNWBData(NWBData):
+
+    __nwbfields__ = ("data", )
+
+    @docval(
+        {"name": "name", "type": str, "doc": "The name of this container"},
+        {"name": "data", "type": ("array_data", "data"), "doc": "any data"},
+    )
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+
+class TestNWBData(TestCase):
+    def test_constructor(self):
+        """Test constructor
+        """
+        obj = MyNWBData("obj1", data=[[1, 2, 3], [1, 2, 3]])
+        self.assertEqual(obj.name, "obj1")
+
+    def test_append_list(self):
+        obj = MyNWBData("obj1", data=[[1, 2, 3], [1, 2, 3]])
+        obj.append([4, 5, 6])
+        np.testing.assert_array_equal(obj.data, [[1, 2, 3], [1, 2, 3], [4, 5, 6]])
+
+    def test_append_ndarray_2d(self):
+        obj = MyNWBData("obj1", data=np.array([[1, 2, 3], [1, 2, 3]]))
+        obj.append([4, 5, 6])
+        np.testing.assert_array_equal(obj.data, [[1, 2, 3], [1, 2, 3], [4, 5, 6]])
+
+    def test_append_ndarray_1d(self):
+        obj = MyNWBData("obj1", data=np.array([1, 2, 3]))
+        obj.append(4)
+        np.testing.assert_array_equal(obj.data, [1, 2, 3, 4])
+
+    def test_append_scalar(self):
+        obj = NWBData(name="obj1", data=1)
+        with self.assertRaises(ValueError):
+            obj.append(2)
+
+    def test_extend_list(self):
+        obj = MyNWBData("obj1", data=[[1, 2, 3], [1, 2, 3]])
+        obj.extend([[4, 5, 6]])
+        np.testing.assert_array_equal(obj.data, [[1, 2, 3], [1, 2, 3], [4, 5, 6]])
+
+    def test_extend_ndarray_1d(self):
+        obj = MyNWBData("obj1", data=np.array([1, 2, 3]))
+        obj.extend([4, 5, 6])
+        np.testing.assert_array_equal(obj.data, [1, 2, 3, 4, 5, 6])
+
+    def test_extend_ndarray_2d(self):
+        obj = MyNWBData("obj1", data=np.array([[1, 2, 3], [1, 2, 3]]))
+        obj.extend([[4, 5, 6]])
+        np.testing.assert_array_equal(obj.data, [[1, 2, 3], [1, 2, 3], [4, 5, 6]])
+
+    def test_extend_scalar(self):
+        obj = NWBData(name="obj1", data=1)
+        with self.assertRaises(ValueError):
+            obj.extend(2)
+
+    def test_set_data_io_visible_through_data(self):
+        """set_data_io is inherited from Data, so its wrapping must be visible on NWBData.data.
+
+        NWBData used to declare its own data storage, which shadowed the parent's, so the DataIO
+        was applied to the parent attribute and then never read back. See #2233.
+        """
+        obj = MyNWBData("obj1", data=np.array([1, 2, 3]))
+        obj.set_data_io(H5DataIO, dict(compression="gzip"))
+        self.assertIsInstance(obj.data, H5DataIO)
+        self.assertEqual(obj.data.io_settings["compression"], "gzip")
+
+    def test_set_data_io_visible_through_data_on_scratch_data(self):
+        """The shadow was on NWBData, so every subclass was affected, not only the image types."""
+        obj = ScratchData(name="obj1", data=np.array([1, 2, 3]), description="test")
+        obj.set_data_io(H5DataIO, dict(compression="gzip"))
+        self.assertIsInstance(obj.data, H5DataIO)
+
+    def test_slicing_list_with_list(self):
+        obj = MyNWBData("obj1", data=[[1, 2, 3], [4, 5, 6]])
+        self.assertEqual(obj[[1,]], [[4, 5, 6]])
 
 
 class TestPrint(TestCase):
-
     def test_print_file(self):
-        nwbfile = NWBFile(session_description='session_description',
-                          identifier='identifier', session_start_time=datetime.now(tzlocal()))
-        ts = TimeSeries('name', [1., 2., 3.] * 1000, timestamps=[1, 2, 3])
-        ts2 = TimeSeries('name2', [1, 2, 3] * 1000, timestamps=[1, 2, 3])
-        expected = """name pynwb.base.TimeSeries at 0x%d
+        nwbfile = NWBFile(
+            session_description="session_description",
+            identifier="identifier",
+            session_start_time=datetime.now(tzlocal()),
+        )
+        ts1 = TimeSeries(
+            name="name1",
+            data=[1000, 2000, 3000],
+            unit="unit",
+            timestamps=[1.0, 2.0, 3.0],
+        )
+        ts2 = TimeSeries(
+            name="name2",
+            data=[1000, 2000, 3000],
+            unit="unit",
+            timestamps=[1.0, 2.0, 3.0],
+        )
+        expected = """name1 pynwb.base.TimeSeries at 0x%d
 Fields:
   comments: no comments
   conversion: 1.0
-  data: [1. 2. 3. ... 1. 2. 3.]
+  data: [1000 2000 3000]
   description: no description
   interval: 1
+  offset: 0.0
   resolution: -1.0
-  timestamps: [1 2 3]
+  timestamps: [1. 2. 3.]
   timestamps_unit: seconds
+  unit: unit
 """
-        expected %= id(ts)
-        self.assertEqual(str(ts), expected)
-        nwbfile.add_acquisition(ts)
+        expected %= id(ts1)
+        self.assertEqual(str(ts1), expected)
+        nwbfile.add_acquisition(ts1)
         nwbfile.add_acquisition(ts2)
-        nwbfile.add_epoch(start_time=1.0, stop_time=10.0, tags=['tag1', 'tag2'])
+        nwbfile.add_epoch(start_time=1.0, stop_time=10.0, tags=["tag1", "tag2"])
         expected_re = r"""root pynwb\.file\.NWBFile at 0x\d+
 Fields:
   acquisition: {
-    name <class 'pynwb\.base\.TimeSeries'>,
+    name1 <class 'pynwb\.base\.TimeSeries'>,
     name2 <class 'pynwb\.base\.TimeSeries'>
-  }
-  epoch_tags: {
-    tag1,
-    tag2
   }
   epochs: epochs <class 'pynwb.epoch.TimeIntervals'>
   file_create_date: \[datetime.datetime\(.*\)\]
@@ -81,22 +178,6 @@ Fields:
 
 class TestAvailableNamespaces(TestCase):
     def test_available_namespaces(self):
-        self.assertEqual(available_namespaces(), ('hdmf-common', 'core'))
-
-
-class TestLabelledDict(TestCase):
-
-    def setUp(self):
-        self.name = 'name'
-        self.container = TimeSeries(self.name, [1., 2., 3.] * 1000, timestamps=[1, 2, 3])
-        self.object_id = self.container.object_id
-
-    def test_add_default(self):
-        ld = LabelledDict('test_dict')
-        ld.add(self.container)
-        self.assertIs(ld[self.name], self.container)
-
-    def test_add_nondefault(self):
-        ld = LabelledDict('test_dict', def_key_name='object_id')
-        ld.add(self.container)
-        self.assertIs(ld[self.object_id], self.container)
+        self.assertEqual(
+            available_namespaces(), ("hdmf-common", "hdmf-experimental", "core")
+        )

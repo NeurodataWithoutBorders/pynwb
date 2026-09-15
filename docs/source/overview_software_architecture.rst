@@ -69,7 +69,7 @@ Builder
    * :py:class:`~hdmf.build.builders.GroupBuilder` - represents a collection of objects
    * :py:class:`~hdmf.build.builders.DatasetBuilder` - represents data
    * :py:class:`~hdmf.build.builders.LinkBuilder` - represents soft-links
-   * :py:class:`~hdmf.build.builders.RegionBuilder` - represents a slice into data (Subclass of :py:class:`~hdmf.build.builders.DatasetBuilder`)
+   * :py:class:`~hdmf.build.builders.ReferenceBuilder` - represents a reference to another group or dataset
 
 * **Main Module:** :py:mod:`hdmf.build.builders`
 

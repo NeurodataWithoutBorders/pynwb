@@ -1,0 +1,284 @@
+name: Run tests
+on:
+  push:
+    branches:
+      - dev
+    tags-ignore:  # exclude the rolling tag that the deploy-dev job moves to each dev commit
+      - 'latest'
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  run-tests:
+    name: ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { name: linux-python3.10-minimum      , test-tox-env: test-py310-minimum    , python-ver: "3.10" , os: ubuntu-latest }
+          # NOTE config below with "upload-wheels: true" specifies that wheels should be uploaded as an artifact
+          - { name: linux-python3.14-upgraded    , test-tox-env: test-py314-upgraded  , python-ver: "3.14", os: ubuntu-latest , upload-wheels: true }
+          - { name: windows-python3.10-minimum   , test-tox-env: test-py310-minimum   , python-ver: "3.10", os: windows-latest }
+          - { name: windows-python3.14-upgraded  , test-tox-env: test-py314-upgraded  , python-ver: "3.14", os: windows-latest }
+          - { name: macos-python3.10-minimum     , test-tox-env: test-py310-minimum   , python-ver: "3.10", os: macos-15-intel }
+          - { name: macos-python3.14-upgraded    , test-tox-env: test-py314-upgraded  , python-ver: "3.14", os: macos-latest }
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          submodules: 'recursive'
+          fetch-depth: 0  # tags are required for versioneer to determine the version
+
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: ${{ matrix.python-ver }}
+
+      - name: Install build dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install tox
+          python -m pip list
+
+      - name: Run tox tests
+        run: |
+          tox -e ${{ matrix.test-tox-env }}
+
+      - name: Build wheel and source distribution
+        run: |
+          tox -e build
+          ls -1 dist
+
+      - name: Check distribution metadata
+        # twine is pinned to the version bundled in pypa/gh-action-pypi-publish so that this check
+        # and the upload in deploy_release.yml apply the same metadata validation.
+        run: |
+          python -m pip install twine==7.0.0
+          python -m twine check --strict dist/*
+
+      - name: Test installation from a wheel
+        run: |
+          tox -e wheelinstall --recreate --installpkg dist/*-none-any.whl
+
+      - name: Upload distribution as a workspace artifact
+        if: ${{ matrix.upload-wheels }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: distributions
+          path: dist
+
+  run-gallery-tests:
+    name: ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { name: linux-gallery-python3.10-minimum   , test-tox-env: gallery-py310-minimum , python-ver: "3.10", os: ubuntu-latest }
+          - { name: linux-gallery-python3.14-upgraded  , test-tox-env: gallery-py314-upgraded, python-ver: "3.14", os: ubuntu-latest }
+          - { name: windows-gallery-python3.10-minimum , test-tox-env: gallery-py310-minimum , python-ver: "3.10", os: windows-latest }
+          - { name: windows-gallery-python3.14-upgraded, test-tox-env: gallery-py314-upgraded, python-ver: "3.14", os: windows-latest }
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          submodules: 'recursive'
+          fetch-depth: 0  # tags are required for versioneer to determine the version
+
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: ${{ matrix.python-ver }}
+
+      - name: Install build dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install tox
+          python -m pip list
+
+      - name: Run tox tests
+        run: |
+          tox -e ${{ matrix.test-tox-env }}
+
+  run-tests-on-conda:
+    name: ${{ matrix.name }}
+    runs-on: ubuntu-latest
+    defaults:
+     run:
+       shell: bash -l {0}  # necessary for conda
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { name: conda-linux-python3.10-minimum   , test-tox-env: test-py310-minimum   , python-ver: "3.10", os: ubuntu-latest }
+          - { name: conda-linux-python3.14-upgraded  , test-tox-env: test-py314-upgraded  , python-ver: "3.14", os: ubuntu-latest }
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          submodules: 'recursive'
+          fetch-depth: 0  # tags are required for versioneer to determine the version
+
+      - name: Set up Conda
+        uses: conda-incubator/setup-miniconda@v4
+        with:
+          auto-update-conda: true
+          python-version: ${{ matrix.python-ver }}
+
+      - name: Install build dependencies
+        run: |
+          conda config --set always_yes yes --set changeps1 no
+          conda info
+          conda install -c conda-forge tox
+
+      - name: Conda reporting
+        run: |
+          conda info
+          conda config --show-sources
+          conda list --show-channel-urls
+
+      - name: Run tox tests
+        run: |
+          tox -e ${{ matrix.test-tox-env }}
+
+      - name: Build wheel and source distribution
+        run: |
+          tox -e build
+          ls -1 dist
+
+      - name: Check distribution metadata
+        # twine is pinned to the version bundled in pypa/gh-action-pypi-publish so that this check
+        # and the upload in deploy_release.yml apply the same metadata validation.
+        run: |
+          python -m pip install twine==7.0.0
+          python -m twine check --strict dist/*
+
+      - name: Test installation from a wheel
+        run: |
+          tox -e wheelinstall --recreate --installpkg dist/*-none-any.whl
+
+  run-ros3-tests:  # tox and conda do not play nicely so do not use tox here
+    name: ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash -l {0}  # necessary for conda
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { name: conda-linux-python3.14-ros3  , python-ver: "3.14", os: ubuntu-latest }
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          submodules: 'recursive'
+          fetch-depth: 0  # tags are required for versioneer to determine the version
+
+      - name: Set up Conda
+        uses: conda-incubator/setup-miniconda@v4
+        with:
+          auto-update-conda: true
+          activate-environment: ros3
+          environment-file: environment-ros3.yml
+          python-version: ${{ matrix.python-ver }}
+          channels: conda-forge
+          conda-remove-defaults: "true"
+          auto-activate: false
+
+      - name: Install run dependencies
+        run: |
+          pip install --group test .
+          conda info
+          conda list
+          pip list
+
+      - name: Run ros3 tests
+        run: |
+          python scripts/test_ros3.py --ros3
+
+  run-gallery-ros3-tests:
+    name: ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash -l {0}  # necessary for conda
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { name: conda-linux-gallery-python3.14-ros3  , python-ver: "3.14", os: ubuntu-latest }
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          submodules: 'recursive'
+          fetch-depth: 0  # tags are required for versioneer to determine the version
+
+      - name: Set up Conda
+        uses: conda-incubator/setup-miniconda@v4
+        with:
+          auto-update-conda: true
+          activate-environment: ros3
+          environment-file: environment-ros3.yml
+          python-version: ${{ matrix.python-ver }}
+          channels: conda-forge
+          conda-remove-defaults: "true"
+          auto-activate: false
+
+      - name: Install run dependencies
+        run: |
+          pip install --group docs ".[zarr,termset]"
+          pip list
+
+      - name: Conda reporting
+        run: |
+          conda info
+          conda config --show-sources
+          conda list --show-channel-urls
+
+      - name: Run gallery ros3 tests
+        run: |
+          python scripts/test_ros3.py --example-ros3
+
+  deploy-dev:
+    name: Deploy pre-release from dev
+    needs: [run-tests, run-gallery-tests, run-tests-on-conda, run-ros3-tests, run-gallery-ros3-tests]
+    if: ${{ github.event_name == 'push' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write  # create the "latest" pre-release and move its tag
+    steps:
+      - name: Download wheel and source distributions from artifact
+        uses: actions/download-artifact@v8
+        with:
+          name: distributions
+          path: dist
+
+      - name: Publish wheel and source distributions as a GitHub pre-release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          ls -1 dist
+          # The "latest" pre-release is a rolling pointer to the tip of dev, holding only the
+          # distributions built from that commit. Delete the release and the tag separately, then
+          # recreate both, so that the tag, the target commit, and the attached artifacts stay
+          # consistent.
+          if gh release view latest --repo "$GITHUB_REPOSITORY" > /dev/null 2>&1; then
+            gh release delete latest --repo "$GITHUB_REPOSITORY" --yes
+          fi
+          # Delete the tag on its own so the step tolerates a release and tag that are out of sync,
+          # such as a release whose tag was already removed or a tag left behind without a release.
+          gh api --silent -X DELETE "repos/$GITHUB_REPOSITORY/git/refs/tags/latest" 2> /dev/null || true
+
+          gh release create latest dist/* \
+            --repo "$GITHUB_REPOSITORY" \
+            --target "$GITHUB_SHA" \
+            --title "Latest" \
+            --prerelease \
+            --notes "Pre-release build of the dev branch at commit $GITHUB_SHA."

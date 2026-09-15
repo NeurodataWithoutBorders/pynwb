@@ -1,10 +1,53 @@
-import warnings
-from collections.abc import Iterable
+"""
+Module for image data in NWB files.
 
-from hdmf.utils import docval, popargs, call_docval_func, get_docval
+This module provides classes for storing and manipulating image data in NWB files.
+The following classes are available:
+
+- :class:`~pynwb.image.ImageSeries`: General image data that is common between acquisition and stimulus time series
+- :class:`~pynwb.image.IndexSeries`: Stores indices to image frames stored in an ImageSeries
+- :class:`~pynwb.image.OpticalSeries`: Image data that is presented or recorded
+- :class:`~pynwb.image.GrayscaleImage`: Single-channel (grayscale) image data
+- :class:`~pynwb.image.RGBImage`: Three-channel (RGB) image data
+- :class:`~pynwb.image.RGBAImage`: Four-channel (RGBA) image data with transparency
+- :class:`~pynwb.base.Images`: Container for storing a collection of images (imported from :mod:`pynwb.base`)
+- :class:`~pynwb.base.Image`: Base class for image data (imported from :mod:`pynwb.base`)
+
+Note: While the :class:`~pynwb.base.Image` and :class:`~pynwb.base.Images` classes are defined in :mod:`pynwb.base`, 
+they can be imported directly from this module:
+
+.. code-block:: python
+
+    from pynwb.image import Image, Images
+"""
+
+import warnings
+
+import numpy as np
+
+from hdmf.utils import (
+    docval,
+    getargs,
+    popargs,
+    popargs_to_dict,
+    get_docval,
+    get_data_shape,
+    AllowPositional,
+)
 
 from . import register_class, CORE_NAMESPACE
-from .base import TimeSeries, Image
+from .base import TimeSeries, Image, Images, _get_num_samples
+from .device import Device
+
+
+__all__ = [
+    'ImageSeries',
+    'IndexSeries',
+    'OpticalSeries',
+    'GrayscaleImage',
+    'RGBImage',
+    'RGBAImage'
+]
 
 
 @register_class('ImageSeries', CORE_NAMESPACE)
@@ -17,40 +60,201 @@ class ImageSeries(TimeSeries):
     __nwbfields__ = ('dimension',
                      'external_file',
                      'starting_frame',
-                     'format')
+                     'format',
+                     'num_samples',
+                     'device')
+
+    # value used when an ImageSeries is read and missing data
+    DEFAULT_DATA = np.ndarray(shape=(0, 0, 0), dtype=np.uint8)
+    # TODO: copy new docs from 2.4 schema
 
     @docval(*get_docval(TimeSeries.__init__, 'name'),  # required
             {'name': 'data', 'type': ('array_data', 'data', TimeSeries), 'shape': ([None] * 3, [None] * 4),
-             'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames. '
-                    'dimensions: time, x, y [, z]',
+             'doc': ('The data values. Can be 3D or 4D. The first dimension must be time (frame). The second and third '
+                     'dimensions represent x and y. The optional fourth dimension represents z. Either data or '
+                     'external_file must be specified (not None), but not both. If data is not specified, '
+                     'data will be set to an empty 3D array.'),
              'default': None},
-            *get_docval(TimeSeries.__init__, 'unit'),
+            {'name': 'unit', 'type': str,
+             'doc': ('The unit of measurement of the image data, e.g., values between 0 and 255. Required when data '
+                     'is specified. If unit (and data) are not specified, then unit will be set to "unknown".'),
+             'default': None},
             {'name': 'format', 'type': str,
-             'doc': 'Format of image. Three types: 1) Image format; tiff, png, jpg, etc. 2) external 3) raw.',
+             'doc': 'Format of image. Three types - 1) Image format; tiff, png, jpg, etc. 2) external 3) raw.',
              'default': None},
             {'name': 'external_file', 'type': ('array_data', 'data'),
              'doc': 'Path or URL to one or more external file(s). Field only present if format=external. '
-                    'Either external_file or data must be specified, but not both.', 'default': None},
-            {'name': 'starting_frame', 'type': Iterable,
-             'doc': 'Each entry is the frame number in the corresponding external_file variable. '
-                    'This serves as an index to what frames each file contains.', 'default': None},
+                    'Either external_file or data must be specified (not None), but not both.', 'default': None},
+            {'name': 'starting_frame', 'type': ('array_data', 'data'),
+             'doc': 'Each entry is a frame number that corresponds to the first frame of each file '
+                    'listed in external_file within the full ImageSeries.', 'default': None},
+            {'name': 'num_samples', 'type': (int, np.unsignedinteger),
+             'doc': ('Total number of frames across all external files. Required when format="external" and '
+                     'timing is described using starting_time and rate, because data is empty and its first '
+                     'dimension cannot be used to determine the number of frames. When timestamps is provided, '
+                     'len(timestamps) already serves this purpose.'),
+             'default': None},
             {'name': 'bits_per_pixel', 'type': int, 'doc': 'DEPRECATED: Number of bits per image pixel',
              'default': None},
-            {'name': 'dimension', 'type': Iterable,
+            {'name': 'dimension', 'type': ('array_data', 'data'),
              'doc': 'Number of pixels on x, y, (and z) axes.', 'default': None},
             *get_docval(TimeSeries.__init__, 'resolution', 'conversion', 'timestamps', 'starting_time', 'rate',
-                        'comments', 'description', 'control', 'control_description'))
+                        'comments', 'description', 'control', 'control_description', 'offset'),
+            {'name': 'device', 'type': Device,
+             'doc': 'Device used to capture the images/video.', 'default': None},
+             allow_positional=AllowPositional.WARNING,)
     def __init__(self, **kwargs):
-        bits_per_pixel, dimension, external_file, starting_frame, format = popargs(
-            'bits_per_pixel', 'dimension', 'external_file', 'starting_frame', 'format', kwargs)
-        call_docval_func(super(ImageSeries, self).__init__, kwargs)
-        if external_file is None and self.data is None:
-            raise ValueError('must supply either external_file or data to ' + self.name)
-        self.bits_per_pixel = bits_per_pixel
-        self.dimension = dimension
-        self.external_file = external_file
-        self.starting_frame = starting_frame
-        self.format = format
+        num_samples = kwargs.pop('num_samples')
+        keys_to_set = ('bits_per_pixel', 'dimension', 'external_file', 'starting_frame', 'format', 'device')
+        args_to_set = popargs_to_dict(keys_to_set, kwargs)
+        name, data, unit = getargs('name', 'data', 'unit', kwargs)
+        if data is not None and unit is None:
+            raise ValueError("Must supply 'unit' argument when supplying 'data' to %s '%s'."
+                             % (self.__class__.__name__, name))
+        if args_to_set['external_file'] is None and data is None:
+            raise ValueError("Must supply either external_file or data to %s '%s'."
+                             % (self.__class__.__name__, name))
+
+        # data and unit are required in TimeSeries, but allowed to be None here, so handle this specially
+        if data is None:
+            kwargs['data'] = ImageSeries.DEFAULT_DATA
+        if unit is None:
+            kwargs['unit'] = ImageSeries.DEFAULT_UNIT
+
+        # If a single external_file is given then set starting_frame  to [0] for backward compatibility
+        if (
+            args_to_set["external_file"] is not None
+            and args_to_set["starting_frame"] is None
+        ):
+            args_to_set["starting_frame"] = (
+                [0] if len(args_to_set["external_file"]) == 1 else None
+            )
+
+        self._num_samples = None  # must exist before super().__init__ accesses num_samples
+        super().__init__(**kwargs)
+
+        for key, val in args_to_set.items():
+            setattr(self, key, val)
+
+        self._num_samples = num_samples
+        self._change_external_file_format()
+
+        error_msg = self._check_image_series_dimension()
+        if error_msg:
+            self._error_on_new_warn_on_construct(error_msg=error_msg)
+
+        error_msg = self._check_external_file_starting_frame_length()
+        if error_msg:
+            self._error_on_new_warn_on_construct(error_msg=error_msg)
+
+        error_msg = self._check_external_file_format()
+        if error_msg:
+            self._error_on_new_warn_on_construct(error_msg=error_msg)
+
+        error_msg = self._check_external_file_data()
+        if error_msg:
+            self._error_on_new_warn_on_construct(error_msg=error_msg)
+
+        error_msg = self._check_num_samples()
+        if error_msg:
+            self._error_on_new_pass_on_construct(error_msg=error_msg)
+
+    def _check_num_samples(self):
+        """Check that num_samples is set when format='external' and rate is used for timing.
+
+        In this configuration data is an empty array so its shape cannot indicate frame count.
+        """
+        if (
+            self.external_file is not None
+            and self.rate is not None
+            and self.num_samples is None
+        ):
+            return (
+                "%s '%s': num_samples should be set when format='external' and rate is used for timing, "
+                "because data is empty and its length cannot be used to determine the number of frames."
+                % (self.__class__.__name__, self.name)
+            )
+
+    def _change_external_file_format(self):
+        """
+        Change the format to 'external' when external_file is specified.
+        """
+        if (
+            get_data_shape(self.data)[0] == 0
+            and self.external_file is not None
+            and self.format is None
+        ):
+            self.format = "external"
+
+    def _check_time_series_dimension(self):
+        """Override _check_time_series_dimension to do nothing.
+        The _check_image_series_dimension method will be called instead.
+        """
+        return
+
+    def _check_image_series_dimension(self):
+        """Check that the 0th dimension of data equals the length of timestamps, when applicable.
+
+        ImageSeries objects can have an external file instead of data stored. The external file cannot be
+        queried for the number of frames it contains, so this check will return True when an external file
+        is provided. Otherwise, this function calls the parent class' _check_time_series_dimension method.
+        """
+        if self.external_file is not None:
+            return
+        return super()._check_time_series_dimension()
+
+    def _check_external_file_starting_frame_length(self):
+        """
+        Check that the number of frame indices in 'starting_frame' matches
+        the number of files in 'external_file'.
+        """
+        if self.external_file is None:
+            return
+        if get_data_shape(self.external_file) == get_data_shape(self.starting_frame):
+            return
+
+        return (
+            "%s '%s': The number of frame indices in 'starting_frame' should have "
+            "the same length as 'external_file'." % (self.__class__.__name__, self.name)
+        )
+
+    def _check_external_file_format(self):
+        """
+        Check that format is 'external' when external_file is specified.
+        """
+        if self.external_file is None:
+            return
+        if self.format == "external":
+            return
+
+        return "%s '%s': Format must be 'external' when external_file is specified." % (
+            self.__class__.__name__,
+            self.name,
+        )
+
+    def _check_external_file_data(self):
+        """
+        Check that data is an empty array when external_file is specified.
+        """
+        if self.external_file is None:
+            return
+        if get_data_shape(self.data)[0] == 0:
+            return
+
+        return (
+            "%s '%s': Either external_file or data must be specified (not None), but not both."
+            % (self.__class__.__name__, self.name)
+        )
+
+    @property
+    def num_samples(self):
+        # The data of an external-file series is empty, so its frame count comes from the
+        # num_samples given at construction, and from the length of the timestamps otherwise.
+        if self._num_samples is not None:
+            return self._num_samples
+        if self.external_file is not None:
+            return _get_num_samples(self.timestamps)
+        return super().num_samples
 
     @property
     def bits_per_pixel(self):
@@ -59,40 +263,88 @@ class ImageSeries(TimeSeries):
     @bits_per_pixel.setter
     def bits_per_pixel(self, val):
         if val is not None:
-            warnings.warn("bits_per_pixel is no longer used", DeprecationWarning)
+            self._error_on_new_pass_on_construct(error_msg="bits_per_pixel is deprecated")
             self.fields['bits_per_pixel'] = val
 
 
 @register_class('IndexSeries', CORE_NAMESPACE)
 class IndexSeries(TimeSeries):
     '''
-    Stores indices to image frames stored in an ImageSeries. The purpose of the ImageIndexSeries is to allow
+    Stores indices to image frames stored in an ImageSeries. The purpose of the IndexSeries is to allow
     a static image stack to be stored somewhere, and the images in the stack to be referenced out-of-order.
     This can be for the display of individual images, or of movie segments (as a movie is simply a series of
     images). The data field stores the index of the frame in the referenced ImageSeries, and the timestamps
     array indicates when that image was displayed.
     '''
 
-    __nwbfields__ = ('indexed_timeseries',)
+    __nwbfields__ = ("indexed_timeseries", "indexed_images")
 
-    @docval(*get_docval(TimeSeries.__init__, 'name'),  # required
-            {'name': 'data', 'type': ('array_data', 'data', TimeSeries), 'shape': (None, ),  # required
-             'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
-            *get_docval(TimeSeries.__init__, 'unit'),
-            {'name': 'indexed_timeseries', 'type': TimeSeries,  # required
-             'doc': 'HDF5 link to TimeSeries containing images that are indexed.'},
-            *get_docval(TimeSeries.__init__, 'resolution', 'conversion', 'timestamps', 'starting_time', 'rate',
-                        'comments', 'description', 'control', 'control_description'))
+    # # value used when an ImageSeries is read and missing data
+    # DEFAULT_UNIT = 'N/A'
+
+    @docval(
+        *get_docval(TimeSeries.__init__, 'name'),  # required
+        {
+            'name': 'data',
+            'type': ('array_data', 'data', TimeSeries),
+            'shape': (None,),  # required
+            'doc': 'The data values. Must be 1D, where the first dimension must be time (frame)',
+        },
+        *get_docval(TimeSeries.__init__, 'unit'),  # required
+        {
+            'name': 'indexed_timeseries', 'type': TimeSeries,  # required
+            'doc': 'Link to TimeSeries containing images that are indexed.',
+            'default': None,
+        },
+        {
+            'name': 'indexed_images',
+            'type': Images,  # required
+            'doc': "Link to Images object containing an ordered set of images that are indexed. The Images object must "
+                   "contain a 'ordered_images' dataset specifying the order of the images in the Images type.",
+            'default': None
+        },
+        *get_docval(
+            TimeSeries.__init__,
+            'resolution',
+            'conversion',
+            'timestamps',
+            'starting_time',
+            'rate',
+            'comments',
+            'description',
+            'control',
+            'control_description',
+            'offset',
+        ),
+        allow_positional=AllowPositional.WARNING,
+    )
     def __init__(self, **kwargs):
-        name, data = popargs('name', 'data', kwargs)
-        indexed_timeseries = popargs('indexed_timeseries', kwargs)
-        super(IndexSeries, self).__init__(name, data, **kwargs)
+        indexed_timeseries, indexed_images = popargs('indexed_timeseries', 'indexed_images', kwargs)
+        if kwargs['unit'] and kwargs['unit'] != 'N/A':
+            self._error_on_new_pass_on_construct(error_msg=("The 'unit' field of IndexSeries is "
+                                                            "fixed to the value 'N/A'."))
+        if not indexed_timeseries and not indexed_images:
+            msg = "Either indexed_timeseries or indexed_images must be provided when creating an IndexSeries."
+            raise ValueError(msg)
+        if indexed_timeseries:
+            self._error_on_new_pass_on_construct("The indexed_timeseries field of IndexSeries is deprecated. "
+                                                 "Use the indexed_images field instead.")
+        kwargs['unit'] = 'N/A'  # fixed value starting in NWB 2.5
+        super().__init__(**kwargs)
         self.indexed_timeseries = indexed_timeseries
+        self.indexed_images = indexed_images
+        if kwargs['conversion'] and kwargs['conversion'] != self.DEFAULT_CONVERSION:
+            warnings.warn("The conversion attribute is not used by IndexSeries.")
+        if kwargs['resolution'] and kwargs['resolution'] != self.DEFAULT_RESOLUTION:
+            warnings.warn("The resolution attribute is not used by IndexSeries.")
+        if kwargs['offset'] and kwargs['offset'] != self.DEFAULT_OFFSET:
+            warnings.warn("The offset attribute is not used by IndexSeries.")
 
 
 @register_class('ImageMaskSeries', CORE_NAMESPACE)
 class ImageMaskSeries(ImageSeries):
     '''
+    DEPRECATED as of NWB 2.8.0 and PyNWB 3.0.0. 
     An alpha mask that is applied to a presented visual stimulus. The data[] array contains an array
     of mask values that are applied to the displayed image. Mask values are stored as RGBA. Mask
     can vary with time. The timestamps array indicates the starting time of a mask, and that mask
@@ -102,19 +354,25 @@ class ImageMaskSeries(ImageSeries):
     __nwbfields__ = ('masked_imageseries',)
 
     @docval(*get_docval(ImageSeries.__init__, 'name'),  # required
-            {'name': 'data', 'type': ('array_data', 'data', TimeSeries),  # required
-             'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
-            *get_docval(ImageSeries.__init__, 'unit'),
             {'name': 'masked_imageseries', 'type': ImageSeries,  # required
              'doc': 'Link to ImageSeries that mask is applied to.'},
-            *get_docval(ImageSeries.__init__, 'format', 'external_file', 'starting_frame', 'bits_per_pixel',
-                        'dimension', 'resolution', 'conversion', 'timestamps', 'starting_time', 'rate', 'comments',
-                        'description', 'control', 'control_description'))
+            *get_docval(ImageSeries.__init__, 'data', 'unit', 'format', 'external_file', 'starting_frame',
+                        'bits_per_pixel', 'dimension', 'resolution', 'conversion', 'timestamps', 'starting_time',
+                        'rate', 'comments', 'description', 'control', 'control_description', 'offset'),
+            {'name': 'device', 'type': Device,
+             'doc': ('Device used to capture the mask data. This field will likely not be needed. '
+                     'The device used to capture the masked ImageSeries data should be stored in the ImageSeries.'),
+             'default': None},
+            allow_positional=AllowPositional.WARNING,)
     def __init__(self, **kwargs):
-        name, data = popargs('name', 'data', kwargs)
-        masked_imageseries = popargs('masked_imageseries', kwargs)
-        super(ImageMaskSeries, self).__init__(name, data, **kwargs)
-        self.masked_imageseries = masked_imageseries
+        if not self._in_construct_mode:
+            raise ValueError(
+                "The ImageMaskSeries neurodata type is deprecated. If you are interested in using it, "
+                "please create an issue on https://github.com/NeurodataWithoutBorders/nwb-schema/issues."
+            )
+        masked_imageseries = popargs('masked_imageseries', kwargs)  # pragma: no cover
+        super().__init__(**kwargs)  # pragma: no cover
+        self.masked_imageseries = masked_imageseries  # pragma: no cover
 
 
 @register_class('OpticalSeries', CORE_NAMESPACE)
@@ -131,23 +389,40 @@ class OpticalSeries(ImageSeries):
                      'field_of_view',
                      'orientation')
 
-    @docval(*get_docval(ImageSeries.__init__, 'name'),
+    @docval(*get_docval(ImageSeries.__init__, 'name'),  # required
+            {
+                "name": "distance",
+                "type": float,
+                "doc": "Distance from camera/monitor to target/eye.",
+                "default": None,
+            },
+            {
+                "name": "field_of_view",
+                "type": ("array_data", "data", "TimeSeries"),
+                "shape": ((2,), (3,)),
+                "doc": "Width, height and depth of image, or imaged area (meters).",
+                "default": None,
+            },
+            {
+                "name": "orientation",
+                "type": str,
+                "doc": "Description of image relative to some reference frame (e.g., which way is up). "
+                "Must also specify frame of reference.",
+                "default": None,
+            },
             {'name': 'data', 'type': ('array_data', 'data'), 'shape': ([None] * 3, [None, None, None, 3]),
-             'doc': 'Images presented to subject, either grayscale or RGB'},
-            *get_docval(ImageSeries.__init__, 'unit', 'format'),
-            {'name': 'distance', 'type': 'float', 'doc': 'Distance from camera/monitor to target/eye.'},  # required
-            {'name': 'field_of_view', 'type': ('array_data', 'data', 'TimeSeries'), 'shape': ((2, ), (3, )),  # required
-             'doc': 'Width, height and depth of image, or imaged area (meters).'},
-            {'name': 'orientation', 'type': str,  # required
-             'doc': 'Description of image relative to some reference frame (e.g., which way is up). '
-                    'Must also specify frame of reference.'},
-            *get_docval(ImageSeries.__init__, 'external_file', 'starting_frame', 'bits_per_pixel',
-                        'dimension', 'resolution', 'conversion', 'timestamps', 'starting_time', 'rate', 'comments',
-                        'description', 'control', 'control_description'))
+             'doc': ('Images presented to subject, either grayscale or RGB. May be 3D or 4D. The first dimension must '
+                     'be time (frame). The second and third dimensions represent x and y. The optional fourth '
+                     'dimension must be length 3 and represents the RGB value for color images. Either data or '
+                     'external_file must be specified, but not both.'),
+             'default': None},
+            *get_docval(ImageSeries.__init__, 'unit', 'format', 'external_file', 'starting_frame', 'num_samples',
+                        'bits_per_pixel', 'dimension', 'resolution', 'conversion', 'timestamps', 'starting_time',
+                        'rate', 'comments', 'description', 'control', 'control_description', 'device', 'offset'),
+            allow_positional=AllowPositional.WARNING,)
     def __init__(self, **kwargs):
-        name, data, = popargs('name', 'data', kwargs)
         distance, field_of_view, orientation = popargs('distance', 'field_of_view', 'orientation', kwargs)
-        super(OpticalSeries, self).__init__(name, data, **kwargs)
+        super().__init__(**kwargs)
         self.distance = distance
         self.field_of_view = field_of_view
         self.orientation = orientation
@@ -156,31 +431,39 @@ class OpticalSeries(ImageSeries):
 @register_class('GrayscaleImage', CORE_NAMESPACE)
 class GrayscaleImage(Image):
 
-    @docval(*get_docval(Image.__init__, 'name'),  # required
-            {'name': 'data', 'type': ('array_data', 'data'), 'doc': 'data of image',  # required
+    @docval(*get_docval(Image.__init__, 'name'),
+            {'name': 'data', 'type': ('array_data', 'data'),
+             'doc': 'Data of grayscale image. Must be 2D where the dimensions represent x and y.',
              'shape': (None, None)},
-            *get_docval(Image.__init__, 'resolution', 'description'))
+            *get_docval(Image.__init__, 'resolution', 'description'),
+            allow_positional=AllowPositional.WARNING,)
     def __init__(self, **kwargs):
-        call_docval_func(super(GrayscaleImage, self).__init__, kwargs)
+        super().__init__(**kwargs)
 
 
 @register_class('RGBImage', CORE_NAMESPACE)
 class RGBImage(Image):
 
     @docval(*get_docval(Image.__init__, 'name'),
-            {'name': 'data', 'type': ('array_data', 'data'), 'doc': 'data of image',  # required
+            {'name': 'data', 'type': ('array_data', 'data'),
+             'doc': 'Data of color image. Must be 3D where the first and second dimensions represent x and y. '
+                    'The third dimension has length 3 and represents the RGB value.',
              'shape': (None, None, 3)},
-            *get_docval(Image.__init__, 'resolution', 'description'))
+            *get_docval(Image.__init__, 'resolution', 'description'),
+            allow_positional=AllowPositional.WARNING,)
     def __init__(self, **kwargs):
-        call_docval_func(super(RGBImage, self).__init__, kwargs)
+        super().__init__(**kwargs)
 
 
 @register_class('RGBAImage', CORE_NAMESPACE)
 class RGBAImage(Image):
 
     @docval(*get_docval(Image.__init__, 'name'),
-            {'name': 'data', 'type': ('array_data', 'data'), 'doc': 'data of image',  # required
+            {'name': 'data', 'type': ('array_data', 'data'),
+             'doc': 'Data of color image with transparency. Must be 3D where the first and second dimensions '
+                    'represent x and y. The third dimension has length 4 and represents the RGBA value.',
              'shape': (None, None, 4)},
-            *get_docval(Image.__init__, 'resolution', 'description'))
+            *get_docval(Image.__init__, 'resolution', 'description'),
+            allow_positional=AllowPositional.WARNING,)
     def __init__(self, **kwargs):
-        call_docval_func(super(RGBAImage, self).__init__, kwargs)
+        super().__init__(**kwargs)

@@ -1,12 +1,15 @@
 from bisect import bisect_left
 
-from hdmf.utils import docval, getargs, popargs, call_docval_func, get_docval
+import numpy as np
+
 from hdmf.data_utils import DataIO
+from hdmf.common import DynamicTable
+from hdmf.utils import docval, getargs, popargs, get_docval, AllowPositional
 
 from . import register_class, CORE_NAMESPACE
-from .base import TimeSeries
-from hdmf.common import DynamicTable
+from .base import TimeSeries, TimeSeriesReferenceVectorData, TimeSeriesReference
 
+__all__ = ['TimeIntervals']
 
 @register_class('TimeIntervals', CORE_NAMESPACE)
 class TimeIntervals(DynamicTable):
@@ -20,18 +23,20 @@ class TimeIntervals(DynamicTable):
         {'name': 'start_time', 'description': 'Start time of epoch, in seconds', 'required': True},
         {'name': 'stop_time', 'description': 'Stop time of epoch, in seconds', 'required': True},
         {'name': 'tags', 'description': 'user-defined tags', 'index': True},
-        {'name': 'timeseries', 'description': 'index into a TimeSeries object', 'index': True}
+        {'name': 'timeseries', 'description': 'index into a TimeSeries object',
+         'index': True, 'class': TimeSeriesReferenceVectorData}
     )
 
     @docval({'name': 'name', 'type': str, 'doc': 'name of this TimeIntervals'},  # required
             {'name': 'description', 'type': str, 'doc': 'Description of this TimeIntervals',
              'default': "experimental intervals"},
-            *get_docval(DynamicTable.__init__, 'id', 'columns', 'colnames'))
+            *get_docval(DynamicTable.__init__, 'id', 'columns', 'colnames', 'target_tables', 'meanings_tables'),
+            allow_positional=AllowPositional.WARNING,)
     def __init__(self, **kwargs):
-        call_docval_func(super(TimeIntervals, self).__init__, kwargs)
+        super().__init__(**kwargs)
 
-    @docval({'name': 'start_time', 'type': 'float', 'doc': 'Start time of epoch, in seconds'},
-            {'name': 'stop_time', 'type': 'float', 'doc': 'Stop time of epoch, in seconds'},
+    @docval({'name': 'start_time', 'type': float, 'doc': 'Start time of epoch, in seconds'},
+            {'name': 'stop_time', 'type': float, 'doc': 'Stop time of epoch, in seconds'},
             {'name': 'tags', 'type': (str, list, tuple), 'doc': 'user-defined tags used throughout time intervals',
              'default': None},
             {'name': 'timeseries', 'type': (list, tuple, TimeSeries), 'doc': 'the TimeSeries this epoch applies to',
@@ -51,10 +56,10 @@ class TimeIntervals(DynamicTable):
             tmp = list()
             for ts in timeseries:
                 idx_start, count = self.__calculate_idx_count(start_time, stop_time, ts)
-                tmp.append((idx_start, count, ts))
+                tmp.append(TimeSeriesReference(idx_start, count, ts))
             timeseries = tmp
             rkwargs['timeseries'] = timeseries
-        return super(TimeIntervals, self).add_row(**rkwargs)
+        return super().add_row(**rkwargs)
 
     def __calculate_idx_count(self, start_time, stop_time, ts_data):
         if isinstance(ts_data.timestamps, DataIO):
@@ -66,10 +71,10 @@ class TimeIntervals(DynamicTable):
             ts_timestamps = ts.timestamps
             ts_starting_time = ts.starting_time
             ts_rate = ts.rate
-        if ts_starting_time is not None and ts_rate:
+        if ts_starting_time is not None and ts_rate is not None:
             start_idx = int((start_time - ts_starting_time)*ts_rate)
             stop_idx = int((stop_time - ts_starting_time)*ts_rate)
-        elif len(ts_timestamps) > 0:
+        elif ts_timestamps is not None and len(ts_timestamps) > 0:
             timestamps = ts_timestamps
             start_idx = bisect_left(timestamps, start_time)
             stop_idx = bisect_left(timestamps, stop_time)
@@ -78,3 +83,38 @@ class TimeIntervals(DynamicTable):
         count = stop_idx - start_idx
         idx_start = start_idx
         return int(idx_start), int(count)
+
+    def get_starting_time(self):
+        """
+        Get the earliest start time across all intervals in this TimeIntervals table.
+
+        Returns
+        -------
+        float or None
+            The earliest start time in seconds, or None if the table is empty.
+        """
+        if len(self) == 0:
+            return None
+        # NOTE: Could be optimized to self['start_time'].data[0] if intervals are guaranteed sorted
+        return float(np.min(self['start_time'].data[:]))
+
+    def get_duration(self):
+        """
+        Get the total duration from the earliest start time to the latest stop time.
+
+        Returns
+        -------
+        float or None
+            The duration in seconds, or None if the table is empty.
+
+        Notes
+        -----
+        The duration represents the time span from the earliest interval start to the
+        latest interval stop, not the sum of individual interval durations.
+        """
+        if len(self) == 0:
+            return None
+        starting_time = self.get_starting_time()
+        # NOTE: Could be optimized to self['stop_time'].data[-1] if intervals are guaranteed sorted
+        stopping_time = float(np.max(self['stop_time'].data[:]))
+        return stopping_time - starting_time

@@ -1,5 +1,0 @@
-sphinx
-matplotlib
-sphinx_rtd_theme
-sphinx-gallery
-allensdk==1.3.2

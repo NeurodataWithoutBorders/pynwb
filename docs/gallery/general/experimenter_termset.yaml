@@ -1,0 +1,17 @@
+id: termset/experimenter_example
+name: Experimenter
+version: 0.0.1
+prefixes:
+  ORC: https://orcid.org/
+imports:
+  - linkml:types
+default_range: string
+
+enums:
+  Experimenters:
+    permissible_values:
+      Bilbo Baggins:
+        description: He who must not be named.
+        meaning: ORC:111
+
+      

@@ -20,11 +20,15 @@ docs/source/modules/generated
 mylab.*.yaml
 *.npy
 *.nwb
+*.nwb.zarr/
+*.h5
 !/tests/back_compat/*.nwb
 manifest.json
+nwb-cache/
 
 # Auto-generated tutorials
 docs/source/tutorials/
+docs/source/sg_execution_times.rst
 
 ### Python ###
 # Byte-compiled / optimized / DLL files
@@ -37,6 +41,11 @@ docs/_build/
 docs/build/
 docs/source/pynwb.*.rst
 
+
+# Virtual Environment
+venv/
+env/
+ENV/
 
 # setuptools
 build/
@@ -58,6 +67,10 @@ docs/tmpl.index.rst
 # coverage output
 tests/coverage/htmlcov
 .coverage
+.coverage.*
+
+# duecredit output
+.duecredit.p
 
 # tox
 .tox
@@ -65,5 +78,17 @@ tests/coverage/htmlcov
 # vscode
 .vscode/
 
-#mypy
+# mypy
 .mypy_cache/
+
+# macos
+.DS_Store
+
+# Version
+_version.py
+
+.core_typemap_version
+core_typemap.pkl
+
+venv/
+uv.lock

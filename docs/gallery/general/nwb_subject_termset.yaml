@@ -1,0 +1,27 @@
+id: termset/species_example
+name: Species
+version: 0.0.1
+prefixes:
+  NCBI_TAXON: https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?mode=Info&id=
+imports:
+  - linkml:types
+default_range: string
+
+enums:
+  Species:
+    permissible_values:
+      Homo sapiens:
+        description: the species is human
+        meaning: NCBI_TAXON:9606
+      Mus musculus:
+        description: the species is a house mouse
+        meaning: NCBI_TAXON:10090
+      Ursus arctos horribilis:
+        description: the species is a grizzly bear
+        meaning: NCBI_TAXON:116960
+      Myrmecophaga tridactyla:
+        description: the species is an anteater
+        meaning: NCBI_TAXON:71006
+      Ailuropoda melanoleuca:
+        description: the species is a panda
+        meaning: NCBI_TAXON:9646

@@ -1,5 +1,5 @@
-How to contribute to NWB:N software and documents
-=================================================
+How to contribute to NWB software and documents
+===============================================
 
 .. _sec-code-of-conduct:
 
@@ -18,30 +18,30 @@ Did you find a bug? or Do you intend to add a new feature or change an existing 
 
 * **Identify the appropriate repository** for the change you are suggesting:
 
-   * Use `nwb-schema <https://github.com/NeurodataWithoutBorders/nwb-schema/>`_ for any changes to the NWB:N format schema, schema language, storage, and other NWB:N related documents
+   * Use `nwb-schema <https://github.com/NeurodataWithoutBorders/nwb-schema/>`_ for any changes to the NWB format schema, schema language, storage, and other NWB related documents
    * Use `PyNWB <https://github.com/NeurodataWithoutBorders/pynwb>`_  for any changes regarding the PyNWB API and the corresponding documentation
-   * Use `MatNWB <https://github.com/NeurodataWithoutBorders/matnwb>`_  for any changes regarding the PyNWB API and the corresponding documentation
+   * Use `MatNWB <https://github.com/NeurodataWithoutBorders/matnwb>`_  for any changes regarding the MatNWB API and the corresponding documentation
 
 * **Ensure the feature or change was not already reported** by searching on GitHub under `PyNWB Issues <https://github.com/NeurodataWithoutBorders/pynwb/issues>`_ and `nwb-schema issues <https://github.com/NeurodataWithoutBorders/nwb-schema/issues>`_, respectively .
 
 * If you are unable to find an open issue addressing the problem then open a new issue on the respective repository. Be sure to include:
 
     * **brief and descriptive title**
-    * **clear description of the problem you are trying to solve***. Describing the use case is often more important than proposing a specific solution. By describing the use case and problem you are trying to solve gives the development team and ultimately the NWB:N community a better understanding for the reasons of changes and enables others to suggest solutions.
+    * **clear description of the problem you are trying to solve***. Describing the use case is often more important than proposing a specific solution. By describing the use case and problem you are trying to solve gives the development team and ultimately the NWB community a better understanding for the reasons of changes and enables others to suggest solutions.
     * **context** providing as much relevant information as possible and if available a **code sample** or an **executable test case** demonstrating the expected behavior and/or problem.
 
 * Be sure to select the appropriate labels (see :ref:`sec-issue-labels`) for your tickets so that they can be processed accordingly.
 
-* NWB:N is currently being developed primarily by staff at scientific research institutions and industry, most of which work on many different research projects. Please be patient, if our development team is not able to respond immediately to your issues. In particular issues that belong to later project milestones may not be reviewed or processed until work on that milestone begins.
+* NWB is currently being developed primarily by staff at scientific research institutions and industry, most of which work on many different research projects. Please be patient, if our development team is not able to respond immediately to your issues. In particular issues that belong to later project milestones may not be reviewed or processed until work on that milestone begins.
 
 Did you write a patch that fixes a bug or implements a new feature?
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 See the ``Contributing Patches and Changes`` section below for details.
 
-Do you have questions about NWB:N?
+Do you have questions about NWB?
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Ask questions on our `Slack workspace <https://nwb-users.slack.com>`_ or sign up for our `NWB:N mailing list <http://visitor.r20.constantcontact.com/manage/optin?v=001nQUq2GTjwCjZxK_V2-6RLElLJO1HMVtoNLJ-wGyDCukZQZxu2AFJmNh6NS0_lGMsWc2w9hZpeNn74HuWdv5RtLX9qX0o0Hy1P0hOgMrkm2NoGAX3VoY25wx8HAtIZwredcCuM0nCUGodpvoaue3SzQ%3D%3D>`_ for updates.
+Ask questions on our `Slack workspace <https://nwb-users.slack.com>`_ or sign up for our `NWB mailing list <http://visitor.r20.constantcontact.com/manage/optin?v=001nQUq2GTjwCjZxK_V2-6RLElLJO1HMVtoNLJ-wGyDCukZQZxu2AFJmNh6NS0_lGMsWc2w9hZpeNn74HuWdv5RtLX9qX0o0Hy1P0hOgMrkm2NoGAX3VoY25wx8HAtIZwredcCuM0nCUGodpvoaue3SzQ%3D%3D>`_ for updates.
 
 Informal discussions between developers and users?
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -53,7 +53,7 @@ The https://nwb-users.slack.com slack is currently used mainly for informal disc
 Contributing Patches and Changes
 --------------------------------
 
-The ``dev`` branches of `PyNWB <https://github.com/NeurodataWithoutBorders/pynwb>`_ and `nwb-schema <https://github.com/NeurodataWithoutBorders/nwb-schema/>`_, are protected; you cannot push to them directly. You must upload your changes by pushing a new branch, then submit your changes to the ``dev`` branch via a `Pull Request <https://help.github.com/articles/creating-a-pull-request>`_. This allows us to conduct automated testing of your contribution, and gives us a space for developers to discuss the contribution and request changes. If you decide to tackle an issue, please make yourself an assignee on the issue to communicate this to the team. Don't worry - this does not commit you to solving this issue. It just lets others know who they should talk to about it.
+The ``dev`` branches of `PyNWB <https://github.com/NeurodataWithoutBorders/pynwb>`_ and `nwb-schema <https://github.com/NeurodataWithoutBorders/nwb-schema/>`_, are protected; you cannot push to them directly. You must upload your changes by pushing a new branch, then submit your changes to the ``dev`` branch via a `Pull Request <https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request>`_. This allows us to conduct automated testing of your contribution, and gives us a space for developers to discuss the contribution and request changes. If you decide to tackle an issue, please make yourself an assignee on the issue to communicate this to the team. Don't worry - this does not commit you to solving this issue. It just lets others know who they should talk to about it.
 
 From your local copy directory, use the following commands.
 
@@ -115,11 +115,11 @@ Projects are currently used mainly on the NeurodataWithoutBorders organization l
 
 .. _sec-styleguides:
 
-Styleguides
------------
+Style Guides
+------------
 
-Git Commit Message Styleguide
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Git Commit Message Style Guide
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 * Use the present tense ("Add feature" not "Added feature")
 * The first line should be short and descriptive.
@@ -127,8 +127,8 @@ Git Commit Message Styleguide
 * If a commit fixes an issues, then include "Fix #X" where X is the number of the issue.
 * Reference relevant issues and pull requests liberally after the first line.
 
-Documentation Styleguide
-^^^^^^^^^^^^^^^^^^^^^^^^
+Documentation Style Guide
+^^^^^^^^^^^^^^^^^^^^^^^^^
 
 All documentations is written in reStructuredText (RST) using Sphinx.
 
@@ -137,23 +137,40 @@ Did you fix whitespace, format code, or make a purely cosmetic patch in source c
 
 Source code changes that are purely cosmetic in nature and do not add anything substantial to the stability, functionality, or testability will generally not be accepted unless they have been approved beforehand. One of the main reasons is that there are a lot of hidden costs in addition to writing the code itself, and with the limited resources of the project, we need to optimize developer time. E.g,. someone needs to test and review PRs, backporting of bug fixes gets harder, it creates noise and pollutes the git repo and many other cost factors.
 
-Format Specification Styleguide
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Format Specification Style Guide
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 **Coming soon**
 
-Python Code Styleguide
-^^^^^^^^^^^^^^^^^^^^^^
+Python Code Style Guide
+^^^^^^^^^^^^^^^^^^^^^^^
 
-Python coding style is checked via ``flake8`` for automatic checking of PEP8 style during pull requests.
+Before you create a Pull Request, make sure you are following the PyNWB style guide.
+To check whether your code conforms to the PyNWB style guide, simply run the ruff_ tool in the project's root
+directory. ``ruff`` will also sort imports automatically and check against additional code style rules.
+
+We also use ``ruff`` to sort python imports automatically and double-check that the codebase
+conforms to PEP8 standards, while using the codespell_ tool to check spelling.
+
+``ruff`` and ``codespell`` are installed when you follow the developer installation instructions. See
+:ref:`install_developers`.
+
+.. _ruff: https://docs.astral.sh/ruff/
+.. _codespell: https://github.com/codespell-project/codespell
+
+.. code::
+
+   $ ruff check .
+   $ codespell
 
 Endorsement
 -----------
 
-Please don’t take the fact that working with an organization (e.g., during a hackathon or via GitHub) as an endorsement of your work or your organization. It’s okay to say  e.g., “We worked with XXXXX to advance science” but not e.g., “XXXXX supports our work on NWB”.”
+Please don’t take the fact that you worked with an organization (e.g., during a hackathon or via GitHub) as an endorsement of your work or your organization. It is okay to say e.g., “We worked with XXXXX to advance science” but not e.g., “XXXXX supports our work on NWB”.”
+
 
 License and Copyright
-=======================
+---------------------
 
 See the `license <https://raw.githubusercontent.com/NeurodataWithoutBorders/pynwb/dev/license.txt>`_ files for details about the copyright and license.
 
