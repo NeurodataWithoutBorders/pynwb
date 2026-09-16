@@ -167,6 +167,28 @@ class TestOnePhotonSeriesIO(AcquisitionH5IOMixin, TestCase):
         nwbfile.add_acquisition(self.container)
 
 
+class TestOnePhotonSeriesWithNumSamplesIO(AcquisitionH5IOMixin, TestCase):
+    """Roundtrip test for OnePhotonSeries with num_samples (external file + rate timing)."""
+
+    def setUpContainer(self):
+        self.device, self.optical_channel, self.imaging_plane = make_imaging_plane()
+        return OnePhotonSeries(
+            name='test_1ps_num_samples',
+            imaging_plane=self.imaging_plane,
+            unit='image_unit',
+            external_file=['external_file'],
+            starting_frame=[0],
+            format='external',
+            rate=30.0,
+            num_samples=900,
+        )
+
+    def addContainer(self, nwbfile):
+        nwbfile.add_device(self.device)
+        nwbfile.add_imaging_plane(self.imaging_plane)
+        nwbfile.add_acquisition(self.container)
+
+
 class TestTwoPhotonSeriesIO(AcquisitionH5IOMixin, TestCase):
 
     def setUpContainer(self):
@@ -191,6 +213,29 @@ class TestTwoPhotonSeriesIO(AcquisitionH5IOMixin, TestCase):
 
     def addContainer(self, nwbfile):
         """ Add the test TwoPhotonSeries as an acquisition and add Device and ImagingPlane to the given NWBFile """
+        nwbfile.add_device(self.device)
+        nwbfile.add_imaging_plane(self.imaging_plane)
+        nwbfile.add_acquisition(self.container)
+
+
+class TestTwoPhotonSeriesWithNumSamplesIO(AcquisitionH5IOMixin, TestCase):
+    """Roundtrip test for TwoPhotonSeries with num_samples (external file + rate timing)."""
+
+    def setUpContainer(self):
+        self.device, self.optical_channel, self.imaging_plane = make_imaging_plane()
+        return TwoPhotonSeries(
+            name='test_2ps_num_samples',
+            imaging_plane=self.imaging_plane,
+            unit='image_unit',
+            external_file=['external_file'],
+            starting_frame=[0],
+            format='external',
+            field_of_view=[2.0, 2.0, 5.0],
+            rate=30.0,
+            num_samples=900,
+        )
+
+    def addContainer(self, nwbfile):
         nwbfile.add_device(self.device)
         nwbfile.add_imaging_plane(self.imaging_plane)
         nwbfile.add_acquisition(self.container)

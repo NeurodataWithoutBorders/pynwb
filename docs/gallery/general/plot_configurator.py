@@ -112,6 +112,47 @@ nwbfile.subject = subject
 # current configuration.
 config = get_loaded_type_config()
 
+####################################
+# How to populate HERD from TermSet-wrapped fields
+# -------------------------------------------------
+# Since ``experimenter`` and ``species`` are validated against a
+# :py:class:`~hdmf.term_set.TermSet`, PyNWB can automatically populate a
+# :py:class:`~pynwb.resources.HERD` (HDMF External Resources Data Structure) with references
+# derived from those :py:class:`~hdmf.term_set.TermSetWrapper` fields, without having to manually
+# specify the ``entity_id`` and ``entity_uri`` for each value.
+#
+# Use :py:meth:`~pynwb.file.NWBFile.get_external_resources` to get (or create) the file's HERD,
+# then call :py:meth:`~hdmf.common.resources.HERD.add_ref_container` on the ``NWBFile``. This walks
+# through all of the objects contained in the file, finds every field wrapped with a
+# :py:class:`~hdmf.term_set.TermSetWrapper`, looks up the matching entity in the associated
+# :py:class:`~hdmf.term_set.TermSet`, and adds the corresponding reference to HERD automatically.
+
+herd = nwbfile.get_external_resources()
+herd.add_ref_container(root_container=nwbfile)
+
+####################################
+# Inspect the populated HERD
+# --------------------------
+# :py:meth:`~hdmf.common.resources.HERD.to_dataframe` flattens the interlinked HERD tables into a
+# single :py:class:`~pandas.DataFrame`, showing one row per (object, key, entity) reference. Note
+# that both the ``experimenter`` reference on the ``NWBFile`` and the ``species`` reference on the
+# ``Subject`` were added automatically.
+herd.to_dataframe()
+
+####################################
+# If instead you only want to add a reference for a single, specific field rather than searching
+# the whole file, use :py:meth:`~hdmf.common.resources.HERD.add_ref_termset` directly on that
+# field, e.g.:
+#
+# .. code-block:: python
+#
+#     herd.add_ref_termset(
+#         container=subject,
+#         attribute="species",
+#         termset=subject.fields["species"].termset,
+#         key=subject.fields["species"].value,
+#     )
+
 ######################################
 # How to unload the Configuration file
 # ------------------------------------

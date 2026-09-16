@@ -1,5 +1,4 @@
 import warnings
-from collections.abc import Iterable
 from bisect import bisect_left, bisect_right
 
 import numpy as np
@@ -72,9 +71,9 @@ class AbstractFeatureSeries(TimeSeries):
                      'features')
 
     @docval(*get_docval(TimeSeries.__init__, 'name'),  # required
-            {'name': 'feature_units', 'type': Iterable, 'shape': (None, ),  # required
+            {'name': 'feature_units', 'type': ('array_data', 'data'), 'shape': (None, ),  # required
              'doc': 'The unit of each feature'},
-            {'name': 'features', 'type': Iterable, 'shape': (None, ),  # required
+            {'name': 'features', 'type': ('array_data', 'data'), 'shape': (None, ),  # required
              'doc': 'Description of each feature'},
             {'name': 'data', 'type': ('array_data', 'data', TimeSeries), 'shape': ((None,), (None, None)),
              'doc': ('The data values. May be 1D or 2D. The first dimension must be time. The optional second '
@@ -154,6 +153,7 @@ class Units(DynamicTable):
     __fields__ = (
         'waveform_rate',
         'waveform_unit',
+        'waveform_time_before_peak_in_ms',
         'resolution'
     )
 
@@ -180,15 +180,24 @@ class Units(DynamicTable):
             {'name': 'electrode_table', 'type': DynamicTable,
              'doc': 'the table that the *electrodes* column indexes', 'default': None},
             {'name': 'waveform_rate', 'type': float,
-             'doc': 'Sampling rate of the waveform means', 'default': None},
+             'doc': 'Sampling rate of the data in the waveform_mean, waveform_sd, and waveforms columns',
+             'default': None},
             {'name': 'waveform_unit', 'type': str,
-             'doc': 'Unit of measurement of the waveform means', 'default': 'volts'},
+             'doc': 'Unit of measurement of the data in the waveform_mean, waveform_sd, and waveforms columns',
+             'default': 'volts'},
+            {'name': 'waveform_time_before_peak_in_ms', 'type': float,
+             'doc': ('Time, in milliseconds, from the start of each waveform in the waveform_mean, waveform_sd, and '
+                     'waveforms columns to the spike peak, i.e., the alignment point used during spike sorting. The '
+                     'same value applies to every unit in the table.'),
+             'default': None},
             {'name': 'resolution', 'type': float,
              'doc': 'The smallest possible difference between two spike times', 'default': None},
             allow_positional=AllowPositional.WARNING,
             )
     def __init__(self, **kwargs):
-        args_to_set = popargs_to_dict(("waveform_rate", "waveform_unit", "resolution"), kwargs)
+        args_to_set = popargs_to_dict(
+            ("waveform_rate", "waveform_unit", "waveform_time_before_peak_in_ms", "resolution"), kwargs
+        )
         electrode_table = popargs("electrode_table", kwargs)
         if kwargs['description'] is None:
             kwargs['description'] = "data on spiking units"

@@ -65,7 +65,7 @@ def mock_electrodes(
         n_electrodes: int = 5, table: Optional[DynamicTable] = None, nwbfile: Optional[NWBFile] = None
 ) -> DynamicTableRegion:
 
-    table = table or mock_ElectrodesTable(n_rows=5, nwbfile=nwbfile)
+    table = table or mock_ElectrodesTable(n_rows=n_electrodes, nwbfile=nwbfile)
     return DynamicTableRegion(
         name="electrodes",
         data=list(range(n_electrodes)),
