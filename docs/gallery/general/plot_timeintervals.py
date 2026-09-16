@@ -25,6 +25,8 @@ a :py:class:`~hdmf.common.table.DynamicTable` with the following columns:
           as :py:class:`~pynwb.base.TimeSeries`. NWB provides several types for this purposes, e.g.,
           :py:class:`~pynwb.misc.IntervalSeries`, :py:class:`~pynwb.behavior.BehavioralEpochs`,
           :py:class:`~pynwb.ecephys.EventDetection`, or :py:class:`~pynwb.ecephys.SpikeEventSeries`.
+          For instantaneous events, use :py:class:`~pynwb.event.EventsTable`, which is stored in the
+          top-level ``/events`` group of the file.
 
 """
 
