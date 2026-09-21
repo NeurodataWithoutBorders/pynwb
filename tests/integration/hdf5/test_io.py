@@ -473,6 +473,25 @@ class TestNWBHDF5IO(TestCase):
         with NWBHDF5IO(self.path, 'r') as io:
             self.assertTupleEqual(io.nwb_version, ("2.0.5", (2, 0, 5)))
 
+    def test_nwb1_version_from_root_dataset(self):
+        """NWB 1.x files store the version as a root-level dataset rather than an attribute.
+        Such a file must be reported as an unsupported version, not as a file with no version."""
+        for name, ver in [('nwb_version', '1.0.6'), ('neurodata_version', '1.0.0')]:
+            with File(self.path, mode='w') as f:
+                f.create_dataset(name, data=ver)
+            with NWBHDF5IO(self.path, 'r', load_namespaces=False) as io:
+                self.assertTupleEqual(io.nwb_version, (ver, tuple(int(i) for i in ver.split('.'))))
+                msg = "NWB version %s not supported. PyNWB supports NWB files version 2 and above." % ver
+                with self.assertRaisesWith(TypeError, msg):
+                    io.read()
+            with self.assertWarnsWith(UserWarning, "Cannot read because PyNWB supports NWB files version 2 and above."):
+                self.assertFalse(NWBHDF5IO.can_read(self.path))
+        # a root dataset by that name that is not a scalar string is not a version
+        with File(self.path, mode='w') as f:
+            f.create_dataset('nwb_version', data=[1, 0, 6])
+        with NWBHDF5IO(self.path, 'r', load_namespaces=False) as io:
+            self.assertTupleEqual(io.nwb_version, (None, None))
+
     def test_check_nwb_version_ok(self):
         """Test that opening a current NWBFile passes the version check"""
         with NWBHDF5IO(self.path, 'w') as io:
