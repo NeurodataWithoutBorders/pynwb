@@ -169,6 +169,48 @@ with fs.open(s3_url, "rb") as f:
 # One downside of the fsspec method is that fsspec is not optimized for reading HDF5 files, and so streaming data
 # using this method can be slow. ``remfile`` may be a faster alternative.
 #
+# Streaming data with LINDI
+# -------------------------
+# The Linked Data Interface (LINDI) provides a cloud-friendly representation of NWB data. It stores the
+# metadata and references to data chunks separately, so a remote NWB file can be opened without first
+# downloading the complete HDF5 file. LINDI exposes an h5py-compatible file object, which means that it
+# can be passed directly to :py:class:`~pynwb.NWBHDF5IO`.
+#
+# Install LINDI with pip:
+#
+# .. code-block:: bash
+#
+#    pip install lindi
+#
+# A local cache is optional, but is useful when exploring the same remote file repeatedly. The cache stores
+# chunks after their first download and can be reused across Python sessions.
+
+import lindi
+
+local_cache = lindi.LocalCache()
+
+with lindi.LindiH5pyFile.from_hdf5_file(s3_url, local_cache=local_cache) as lindi_file:
+    with NWBHDF5IO(file=lindi_file, mode="r") as io:
+        nwbfile = io.read()
+        streamed_data = nwbfile.acquisition['lick_times'].time_series['lick_left_times'].data[:]
+
+##################################
+# LINDI reference files can also be opened directly from a local path or a URL. A reference file stores the
+# remote data locations in a compact ``.lindi.json`` document, so it can be generated once and reused later:
+#
+# .. code-block:: python
+#
+#    with lindi.LindiH5pyFile.from_lindi_file(
+#        "https://example.org/recording.nwb.lindi.json",
+#        local_cache=local_cache,
+#    ) as lindi_file:
+#        with NWBHDF5IO(file=lindi_file, mode="r") as io:
+#            nwbfile = io.read()
+#            streamed_data = nwbfile.acquisition["lick_times"].time_series["lick_left_times"].data[:]
+#
+# As with the other methods in this tutorial, data are loaded lazily. Slicing a dataset downloads only the
+# requested portion, while the metadata is kept in memory.
+
 # Streaming data with ROS3
 # ------------------------
 # ROS3 stands for "read only S3" and is a driver created by the HDF5 Group that allows HDF5 to read HDF5 files stored
