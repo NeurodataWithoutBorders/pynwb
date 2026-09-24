@@ -444,6 +444,33 @@ class NWBFileTest(TestCase):
         self.assertIn(device, children)
         self.assertIn(elecgrp, children)
 
+    def test_objects_updated_after_adding_container(self):
+        ts = TimeSeries(name='added', data=[0, 1], unit='grams', timestamps=[0.0, 1.0])
+        self.nwbfile.objects
+
+        self.nwbfile.add_acquisition(ts)
+
+        self.assertIs(self.nwbfile.objects[ts.object_id], ts)
+
+    def test_objects_updated_after_removing_container(self):
+        ts = TimeSeries(name='removed', data=[0, 1], unit='grams', timestamps=[0.0, 1.0])
+        self.nwbfile.add_acquisition(ts)
+        self.nwbfile.objects
+
+        del self.nwbfile.acquisition[ts.name]
+        ts.reset_parent()
+
+        self.assertNotIn(ts.object_id, self.nwbfile.objects)
+
+    def test_objects_updated_after_adding_nested_container(self):
+        module = self.nwbfile.create_processing_module(name='behavior', description='')
+        self.nwbfile.objects
+        ts = TimeSeries(name='nested', data=[0, 1], unit='grams', timestamps=[0.0, 1.0])
+
+        module.add(ts)
+
+        self.assertIs(self.nwbfile.objects[ts.object_id], ts)
+
     def test_fail_if_source_script_file_name_without_source_script(self):
         with self.assertRaises(ValueError):
             # <-- source_script_file_name without source_script is not allowed
