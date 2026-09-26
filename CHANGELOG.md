@@ -1,5 +1,10 @@
 # PyNWB Changelog
 
+## PyNWB 4.2.1 (Upcoming)
+
+### Documentation and tutorial enhancements
+- Replaced the docs assistant with the NWB Assistant chat widget from the Open Science Assistant (OSA). It now appears on every page of the docs. @bendichter [#2266](https://github.com/NeurodataWithoutBorders/pynwb/pull/2266)
+
 ## PyNWB 4.2.0 (September 2, 2026)
 
 ### Changed
