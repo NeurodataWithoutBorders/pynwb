@@ -285,7 +285,12 @@ html_theme_options = {
 # or fully qualified paths (eg. https://...)
 html_css_files = [
     'css/custom.css',
-    'css/nwb_assistant.css'
+]
+
+# NWB Assistant chat widget (Open Science Assistant); see _static/js/nwb_assistant.js
+html_js_files = [
+    'https://demo.osc.earth/osa-chat-widget.js',
+    'js/nwb_assistant.js',
 ]
 
 # The name for this set of Sphinx documents.  If None, it defaults to
