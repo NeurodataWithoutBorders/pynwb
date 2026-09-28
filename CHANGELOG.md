@@ -1,5 +1,10 @@
 # PyNWB Changelog
 
+## Upcoming
+
+### Fixed
+- Fixed `TimeIntervals.get_starting_time` and `get_duration` returning NaN whenever a time column contained NaN values. NaN values are now ignored when calculating the observed interval span. @AtomicGlance [#2255](https://github.com/NeurodataWithoutBorders/pynwb/pull/2255)
+
 ## PyNWB 4.2.0 (September 2, 2026)
 
 ### Changed
