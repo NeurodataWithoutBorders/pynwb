@@ -1,5 +1,10 @@
 # PyNWB Changelog
 
+## Upcoming
+
+### Fixed
+- Fixed `TimeIntervals.get_starting_time` and `get_duration` returning NaN whenever a time column contained NaN values. NaN values are now ignored when calculating the observed interval span. @AtomicGlance [#2255](https://github.com/NeurodataWithoutBorders/pynwb/pull/2255)
+
 ## PyNWB 4.2.0 (September 2, 2026)
 
 ### Changed
@@ -16,7 +21,6 @@
 - Added `model` and `serial_number` parameters to `mock_Device`. Passing a `DeviceModel` as `model` together with an `nwbfile` also places that `DeviceModel` in the `NWBFile`, so the link resolves when the file is written. @rly [#2238](https://github.com/NeurodataWithoutBorders/pynwb/pull/2238)
 
 ### Fixed
-- Fixed `TimeIntervals.get_starting_time` and `get_duration` returning NaN whenever a time column contained NaN values. NaN values are now ignored when calculating the observed interval span. @AtomicGlance [#2212](https://github.com/NeurodataWithoutBorders/pynwb/issues/2212)
 - Fixed `FeatureExtraction.times` and `Clustering.peak_over_rms` being copied into a Python list on construction, which was slow for data read from a file. @cboulay [#2253](https://github.com/NeurodataWithoutBorders/pynwb/pull/2253)
 - Fixed `ElectricalSeries.__init__`, `TimeSeries.get_timestamps`, and `TimeSeries.num_samples` failing on data backed by a zarr array. @rly [#2235](https://github.com/NeurodataWithoutBorders/pynwb/pull/2235)
 - Fixed `TimeSeries.num_samples` returning `None` when the data or timestamps are backed by a `DataChunkIterator` that wraps an array. @rly [#2235](https://github.com/NeurodataWithoutBorders/pynwb/pull/2235)

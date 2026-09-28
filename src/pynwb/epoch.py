@@ -130,7 +130,7 @@ class TimeIntervals(DynamicTable):
             return float('nan')
 
         valid_stops = stop_times[~np.isnan(stop_times)]
-        starting_time = float(np.nanmin(valid_starts))
+        starting_time = float(np.min(valid_starts))
         known_boundaries = np.concatenate((valid_starts, valid_stops))
-        stopping_time = float(np.nanmax(known_boundaries))
+        stopping_time = float(np.max(known_boundaries))
         return stopping_time - starting_time
