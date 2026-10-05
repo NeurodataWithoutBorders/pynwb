@@ -30,12 +30,15 @@ def create_icephys_stimulus_and_response(sweep_number, electrode, randomize_data
                 rate=10e3 if not randomize_data else int(np.random.rand()*10) * 1000 + 1000.,
                 electrode=electrode,
                 gain=0.1 if not randomize_data else np.random.rand(),
+                conversion=1e-12,
+                offset=0.0,
                 sweep_number=sweep_number)
     # Create and ic-response
     response = VoltageClampSeries(
                 name='vcs_'+str(sweep_number),
                 data=[0.1, 0.2, 0.3, 0.4, 0.5] if not randomize_data else np.random.rand(10),
                 conversion=1e-12,
+                offset=0.0,
                 resolution=np.nan,
                 starting_time=123.6 if not randomize_data else (np.random.rand() * 100),
                 rate=20e3 if not randomize_data else int(np.random.rand() * 20) * 1000. + 1000.,

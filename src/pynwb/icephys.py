@@ -198,6 +198,9 @@ class CurrentClampSeries(PatchClampSeries):
     def __init__(self, **kwargs):
         name, unit = popargs('name', 'unit', kwargs)
         unit = ensure_unit(self, name, unit, 'volts', '2.1.0')
+        self._check_conversion_and_offset(
+            name=name, unit=unit, conversion=kwargs['conversion'], offset=kwargs['offset']
+        )
         bias_current, bridge_balance, capacitance_compensation = popargs(
             'bias_current', 'bridge_balance', 'capacitance_compensation', kwargs)
         super().__init__(name=name, unit=unit, **kwargs)
@@ -262,8 +265,8 @@ class CurrentClampStimulusSeries(PatchClampSeries):
     __nwbfields__ = ()
 
     @docval(*get_docval(PatchClampSeries.__init__, 'name', 'data', 'electrode'),  # required
-            *get_docval(PatchClampSeries.__init__, 'gain', 'stimulus_description', 'resolution', 'conversion', 
-                        'timestamps', 'starting_time', 'rate', 'comments', 'description', 'control', 
+            *get_docval(PatchClampSeries.__init__, 'gain', 'stimulus_description', 'resolution', 'conversion',
+                        'timestamps', 'starting_time', 'rate', 'comments', 'description', 'control',
                         'control_description', 'sweep_number', 'offset'),
             {'name': 'unit', 'type': str, 'doc': "The base unit of measurement (must be 'amperes')",
              'default': 'amperes'},
@@ -271,6 +274,9 @@ class CurrentClampStimulusSeries(PatchClampSeries):
     def __init__(self, **kwargs):
         name, unit = popargs('name', 'unit', kwargs)
         unit = ensure_unit(self, name, unit, 'amperes', '2.1.0')
+        self._check_conversion_and_offset(
+            name=name, unit=unit, conversion=kwargs['conversion'], offset=kwargs['offset']
+        )
         super().__init__(name=name, unit=unit, **kwargs)
 
 
@@ -312,6 +318,9 @@ class VoltageClampSeries(PatchClampSeries):
                 'resistance_comp_correction', 'resistance_comp_prediction', 'whole_cell_capacitance_comp',
                 'whole_cell_series_resistance_comp', kwargs)
         unit = ensure_unit(self, name, unit, 'amperes', '2.1.0')
+        self._check_conversion_and_offset(
+            name=name, unit=unit, conversion=kwargs['conversion'], offset=kwargs['offset']
+        )
         
         super().__init__(name=name, unit=unit, **kwargs)
         self.capacitance_fast = capacitance_fast
@@ -333,7 +342,7 @@ class VoltageClampStimulusSeries(PatchClampSeries):
     __nwbfields__ = ()
 
     @docval(*get_docval(PatchClampSeries.__init__, 'name', 'data', 'electrode'),  # required
-            *get_docval(PatchClampSeries.__init__, 'gain', 'stimulus_description', 'resolution', 'conversion', 
+            *get_docval(PatchClampSeries.__init__, 'gain', 'stimulus_description', 'resolution', 'conversion',
                         'timestamps', 'starting_time', 'rate', 'comments', 'description', 'control',
                         'control_description', 'sweep_number', 'offset'),
             {'name': 'unit', 'type': str, 'doc': "The base unit of measurement (must be 'volts')",
@@ -342,6 +351,9 @@ class VoltageClampStimulusSeries(PatchClampSeries):
     def __init__(self, **kwargs):
         name, unit = popargs('name', 'unit', kwargs)
         unit = ensure_unit(self, name, unit, 'volts', '2.1.0')
+        self._check_conversion_and_offset(
+            name=name, unit=unit, conversion=kwargs['conversion'], offset=kwargs['offset']
+        )
         super().__init__(name=name, unit=unit, **kwargs)
 
 

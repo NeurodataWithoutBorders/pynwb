@@ -44,6 +44,8 @@ def mock_VoltageClampStimulusSeries(
     gain: float = 0.02,
     timestamps=None,
     starting_time: Optional[float] = None,
+    conversion: float = 1.0,
+    offset: float = 0.,
     nwbfile: Optional[NWBFile] = None,
 ) -> VoltageClampStimulusSeries:
     voltage_clamp_stimulus_series = VoltageClampStimulusSeries(
@@ -54,6 +56,8 @@ def mock_VoltageClampStimulusSeries(
         gain=gain,
         timestamps=timestamps,
         starting_time=starting_time,
+        conversion=conversion,
+        offset=offset,
     )
 
     if nwbfile is not None:
@@ -66,6 +70,7 @@ def mock_VoltageClampSeries(
     name: Optional[str] = None,
     data=None,
     conversion: float = 1.0,
+    offset: float = 0.,
     resolution: float = np.nan,
     starting_time: Optional[float] = None,
     rate: Optional[float] = 100_000.0,
@@ -79,6 +84,7 @@ def mock_VoltageClampSeries(
         name=name if name is not None else name_generator("VoltageClampSeries"),
         data=data if data is not None else np.ones((30,)),
         conversion=conversion,
+        offset=offset,
         resolution=resolution,
         starting_time=starting_time,
         rate=rate,

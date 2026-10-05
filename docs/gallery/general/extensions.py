@@ -217,6 +217,8 @@ ts = TetrodeSeries(
     # starting_time=ephys_timestamps[0],
     # rate=rate,
     resolution=0.001,
+    conversion=1.0,
+    offset=0.0,
     comments="This data was randomly generated with numpy, using 1234 as the seed",
     description="Random numbers generated with numpy.random.rand",
 )

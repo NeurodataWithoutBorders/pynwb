@@ -193,6 +193,8 @@ raw_electrical_series = ElectricalSeries(
     electrodes=all_table_region,
     starting_time=0.0,  # timestamp of the first sample in seconds relative to the session start time
     rate=20000.0,  # in Hz
+    conversion=1.0,  # scalar to multiply the data by to convert it to volts
+    offset=0.0,  # scalar to add to the scaled data to convert it to volts
 )
 
 ####################
@@ -218,6 +220,8 @@ lfp_electrical_series = ElectricalSeries(
     electrodes=all_table_region,
     starting_time=0.0,
     rate=200.0,
+    conversion=1.0,
+    offset=0.0,
 )
 
 ####################
@@ -272,6 +276,8 @@ filtered_electrical_series = ElectricalSeries(
     electrodes=all_table_region,
     starting_time=0.0,
     rate=200.0,
+    conversion=1.0,
+    offset=0.0,
 )
 
 filtered_ephys = FilteredEphys(electrical_series=filtered_electrical_series)
@@ -400,6 +406,8 @@ spike_events = SpikeEventSeries(
     data=spike_snippets,
     timestamps=np.arange(40).astype(float),
     electrodes=shank0,
+    conversion=1.0,
+    offset=0.0,
 )
 nwbfile.add_acquisition(spike_events)
 

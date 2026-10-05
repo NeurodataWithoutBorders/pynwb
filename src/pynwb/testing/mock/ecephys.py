@@ -120,6 +120,8 @@ def mock_SpikeEventSeries(
     timestamps=np.arange(10).astype(float),
     electrodes: Optional[DynamicTableRegion] = None,
     nwbfile: Optional[NWBFile] = None,
+    conversion: float = 1.0,
+    offset: float = 0.,
 ) -> SpikeEventSeries:
     spike_event_series = SpikeEventSeries(
         name=name or name_generator("SpikeEventSeries"),
@@ -127,6 +129,8 @@ def mock_SpikeEventSeries(
         data=data if data is not None else np.ones((10, 5)),
         timestamps=timestamps if timestamps is not None else np.arange(10).astype(float),
         electrodes=electrodes if electrodes is not None else mock_electrodes(nwbfile=nwbfile),
+        conversion=conversion,
+        offset=offset,
     )
 
     if nwbfile is not None:

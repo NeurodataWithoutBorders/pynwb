@@ -144,6 +144,8 @@ ex_stimulus = VoltageClampStimulusSeries(
     rate=10e3,
     electrode=ex_electrode,
     gain=0.02,
+    conversion=1e-3,  # scalar to multiply the data by to convert it to volts
+    offset=0.0,  # scalar to add to the scaled data to convert it to volts
 )
 
 # Create an ic-response
@@ -151,6 +153,7 @@ ex_response = VoltageClampSeries(
     name="response",
     data=[0.1, 0.2, 0.3, 0.4, 0.5],
     conversion=1e-12,
+    offset=0.0,
     resolution=np.nan,
     starting_time=123.6,
     rate=20e3,
@@ -305,6 +308,8 @@ stimulus = VoltageClampStimulusSeries(
     rate=10e3,
     electrode=electrode,
     gain=0.02,
+    conversion=1e-3,
+    offset=0.0,
     sweep_number=np.uint64(15),
 )
 
@@ -313,6 +318,7 @@ response = VoltageClampSeries(
     name="vcs",
     data=[0.1, 0.2, 0.3, 0.4, 0.5],
     conversion=1e-12,
+    offset=0.0,
     resolution=np.nan,
     starting_time=123.6,
     rate=20e3,
@@ -332,6 +338,7 @@ ccs = CurrentClampSeries(
     name="ccs",
     data=[0.1, 0.2, 0.3, 0.4, 0.5],
     conversion=1e-12,
+    offset=0.0,
     resolution=np.nan,
     starting_time=123.6,
     rate=20e3,
@@ -350,6 +357,8 @@ ccss = CurrentClampStimulusSeries(
     rate=10e3,
     electrode=electrode,
     gain=0.02,
+    conversion=1e-12,
+    offset=0.0,
     sweep_number=np.uint(16),
 )
 
@@ -361,6 +370,7 @@ izcs = IZeroClampSeries(
     gain=0.02,
     resolution=np.nan,
     conversion=1e-12,
+    offset=0.0,
     starting_time=345.6,
     rate=20e3,
     sweep_number=np.uint(17),
@@ -520,6 +530,8 @@ stimulus_template = VoltageClampStimulusSeries(
     rate=10e3,
     electrode=electrode,
     gain=0.02,
+    conversion=1e-3,
+    offset=0.0,
 )
 nwbfile.add_stimulus_template(stimulus_template)
 
