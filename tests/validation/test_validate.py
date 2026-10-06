@@ -346,7 +346,7 @@ class TestValidateZarr(TestCase):
 
     def _write_zarr_nwbfile(self, path):
         nwbfile = mock_NWBFile()
-        with NWBZarrIO(str(path), 'w') as io:
+        with NWBZarrIO(str(path), "w") as io:
             io.write(nwbfile)
 
     def test_validate_zarr_path_cached_namespaces(self):
@@ -367,6 +367,6 @@ class TestValidateZarr(TestCase):
         with tempfile.TemporaryDirectory() as temp_dir:
             path = Path(temp_dir) / "test.nwb.zarr"
             self._write_zarr_nwbfile(path)
-            with NWBZarrIO(str(path), 'r') as io:
+            with NWBZarrIO(str(path), "r") as io:
                 errors = validate(io=io)
             self.assertEqual(errors, [])
