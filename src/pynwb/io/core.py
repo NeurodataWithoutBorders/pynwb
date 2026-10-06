@@ -49,6 +49,8 @@ class VectorDataMap(ObjectMapper):
                     return container.parent.waveform_rate
                 if spec.name == 'unit':
                     return container.parent.waveform_unit
+                if spec.name == 'time_before_peak_in_ms':
+                    return container.parent.waveform_time_before_peak_in_ms
             if container.name == 'spike_times':
                 if spec.name == 'resolution':
                     return container.parent.resolution

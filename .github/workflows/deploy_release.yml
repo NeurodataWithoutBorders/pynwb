@@ -8,15 +8,22 @@ jobs:
   deploy-release:
     name: Deploy release from tag
     runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/p/pynwb
+    permissions:
+      id-token: write  # mint the OIDC token for PyPI trusted publishing
+      contents: write  # create the GitHub release
     steps:
       - name: Checkout repo with submodules
         uses: actions/checkout@v7
         with:
+          persist-credentials: false
           submodules: 'recursive'
           fetch-depth: 0  # tags are required for versioneer to determine the version
 
       - name: Set up Python
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@v7
         with:
           python-version: '3.14'
 
@@ -35,20 +42,58 @@ jobs:
           tox -e build
           ls -1 dist
 
+      - name: Check distribution metadata
+        # twine is pinned to the version bundled in pypa/gh-action-pypi-publish so that this check
+        # and the upload below apply the same metadata validation.
+        run: |
+          python -m pip install twine==7.0.0
+          python -m twine check --strict dist/*
+
       - name: Test installation from a wheel
         run: |
           tox -e wheelinstall --recreate --installpkg dist/*-none-any.whl
 
-      - name: Upload wheel and source distributions to PyPI
+      - name: Test installation from a source distribution
+        # The source distribution is uploaded to PyPI and attached to the GitHub release. --recreate
+        # gives it a fresh environment, so its dependencies are resolved and installed from scratch.
         run: |
-          python -m pip install twine
-          ls -1 dist
-          # twine upload --repository-url https://test.pypi.org/legacy/ -u ${{ secrets.BOT_PYPI_USER }} -p ${{ secrets.BOT_PYPI_PASSWORD }} --skip-existing dist/*
-          twine upload -u ${{ secrets.BOT_PYPI_USER }} -p ${{ secrets.BOT_PYPI_PASSWORD }} --skip-existing dist/*
+          tox -e wheelinstall --recreate --installpkg dist/*.tar.gz
+
+      - name: Upload wheel and source distributions to PyPI
+        # Publishes to PyPI via OIDC trusted publishing. The pynwb project on PyPI must have a trusted
+        # publisher configured for the NeurodataWithoutBorders/pynwb repository, the deploy_release.yml
+        # workflow, and the pypi environment.
+        # This action validates the distributions with the twine and packaging versions pinned in its
+        # requirements/runtime.txt. When bumping it, set the twine pin in the "Check distribution
+        # metadata" steps of this workflow, run_tests.yml, and run_all_tests.yml to match.
+        uses: pypa/gh-action-pypi-publish@v1.14.2
+        with:
+          skip-existing: true
 
       - name: Publish wheel and source distributions as a GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
-          python -m pip install "githubrelease>=1.5.9"
-          githubrelease --github-token ${{ secrets.BOT_GITHUB_TOKEN }} release NeurodataWithoutBorders/pynwb \
-            create ${{ github.ref_name }} --name ${{ github.ref_name }} \
-            --publish dist/*
+          # Use this version's CHANGELOG.md section as the release notes, falling back to
+          # auto-generated notes if no matching section with content is found (e.g. a heading/tag mismatch).
+          awk -v hdr="## PyNWB ${GITHUB_REF_NAME}" '
+            index($0, hdr) == 1 { f = 1; next }
+            f && /^## / { exit }
+            f { print }
+          ' CHANGELOG.md > release_notes.md
+          if grep -q '[^[:space:]]' release_notes.md; then
+            notes_args=(--notes-file release_notes.md)
+          else
+            echo "No release notes found in CHANGELOG.md for ${GITHUB_REF_NAME}; using auto-generated notes."
+            notes_args=(--generate-notes)
+          fi
+          # Create the release, or upload the artifacts to it if a re-run finds it already exists,
+          # so the step can be re-run safely.
+          if gh release view "${GITHUB_REF_NAME}" --repo "$GITHUB_REPOSITORY" > /dev/null 2>&1; then
+            gh release upload "${GITHUB_REF_NAME}" dist/* --repo "$GITHUB_REPOSITORY" --clobber
+          else
+            gh release create "${GITHUB_REF_NAME}" dist/* \
+              --repo "$GITHUB_REPOSITORY" \
+              --title "${GITHUB_REF_NAME}" \
+              "${notes_args[@]}"
+          fi

@@ -346,6 +346,9 @@ def _get_backend(path: str, method: str = None):
     if method == "ros3":
         return NWBHDF5IO  # TODO - add additional conditions for other streaming methods
 
+    if not os.path.exists(path):
+        raise FileNotFoundError(f"Could not find the file '{path}'.")
+
     try:
         from hdmf_zarr import NWBZarrIO
         backend_io_classes = [NWBHDF5IO, NWBZarrIO]
@@ -420,6 +423,20 @@ class NWBHDF5IO(_HDF5IO):
         # Open the file
         super().__init__(path, manager=manager, mode=mode, file=file_obj, comm=comm,
                          driver=driver, aws_region=aws_region, herd_path=herd_path)
+        # fsspec file handle to close alongside this IO, set by read_nwb for remote reads
+        self._fsspec_file = None
+
+    def close(self, close_links=True):
+        """Close this file and any files linked to from this file.
+
+        :param close_links: Whether to close all files linked to from this file. (default: True)
+        :type close_links: bool
+        """
+        super().close(close_links=close_links)
+        fsspec_file = getattr(self, "_fsspec_file", None)
+        if fsspec_file is not None:
+            fsspec_file.close()
+            self._fsspec_file = None
 
     @property
     def nwb_version(self):
@@ -519,13 +536,18 @@ class NWBHDF5IO(_HDF5IO):
         path = str(path) if path is not None else None
 
         # Streaming case
-        if path is not None and (path.startswith("s3://") or path.startswith("http")):
+        if path is not None and path.startswith(_REMOTE_SCHEMES):
             import fsspec
-            fsspec_file_system = fsspec.filesystem("http")
-            ffspec_file = fsspec_file_system.open(path, "rb")
+            scheme = path.split("://", 1)[0]
+            fsspec_file_system = fsspec.filesystem(scheme)
+            fsspec_file = fsspec_file_system.open(path, "rb")
 
-            open_file = h5py.File(ffspec_file, "r")
+            open_file = h5py.File(fsspec_file, "r")
             io = NWBHDF5IO(file=open_file)
+            # h5py does not close a Python file object it was handed, so give the fsspec handle
+            # to the NWBHDF5IO to close alongside the h5py file. Leaving it open leaks the handle
+            # and, on Windows, keeps a lock that blocks deletion of the underlying file.
+            io._fsspec_file = fsspec_file
             nwbfile = io.read()
         else:
             io = NWBHDF5IO(path=path, file=file, mode="r", load_namespaces=True)
@@ -533,12 +555,28 @@ class NWBHDF5IO(_HDF5IO):
 
         return nwbfile
 
+_REMOTE_SCHEMES = (
+    "s3://",      # AWS S3 and S3-compatible stores (MinIO, Ceph, Hetzner Object Storage, etc.)
+    "gs://",      # Google Cloud Storage (canonical scheme)
+    "gcs://",     # Google Cloud Storage (alternative scheme)
+    "az://",      # Azure Blob Storage (short form)
+    "abfs://",    # Azure Data Lake Storage Gen2 over HTTP
+    "abfss://",   # Azure Data Lake Storage Gen2 over HTTPS (recommended)
+    "wasbs://",   # Azure WASB (Windows Azure Storage Blob) over HTTPS (legacy)
+    "http://",    # Generic HTTP, including DANDI signed URLs and any HTTP-accessible store
+    "https://",   # Generic HTTPS, same as above with TLS
+    "ftp://",     # FTP
+    "ftps://",    # FTPS (FTP over TLS)
+)
+
+
 @docval({'name': 'path', 'type': (str, Path),
-         'doc': 'Path to the NWB file. Can be either a local filesystem path to '
-                'an HDF5 (.nwb) or Zarr (.zarr) file.'},
+         'doc': ("Path to the NWB file. Can be a local filesystem path to an HDF5 (.nwb) "
+                 "or Zarr (.zarr) file, or a remote URL "
+                 "(`s3://`, `gs://`, `abfs://`, `https://`, etc.).")},
         is_method=False)
 def read_nwb(**kwargs):
-    """Read an NWB file from a local path.
+    """Read an NWB file from a local path or remote URL.
 
     High-level interface for reading NWB files. Automatically handles both HDF5
     and Zarr formats. For advanced use cases (parallel I/O, custom namespaces),
@@ -555,7 +593,6 @@ def read_nwb(**kwargs):
             * Reads any backend (e.g. HDF5 or Zarr) if there is an IO class available.
 
         Advanced features requiring direct use of IO classes (e.g. NWBHDF5IO NWBZarrIO) include:
-            * Streaming data from s3
             * Custom namespace extensions
             * Parallel I/O with MPI
             * Custom build managers
@@ -563,17 +600,43 @@ def read_nwb(**kwargs):
             * Pre-opened HDF5 file objects or Zarr stores
             * Remote file access configuration
 
-    Example usage reading a local NWB file:
+        Remote reads use each fsspec backend's default credential chain. Public buckets
+        addressed as ``s3://`` are signed by default and fail without credentials. Read
+        them via their ``https://<bucket>.s3.amazonaws.com/...`` form, or use the IO
+        classes directly: ``NWBZarrIO`` accepts ``storage_options={"anon": True}``, and
+        for HDF5 open the object with ``fsspec.filesystem("s3", anon=True).open(url, "rb")``
+        and pass the handle to ``NWBHDF5IO(file=...)``.
+
+    Example usage:
 
     .. code-block:: python
 
         from pynwb import read_nwb
         nwbfile = read_nwb("path/to/file.nwb")
+        nwbfile = read_nwb("s3://bucket/file.nwb")
 
     :Returns: pynwb.NWBFile The loaded NWB file object.
     """
 
     path = popargs('path', kwargs)
+    path_str = str(path)
+    is_remote = path_str.startswith(_REMOTE_SCHEMES)
+
+    # Remote URL: dispatch by URL shape without probing (can_read cannot reach remote paths)
+    if is_remote:
+        path_str = path_str.rstrip("/")
+        has_zarr_suffix = path_str.endswith(".zarr")
+        # DANDI publishes some Zarr assets at `<scheme>://dandiarchive/zarr/<uuid>/` with
+        # no `.zarr` suffix, so suffix matching alone misses them.
+        is_dandi_zarr = "dandiarchive" in path_str and "/zarr/" in path_str
+        if has_zarr_suffix or is_dandi_zarr:
+            from hdmf_zarr import NWBZarrIO
+            return NWBZarrIO.read_nwb(path=path)
+        return NWBHDF5IO.read_nwb(path=path)
+
+    if not os.path.exists(path):
+        raise FileNotFoundError(f"Could not find the file '{path}'.")
+
     # HDF5 is always available so we try that first
     backend_is_hdf5 = NWBHDF5IO.can_read(path=path)
     if backend_is_hdf5:

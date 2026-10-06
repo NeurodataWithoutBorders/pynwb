@@ -293,6 +293,21 @@ class OnePhotonSeriesConstructor(TestCase):
         self.assertEqual(one_photon_series.format, "external")
         self.assertIsNone(one_photon_series.dimension)
 
+    def test_num_samples(self):
+        """Test that num_samples can be set on an external-file OnePhotonSeries timed with rate."""
+        ip = create_imaging_plane()
+        one_photon_series = OnePhotonSeries(
+            name="test_one_photon_series",
+            unit="unit",
+            imaging_plane=ip,
+            external_file=["external_file"],
+            starting_frame=[0],
+            format="external",
+            rate=30.0,
+            num_samples=900,
+        )
+        self.assertEqual(one_photon_series.num_samples, 900)
+
     def test_negative_binning_assertion(self):
         ip = create_imaging_plane()
 
@@ -333,6 +348,21 @@ class TwoPhotonSeriesConstructor(TestCase):
         self.assertEqual(tPS.starting_frame, [0])
         self.assertEqual(tPS.format, 'external')
         self.assertIsNone(tPS.dimension)
+
+    def test_num_samples(self):
+        """Test that num_samples can be set on an external-file TwoPhotonSeries timed with rate."""
+        ip = create_imaging_plane()
+        tPS = TwoPhotonSeries(
+            name='test_tPS',
+            unit='unit',
+            imaging_plane=ip,
+            external_file=['external_file'],
+            starting_frame=[0],
+            format='external',
+            rate=30.0,
+            num_samples=900,
+        )
+        self.assertEqual(tPS.num_samples, 900)
 
 
 class MotionCorrectionConstructor(TestCase):

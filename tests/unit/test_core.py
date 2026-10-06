@@ -2,10 +2,11 @@ from datetime import datetime
 from dateutil.tz import tzlocal
 
 import numpy as np
+from hdmf.backends.hdf5 import H5DataIO
 from hdmf.utils import docval
 
 from pynwb import NWBFile, TimeSeries, available_namespaces
-from pynwb.core import NWBContainer, NWBData
+from pynwb.core import NWBContainer, NWBData, ScratchData
 from pynwb.testing import TestCase
 
 
@@ -99,7 +100,24 @@ class TestNWBData(TestCase):
         obj = NWBData(name="obj1", data=1)
         with self.assertRaises(ValueError):
             obj.extend(2)
-    
+
+    def test_set_data_io_visible_through_data(self):
+        """set_data_io is inherited from Data, so its wrapping must be visible on NWBData.data.
+
+        NWBData used to declare its own data storage, which shadowed the parent's, so the DataIO
+        was applied to the parent attribute and then never read back. See #2233.
+        """
+        obj = MyNWBData("obj1", data=np.array([1, 2, 3]))
+        obj.set_data_io(H5DataIO, dict(compression="gzip"))
+        self.assertIsInstance(obj.data, H5DataIO)
+        self.assertEqual(obj.data.io_settings["compression"], "gzip")
+
+    def test_set_data_io_visible_through_data_on_scratch_data(self):
+        """The shadow was on NWBData, so every subclass was affected, not only the image types."""
+        obj = ScratchData(name="obj1", data=np.array([1, 2, 3]), description="test")
+        obj.set_data_io(H5DataIO, dict(compression="gzip"))
+        self.assertIsInstance(obj.data, H5DataIO)
+
     def test_slicing_list_with_list(self):
         obj = MyNWBData("obj1", data=[[1, 2, 3], [4, 5, 6]])
         self.assertEqual(obj[[1,]], [[4, 5, 6]])

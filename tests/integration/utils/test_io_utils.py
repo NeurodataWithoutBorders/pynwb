@@ -76,9 +76,19 @@ class TestGetNWBBackend(TestCase):
     def tearDown(self):
         remove_test_file(self.hdf5_path)
 
-    def test_get_backend_invalid_file(self):
-        with self.assertRaises(ValueError):
+    def test_get_backend_missing_file(self):
+        with self.assertRaises(FileNotFoundError):
             _get_backend('not_a_file.nwb')
+
+    def test_get_backend_invalid_file(self):
+        invalid_path = "test_pynwb_invalid_backend.nwb"
+        with open(invalid_path, "w") as f:
+            f.write("this is not an NWB file")
+        try:
+            with self.assertRaises(ValueError):
+                _get_backend(invalid_path)
+        finally:
+            remove_test_file(invalid_path)
 
     def test_get_backend_HDF5(self):
         backend_io = _get_backend(self.hdf5_path)

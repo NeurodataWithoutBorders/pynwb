@@ -1,4 +1,3 @@
-from dateutil.parser import parse as dateutil_parse
 import typing
 
 from hdmf.build import ObjectMapper, Builder, GroupBuilder
@@ -7,7 +6,7 @@ from hdmf.utils import docval, get_docval
 from .. import register_map
 from ..file import NWBFile, Subject
 from ..core import ScratchData
-from .utils import get_nwb_version
+from .utils import get_nwb_version, parse_date, NO_OVERRIDE
 
 
 @register_map(NWBFile)
@@ -231,7 +230,7 @@ class NWBFileMap(ObjectMapper):
         for user convenience and consistency with how they are written.
         """
         datestr = builder.get('session_start_time').data
-        date = dateutil_parse(datestr)
+        date = parse_date(datestr, "session_start_time")
         return date
 
     @ObjectMapper.constructor_arg('timestamps_reference_time')
@@ -244,7 +243,7 @@ class NWBFileMap(ObjectMapper):
         for user convenience and consistency with how they are written.
         """
         datestr = builder.get('timestamps_reference_time').data
-        date = dateutil_parse(datestr)
+        date = parse_date(datestr, "timestamps_reference_time")
         return date
 
     @ObjectMapper.constructor_arg('file_create_date')
@@ -257,7 +256,7 @@ class NWBFileMap(ObjectMapper):
         for user convenience and consistency with how they are written.
         """
         datestr = builder.get('file_create_date').data
-        dates = list(map(dateutil_parse, datestr))
+        dates = [parse_date(date_string, "file_create_date") for date_string in datestr]
         return dates
 
     @ObjectMapper.constructor_arg('experimenter')
@@ -290,7 +289,7 @@ class NWBFileMap(ObjectMapper):
         Then it was changed to be a 1-D array of strings. This mapping function is necessary
         for writing a valid 'experimenter' array if it is a string in the NWBFile container.
         """
-        ret = None
+        ret = NO_OVERRIDE
         if isinstance(container.experimenter, str):
             ret = (container.experimenter,)
         return ret
@@ -325,7 +324,7 @@ class NWBFileMap(ObjectMapper):
         Then it was changed to be a 1-D array of strings. This mapping function is necessary
         for writing a valid 'related_publications' array if it is a string in the NWBFile container.
         """
-        ret = None
+        ret = NO_OVERRIDE
         if isinstance(container.related_publications, str):
             ret = (container.related_publications,)
         return ret
@@ -348,7 +347,7 @@ class SubjectMap(ObjectMapper):
             return
         else:
             datestr = dob_builder.data
-            date = dateutil_parse(datestr)
+            date = parse_date(datestr, "date_of_birth")
             return date
 
     @ObjectMapper.constructor_arg("age__reference")

@@ -1,10 +1,55 @@
 # PyNWB Changelog
 
-## PyNWB 4.0.1 (Unreleased)
+## Upcoming
 
 ### Fixed
-- Fixed `mock_electrodes` (and `mock_ElectricalSeries`) sizing the auto-created `ElectrodesTable` to a fixed 5 rows while the `DynamicTableRegion` followed `n_electrodes`, which raised an `IndexError` under HDMF 4.x+ for any data with more than 5 channels. The table is now sized to `n_electrodes`. @h-mayorquin [#2214](https://github.com/NeurodataWithoutBorders/pynwb/pull/2214)
 - Fixed `pynwb.validate(path=...)` raising `TypeError` on Zarr-backed NWB files because HDF5-only kwargs (`driver`, `aws_region`, `load_namespaces`) were forwarded into `NWBZarrIO`. Backend dispatch is now centralized in a single opener helper, and namespace loading uses `HDMFIO.load_namespaces_io` on the open IO, which also retires the `io._file` access in the validator. Added `storage_options` to the `validate()` API for the Zarr backend. @h-mayorquin [#2187](https://github.com/NeurodataWithoutBorders/pynwb/pull/2187)
+
+## PyNWB 4.2.0 (September 2, 2026)
+
+### Changed
+- The array-valued fields `TimeSeries.control` and `control_description`, `ImageSeries.dimension` and `starting_frame`, `TwoPhotonSeries.field_of_view`, `AbstractFeatureSeries.features` and `feature_units`, `Clustering.peak_over_rms`, and `ClusterWaveforms.waveform_mean` and `waveform_sd` accept zarr arrays. They no longer accept non-array iterables such as `str`, `set`, `range`, and generators. @rly [#2235](https://github.com/NeurodataWithoutBorders/pynwb/pull/2235)
+- `TimeSeries.get_timestamps` raises a `ValueError` when timestamps must be generated but the number of samples in the data cannot be determined. @rly [#2235](https://github.com/NeurodataWithoutBorders/pynwb/pull/2235)
+- Added support for NWB Schema 2.11.0
+  - The `unit` attribute of `Units.waveform_mean`, `Units.waveform_sd`, and `Units.waveforms` now has a default value of `"volts"` instead of a fixed value of `"volts"`.
+  - `Units.waveform_mean`, `Units.waveform_sd`, and `Units.waveforms` have a new optional `time_before_peak_in_ms` attribute, exposed as the `waveform_time_before_peak_in_ms` argument and field of `Units`. It holds the time, in milliseconds, from the start of each waveform to the spike peak, i.e., the alignment point used during spike sorting. @rly [#2237](https://github.com/NeurodataWithoutBorders/pynwb/pull/2237)
+  - Incorporates HDMF Common Schema 1.10.0, which changes `MeaningsTable.target` from a link to an object-reference attribute. @rly [#2244](https://github.com/NeurodataWithoutBorders/pynwb/pull/2244)
+- Raised the minimum HDMF requirement to 6.2.0, which bundles the HDMF Common Schema 1.10.0 required by NWB Schema 2.11.0. @rly [#2244](https://github.com/NeurodataWithoutBorders/pynwb/pull/2244)
+
+### Added
+- Added a section to the "How to Configure Term Validations" tutorial showing how to populate a `HERD` from the fields that a loaded type configuration wraps with a `TermSetWrapper`. @oruebel [#2251](https://github.com/NeurodataWithoutBorders/pynwb/pull/2251)
+- Added `model` and `serial_number` parameters to `mock_Device`. Passing a `DeviceModel` as `model` together with an `nwbfile` also places that `DeviceModel` in the `NWBFile`, so the link resolves when the file is written. @rly [#2238](https://github.com/NeurodataWithoutBorders/pynwb/pull/2238)
+
+### Fixed
+- Fixed `FeatureExtraction.times` and `Clustering.peak_over_rms` being copied into a Python list on construction, which was slow for data read from a file. @cboulay [#2253](https://github.com/NeurodataWithoutBorders/pynwb/pull/2253)
+- Fixed `ElectricalSeries.__init__`, `TimeSeries.get_timestamps`, and `TimeSeries.num_samples` failing on data backed by a zarr array. @rly [#2235](https://github.com/NeurodataWithoutBorders/pynwb/pull/2235)
+- Fixed `TimeSeries.num_samples` returning `None` when the data or timestamps are backed by a `DataChunkIterator` that wraps an array. @rly [#2235](https://github.com/NeurodataWithoutBorders/pynwb/pull/2235)
+- Fixed `Units.waveform_unit` having no effect on the written file. It is now written to the `unit` attribute of the `waveform_mean`, `waveform_sd`, and `waveforms` columns, and still defaults to `"volts"`. Reading a file whose waveform columns carry different `unit` or `sampling_rate` attributes now warns, since `Units` keeps a single value for each. @rly [#2237](https://github.com/NeurodataWithoutBorders/pynwb/pull/2237)
+- Fixed `mock_DeviceModel` defaulting `manufacturer` to `None`. The mock now defaults it to `"manufacturer"`. @HugoFara [#2232](https://github.com/NeurodataWithoutBorders/pynwb/pull/2232)
+- Fixed reading a file whose dates carry a sub-minute UTC offset (e.g. `1900-10-01T00:00:00-05:50:36`). @h-mayorquin [#2230](https://github.com/NeurodataWithoutBorders/pynwb/pull/2230)
+- Fixed wide pandas DataFrames in the tutorials spilling out of the content column and into the right margin. @bendichter [#2236](https://github.com/NeurodataWithoutBorders/pynwb/pull/2236)
+- Fixed the experimenter check in the "Annotating Multiple Streamed NWB Files with a Single HERD" example testing for `"Chen, Tsai-Wen"` while dandiset 000015 stores `"Tsai-Wen Chen"`, so the ORCID reference was never added. The example also streams the first 5 assets of the dandiset rather than all 210. @rly [#2246](https://github.com/NeurodataWithoutBorders/pynwb/pull/2246)
+- Fixed `set_data_io` being silently ignored on `NWBData` subclasses (`GrayscaleImage`, `RGBImage`, `RGBAImage`, `ExternalImage`, `ImageReferences`, and `ScratchData`), so requested chunking and compression were dropped. @h-mayorquin [#2233](https://github.com/NeurodataWithoutBorders/pynwb/pull/2233)
+- Fixed `ImageSeries` (and its subclasses) writing a derived `num_samples` dataset that the user never set. @adityasingh2400 [#2239](https://github.com/NeurodataWithoutBorders/pynwb/pull/2239)
+- Fixed `OpticalSeries`, `OnePhotonSeries`, and `TwoPhotonSeries` not accepting `num_samples`, which made them impossible to construct with `format="external"` and `rate`. @rly [#2248](https://github.com/NeurodataWithoutBorders/pynwb/pull/2248)
+- Fixed `ImageSeries.num_samples` returning `None` instead of `len(timestamps)` for an external-file series timed with `timestamps`, which also made `get_starting_time` and `get_duration` return `None`. @rly [#2250](https://github.com/NeurodataWithoutBorders/pynwb/pull/2250)
+- Fixed `TimeSeriesReference.timestamps` returning incorrect times for a `TimeSeries` that has `starting_time` and `rate` instead of `timestamps`. @h-mayorquin @rly [#2245](https://github.com/NeurodataWithoutBorders/pynwb/pull/2245)
+
+## PyNWB 4.1.0 (July 23, 2026)
+
+### Changed
+- Updated `ObjectMapper` `constructor_arg` and `object_attr` override functions to return the `hdmf.build.ObjectMapper.NO_OVERRIDE` sentinel instead of `None` to signal "no override". HDMF 6.2.0 deprecates returning `None` from an override function to signal "no override" (in HDMF 8.0 a `None` return will set the constructor argument or attribute to `None`, dropping data), and emits a `DeprecationWarning` when it happens (see [hdmf-dev/hdmf#1167](https://github.com/hdmf-dev/hdmf/pull/1167)). PyNWB resolves the sentinel via `getattr`, so it degrades to `None` on HDMF < 6.2.0 and keeps working with the existing `hdmf>=6.1.0` requirement without bumping the minimum version. @rly [#2224](https://github.com/NeurodataWithoutBorders/pynwb/pull/2224)
+- Lifted the `<1.11` cap on the `linkml` and `linkml-runtime` termset extras and bumped the `dandi` docs dependency to `>=0.76.5`. dandi 0.76.5 lifts its `click<8.2` bound ([dandi/dandi-cli#1883](https://github.com/dandi/dandi-cli/pull/1883)), which had conflicted with the `click>=8.2` requirement of linkml 1.11. @rly [#2217](https://github.com/NeurodataWithoutBorders/pynwb/pull/2217)
+
+### Added
+- Added remote-read support to `pynwb.read_nwb`. The function now accepts remote URLs (`s3://`, `gs://`, `abfs://`, `https://`, etc.) and dispatches to the right backend based on the URL: `.zarr` suffixes (and DANDI Zarr assets under `/zarr/`) are read with `NWBZarrIO`, everything else with `NWBHDF5IO`. Remote files are opened through `fsspec`, which now uses the URL's actual scheme instead of the previous hardcoded `fsspec.filesystem("http")` that mishandled non-HTTP schemes. @h-mayorquin [#2190](https://github.com/NeurodataWithoutBorders/pynwb/pull/2190)
+
+### Fixed
+- Fixed `pynwb.read_nwb` leaking the `fsspec` file handle when reading a remote HDF5 file. `NWBHDF5IO` now closes the `fsspec` handle when it is closed. @rly [#2226](https://github.com/NeurodataWithoutBorders/pynwb/pull/2226)
+- Worked around a deadlock in the HDF5 2.1 ROS3 driver that hung the Windows ROS3 CI jobs after the tests passed. @rly [#2228](https://github.com/NeurodataWithoutBorders/pynwb/issues/2228)
+- Fixed `mock_electrodes` (and `mock_ElectricalSeries`) sizing the auto-created `ElectrodesTable` to a fixed 5 rows while the `DynamicTableRegion` followed `n_electrodes`, which raised an `IndexError` under HDMF 4.x+ for any data with more than 5 channels. The table is now sized to `n_electrodes`. @h-mayorquin [#2214](https://github.com/NeurodataWithoutBorders/pynwb/pull/2214)
+- Fixed `read_nwb` and `_get_backend` reporting a nonexistent path as an unrecognized backend (and, without hdmf-zarr installed, suggesting `pip install hdmf-zarr`). A missing file now raises a `FileNotFoundError`. @rly [#2222](https://github.com/NeurodataWithoutBorders/pynwb/pull/2222)
+- Fixed the `Deploy pre-release from dev` CI job, which failed with a `404` from the GitHub API because `scikit-ci-addons` resolved the `latest` tag to one of two duplicate draft releases it had itself created. Both release paths now use the `gh` CLI. @rly [#2225](https://github.com/NeurodataWithoutBorders/pynwb/pull/2225)
 
 
 ## PyNWB 4.0.0 (June 29, 2026)
@@ -43,6 +88,16 @@
 - Fixed ROS3 streaming and added an `aws_region` argument to `validate` so the AWS region can be passed through when validating a file opened with the `ros3` driver. HDF5 2.1.0 (h5py 3.16.0) requires the AWS region to be specified when opening an S3 URL with the `ros3` driver, so the ROS3 tests and the streaming tutorial now pass `aws_region="us-east-2"` (the region of the DANDI Archive S3 bucket). @rly [#2201](https://github.com/NeurodataWithoutBorders/pynwb/pull/2201)
 - Fixed reading legacy files where `Device.model` is a string containing `/` or `:` (e.g., `"MFC_200/250-0.66_40mm"`), which previously raised a `ValueError`. The string is now remapped to a read-only `DeviceModel` that preserves the original name, with a warning explaining that the file cannot be written or exported until a `DeviceModel` with a valid name is created. Writing or exporting such a `DeviceModel` raises a clear error instead of silently corrupting the file. @rly [#2186](https://github.com/NeurodataWithoutBorders/pynwb/pull/2186)
 - Fixed invalid CSS properties in documentation assistant toggle that prevented proper positioning on displays ≥1400px wide. @rly [#2151](https://github.com/NeurodataWithoutBorders/pynwb/pull/2151)
+
+### Documentation and tutorial enhancements
+- Added a tutorial on using HERD to annotate an NWB file with external resources and store it at `/general/external_resources`, plus a companion example showing how to annotate multiple NWB files streamed from a DANDI dandiset with a single HERD. @rly, @mavaylon1 [#2200](https://github.com/NeurodataWithoutBorders/pynwb/pull/2200)
+- Added `pandas.ExtensionArray` to `nitpick_ignore` so the Sphinx build does not fail on the unresolved cross-reference that HDMF's `array_data` docval macro renders for every type that accepts array data. @rly [#2209](https://github.com/NeurodataWithoutBorders/pynwb/pull/2209)
+- Added `app.readthedocs.org/projects/pynwb/*` to `linkcheck_ignore` to stop the Sphinx linkcheck CI job from intermittently failing when GitHub Actions runners get throttled by readthedocs. @h-mayorquin [#2191](https://github.com/NeurodataWithoutBorders/pynwb/pull/2191)
+- Added documentation for `ExternalImage` to the images tutorial. @h-mayorquin [#2159](https://github.com/NeurodataWithoutBorders/pynwb/pull/2159)
+- Fixed broken and redirecting links in documentation. @bendichter [#2165](https://github.com/NeurodataWithoutBorders/pynwb/pull/2165)
+- Added `EventsTable` examples to the NWB file basics and behavior tutorials. @rly [#2156](https://github.com/NeurodataWithoutBorders/pynwb/pull/2156)
+- Added example of setting `Units.resolution` in the ecephys tutorial. @h-mayorquin [#2174](https://github.com/NeurodataWithoutBorders/pynwb/pull/2174)
+
 
 ## PyNWB 3.1.3 (December 9, 2025)
 

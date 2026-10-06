@@ -1,4 +1,3 @@
-from collections.abc import Iterable
 import numpy as np
 import warnings
 
@@ -208,6 +207,7 @@ class OnePhotonSeries(ImageSeries):
             ImageSeries.__init__,
             "external_file",
             "starting_frame",
+            "num_samples",
             "bits_per_pixel",
             "dimension",
             "resolution",
@@ -252,14 +252,14 @@ class TwoPhotonSeries(ImageSeries):
     @docval(*get_docval(ImageSeries.__init__, 'name'),  # required
             {'name': 'imaging_plane', 'type': ImagingPlane, 'doc': 'Imaging plane class/pointer.'},  # required
             *get_docval(ImageSeries.__init__, 'data', 'unit', 'format'),
-            {'name': 'field_of_view', 'type': (Iterable, TimeSeries), 'shape': ((2, ), (3, )),
+            {'name': 'field_of_view', 'type': ('array_data', 'data', TimeSeries), 'shape': ((2, ), (3, )),
              'doc': 'Width, height and depth of image, or imaged area (meters).', 'default': None},
             {'name': 'pmt_gain', 'type': float, 'doc': 'Photomultiplier gain.', 'default': None},
             {'name': 'scan_line_rate', 'type': float,
              'doc': 'Lines imaged per second. This is also stored in /general/optophysiology but is kept '
                     'here as it is useful information for analysis, and so good to be stored w/ the actual data.',
              'default': None},
-            *get_docval(ImageSeries.__init__, 'external_file', 'starting_frame', 'bits_per_pixel',
+            *get_docval(ImageSeries.__init__, 'external_file', 'starting_frame', 'num_samples', 'bits_per_pixel',
                         'dimension', 'resolution', 'conversion', 'timestamps', 'starting_time', 'rate',
                         'comments', 'description', 'control', 'control_description', 'device', 'offset'),
             allow_positional=AllowPositional.WARNING,)

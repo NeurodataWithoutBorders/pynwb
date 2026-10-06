@@ -388,6 +388,42 @@ class ImageSeriesConstructor(TestCase):
         num_samples_warnings = [x for x in w if 'num_samples' in str(x.message)]
         self.assertEqual(num_samples_warnings, [])
 
+    def test_num_samples_from_timestamps(self):
+        """Test that num_samples comes from the timestamps on an external-file ImageSeries."""
+        iS = ImageSeries(
+            name='test_iS',
+            external_file=['external_file'],
+            format='external',
+            unit='Frames',
+            starting_frame=[0],
+            timestamps=[1.0, 2.0, 3.0],
+        )
+        self.assertEqual(iS.num_samples, 3)
+        self.assertEqual(iS.get_starting_time(), 1.0)
+        self.assertEqual(iS.get_duration(), 2.0)
+
+    def test_num_samples_none_with_rate_construct_mode(self):
+        """Test that num_samples is None on an external-file ImageSeries timed with rate alone.
+
+        Old files written without num_samples carry no frame count that can be recovered.
+        """
+        obj = ImageSeries.__new__(
+            ImageSeries,
+            container_source=None,
+            parent=None,
+            object_id="test",
+            in_construct_mode=True,
+        )
+        obj.__init__(
+            name='test_iS',
+            external_file=['external_file'],
+            format='external',
+            unit='Frames',
+            starting_frame=[0],
+            rate=30.0,
+        )
+        self.assertIsNone(obj.num_samples)
+
     def test_bits_per_pixel_deprecation(self):
         """Test that bits_per_pixel can be set and that a deprecated warning is raised."""
         msg = "bits_per_pixel is deprecated"
@@ -581,6 +617,23 @@ class OpticalSeriesConstructor(TestCase):
         self.assertIsNone(ts.distance)
         self.assertIsNone(ts.field_of_view)
         self.assertIsNone(ts.orientation)
+
+    def test_num_samples(self):
+        """Test that num_samples can be set on an external-file OpticalSeries timed with rate."""
+        ts = OpticalSeries(
+            name='test_ts',
+            unit='unit',
+            distance=1.0,
+            field_of_view=[4, 5],
+            orientation='orientation',
+            external_file=['external_file'],
+            starting_frame=[0],
+            format='external',
+            rate=30.0,
+            num_samples=900,
+        )
+        self.assertEqual(ts.num_samples, 900)
+
 
 class TestImageSubtypes(TestCase):
 

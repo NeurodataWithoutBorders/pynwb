@@ -1,9 +1,16 @@
-import numpy as np
+import warnings
+from datetime import datetime
 
+import h5py
+import numpy as np
+from dateutil.tz import tzutc
+from hdmf.build.warnings import DtypeConversionWarning
+
+from pynwb import NWBFile, NWBHDF5IO
 from pynwb.base import Image, ImageReferences, Images
 from pynwb.device import Device
 from pynwb.image import ImageSeries, IndexSeries, OpticalSeries
-from pynwb.testing import AcquisitionH5IOMixin, NWBH5IOMixin, TestCase
+from pynwb.testing import AcquisitionH5IOMixin, NWBH5IOMixin, TestCase, remove_test_file
 
 
 class TestImageSeriesIO(AcquisitionH5IOMixin, TestCase):
@@ -48,6 +55,84 @@ class TestImageSeriesWithNumSamplesIO(AcquisitionH5IOMixin, TestCase):
     def addContainer(self, nwbfile):
         nwbfile.add_device(self.dev1)
         super().addContainer(nwbfile)
+
+    def test_num_samples_written_as_uint32(self):
+        """An explicitly set num_samples should be written with the schema dtype (uint32)."""
+        read_container = self.roundtripContainer()
+        self.assertEqual(read_container.num_samples, 900)
+        with h5py.File(self.filename, 'r') as infile:
+            dset = infile['acquisition'][self.container.name]['num_samples']
+            self.assertEqual(dset.dtype, np.uint32)
+            self.assertEqual(dset[()], 900)
+
+
+class TestImageSeriesDerivedNumSamplesIO(AcquisitionH5IOMixin, TestCase):
+    """Roundtrip test for an ImageSeries with internal data and no explicit num_samples."""
+
+    def setUpContainer(self):
+        return ImageSeries(
+            name='test_iS_derived_num_samples',
+            data=np.zeros((10, 5, 5), dtype=np.uint8),
+            unit='n.a.',
+            rate=1.0,
+        )
+
+    def test_derived_num_samples_not_written(self):
+        """num_samples derived from len(data) should not be persisted."""
+        self.assertIsNone(self.container._num_samples)
+        self.assertEqual(self.container.num_samples, 10)  # derived from len(data)
+
+        read_container = self.roundtripContainer()
+        with h5py.File(self.filename, 'r') as infile:
+            self.assertNotIn('num_samples', infile['acquisition'][self.container.name])
+
+        # the value is still available in memory, derived from the data that was read back
+        self.assertIsNone(read_container._num_samples)
+        self.assertEqual(read_container.num_samples, 10)
+
+
+class TestImageSeriesNumSamplesWriteWarnings(TestCase):
+    """Writing num_samples should not emit a DtypeConversionWarning. See #2227."""
+
+    def setUp(self):
+        self.filename = 'test_image_series_num_samples.nwb'
+
+    def tearDown(self):
+        remove_test_file(self.filename)
+
+    def write_and_collect_warnings(self, image_series):
+        nwbfile = NWBFile(
+            session_description='a file to test writing ImageSeries.num_samples',
+            identifier='TEST_num_samples',
+            session_start_time=datetime(1971, 1, 1, 12, tzinfo=tzutc()),
+        )
+        nwbfile.add_acquisition(image_series)
+        with warnings.catch_warnings(record=True) as ws:
+            warnings.simplefilter('always')
+            with NWBHDF5IO(self.filename, mode='w') as write_io:
+                write_io.write(nwbfile)
+        return [str(w.message) for w in ws if issubclass(w.category, DtypeConversionWarning)]
+
+    def test_no_warning_for_derived_num_samples(self):
+        image_series = ImageSeries(
+            name='test_iS',
+            data=np.zeros((10, 5, 5), dtype=np.uint8),
+            unit='n.a.',
+            rate=1.0,
+        )
+        self.assertEqual(self.write_and_collect_warnings(image_series), [])
+
+    def test_no_warning_for_explicit_num_samples(self):
+        image_series = ImageSeries(
+            name='test_iS',
+            unit='n.a.',
+            external_file=['external_file'],
+            starting_frame=[0],
+            format='external',
+            rate=30.0,
+            num_samples=900,
+        )
+        self.assertEqual(self.write_and_collect_warnings(image_series), [])
 
 
 class TestIndexSeriesIO(AcquisitionH5IOMixin, TestCase):
@@ -132,3 +217,31 @@ class TestOpticalSeriesOptionalFieldsIO(NWBH5IOMixin, TestCase):
         self.assertIsNone(self.optical_series.distance)
         self.assertIsNone(self.optical_series.field_of_view)
         self.assertIsNone(self.optical_series.orientation)
+
+
+class TestOpticalSeriesWithNumSamplesIO(NWBH5IOMixin, TestCase):
+    """Roundtrip test for OpticalSeries with num_samples (external file + rate timing)."""
+
+    def setUpContainer(self):
+        self.dev1 = Device(name='dev1')
+        self.optical_series = OpticalSeries(
+            name='OpticalSeries',
+            distance=8.,
+            field_of_view=(4., 5.),
+            orientation='upper left',
+            unit='m',
+            external_file=['external_file'],
+            starting_frame=[0],
+            format='external',
+            rate=30.0,
+            num_samples=900,
+            device=self.dev1,
+        )
+        return self.optical_series
+
+    def addContainer(self, nwbfile):
+        nwbfile.add_device(self.dev1)
+        nwbfile.add_stimulus(self.optical_series)
+
+    def getContainer(self, nwbfile):
+        return nwbfile.stimulus['OpticalSeries']
