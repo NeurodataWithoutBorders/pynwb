@@ -370,3 +370,29 @@ class TestValidateZarr(TestCase):
             with NWBZarrIO(str(path), "r") as io:
                 errors = validate(io=io)
             self.assertEqual(errors, [])
+
+
+class TestOpenBackendIO(TestCase):
+    # _open_backend_io must not special-case any backend: it forwards exactly the open options
+    # that the constructor of the resolved backend declares.
+
+    def test_forwards_only_options_declared_by_backend(self):
+        from hdmf.utils import docval
+        from pynwb.validation import _open_backend_io
+
+        class OtherBackendIO:
+            @docval(
+                {"name": "path", "type": str, "doc": "path"},
+                {"name": "mode", "type": str, "doc": "mode"},
+                {"name": "other_option", "type": str, "doc": "an option only this backend has", "default": None},
+            )
+            def __init__(self, **kwargs):
+                self.kwargs = kwargs
+
+        with patch("pynwb._get_backend", return_value=OtherBackendIO):
+            io = _open_backend_io(
+                "file.other",
+                backend_kwargs={"other_option": "value", "aws_region": "us-east-1", "storage_options": None},
+            )
+
+        self.assertEqual(io.kwargs, {"path": "file.other", "mode": "r", "other_option": "value"})

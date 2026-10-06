@@ -6,7 +6,7 @@ from warnings import warn
 
 from hdmf.spec import NamespaceCatalog
 from hdmf.build import BuildManager, TypeMap
-from hdmf.utils import docval, getargs, AllowPositional
+from hdmf.utils import docval, get_docval, getargs, AllowPositional
 from hdmf.backends.io import HDMFIO
 from hdmf.validate import ValidatorMap
 
@@ -22,23 +22,19 @@ def _validate_helper(io: HDMFIO, namespace: str = CORE_NAMESPACE) -> list:
     return validator.validate(builder)
 
 
-HDF5_OPEN_KEYS = frozenset({"driver", "aws_region", "load_namespaces"})
-ZARR_OPEN_KEYS = frozenset({"storage_options"})
-
-
 def _open_backend_io(
     path: str, *, backend_kwargs: Optional[dict] = None, manager: Optional[BuildManager] = None
 ) -> HDMFIO:
-    # Open an HDMFIO for `path`. `backend_kwargs` may contain a union of
-    # HDF5 (Hierarchical Data Format 5) and Zarr open options; this helper
-    # resolves the backend via _get_backend and keeps only the keys that apply.
-    # Keys whose value is None are dropped, so callers can include all keys
-    # unconditionally.
-    from pynwb import _get_backend, NWBHDF5IO
+    # Open an HDMFIO for `path`. `backend_kwargs` may contain open options for any backend
+    # (e.g., `driver` for HDF5, `storage_options` for Zarr). This helper resolves the backend
+    # via _get_backend and keeps only the options that the constructor of that backend declares,
+    # so no backend is special-cased here. Keys whose value is None are dropped, so callers can
+    # include all keys unconditionally.
+    from pynwb import _get_backend
 
     backend_kwargs = backend_kwargs or {}
     backend_io_cls = _get_backend(path, method=backend_kwargs.get("driver"))
-    valid_keys = HDF5_OPEN_KEYS if backend_io_cls is NWBHDF5IO else ZARR_OPEN_KEYS
+    valid_keys = {arg["name"] for arg in get_docval(backend_io_cls.__init__)}
     io_kwargs = {"path": path, "mode": "r"}
     if manager is not None:
         io_kwargs["manager"] = manager
