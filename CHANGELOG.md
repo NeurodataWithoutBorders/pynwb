@@ -1,5 +1,10 @@
 # PyNWB Changelog
 
+## Upcoming
+
+### Fixed
+- Fixed `pynwb.validate(path=...)` raising `TypeError` on Zarr-backed NWB files because HDF5-only kwargs (`driver`, `aws_region`, `load_namespaces`) were forwarded into `NWBZarrIO`. Backend dispatch is now centralized in a single opener helper, and namespace loading uses `HDMFIO.load_namespaces_io` on the open IO, which also retires the `io._file` access in the validator. Added `storage_options` to the `validate()` API for the Zarr backend. @h-mayorquin [#2187](https://github.com/NeurodataWithoutBorders/pynwb/pull/2187)
+
 ## PyNWB 4.2.0 (September 2, 2026)
 
 ### Changed
