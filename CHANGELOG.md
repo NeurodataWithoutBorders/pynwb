@@ -1,5 +1,11 @@
 # PyNWB Changelog
 
+## PyNWB 4.3.0 (Upcoming)
+
+### Internal improvements
+- Hardened the GitHub Actions CI: least-privilege `permissions`, pinned actions, no credential persistence on checkout, Dependabot for actions, and a zizmor audit of the workflows. @rly [#2262](https://github.com/NeurodataWithoutBorders/pynwb/pull/2262)
+- Tidied the GitHub Actions CI: per-job concurrency groups and timeouts, pip caching, a shared setup composite action, a Codecov upload that no longer fails on pull requests from forks, and removal of the unused "Generate test files" workflow. @rly [#2262](https://github.com/NeurodataWithoutBorders/pynwb/pull/2262)
+
 ## PyNWB 4.2.0 (September 2, 2026)
 
 ### Changed

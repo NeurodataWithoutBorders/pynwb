@@ -320,10 +320,8 @@ if __name__ == '__main__':
     # files will be made in src/pynwb/testing/
     # files should be moved to tests/back_compat/
 
-    # NOTE: this script is run in the GitHub Actions workflow generate_test_files.yml
-
     # _make_device_model_str_special_chars synthesizes a legacy file and requires a current PyNWB
-    # (the one being developed), not one of the old versions installed by the CI matrix.
+    # (the one being developed), not one of the old versions listed below.
     if __version__.startswith(('3.', '4.')):
         _make_device_model_str_special_chars()
 

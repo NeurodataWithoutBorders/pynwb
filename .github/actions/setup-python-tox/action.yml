@@ -1,0 +1,31 @@
+name: Set up Python and tox
+description: Set up the requested Python version with optional pip caching and install tox.
+
+inputs:
+  python-version:
+    description: Python version to pass to actions/setup-python.
+    required: true
+  pip-cache:
+    description: >
+      Whether to restore and save the pip download cache, as "true" or "false". Set it to "false"
+      for a build whose output is published, so every dependency is fetched from the index.
+    required: false
+    default: 'true'
+
+runs:
+  using: composite
+  steps:
+    - name: Set up Python
+      uses: actions/setup-python@v7.0.0
+      with:
+        python-version: ${{ inputs.python-version }}
+        # setup-python treats an empty string as "no caching"
+        cache: ${{ inputs.pip-cache == 'true' && 'pip' || '' }}
+        cache-dependency-path: pyproject.toml
+
+    - name: Install tox
+      shell: bash
+      run: |
+        python -m pip install --upgrade pip
+        python -m pip install tox
+        python -m pip list
