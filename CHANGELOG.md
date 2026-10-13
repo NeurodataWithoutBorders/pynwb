@@ -1,5 +1,10 @@
 # PyNWB Changelog
 
+## PyNWB 4.2.1 (Upcoming)
+
+### Fixed
+- Fixed `pynwb.validate(io=...)` validating against the namespaces loaded by the io, usually the NWB schema installed with PyNWB, instead of the namespaces cached in the file. It now matches `pynwb.validate(path=...)`, and no longer raises a `KeyError` when the io was opened with `load_namespaces=False` on a file that caches an extension. @h-mayorquin [#XXXX](https://github.com/NeurodataWithoutBorders/pynwb/pull/XXXX)
+
 ## PyNWB 4.2.0 (September 2, 2026)
 
 ### Changed

@@ -18,9 +18,9 @@ __all__ = [
     'get_cached_namespaces_to_validate'
 ]
 
-def _validate_helper(io: HDMFIO, namespace: str = CORE_NAMESPACE) -> list:
+def _validate_helper(io: HDMFIO, namespace_catalog: NamespaceCatalog, namespace: str = CORE_NAMESPACE) -> list:
     builder = io.read_builder()
-    validator = ValidatorMap(io.manager.namespace_catalog.get_namespace(name=namespace))
+    validator = ValidatorMap(namespace_catalog.get_namespace(name=namespace))
     return validator.validate(builder)
 
 
@@ -154,6 +154,7 @@ def validate(**kwargs):
     # get namespaces to validate
     namespace_message = "PyNWB namespace information"
     io_kwargs = dict(path=path, mode="r", driver=driver, aws_region=aws_region)
+    manager = None
 
     if use_cached_namespaces:
         cached_namespaces, manager, namespace_dependencies = get_cached_namespaces_to_validate(path=path,
@@ -195,13 +196,15 @@ def validate(**kwargs):
                 f"The namespace '{namespace}' could not be found in {namespace_message} as only "
                 f"{namespaces_to_validate} is present.",)
   
-    # validate against namespaces
+    # validate against namespaces, using the cached namespaces even when the io loaded different ones
+    namespace_catalog = manager.namespace_catalog if manager is not None else io.manager.namespace_catalog
     validation_errors = []
     for validation_namespace in namespaces_to_validate:
         if verbose:
             print(f"Validating {f'{path} ' if path is not None else ''}against "  # noqa: T201
                   f"{namespace_message} using namespace '{validation_namespace}'.")  
-        validation_errors += _validate_helper(io=io, namespace=validation_namespace)
+        validation_errors += _validate_helper(io=io, namespace_catalog=namespace_catalog,
+                                              namespace=validation_namespace)
 
     if path is not None:
         io.close()  # close the io object if it was created within this function, otherwise leave as is

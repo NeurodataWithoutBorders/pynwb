@@ -277,7 +277,8 @@ class TestValidateFunction(TestCase):
         tests = [('tests/back_compat/1.1.2_nwbfile.nwb', None),
                  ('tests/back_compat/1.1.2_nwbfile.nwb', 'core'),
                  ('tests/back_compat/2.1.0_nwbfile_with_extension.nwb', None),
-                 ('tests/back_compat/2.1.0_nwbfile_with_extension.nwb', 'ndx-testextension'),]
+                 ('tests/back_compat/2.1.0_nwbfile_with_extension.nwb', 'ndx-testextension'),
+                 ('tests/back_compat/1.0.3_str_experimenter.nwb', None),]
         
         tests_with_error = [('tests/back_compat/1.1.2_nwbfile.nwb', 'notfound'),
                             ('tests/back_compat/1.1.2_nwbfile.nwb', 'hdmf-common'),
