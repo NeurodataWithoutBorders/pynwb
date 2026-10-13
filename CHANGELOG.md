@@ -1,5 +1,10 @@
 # PyNWB Changelog
 
+## PyNWB 4.2.1 (Upcoming)
+
+### Fixed
+- Fixed `pynwb.validate(io=...)` validating against the namespaces loaded by the io instead of the namespaces cached in the file. @h-mayorquin [#2268](https://github.com/NeurodataWithoutBorders/pynwb/pull/2268)
+
 ## PyNWB 4.2.0 (September 2, 2026)
 
 ### Changed
