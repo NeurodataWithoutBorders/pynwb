@@ -1,5 +1,10 @@
 # PyNWB Changelog
 
+## Upcoming
+
+### Fixed
+- Check the resolved data shape when a `TimeSeries` is passed as `SpatialSeries.data`, preserving the warning for more than three columns. @CAOShurong [#2271](https://github.com/NeurodataWithoutBorders/pynwb/pull/2271)
+
 ## PyNWB 4.2.0 (September 2, 2026)
 
 ### Changed
