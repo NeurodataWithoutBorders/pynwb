@@ -156,10 +156,25 @@ class NWBFileMap(ObjectMapper):
         def update_builder_frequency_bands_table(builder: Builder):
             if (isinstance(builder, GroupBuilder) and
                 builder.attributes.get('namespace') == 'core' and
-                builder.attributes.get('neurodata_type') == 'DecompositionSeries' and
-                builder.groups['bands'].attributes['neurodata_type'] == 'DynamicTable'):
-                builder.groups['bands'].attributes['neurodata_type'] = 'FrequencyBandsTable'
-                builder.groups['bands'].attributes['namespace'] = 'core'
+                builder.attributes.get('neurodata_type') == 'DecompositionSeries'):
+                bands_builder = builder.groups.get('bands')
+                if bands_builder is None or bands_builder.attributes.get('neurodata_type') != 'DynamicTable':
+                    return
+
+                colnames = bands_builder.attributes.get('colnames', ())
+                required_columns = {'band_name', 'band_limits'}
+                id_builder = bands_builder.datasets.get('id')
+                available_columns = set(bands_builder.datasets) | set(bands_builder.links)
+                try:
+                    is_empty = (id_builder is not None and
+                                all(len(dataset.data) == 0 for dataset in bands_builder.datasets.values()))
+                except (AttributeError, TypeError):
+                    is_empty = False
+                if (is_empty or
+                    (required_columns.issubset(set(colnames)) and
+                     required_columns.issubset(available_columns))):
+                    bands_builder.attributes['neurodata_type'] = 'FrequencyBandsTable'
+                    bands_builder.attributes['namespace'] = 'core'
 
         apply_to_child_builders(nwbfile_builder, [update_builder_frequency_bands_table])
 
