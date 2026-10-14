@@ -16,6 +16,7 @@
 - Added `model` and `serial_number` parameters to `mock_Device`. Passing a `DeviceModel` as `model` together with an `nwbfile` also places that `DeviceModel` in the `NWBFile`, so the link resolves when the file is written. @rly [#2238](https://github.com/NeurodataWithoutBorders/pynwb/pull/2238)
 
 ### Fixed
+- Fixed reading legacy `DecompositionSeries` bands tables that contain columns from the older `DynamicTable` representation instead of the required `FrequencyBandsTable` columns.
 - Fixed `FeatureExtraction.times` and `Clustering.peak_over_rms` being copied into a Python list on construction, which was slow for data read from a file. @cboulay [#2253](https://github.com/NeurodataWithoutBorders/pynwb/pull/2253)
 - Fixed `ElectricalSeries.__init__`, `TimeSeries.get_timestamps`, and `TimeSeries.num_samples` failing on data backed by a zarr array. @rly [#2235](https://github.com/NeurodataWithoutBorders/pynwb/pull/2235)
 - Fixed `TimeSeries.num_samples` returning `None` when the data or timestamps are backed by a `DataChunkIterator` that wraps an array. @rly [#2235](https://github.com/NeurodataWithoutBorders/pynwb/pull/2235)

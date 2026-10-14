@@ -437,7 +437,7 @@ class DecompositionSeries(TimeSeries):
             {'name': 'metric', 'type': str,  # required
              'doc': "metric of analysis. recommended - 'phase', 'amplitude', 'power'"},
             {'name': 'unit', 'type': str, 'doc': 'SI unit of measurement', 'default': 'no unit'},
-            {'name': 'bands', 'type': FrequencyBandsTable,
+            {'name': 'bands', 'type': DynamicTable,
              'doc': 'a table for describing the frequency bands that the signal was decomposed into', 'default': None},
             {'name': 'source_timeseries', 'type': TimeSeries,
              'doc': 'the input TimeSeries from this analysis', 'default': None},
@@ -452,6 +452,8 @@ class DecompositionSeries(TimeSeries):
     def __init__(self, **kwargs):
         metric, source_timeseries, bands, source_channels = popargs('metric', 'source_timeseries', 'bands',
                                                                     'source_channels', kwargs)
+        if bands is not None and not isinstance(bands, FrequencyBandsTable) and not self._in_construct_mode:
+            raise TypeError("DecompositionSeries.bands must be a FrequencyBandsTable.")
         super().__init__(**kwargs)
         self.source_timeseries = source_timeseries
         self.source_channels = source_channels
