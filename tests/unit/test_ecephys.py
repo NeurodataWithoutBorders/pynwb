@@ -171,6 +171,20 @@ class SpikeEventSeriesConstructor(TestCase):
         np.testing.assert_array_equal(sES.data, data)
         np.testing.assert_array_equal(sES.timestamps, timestamps)
 
+    def test_init_channel_conversion_filtering(self):
+        table, region = self._create_table_and_region()
+        data = ((1, 1), (2, 2), (3, 3))
+        sES = SpikeEventSeries(
+            name='test_sES',
+            data=data,
+            timestamps=np.arange(3),
+            electrodes=region,
+            channel_conversion=[2.0, 6.3],
+            filtering='Band-pass filter at 300-6000 Hz',
+        )
+        self.assertEqual(sES.channel_conversion, [2.0, 6.3])
+        self.assertEqual(sES.filtering, 'Band-pass filter at 300-6000 Hz')
+
     def test_init_no_rate(self):
         table, region = self._create_table_and_region()
         data = ((1, 1, 1), (2, 2, 2))

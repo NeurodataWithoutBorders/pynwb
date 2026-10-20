@@ -184,8 +184,8 @@ class SpikeEventSeries(ElectricalSeries):
             {'name': 'timestamps', 'type': ('array_data', 'data', TimeSeries),  # required
              'doc': 'Timestamps for samples stored in data'},
             *get_docval(ElectricalSeries.__init__, 'electrodes'),  # required
-            *get_docval(ElectricalSeries.__init__, 'resolution', 'conversion', 'comments', 'description', 'control',
-                        'control_description', 'offset'),
+            *get_docval(ElectricalSeries.__init__, 'channel_conversion', 'filtering', 'resolution', 'conversion',
+                        'comments', 'description', 'control', 'control_description', 'offset'),
             allow_positional=AllowPositional.WARNING,)
     def __init__(self, **kwargs):
         data = kwargs['data']

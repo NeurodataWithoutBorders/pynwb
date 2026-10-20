@@ -228,6 +228,38 @@ class SpikeEventSeriesConstructor(NWBH5IOFlexMixin, TestCase):
         return nwbfile.acquisition['SpikeEventSeries']
 
 
+class SpikeEventSeriesChannelConversionIO(NWBH5IOFlexMixin, TestCase):
+    """Test roundtrip of a SpikeEventSeries with channel_conversion and filtering"""
+
+    def getContainerType(self):
+        return "SpikeEventSeries with channel_conversion and filtering"
+
+    def addContainer(self):
+        """ Add the test SpikeEventSeries and related objects to the given NWBFile """
+        table, group, dev1 = setup_electrode_table()
+        self.nwbfile.add_device(dev1)
+        self.nwbfile.add_electrode_group(group)
+        self.nwbfile.set_electrode_table(table)
+
+        region = DynamicTableRegion(name='electrodes',
+                                    data=[0, 2],
+                                    description='the first and third electrodes',
+                                    table=table)
+        ses = SpikeEventSeries(
+            name='SpikeEventSeries',
+            data=((1, 1), (2, 2), (3, 3)),
+            timestamps=[0., 1., 2.],
+            electrodes=region,
+            channel_conversion=[2., 6.3],
+            filtering='Band-pass filter at 300-6000 Hz',
+        )
+
+        self.nwbfile.add_acquisition(ses)
+
+    def getContainer(self, nwbfile: NWBFile):
+        return nwbfile.acquisition['SpikeEventSeries']
+
+
 class ClusterWaveformsConstructor(AcquisitionH5IOMixin, TestCase):
 
     def setUpContainer(self):
