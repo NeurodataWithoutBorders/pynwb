@@ -1,5 +1,10 @@
 # PyNWB Changelog
 
+## PyNWB 4.2.1 (Upcoming)
+
+### Fixed
+- Fixed `SpikeEventSeries` not accepting the `channel_conversion` and `filtering` arguments inherited from `ElectricalSeries`, which caused them to be dropped when reading a `SpikeEventSeries` from a file. @oruebel [#2273](https://github.com/NeurodataWithoutBorders/pynwb/pull/2273)
+
 ## PyNWB 4.2.0 (September 2, 2026)
 
 ### Changed
