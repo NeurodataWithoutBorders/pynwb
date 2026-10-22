@@ -1,5 +1,6 @@
 import warnings
 
+from hdmf.build import LinkBuilder
 from hdmf.common.io.table import DynamicTableMap
 
 from .. import register_map
@@ -13,7 +14,7 @@ class UnitsMap(DynamicTableMap):
     @DynamicTableMap.constructor_arg('resolution')
     def resolution_carg(self, builder, manager):
         if 'spike_times' in builder:
-            resolution = builder['spike_times'].attributes.get('resolution')
+            resolution = self._get_column_builder(builder, 'spike_times').attributes.get('resolution')
             if resolution is not None:
                 return resolution
         return NO_OVERRIDE
@@ -39,7 +40,7 @@ class UnitsMap(DynamicTableMap):
         the first populated column is used and a warning is raised.
         """
         waveform_columns = ('waveform_mean', 'waveform_sd', 'waveforms')
-        stats = {column: builder[column].attributes.get(attribute)
+        stats = {column: self._get_column_builder(builder, column).attributes.get(attribute)
                  for column in waveform_columns if column in builder}
         populated_stats = {column: value for column, value in stats.items() if value is not None}
         if not populated_stats:
@@ -53,6 +54,17 @@ class UnitsMap(DynamicTableMap):
                 stacklevel=2
             )
         return first_value
+
+    @staticmethod
+    def _get_column_builder(builder, column):
+        """Get the builder of a column of a Units table, following the link if the column is a link.
+
+        A column is a link, e.g., when the Units table was shallow copied from another file.
+        """
+        column_builder = builder[column]
+        if isinstance(column_builder, LinkBuilder):
+            column_builder = column_builder.builder
+        return column_builder
 
     @DynamicTableMap.object_attr("electrodes")
     def electrodes_column(self, container, manager):

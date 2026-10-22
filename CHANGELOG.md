@@ -1,5 +1,10 @@
 # PyNWB Changelog
 
+## PyNWB 4.2.1 (Upcoming)
+
+### Fixed
+- Fixed reading a file containing a `Units` table whose columns are links, e.g., a file written from a shallow copy made with `NWBFile.copy()`, which raised `AttributeError: 'LinkBuilder' object has no attribute 'attributes'`. @monsterlag
+
 ## PyNWB 4.2.0 (September 2, 2026)
 
 ### Changed
