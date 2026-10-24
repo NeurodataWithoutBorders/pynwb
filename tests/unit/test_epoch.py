@@ -139,6 +139,32 @@ class TimeIntervalsTest(TestCase):
         self.assertEqual(ts_ref.idx_start, 20)  # at t=2.0
         self.assertEqual(ts_ref.count, 20)      # from t=2.0 to t=4.0
 
+    def test_add_interval_timeseries_rate_matches_timestamps(self):
+        """A rate-based TimeSeries gets the same reference as the same samples stored as timestamps"""
+        ts_rate = TimeSeries(name='ts_rate', data=list(range(100)), unit='units', starting_time=1.0, rate=100.0)
+        ts_timestamps = TimeSeries(name='ts_timestamps', data=list(range(100)), unit='units',
+                                   timestamps=ts_rate.get_timestamps())
+        for start_time, stop_time in [(1.255, 1.505), (1.9, 1.95), (1.3, 1.6)]:
+            epochs = TimeIntervals(name='test_epochs')
+            epochs.add_interval(start_time=start_time, stop_time=stop_time, timeseries=[ts_rate, ts_timestamps])
+            rate_ref, timestamps_ref = epochs['timeseries'][0]
+            self.assertEqual((rate_ref.idx_start, rate_ref.count),
+                             (timestamps_ref.idx_start, timestamps_ref.count))
+            self.assertGreaterEqual(rate_ref.timestamps[0], start_time)
+
+    def test_add_interval_timeseries_rate_outside_data(self):
+        """An interval that extends past either end of a rate-based TimeSeries is clipped to its samples"""
+        ts = TimeSeries(name='test_ts', data=list(range(100)), unit='units', starting_time=1.0, rate=100.0)
+        epochs = TimeIntervals(name='test_epochs')
+        epochs.add_interval(start_time=0.5, stop_time=1.1, timeseries=ts)
+        epochs.add_interval(start_time=1.9, stop_time=3.0, timeseries=ts)
+        first_ref = epochs['timeseries'][0][0]
+        last_ref = epochs['timeseries'][1][0]
+        self.assertEqual((first_ref.idx_start, first_ref.count), (0, 10))
+        self.assertEqual((last_ref.idx_start, last_ref.count), (90, 10))
+        self.assertTrue(first_ref.isvalid())
+        self.assertTrue(last_ref.isvalid())
+
     def test_add_interval_multiple_timeseries(self):
         """Test adding interval with multiple TimeSeries"""
         epochs = TimeIntervals(name='test_epochs')

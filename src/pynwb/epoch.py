@@ -61,6 +61,23 @@ class TimeIntervals(DynamicTable):
             rkwargs['timeseries'] = timeseries
         return super().add_row(**rkwargs)
 
+    @staticmethod
+    def __bisect_left_rate(time, starting_time, rate, num_samples):
+        """Index of the first sample at or after ``time`` for a TimeSeries with a regular rate.
+
+        This matches ``bisect_left`` on the timestamps from ``TimeSeries.get_timestamps``, so a rate-based
+        TimeSeries gives the same index as the same samples stored as timestamps.
+        """
+        idx = max(int(np.ceil((time - starting_time) * rate)), 0)
+        if num_samples is not None:
+            idx = min(idx, num_samples)
+        # correct for floating point rounding against the sample times starting_time + i / rate
+        while idx > 0 and (idx - 1) / rate + starting_time >= time:
+            idx -= 1
+        while (num_samples is None or idx < num_samples) and idx / rate + starting_time < time:
+            idx += 1
+        return idx
+
     def __calculate_idx_count(self, start_time, stop_time, ts_data):
         if isinstance(ts_data.timestamps, DataIO):
             ts_timestamps = ts_data.timestamps.data
@@ -72,8 +89,9 @@ class TimeIntervals(DynamicTable):
             ts_starting_time = ts.starting_time
             ts_rate = ts.rate
         if ts_starting_time is not None and ts_rate is not None:
-            start_idx = int((start_time - ts_starting_time)*ts_rate)
-            stop_idx = int((stop_time - ts_starting_time)*ts_rate)
+            num_samples = ts_data.num_samples
+            start_idx = self.__bisect_left_rate(start_time, ts_starting_time, ts_rate, num_samples)
+            stop_idx = self.__bisect_left_rate(stop_time, ts_starting_time, ts_rate, num_samples)
         elif ts_timestamps is not None and len(ts_timestamps) > 0:
             timestamps = ts_timestamps
             start_idx = bisect_left(timestamps, start_time)
