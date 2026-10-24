@@ -1,5 +1,10 @@
 # PyNWB Changelog
 
+## PyNWB 4.3.0 (Upcoming)
+
+### Fixed
+- Fixed `TimeIntervals.add_interval` (and `NWBFile.add_epoch`) computing a wrong `TimeSeriesReference` for a `TimeSeries` that uses `starting_time` and `rate`. The start index was truncated instead of rounded up, so it could point one sample before `start_time` and disagree with the same samples stored as timestamps, and it was not clipped to the data, so an interval starting before the series was stored as a missing reference and an interval running past the end gave a reference that raised `IndexError`. @aaronkanzer [#2275](https://github.com/NeurodataWithoutBorders/pynwb/pull/2275)
+
 ## PyNWB 4.2.0 (September 2, 2026)
 
 ### Changed
