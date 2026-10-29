@@ -1,5 +1,10 @@
 # PyNWB Changelog
 
+## PyNWB 4.2.1 (Unreleased)
+
+### Changed
+- Time zones are now handled with the standard library (`datetime.timezone.utc` and `datetime.astimezone()`) instead of `dateutil.tz` in `NWBFile` and the `pynwb.testing` helpers. A naive date is still given the local time zone, with the same wall-clock time. This needs no time-zone database, so it also works on Windows and WebAssembly. `python-dateutil` is still used to parse dates. Part of [#2027](https://github.com/NeurodataWithoutBorders/pynwb/issues/2027). @Arihanth-Mutha
+
 ## PyNWB 4.2.0 (September 2, 2026)
 
 ### Changed

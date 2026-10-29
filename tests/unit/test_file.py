@@ -717,6 +717,23 @@ class TestTimezone(TestCase):
         with self.assertWarnsWith(UserWarning, "Date is missing timezone information. Updating to local timezone."):
             _add_missing_timezone(datetime(2017, 5, 1, 12))
 
+    def test_add_missing_timezone_keeps_local_wall_time(self):
+        # one date in each half of the year, so daylight saving time is covered wherever the tests run
+        for naive in (datetime(2017, 1, 15, 12), datetime(2017, 7, 15, 12)):
+            with self.assertWarnsWith(UserWarning, "Date is missing timezone information. Updating to local timezone."):
+                aware = _add_missing_timezone(naive)
+            self.assertIsNotNone(aware.utcoffset())
+            self.assertEqual(aware.replace(tzinfo=None), naive)
+            self.assertEqual(aware, naive.replace(tzinfo=tzlocal()))
+
+    def test_default_file_create_date_is_timezone_aware(self):
+        before = datetime.now().astimezone()
+        nwbfile = NWBFile('test session description', 'TEST125', datetime(2017, 5, 1, 12, tzinfo=tzutc()))
+        created = nwbfile.file_create_date[0]
+        self.assertIsNotNone(created.utcoffset())
+        self.assertLessEqual(before, created)
+        self.assertLessEqual(created, datetime.now().astimezone())
+
 class TestNoWarningWithoutPath(TestCase):
     def test_raise_warning(self):
         with warnings.catch_warnings():
