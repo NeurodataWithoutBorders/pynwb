@@ -1,5 +1,10 @@
 # PyNWB Changelog
 
+## PyNWB 4.2.1 (Upcoming)
+
+### Changed
+- Updated the `zarr` extra to use Zarr 3 on Python 3.12 and newer. @h-mayorquin [#2281](https://github.com/NeurodataWithoutBorders/pynwb/pull/2281)
+
 ## PyNWB 4.2.0 (September 2, 2026)
 
 ### Changed
