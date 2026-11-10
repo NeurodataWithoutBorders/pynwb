@@ -631,6 +631,14 @@ def read_nwb(**kwargs):
         is_dandi_zarr = "dandiarchive" in path_str and "/zarr/" in path_str
         if has_zarr_suffix or is_dandi_zarr:
             from hdmf_zarr import NWBZarrIO
+            try:
+                from hdmf_zarr import NWBZarrV2IO, is_zarr_v2_file
+            except ImportError:
+                pass
+            else:
+                storage_options = {"anon": True} if path_str.startswith("s3://") else None
+                if is_zarr_v2_file(path, storage_options=storage_options):
+                    return NWBZarrV2IO.read_nwb(path=path)
             return NWBZarrIO.read_nwb(path=path)
         return NWBHDF5IO.read_nwb(path=path)
 
@@ -645,6 +653,13 @@ def read_nwb(**kwargs):
         # If hdmf5 zarr is available we try that next
         try:
             from hdmf_zarr import NWBZarrIO
+            try:
+                from hdmf_zarr import NWBZarrV2IO, is_zarr_v2_file
+            except ImportError:
+                pass
+            else:
+                if is_zarr_v2_file(path):
+                    return NWBZarrV2IO.read_nwb(path=path)
             backend_is_zarr = NWBZarrIO.can_read(path=path)
             if backend_is_zarr:
                 return NWBZarrIO.read_nwb(path=path)
