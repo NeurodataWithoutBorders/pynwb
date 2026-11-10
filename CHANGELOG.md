@@ -1,5 +1,10 @@
 # PyNWB Changelog
 
+## PyNWB 4.2.1 (Upcoming)
+
+### Fixed
+- Fixed `read_nwb` to select `NWBZarrV2IO` for legacy Zarr 2 files. @h-mayorquin [#2280](https://github.com/NeurodataWithoutBorders/pynwb/pull/2280)
+
 ## PyNWB 4.2.0 (September 2, 2026)
 
 ### Changed
