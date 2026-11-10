@@ -45,9 +45,8 @@ dynamic = ["version"] # the build backend will compute the version dynamically f
 [project.optional-dependencies]
 # user-installable optional features (e.g. ``pip install pynwb[zarr]``)
 zarr = [
-    "hdmf-zarr>=0.11.0",
-    "zarr>=2.12.0,<3",
-    "numcodecs>=0.10.0,<0.16.0",  # numcodecs 0.16.0 is not compatible with zarr<3
+    "hdmf-zarr>=0.14.0; python_version >= '3.12'",
+    "zarr>=3.4.0; python_version >= '3.12'",
 ]
 termset = [
     "linkml>=1.5.0",

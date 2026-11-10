@@ -101,7 +101,9 @@ def run_example_tests():
         for f in files:
             if f.endswith(".py"):
                 name_with_parent_dir = os.path.join(os.path.basename(root), f)
-                if name_with_parent_dir in ros3_examples or name_with_parent_dir in streaming_examples:
+                if (name_with_parent_dir in ros3_examples or name_with_parent_dir in streaming_examples
+                        or (sys.version_info < (3, 12)
+                            and name_with_parent_dir == os.path.join("advanced_io", "plot_zarr_io.py"))):
                     logging.info("Skipping %s" % name_with_parent_dir)
                     continue
                 examples_scripts.append(os.path.join(root, f))
