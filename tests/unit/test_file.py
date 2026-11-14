@@ -6,7 +6,7 @@ import io
 import warnings
 
 from datetime import datetime, timedelta
-from dateutil.tz import tzlocal, tzutc
+from zoneinfo import ZoneInfo
 from hdmf.common import DynamicTable
 
 from hdmf.common import VectorData
@@ -22,11 +22,11 @@ from pynwb.testing import TestCase, remove_test_file
 
 class NWBFileTest(TestCase):
     def setUp(self):
-        self.start = datetime(2017, 5, 1, 12, 0, 0, tzinfo=tzlocal())
-        self.ref_time = datetime(1979, 1, 1, 0, tzinfo=tzutc())
-        self.create = [datetime(2017, 5, 1, 12, tzinfo=tzlocal()),
-                       datetime(2017, 5, 2, 13, 0, 0, 1, tzinfo=tzutc()),
-                       datetime(2017, 5, 2, 14, tzinfo=tzutc())]
+        self.start = datetime(2017, 5, 1, 12, 0, 0, tzinfo=ZoneInfo("UTC"))
+        self.ref_time = datetime(1979, 1, 1, 0, tzinfo=ZoneInfo("UTC"))
+        self.create = [datetime(2017, 5, 1, 12, tzinfo=ZoneInfo("UTC")),
+                       datetime(2017, 5, 2, 13, 0, 0, 1, tzinfo=ZoneInfo("UTC")),
+                       datetime(2017, 5, 2, 14, tzinfo=ZoneInfo("UTC"))]
         self.path = 'nwbfile_test.h5'
         self.nwbfile = NWBFile(session_description='a test session description for a test NWBFile',
                                identifier='FILE123',
@@ -93,7 +93,7 @@ class NWBFileTest(TestCase):
         Test the case where the user creates an electrode table region with
         indexes that are out of range of the amount of electrodes added.
         """
-        nwbfile = NWBFile('a', 'b', datetime.now(tzlocal()))
+        nwbfile = NWBFile('a', 'b', datetime.now(ZoneInfo("UTC")))
         device = nwbfile.create_device('a')
         elecgrp = nwbfile.create_electrode_group('a', 'b', device=device, location='a')
         for i in range(4):
@@ -105,7 +105,7 @@ class NWBFileTest(TestCase):
         """
         Motivated by #739
         """
-        nwbfile = NWBFile('a', 'b', datetime.now(tzlocal()))
+        nwbfile = NWBFile('a', 'b', datetime.now(ZoneInfo("UTC")))
         device = nwbfile.create_device('a')
         elecgrp = nwbfile.create_electrode_group('a', 'b', device=device, location='a')
         nwbfile.add_electrode(location='a', group=elecgrp, id=0)
@@ -409,7 +409,7 @@ class NWBFileTest(TestCase):
         Test the case where the user creates an electrode table region with
         indexes that are out of range of the amount of electrodes added.
         """
-        nwbfile = NWBFile('a', 'b', datetime.now(tzlocal()))
+        nwbfile = NWBFile('a', 'b', datetime.now(ZoneInfo("UTC")))
         device = nwbfile.create_device('a')
         elecgrp = nwbfile.create_electrode_group('a', 'b', device=device, location='a')
         msg = "The 'location' argument is required when creating an electrode."
@@ -421,7 +421,7 @@ class NWBFileTest(TestCase):
         Test the case where the user creates an electrode table region with
         indexes that are out of range of the amount of electrodes added.
         """
-        nwbfile = NWBFile('a', 'b', datetime.now(tzlocal()))
+        nwbfile = NWBFile('a', 'b', datetime.now(ZoneInfo("UTC")))
         msg = "The 'group' argument is required when creating an electrode."
         with self.assertRaisesWith(ValueError, msg):
             nwbfile.add_electrode(location='a', id=0)
@@ -541,7 +541,7 @@ Fields:
         self.assertTupleEqual(self.nwbfile.related_publications, ('pub1', 'pub2'))
 
     def test_ec_electrodes_deprecation(self):
-        nwbfile = NWBFile('a', 'b', datetime.now(tzlocal()))
+        nwbfile = NWBFile('a', 'b', datetime.now(ZoneInfo("UTC")))
         device = nwbfile.create_device('a')
         elecgrp = nwbfile.create_electrode_group('name', 'desc', device=device, location='a')
         nwbfile.add_electrode(location='loc1', group=elecgrp, id=0)
@@ -567,10 +567,10 @@ class SubjectTest(TestCase):
             species='Rattus norvegicus',
             subject_id='RAT123',
             weight='2 kg',
-            date_of_birth=datetime(2017, 5, 1, 12, tzinfo=tzlocal()),
+            date_of_birth=datetime(2017, 5, 1, 12, tzinfo=ZoneInfo("UTC")),
             strain='my_strain',
         )
-        self.start = datetime(2017, 5, 1, 12, tzinfo=tzlocal())
+        self.start = datetime(2017, 5, 1, 12, tzinfo=ZoneInfo("UTC"))
         self.path = 'nwbfile_test.h5'
         self.nwbfile = NWBFile(
             'a test session description for a test NWBFile',
@@ -593,7 +593,7 @@ class SubjectTest(TestCase):
         self.assertEqual(self.subject.species, 'Rattus norvegicus')
         self.assertEqual(self.subject.subject_id, 'RAT123')
         self.assertEqual(self.subject.weight, '2 kg')
-        self.assertEqual(self.subject.date_of_birth, datetime(2017, 5, 1, 12, tzinfo=tzlocal()))
+        self.assertEqual(self.subject.date_of_birth, datetime(2017, 5, 1, 12, tzinfo=ZoneInfo("UTC")))
         self.assertEqual(self.subject.strain, 'my_strain')
 
     def test_nwbfile_constructor(self):
@@ -651,8 +651,8 @@ class TestCacheSpec(TestCase):
 
     def test_simple(self):
         nwbfile = NWBFile('sess_desc', 'identifier',
-                          datetime.now(tzlocal()),
-                          file_create_date=datetime.now(tzlocal()),
+                          datetime.now(ZoneInfo("UTC")),
+                          file_create_date=datetime.now(ZoneInfo("UTC")),
                           institution='University of California, San Francisco',
                           lab='Chang Lab')
         with NWBHDF5IO(self.path, 'w') as io:
@@ -673,8 +673,8 @@ class TestNoCacheSpec(TestCase):
 
     def test_simple(self):
         nwbfile = NWBFile('sess_desc', 'identifier',
-                          datetime.now(tzlocal()),
-                          file_create_date=datetime.now(tzlocal()),
+                          datetime.now(ZoneInfo("UTC")),
+                          file_create_date=datetime.now(ZoneInfo("UTC")),
                           institution='University of California, San Francisco',
                           lab='Chang Lab')
         with NWBHDF5IO(self.path, 'w') as io:
@@ -687,7 +687,7 @@ class TestNoCacheSpec(TestCase):
 
 class TestTimestampsRefDefault(TestCase):
     def setUp(self):
-        self.start_time = datetime(2017, 5, 1, 12, 0, 0, tzinfo=tzlocal())
+        self.start_time = datetime(2017, 5, 1, 12, 0, 0, tzinfo=ZoneInfo("UTC"))
         self.nwbfile = NWBFile('test session description',
                                'TEST123',
                                self.start_time)
@@ -699,7 +699,7 @@ class TestTimestampsRefDefault(TestCase):
 
 class TestTimestampsRefAware(TestCase):
     def setUp(self):
-        self.start_time = datetime(2017, 5, 1, 12, 0, 0, tzinfo=tzlocal())
+        self.start_time = datetime(2017, 5, 1, 12, 0, 0, tzinfo=ZoneInfo("UTC"))
         self.ref_time_notz = datetime(1979, 1, 1, 0, 0, 0)
 
     def test_reftime_tzaware(self):
@@ -710,7 +710,7 @@ class TestTimestampsRefAware(TestCase):
                               timestamps_reference_time=self.ref_time_notz)
 
         # test time zone is automatically added to timestamps_reference_time
-        self.assertEqual(nwbfile.timestamps_reference_time, self.ref_time_notz.replace(tzinfo=tzlocal()))
+        self.assertEqual(nwbfile.timestamps_reference_time, self.ref_time_notz.replace().astimezone(ZoneInfo("UTC")))
 
 class TestTimezone(TestCase):
     def test_raise_warning__add_missing_timezone(self):
@@ -764,8 +764,8 @@ class TestSubMinuteOffsetDates(TestCase):
         nwbfile = NWBFile(
             session_description="a test session",
             identifier="TEST123",
-            session_start_time=datetime(1900, 10, 1, tzinfo=tzutc()),
-            subject=Subject(subject_id="SUBJ1", date_of_birth=datetime(1900, 9, 1, tzinfo=tzutc())),
+            session_start_time=datetime(1900, 10, 1, tzinfo=ZoneInfo("UTC")),
+            subject=Subject(subject_id="SUBJ1", date_of_birth=datetime(1900, 9, 1, tzinfo=ZoneInfo("UTC"))),
         )
         with NWBHDF5IO(self.path, "w") as write_io:
             write_io.write(nwbfile)
