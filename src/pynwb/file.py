@@ -1,5 +1,4 @@
 from datetime import datetime, timedelta
-from zoneinfo import ZoneInfo
 from collections.abc import Iterable
 from warnings import warn
 import copy as _copy
