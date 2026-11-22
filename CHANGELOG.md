@@ -1,5 +1,10 @@
 # PyNWB Changelog
 
+## Upcoming
+
+### Added
+- Warn when writing, exporting, or reading an NWB file with an unreleased core schema version, except for `2.6.0-alpha`, which was used by the 2.6.0 release. @Kulraj69 [#1837](https://github.com/NeurodataWithoutBorders/pynwb/issues/1837)
+
 ## PyNWB 4.2.0 (September 2, 2026)
 
 ### Changed
