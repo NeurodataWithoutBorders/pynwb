@@ -6,6 +6,7 @@ from pathlib import Path
 from copy import deepcopy
 import subprocess
 import pickle
+import re
 from warnings import warn
 from platformdirs import PlatformDirs
 import h5py
@@ -366,6 +367,23 @@ def _get_backend(path: str, method: str = None):
 class NWBHDF5IO(_HDF5IO):
 
     @staticmethod
+    def _check_schema_version(version):
+        if version is None:
+            return
+        if isinstance(version, bytes):
+            version = version.decode()
+        if version != '2.6.0-alpha' and re.fullmatch(r'[0-9]+\.[0-9]+\.[0-9]+', version) is None:
+            warn(f"The NWB file uses an unreleased core schema version '{version}'. "
+                 "Files written with an unreleased schema may not be compatible with future versions of PyNWB.",
+                 UserWarning, stacklevel=3)
+
+    @docval(*get_docval(_HDF5IO.write_builder))
+    def write_builder(self, **kwargs):
+        """Write a builder, warning if it uses an unreleased core schema."""
+        self._check_schema_version(kwargs['builder'].attributes.get('nwb_version'))
+        return super().write_builder(**kwargs)
+
+    @staticmethod
     def can_read(path: str):
         """Determine whether a given path is readable by this class"""
         if not os.path.isfile(path):  # path is file that exists
@@ -469,6 +487,7 @@ class NWBHDF5IO(_HDF5IO):
             if file_version[0] < 2:
                 raise TypeError("NWB version %s not supported. PyNWB supports NWB files version 2 and above." %
                                 str(file_version_str))
+            self._check_schema_version(file_version_str)
         # read the file
         file = super().read(**kwargs)
         return file
