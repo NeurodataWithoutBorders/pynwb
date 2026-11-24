@@ -320,7 +320,8 @@ def clean_up_tests():
             if os.path.exists(name):
                 os.remove(name)
 
-    shutil.rmtree("zarr_tutorial.nwb.zarr")
+    if os.path.exists("zarr_tutorial.nwb.zarr"):
+        shutil.rmtree("zarr_tutorial.nwb.zarr")
 
 
 def main():
