@@ -40,17 +40,17 @@ nwbfile = NWBFile(
 # Like HDF5, Zarr provides options to chunk and compress datasets. To leverage these
 # features, replace all :py:class:`~hdmf.backends.hdf5.h5_utils.H5DataIO` with the analogous
 # :py:class:`~hdmf_zarr.utils.ZarrDataIO`, which takes compressors specified by the
-# :py:mod:`numcodecs` library. For example, here is an example :py:class:`.TimeSeries`
+# :py:mod:`zarr.codecs` module. For example, here is an example :py:class:`.TimeSeries`
 # where the ``data`` Dataset is compressed with a Blosc-zstd compressor:
 
-from numcodecs import Blosc
+from zarr.codecs import BloscCodec
 from hdmf_zarr import ZarrDataIO
 
 data_with_zarr_data_io = ZarrDataIO(
     data=np.random.randn(100, 100),
     chunks=(10, 10),
     fillvalue=0,
-    compressor=Blosc(cname='zstd', clevel=3, shuffle=Blosc.SHUFFLE)
+    compressors=BloscCodec(cname='zstd', clevel=3, shuffle='shuffle')
 )
 
 #######################################################################################
