@@ -4,6 +4,7 @@
 
 ### Fixed
 - Fixed `read_nwb` to select `NWBZarrV2IO` for legacy Zarr 2 files. @h-mayorquin [#2280](https://github.com/NeurodataWithoutBorders/pynwb/pull/2280)
+- Fixed reading `file_create_date` from a zarr v3 array, whose elements are 0-d arrays instead of strings. @h-mayorquin [#2263](https://github.com/NeurodataWithoutBorders/pynwb/pull/2263)
 
 ## PyNWB 4.2.0 (September 2, 2026)
 

@@ -256,7 +256,7 @@ class NWBFileMap(ObjectMapper):
         for user convenience and consistency with how they are written.
         """
         datestr = builder.get('file_create_date').data
-        dates = [parse_date(date_string, "file_create_date") for date_string in datestr]
+        dates = [parse_date(date_string, "file_create_date") for date_string in datestr[:]]
         return dates
 
     @ObjectMapper.constructor_arg('experimenter')
