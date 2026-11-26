@@ -66,7 +66,7 @@ jobs:
         # This action validates the distributions with the twine and packaging versions pinned in its
         # requirements/runtime.txt. When bumping it, set the twine pin in the "Check distribution
         # metadata" steps of this workflow, run_tests.yml, and run_all_tests.yml to match.
-        uses: pypa/gh-action-pypi-publish@v1.14.2
+        uses: pypa/gh-action-pypi-publish@v1.14.3
         with:
           skip-existing: true
 
