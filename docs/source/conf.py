@@ -194,6 +194,7 @@ linkcheck_ignore = [
     r'https://scicrunch.org/*',  # scicrunch.org blocks automated requests with 403
     r'https://app\.readthedocs\.org/projects/pynwb/.*',  # readthedocs blocks CI runner IPs (intermittent 403)
     r'https://nwb-users\.slack\.com/*',  # Slack returns 403 to unauthenticated requests
+    r'https://ror\.org/.*',  # ror.org rate-limits CI runners (429)
 ]
 
 suppress_warnings = ["config.cache"]

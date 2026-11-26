@@ -32,7 +32,7 @@ jobs:
           git clone https://github.com/NeurodataWithoutBorders/nwbinspector.git
           cd nwbinspector
           python -m pip install pytest
-          python -m pip install ".[dandi]"  # this might install a pinned version of pynwb instead of the current one
+          python -m pip install ".[dandi,video]"  # this might install a pinned version of pynwb instead of the current one
           # Download testing data and set config path
           dandi download "https://sandbox.dandiarchive.org/dandiset/204919"
           cd ..
