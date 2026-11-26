@@ -3,7 +3,6 @@ Module with helper functions to facilitate testing
 """
 import numpy as np
 from datetime import datetime
-from dateutil.tz import tzlocal
 from pynwb.file import NWBFile
 from pynwb.icephys import (VoltageClampStimulusSeries, VoltageClampSeries)
 from pynwb import NWBHDF5IO
@@ -68,7 +67,7 @@ def create_icephys_testfile(filename=None, add_custom_columns=True, randomize_da
     nwbfile = NWBFile(
             session_description='my first synthetic recording',
             identifier='EXAMPLE_ID',
-            session_start_time=datetime.now(tzlocal()),
+            session_start_time=datetime.now().astimezone(),
             experimenter='Dr. Bilbo Baggins',
             lab='Bag End Laboratory',
             institution='University of Middle Earth at the Shire',

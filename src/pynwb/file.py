@@ -1,5 +1,4 @@
 from datetime import datetime, timedelta
-from dateutil.tz import tzlocal
 from collections.abc import Iterable
 from warnings import warn
 import copy as _copy
@@ -517,7 +516,7 @@ class NWBFile(MultiContainerInterface, HERDManager):
         # convert file_create_date to list and add timezone if missing
         file_create_date = args_to_set['file_create_date']
         if file_create_date is None:
-            file_create_date = datetime.now(tzlocal())
+            file_create_date = datetime.now().astimezone()
         if isinstance(file_create_date, datetime):
             file_create_date = [file_create_date]
         args_to_set['file_create_date'] = list(map(_add_missing_timezone, file_create_date))
@@ -1153,7 +1152,7 @@ def _add_missing_timezone(date):
         raise ValueError("require datetime object")
     if date.tzinfo is None:
         warn("Date is missing timezone information. Updating to local timezone.", stacklevel=2)
-        return date.replace(tzinfo=tzlocal())
+        return date.astimezone()  # a naive datetime is taken as local time
     return date
 
 
