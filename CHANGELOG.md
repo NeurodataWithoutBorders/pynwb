@@ -1,5 +1,10 @@
 # PyNWB Changelog
 
+## PyNWB 4.2.1 (Upcoming)
+
+### Fixed
+- Fixed reading `file_create_date` from a zarr v3 array, whose elements are 0-d arrays instead of strings. @h-mayorquin [#2263](https://github.com/NeurodataWithoutBorders/pynwb/pull/2263)
+
 ## PyNWB 4.2.0 (September 2, 2026)
 
 ### Changed
