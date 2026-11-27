@@ -148,6 +148,56 @@ class ElectricalSeriesConstructor(TestCase):
                 np.ones(samples) * conversion * channel_conversion[channel_index] + offset
             )
 
+    def test_get_data_in_units_3d(self):
+        times = 4
+        channels = 3
+        samples = 5
+        conversion = 2.0
+        offset = 0.5
+        channel_conversion = np.array([1.0, 2.0, 3.0])
+
+        electrical_series = mock_ElectricalSeries(
+            data=np.ones((times, channels, samples)),
+            conversion=conversion,
+            offset=offset,
+            channel_conversion=channel_conversion,
+        )
+
+        data_in_units = electrical_series.get_data_in_units()
+        assert data_in_units.shape == (times, channels, samples)
+        for channel_index in range(channels):
+            np.testing.assert_almost_equal(
+                data_in_units[:, channel_index, :],
+                np.ones((times, samples)) * conversion * channel_conversion[channel_index] + offset,
+            )
+
+    def test_get_data_in_units_3d_equal_channels_and_samples(self):
+        # When num_channels == num_samples, broadcasting along the trailing axis
+        # would silently scale samples instead of channels.
+        channel_conversion = np.array([2.0, 3.0])
+        electrical_series = mock_ElectricalSeries(
+            data=np.ones((1, 2, 2)),
+            conversion=1.0,
+            offset=0.0,
+            channel_conversion=channel_conversion,
+        )
+
+        data_in_units = electrical_series.get_data_in_units()
+        expected = np.array([[[2.0, 2.0], [3.0, 3.0]]])
+        np.testing.assert_almost_equal(data_in_units, expected)
+
+    def test_get_data_in_units_list_channel_conversion(self):
+        electrical_series = mock_ElectricalSeries(
+            data=np.ones((4, 2)),
+            conversion=2.0,
+            offset=1.0,
+            channel_conversion=[3.0, 5.0],
+        )
+
+        data_in_units = electrical_series.get_data_in_units()
+        expected = np.tile([7.0, 11.0], (4, 1))
+        np.testing.assert_almost_equal(data_in_units, expected)
+
 
 class SpikeEventSeriesConstructor(TestCase):
 
