@@ -39,6 +39,23 @@ class SpatialSeriesConstructor(TestCase):
         )
         self.assertEqual(sS.unit, 'degrees')
 
+    def test_timeseries_data_shape(self):
+        """Check the resolved data when a TimeSeries is passed as data."""
+        for shape in ((5,), (5, 1), (5, 2), (5, 3)):
+            with self.subTest(shape=shape):
+                data = np.ones(shape)
+                source = TimeSeries(name='source', data=data, unit='meters', rate=1.)
+                linked = TimeSeries(name='linked', data=source, unit='meters', rate=1.)
+                series = SpatialSeries(name='test_sS', data=linked, rate=1.)
+                self.assertIs(series.data, data)
+
+    def test_timeseries_data_gt_3_cols(self):
+        source = TimeSeries(name='source', data=np.ones((5, 4)), unit='meters', rate=1.)
+        msg = ("SpatialSeries 'test_sS' has data shape (5, 4) which is not compliant with NWB 2.5 and greater. "
+               "The second dimension should have length <= 3 to represent at most x, y, z.")
+        with self.assertWarnsWith(UserWarning, msg):
+            SpatialSeries(name='test_sS', data=source, rate=1.)
+
     def test_gt_3_cols(self):
         msg = ("SpatialSeries 'test_sS' has data shape (5, 4) which is not compliant with NWB 2.5 and greater. "
                "The second dimension should have length <= 3 to represent at most x, y, z.")

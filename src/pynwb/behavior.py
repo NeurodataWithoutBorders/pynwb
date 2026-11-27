@@ -53,7 +53,7 @@ class SpatialSeries(TimeSeries):
 
         # NWB 2.5 restricts length of second dimension to be <= 3
         allowed_data_shapes = ((None, ), (None, 1), (None, 2), (None, 3))
-        data_shape = get_data_shape(data)
+        data_shape = get_data_shape(self.data)
         if not any(self._validate_data_shape(data_shape, a) for a in allowed_data_shapes):
             warnings.warn("SpatialSeries '%s' has data shape %s which is not compliant with NWB 2.5 and greater. "
                           "The second dimension should have length <= 3 to represent at most x, y, z." %
