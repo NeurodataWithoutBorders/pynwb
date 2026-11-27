@@ -452,11 +452,14 @@ class TimeSeries(NWBDataInterface):
         :class:`numpy.ndarray`
 
         """
+        data = np.asarray(self.data)
         if "channel_conversion" in self.fields:
-            scale_factor = self.conversion * self.channel_conversion
+            scale_factor = self.conversion * np.asarray(self.channel_conversion)
+            if data.ndim > 2:
+                scale_factor = scale_factor.reshape((1, -1) + (1,) * (data.ndim - 2))
         else:
             scale_factor = self.conversion
-        return np.asarray(self.data) * scale_factor + self.offset
+        return data * scale_factor + self.offset
 
 
 @register_class('BaseImage', CORE_NAMESPACE)
