@@ -1,13 +1,16 @@
 import numpy as np
 from pathlib import Path
+import shutil
 import tempfile
 import warnings
 
+import h5py
 from pynwb import NWBHDF5IO, validate, TimeSeries
 from pynwb.device import DeviceModel
 from pynwb.ecephys import ElectrodesTable
 from pynwb.image import ImageSeries
 from pynwb.misc import FrequencyBandsTable
+from hdmf.common import DynamicTable
 from pynwb.testing import TestCase
 
 
@@ -167,7 +170,96 @@ class TestReadOldVersions(TestCase):
         f = Path(__file__).parent / '3.0.0_decompositionseries_bands_dynamic_table.nwb'
         with self.get_io(f) as io:
             read_nwbfile = io.read()
-            assert isinstance(read_nwbfile.processing['test_mod']['LFPSpectralAnalysis'].bands, FrequencyBandsTable)
+            bands = read_nwbfile.processing['test_mod']['LFPSpectralAnalysis'].bands
+            assert isinstance(bands, FrequencyBandsTable)
+            assert bands.colnames == ('band_name', 'band_limits', 'band_mean', 'band_stdev')
+            assert list(bands['band_name'].data[:]) == ['alpha', 'beta', 'gamma']
+            np.testing.assert_array_equal(bands['band_limits'].data[:], np.ones((3, 2)))
+            np.testing.assert_array_equal(bands['band_mean'].data[:], np.ones((3,)))
+            np.testing.assert_array_equal(bands['band_stdev'].data[:], np.ones((3,)))
+
+    def test_read_bands_table_with_linked_required_column(self):
+        """Test that required columns remain typed when HDF5 stores one through a link."""
+        source = Path(__file__).parent / '3.0.0_decompositionseries_bands_dynamic_table.nwb'
+        for link_type in ('hard', 'soft'):
+            with self.subTest(link_type=link_type), tempfile.TemporaryDirectory() as temp_dir:
+                f = Path(temp_dir) / source.name
+                shutil.copyfile(source, f)
+                with h5py.File(f, 'r+') as h5file:
+                    bands = h5file['processing/test_mod/LFPSpectralAnalysis/bands']
+                    targets = h5file.require_group('link_targets')
+                    h5file.copy(bands['band_name'], targets, name='band_name')
+                    del bands['band_name']
+                    if link_type == 'hard':
+                        bands['band_name'] = targets['band_name']
+                    else:
+                        bands['band_name'] = h5py.SoftLink('/link_targets/band_name')
+
+                with self.get_io(f) as io:
+                    read_nwbfile = io.read()
+                    bands = read_nwbfile.processing['test_mod']['LFPSpectralAnalysis'].bands
+                    assert isinstance(bands, FrequencyBandsTable)
+                    assert list(bands['band_name'].data[:]) == ['alpha', 'beta', 'gamma']
+                    np.testing.assert_array_equal(bands['band_limits'].data[:], np.ones((3, 2)))
+
+    def test_read_legacy_bands_table_without_frequency_band_columns(self):
+        """Test that a legacy partial bands table remains a DynamicTable when read."""
+        source = Path(__file__).parent / '3.0.0_decompositionseries_bands_dynamic_table.nwb'
+        with tempfile.TemporaryDirectory() as temp_dir:
+            f = Path(temp_dir) / source.name
+            shutil.copyfile(source, f)
+            with h5py.File(f, 'r+') as h5file:
+                bands = h5file['processing/test_mod/LFPSpectralAnalysis/bands']
+                bands.move('band_mean', 'freq')
+                del bands['band_name']
+                del bands['band_limits']
+                del bands['band_stdev']
+                del bands.attrs['colnames']
+                bands.attrs.create('colnames', ['freq'], dtype=h5py.string_dtype(encoding='utf-8'))
+
+            with self.get_io(f) as io:
+                read_nwbfile = io.read()
+                bands = read_nwbfile.processing['test_mod']['LFPSpectralAnalysis'].bands
+                assert isinstance(bands, DynamicTable)
+                assert not isinstance(bands, FrequencyBandsTable)
+                assert bands.colnames == ('freq',)
+                assert len(bands) == 3
+
+    def test_read_empty_legacy_bands_table_as_frequency_bands_table(self):
+        """Test that an empty legacy table remains usable for adding frequency bands."""
+        source = Path(__file__).parent / '3.0.0_decompositionseries_bands_dynamic_table.nwb'
+        with tempfile.TemporaryDirectory() as temp_dir:
+            f = Path(temp_dir) / source.name
+            shutil.copyfile(source, f)
+            with h5py.File(f, 'r+') as h5file:
+                bands = h5file['processing/test_mod/LFPSpectralAnalysis/bands']
+                for name in ('band_name', 'band_limits'):
+                    del bands[name]
+                for name in ('band_mean', 'band_stdev', 'id'):
+                    dataset = bands[name]
+                    shape = (0,) if dataset.ndim == 1 else (0, dataset.shape[1])
+                    maxshape = (None,) if dataset.ndim == 1 else (None, dataset.shape[1])
+                    attrs = dict(dataset.attrs)
+                    dtype = dataset.dtype
+                    del bands[name]
+                    empty = bands.create_dataset(name, shape=shape, maxshape=maxshape, dtype=dtype)
+                    for key, value in attrs.items():
+                        empty.attrs[key] = value
+                del bands.attrs['colnames']
+                bands.attrs.create('colnames', ['band_mean', 'band_stdev'],
+                                   dtype=h5py.string_dtype(encoding='utf-8'))
+
+            with NWBHDF5IO(str(f), 'r+') as io:
+                read_nwbfile = io.read()
+                series = read_nwbfile.processing['test_mod']['LFPSpectralAnalysis']
+                bands = series.bands
+                assert isinstance(bands, FrequencyBandsTable)
+                assert len(bands) == 0
+                series.add_band(band_name='new', band_limits=[2., 3.], band_mean=2.5, band_stdev=.25)
+                assert list(bands['band_name'].data[:]) == ['new']
+                np.testing.assert_array_equal(bands['band_limits'].data[:], [[2., 3.]])
+                np.testing.assert_array_equal(bands['band_mean'].data[:], [2.5])
+                np.testing.assert_array_equal(bands['band_stdev'].data[:], [.25])
     
     def test_read_device_model_str_attribute(self):
         """Test that a Device.model written as a string attribute is read and remapped to a DeviceModel object"""

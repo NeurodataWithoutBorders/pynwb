@@ -2,7 +2,7 @@ import warnings
 
 import numpy as np
 
-from hdmf.common import VectorData, DynamicTableRegion
+from hdmf.common import VectorData, DynamicTable, DynamicTableRegion
 
 from pynwb.misc import (
     AnnotationSeries, AbstractFeatureSeries, IntervalSeries, Units, DecompositionSeries, FrequencyBandsTable
@@ -144,6 +144,16 @@ class DecompositionSeriesConstructor(TestCase):
         self.assertEqual(spec_anal.metric, 'amplitude')
         self.assertEqual(spec_anal.bands['band_name'].data, ['alpha', 'beta', 'gamma'])
         np.testing.assert_equal(spec_anal.bands['band_limits'].data, [np.array([1., 1.]) for _ in range(3)])
+
+    def test_init_rejects_legacy_dynamic_table(self):
+        bands = DynamicTable(name='bands', description='legacy bands table')
+        with self.assertRaises(TypeError):
+            DecompositionSeries(name='LFPSpectralAnalysis',
+                                description='my description',
+                                data=np.ones((3, 3, 3)),
+                                timestamps=[1., 2., 3.],
+                                metric='amplitude',
+                                bands=bands)
 
     @staticmethod
     def make_electrode_table(self):
